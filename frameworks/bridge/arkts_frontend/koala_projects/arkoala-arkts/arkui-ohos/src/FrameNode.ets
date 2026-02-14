@@ -15,6 +15,7 @@
 
 import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
+import { UIEventHelper } from 'arkui/component/idlize';
 import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
 import {
     Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk, InteropNativeModule
@@ -526,28 +527,28 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.getLayoutPosition(this);
     }
     public getUserConfigBorderWidth(): NodeEdges<LengthMetrics> {
-        let borderWidth = FrameNodeExtender.getUserConfigBorderWidth_serialize(this);
+        let borderWidth = FrameNodeExtender.getUserConfigBorderWidth(this);
         return {
             top: borderWidth.top, left: borderWidth.left,
             bottom: borderWidth.bottom, right: borderWidth.right
         };
     }
     public getUserConfigPadding(): NodeEdges<LengthMetrics> {
-        let padding = FrameNodeExtender.getUserConfigPadding_serialize(this)
+        let padding = FrameNodeExtender.getUserConfigPadding(this)
         return {
             top: padding.top, left: padding.left,
             bottom: padding.bottom, right: padding.right
         }
     }
     public getUserConfigMargin(): NodeEdges<LengthMetrics> {
-        let margin = FrameNodeExtender.getUserConfigMargin_serialize(this)
+        let margin = FrameNodeExtender.getUserConfigMargin(this)
         return {
             top: margin.top, left: margin.left,
             bottom: margin.bottom, right: margin.right
         }
     }
     public getUserConfigSize(): SizeT<LengthMetrics> {
-        let size = FrameNodeExtender.getUserConfigSize_serialize(this)
+        let size = FrameNodeExtender.getUserConfigSize(this)
         return { width: size.width, height: size.height }
     }
     public getId(): string {
@@ -757,7 +758,7 @@ export class FrameNode implements MaterializedBase {
         return
     }
     public getInteractionEventBindingInfo(eventType: EventQueryType): InteractionEventBindingInfo | undefined {
-        const info = FrameNodeExtender.getInteractionEventBindingInfo_serialize(this, eventType);
+        const info = FrameNodeExtender.getInteractionEventBindingInfo(this, eventType);
         if (!info || (!info.baseEventRegistered && !info.nodeEventRegistered &&
             !info.nativeEventRegistered && !info.builtInEventRegistered)) {
             return undefined;
@@ -1754,7 +1755,7 @@ export namespace typeNode {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
-        const event = UIListEventInternal.construct(ptr);
+        const event = UIEventHelper.constructListEvent(ptr);
         if (event !== undefined) {
             return event
         }
@@ -1851,7 +1852,7 @@ export namespace typeNode {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
-        const event = UIScrollEventInternal.construct(ptr);
+        const event = UIEventHelper.constructScrollEvent(ptr);
         if (event !== undefined) {
             return event
         }
@@ -1902,7 +1903,7 @@ export namespace typeNode {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
-        const event = UIGridEventInternal.construct(ptr);
+        const event = UIEventHelper.constructGridEvent(ptr);
         if (event !== undefined) {
             return event
         }
@@ -1978,7 +1979,7 @@ export namespace typeNode {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
-        const event = UIWaterFlowEventInternal.construct(ptr);
+        const event = UIEventHelper.constructWaterFlowEvent(ptr);
         if (event !== undefined) {
             return event
         }

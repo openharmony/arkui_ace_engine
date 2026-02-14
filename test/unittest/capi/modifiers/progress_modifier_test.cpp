@@ -208,7 +208,7 @@ HWTEST_F(ProgressModifierTest, setValueTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierTest, setValueTestValidValues, TestSize.Level1)
 {
-    auto value = Converter::ArkValue<Opt_Number>(8.);
+    auto value = Converter::ArkValue<Opt_Float64>(8.);
     modifier_->setValue(node_, &value);
 
     std::string strResult;
@@ -224,7 +224,7 @@ HWTEST_F(ProgressModifierTest, setValueTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierTest, setValueTestInvalidValues, TestSize.Level1)
 {
-    auto value = Converter::ArkValue<Opt_Number>(254.);
+    auto value = Converter::ArkValue<Opt_Float64>(254.);
     modifier_->setValue(node_, &value);
 
     std::string strResult;

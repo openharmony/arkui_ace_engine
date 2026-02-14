@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_DrawingColorFilter CreateBlendModeColorFilter0Impl(Ark_Color color,
+Ark_DrawingColorFilter CreateBlendModeColorFilter0Impl(Ark_arkui_component_enums_Color color,
                                                        Ark_BlendMode mode)
 {
     return {};

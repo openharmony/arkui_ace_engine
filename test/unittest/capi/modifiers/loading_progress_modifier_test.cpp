@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "generated/test_fixtures.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"

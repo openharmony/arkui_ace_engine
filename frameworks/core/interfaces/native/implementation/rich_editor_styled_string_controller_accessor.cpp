@@ -90,7 +90,7 @@ void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
         auto onWillChange = [onWillChangeArk, arkCallback = CallbackHelper(*onWillChangeArk)](
             const StyledStringChangeValue& value) {
             auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
-            auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(changeValue);
+            auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(changeValue);
             return Converter::Convert<bool>(result);
         };
         peer->SetOnWillChange(std::move(onWillChange));

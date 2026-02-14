@@ -355,7 +355,7 @@ void SetAboutToIMEInputImpl(Ark_NativePointer node,
         frameNode](const RichEditorInsertValue& param) -> bool {
         Converter::ConvContext ctx;
         Ark_RichEditorInsertValue data = Converter::ArkValue<Ark_RichEditorInsertValue>(param, &ctx);
-        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
     };
     RichEditorModelNG::SetAboutToIMEInput(frameNode, std::move(onCallback));
@@ -409,7 +409,7 @@ void SetAboutToDeleteImpl(Ark_NativePointer node,
     auto onCallback = [arkCallback = CallbackHelper(*optValue), frameNode](const RichEditorDeleteValue& param) -> bool {
         Converter::ConvContext ctx;
         auto data = Converter::ArkValue<Ark_RichEditorDeleteValue>(param, &ctx);
-        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
     };
     RichEditorModelStatic::SetAboutToDelete(frameNode, std::move(onCallback));
@@ -536,7 +536,7 @@ void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
     RichEditorModelStatic::SetSelectedBackgroundColor(frameNode, convValue);
 }
 void SetOnEditingChangeImpl(Ark_NativePointer node,
-                            const Opt_Callback_Boolean_Void* value)
+                            const Opt_arkui_component_common_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -592,7 +592,7 @@ void SetOnWillChangeImpl(Ark_NativePointer node,
         frameNode](const RichEditorChangeValue& param) -> bool {
         Converter::ConvContext ctx;
         auto data = Converter::ArkValue<Ark_RichEditorChangeValue>(param, &ctx);
-        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
     };
     RichEditorModelNG::SetOnWillChange(frameNode, std::move(onCallback));
@@ -707,7 +707,8 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
             auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
             auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
             auto arkResult =
-                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(
+                    menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
     }
@@ -799,14 +800,6 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<KeyboardAppearance>(value);
     RichEditorModelNG::SetKeyboardAppearance(frameNode, convValue.value_or(KeyboardAppearance::NONE_IMMERSIVE));
 }
-void SetStopBackPressImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    RichEditorModelNG::SetStopBackPress(frameNode, convValue.value_or(true));
-}
 void SetUndoStyleImpl(Ark_NativePointer node,
                       const Opt_UndoStyle* value)
 {
@@ -818,12 +811,36 @@ void SetUndoStyleImpl(Ark_NativePointer node,
     RichEditorModelNG::SetSupportStyledUndo(frameNode, supportStyledUndo);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_ColorMetrics* value)
+                           const Opt_ColorMetricsExt* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Color>(value);
     RichEditorModelNG::SetScrollBarColor(frameNode, convValue.value_or(Color::GRAY));
+}
+void SetStopBackPressImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RichEditorModelNG::SetStopBackPress(frameNode, convValue.value_or(true));
+}
+void SetIncludeFontPaddingImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RichEditorModelStatic::SetIncludeFontPadding(frameNode, convValue);
+}
+void SetFallbackLineSpacingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RichEditorModelStatic::SetFallbackLineSpacing(frameNode, convValue);
 }
 void SetSingleLineImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
@@ -841,21 +858,13 @@ void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     RichEditorModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
 }
-void SetIncludeFontPaddingImpl(Ark_NativePointer node,
-                               const Opt_Boolean* value)
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    RichEditorModelStatic::SetIncludeFontPadding(frameNode, convValue);
-}
-void SetFallbackLineSpacingImpl(Ark_NativePointer node,
-                                const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    RichEditorModelStatic::SetFallbackLineSpacing(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
+    RichEditorModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
 }
 void SetBindSelectionMenuImpl(Ark_NativePointer node,
                               const Opt_RichEditorSpanType* spanType,
@@ -884,16 +893,8 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
         RichEditorModelStatic::BindSelectionMenu(frameNode, span, response, builder, convMenuParam);
         }, node);
 }
-void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
-                                     const Opt_SelectedDragPreviewStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
-    RichEditorModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
-}
 void SetCustomKeyboardImpl(Ark_NativePointer node,
-                           const Opt_Union_CustomBuilder_ComponentContentBase* value,
+                           const Opt_Union_CustomNodeBuilder_ComponentContentBase* value,
                            const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -983,15 +984,15 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorStaticModifier()
         RichEditorAttributeModifier::SetMaxLinesImpl,
         RichEditorAttributeModifier::SetEnableAutoSpacingImpl,
         RichEditorAttributeModifier::SetKeyboardAppearanceImpl,
-        RichEditorAttributeModifier::SetStopBackPressImpl,
-        RichEditorAttributeModifier::SetScrollBarColorImpl,
         RichEditorAttributeModifier::SetUndoStyleImpl,
-        RichEditorAttributeModifier::SetSingleLineImpl,
-        RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
+        RichEditorAttributeModifier::SetScrollBarColorImpl,
+        RichEditorAttributeModifier::SetStopBackPressImpl,
         RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
         RichEditorAttributeModifier::SetFallbackLineSpacingImpl,
-        RichEditorAttributeModifier::SetBindSelectionMenuImpl,
+        RichEditorAttributeModifier::SetSingleLineImpl,
+        RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
         RichEditorAttributeModifier::SetSelectedDragPreviewStyleImpl,
+        RichEditorAttributeModifier::SetBindSelectionMenuImpl,
         RichEditorAttributeModifier::SetCustomKeyboardImpl,
         RichEditorAttributeModifier::SetPlaceholderImpl,
     };

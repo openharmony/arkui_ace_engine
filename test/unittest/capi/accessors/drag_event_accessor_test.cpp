@@ -376,6 +376,8 @@ HWTEST_F(DragEventAccessorTest, GetDragBehaviorTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
 {
+#ifdef WRONG_GEN_v140
+    // DISABLED_TEST: in gen140 DragEventAccessor has no getGetModifierKeyState, only setGetModifierKeyState
     const std::vector<std::tuple<std::vector<std::string>, std::vector<KeyCode>, bool>> TEST_PLAN = {
         { {"ctrl"}, {KeyCode::KEY_CTRL_LEFT}, true },
         { {"ctrl"}, {KeyCode::KEY_CTRL_RIGHT}, true },
@@ -402,6 +404,9 @@ HWTEST_F(DragEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
         bool result = getResult(stringArrayValues);
         EXPECT_EQ(Converter::Convert<bool>(result), expected);
     }
+#else
+    GTEST_SKIP() << "getGetModifierKeyState not in gen140 DragEventAccessor API";
+#endif
 }
 
 /**

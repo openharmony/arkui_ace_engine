@@ -1683,7 +1683,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage2TestValidValues, 
     auto src = Converter::ArkUnion<Opt_Union_ResourceStr_PixelMap, Ark_ResourceStr>(resStr);
     Opt_ImageRepeat repeat = Converter::ArkValue<Opt_ImageRepeat>(Ark_Empty());
 
-    modifier_->setBackgroundImage2(node_, &src, &repeat);
+    modifier_->setBackgroundImage2(node_, &src, repeat.value);
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.NoRepeat");
 
@@ -1691,7 +1691,7 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage2TestValidValues, 
     resStr = CreateResourceUnion<Ark_ResourceStr>(resName);
     src = Converter::ArkUnion<Opt_Union_ResourceStr_PixelMap, Ark_ResourceStr>(resStr);
 
-    modifier_->setBackgroundImage2(node_, &src, nullptr);
+    modifier_->setBackgroundImage2(node_, &src, ARK_IMAGE_REPEAT_NO_REPEAT);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path_to_background_image, ImageRepeat.NoRepeat");
 }
@@ -1707,22 +1707,22 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImage2TestRepeatValidVa
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str);
     auto src = Converter::ArkUnion<Opt_Union_ResourceStr_PixelMap, Ark_ResourceStr>(resStr);
     Opt_ImageRepeat repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_X);
-    modifier_->setBackgroundImage2(node_, &src, &repeat);
+    modifier_->setBackgroundImage2(node_, &src, repeat.value);
     std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.X");
 
     repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_Y);
-    modifier_->setBackgroundImage2(node_, &src, &repeat);
+    modifier_->setBackgroundImage2(node_, &src, repeat.value);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.Y");
 
     repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_XY);
-    modifier_->setBackgroundImage2(node_, &src, &repeat);
+    modifier_->setBackgroundImage2(node_, &src, repeat.value);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.XY");
 
     repeat = Converter::ArkValue<Opt_ImageRepeat>(ARK_IMAGE_REPEAT_NO_REPEAT);
-    modifier_->setBackgroundImage2(node_, &src, &repeat);
+    modifier_->setBackgroundImage2(node_, &src, repeat.value);
     strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
     EXPECT_EQ(strResult, "path, ImageRepeat.NoRepeat");
 }

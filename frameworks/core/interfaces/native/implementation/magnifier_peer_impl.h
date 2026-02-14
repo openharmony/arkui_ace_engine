@@ -23,10 +23,10 @@
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/pipeline/pipeline_base.h"
 
-struct MagnifierPeer : public OHOS::Ace::Referenced {
+struct arkui_component_idlize_MagnifierPeer : public OHOS::Ace::Referenced {
 protected:
-    MagnifierPeer() = default;
-    ~MagnifierPeer() override = default;
+    arkui_component_idlize_MagnifierPeer() = default;
+    ~arkui_component_idlize_MagnifierPeer() override = default;
     friend OHOS::Ace::NG::PeerUtils;
 public:
     void Bind(const std::string& id);

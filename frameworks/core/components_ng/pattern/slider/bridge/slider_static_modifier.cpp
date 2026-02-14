@@ -33,7 +33,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_F64_Bindable& value)
+std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_F64_Bindable_F64& value)
 {
     std::optional<float> result;
     Converter::VisitUnion(
@@ -68,7 +68,7 @@ SliderModel::SliderShowStepOptions Convert(const Ark_SliderShowStepOptions& src)
     if (accessibilityOpt.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         return dst;
     }
-    auto stepItemAccessibility = Converter::OptConvert<Map_Float64_SliderStepItemAccessibility>(accessibilityOpt.value);
+    auto stepItemAccessibility = Converter::OptConvert<Map_F64_SliderStepItemAccessibility>(accessibilityOpt.value);
     if (!stepItemAccessibility) {
         return dst;
     }

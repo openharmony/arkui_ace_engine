@@ -14,15 +14,9 @@
  */
 
 import { ArkUIAniModule } from 'arkui.ani';
-import { TypeChecker, ArkUIGeneratedNativeModule } from '#components';
-import { Finalizable, KPointer, MaterializedBase } from '@koalaui/interop';
+import { ArkUIGeneratedNativeModule } from '#components';
+import { KPointer } from '@koalaui/interop';
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common';
-
-export class WaterFlowSectionsInternal {
-    public static fromPtr(ptr: KPointer): WaterFlowSections {
-        return new WaterFlowSections(ptr)
-    }
-}
 
 export interface SectionChangeInfo {
     start: int32;
@@ -30,30 +24,10 @@ export interface SectionChangeInfo {
     sections?: Array<SectionOptions>;
 }
 
-export class WaterFlowSections implements MaterializedBase {
-    public peer?: Finalizable | undefined = undefined;
+export class WaterFlowSections {
     public sectionArray: Array<SectionOptions> = [];
     public changeArray: Array<SectionChangeInfo> = [];
     public waterFlowNodePtr?: KPointer = undefined;
-
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, WaterFlowSections.getFinalizer())
-    }
-    constructor() {
-        this(WaterFlowSections.construct())
-    }
-
-    static construct(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._WaterFlowSections_construct();
-        return retval;
-    }
-
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._WaterFlowSections_getFinalizer();
-    }
 
     static isNonNegativeInt32(input: int32): boolean {
         return Number.isSafeInteger(input) && input >= 0 && input <= 2147483647;

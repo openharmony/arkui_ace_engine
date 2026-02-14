@@ -165,18 +165,16 @@ HWTEST_F(TabContentModifierTest, setTabBarBottomStyleTestText, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
 
     ASSERT_NE(modifier_->setTabBar, nullptr);
-    Ark_BottomTabBarStyle style;
-    style._text = Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(textValue));
-    style._icon = Converter::ArkValue<Opt_Union_ResourceStr_TabBarSymbol>(Ark_Empty());
-    style._iconStyle = Converter::ArkValue<Opt_TabBarIconStyle>(Ark_Empty());
-    style._id = Converter::ArkValue<Opt_String>(Ark_Empty());
-    style._labelStyle = Converter::ArkValue<Opt_TabBarLabelStyle>(Ark_Empty());
-    style._layoutMode = Converter::ArkValue<Opt_LayoutMode>(Ark_Empty());
-    style._padding = Converter::ArkValue<Opt_Union_Padding_Dimension_LocalizedPadding>(Ark_Empty());
-    style._symmetricExtensible = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
-    style._verticalAlign = Converter::ArkValue<Opt_VerticalAlign>(Ark_Empty());
+    const auto *accessor = fullAPI_->getAccessors()->getBottomTabBarStyleAccessor();
+    ASSERT_NE(accessor, nullptr);
+    auto textArk = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(textValue);
+    auto iconUnion = Converter::ArkUnion<Ark_Union_ResourceStr_TabBarSymbol, Ark_ResourceStr>(
+        Converter::ArkUnion<Ark_ResourceStr, Ark_String>(""));
+    Ark_BottomTabBarStyle style = accessor->of(&iconUnion, &textArk);
+    ASSERT_NE(style, nullptr);
     auto args = ArkUnion<TestBaseUnionType, Ark_BottomTabBarStyle>(style);
     modifier_->setTabBar(node_, &args);
+    accessor->destroyPeer(style);
     jsonValue = GetJsonValue(node_);
     auto checkInitial = GetAttrValue<std::string>(jsonValue, propName);
     EXPECT_EQ(checkInitial, textValue);

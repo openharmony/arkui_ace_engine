@@ -17,6 +17,7 @@
 
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "../capi_gen140_compat.h"
 
 using namespace std::literals;
 using namespace testing;
@@ -193,20 +194,18 @@ HWTEST_F(ReverseConvertorTest, OptionalTypes, TestSize.Level1)
  */
 HWTEST_F(ReverseConvertorTest, UnionTypes, TestSize.Level1)
 {
-    auto unionResult = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(123);
+    auto unionResult = Converter::ArkUnion<Ark_Union_Number_String, Ark_Float64>(123);
     EXPECT_EQ(unionResult.selector, 0);
-    EXPECT_EQ(unionResult.value0.tag, INTEROP_TAG_INT32);
-    EXPECT_EQ(unionResult.value0.i32, 123);
+    EXPECT_DOUBLE_EQ(unionResult.value0, 123);
 
     unionResult = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("abc");
     EXPECT_EQ(unionResult.selector, 1);
     EXPECT_EQ(unionResult.value1.chars, "abc"s);
 
-    auto optUnionResult = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(123);
+    auto optUnionResult = Converter::ArkUnion<Opt_Union_Number_String, Ark_Float64>(123);
     EXPECT_NE(optUnionResult.tag, INTEROP_TAG_UNDEFINED);
     EXPECT_EQ(optUnionResult.value.selector, 0);
-    EXPECT_EQ(optUnionResult.value.value0.tag, INTEROP_TAG_INT32);
-    EXPECT_EQ(optUnionResult.value.value0.i32, 123);
+    EXPECT_DOUBLE_EQ(optUnionResult.value.value0, 123);
 
     std::string testStr = "abc";
     optUnionResult = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(testStr);

@@ -42,7 +42,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ScreenModifier
 namespace ScreenInterfaceModifier {
 void SetScreenOptionsImpl(Ark_NativePointer node,
-                          const Ark_Number* screenId)
+                          Ark_Int64 screenId)
 {
 }
 } // ScreenInterfaceModifier

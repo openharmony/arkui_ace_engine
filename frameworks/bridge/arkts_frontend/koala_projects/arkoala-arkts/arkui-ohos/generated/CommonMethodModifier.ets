@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,34 +16,34 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier, TouchTestInfo, TouchResult, extractors, hookAllowDrop, hookDragPreviewOptions, hookCommonMethodModifierCustomProperty, hookCustomPropertyImpl, hookKeyboardShortcut, hookMergeKeyboardShortcuts, KeyboardShortcut } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, OnNeedSoftkeyboardCallback, TouchTestDoneCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, AccessibilityOptions } from "./component/units"
-import { Resource } from "global.resource"
-import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
-import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
-import { default as image } from "@ohos.multimedia.image"
-import { ResizableOptions } from "./component/image"
-import { default as uiEffect } from "@ohos.graphics.uiEffect"
-import { FocusBoxStyle, FocusPriority } from "./component/focus"
-import { default as matrix4 } from "@ohos.matrix4"
-import { CustomBuilder, CustomBuilderT } from "./component/builder"
-import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
-import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, TouchRecognizer } from "./component/gesture"
-import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
-import { dragController } from "@ohos.arkui.dragController"
-import { ComponentContent } from "arkui.ComponentContent"
-import { StyledString } from "./component/styledString"
+import { AttributeModifier, DrawModifier, extractors, GestureModifier, GestureType, hookDrawModifier, hookAllowDrop, hookStateStyleImpl, hookGestureModifier, hookCustomPropertyImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookDragPreviewOptions, hookCommonMethodModifierCustomProperty } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, TouchTestInfo, TouchResult, PixelRoundPolicy, PixelMap, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, Callback as arkui_component_common_Callback, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, Matrix4Transit, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, UniformDataType, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, SystemUiMaterial, OnNeedSoftkeyboardCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, BackgroundEffectOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, SpringLoadingContext, DragSpringLoadingConfiguration, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, Bindable, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from './component/common'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { Length, Resource as arkui_component_units_Resource, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions } from './component/units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { HitTestMode, Color as arkui_component_enums_Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from './component/enums'
+import { LengthMetrics as arkui_Graphics_LengthMetrics, ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
+import { default as image } from '@ohos.multimedia.image'
+import { ResizableOptions } from './component/image'
+import { default as uiEffect } from '@ohos.graphics.uiEffect'
+import { FocusBoxStyle, FocusPriority } from './component/focus'
+import { default as matrix4 } from '@ohos.matrix4'
+import { CustomBuilder, CustomBuilderT } from './component/builder'
+import { default as uniformTypeDescriptor } from '@ohos.data.uniformTypeDescriptor'
+import { CircleShape, EllipseShape, PathShape, RectShape } from '@ohos.arkui.shape'
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, TouchRecognizer, GestureMask } from './component/gesture'
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
+import { default as dragController } from '@ohos.arkui.dragController'
+import { ComponentContent } from 'arkui.ComponentContent'
+import { StyledString } from './component/styledString'
 export class CommonMethodModifier implements CommonMethod {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState;
     _addr: ArrayBuffer = new ArrayBuffer(4096);
-    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    private _flagArray: Uint8Array = new Uint8Array(this._addr);
     constructor() {
         this._flagArray.fill(0);
     }
@@ -51,275 +51,276 @@ export class CommonMethodModifier implements CommonMethod {
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    _width_0_0value?: Length | LayoutPolicy | undefined
-    _height_0_0value?: Length | LayoutPolicy | undefined
-    _responseRegion_0_0value?: Array<Rectangle> | Rectangle | undefined
-    _mouseResponseRegion_0_0value?: Array<Rectangle> | Rectangle | undefined
-    _responseRegionList_0_0value?: Array<ResponseRegion> | undefined
-    _size_0_0value?: SizeOptions | undefined
-    _constraintSize_0_0value?: ConstraintSizeOptions | undefined
-    _hitTestBehavior_0_0value?: HitTestMode | undefined
-    _onChildTouchTest_0_0value?: ((value: Array<TouchTestInfo>) => TouchResult) | undefined
-    _layoutWeight_0_0value?: number | string | undefined
-    _chainWeight_0_0value?: ChainWeightOptions | undefined
-    _padding_0_0value?: Padding | Length | LocalizedPadding | undefined
-    _safeAreaPadding_0_0value?: Padding | LengthMetrics | LocalizedPadding | undefined
-    _margin_0_0value?: Padding | Length | LocalizedPadding | undefined
-    _backgroundColor_0_0value?: ResourceColor | ColorMetrics | undefined
-    _pixelRound_0_0value?: PixelRoundPolicy | undefined
-    _backgroundImage_0_0value?: ResourceStr | image.PixelMap | undefined
-    _backgroundImageSize_0_0value?: SizeOptions | ImageSize | undefined
-    _backgroundImagePosition_0_0value?: Position | Alignment | undefined
-    _backgroundEffect_0_0value?: BackgroundEffectOptions | undefined
-    _backgroundImageResizable_0_0value?: ResizableOptions | undefined
-    _foregroundEffect_0_0value?: ForegroundEffectOptions | undefined
-    _visualEffect_0_0value?: uiEffect.VisualEffect | undefined
-    _backgroundFilter_0_0value?: uiEffect.Filter | undefined
-    _foregroundFilter_0_0value?: uiEffect.Filter | undefined
-    _compositingFilter_0_0value?: uiEffect.Filter | undefined
-    _materialFilter_0_0value?: uiEffect.Filter | undefined
-    _opacity_0_0value?: double | Resource | undefined
-    _border_0_0value?: BorderOptions | undefined
-    _borderStyle_0_0value?: BorderStyle | EdgeStyles | undefined
-    _borderWidth_0_0value?: Length | EdgeWidths | LocalizedEdgeWidths | undefined
-    _borderColor_0_0value?: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined
-    _borderRadius_0_0value?: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
-    _borderImage_0_0value?: BorderImageOption | undefined
-    _outline_0_0value?: OutlineOptions | undefined
-    _outlineStyle_0_0value?: OutlineStyle | EdgeOutlineStyles | undefined
-    _outlineWidth_0_0value?: Dimension | EdgeOutlineWidths | undefined
-    _outlineColor_0_0value?: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined
-    _outlineRadius_0_0value?: Dimension | OutlineRadiuses | undefined
-    _foregroundColor_0_0value?: ResourceColor | ColoringStrategy | undefined
-    _onClick_0_0value?: ((event: ClickEvent) => void) | undefined
-    _onHover_0_0value?: ((isHover: boolean,event: HoverEvent) => void) | undefined
-    _onHoverMove_0_0value?: ((value0: HoverEvent) => void) | undefined
-    _onAccessibilityHover_0_0value?: AccessibilityCallback | undefined
-    _onAccessibilityHoverTransparent_0_0value?: AccessibilityTransparentCallback | undefined
-    _hoverEffect_0_0value?: HoverEffect | undefined
-    _onMouse_0_0value?: ((event: MouseEvent) => void) | undefined
-    _onTouch_0_0value?: ((event: TouchEvent) => void) | undefined
-    _onKeyEvent_0_0value?: ((value0: KeyEvent) => boolean) | undefined
-    _onDigitalCrown_0_0value?: ((value0: CrownEvent) => void) | undefined
-    _onKeyPreIme_0_0value?: ((value0: KeyEvent) => boolean) | undefined
-    _onKeyEventDispatch_0_0value?: ((value0: KeyEvent) => boolean) | undefined
-    _onFocusAxisEvent_0_0value?: ((value0: FocusAxisEvent) => void) | undefined
-    _onAxisEvent_0_0value?: ((value0: AxisEvent) => void) | undefined
-    _focusable_0_0value?: boolean | undefined
-    _nextFocus_0_0value?: FocusMovement | undefined
-    _tabStop_0_0value?: boolean | undefined
-    _onFocus_0_0value?: (() => void) | undefined
-    _onBlur_0_0value?: (() => void) | undefined
-    _tabIndex_0_0value?: int32 | undefined
-    _defaultFocus_0_0value?: boolean | undefined
-    _groupDefaultFocus_0_0value?: boolean | undefined
-    _focusOnTouch_0_0value?: boolean | undefined
-    _focusBox_0_0value?: FocusBoxStyle | undefined
-    _animation_0_0value?: AnimateParam | undefined
-    _transition_0_0value?: TransitionEffect | undefined
-    _motionBlur_0_0value?: MotionBlurOptions | undefined
-    _brightness_0_0value?: double | undefined
-    _contrast_0_0value?: double | undefined
-    _grayscale_0_0value?: double | undefined
-    _colorBlend_0_0value?: Color | string | Resource | undefined
-    _saturate_0_0value?: double | undefined
-    _sepia_0_0value?: double | undefined
-    _invert_0_0value?: double | InvertOptions | undefined
-    _hueRotate_0_0value?: double | string | undefined
-    _useShadowBatching_0_0value?: boolean | undefined
-    _useEffect_0_0value?: boolean | undefined
-    _useUnionEffect_0_0value?: boolean | undefined
-    _renderGroup_0_0value?: boolean | undefined
-    _excludeFromRenderGroup_0_0value?: boolean | undefined
-    _freeze_0_0value?: boolean | undefined
-    _translate_0_0value?: TranslateOptions | undefined
-    _scale_0_0value?: ScaleOptions | undefined
-    _rotate_0_0value?: RotateOptions | RotateAngleOptions | undefined
-    _transform_0_0value?: matrix4.Matrix4Transit | undefined
-    _transform3D_0_0value?: matrix4.Matrix4Transit | undefined
-    _onAppear_0_0value?: (() => void) | undefined
-    _onDisAppear_0_0value?: (() => void) | undefined
-    _onAttach_0_0value?: VoidCallback | undefined
-    _onDetach_0_0value?: VoidCallback | undefined
-    _onAreaChange_0_0value?: ((oldValue: Area,newValue: Area) => void) | undefined
-    _visibility_0_0value?: Visibility | undefined
-    _flexGrow_0_0value?: number | undefined
-    _flexShrink_0_0value?: number | undefined
-    _flexBasis_0_0value?: number | string | undefined
-    _alignSelf_0_0value?: ItemAlign | undefined
-    _layoutGravity_0_0value?: LocalizedAlignment | undefined
-    _displayPriority_0_0value?: number | undefined
-    _zIndex_0_0value?: int32 | undefined
-    _direction_0_0value?: Direction | undefined
-    _align_0_0value?: Alignment | LocalizedAlignment | undefined
-    _position_0_0value?: Position | Edges | LocalizedEdges | undefined
-    _markAnchor_0_0value?: Position | LocalizedPosition | undefined
-    _offset_0_0value?: Position | Edges | LocalizedEdges | undefined
-    _enabled_0_0value?: boolean | undefined
-    _alignRules_0_0value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
-    _aspectRatio_0_0value?: number | undefined
-    _clickEffect_0_0value?: ClickEffect | null | undefined
-    _onDragStart_0_0value?: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined
-    _onDragEnter_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
-    _onDragMove_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
-    _onDragLeave_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
-    _onDrop_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
-    _onDragEnd_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
-    _allowDrop_0_0value?: Array<uniformTypeDescriptor.UniformDataType> | Array<string> | null | undefined
-    _draggable_0_0value?: boolean | undefined
-    _dragPreview_0_0value?: CustomBuilder | DragItemInfo | string | undefined
-    _onPreDrag_0_0value?: ((value0: PreDragStatus) => void) | undefined
-    _linearGradient_0_0value?: LinearGradientOptions | undefined
-    _sweepGradient_0_0value?: SweepGradientOptions | undefined
-    _radialGradient_0_0value?: RadialGradientOptions | undefined
-    _motionPath_0_0value?: MotionPathOptions | undefined
-    _shadow_0_0value?: ShadowOptions | ShadowStyle | undefined
-    _clip_0_0value?: boolean | undefined
-    _clipShape_0_0value?: CircleShape | EllipseShape | PathShape | RectShape | undefined
-    _mask_0_0value?: ProgressMask | undefined
-    _maskShape_0_0value?: CircleShape | EllipseShape | PathShape | RectShape | undefined
-    _key_0_0value?: string | undefined
-    _id_0_0value?: string | undefined
-    _geometryTransition_0_0value?: string | undefined
-    _restoreId_0_0value?: int32 | undefined
-    _sphericalEffect_0_0value?: double | undefined
-    _lightUpEffect_0_0value?: double | undefined
-    _pixelStretchEffect_0_0value?: PixelStretchEffectOptions | undefined
-    _accessibilityGroup_0_0value?: boolean | undefined
-    _accessibilityTextOfStringType_0_0value?: string | undefined
-    _accessibilityNextFocusId_0_0value?: string | undefined
-    _accessibilityDefaultFocus_0_0value?: boolean | undefined
-    _accessibilityUseSamePage_0_0value?: AccessibilitySamePageMode | undefined
-    _accessibilityScrollTriggerable_0_0value?: boolean | undefined
-    _accessibilityTextOfResourceType_0_0value?: Resource | undefined
-    _accessibilityRole_0_0value?: AccessibilityRoleType | undefined
-    _onAccessibilityFocus_0_0value?: AccessibilityFocusCallback | undefined
-    _onAccessibilityActionIntercept_0_0value?: AccessibilityActionInterceptCallback | undefined
-    _accessibilityTextHint_0_0value?: string | undefined
-    _accessibilityDescriptionOfStringType_0_0value?: string | undefined
-    _accessibilityDescriptionOfResourceType_0_0value?: Resource | undefined
-    _accessibilityLevel_0_0value?: string | undefined
-    _accessibilityVirtualNode_0_0value?: CustomBuilder | undefined
-    _accessibilityChecked_0_0value?: boolean | undefined
-    _accessibilitySelected_0_0value?: boolean | undefined
-    _obscured_0_0value?: Array<ObscuredReasons> | undefined
-    _reuseId_0_0value?: string | undefined
-    _reuse_0_0value?: ReuseOptions | undefined
-    _renderFit_0_0value?: RenderFit | undefined
-    _backgroundBrightness_0_0value?: BackgroundBrightnessOptions | undefined
-    _onGestureJudgeBegin_0_0value?: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined
-    _onGestureRecognizerJudgeBegin_0_0value?: GestureRecognizerJudgeBeginCallback | undefined
-    _shouldBuiltInRecognizerParallelWith_0_0value?: ShouldBuiltInRecognizerParallelWithCallback | undefined
-    _monopolizeEvents_0_0value?: boolean | undefined
-    _onTouchIntercept_0_0value?: ((value0: TouchEvent) => HitTestMode) | undefined
-    _onSizeChange_0_0value?: SizeChangeCallback | undefined
-    _accessibilityFocusDrawLevel_0_0value?: FocusDrawLevel | undefined
-    _onTouchTestDone_0_0value?: TouchTestDoneCallback | undefined
-    _systemMaterial_0_0value?: uiMaterial.Material | undefined
-    _accessibilityStateDescription_0_0value?: string | Resource | undefined
-    _accessibilityActionOptions_0_0value?: AccessibilityActionOptions | undefined
-    _onNeedSoftkeyboard_0_0value?: OnNeedSoftkeyboardCallback | undefined
-    _customProperty_0_0value?: string
-    _customProperty_0_1value?: CustomProperty
-    _expandSafeArea_0_0value?: Array<SafeAreaType> | undefined
-    _expandSafeArea_0_1value?: Array<SafeAreaEdge> | undefined
-    _ignoreLayoutSafeArea_0_0value?: Array<LayoutSafeAreaType> | undefined
-    _ignoreLayoutSafeArea_0_1value?: Array<LayoutSafeAreaEdge> | undefined
-    _background_0_0value?: CustomBuilder | ResourceColor | undefined
-    _background_0_1value?: BackgroundOptions | undefined
-    _backgroundImage_1_0value?: ResourceStr | image.PixelMap | undefined
-    _backgroundImage_1_1value?: BackgroundImageOptions
-    _backgroundImage_2_0value?: ResourceStr | image.PixelMap | undefined
-    _backgroundImage_2_1value?: ImageRepeat
-    _backgroundBlurStyle_0_0value?: BlurStyle | undefined
-    _backgroundBlurStyle_0_1value?: BackgroundBlurStyleOptions | undefined
-    _backgroundBlurStyle_0_2value?: SystemAdaptiveOptions | undefined
-    _backgroundEffect_1_0value?: BackgroundEffectOptions | undefined
-    _backgroundEffect_1_1value?: SystemAdaptiveOptions | undefined
-    _foregroundBlurStyle_0_0value?: BlurStyle | undefined
-    _foregroundBlurStyle_0_1value?: ForegroundBlurStyleOptions | undefined
-    _foregroundBlurStyle_0_2value?: SystemAdaptiveOptions | undefined
-    _borderRadius_1_0value?: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
-    _borderRadius_1_1value?: RenderStrategy | undefined
-    _onClick_1_0value?: ((event: ClickEvent) => void) | undefined
-    _onClick_1_1value?: double | undefined
-    _focusScopeId_0_0value?: string | undefined
-    _focusScopeId_0_1value?: boolean | undefined
-    _focusScopeId_0_2value?: boolean | undefined
-    _focusScopePriority_0_0value?: string | undefined
-    _focusScopePriority_0_1value?: FocusPriority | undefined
-    _transition_1_0value?: TransitionEffect | undefined
-    _transition_1_1value?: TransitionFinishCallback | undefined
-    _blur_0_0value?: double | undefined
-    _blur_0_1value?: BlurOptions | undefined
-    _blur_0_2value?: SystemAdaptiveOptions | undefined
-    _linearGradientBlur_0_0value?: double | undefined
-    _linearGradientBlur_0_1value?: LinearGradientBlurOptions | undefined
-    _useEffect_1_0value?: boolean | undefined
-    _useEffect_1_1value?: EffectType | undefined
-    _backdropBlur_0_0value?: double | undefined
-    _backdropBlur_0_1value?: BlurOptions | undefined
-    _backdropBlur_0_2value?: SystemAdaptiveOptions | undefined
-    _sharedTransition_0_0value?: string | undefined
-    _sharedTransition_0_1value?: sharedTransitionOptions | undefined
-    _chainMode_0_0value?: Axis | undefined
-    _chainMode_0_1value?: ChainStyle | undefined
-    _onDrop_1_0value?: OnDragEventCallback | undefined
-    _onDrop_1_1value?: DropOptions | undefined
-    _onDragSpringLoading_0_0value?: ((value0: dragController.SpringLoadingContext) => void) | null | undefined
-    _onDragSpringLoading_0_1value?: dragController.DragSpringLoadingConfiguration | undefined
-    _dragPreview_1_0value?: CustomBuilder | DragItemInfo | string | undefined
-    _dragPreview_1_1value?: PreviewConfiguration | undefined
-    _dragPreviewOptions_0_0value?: DragPreviewOptions | undefined
-    _dragPreviewOptions_0_1value?: DragInteractionOptions | undefined
-    _overlay_0_0value?: string | CustomBuilder | ComponentContent | undefined
-    _overlay_0_1value?: OverlayOptions | undefined
-    _blendMode_0_0value?: BlendMode | undefined
-    _blendMode_0_1value?: BlendApplyType | undefined
-    _advancedBlendMode_0_0value?: BlendMode | uiEffect.Blender | undefined
-    _advancedBlendMode_0_1value?: BlendApplyType | undefined
-    _geometryTransition_1_0value?: string | undefined
-    _geometryTransition_1_1value?: GeometryTransitionOptions | undefined
-    _bindTips_0_0value?: TipsMessageType | undefined
-    _bindTips_0_1value?: TipsOptions | undefined
-    _bindPopup_0_0value?: boolean | undefined
-    _bindPopup_0_1value?: PopupOptions | CustomPopupOptions | undefined
-    _bindMenu_0_0value?: Array<MenuElement> | CustomBuilder | undefined
-    _bindMenu_0_1value?: MenuOptions | undefined
-    _bindMenu_1_0value?: boolean | Bindable<boolean> | undefined
-    _bindMenu_1_1value?: Array<MenuElement> | CustomBuilder | undefined
-    _bindMenu_1_2value?: MenuOptions | undefined
-    _bindContextMenu_0_0value?: CustomBuilder | undefined
-    _bindContextMenu_0_1value?: ResponseType | undefined
-    _bindContextMenu_0_2value?: ContextMenuOptions | undefined
-    _bindContextMenuWithResponse_0_0value?: CustomBuilderT<ResponseType> | undefined
-    _bindContextMenuWithResponse_0_1value?: ContextMenuOptions | undefined
-    _bindContextMenu_1_0value?: boolean | Bindable<boolean> | undefined
-    _bindContextMenu_1_1value?: CustomBuilder | undefined
-    _bindContextMenu_1_2value?: ContextMenuOptions | undefined
-    _bindContentCover_0_0value?: boolean | Bindable<boolean> | undefined
-    _bindContentCover_0_1value?: CustomBuilder | undefined
-    _bindContentCover_0_2value?: ModalTransition | undefined
-    _bindContentCover_1_0value?: boolean | Bindable<boolean> | undefined
-    _bindContentCover_1_1value?: CustomBuilder | undefined
-    _bindContentCover_1_2value?: ContentCoverOptions | undefined
-    _bindSheet_0_0value?: boolean | Bindable<boolean> | undefined
-    _bindSheet_0_1value?: CustomBuilder | undefined
-    _bindSheet_0_2value?: SheetOptions | undefined
-    _onVisibleAreaChange_0_0value?: Array<double> | undefined
-    _onVisibleAreaChange_0_1value?: VisibleAreaChangeCallback | undefined
-    _onVisibleAreaApproximateChange_0_0value?: VisibleAreaEventOptions | undefined
-    _onVisibleAreaApproximateChange_0_1value?: VisibleAreaChangeCallback | undefined
-    _keyboardShortcut_0_0value?: string | FunctionKey | undefined
-    _keyboardShortcut_0_1value?: Array<ModifierKey> | undefined
-    _keyboardShortcut_0_2value?: (() => void) | undefined
-    _keyboardShortcutList: Array<KeyboardShortcut> = []
-    _accessibilityGroup_1_0value?: boolean | undefined
-    _accessibilityGroup_1_1value?: AccessibilityOptions | undefined
-    _onGestureRecognizerJudgeBegin_1_0value?: GestureRecognizerJudgeBeginCallback | undefined
-    _onGestureRecognizerJudgeBegin_1_1value?: boolean | undefined
-    _enableClickSoundEffect_0_0value?: boolean | undefined
-    applyModifierPatch(node: PeerNode): void {
+    public _width_0_0value?: Length | LayoutPolicy | undefined
+    public _height_0_0value?: Length | LayoutPolicy | undefined
+    public _drawModifier_0_0value?: DrawModifier | undefined
+    public _responseRegion_0_0value?: Array<Rectangle> | Rectangle | undefined
+    public _mouseResponseRegion_0_0value?: Array<Rectangle> | Rectangle | undefined
+    public _responseRegionList_0_0value?: Array<ResponseRegion> | undefined
+    public _size_0_0value?: SizeOptions | undefined
+    public _constraintSize_0_0value?: ConstraintSizeOptions | undefined
+    public _hitTestBehavior_0_0value?: HitTestMode | undefined
+    public _onChildTouchTest_0_0value?: ((value: Array<TouchTestInfo>) => TouchResult) | undefined
+    public _layoutWeight_0_0value?: double | string | undefined
+    public _chainWeight_0_0value?: ChainWeightOptions | undefined
+    public _padding_0_0value?: Padding | Length | LocalizedPadding | undefined
+    public _safeAreaPadding_0_0value?: Padding | arkui_Graphics_LengthMetrics | LocalizedPadding | undefined
+    public _margin_0_0value?: Margin | Length | LocalizedMargin | undefined
+    public _backgroundColor_0_0value?: ResourceColor | arkui_component_units_ColorMetrics | undefined
+    public _pixelRound_0_0value?: PixelRoundPolicy | undefined
+    public _backgroundImage_0_0value?: ResourceStr | PixelMap | undefined
+    public _backgroundImageSize_0_0value?: SizeOptions | ImageSize | undefined
+    public _backgroundImagePosition_0_0value?: Position | Alignment | undefined
+    public _backgroundImageResizable_0_0value?: ResizableOptions | undefined
+    public _foregroundEffect_0_0value?: ForegroundEffectOptions | undefined
+    public _visualEffect_0_0value?: VisualEffect | undefined
+    public _backgroundFilter_0_0value?: Filter | undefined
+    public _foregroundFilter_0_0value?: Filter | undefined
+    public _compositingFilter_0_0value?: Filter | undefined
+    public _materialFilter_0_0value?: Filter | undefined
+    public _opacity_0_0value?: double | global_resource_Resource | undefined
+    public _border_0_0value?: BorderOptions | undefined
+    public _borderStyle_0_0value?: BorderStyle | EdgeStyles | undefined
+    public _borderWidth_0_0value?: Length | EdgeWidths | LocalizedEdgeWidths | undefined
+    public _borderColor_0_0value?: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined
+    public _borderImage_0_0value?: BorderImageOption | undefined
+    public _outline_0_0value?: OutlineOptions | undefined
+    public _outlineStyle_0_0value?: OutlineStyle | EdgeOutlineStyles | undefined
+    public _outlineWidth_0_0value?: Dimension | EdgeOutlineWidths | undefined
+    public _outlineColor_0_0value?: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined
+    public _outlineRadius_0_0value?: Dimension | OutlineRadiuses | undefined
+    public _foregroundColor_0_0value?: ResourceColor | ColoringStrategy | undefined
+    public _onClick_0_0value?: ((event: ClickEvent) => void) | undefined
+    public _onHover_0_0value?: ((isHover: boolean,event: HoverEvent) => void) | undefined
+    public _onHoverMove_0_0value?: arkui_component_common_Callback<HoverEvent, void> | undefined
+    public _onAccessibilityHover_0_0value?: AccessibilityCallback | undefined
+    public _onAccessibilityHoverTransparent_0_0value?: AccessibilityTransparentCallback | undefined
+    public _hoverEffect_0_0value?: HoverEffect | undefined
+    public _onMouse_0_0value?: ((event: MouseEvent) => void) | undefined
+    public _onTouch_0_0value?: ((event: TouchEvent) => void) | undefined
+    public _onKeyEvent_0_0value?: arkui_component_common_Callback<KeyEvent, boolean> | undefined
+    public _onDigitalCrown_0_0value?: arkui_component_common_Callback<CrownEvent, void> | undefined
+    public _onKeyPreIme_0_0value?: arkui_component_common_Callback<KeyEvent, boolean> | undefined
+    public _onKeyEventDispatch_0_0value?: arkui_component_common_Callback<KeyEvent, boolean> | undefined
+    public _onFocusAxisEvent_0_0value?: arkui_component_common_Callback<FocusAxisEvent, void> | undefined
+    public _onAxisEvent_0_0value?: arkui_component_common_Callback<AxisEvent, void> | undefined
+    public _focusable_0_0value?: boolean | undefined
+    public _nextFocus_0_0value?: FocusMovement | undefined
+    public _tabStop_0_0value?: boolean | undefined
+    public _onFocus_0_0value?: (() => void) | undefined
+    public _onBlur_0_0value?: (() => void) | undefined
+    public _tabIndex_0_0value?: int32 | undefined
+    public _defaultFocus_0_0value?: boolean | undefined
+    public _groupDefaultFocus_0_0value?: boolean | undefined
+    public _focusOnTouch_0_0value?: boolean | undefined
+    public _focusBox_0_0value?: FocusBoxStyle | undefined
+    public _animation_0_0value?: AnimateParam | undefined
+    public _transition_0_0value?: TransitionEffect | undefined
+    public _motionBlur_0_0value?: MotionBlurOptions | undefined
+    public _brightness_0_0value?: double | undefined
+    public _contrast_0_0value?: double | undefined
+    public _grayscale_0_0value?: double | undefined
+    public _colorBlend_0_0value?: arkui_component_enums_Color | string | global_resource_Resource | undefined
+    public _saturate_0_0value?: double | undefined
+    public _sepia_0_0value?: double | undefined
+    public _invert_0_0value?: double | InvertOptions | undefined
+    public _hueRotate_0_0value?: double | string | undefined
+    public _useShadowBatching_0_0value?: boolean | undefined
+    public _useEffect_0_0value?: boolean | undefined
+    public _useUnionEffect_0_0value?: boolean | undefined
+    public _renderGroup_0_0value?: boolean | undefined
+    public _excludeFromRenderGroup_0_0value?: boolean | undefined
+    public _freeze_0_0value?: boolean | undefined
+    public _translate_0_0value?: TranslateOptions | undefined
+    public _scale_0_0value?: ScaleOptions | undefined
+    public _rotate_0_0value?: RotateOptions | RotateAngleOptions | undefined
+    public _transform_0_0value?: Matrix4Transit | undefined
+    public _transform3D_0_0value?: Matrix4Transit | undefined
+    public _onAppear_0_0value?: (() => void) | undefined
+    public _onDisAppear_0_0value?: (() => void) | undefined
+    public _onAttach_0_0value?: VoidCallback | undefined
+    public _onDetach_0_0value?: VoidCallback | undefined
+    public _onAreaChange_0_0value?: ((oldValue: Area,newValue: Area) => void) | undefined
+    public _visibility_0_0value?: Visibility | undefined
+    public _flexGrow_0_0value?: double | undefined
+    public _flexShrink_0_0value?: double | undefined
+    public _flexBasis_0_0value?: double | string | undefined
+    public _alignSelf_0_0value?: ItemAlign | undefined
+    public _layoutGravity_0_0value?: LocalizedAlignment | undefined
+    public _displayPriority_0_0value?: double | undefined
+    public _zIndex_0_0value?: int32 | undefined
+    public _direction_0_0value?: Direction | undefined
+    public _align_0_0value?: Alignment | LocalizedAlignment | undefined
+    public _position_0_0value?: Position | Edges | LocalizedEdges | undefined
+    public _markAnchor_0_0value?: Position | LocalizedPosition | undefined
+    public _offset_0_0value?: Position | Edges | LocalizedEdges | undefined
+    public _enabled_0_0value?: boolean | undefined
+    public _alignRules_0_0value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
+    public _aspectRatio_0_0value?: double | undefined
+    public _clickEffect_0_0value?: ClickEffect | null | undefined
+    public _enableClickSoundEffect_0_0value?: boolean | undefined
+    public _onDragStart_0_0value?: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined
+    public _onDragEnter_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
+    public _onDragMove_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
+    public _onDragLeave_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
+    public _onDrop_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
+    public _onDragEnd_0_0value?: ((event: DragEvent,extraParams?: string) => void) | undefined
+    public _allowDrop_0_0value?: Array<UniformDataType> | Array<string> | null | undefined
+    public _draggable_0_0value?: boolean | undefined
+    public _onPreDrag_0_0value?: arkui_component_common_Callback<PreDragStatus, void> | undefined
+    public _linearGradient_0_0value?: LinearGradientOptions | undefined
+    public _sweepGradient_0_0value?: SweepGradientOptions | undefined
+    public _radialGradient_0_0value?: RadialGradientOptions | undefined
+    public _motionPath_0_0value?: MotionPathOptions | undefined
+    public _shadow_0_0value?: ShadowOptions | ShadowStyle | undefined
+    public _clip_0_0value?: boolean | undefined
+    public _clipShape_0_0value?: CircleShape | EllipseShape | PathShape | RectShape | undefined
+    public _mask_0_0value?: ProgressMask | undefined
+    public _maskShape_0_0value?: CircleShape | EllipseShape | PathShape | RectShape | undefined
+    public _key_0_0value?: string | undefined
+    public _id_0_0value?: string | undefined
+    public _stateStyles_0_0value?: StateStyles | undefined
+    public _restoreId_0_0value?: int32 | undefined
+    public _sphericalEffect_0_0value?: double | undefined
+    public _lightUpEffect_0_0value?: double | undefined
+    public _pixelStretchEffect_0_0value?: PixelStretchEffectOptions | undefined
+    public _accessibilityNextFocusId_0_0value?: string | undefined
+    public _accessibilityDefaultFocus_0_0value?: boolean | undefined
+    public _accessibilityUseSamePage_0_0value?: AccessibilitySamePageMode | undefined
+    public _accessibilityScrollTriggerable_0_0value?: boolean | undefined
+    public _accessibilityText_0_0value?: global_resource_Resource | string | undefined
+    public _accessibilityRole_0_0value?: AccessibilityRoleType | undefined
+    public _onAccessibilityFocus_0_0value?: AccessibilityFocusCallback | undefined
+    public _onAccessibilityActionIntercept_0_0value?: AccessibilityActionInterceptCallback | undefined
+    public _accessibilityTextHint_0_0value?: string | undefined
+    public _accessibilityDescription_0_0value?: global_resource_Resource | string | undefined
+    public _accessibilityLevel_0_0value?: string | undefined
+    public _accessibilityVirtualNode_0_0value?: CustomBuilder | undefined
+    public _accessibilityChecked_0_0value?: boolean | undefined
+    public _accessibilitySelected_0_0value?: boolean | undefined
+    public _obscured_0_0value?: Array<ObscuredReasons> | undefined
+    public _reuseId_0_0value?: string | undefined
+    public _reuse_0_0value?: ReuseOptions | undefined
+    public _renderFit_0_0value?: RenderFit | undefined
+    public _gestureModifier_0_0value?: GestureModifier | undefined
+    public _backgroundBrightness_0_0value?: BackgroundBrightnessOptions | undefined
+    public _onGestureJudgeBegin_0_0value?: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined
+    public _onGestureRecognizerJudgeBegin_0_0value?: GestureRecognizerJudgeBeginCallback | undefined
+    public _shouldBuiltInRecognizerParallelWith_0_0value?: ShouldBuiltInRecognizerParallelWithCallback | undefined
+    public _monopolizeEvents_0_0value?: boolean | undefined
+    public _onTouchIntercept_0_0value?: arkui_component_common_Callback<TouchEvent, HitTestMode> | undefined
+    public _onSizeChange_0_0value?: SizeChangeCallback | undefined
+    public _accessibilityFocusDrawLevel_0_0value?: FocusDrawLevel | undefined
+    public _onTouchTestDone_0_0value?: TouchTestDoneCallback | undefined
+    public _systemMaterial_0_0value?: SystemUiMaterial | undefined
+    public _onNeedSoftkeyboard_0_0value?: OnNeedSoftkeyboardCallback | undefined
+    public _accessibilityStateDescription_0_0value?: string | global_resource_Resource | undefined
+    public _accessibilityActionOptions_0_0value?: AccessibilityActionOptions | undefined
+    public _customProperty_0_0value?: string
+    public _customProperty_0_1value?: CustomProperty
+    public _expandSafeArea_0_0value?: Array<SafeAreaType> | undefined
+    public _expandSafeArea_0_1value?: Array<SafeAreaEdge> | undefined
+    public _ignoreLayoutSafeArea_0_0value?: Array<LayoutSafeAreaType> | undefined
+    public _ignoreLayoutSafeArea_0_1value?: Array<LayoutSafeAreaEdge> | undefined
+    public _background_0_0value?: CustomBuilder | ResourceColor | undefined
+    public _background_0_1value?: BackgroundOptions | undefined
+    public _backgroundImage_1_0value?: ResourceStr | PixelMap | undefined
+    public _backgroundImage_1_1value?: BackgroundImageOptions
+    public _backgroundImage_2_0value?: ResourceStr | PixelMap | undefined
+    public _backgroundImage_2_1value?: ImageRepeat
+    public _backgroundBlurStyle_0_0value?: BlurStyle | undefined
+    public _backgroundBlurStyle_0_1value?: BackgroundBlurStyleOptions | undefined
+    public _backgroundBlurStyle_0_2value?: SystemAdaptiveOptions | undefined
+    public _backgroundEffect_0_0value?: BackgroundEffectOptions | undefined
+    public _backgroundEffect_0_1value?: SystemAdaptiveOptions | undefined
+    public _foregroundBlurStyle_0_0value?: BlurStyle | undefined
+    public _foregroundBlurStyle_0_1value?: ForegroundBlurStyleOptions | undefined
+    public _foregroundBlurStyle_0_2value?: SystemAdaptiveOptions | undefined
+    public _borderRadius_0_0value?: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
+    public _borderRadius_0_1value?: RenderStrategy | undefined
+    public _onClick_1_0value?: ((event: ClickEvent) => void) | undefined
+    public _onClick_1_1value?: double | undefined
+    public _focusScopeId_0_0value?: string | undefined
+    public _focusScopeId_0_1value?: boolean | undefined
+    public _focusScopeId_0_2value?: boolean | undefined
+    public _focusScopePriority_0_0value?: string | undefined
+    public _focusScopePriority_0_1value?: FocusPriority | undefined
+    public _transition_1_0value?: TransitionEffect | undefined
+    public _transition_1_1value?: TransitionFinishCallback | undefined
+    public _gesture_0_0value?: GestureType
+    public _gesture_0_1value?: GestureMask | undefined
+    public _priorityGesture_0_0value?: GestureType
+    public _priorityGesture_0_1value?: GestureMask | undefined
+    public _parallelGesture_0_0value?: GestureType
+    public _parallelGesture_0_1value?: GestureMask | undefined
+    public _blur_0_0value?: double | undefined
+    public _blur_0_1value?: BlurOptions | undefined
+    public _blur_0_2value?: SystemAdaptiveOptions | undefined
+    public _linearGradientBlur_0_0value?: double | undefined
+    public _linearGradientBlur_0_1value?: LinearGradientBlurOptions | undefined
+    public _useEffect_1_0value?: boolean | undefined
+    public _useEffect_1_1value?: EffectType | undefined
+    public _backdropBlur_0_0value?: double | undefined
+    public _backdropBlur_0_1value?: BlurOptions | undefined
+    public _backdropBlur_0_2value?: SystemAdaptiveOptions | undefined
+    public _sharedTransition_0_0value?: string | undefined
+    public _sharedTransition_0_1value?: sharedTransitionOptions | undefined
+    public _chainMode_0_0value?: Axis | undefined
+    public _chainMode_0_1value?: ChainStyle | undefined
+    public _onDrop_1_0value?: OnDragEventCallback | undefined
+    public _onDrop_1_1value?: DropOptions
+    public _onDragSpringLoading_0_0value?: arkui_component_common_Callback<SpringLoadingContext, void> | null | undefined
+    public _onDragSpringLoading_0_1value?: DragSpringLoadingConfiguration | undefined
+    public _dragPreview_0_0value?: CustomBuilder | DragItemInfo | string | undefined
+    public _dragPreview_0_1value?: PreviewConfiguration | undefined
+    public _dragPreviewOptions_0_0value?: DragPreviewOptions | undefined
+    public _dragPreviewOptions_0_1value?: DragInteractionOptions | undefined
+    public _overlay_0_0value?: string | CustomBuilder | ComponentContent<Object> | undefined
+    public _overlay_0_1value?: OverlayOptions | undefined
+    public _blendMode_0_0value?: BlendMode | undefined
+    public _blendMode_0_1value?: BlendApplyType | undefined
+    public _advancedBlendMode_0_0value?: BlendMode | Blender | undefined
+    public _advancedBlendMode_0_1value?: BlendApplyType | undefined
+    public _geometryTransition_0_0value?: string | undefined
+    public _geometryTransition_0_1value?: GeometryTransitionOptions | undefined
+    public _bindTips_0_0value?: TipsMessageType | undefined
+    public _bindTips_0_1value?: TipsOptions | undefined
+    public _bindPopup_0_0value?: boolean | undefined
+    public _bindPopup_0_1value?: PopupOptions | CustomPopupOptions | undefined
+    public _bindMenu_0_0value?: Array<MenuElement> | CustomBuilder | undefined
+    public _bindMenu_0_1value?: MenuOptions | undefined
+    public _bindMenu_1_0value?: boolean | Bindable<boolean> | undefined
+    public _bindMenu_1_1value?: Array<MenuElement> | CustomBuilder | undefined
+    public _bindMenu_1_2value?: MenuOptions | undefined
+    public _bindContextMenu_0_0value?: CustomBuilder | undefined
+    public _bindContextMenu_0_1value?: ResponseType | undefined
+    public _bindContextMenu_0_2value?: ContextMenuOptions | undefined
+    public _bindContextMenuWithResponse_0_0value?: CustomBuilderT<ResponseType> | undefined
+    public _bindContextMenuWithResponse_0_1value?: ContextMenuOptions | undefined
+    public _bindContextMenu_1_0value?: boolean | Bindable<boolean> | undefined
+    public _bindContextMenu_1_1value?: CustomBuilder | undefined
+    public _bindContextMenu_1_2value?: ContextMenuOptions | undefined
+    public _bindContentCover_0_0value?: boolean | Bindable<boolean> | undefined
+    public _bindContentCover_0_1value?: CustomBuilder | undefined
+    public _bindContentCover_0_2value?: ModalTransition | undefined
+    public _bindContentCover_1_0value?: boolean | Bindable<boolean> | undefined
+    public _bindContentCover_1_1value?: CustomBuilder | undefined
+    public _bindContentCover_1_2value?: ContentCoverOptions | undefined
+    public _bindSheet_0_0value?: boolean | Bindable<boolean> | undefined
+    public _bindSheet_0_1value?: CustomBuilder | undefined
+    public _bindSheet_0_2value?: SheetOptions | undefined
+    public _onVisibleAreaChange_0_0value?: Array<double> | undefined
+    public _onVisibleAreaChange_0_1value?: VisibleAreaChangeCallback | undefined
+    public _onVisibleAreaApproximateChange_0_0value?: VisibleAreaEventOptions | undefined
+    public _onVisibleAreaApproximateChange_0_1value?: VisibleAreaChangeCallback | undefined
+    public _keyboardShortcut_0_0value?: string | FunctionKey | undefined
+    public _keyboardShortcut_0_1value?: Array<ModifierKey> | undefined
+    public _keyboardShortcut_0_2value?: (() => void) | undefined
+    public _accessibilityGroup_0_0value?: boolean | undefined
+    public _accessibilityGroup_0_1value?: AccessibilityOptions | undefined
+    public _onGestureRecognizerJudgeBegin_1_0value?: GestureRecognizerJudgeBeginCallback | undefined
+    public _onGestureRecognizerJudgeBegin_1_1value?: boolean | undefined
+    applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkCommonMethodPeer;
         const flagArray = this._flagArray;
@@ -336,9 +337,8 @@ export class CommonMethodModifier implements CommonMethod {
         this.applyModifierPatch10(peer, flagArray);
     }
     applyModifierPatch0(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
-        if (flagArray[0] != 0)
-        {
-            switch (flagArray[0] as int32) {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
                 case 1: {
                     peer.setWidthAttribute((this._width_0_0value as Length | LayoutPolicy | undefined));
                     flagArray[0] = 2;
@@ -354,9 +354,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[1] != 0)
-        {
-            switch (flagArray[1] as int32) {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
                 case 1: {
                     peer.setHeightAttribute((this._height_0_0value as Length | LayoutPolicy | undefined));
                     flagArray[1] = 2;
@@ -372,11 +371,10 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[2] != 0)
-        {
-            switch (flagArray[2] as int32) {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
                 case 1: {
-                    peer.setResponseRegionAttribute((this._responseRegion_0_0value as Array<Rectangle> | Rectangle | undefined));
+                    hookDrawModifier(peer, (this._drawModifier_0_0value as DrawModifier | undefined));
                     flagArray[2] = 2;
                     break;
                 }
@@ -386,15 +384,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[2] = 0;
-                    peer.setResponseRegionAttribute((undefined as Array<Rectangle> | Rectangle | undefined));
+                    hookDrawModifier(peer, (undefined as DrawModifier | undefined));
                 }
             }
         }
-        if (flagArray[3] != 0)
-        {
-            switch (flagArray[3] as int32) {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
                 case 1: {
-                    peer.setMouseResponseRegionAttribute((this._mouseResponseRegion_0_0value as Array<Rectangle> | Rectangle | undefined));
+                    peer.setResponseRegionAttribute((this._responseRegion_0_0value as Array<Rectangle> | Rectangle | undefined));
                     flagArray[3] = 2;
                     break;
                 }
@@ -404,15 +401,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[3] = 0;
-                    peer.setMouseResponseRegionAttribute((undefined as Array<Rectangle> | Rectangle | undefined));
+                    peer.setResponseRegionAttribute((undefined as Array<Rectangle> | Rectangle | undefined));
                 }
             }
         }
-        if (flagArray[4] != 0)
-        {
-            switch (flagArray[4] as int32) {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
                 case 1: {
-                    peer.setResponseRegionListAttribute((this._responseRegionList_0_0value as Array<ResponseRegion> | undefined));
+                    peer.setMouseResponseRegionAttribute((this._mouseResponseRegion_0_0value as Array<Rectangle> | Rectangle | undefined));
                     flagArray[4] = 2;
                     break;
                 }
@@ -422,15 +418,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[4] = 0;
-                    peer.setResponseRegionListAttribute((undefined as Array<ResponseRegion> | undefined));
+                    peer.setMouseResponseRegionAttribute((undefined as Array<Rectangle> | Rectangle | undefined));
                 }
             }
         }
-        if (flagArray[5] != 0)
-        {
-            switch (flagArray[5] as int32) {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
                 case 1: {
-                    peer.setSizeAttribute((this._size_0_0value as SizeOptions | undefined));
+                    peer.setResponseRegionListAttribute((this._responseRegionList_0_0value as Array<ResponseRegion> | undefined));
                     flagArray[5] = 2;
                     break;
                 }
@@ -440,15 +435,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[5] = 0;
-                    peer.setSizeAttribute((undefined as SizeOptions | undefined));
+                    peer.setResponseRegionListAttribute((undefined as Array<ResponseRegion> | undefined));
                 }
             }
         }
-        if (flagArray[6] != 0)
-        {
-            switch (flagArray[6] as int32) {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
                 case 1: {
-                    peer.setConstraintSizeAttribute((this._constraintSize_0_0value as ConstraintSizeOptions | undefined));
+                    peer.setSizeAttribute((this._size_0_0value as SizeOptions | undefined));
                     flagArray[6] = 2;
                     break;
                 }
@@ -458,15 +452,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[6] = 0;
-                    peer.setConstraintSizeAttribute((undefined as ConstraintSizeOptions | undefined));
+                    peer.setSizeAttribute((undefined as SizeOptions | undefined));
                 }
             }
         }
-        if (flagArray[7] != 0)
-        {
-            switch (flagArray[7] as int32) {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
                 case 1: {
-                    peer.setHitTestBehaviorAttribute((this._hitTestBehavior_0_0value as HitTestMode | undefined));
+                    peer.setConstraintSizeAttribute((this._constraintSize_0_0value as ConstraintSizeOptions | undefined));
                     flagArray[7] = 2;
                     break;
                 }
@@ -476,15 +469,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[7] = 0;
-                    peer.setHitTestBehaviorAttribute((undefined as HitTestMode | undefined));
+                    peer.setConstraintSizeAttribute((undefined as ConstraintSizeOptions | undefined));
                 }
             }
         }
-        if (flagArray[8] != 0)
-        {
-            switch (flagArray[8] as int32) {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
                 case 1: {
-                    peer.setOnChildTouchTestAttribute((this._onChildTouchTest_0_0value as ((value: Array<TouchTestInfo>) => TouchResult) | undefined));
+                    peer.setHitTestBehaviorAttribute((this._hitTestBehavior_0_0value as HitTestMode | undefined));
                     flagArray[8] = 2;
                     break;
                 }
@@ -494,15 +486,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[8] = 0;
-                    peer.setOnChildTouchTestAttribute((undefined as ((value: Array<TouchTestInfo>) => TouchResult) | undefined));
+                    peer.setHitTestBehaviorAttribute((undefined as HitTestMode | undefined));
                 }
             }
         }
-        if (flagArray[9] != 0)
-        {
-            switch (flagArray[9] as int32) {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
                 case 1: {
-                    peer.setLayoutWeightAttribute((this._layoutWeight_0_0value as number | string | undefined));
+                    peer.setOnChildTouchTestAttribute((this._onChildTouchTest_0_0value as ((value: Array<TouchTestInfo>) => TouchResult) | undefined));
                     flagArray[9] = 2;
                     break;
                 }
@@ -512,15 +503,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[9] = 0;
-                    peer.setLayoutWeightAttribute((undefined as number | string | undefined));
+                    peer.setOnChildTouchTestAttribute((undefined as ((value: Array<TouchTestInfo>) => TouchResult) | undefined));
                 }
             }
         }
-        if (flagArray[10] != 0)
-        {
-            switch (flagArray[10] as int32) {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
                 case 1: {
-                    peer.setChainWeightAttribute((this._chainWeight_0_0value as ChainWeightOptions | undefined));
+                    peer.setLayoutWeightAttribute((this._layoutWeight_0_0value as double | string | undefined));
                     flagArray[10] = 2;
                     break;
                 }
@@ -530,15 +520,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[10] = 0;
-                    peer.setChainWeightAttribute((undefined as ChainWeightOptions | undefined));
+                    peer.setLayoutWeightAttribute((undefined as double | string | undefined));
                 }
             }
         }
-        if (flagArray[11] != 0)
-        {
-            switch (flagArray[11] as int32) {
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
                 case 1: {
-                    peer.setPaddingAttribute((this._padding_0_0value as Padding | Length | LocalizedPadding | undefined));
+                    peer.setChainWeightAttribute((this._chainWeight_0_0value as ChainWeightOptions | undefined));
                     flagArray[11] = 2;
                     break;
                 }
@@ -548,15 +537,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[11] = 0;
-                    peer.setPaddingAttribute((undefined as Padding | Length | LocalizedPadding | undefined));
+                    peer.setChainWeightAttribute((undefined as ChainWeightOptions | undefined));
                 }
             }
         }
-        if (flagArray[12] != 0)
-        {
-            switch (flagArray[12] as int32) {
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
                 case 1: {
-                    peer.setSafeAreaPaddingAttribute((this._safeAreaPadding_0_0value as Padding | LengthMetrics | LocalizedPadding | undefined));
+                    peer.setPaddingAttribute((this._padding_0_0value as Padding | Length | LocalizedPadding | undefined));
                     flagArray[12] = 2;
                     break;
                 }
@@ -566,15 +554,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[12] = 0;
-                    peer.setSafeAreaPaddingAttribute((undefined as Padding | LengthMetrics | LocalizedPadding | undefined));
+                    peer.setPaddingAttribute((undefined as Padding | Length | LocalizedPadding | undefined));
                 }
             }
         }
-        if (flagArray[13] != 0)
-        {
-            switch (flagArray[13] as int32) {
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
                 case 1: {
-                    peer.setMarginAttribute((this._margin_0_0value as Padding | Length | LocalizedPadding | undefined));
+                    peer.setSafeAreaPaddingAttribute((this._safeAreaPadding_0_0value as Padding | arkui_Graphics_LengthMetrics | LocalizedPadding | undefined));
                     flagArray[13] = 2;
                     break;
                 }
@@ -584,15 +571,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[13] = 0;
-                    peer.setMarginAttribute((undefined as Padding | Length | LocalizedPadding | undefined));
+                    peer.setSafeAreaPaddingAttribute((undefined as Padding | arkui_Graphics_LengthMetrics | LocalizedPadding | undefined));
                 }
             }
         }
-        if (flagArray[14] != 0)
-        {
-            switch (flagArray[14] as int32) {
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
                 case 1: {
-                    peer.setBackgroundColorAttribute((this._backgroundColor_0_0value as ResourceColor | ColorMetrics | undefined));
+                    peer.setMarginAttribute((this._margin_0_0value as Margin | Length | LocalizedMargin | undefined));
                     flagArray[14] = 2;
                     break;
                 }
@@ -602,15 +588,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[14] = 0;
-                    peer.setBackgroundColorAttribute((undefined as ResourceColor | ColorMetrics | undefined));
+                    peer.setMarginAttribute((undefined as Margin | Length | LocalizedMargin | undefined));
                 }
             }
         }
-        if (flagArray[15] != 0)
-        {
-            switch (flagArray[15] as int32) {
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
                 case 1: {
-                    peer.setPixelRoundAttribute((this._pixelRound_0_0value as PixelRoundPolicy | undefined));
+                    peer.setBackgroundColorAttribute((this._backgroundColor_0_0value as ResourceColor | arkui_component_units_ColorMetrics | undefined));
                     flagArray[15] = 2;
                     break;
                 }
@@ -620,15 +605,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[15] = 0;
-                    peer.setPixelRoundAttribute((undefined as PixelRoundPolicy | undefined));
+                    peer.setBackgroundColorAttribute((undefined as ResourceColor | arkui_component_units_ColorMetrics | undefined));
                 }
             }
         }
-        if (flagArray[16] != 0)
-        {
-            switch (flagArray[16] as int32) {
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
                 case 1: {
-                    peer.setBackgroundImage0Attribute((this._backgroundImage_0_0value as ResourceStr | image.PixelMap | undefined));
+                    peer.setPixelRoundAttribute((this._pixelRound_0_0value as PixelRoundPolicy | undefined));
                     flagArray[16] = 2;
                     break;
                 }
@@ -638,15 +622,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[16] = 0;
-                    peer.setBackgroundImage0Attribute((undefined as ResourceStr | image.PixelMap | undefined));
+                    peer.setPixelRoundAttribute((undefined as PixelRoundPolicy | undefined));
                 }
             }
         }
-        if (flagArray[17] != 0)
-        {
-            switch (flagArray[17] as int32) {
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
                 case 1: {
-                    peer.setBackgroundImageSizeAttribute((this._backgroundImageSize_0_0value as SizeOptions | ImageSize | undefined));
+                    peer.setBackgroundImage0Attribute((this._backgroundImage_0_0value as ResourceStr | PixelMap | undefined));
                     flagArray[17] = 2;
                     break;
                 }
@@ -656,15 +639,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[17] = 0;
-                    peer.setBackgroundImageSizeAttribute((undefined as SizeOptions | ImageSize | undefined));
+                    peer.setBackgroundImage0Attribute((undefined as ResourceStr | PixelMap | undefined));
                 }
             }
         }
-        if (flagArray[18] != 0)
-        {
-            switch (flagArray[18] as int32) {
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
                 case 1: {
-                    peer.setBackgroundImagePositionAttribute((this._backgroundImagePosition_0_0value as Position | Alignment | undefined));
+                    peer.setBackgroundImageSizeAttribute((this._backgroundImageSize_0_0value as SizeOptions | ImageSize | undefined));
                     flagArray[18] = 2;
                     break;
                 }
@@ -674,15 +656,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[18] = 0;
-                    peer.setBackgroundImagePositionAttribute((undefined as Position | Alignment | undefined));
+                    peer.setBackgroundImageSizeAttribute((undefined as SizeOptions | ImageSize | undefined));
                 }
             }
         }
-        if (flagArray[19] != 0)
-        {
-            switch (flagArray[19] as int32) {
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
                 case 1: {
-                    peer.setBackgroundEffect0Attribute((this._backgroundEffect_0_0value as BackgroundEffectOptions | undefined));
+                    peer.setBackgroundImagePositionAttribute((this._backgroundImagePosition_0_0value as Position | Alignment | undefined));
                     flagArray[19] = 2;
                     break;
                 }
@@ -692,15 +673,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[19] = 0;
-                    peer.setBackgroundEffect0Attribute((undefined as BackgroundEffectOptions | undefined));
+                    peer.setBackgroundImagePositionAttribute((undefined as Position | Alignment | undefined));
                 }
             }
         }
     }
     applyModifierPatch1(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
-        if (flagArray[20] != 0)
-        {
-            switch (flagArray[20] as int32) {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
                 case 1: {
                     peer.setBackgroundImageResizableAttribute((this._backgroundImageResizable_0_0value as ResizableOptions | undefined));
                     flagArray[20] = 2;
@@ -716,9 +696,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[21] != 0)
-        {
-            switch (flagArray[21] as int32) {
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
                 case 1: {
                     peer.setForegroundEffectAttribute((this._foregroundEffect_0_0value as ForegroundEffectOptions | undefined));
                     flagArray[21] = 2;
@@ -734,11 +713,10 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[22] != 0)
-        {
-            switch (flagArray[22] as int32) {
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
                 case 1: {
-                    peer.setVisualEffectAttribute((this._visualEffect_0_0value as uiEffect.VisualEffect | undefined));
+                    peer.setVisualEffectAttribute((this._visualEffect_0_0value as VisualEffect | undefined));
                     flagArray[22] = 2;
                     break;
                 }
@@ -748,15 +726,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[22] = 0;
-                    peer.setVisualEffectAttribute((undefined as uiEffect.VisualEffect | undefined));
+                    peer.setVisualEffectAttribute((undefined as VisualEffect | undefined));
                 }
             }
         }
-        if (flagArray[23] != 0)
-        {
-            switch (flagArray[23] as int32) {
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
                 case 1: {
-                    peer.setBackgroundFilterAttribute((this._backgroundFilter_0_0value as uiEffect.Filter | undefined));
+                    peer.setBackgroundFilterAttribute((this._backgroundFilter_0_0value as Filter | undefined));
                     flagArray[23] = 2;
                     break;
                 }
@@ -766,15 +743,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[23] = 0;
-                    peer.setBackgroundFilterAttribute((undefined as uiEffect.Filter | undefined));
+                    peer.setBackgroundFilterAttribute((undefined as Filter | undefined));
                 }
             }
         }
-        if (flagArray[24] != 0)
-        {
-            switch (flagArray[24] as int32) {
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
                 case 1: {
-                    peer.setForegroundFilterAttribute((this._foregroundFilter_0_0value as uiEffect.Filter | undefined));
+                    peer.setForegroundFilterAttribute((this._foregroundFilter_0_0value as Filter | undefined));
                     flagArray[24] = 2;
                     break;
                 }
@@ -784,15 +760,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[24] = 0;
-                    peer.setForegroundFilterAttribute((undefined as uiEffect.Filter | undefined));
+                    peer.setForegroundFilterAttribute((undefined as Filter | undefined));
                 }
             }
         }
-        if (flagArray[25] != 0)
-        {
-            switch (flagArray[25] as int32) {
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
                 case 1: {
-                    peer.setCompositingFilterAttribute((this._compositingFilter_0_0value as uiEffect.Filter | undefined));
+                    peer.setCompositingFilterAttribute((this._compositingFilter_0_0value as Filter | undefined));
                     flagArray[25] = 2;
                     break;
                 }
@@ -802,15 +777,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[25] = 0;
-                    peer.setCompositingFilterAttribute((undefined as uiEffect.Filter | undefined));
+                    peer.setCompositingFilterAttribute((undefined as Filter | undefined));
                 }
             }
         }
-        if (flagArray[26] != 0)
-        {
-            switch (flagArray[26] as int32) {
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
                 case 1: {
-                    peer.setOpacityAttribute((this._opacity_0_0value as double | Resource | undefined));
+                    peer.setMaterialFilterAttribute((this._materialFilter_0_0value as Filter | undefined));
                     flagArray[26] = 2;
                     break;
                 }
@@ -820,15 +794,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[26] = 0;
-                    peer.setOpacityAttribute((undefined as double | Resource | undefined));
+                    peer.setMaterialFilterAttribute((undefined as Filter | undefined));
                 }
             }
         }
-        if (flagArray[27] != 0)
-        {
-            switch (flagArray[27] as int32) {
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
                 case 1: {
-                    peer.setBorderAttribute((this._border_0_0value as BorderOptions | undefined));
+                    peer.setOpacityAttribute((this._opacity_0_0value as double | global_resource_Resource | undefined));
                     flagArray[27] = 2;
                     break;
                 }
@@ -838,15 +811,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[27] = 0;
-                    peer.setBorderAttribute((undefined as BorderOptions | undefined));
+                    peer.setOpacityAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
-        if (flagArray[28] != 0)
-        {
-            switch (flagArray[28] as int32) {
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
                 case 1: {
-                    peer.setBorderStyleAttribute((this._borderStyle_0_0value as BorderStyle | EdgeStyles | undefined));
+                    peer.setBorderAttribute((this._border_0_0value as BorderOptions | undefined));
                     flagArray[28] = 2;
                     break;
                 }
@@ -856,15 +828,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[28] = 0;
-                    peer.setBorderStyleAttribute((undefined as BorderStyle | EdgeStyles | undefined));
+                    peer.setBorderAttribute((undefined as BorderOptions | undefined));
                 }
             }
         }
-        if (flagArray[29] != 0)
-        {
-            switch (flagArray[29] as int32) {
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
                 case 1: {
-                    peer.setBorderWidthAttribute((this._borderWidth_0_0value as Length | EdgeWidths | LocalizedEdgeWidths | undefined));
+                    peer.setBorderStyleAttribute((this._borderStyle_0_0value as BorderStyle | EdgeStyles | undefined));
                     flagArray[29] = 2;
                     break;
                 }
@@ -874,15 +845,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[29] = 0;
-                    peer.setBorderWidthAttribute((undefined as Length | EdgeWidths | LocalizedEdgeWidths | undefined));
+                    peer.setBorderStyleAttribute((undefined as BorderStyle | EdgeStyles | undefined));
                 }
             }
         }
-        if (flagArray[30] != 0)
-        {
-            switch (flagArray[30] as int32) {
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
                 case 1: {
-                    peer.setBorderColorAttribute((this._borderColor_0_0value as ResourceColor | EdgeColors | LocalizedEdgeColors | undefined));
+                    peer.setBorderWidthAttribute((this._borderWidth_0_0value as Length | EdgeWidths | LocalizedEdgeWidths | undefined));
                     flagArray[30] = 2;
                     break;
                 }
@@ -892,15 +862,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[30] = 0;
-                    peer.setBorderColorAttribute((undefined as ResourceColor | EdgeColors | LocalizedEdgeColors | undefined));
+                    peer.setBorderWidthAttribute((undefined as Length | EdgeWidths | LocalizedEdgeWidths | undefined));
                 }
             }
         }
-        if (flagArray[31] != 0)
-        {
-            switch (flagArray[31] as int32) {
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
                 case 1: {
-                    peer.setBorderRadius0Attribute((this._borderRadius_0_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
+                    peer.setBorderColorAttribute((this._borderColor_0_0value as ResourceColor | EdgeColors | LocalizedEdgeColors | undefined));
                     flagArray[31] = 2;
                     break;
                 }
@@ -910,13 +879,12 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[31] = 0;
-                    peer.setBorderRadius0Attribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
+                    peer.setBorderColorAttribute((undefined as ResourceColor | EdgeColors | LocalizedEdgeColors | undefined));
                 }
             }
         }
-        if (flagArray[32] != 0)
-        {
-            switch (flagArray[32] as int32) {
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
                 case 1: {
                     peer.setBorderImageAttribute((this._borderImage_0_0value as BorderImageOption | undefined));
                     flagArray[32] = 2;
@@ -932,9 +900,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[33] != 0)
-        {
-            switch (flagArray[33] as int32) {
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
                 case 1: {
                     peer.setOutlineAttribute((this._outline_0_0value as OutlineOptions | undefined));
                     flagArray[33] = 2;
@@ -950,9 +917,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[34] != 0)
-        {
-            switch (flagArray[34] as int32) {
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
                 case 1: {
                     peer.setOutlineStyleAttribute((this._outlineStyle_0_0value as OutlineStyle | EdgeOutlineStyles | undefined));
                     flagArray[34] = 2;
@@ -968,9 +934,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[35] != 0)
-        {
-            switch (flagArray[35] as int32) {
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
                 case 1: {
                     peer.setOutlineWidthAttribute((this._outlineWidth_0_0value as Dimension | EdgeOutlineWidths | undefined));
                     flagArray[35] = 2;
@@ -986,9 +951,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[36] != 0)
-        {
-            switch (flagArray[36] as int32) {
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
                 case 1: {
                     peer.setOutlineColorAttribute((this._outlineColor_0_0value as ResourceColor | EdgeColors | LocalizedEdgeColors | undefined));
                     flagArray[36] = 2;
@@ -1004,9 +968,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[37] != 0)
-        {
-            switch (flagArray[37] as int32) {
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
                 case 1: {
                     peer.setOutlineRadiusAttribute((this._outlineRadius_0_0value as Dimension | OutlineRadiuses | undefined));
                     flagArray[37] = 2;
@@ -1022,9 +985,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[38] != 0)
-        {
-            switch (flagArray[38] as int32) {
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
                 case 1: {
                     peer.setForegroundColorAttribute((this._foregroundColor_0_0value as ResourceColor | ColoringStrategy | undefined));
                     flagArray[38] = 2;
@@ -1040,9 +1002,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[39] != 0)
-        {
-            switch (flagArray[39] as int32) {
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
                 case 1: {
                     peer.setOnClick0Attribute((this._onClick_0_0value as ((event: ClickEvent) => void) | undefined));
                     flagArray[39] = 2;
@@ -1060,9 +1021,8 @@ export class CommonMethodModifier implements CommonMethod {
         }
     }
     applyModifierPatch2(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
-        if (flagArray[40] != 0)
-        {
-            switch (flagArray[40] as int32) {
+        if (flagArray[40] != 0) {
+            switch (flagArray[40]) {
                 case 1: {
                     peer.setOnHoverAttribute((this._onHover_0_0value as ((isHover: boolean,event: HoverEvent) => void) | undefined));
                     flagArray[40] = 2;
@@ -1078,11 +1038,10 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[41] != 0)
-        {
-            switch (flagArray[41] as int32) {
+        if (flagArray[41] != 0) {
+            switch (flagArray[41]) {
                 case 1: {
-                    peer.setOnHoverMoveAttribute((this._onHoverMove_0_0value as ((value0: HoverEvent) => void) | undefined));
+                    peer.setOnHoverMoveAttribute((this._onHoverMove_0_0value as arkui_component_common_Callback<HoverEvent, void> | undefined));
                     flagArray[41] = 2;
                     break;
                 }
@@ -1092,13 +1051,12 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[41] = 0;
-                    peer.setOnHoverMoveAttribute((undefined as ((value0: HoverEvent) => void) | undefined));
+                    peer.setOnHoverMoveAttribute((undefined as arkui_component_common_Callback<HoverEvent, void> | undefined));
                 }
             }
         }
-        if (flagArray[42] != 0)
-        {
-            switch (flagArray[42] as int32) {
+        if (flagArray[42] != 0) {
+            switch (flagArray[42]) {
                 case 1: {
                     peer.setOnAccessibilityHoverAttribute((this._onAccessibilityHover_0_0value as AccessibilityCallback | undefined));
                     flagArray[42] = 2;
@@ -1114,9 +1072,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[43] != 0)
-        {
-            switch (flagArray[43] as int32) {
+        if (flagArray[43] != 0) {
+            switch (flagArray[43]) {
                 case 1: {
                     peer.setOnAccessibilityHoverTransparentAttribute((this._onAccessibilityHoverTransparent_0_0value as AccessibilityTransparentCallback | undefined));
                     flagArray[43] = 2;
@@ -1132,9 +1089,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[44] != 0)
-        {
-            switch (flagArray[44] as int32) {
+        if (flagArray[44] != 0) {
+            switch (flagArray[44]) {
                 case 1: {
                     peer.setHoverEffectAttribute((this._hoverEffect_0_0value as HoverEffect | undefined));
                     flagArray[44] = 2;
@@ -1150,9 +1106,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[45] != 0)
-        {
-            switch (flagArray[45] as int32) {
+        if (flagArray[45] != 0) {
+            switch (flagArray[45]) {
                 case 1: {
                     peer.setOnMouseAttribute((this._onMouse_0_0value as ((event: MouseEvent) => void) | undefined));
                     flagArray[45] = 2;
@@ -1168,9 +1123,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[46] != 0)
-        {
-            switch (flagArray[46] as int32) {
+        if (flagArray[46] != 0) {
+            switch (flagArray[46]) {
                 case 1: {
                     peer.setOnTouchAttribute((this._onTouch_0_0value as ((event: TouchEvent) => void) | undefined));
                     flagArray[46] = 2;
@@ -1186,11 +1140,10 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[47] != 0)
-        {
-            switch (flagArray[47] as int32) {
+        if (flagArray[47] != 0) {
+            switch (flagArray[47]) {
                 case 1: {
-                    peer.setOnKeyEventAttribute((this._onKeyEvent_0_0value as ((value0: KeyEvent) => boolean) | undefined));
+                    peer.setOnKeyEventAttribute((this._onKeyEvent_0_0value as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                     flagArray[47] = 2;
                     break;
                 }
@@ -1200,15 +1153,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[47] = 0;
-                    peer.setOnKeyEventAttribute((undefined as ((value0: KeyEvent) => boolean) | undefined));
+                    peer.setOnKeyEventAttribute((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                 }
             }
         }
-        if (flagArray[48] != 0)
-        {
-            switch (flagArray[48] as int32) {
+        if (flagArray[48] != 0) {
+            switch (flagArray[48]) {
                 case 1: {
-                    peer.setOnDigitalCrownAttribute((this._onDigitalCrown_0_0value as ((value0: CrownEvent) => void) | undefined));
+                    peer.setOnDigitalCrownAttribute((this._onDigitalCrown_0_0value as arkui_component_common_Callback<CrownEvent, void> | undefined));
                     flagArray[48] = 2;
                     break;
                 }
@@ -1218,15 +1170,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[48] = 0;
-                    peer.setOnDigitalCrownAttribute((undefined as ((value0: CrownEvent) => void) | undefined));
+                    peer.setOnDigitalCrownAttribute((undefined as arkui_component_common_Callback<CrownEvent, void> | undefined));
                 }
             }
         }
-        if (flagArray[49] != 0)
-        {
-            switch (flagArray[49] as int32) {
+        if (flagArray[49] != 0) {
+            switch (flagArray[49]) {
                 case 1: {
-                    peer.setOnKeyPreImeAttribute((this._onKeyPreIme_0_0value as ((value0: KeyEvent) => boolean) | undefined));
+                    peer.setOnKeyPreImeAttribute((this._onKeyPreIme_0_0value as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                     flagArray[49] = 2;
                     break;
                 }
@@ -1236,15 +1187,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[49] = 0;
-                    peer.setOnKeyPreImeAttribute((undefined as ((value0: KeyEvent) => boolean) | undefined));
+                    peer.setOnKeyPreImeAttribute((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                 }
             }
         }
-        if (flagArray[50] != 0)
-        {
-            switch (flagArray[50] as int32) {
+        if (flagArray[50] != 0) {
+            switch (flagArray[50]) {
                 case 1: {
-                    peer.setOnKeyEventDispatchAttribute((this._onKeyEventDispatch_0_0value as ((value0: KeyEvent) => boolean) | undefined));
+                    peer.setOnKeyEventDispatchAttribute((this._onKeyEventDispatch_0_0value as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                     flagArray[50] = 2;
                     break;
                 }
@@ -1254,15 +1204,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[50] = 0;
-                    peer.setOnKeyEventDispatchAttribute((undefined as ((value0: KeyEvent) => boolean) | undefined));
+                    peer.setOnKeyEventDispatchAttribute((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                 }
             }
         }
-        if (flagArray[51] != 0)
-        {
-            switch (flagArray[51] as int32) {
+        if (flagArray[51] != 0) {
+            switch (flagArray[51]) {
                 case 1: {
-                    peer.setOnFocusAxisEventAttribute((this._onFocusAxisEvent_0_0value as ((value0: FocusAxisEvent) => void) | undefined));
+                    peer.setOnFocusAxisEventAttribute((this._onFocusAxisEvent_0_0value as arkui_component_common_Callback<FocusAxisEvent, void> | undefined));
                     flagArray[51] = 2;
                     break;
                 }
@@ -1272,15 +1221,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[51] = 0;
-                    peer.setOnFocusAxisEventAttribute((undefined as ((value0: FocusAxisEvent) => void) | undefined));
+                    peer.setOnFocusAxisEventAttribute((undefined as arkui_component_common_Callback<FocusAxisEvent, void> | undefined));
                 }
             }
         }
-        if (flagArray[52] != 0)
-        {
-            switch (flagArray[52] as int32) {
+        if (flagArray[52] != 0) {
+            switch (flagArray[52]) {
                 case 1: {
-                    peer.setOnAxisEventAttribute((this._onAxisEvent_0_0value as ((value0: AxisEvent) => void) | undefined));
+                    peer.setOnAxisEventAttribute((this._onAxisEvent_0_0value as arkui_component_common_Callback<AxisEvent, void> | undefined));
                     flagArray[52] = 2;
                     break;
                 }
@@ -1290,13 +1238,12 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[52] = 0;
-                    peer.setOnAxisEventAttribute((undefined as ((value0: AxisEvent) => void) | undefined));
+                    peer.setOnAxisEventAttribute((undefined as arkui_component_common_Callback<AxisEvent, void> | undefined));
                 }
             }
         }
-        if (flagArray[53] != 0)
-        {
-            switch (flagArray[53] as int32) {
+        if (flagArray[53] != 0) {
+            switch (flagArray[53]) {
                 case 1: {
                     peer.setFocusableAttribute((this._focusable_0_0value as boolean | undefined));
                     flagArray[53] = 2;
@@ -1312,9 +1259,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[54] != 0)
-        {
-            switch (flagArray[54] as int32) {
+        if (flagArray[54] != 0) {
+            switch (flagArray[54]) {
                 case 1: {
                     peer.setNextFocusAttribute((this._nextFocus_0_0value as FocusMovement | undefined));
                     flagArray[54] = 2;
@@ -1330,9 +1276,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[55] != 0)
-        {
-            switch (flagArray[55] as int32) {
+        if (flagArray[55] != 0) {
+            switch (flagArray[55]) {
                 case 1: {
                     peer.setTabStopAttribute((this._tabStop_0_0value as boolean | undefined));
                     flagArray[55] = 2;
@@ -1348,9 +1293,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[56] != 0)
-        {
-            switch (flagArray[56] as int32) {
+        if (flagArray[56] != 0) {
+            switch (flagArray[56]) {
                 case 1: {
                     peer.setOnFocusAttribute((this._onFocus_0_0value as (() => void) | undefined));
                     flagArray[56] = 2;
@@ -1366,9 +1310,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[57] != 0)
-        {
-            switch (flagArray[57] as int32) {
+        if (flagArray[57] != 0) {
+            switch (flagArray[57]) {
                 case 1: {
                     peer.setOnBlurAttribute((this._onBlur_0_0value as (() => void) | undefined));
                     flagArray[57] = 2;
@@ -1384,9 +1327,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[58] != 0)
-        {
-            switch (flagArray[58] as int32) {
+        if (flagArray[58] != 0) {
+            switch (flagArray[58]) {
                 case 1: {
                     peer.setTabIndexAttribute((this._tabIndex_0_0value as int32 | undefined));
                     flagArray[58] = 2;
@@ -1402,9 +1344,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[59] != 0)
-        {
-            switch (flagArray[59] as int32) {
+        if (flagArray[59] != 0) {
+            switch (flagArray[59]) {
                 case 1: {
                     peer.setDefaultFocusAttribute((this._defaultFocus_0_0value as boolean | undefined));
                     flagArray[59] = 2;
@@ -1422,9 +1363,8 @@ export class CommonMethodModifier implements CommonMethod {
         }
     }
     applyModifierPatch3(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
-        if (flagArray[60] != 0)
-        {
-            switch (flagArray[60] as int32) {
+        if (flagArray[60] != 0) {
+            switch (flagArray[60]) {
                 case 1: {
                     peer.setGroupDefaultFocusAttribute((this._groupDefaultFocus_0_0value as boolean | undefined));
                     flagArray[60] = 2;
@@ -1440,9 +1380,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[61] != 0)
-        {
-            switch (flagArray[61] as int32) {
+        if (flagArray[61] != 0) {
+            switch (flagArray[61]) {
                 case 1: {
                     peer.setFocusOnTouchAttribute((this._focusOnTouch_0_0value as boolean | undefined));
                     flagArray[61] = 2;
@@ -1458,9 +1397,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[62] != 0)
-        {
-            switch (flagArray[62] as int32) {
+        if (flagArray[62] != 0) {
+            switch (flagArray[62]) {
                 case 1: {
                     peer.setFocusBoxAttribute((this._focusBox_0_0value as FocusBoxStyle | undefined));
                     flagArray[62] = 2;
@@ -1476,9 +1414,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[63] != 0)
-        {
-            switch (flagArray[63] as int32) {
+        if (flagArray[63] != 0) {
+            switch (flagArray[63]) {
                 case 1: {
                     peer.setAnimationAttribute((this._animation_0_0value as AnimateParam | undefined));
                     flagArray[63] = 2;
@@ -1494,9 +1431,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[64] != 0)
-        {
-            switch (flagArray[64] as int32) {
+        if (flagArray[64] != 0) {
+            switch (flagArray[64]) {
                 case 1: {
                     peer.setTransition0Attribute((this._transition_0_0value as TransitionEffect | undefined));
                     flagArray[64] = 2;
@@ -1512,9 +1448,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[65] != 0)
-        {
-            switch (flagArray[65] as int32) {
+        if (flagArray[65] != 0) {
+            switch (flagArray[65]) {
                 case 1: {
                     peer.setMotionBlurAttribute((this._motionBlur_0_0value as MotionBlurOptions | undefined));
                     flagArray[65] = 2;
@@ -1530,9 +1465,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[66] != 0)
-        {
-            switch (flagArray[66] as int32) {
+        if (flagArray[66] != 0) {
+            switch (flagArray[66]) {
                 case 1: {
                     peer.setBrightnessAttribute((this._brightness_0_0value as double | undefined));
                     flagArray[66] = 2;
@@ -1548,9 +1482,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[67] != 0)
-        {
-            switch (flagArray[67] as int32) {
+        if (flagArray[67] != 0) {
+            switch (flagArray[67]) {
                 case 1: {
                     peer.setContrastAttribute((this._contrast_0_0value as double | undefined));
                     flagArray[67] = 2;
@@ -1566,9 +1499,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[68] != 0)
-        {
-            switch (flagArray[68] as int32) {
+        if (flagArray[68] != 0) {
+            switch (flagArray[68]) {
                 case 1: {
                     peer.setGrayscaleAttribute((this._grayscale_0_0value as double | undefined));
                     flagArray[68] = 2;
@@ -1584,11 +1516,10 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[69] != 0)
-        {
-            switch (flagArray[69] as int32) {
+        if (flagArray[69] != 0) {
+            switch (flagArray[69]) {
                 case 1: {
-                    peer.setColorBlendAttribute((this._colorBlend_0_0value as Color | string | Resource | undefined));
+                    peer.setColorBlendAttribute((this._colorBlend_0_0value as arkui_component_enums_Color | string | global_resource_Resource | undefined));
                     flagArray[69] = 2;
                     break;
                 }
@@ -1598,13 +1529,12 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[69] = 0;
-                    peer.setColorBlendAttribute((undefined as Color | string | Resource | undefined));
+                    peer.setColorBlendAttribute((undefined as arkui_component_enums_Color | string | global_resource_Resource | undefined));
                 }
             }
         }
-        if (flagArray[70] != 0)
-        {
-            switch (flagArray[70] as int32) {
+        if (flagArray[70] != 0) {
+            switch (flagArray[70]) {
                 case 1: {
                     peer.setSaturateAttribute((this._saturate_0_0value as double | undefined));
                     flagArray[70] = 2;
@@ -1620,9 +1550,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[71] != 0)
-        {
-            switch (flagArray[71] as int32) {
+        if (flagArray[71] != 0) {
+            switch (flagArray[71]) {
                 case 1: {
                     peer.setSepiaAttribute((this._sepia_0_0value as double | undefined));
                     flagArray[71] = 2;
@@ -1638,9 +1567,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[72] != 0)
-        {
-            switch (flagArray[72] as int32) {
+        if (flagArray[72] != 0) {
+            switch (flagArray[72]) {
                 case 1: {
                     peer.setInvertAttribute((this._invert_0_0value as double | InvertOptions | undefined));
                     flagArray[72] = 2;
@@ -1656,9 +1584,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[73] != 0)
-        {
-            switch (flagArray[73] as int32) {
+        if (flagArray[73] != 0) {
+            switch (flagArray[73]) {
                 case 1: {
                     peer.setHueRotateAttribute((this._hueRotate_0_0value as double | string | undefined));
                     flagArray[73] = 2;
@@ -1674,9 +1601,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[74] != 0)
-        {
-            switch (flagArray[74] as int32) {
+        if (flagArray[74] != 0) {
+            switch (flagArray[74]) {
                 case 1: {
                     peer.setUseShadowBatchingAttribute((this._useShadowBatching_0_0value as boolean | undefined));
                     flagArray[74] = 2;
@@ -1692,9 +1618,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[75] != 0)
-        {
-            switch (flagArray[75] as int32) {
+        if (flagArray[75] != 0) {
+            switch (flagArray[75]) {
                 case 1: {
                     peer.setUseEffect0Attribute((this._useEffect_0_0value as boolean | undefined));
                     flagArray[75] = 2;
@@ -1710,11 +1635,10 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[76] != 0)
-        {
-            switch (flagArray[76] as int32) {
+        if (flagArray[76] != 0) {
+            switch (flagArray[76]) {
                 case 1: {
-                    peer.setRenderGroupAttribute((this._renderGroup_0_0value as boolean | undefined));
+                    peer.setUseUnionEffectAttribute((this._useUnionEffect_0_0value as boolean | undefined));
                     flagArray[76] = 2;
                     break;
                 }
@@ -1724,15 +1648,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[76] = 0;
-                    peer.setRenderGroupAttribute((undefined as boolean | undefined));
+                    peer.setUseUnionEffectAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[77] != 0)
-        {
-            switch (flagArray[77] as int32) {
+        if (flagArray[77] != 0) {
+            switch (flagArray[77]) {
                 case 1: {
-                    peer.setFreezeAttribute((this._freeze_0_0value as boolean | undefined));
+                    peer.setRenderGroupAttribute((this._renderGroup_0_0value as boolean | undefined));
                     flagArray[77] = 2;
                     break;
                 }
@@ -1742,15 +1665,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[77] = 0;
-                    peer.setFreezeAttribute((undefined as boolean | undefined));
+                    peer.setRenderGroupAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[78] != 0)
-        {
-            switch (flagArray[78] as int32) {
+        if (flagArray[78] != 0) {
+            switch (flagArray[78]) {
                 case 1: {
-                    peer.setTranslateAttribute((this._translate_0_0value as TranslateOptions | undefined));
+                    peer.setExcludeFromRenderGroupAttribute((this._excludeFromRenderGroup_0_0value as boolean | undefined));
                     flagArray[78] = 2;
                     break;
                 }
@@ -1760,15 +1682,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[78] = 0;
-                    peer.setTranslateAttribute((undefined as TranslateOptions | undefined));
+                    peer.setExcludeFromRenderGroupAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[79] != 0)
-        {
-            switch (flagArray[79] as int32) {
+        if (flagArray[79] != 0) {
+            switch (flagArray[79]) {
                 case 1: {
-                    peer.setScaleAttribute((this._scale_0_0value as ScaleOptions | undefined));
+                    peer.setFreezeAttribute((this._freeze_0_0value as boolean | undefined));
                     flagArray[79] = 2;
                     break;
                 }
@@ -1778,17 +1699,16 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[79] = 0;
-                    peer.setScaleAttribute((undefined as ScaleOptions | undefined));
+                    peer.setFreezeAttribute((undefined as boolean | undefined));
                 }
             }
         }
     }
     applyModifierPatch4(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
-        if (flagArray[80] != 0)
-        {
-            switch (flagArray[80] as int32) {
+        if (flagArray[80] != 0) {
+            switch (flagArray[80]) {
                 case 1: {
-                    peer.setRotateAttribute((this._rotate_0_0value as RotateOptions | RotateAngleOptions | undefined));
+                    peer.setTranslateAttribute((this._translate_0_0value as TranslateOptions | undefined));
                     flagArray[80] = 2;
                     break;
                 }
@@ -1798,15 +1718,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[80] = 0;
-                    peer.setRotateAttribute((undefined as RotateOptions | RotateAngleOptions | undefined));
+                    peer.setTranslateAttribute((undefined as TranslateOptions | undefined));
                 }
             }
         }
-        if (flagArray[81] != 0)
-        {
-            switch (flagArray[81] as int32) {
+        if (flagArray[81] != 0) {
+            switch (flagArray[81]) {
                 case 1: {
-                    peer.setTransformAttribute((this._transform_0_0value as matrix4.Matrix4Transit | undefined));
+                    peer.setScaleAttribute((this._scale_0_0value as ScaleOptions | undefined));
                     flagArray[81] = 2;
                     break;
                 }
@@ -1816,15 +1735,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[81] = 0;
-                    peer.setTransformAttribute((undefined as matrix4.Matrix4Transit | undefined));
+                    peer.setScaleAttribute((undefined as ScaleOptions | undefined));
                 }
             }
         }
-        if (flagArray[82] != 0)
-        {
-            switch (flagArray[82] as int32) {
+        if (flagArray[82] != 0) {
+            switch (flagArray[82]) {
                 case 1: {
-                    peer.setTransform3DAttribute((this._transform3D_0_0value as matrix4.Matrix4Transit | undefined));
+                    peer.setRotateAttribute((this._rotate_0_0value as RotateOptions | RotateAngleOptions | undefined));
                     flagArray[82] = 2;
                     break;
                 }
@@ -1834,15 +1752,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[82] = 0;
-                    peer.setTransform3DAttribute((undefined as matrix4.Matrix4Transit | undefined));
+                    peer.setRotateAttribute((undefined as RotateOptions | RotateAngleOptions | undefined));
                 }
             }
         }
-        if (flagArray[83] != 0)
-        {
-            switch (flagArray[83] as int32) {
+        if (flagArray[83] != 0) {
+            switch (flagArray[83]) {
                 case 1: {
-                    peer.setOnAppearAttribute((this._onAppear_0_0value as (() => void) | undefined));
+                    peer.setTransformAttribute((this._transform_0_0value as Matrix4Transit | undefined));
                     flagArray[83] = 2;
                     break;
                 }
@@ -1852,15 +1769,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[83] = 0;
-                    peer.setOnAppearAttribute((undefined as (() => void) | undefined));
+                    peer.setTransformAttribute((undefined as Matrix4Transit | undefined));
                 }
             }
         }
-        if (flagArray[84] != 0)
-        {
-            switch (flagArray[84] as int32) {
+        if (flagArray[84] != 0) {
+            switch (flagArray[84]) {
                 case 1: {
-                    peer.setOnDisAppearAttribute((this._onDisAppear_0_0value as (() => void) | undefined));
+                    peer.setTransform3DAttribute((this._transform3D_0_0value as Matrix4Transit | undefined));
                     flagArray[84] = 2;
                     break;
                 }
@@ -1870,15 +1786,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[84] = 0;
-                    peer.setOnDisAppearAttribute((undefined as (() => void) | undefined));
+                    peer.setTransform3DAttribute((undefined as Matrix4Transit | undefined));
                 }
             }
         }
-        if (flagArray[85] != 0)
-        {
-            switch (flagArray[85] as int32) {
+        if (flagArray[85] != 0) {
+            switch (flagArray[85]) {
                 case 1: {
-                    peer.setOnAttachAttribute((this._onAttach_0_0value as VoidCallback | undefined));
+                    peer.setOnAppearAttribute((this._onAppear_0_0value as (() => void) | undefined));
                     flagArray[85] = 2;
                     break;
                 }
@@ -1888,15 +1803,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[85] = 0;
-                    peer.setOnAttachAttribute((undefined as VoidCallback | undefined));
+                    peer.setOnAppearAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
-        if (flagArray[86] != 0)
-        {
-            switch (flagArray[86] as int32) {
+        if (flagArray[86] != 0) {
+            switch (flagArray[86]) {
                 case 1: {
-                    peer.setOnDetachAttribute((this._onDetach_0_0value as VoidCallback | undefined));
+                    peer.setOnDisAppearAttribute((this._onDisAppear_0_0value as (() => void) | undefined));
                     flagArray[86] = 2;
                     break;
                 }
@@ -1906,15 +1820,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[86] = 0;
-                    peer.setOnDetachAttribute((undefined as VoidCallback | undefined));
+                    peer.setOnDisAppearAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
-        if (flagArray[87] != 0)
-        {
-            switch (flagArray[87] as int32) {
+        if (flagArray[87] != 0) {
+            switch (flagArray[87]) {
                 case 1: {
-                    peer.setOnAreaChangeAttribute((this._onAreaChange_0_0value as ((oldValue: Area,newValue: Area) => void) | undefined));
+                    peer.setOnAttachAttribute((this._onAttach_0_0value as VoidCallback | undefined));
                     flagArray[87] = 2;
                     break;
                 }
@@ -1924,15 +1837,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[87] = 0;
-                    peer.setOnAreaChangeAttribute((undefined as ((oldValue: Area,newValue: Area) => void) | undefined));
+                    peer.setOnAttachAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
-        if (flagArray[88] != 0)
-        {
-            switch (flagArray[88] as int32) {
+        if (flagArray[88] != 0) {
+            switch (flagArray[88]) {
                 case 1: {
-                    peer.setVisibilityAttribute((this._visibility_0_0value as Visibility | undefined));
+                    peer.setOnDetachAttribute((this._onDetach_0_0value as VoidCallback | undefined));
                     flagArray[88] = 2;
                     break;
                 }
@@ -1942,15 +1854,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[88] = 0;
-                    peer.setVisibilityAttribute((undefined as Visibility | undefined));
+                    peer.setOnDetachAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
-        if (flagArray[89] != 0)
-        {
-            switch (flagArray[89] as int32) {
+        if (flagArray[89] != 0) {
+            switch (flagArray[89]) {
                 case 1: {
-                    peer.setFlexGrowAttribute((this._flexGrow_0_0value as number | undefined));
+                    peer.setOnAreaChangeAttribute((this._onAreaChange_0_0value as ((oldValue: Area,newValue: Area) => void) | undefined));
                     flagArray[89] = 2;
                     break;
                 }
@@ -1960,15 +1871,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[89] = 0;
-                    peer.setFlexGrowAttribute((undefined as number | undefined));
+                    peer.setOnAreaChangeAttribute((undefined as ((oldValue: Area,newValue: Area) => void) | undefined));
                 }
             }
         }
-        if (flagArray[90] != 0)
-        {
-            switch (flagArray[90] as int32) {
+        if (flagArray[90] != 0) {
+            switch (flagArray[90]) {
                 case 1: {
-                    peer.setFlexShrinkAttribute((this._flexShrink_0_0value as number | undefined));
+                    peer.setVisibilityAttribute((this._visibility_0_0value as Visibility | undefined));
                     flagArray[90] = 2;
                     break;
                 }
@@ -1978,15 +1888,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[90] = 0;
-                    peer.setFlexShrinkAttribute((undefined as number | undefined));
+                    peer.setVisibilityAttribute((undefined as Visibility | undefined));
                 }
             }
         }
-        if (flagArray[91] != 0)
-        {
-            switch (flagArray[91] as int32) {
+        if (flagArray[91] != 0) {
+            switch (flagArray[91]) {
                 case 1: {
-                    peer.setFlexBasisAttribute((this._flexBasis_0_0value as number | string | undefined));
+                    peer.setFlexGrowAttribute((this._flexGrow_0_0value as double | undefined));
                     flagArray[91] = 2;
                     break;
                 }
@@ -1996,15 +1905,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[91] = 0;
-                    peer.setFlexBasisAttribute((undefined as number | string | undefined));
+                    peer.setFlexGrowAttribute((undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[92] != 0)
-        {
-            switch (flagArray[92] as int32) {
+        if (flagArray[92] != 0) {
+            switch (flagArray[92]) {
                 case 1: {
-                    peer.setAlignSelfAttribute((this._alignSelf_0_0value as ItemAlign | undefined));
+                    peer.setFlexShrinkAttribute((this._flexShrink_0_0value as double | undefined));
                     flagArray[92] = 2;
                     break;
                 }
@@ -2014,15 +1922,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[92] = 0;
-                    peer.setAlignSelfAttribute((undefined as ItemAlign | undefined));
+                    peer.setFlexShrinkAttribute((undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[93] != 0)
-        {
-            switch (flagArray[93] as int32) {
+        if (flagArray[93] != 0) {
+            switch (flagArray[93]) {
                 case 1: {
-                    peer.setLayoutGravityAttribute((this._layoutGravity_0_0value as LocalizedAlignment | undefined));
+                    peer.setFlexBasisAttribute((this._flexBasis_0_0value as double | string | undefined));
                     flagArray[93] = 2;
                     break;
                 }
@@ -2032,15 +1939,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[93] = 0;
-                    peer.setLayoutGravityAttribute((undefined as LocalizedAlignment | undefined));
+                    peer.setFlexBasisAttribute((undefined as double | string | undefined));
                 }
             }
         }
-        if (flagArray[94] != 0)
-        {
-            switch (flagArray[94] as int32) {
+        if (flagArray[94] != 0) {
+            switch (flagArray[94]) {
                 case 1: {
-                    peer.setDisplayPriorityAttribute((this._displayPriority_0_0value as number | undefined));
+                    peer.setAlignSelfAttribute((this._alignSelf_0_0value as ItemAlign | undefined));
                     flagArray[94] = 2;
                     break;
                 }
@@ -2050,15 +1956,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[94] = 0;
-                    peer.setDisplayPriorityAttribute((undefined as number | undefined));
+                    peer.setAlignSelfAttribute((undefined as ItemAlign | undefined));
                 }
             }
         }
-        if (flagArray[95] != 0)
-        {
-            switch (flagArray[95] as int32) {
+        if (flagArray[95] != 0) {
+            switch (flagArray[95]) {
                 case 1: {
-                    peer.setZIndexAttribute((this._zIndex_0_0value as int32 | undefined));
+                    peer.setLayoutGravityAttribute((this._layoutGravity_0_0value as LocalizedAlignment | undefined));
                     flagArray[95] = 2;
                     break;
                 }
@@ -2068,15 +1973,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[95] = 0;
-                    peer.setZIndexAttribute((undefined as int32 | undefined));
+                    peer.setLayoutGravityAttribute((undefined as LocalizedAlignment | undefined));
                 }
             }
         }
-        if (flagArray[96] != 0)
-        {
-            switch (flagArray[96] as int32) {
+        if (flagArray[96] != 0) {
+            switch (flagArray[96]) {
                 case 1: {
-                    peer.setDirectionAttribute((this._direction_0_0value as Direction | undefined));
+                    peer.setDisplayPriorityAttribute((this._displayPriority_0_0value as double | undefined));
                     flagArray[96] = 2;
                     break;
                 }
@@ -2086,15 +1990,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[96] = 0;
-                    peer.setDirectionAttribute((undefined as Direction | undefined));
+                    peer.setDisplayPriorityAttribute((undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[97] != 0)
-        {
-            switch (flagArray[97] as int32) {
+        if (flagArray[97] != 0) {
+            switch (flagArray[97]) {
                 case 1: {
-                    peer.setAlignAttribute((this._align_0_0value as Alignment | LocalizedAlignment | undefined));
+                    peer.setZIndexAttribute((this._zIndex_0_0value as int32 | undefined));
                     flagArray[97] = 2;
                     break;
                 }
@@ -2104,15 +2007,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[97] = 0;
-                    peer.setAlignAttribute((undefined as Alignment | LocalizedAlignment | undefined));
+                    peer.setZIndexAttribute((undefined as int32 | undefined));
                 }
             }
         }
-        if (flagArray[98] != 0)
-        {
-            switch (flagArray[98] as int32) {
+        if (flagArray[98] != 0) {
+            switch (flagArray[98]) {
                 case 1: {
-                    peer.setPositionAttribute((this._position_0_0value as Position | Edges | LocalizedEdges | undefined));
+                    peer.setDirectionAttribute((this._direction_0_0value as Direction | undefined));
                     flagArray[98] = 2;
                     break;
                 }
@@ -2122,15 +2024,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[98] = 0;
-                    peer.setPositionAttribute((undefined as Position | Edges | LocalizedEdges | undefined));
+                    peer.setDirectionAttribute((undefined as Direction | undefined));
                 }
             }
         }
-        if (flagArray[99] != 0)
-        {
-            switch (flagArray[99] as int32) {
+        if (flagArray[99] != 0) {
+            switch (flagArray[99]) {
                 case 1: {
-                    peer.setMarkAnchorAttribute((this._markAnchor_0_0value as Position | LocalizedPosition | undefined));
+                    peer.setAlignAttribute((this._align_0_0value as Alignment | LocalizedAlignment | undefined));
                     flagArray[99] = 2;
                     break;
                 }
@@ -2140,17 +2041,16 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[99] = 0;
-                    peer.setMarkAnchorAttribute((undefined as Position | LocalizedPosition | undefined));
+                    peer.setAlignAttribute((undefined as Alignment | LocalizedAlignment | undefined));
                 }
             }
         }
     }
     applyModifierPatch5(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
-        if (flagArray[100] != 0)
-        {
-            switch (flagArray[100] as int32) {
+        if (flagArray[100] != 0) {
+            switch (flagArray[100]) {
                 case 1: {
-                    peer.setOffsetAttribute((this._offset_0_0value as Position | Edges | LocalizedEdges | undefined));
+                    peer.setPositionAttribute((this._position_0_0value as Position | Edges | LocalizedEdges | undefined));
                     flagArray[100] = 2;
                     break;
                 }
@@ -2160,15 +2060,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[100] = 0;
-                    peer.setOffsetAttribute((undefined as Position | Edges | LocalizedEdges | undefined));
+                    peer.setPositionAttribute((undefined as Position | Edges | LocalizedEdges | undefined));
                 }
             }
         }
-        if (flagArray[101] != 0)
-        {
-            switch (flagArray[101] as int32) {
+        if (flagArray[101] != 0) {
+            switch (flagArray[101]) {
                 case 1: {
-                    peer.setEnabledAttribute((this._enabled_0_0value as boolean | undefined));
+                    peer.setMarkAnchorAttribute((this._markAnchor_0_0value as Position | LocalizedPosition | undefined));
                     flagArray[101] = 2;
                     break;
                 }
@@ -2178,15 +2077,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[101] = 0;
-                    peer.setEnabledAttribute((undefined as boolean | undefined));
+                    peer.setMarkAnchorAttribute((undefined as Position | LocalizedPosition | undefined));
                 }
             }
         }
-        if (flagArray[102] != 0)
-        {
-            switch (flagArray[102] as int32) {
+        if (flagArray[102] != 0) {
+            switch (flagArray[102]) {
                 case 1: {
-                    peer.setAlignRulesAttribute((this._alignRules_0_0value as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
+                    peer.setOffsetAttribute((this._offset_0_0value as Position | Edges | LocalizedEdges | undefined));
                     flagArray[102] = 2;
                     break;
                 }
@@ -2196,15 +2094,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[102] = 0;
-                    peer.setAlignRulesAttribute((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
+                    peer.setOffsetAttribute((undefined as Position | Edges | LocalizedEdges | undefined));
                 }
             }
         }
-        if (flagArray[103] != 0)
-        {
-            switch (flagArray[103] as int32) {
+        if (flagArray[103] != 0) {
+            switch (flagArray[103]) {
                 case 1: {
-                    peer.setAspectRatioAttribute((this._aspectRatio_0_0value as number | undefined));
+                    peer.setEnabledAttribute((this._enabled_0_0value as boolean | undefined));
                     flagArray[103] = 2;
                     break;
                 }
@@ -2214,15 +2111,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[103] = 0;
-                    peer.setAspectRatioAttribute((undefined as number | undefined));
+                    peer.setEnabledAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[104] != 0)
-        {
-            switch (flagArray[104] as int32) {
+        if (flagArray[104] != 0) {
+            switch (flagArray[104]) {
                 case 1: {
-                    peer.setClickEffectAttribute((this._clickEffect_0_0value as ClickEffect | null | undefined));
+                    peer.setAlignRulesAttribute((this._alignRules_0_0value as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                     flagArray[104] = 2;
                     break;
                 }
@@ -2232,15 +2128,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[104] = 0;
-                    peer.setClickEffectAttribute((undefined as ClickEffect | null | undefined));
+                    peer.setAlignRulesAttribute((undefined as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                 }
             }
         }
-        if (flagArray[105] != 0)
-        {
-            switch (flagArray[105] as int32) {
+        if (flagArray[105] != 0) {
+            switch (flagArray[105]) {
                 case 1: {
-                    peer.setOnDragStartAttribute((this._onDragStart_0_0value as ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined));
+                    peer.setAspectRatioAttribute((this._aspectRatio_0_0value as double | undefined));
                     flagArray[105] = 2;
                     break;
                 }
@@ -2250,15 +2145,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[105] = 0;
-                    peer.setOnDragStartAttribute((undefined as ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined));
+                    peer.setAspectRatioAttribute((undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[106] != 0)
-        {
-            switch (flagArray[106] as int32) {
+        if (flagArray[106] != 0) {
+            switch (flagArray[106]) {
                 case 1: {
-                    peer.setOnDragEnterAttribute((this._onDragEnter_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setClickEffectAttribute((this._clickEffect_0_0value as ClickEffect | null | undefined));
                     flagArray[106] = 2;
                     break;
                 }
@@ -2268,15 +2162,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[106] = 0;
-                    peer.setOnDragEnterAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setClickEffectAttribute((undefined as ClickEffect | null | undefined));
                 }
             }
         }
-        if (flagArray[107] != 0)
-        {
-            switch (flagArray[107] as int32) {
+        if (flagArray[107] != 0) {
+            switch (flagArray[107]) {
                 case 1: {
-                    peer.setOnDragMoveAttribute((this._onDragMove_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setEnableClickSoundEffectAttribute((this._enableClickSoundEffect_0_0value as boolean | undefined));
                     flagArray[107] = 2;
                     break;
                 }
@@ -2286,15 +2179,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[107] = 0;
-                    peer.setOnDragMoveAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setEnableClickSoundEffectAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[108] != 0)
-        {
-            switch (flagArray[108] as int32) {
+        if (flagArray[108] != 0) {
+            switch (flagArray[108]) {
                 case 1: {
-                    peer.setOnDragLeaveAttribute((this._onDragLeave_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setOnDragStartAttribute((this._onDragStart_0_0value as ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined));
                     flagArray[108] = 2;
                     break;
                 }
@@ -2304,15 +2196,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[108] = 0;
-                    peer.setOnDragLeaveAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setOnDragStartAttribute((undefined as ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined));
                 }
             }
         }
-        if (flagArray[109] != 0)
-        {
-            switch (flagArray[109] as int32) {
+        if (flagArray[109] != 0) {
+            switch (flagArray[109]) {
                 case 1: {
-                    peer.setOnDrop0Attribute((this._onDrop_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setOnDragEnterAttribute((this._onDragEnter_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
                     flagArray[109] = 2;
                     break;
                 }
@@ -2322,15 +2213,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[109] = 0;
-                    peer.setOnDrop0Attribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setOnDragEnterAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
                 }
             }
         }
-        if (flagArray[110] != 0)
-        {
-            switch (flagArray[110] as int32) {
+        if (flagArray[110] != 0) {
+            switch (flagArray[110]) {
                 case 1: {
-                    peer.setOnDragEndAttribute((this._onDragEnd_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setOnDragMoveAttribute((this._onDragMove_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
                     flagArray[110] = 2;
                     break;
                 }
@@ -2340,15 +2230,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[110] = 0;
-                    peer.setOnDragEndAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
+                    peer.setOnDragMoveAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
                 }
             }
         }
-        if (flagArray[111] != 0)
-        {
-            switch (flagArray[111] as int32) {
+        if (flagArray[111] != 0) {
+            switch (flagArray[111]) {
                 case 1: {
-                    hookAllowDrop(peer, (this._allowDrop_0_0value as Array<uniformTypeDescriptor.UniformDataType> | Array<string> | null | undefined));
+                    peer.setOnDragLeaveAttribute((this._onDragLeave_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
                     flagArray[111] = 2;
                     break;
                 }
@@ -2358,15 +2247,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[111] = 0;
-                    hookAllowDrop(peer, (undefined as Array<uniformTypeDescriptor.UniformDataType> | Array<string> | null | undefined));
+                    peer.setOnDragLeaveAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
                 }
             }
         }
-        if (flagArray[112] != 0)
-        {
-            switch (flagArray[112] as int32) {
+        if (flagArray[112] != 0) {
+            switch (flagArray[112]) {
                 case 1: {
-                    peer.setDraggableAttribute((this._draggable_0_0value as boolean | undefined));
+                    peer.setOnDrop0Attribute((this._onDrop_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
                     flagArray[112] = 2;
                     break;
                 }
@@ -2376,15 +2264,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[112] = 0;
-                    peer.setDraggableAttribute((undefined as boolean | undefined));
+                    peer.setOnDrop0Attribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
                 }
             }
         }
-        if (flagArray[113] != 0)
-        {
-            switch (flagArray[113] as int32) {
+        if (flagArray[113] != 0) {
+            switch (flagArray[113]) {
                 case 1: {
-                    peer.setDragPreview0Attribute((this._dragPreview_0_0value as CustomBuilder | DragItemInfo | string | undefined));
+                    peer.setOnDragEndAttribute((this._onDragEnd_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
                     flagArray[113] = 2;
                     break;
                 }
@@ -2394,15 +2281,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[113] = 0;
-                    peer.setDragPreview0Attribute((undefined as CustomBuilder | DragItemInfo | string | undefined));
+                    peer.setOnDragEndAttribute((undefined as ((event: DragEvent,extraParams?: string) => void) | undefined));
                 }
             }
         }
-        if (flagArray[114] != 0)
-        {
-            switch (flagArray[114] as int32) {
+        if (flagArray[114] != 0) {
+            switch (flagArray[114]) {
                 case 1: {
-                    peer.setOnPreDragAttribute((this._onPreDrag_0_0value as ((value0: PreDragStatus) => void) | undefined));
+                    hookAllowDrop(peer, (this._allowDrop_0_0value as Array<UniformDataType> | Array<string> | null | undefined));
                     flagArray[114] = 2;
                     break;
                 }
@@ -2412,15 +2298,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[114] = 0;
-                    peer.setOnPreDragAttribute((undefined as ((value0: PreDragStatus) => void) | undefined));
+                    hookAllowDrop(peer, (undefined as Array<UniformDataType> | Array<string> | null | undefined));
                 }
             }
         }
-        if (flagArray[115] != 0)
-        {
-            switch (flagArray[115] as int32) {
+        if (flagArray[115] != 0) {
+            switch (flagArray[115]) {
                 case 1: {
-                    peer.setLinearGradientAttribute((this._linearGradient_0_0value as LinearGradientOptions | undefined));
+                    peer.setDraggableAttribute((this._draggable_0_0value as boolean | undefined));
                     flagArray[115] = 2;
                     break;
                 }
@@ -2430,15 +2315,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[115] = 0;
-                    peer.setLinearGradientAttribute((undefined as LinearGradientOptions | undefined));
+                    peer.setDraggableAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[116] != 0)
-        {
-            switch (flagArray[116] as int32) {
+        if (flagArray[116] != 0) {
+            switch (flagArray[116]) {
                 case 1: {
-                    peer.setSweepGradientAttribute((this._sweepGradient_0_0value as SweepGradientOptions | undefined));
+                    peer.setOnPreDragAttribute((this._onPreDrag_0_0value as arkui_component_common_Callback<PreDragStatus, void> | undefined));
                     flagArray[116] = 2;
                     break;
                 }
@@ -2448,15 +2332,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[116] = 0;
-                    peer.setSweepGradientAttribute((undefined as SweepGradientOptions | undefined));
+                    peer.setOnPreDragAttribute((undefined as arkui_component_common_Callback<PreDragStatus, void> | undefined));
                 }
             }
         }
-        if (flagArray[117] != 0)
-        {
-            switch (flagArray[117] as int32) {
+        if (flagArray[117] != 0) {
+            switch (flagArray[117]) {
                 case 1: {
-                    peer.setRadialGradientAttribute((this._radialGradient_0_0value as RadialGradientOptions | undefined));
+                    peer.setLinearGradientAttribute((this._linearGradient_0_0value as LinearGradientOptions | undefined));
                     flagArray[117] = 2;
                     break;
                 }
@@ -2466,15 +2349,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[117] = 0;
-                    peer.setRadialGradientAttribute((undefined as RadialGradientOptions | undefined));
+                    peer.setLinearGradientAttribute((undefined as LinearGradientOptions | undefined));
                 }
             }
         }
-        if (flagArray[118] != 0)
-        {
-            switch (flagArray[118] as int32) {
+        if (flagArray[118] != 0) {
+            switch (flagArray[118]) {
                 case 1: {
-                    peer.setMotionPathAttribute((this._motionPath_0_0value as MotionPathOptions | undefined));
+                    peer.setSweepGradientAttribute((this._sweepGradient_0_0value as SweepGradientOptions | undefined));
                     flagArray[118] = 2;
                     break;
                 }
@@ -2484,15 +2366,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[118] = 0;
-                    peer.setMotionPathAttribute((undefined as MotionPathOptions | undefined));
+                    peer.setSweepGradientAttribute((undefined as SweepGradientOptions | undefined));
                 }
             }
         }
-        if (flagArray[119] != 0)
-        {
-            switch (flagArray[119] as int32) {
+        if (flagArray[119] != 0) {
+            switch (flagArray[119]) {
                 case 1: {
-                    peer.setShadowAttribute((this._shadow_0_0value as ShadowOptions | ShadowStyle | undefined));
+                    peer.setRadialGradientAttribute((this._radialGradient_0_0value as RadialGradientOptions | undefined));
                     flagArray[119] = 2;
                     break;
                 }
@@ -2502,17 +2383,16 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[119] = 0;
-                    peer.setShadowAttribute((undefined as ShadowOptions | ShadowStyle | undefined));
+                    peer.setRadialGradientAttribute((undefined as RadialGradientOptions | undefined));
                 }
             }
         }
     }
     applyModifierPatch6(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
-        if (flagArray[120] != 0)
-        {
-            switch (flagArray[120] as int32) {
+        if (flagArray[120] != 0) {
+            switch (flagArray[120]) {
                 case 1: {
-                    peer.setClipAttribute((this._clip_0_0value as boolean | undefined));
+                    peer.setMotionPathAttribute((this._motionPath_0_0value as MotionPathOptions | undefined));
                     flagArray[120] = 2;
                     break;
                 }
@@ -2522,15 +2402,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[120] = 0;
-                    peer.setClipAttribute((undefined as boolean | undefined));
+                    peer.setMotionPathAttribute((undefined as MotionPathOptions | undefined));
                 }
             }
         }
-        if (flagArray[121] != 0)
-        {
-            switch (flagArray[121] as int32) {
+        if (flagArray[121] != 0) {
+            switch (flagArray[121]) {
                 case 1: {
-                    peer.setClipShapeAttribute((this._clipShape_0_0value as CircleShape | EllipseShape | PathShape | RectShape | undefined));
+                    peer.setShadowAttribute((this._shadow_0_0value as ShadowOptions | ShadowStyle | undefined));
                     flagArray[121] = 2;
                     break;
                 }
@@ -2540,15 +2419,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[121] = 0;
-                    peer.setClipShapeAttribute((undefined as CircleShape | EllipseShape | PathShape | RectShape | undefined));
+                    peer.setShadowAttribute((undefined as ShadowOptions | ShadowStyle | undefined));
                 }
             }
         }
-        if (flagArray[122] != 0)
-        {
-            switch (flagArray[122] as int32) {
+        if (flagArray[122] != 0) {
+            switch (flagArray[122]) {
                 case 1: {
-                    peer.setMaskAttribute((this._mask_0_0value as ProgressMask | undefined));
+                    peer.setClipAttribute((this._clip_0_0value as boolean | undefined));
                     flagArray[122] = 2;
                     break;
                 }
@@ -2558,15 +2436,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[122] = 0;
-                    peer.setMaskAttribute((undefined as ProgressMask | undefined));
+                    peer.setClipAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[123] != 0)
-        {
-            switch (flagArray[123] as int32) {
+        if (flagArray[123] != 0) {
+            switch (flagArray[123]) {
                 case 1: {
-                    peer.setMaskShapeAttribute((this._maskShape_0_0value as CircleShape | EllipseShape | PathShape | RectShape | undefined));
+                    peer.setClipShapeAttribute((this._clipShape_0_0value as CircleShape | EllipseShape | PathShape | RectShape | undefined));
                     flagArray[123] = 2;
                     break;
                 }
@@ -2576,15 +2453,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[123] = 0;
-                    peer.setMaskShapeAttribute((undefined as CircleShape | EllipseShape | PathShape | RectShape | undefined));
+                    peer.setClipShapeAttribute((undefined as CircleShape | EllipseShape | PathShape | RectShape | undefined));
                 }
             }
         }
-        if (flagArray[124] != 0)
-        {
-            switch (flagArray[124] as int32) {
+        if (flagArray[124] != 0) {
+            switch (flagArray[124]) {
                 case 1: {
-                    peer.setKeyAttribute((this._key_0_0value as string | undefined));
+                    peer.setMaskAttribute((this._mask_0_0value as ProgressMask | undefined));
                     flagArray[124] = 2;
                     break;
                 }
@@ -2594,15 +2470,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[124] = 0;
-                    peer.setKeyAttribute((undefined as string | undefined));
+                    peer.setMaskAttribute((undefined as ProgressMask | undefined));
                 }
             }
         }
-        if (flagArray[125] != 0)
-        {
-            switch (flagArray[125] as int32) {
+        if (flagArray[125] != 0) {
+            switch (flagArray[125]) {
                 case 1: {
-                    peer.setIdAttribute((this._id_0_0value as string | undefined));
+                    peer.setMaskShapeAttribute((this._maskShape_0_0value as CircleShape | EllipseShape | PathShape | RectShape | undefined));
                     flagArray[125] = 2;
                     break;
                 }
@@ -2612,15 +2487,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[125] = 0;
-                    peer.setIdAttribute((undefined as string | undefined));
+                    peer.setMaskShapeAttribute((undefined as CircleShape | EllipseShape | PathShape | RectShape | undefined));
                 }
             }
         }
-        if (flagArray[126] != 0)
-        {
-            switch (flagArray[126] as int32) {
+        if (flagArray[126] != 0) {
+            switch (flagArray[126]) {
                 case 1: {
-                    peer.setGeometryTransition0Attribute((this._geometryTransition_0_0value as string | undefined));
+                    peer.setKeyAttribute((this._key_0_0value as string | undefined));
                     flagArray[126] = 2;
                     break;
                 }
@@ -2630,15 +2504,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[126] = 0;
-                    peer.setGeometryTransition0Attribute((undefined as string | undefined));
+                    peer.setKeyAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (flagArray[127] != 0)
-        {
-            switch (flagArray[127] as int32) {
+        if (flagArray[127] != 0) {
+            switch (flagArray[127]) {
                 case 1: {
-                    peer.setRestoreIdAttribute((this._restoreId_0_0value as int32 | undefined));
+                    peer.setIdAttribute((this._id_0_0value as string | undefined));
                     flagArray[127] = 2;
                     break;
                 }
@@ -2648,15 +2521,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[127] = 0;
-                    peer.setRestoreIdAttribute((undefined as int32 | undefined));
+                    peer.setIdAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (flagArray[128] != 0)
-        {
-            switch (flagArray[128] as int32) {
+        if (flagArray[128] != 0) {
+            switch (flagArray[128]) {
                 case 1: {
-                    peer.setSphericalEffectAttribute((this._sphericalEffect_0_0value as double | undefined));
+                    hookStateStyleImpl(peer, (this._stateStyles_0_0value as StateStyles | undefined));
                     flagArray[128] = 2;
                     break;
                 }
@@ -2666,15 +2538,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[128] = 0;
-                    peer.setSphericalEffectAttribute((undefined as double | undefined));
+                    hookStateStyleImpl(peer, (undefined as StateStyles | undefined));
                 }
             }
         }
-        if (flagArray[129] != 0)
-        {
-            switch (flagArray[129] as int32) {
+        if (flagArray[129] != 0) {
+            switch (flagArray[129]) {
                 case 1: {
-                    peer.setLightUpEffectAttribute((this._lightUpEffect_0_0value as double | undefined));
+                    peer.setRestoreIdAttribute((this._restoreId_0_0value as int32 | undefined));
                     flagArray[129] = 2;
                     break;
                 }
@@ -2684,15 +2555,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[129] = 0;
-                    peer.setLightUpEffectAttribute((undefined as double | undefined));
+                    peer.setRestoreIdAttribute((undefined as int32 | undefined));
                 }
             }
         }
-        if (flagArray[130] != 0)
-        {
-            switch (flagArray[130] as int32) {
+        if (flagArray[130] != 0) {
+            switch (flagArray[130]) {
                 case 1: {
-                    peer.setPixelStretchEffectAttribute((this._pixelStretchEffect_0_0value as PixelStretchEffectOptions | undefined));
+                    peer.setSphericalEffectAttribute((this._sphericalEffect_0_0value as double | undefined));
                     flagArray[130] = 2;
                     break;
                 }
@@ -2702,15 +2572,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[130] = 0;
-                    peer.setPixelStretchEffectAttribute((undefined as PixelStretchEffectOptions | undefined));
+                    peer.setSphericalEffectAttribute((undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[131] != 0)
-        {
-            switch (flagArray[131] as int32) {
+        if (flagArray[131] != 0) {
+            switch (flagArray[131]) {
                 case 1: {
-                    peer.setAccessibilityGroupWithValueAttribute((this._accessibilityGroup_0_0value as boolean | undefined));
+                    peer.setLightUpEffectAttribute((this._lightUpEffect_0_0value as double | undefined));
                     flagArray[131] = 2;
                     break;
                 }
@@ -2720,15 +2589,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[131] = 0;
-                    peer.setAccessibilityGroupWithValueAttribute((undefined as boolean | undefined));
+                    peer.setLightUpEffectAttribute((undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[132] != 0)
-        {
-            switch (flagArray[132] as int32) {
+        if (flagArray[132] != 0) {
+            switch (flagArray[132]) {
                 case 1: {
-                    peer.setAccessibilityTextOfStringTypeAttribute((this._accessibilityTextOfStringType_0_0value as string | undefined));
+                    peer.setPixelStretchEffectAttribute((this._pixelStretchEffect_0_0value as PixelStretchEffectOptions | undefined));
                     flagArray[132] = 2;
                     break;
                 }
@@ -2738,13 +2606,12 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[132] = 0;
-                    peer.setAccessibilityTextOfStringTypeAttribute((undefined as string | undefined));
+                    peer.setPixelStretchEffectAttribute((undefined as PixelStretchEffectOptions | undefined));
                 }
             }
         }
-        if (flagArray[133] != 0)
-        {
-            switch (flagArray[133] as int32) {
+        if (flagArray[133] != 0) {
+            switch (flagArray[133]) {
                 case 1: {
                     peer.setAccessibilityNextFocusIdAttribute((this._accessibilityNextFocusId_0_0value as string | undefined));
                     flagArray[133] = 2;
@@ -2760,9 +2627,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[134] != 0)
-        {
-            switch (flagArray[134] as int32) {
+        if (flagArray[134] != 0) {
+            switch (flagArray[134]) {
                 case 1: {
                     peer.setAccessibilityDefaultFocusAttribute((this._accessibilityDefaultFocus_0_0value as boolean | undefined));
                     flagArray[134] = 2;
@@ -2778,9 +2644,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[135] != 0)
-        {
-            switch (flagArray[135] as int32) {
+        if (flagArray[135] != 0) {
+            switch (flagArray[135]) {
                 case 1: {
                     peer.setAccessibilityUseSamePageAttribute((this._accessibilityUseSamePage_0_0value as AccessibilitySamePageMode | undefined));
                     flagArray[135] = 2;
@@ -2796,9 +2661,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[136] != 0)
-        {
-            switch (flagArray[136] as int32) {
+        if (flagArray[136] != 0) {
+            switch (flagArray[136]) {
                 case 1: {
                     peer.setAccessibilityScrollTriggerableAttribute((this._accessibilityScrollTriggerable_0_0value as boolean | undefined));
                     flagArray[136] = 2;
@@ -2814,11 +2678,10 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[137] != 0)
-        {
-            switch (flagArray[137] as int32) {
+        if (flagArray[137] != 0) {
+            switch (flagArray[137]) {
                 case 1: {
-                    peer.setAccessibilityTextOfResourceTypeAttribute((this._accessibilityTextOfResourceType_0_0value as Resource | undefined));
+                    peer.setAccessibilityTextAttribute((this._accessibilityText_0_0value as global_resource_Resource | string | undefined));
                     flagArray[137] = 2;
                     break;
                 }
@@ -2828,13 +2691,12 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[137] = 0;
-                    peer.setAccessibilityTextOfResourceTypeAttribute((undefined as Resource | undefined));
+                    peer.setAccessibilityTextAttribute((undefined as global_resource_Resource | string | undefined));
                 }
             }
         }
-        if (flagArray[138] != 0)
-        {
-            switch (flagArray[138] as int32) {
+        if (flagArray[138] != 0) {
+            switch (flagArray[138]) {
                 case 1: {
                     peer.setAccessibilityRoleAttribute((this._accessibilityRole_0_0value as AccessibilityRoleType | undefined));
                     flagArray[138] = 2;
@@ -2850,9 +2712,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[139] != 0)
-        {
-            switch (flagArray[139] as int32) {
+        if (flagArray[139] != 0) {
+            switch (flagArray[139]) {
                 case 1: {
                     peer.setOnAccessibilityFocusAttribute((this._onAccessibilityFocus_0_0value as AccessibilityFocusCallback | undefined));
                     flagArray[139] = 2;
@@ -2870,9 +2731,8 @@ export class CommonMethodModifier implements CommonMethod {
         }
     }
     applyModifierPatch7(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
-        if (flagArray[140] != 0)
-        {
-            switch (flagArray[140] as int32) {
+        if (flagArray[140] != 0) {
+            switch (flagArray[140]) {
                 case 1: {
                     peer.setOnAccessibilityActionInterceptAttribute((this._onAccessibilityActionIntercept_0_0value as AccessibilityActionInterceptCallback | undefined));
                     flagArray[140] = 2;
@@ -2888,9 +2748,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[141] != 0)
-        {
-            switch (flagArray[141] as int32) {
+        if (flagArray[141] != 0) {
+            switch (flagArray[141]) {
                 case 1: {
                     peer.setAccessibilityTextHintAttribute((this._accessibilityTextHint_0_0value as string | undefined));
                     flagArray[141] = 2;
@@ -2906,11 +2765,10 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[142] != 0)
-        {
-            switch (flagArray[142] as int32) {
+        if (flagArray[142] != 0) {
+            switch (flagArray[142]) {
                 case 1: {
-                    peer.setAccessibilityDescriptionOfStringTypeAttribute((this._accessibilityDescriptionOfStringType_0_0value as string | undefined));
+                    peer.setAccessibilityDescriptionAttribute((this._accessibilityDescription_0_0value as global_resource_Resource | string | undefined));
                     flagArray[142] = 2;
                     break;
                 }
@@ -2920,15 +2778,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[142] = 0;
-                    peer.setAccessibilityDescriptionOfStringTypeAttribute((undefined as string | undefined));
+                    peer.setAccessibilityDescriptionAttribute((undefined as global_resource_Resource | string | undefined));
                 }
             }
         }
-        if (flagArray[143] != 0)
-        {
-            switch (flagArray[143] as int32) {
+        if (flagArray[143] != 0) {
+            switch (flagArray[143]) {
                 case 1: {
-                    peer.setAccessibilityDescriptionOfResourceTypeAttribute((this._accessibilityDescriptionOfResourceType_0_0value as Resource | undefined));
+                    peer.setAccessibilityLevelAttribute((this._accessibilityLevel_0_0value as string | undefined));
                     flagArray[143] = 2;
                     break;
                 }
@@ -2938,15 +2795,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[143] = 0;
-                    peer.setAccessibilityDescriptionOfResourceTypeAttribute((undefined as Resource | undefined));
+                    peer.setAccessibilityLevelAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (flagArray[144] != 0)
-        {
-            switch (flagArray[144] as int32) {
+        if (flagArray[144] != 0) {
+            switch (flagArray[144]) {
                 case 1: {
-                    peer.setAccessibilityLevelAttribute((this._accessibilityLevel_0_0value as string | undefined));
+                    peer.setAccessibilityVirtualNodeAttribute((this._accessibilityVirtualNode_0_0value as CustomBuilder | undefined));
                     flagArray[144] = 2;
                     break;
                 }
@@ -2956,15 +2812,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[144] = 0;
-                    peer.setAccessibilityLevelAttribute((undefined as string | undefined));
+                    peer.setAccessibilityVirtualNodeAttribute((undefined as CustomBuilder | undefined));
                 }
             }
         }
-        if (flagArray[145] != 0)
-        {
-            switch (flagArray[145] as int32) {
+        if (flagArray[145] != 0) {
+            switch (flagArray[145]) {
                 case 1: {
-                    peer.setAccessibilityVirtualNodeAttribute((this._accessibilityVirtualNode_0_0value as CustomBuilder | undefined));
+                    peer.setAccessibilityCheckedAttribute((this._accessibilityChecked_0_0value as boolean | undefined));
                     flagArray[145] = 2;
                     break;
                 }
@@ -2974,15 +2829,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[145] = 0;
-                    peer.setAccessibilityVirtualNodeAttribute((undefined as CustomBuilder | undefined));
+                    peer.setAccessibilityCheckedAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[146] != 0)
-        {
-            switch (flagArray[146] as int32) {
+        if (flagArray[146] != 0) {
+            switch (flagArray[146]) {
                 case 1: {
-                    peer.setAccessibilityCheckedAttribute((this._accessibilityChecked_0_0value as boolean | undefined));
+                    peer.setAccessibilitySelectedAttribute((this._accessibilitySelected_0_0value as boolean | undefined));
                     flagArray[146] = 2;
                     break;
                 }
@@ -2992,15 +2846,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[146] = 0;
-                    peer.setAccessibilityCheckedAttribute((undefined as boolean | undefined));
+                    peer.setAccessibilitySelectedAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[147] != 0)
-        {
-            switch (flagArray[147] as int32) {
+        if (flagArray[147] != 0) {
+            switch (flagArray[147]) {
                 case 1: {
-                    peer.setAccessibilitySelectedAttribute((this._accessibilitySelected_0_0value as boolean | undefined));
+                    peer.setObscuredAttribute((this._obscured_0_0value as Array<ObscuredReasons> | undefined));
                     flagArray[147] = 2;
                     break;
                 }
@@ -3010,15 +2863,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[147] = 0;
-                    peer.setAccessibilitySelectedAttribute((undefined as boolean | undefined));
+                    peer.setObscuredAttribute((undefined as Array<ObscuredReasons> | undefined));
                 }
             }
         }
-        if (flagArray[148] != 0)
-        {
-            switch (flagArray[148] as int32) {
+        if (flagArray[148] != 0) {
+            switch (flagArray[148]) {
                 case 1: {
-                    peer.setObscuredAttribute((this._obscured_0_0value as Array<ObscuredReasons> | undefined));
+                    peer.setReuseIdAttribute((this._reuseId_0_0value as string | undefined));
                     flagArray[148] = 2;
                     break;
                 }
@@ -3028,15 +2880,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[148] = 0;
-                    peer.setObscuredAttribute((undefined as Array<ObscuredReasons> | undefined));
+                    peer.setReuseIdAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (flagArray[149] != 0)
-        {
-            switch (flagArray[149] as int32) {
+        if (flagArray[149] != 0) {
+            switch (flagArray[149]) {
                 case 1: {
-                    peer.setReuseIdAttribute((this._reuseId_0_0value as string | undefined));
+                    peer.setReuseAttribute((this._reuse_0_0value as ReuseOptions | undefined));
                     flagArray[149] = 2;
                     break;
                 }
@@ -3046,15 +2897,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[149] = 0;
-                    peer.setReuseIdAttribute((undefined as string | undefined));
+                    peer.setReuseAttribute((undefined as ReuseOptions | undefined));
                 }
             }
         }
-        if (flagArray[150] != 0)
-        {
-            switch (flagArray[150] as int32) {
+        if (flagArray[150] != 0) {
+            switch (flagArray[150]) {
                 case 1: {
-                    peer.setReuseAttribute((this._reuse_0_0value as ReuseOptions | undefined));
+                    peer.setRenderFitAttribute((this._renderFit_0_0value as RenderFit | undefined));
                     flagArray[150] = 2;
                     break;
                 }
@@ -3064,15 +2914,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[150] = 0;
-                    peer.setReuseAttribute((undefined as ReuseOptions | undefined));
+                    peer.setRenderFitAttribute((undefined as RenderFit | undefined));
                 }
             }
         }
-        if (flagArray[151] != 0)
-        {
-            switch (flagArray[151] as int32) {
+        if (flagArray[151] != 0) {
+            switch (flagArray[151]) {
                 case 1: {
-                    peer.setRenderFitAttribute((this._renderFit_0_0value as RenderFit | undefined));
+                    hookGestureModifier(peer, (this._gestureModifier_0_0value as GestureModifier | undefined));
                     flagArray[151] = 2;
                     break;
                 }
@@ -3082,13 +2931,12 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[151] = 0;
-                    peer.setRenderFitAttribute((undefined as RenderFit | undefined));
+                    hookGestureModifier(peer, (undefined as GestureModifier | undefined));
                 }
             }
         }
-        if (flagArray[152] != 0)
-        {
-            switch (flagArray[152] as int32) {
+        if (flagArray[152] != 0) {
+            switch (flagArray[152]) {
                 case 1: {
                     peer.setBackgroundBrightnessAttribute((this._backgroundBrightness_0_0value as BackgroundBrightnessOptions | undefined));
                     flagArray[152] = 2;
@@ -3104,9 +2952,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[153] != 0)
-        {
-            switch (flagArray[153] as int32) {
+        if (flagArray[153] != 0) {
+            switch (flagArray[153]) {
                 case 1: {
                     peer.setOnGestureJudgeBeginAttribute((this._onGestureJudgeBegin_0_0value as ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined));
                     flagArray[153] = 2;
@@ -3122,9 +2969,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[154] != 0)
-        {
-            switch (flagArray[154] as int32) {
+        if (flagArray[154] != 0) {
+            switch (flagArray[154]) {
                 case 1: {
                     peer.setOnGestureRecognizerJudgeBegin0Attribute((this._onGestureRecognizerJudgeBegin_0_0value as GestureRecognizerJudgeBeginCallback | undefined));
                     flagArray[154] = 2;
@@ -3140,9 +2986,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[155] != 0)
-        {
-            switch (flagArray[155] as int32) {
+        if (flagArray[155] != 0) {
+            switch (flagArray[155]) {
                 case 1: {
                     peer.setShouldBuiltInRecognizerParallelWithAttribute((this._shouldBuiltInRecognizerParallelWith_0_0value as ShouldBuiltInRecognizerParallelWithCallback | undefined));
                     flagArray[155] = 2;
@@ -3158,9 +3003,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[156] != 0)
-        {
-            switch (flagArray[156] as int32) {
+        if (flagArray[156] != 0) {
+            switch (flagArray[156]) {
                 case 1: {
                     peer.setMonopolizeEventsAttribute((this._monopolizeEvents_0_0value as boolean | undefined));
                     flagArray[156] = 2;
@@ -3176,11 +3020,10 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[157] != 0)
-        {
-            switch (flagArray[157] as int32) {
+        if (flagArray[157] != 0) {
+            switch (flagArray[157]) {
                 case 1: {
-                    peer.setOnTouchInterceptAttribute((this._onTouchIntercept_0_0value as ((value0: TouchEvent) => HitTestMode) | undefined));
+                    peer.setOnTouchInterceptAttribute((this._onTouchIntercept_0_0value as arkui_component_common_Callback<TouchEvent, HitTestMode> | undefined));
                     flagArray[157] = 2;
                     break;
                 }
@@ -3190,13 +3033,12 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[157] = 0;
-                    peer.setOnTouchInterceptAttribute((undefined as ((value0: TouchEvent) => HitTestMode) | undefined));
+                    peer.setOnTouchInterceptAttribute((undefined as arkui_component_common_Callback<TouchEvent, HitTestMode> | undefined));
                 }
             }
         }
-        if (flagArray[158] != 0)
-        {
-            switch (flagArray[158] as int32) {
+        if (flagArray[158] != 0) {
+            switch (flagArray[158]) {
                 case 1: {
                     peer.setOnSizeChangeAttribute((this._onSizeChange_0_0value as SizeChangeCallback | undefined));
                     flagArray[158] = 2;
@@ -3212,9 +3054,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[159] != 0)
-        {
-            switch (flagArray[159] as int32) {
+        if (flagArray[159] != 0) {
+            switch (flagArray[159]) {
                 case 1: {
                     peer.setAccessibilityFocusDrawLevelAttribute((this._accessibilityFocusDrawLevel_0_0value as FocusDrawLevel | undefined));
                     flagArray[159] = 2;
@@ -3233,9 +3074,9 @@ export class CommonMethodModifier implements CommonMethod {
     }
     applyModifierPatch8(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
         if (flagArray[160] != 0) {
-            switch (flagArray[160] as int32) {
+            switch (flagArray[160]) {
                 case 1: {
-                    hookCustomPropertyImpl(peer, (this._customProperty_0_0value as string), (this._customProperty_0_1value as CustomProperty), this);
+                    peer.setOnTouchTestDoneAttribute((this._onTouchTestDone_0_0value as TouchTestDoneCallback | undefined));
                     flagArray[160] = 2;
                     break;
                 }
@@ -3245,14 +3086,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[160] = 0;
+                    peer.setOnTouchTestDoneAttribute((undefined as TouchTestDoneCallback | undefined));
                 }
             }
         }
-        if (flagArray[161] != 0)
-        {
-            switch (flagArray[161] as int32) {
+        if (flagArray[161] != 0) {
+            switch (flagArray[161]) {
                 case 1: {
-                    peer.setExpandSafeAreaAttribute((this._expandSafeArea_0_0value as Array<SafeAreaType> | undefined | undefined), (this._expandSafeArea_0_1value as Array<SafeAreaEdge> | undefined | undefined));
+                    peer.setSystemMaterialAttribute((this._systemMaterial_0_0value as SystemUiMaterial | undefined));
                     flagArray[161] = 2;
                     break;
                 }
@@ -3262,15 +3103,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[161] = 0;
-                    peer.setExpandSafeAreaAttribute((undefined as Array<SafeAreaType> | undefined | undefined), (undefined as Array<SafeAreaEdge> | undefined | undefined));
+                    peer.setSystemMaterialAttribute((undefined as SystemUiMaterial | undefined));
                 }
             }
         }
-        if (flagArray[162] != 0)
-        {
-            switch (flagArray[162] as int32) {
+        if (flagArray[162] != 0) {
+            switch (flagArray[162]) {
                 case 1: {
-                    peer.setIgnoreLayoutSafeAreaAttribute((this._ignoreLayoutSafeArea_0_0value as Array<LayoutSafeAreaType> | undefined | undefined), (this._ignoreLayoutSafeArea_0_1value as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                    peer.setOnNeedSoftkeyboardAttribute((this._onNeedSoftkeyboard_0_0value as OnNeedSoftkeyboardCallback | undefined));
                     flagArray[162] = 2;
                     break;
                 }
@@ -3280,15 +3120,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[162] = 0;
-                    peer.setIgnoreLayoutSafeAreaAttribute((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                    peer.setOnNeedSoftkeyboardAttribute((undefined as OnNeedSoftkeyboardCallback | undefined));
                 }
             }
         }
-        if (flagArray[163] != 0)
-        {
-            switch (flagArray[163] as int32) {
+        if (flagArray[163] != 0) {
+            switch (flagArray[163]) {
                 case 1: {
-                    peer.setBackgroundAttribute((this._background_0_0value as CustomBuilder | ResourceColor | undefined), (this._background_0_1value as BackgroundOptions | undefined));
+                    peer.setAccessibilityStateDescriptionAttribute((this._accessibilityStateDescription_0_0value as string | global_resource_Resource | undefined));
                     flagArray[163] = 2;
                     break;
                 }
@@ -3298,15 +3137,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[163] = 0;
-                    peer.setBackgroundAttribute((undefined as CustomBuilder | ResourceColor | undefined), (undefined as BackgroundOptions | undefined));
+                    peer.setAccessibilityStateDescriptionAttribute((undefined as string | global_resource_Resource | undefined));
                 }
             }
         }
-        if (flagArray[164] != 0)
-        {
-            switch (flagArray[164] as int32) {
+        if (flagArray[164] != 0) {
+            switch (flagArray[164]) {
                 case 1: {
-                    peer.setBackgroundImage1Attribute((this._backgroundImage_1_0value as ResourceStr | image.PixelMap | undefined), (this._backgroundImage_1_1value as BackgroundImageOptions));
+                    peer.setAccessibilityActionOptionsAttribute((this._accessibilityActionOptions_0_0value as AccessibilityActionOptions | undefined));
                     flagArray[164] = 2;
                     break;
                 }
@@ -3316,16 +3154,16 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[164] = 0;
-                    peer.setBackgroundImage1Attribute((undefined as ResourceStr | image.PixelMap | undefined), (undefined as BackgroundImageOptions | undefined | undefined));
+                    peer.setAccessibilityActionOptionsAttribute((undefined as AccessibilityActionOptions | undefined));
                 }
             }
         }
-        if (flagArray[165] != 0)
-        {
-            switch (flagArray[165] as int32) {
+        if (flagArray[165] != 0) {
+            switch (flagArray[165]) {
                 case 1: {
-                    peer.setBackgroundImage2Attribute((this._backgroundImage_2_0value as ResourceStr | image.PixelMap | undefined), (this._backgroundImage_2_1value as ImageRepeat));
-                    flagArray[165] = 2;
+                    // instructive change start
+                    hookCustomPropertyImpl(peer, (this._customProperty_0_0value as string), (this._customProperty_0_1value as CustomProperty), this);
+                    // instructive change end
                     break;
                 }
                 case 3: {
@@ -3334,15 +3172,13 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[165] = 0;
-                    peer.setBackgroundImage2Attribute((undefined as ResourceStr | image.PixelMap | undefined), (undefined as ImageRepeat | undefined | undefined));
                 }
             }
         }
-        if (flagArray[166] != 0)
-        {
-            switch (flagArray[166] as int32) {
+        if (flagArray[166] != 0) {
+            switch (flagArray[166]) {
                 case 1: {
-                    peer.setBackgroundBlurStyleAttribute((this._backgroundBlurStyle_0_0value as BlurStyle | undefined), (this._backgroundBlurStyle_0_1value as BackgroundBlurStyleOptions | undefined | undefined), (this._backgroundBlurStyle_0_2value as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setExpandSafeAreaAttribute((this._expandSafeArea_0_0value as Array<SafeAreaType> | undefined), (this._expandSafeArea_0_1value as Array<SafeAreaEdge> | undefined));
                     flagArray[166] = 2;
                     break;
                 }
@@ -3352,15 +3188,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[166] = 0;
-                    peer.setBackgroundBlurStyleAttribute((undefined as BlurStyle | undefined), (undefined as BackgroundBlurStyleOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setExpandSafeAreaAttribute((undefined as Array<SafeAreaType> | undefined), (undefined as Array<SafeAreaEdge> | undefined));
                 }
             }
         }
-        if (flagArray[167] != 0)
-        {
-            switch (flagArray[167] as int32) {
+        if (flagArray[167] != 0) {
+            switch (flagArray[167]) {
                 case 1: {
-                    peer.setBackgroundEffect1Attribute((this._backgroundEffect_1_0value as BackgroundEffectOptions | undefined), (this._backgroundEffect_1_1value as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setIgnoreLayoutSafeAreaAttribute((this._ignoreLayoutSafeArea_0_0value as Array<LayoutSafeAreaType> | undefined | undefined), (this._ignoreLayoutSafeArea_0_1value as Array<LayoutSafeAreaEdge> | undefined | undefined));
                     flagArray[167] = 2;
                     break;
                 }
@@ -3370,15 +3205,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[167] = 0;
-                    peer.setBackgroundEffect1Attribute((undefined as BackgroundEffectOptions | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setIgnoreLayoutSafeAreaAttribute((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
                 }
             }
         }
-        if (flagArray[168] != 0)
-        {
-            switch (flagArray[168] as int32) {
+        if (flagArray[168] != 0) {
+            switch (flagArray[168]) {
                 case 1: {
-                    peer.setForegroundBlurStyleAttribute((this._foregroundBlurStyle_0_0value as BlurStyle | undefined), (this._foregroundBlurStyle_0_1value as ForegroundBlurStyleOptions | undefined | undefined), (this._foregroundBlurStyle_0_2value as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setBackgroundAttribute((this._background_0_0value as CustomBuilder | ResourceColor | undefined), (this._background_0_1value as BackgroundOptions | undefined));
                     flagArray[168] = 2;
                     break;
                 }
@@ -3388,15 +3222,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[168] = 0;
-                    peer.setForegroundBlurStyleAttribute((undefined as BlurStyle | undefined), (undefined as ForegroundBlurStyleOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
+                    peer.setBackgroundAttribute((undefined as CustomBuilder | ResourceColor | undefined), (undefined as BackgroundOptions | undefined));
                 }
             }
         }
-        if (flagArray[169] != 0)
-        {
-            switch (flagArray[169] as int32) {
+        if (flagArray[169] != 0) {
+            switch (flagArray[169]) {
                 case 1: {
-                    peer.setBorderRadius1Attribute((this._borderRadius_1_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (this._borderRadius_1_1value as RenderStrategy | undefined | undefined));
+                    peer.setBackgroundImage1Attribute((this._backgroundImage_1_0value as ResourceStr | PixelMap | undefined), (this._backgroundImage_1_1value as BackgroundImageOptions));
                     flagArray[169] = 2;
                     break;
                 }
@@ -3406,15 +3239,13 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[169] = 0;
-                    peer.setBorderRadius1Attribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined | undefined));
                 }
             }
         }
-        if (flagArray[170] != 0)
-        {
-            switch (flagArray[170] as int32) {
+        if (flagArray[170] != 0) {
+            switch (flagArray[170]) {
                 case 1: {
-                    peer.setOnClick1Attribute((this._onClick_1_0value as ((event: ClickEvent) => void) | undefined), (this._onClick_1_1value as double | undefined));
+                    peer.setBackgroundImage2Attribute((this._backgroundImage_2_0value as ResourceStr | PixelMap | undefined), (this._backgroundImage_2_1value as ImageRepeat));
                     flagArray[170] = 2;
                     break;
                 }
@@ -3424,15 +3255,13 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[170] = 0;
-                    peer.setOnClick1Attribute((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[171] != 0)
-        {
-            switch (flagArray[171] as int32) {
+        if (flagArray[171] != 0) {
+            switch (flagArray[171]) {
                 case 1: {
-                    peer.setFocusScopeIdAttribute((this._focusScopeId_0_0value as string | undefined), (this._focusScopeId_0_1value as boolean | undefined | undefined), (this._focusScopeId_0_2value as boolean | undefined | undefined));
+                    peer.setBackgroundBlurStyleAttribute((this._backgroundBlurStyle_0_0value as BlurStyle | undefined), (this._backgroundBlurStyle_0_1value as BackgroundBlurStyleOptions | undefined), (this._backgroundBlurStyle_0_2value as SystemAdaptiveOptions | undefined));
                     flagArray[171] = 2;
                     break;
                 }
@@ -3442,15 +3271,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[171] = 0;
-                    peer.setFocusScopeIdAttribute((undefined as string | undefined), (undefined as boolean | undefined | undefined), (undefined as boolean | undefined | undefined));
+                    peer.setBackgroundBlurStyleAttribute((undefined as BlurStyle | undefined), (undefined as BackgroundBlurStyleOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
                 }
             }
         }
-        if (flagArray[172] != 0)
-        {
-            switch (flagArray[172] as int32) {
+        if (flagArray[172] != 0) {
+            switch (flagArray[172]) {
                 case 1: {
-                    peer.setFocusScopePriorityAttribute((this._focusScopePriority_0_0value as string | undefined), (this._focusScopePriority_0_1value as FocusPriority | undefined | undefined));
+                    peer.setBackgroundEffectAttribute((this._backgroundEffect_0_0value as BackgroundEffectOptions | undefined), (this._backgroundEffect_0_1value as SystemAdaptiveOptions | undefined));
                     flagArray[172] = 2;
                     break;
                 }
@@ -3460,15 +3288,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[172] = 0;
-                    peer.setFocusScopePriorityAttribute((undefined as string | undefined), (undefined as FocusPriority | undefined | undefined));
+                    peer.setBackgroundEffectAttribute((undefined as BackgroundEffectOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
                 }
             }
         }
-        if (flagArray[173] != 0)
-        {
-            switch (flagArray[173] as int32) {
+        if (flagArray[173] != 0) {
+            switch (flagArray[173]) {
                 case 1: {
-                    peer.setTransition1Attribute((this._transition_1_0value as TransitionEffect | undefined), (this._transition_1_1value as TransitionFinishCallback | undefined));
+                    peer.setForegroundBlurStyleAttribute((this._foregroundBlurStyle_0_0value as BlurStyle | undefined), (this._foregroundBlurStyle_0_1value as ForegroundBlurStyleOptions | undefined), (this._foregroundBlurStyle_0_2value as SystemAdaptiveOptions | undefined));
                     flagArray[173] = 2;
                     break;
                 }
@@ -3478,15 +3305,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[173] = 0;
-                    peer.setTransition1Attribute((undefined as TransitionEffect | undefined), (undefined as TransitionFinishCallback | undefined));
+                    peer.setForegroundBlurStyleAttribute((undefined as BlurStyle | undefined), (undefined as ForegroundBlurStyleOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
                 }
             }
         }
-        if (flagArray[174] != 0)
-        {
-            switch (flagArray[174] as int32) {
+        if (flagArray[174] != 0) {
+            switch (flagArray[174]) {
                 case 1: {
-                    peer.setBlurAttribute((this._blur_0_0value as double | undefined), (this._blur_0_1value as BlurOptions | undefined), (this._blur_0_2value as SystemAdaptiveOptions | undefined));
+                    peer.setBorderRadiusAttribute((this._borderRadius_0_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (this._borderRadius_0_1value as RenderStrategy | undefined | undefined));
                     flagArray[174] = 2;
                     break;
                 }
@@ -3496,15 +3322,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[174] = 0;
-                    peer.setBlurAttribute((undefined as double | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    peer.setBorderRadiusAttribute((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined | undefined));
                 }
             }
         }
-        if (flagArray[175] != 0)
-        {
-            switch (flagArray[175] as int32) {
+        if (flagArray[175] != 0) {
+            switch (flagArray[175]) {
                 case 1: {
-                    peer.setLinearGradientBlurAttribute((this._linearGradientBlur_0_0value as double | undefined), (this._linearGradientBlur_0_1value as LinearGradientBlurOptions | undefined));
+                    peer.setOnClick1Attribute((this._onClick_1_0value as ((event: ClickEvent) => void) | undefined), (this._onClick_1_1value as double | undefined));
                     flagArray[175] = 2;
                     break;
                 }
@@ -3514,15 +3339,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[175] = 0;
-                    peer.setLinearGradientBlurAttribute((undefined as double | undefined), (undefined as LinearGradientBlurOptions | undefined));
+                    peer.setOnClick1Attribute((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[176] != 0)
-        {
-            switch (flagArray[176] as int32) {
+        if (flagArray[176] != 0) {
+            switch (flagArray[176]) {
                 case 1: {
-                    peer.setSystemBarEffectAttribute();
+                    peer.setFocusScopeIdAttribute((this._focusScopeId_0_0value as string | undefined), (this._focusScopeId_0_1value as boolean | undefined), (this._focusScopeId_0_2value as boolean | undefined));
                     flagArray[176] = 2;
                     break;
                 }
@@ -3532,15 +3356,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[176] = 0;
-                    peer.setSystemBarEffectAttribute();
+                    peer.setFocusScopeIdAttribute((undefined as string | undefined), (undefined as boolean | undefined), (undefined as boolean | undefined));
                 }
             }
         }
-        if (flagArray[177] != 0)
-        {
-            switch (flagArray[177] as int32) {
+        if (flagArray[177] != 0) {
+            switch (flagArray[177]) {
                 case 1: {
-                    peer.setUseEffect1Attribute((this._useEffect_1_0value as boolean | undefined), (this._useEffect_1_1value as EffectType | undefined));
+                    peer.setFocusScopePriorityAttribute((this._focusScopePriority_0_0value as string | undefined), (this._focusScopePriority_0_1value as FocusPriority | undefined));
                     flagArray[177] = 2;
                     break;
                 }
@@ -3550,15 +3373,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[177] = 0;
-                    peer.setUseEffect1Attribute((undefined as boolean | undefined), (undefined as EffectType | undefined));
+                    peer.setFocusScopePriorityAttribute((undefined as string | undefined), (undefined as FocusPriority | undefined));
                 }
             }
         }
-        if (flagArray[178] != 0)
-        {
-            switch (flagArray[178] as int32) {
+        if (flagArray[178] != 0) {
+            switch (flagArray[178]) {
                 case 1: {
-                    peer.setBackdropBlurAttribute((this._backdropBlur_0_0value as double | undefined), (this._backdropBlur_0_1value as BlurOptions | undefined), (this._backdropBlur_0_2value as SystemAdaptiveOptions | undefined));
+                    peer.setTransition1Attribute((this._transition_1_0value as TransitionEffect | undefined), (this._transition_1_1value as TransitionFinishCallback | undefined));
                     flagArray[178] = 2;
                     break;
                 }
@@ -3568,15 +3390,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[178] = 0;
-                    peer.setBackdropBlurAttribute((undefined as number | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                    peer.setTransition1Attribute((undefined as TransitionEffect | undefined), (undefined as TransitionFinishCallback | undefined));
                 }
             }
         }
-        if (flagArray[179] != 0)
-        {
-            switch (flagArray[179] as int32) {
+        if (flagArray[179] != 0) {
+            switch (flagArray[179]) {
                 case 1: {
-                    peer.setSharedTransitionAttribute((this._sharedTransition_0_0value as string | undefined), (this._sharedTransition_0_1value as sharedTransitionOptions | undefined | undefined));
+                    hookGesture(peer, (this._gesture_0_0value as GestureType), (this._gesture_0_1value as GestureMask | undefined));
                     flagArray[179] = 2;
                     break;
                 }
@@ -3586,35 +3407,15 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[179] = 0;
-                    peer.setSharedTransitionAttribute((undefined as string | undefined), (undefined as sharedTransitionOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[211] != 0)
-        {
-            switch (flagArray[211]) {
-                case 1: {
-                    peer.setOnTouchTestDoneAttribute((this._onTouchTestDone_0_0value as TouchTestDoneCallback | undefined));
-                    flagArray[211] = 2;
-                    break;
-                }
-                case 3: {
-                    flagArray[211] = 2;
-                    break;
-                }
-                default: {
-                    flagArray[211] = 0;
-                    peer.setOnTouchTestDoneAttribute((undefined as TouchTestDoneCallback | undefined));
                 }
             }
         }
     }
     applyModifierPatch9(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
-        if (flagArray[180] != 0)
-        {
-            switch (flagArray[180] as int32) {
+        if (flagArray[180] != 0) {
+            switch (flagArray[180]) {
                 case 1: {
-                    peer.setChainModeAttribute((this._chainMode_0_0value as Axis | undefined), (this._chainMode_0_1value as ChainStyle | undefined));
+                    hookPriorityGesture(peer, (this._priorityGesture_0_0value as GestureType), (this._priorityGesture_0_1value as GestureMask | undefined));
                     flagArray[180] = 2;
                     break;
                 }
@@ -3624,15 +3425,13 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[180] = 0;
-                    peer.setChainModeAttribute((undefined as Axis | undefined), (undefined as ChainStyle | undefined));
                 }
             }
         }
-        if (flagArray[181] != 0)
-        {
-            switch (flagArray[181] as int32) {
+        if (flagArray[181] != 0) {
+            switch (flagArray[181]) {
                 case 1: {
-                    peer.setOnDrop1Attribute((this._onDrop_1_0value as OnDragEventCallback | undefined), (this._onDrop_1_1value as DropOptions | undefined | undefined));
+                    hookParallelGesture(peer, (this._parallelGesture_0_0value as GestureType), (this._parallelGesture_0_1value as GestureMask | undefined));
                     flagArray[181] = 2;
                     break;
                 }
@@ -3642,15 +3441,13 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[181] = 0;
-                    peer.setOnDrop1Attribute((undefined as OnDragEventCallback | undefined), (undefined as DropOptions | undefined | undefined));
                 }
             }
         }
-        if (flagArray[182] != 0)
-        {
-            switch (flagArray[182] as int32) {
+        if (flagArray[182] != 0) {
+            switch (flagArray[182]) {
                 case 1: {
-                    peer.setDragPreview1Attribute((this._dragPreview_1_0value as CustomBuilder | DragItemInfo | string | undefined), (this._dragPreview_1_1value as PreviewConfiguration | undefined | undefined));
+                    peer.setBlurAttribute((this._blur_0_0value as double | undefined), (this._blur_0_1value as BlurOptions | undefined), (this._blur_0_2value as SystemAdaptiveOptions | undefined));
                     flagArray[182] = 2;
                     break;
                 }
@@ -3660,15 +3457,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[182] = 0;
-                    peer.setDragPreview1Attribute((undefined as CustomBuilder | DragItemInfo | string | undefined), (undefined as PreviewConfiguration | undefined | undefined));
+                    peer.setBlurAttribute((undefined as double | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
                 }
             }
         }
-        if (flagArray[183] != 0)
-        {
-            switch (flagArray[183] as int32) {
+        if (flagArray[183] != 0) {
+            switch (flagArray[183]) {
                 case 1: {
-                    hookDragPreviewOptions(peer, (this._dragPreviewOptions_0_0value as DragPreviewOptions | undefined), (this._dragPreviewOptions_0_1value as DragInteractionOptions | undefined | undefined));
+                    peer.setLinearGradientBlurAttribute((this._linearGradientBlur_0_0value as double | undefined), (this._linearGradientBlur_0_1value as LinearGradientBlurOptions | undefined));
                     flagArray[183] = 2;
                     break;
                 }
@@ -3678,15 +3474,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[183] = 0;
-                    hookDragPreviewOptions(peer, (undefined as DragPreviewOptions | undefined), (undefined as DragInteractionOptions | undefined | undefined));
+                    peer.setLinearGradientBlurAttribute((undefined as double | undefined), (undefined as LinearGradientBlurOptions | undefined));
                 }
             }
         }
-        if (flagArray[184] != 0)
-        {
-            switch (flagArray[184] as int32) {
+        if (flagArray[184] != 0) {
+            switch (flagArray[184]) {
                 case 1: {
-                    peer.setOverlayAttribute((this._overlay_0_0value as string | CustomBuilder | ComponentContent | undefined), (this._overlay_0_1value as OverlayOptions | undefined | undefined));
+                    peer.setSystemBarEffectAttribute();
                     flagArray[184] = 2;
                     break;
                 }
@@ -3696,15 +3491,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[184] = 0;
-                    peer.setOverlayAttribute((undefined as string | CustomBuilder | ComponentContent | undefined), (undefined as OverlayOptions | undefined | undefined));
+                    peer.setSystemBarEffectAttribute();
                 }
             }
         }
-        if (flagArray[185] != 0)
-        {
-            switch (flagArray[185] as int32) {
+        if (flagArray[185] != 0) {
+            switch (flagArray[185]) {
                 case 1: {
-                    peer.setBlendModeAttribute((this._blendMode_0_0value as BlendMode | undefined), (this._blendMode_0_1value as BlendApplyType | undefined | undefined));
+                    peer.setUseEffect1Attribute((this._useEffect_1_0value as boolean | undefined), (this._useEffect_1_1value as EffectType | undefined));
                     flagArray[185] = 2;
                     break;
                 }
@@ -3714,15 +3508,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[185] = 0;
-                    peer.setBlendModeAttribute((undefined as BlendMode | undefined), (undefined as BlendApplyType | undefined | undefined));
+                    peer.setUseEffect1Attribute((undefined as boolean | undefined), (undefined as EffectType | undefined));
                 }
             }
         }
-        if (flagArray[186] != 0)
-        {
-            switch (flagArray[186] as int32) {
+        if (flagArray[186] != 0) {
+            switch (flagArray[186]) {
                 case 1: {
-                    peer.setAdvancedBlendModeAttribute((this._advancedBlendMode_0_0value as BlendMode | uiEffect.Blender | undefined), (this._advancedBlendMode_0_1value as BlendApplyType | undefined));
+                    peer.setBackdropBlurAttribute((this._backdropBlur_0_0value as double | undefined), (this._backdropBlur_0_1value as BlurOptions | undefined), (this._backdropBlur_0_2value as SystemAdaptiveOptions | undefined));
                     flagArray[186] = 2;
                     break;
                 }
@@ -3732,15 +3525,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[186] = 0;
-                    peer.setAdvancedBlendModeAttribute((undefined as BlendMode | uiEffect.Blender | undefined), (undefined as BlendApplyType | undefined));
+                    peer.setBackdropBlurAttribute((undefined as double | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
                 }
             }
         }
-        if (flagArray[187] != 0)
-        {
-            switch (flagArray[187] as int32) {
+        if (flagArray[187] != 0) {
+            switch (flagArray[187]) {
                 case 1: {
-                    peer.setGeometryTransition1Attribute((this._geometryTransition_1_0value as string | undefined), (this._geometryTransition_1_1value as GeometryTransitionOptions | undefined | undefined));
+                    peer.setSharedTransitionAttribute((this._sharedTransition_0_0value as string | undefined), (this._sharedTransition_0_1value as sharedTransitionOptions | undefined));
                     flagArray[187] = 2;
                     break;
                 }
@@ -3750,15 +3542,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[187] = 0;
-                    peer.setGeometryTransition1Attribute((undefined as string | undefined), (undefined as GeometryTransitionOptions | undefined | undefined));
+                    peer.setSharedTransitionAttribute((undefined as string | undefined), (undefined as sharedTransitionOptions | undefined));
                 }
             }
         }
-        if (flagArray[188] != 0)
-        {
-            switch (flagArray[188] as int32) {
+        if (flagArray[188] != 0) {
+            switch (flagArray[188]) {
                 case 1: {
-                    peer.setBindTipsAttribute((this._bindTips_0_0value as TipsMessageType | undefined), (this._bindTips_0_1value as TipsOptions | undefined | undefined));
+                    peer.setChainModeAttribute((this._chainMode_0_0value as Axis | undefined), (this._chainMode_0_1value as ChainStyle | undefined));
                     flagArray[188] = 2;
                     break;
                 }
@@ -3768,15 +3559,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[188] = 0;
-                    peer.setBindTipsAttribute((undefined as TipsMessageType | undefined), (undefined as TipsOptions | undefined | undefined));
+                    peer.setChainModeAttribute((undefined as Axis | undefined), (undefined as ChainStyle | undefined));
                 }
             }
         }
-        if (flagArray[189] != 0)
-        {
-            switch (flagArray[189] as int32) {
+        if (flagArray[189] != 0) {
+            switch (flagArray[189]) {
                 case 1: {
-                    peer.setBindPopupAttribute((this._bindPopup_0_0value as boolean | undefined), (this._bindPopup_0_1value as PopupOptions | CustomPopupOptions | undefined));
+                    peer.setOnDrop1Attribute((this._onDrop_1_0value as OnDragEventCallback | undefined), (this._onDrop_1_1value as DropOptions));
                     flagArray[189] = 2;
                     break;
                 }
@@ -3786,15 +3576,13 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[189] = 0;
-                    peer.setBindPopupAttribute((undefined as boolean | undefined), (undefined as PopupOptions | CustomPopupOptions | undefined));
                 }
             }
         }
-        if (flagArray[190] != 0)
-        {
-            switch (flagArray[190] as int32) {
+        if (flagArray[190] != 0) {
+            switch (flagArray[190]) {
                 case 1: {
-                    peer.setBindMenu0Attribute((this._bindMenu_0_0value as Array<MenuElement> | CustomBuilder | undefined), (this._bindMenu_0_1value as MenuOptions | undefined | undefined));
+                    peer.setOnDragSpringLoadingAttribute((this._onDragSpringLoading_0_0value as arkui_component_common_Callback<SpringLoadingContext, void> | null | undefined), (this._onDragSpringLoading_0_1value as DragSpringLoadingConfiguration | undefined));
                     flagArray[190] = 2;
                     break;
                 }
@@ -3804,15 +3592,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[190] = 0;
-                    peer.setBindMenu0Attribute((undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined | undefined));
+                    peer.setOnDragSpringLoadingAttribute((undefined as arkui_component_common_Callback<SpringLoadingContext, void> | null | undefined), (undefined as DragSpringLoadingConfiguration | undefined));
                 }
             }
         }
-        if (flagArray[191] != 0)
-        {
-            switch (flagArray[191] as int32) {
+        if (flagArray[191] != 0) {
+            switch (flagArray[191]) {
                 case 1: {
-                    peer.setBindMenu1Attribute((this._bindMenu_1_0value as boolean | Bindable<boolean> | undefined), (this._bindMenu_1_1value as Array<MenuElement> | CustomBuilder | undefined), (this._bindMenu_1_2value as MenuOptions | undefined | undefined));
+                    peer.setDragPreviewAttribute((this._dragPreview_0_0value as CustomBuilder | DragItemInfo | string | undefined), (this._dragPreview_0_1value as PreviewConfiguration | undefined));
                     flagArray[191] = 2;
                     break;
                 }
@@ -3822,15 +3609,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[191] = 0;
-                    peer.setBindMenu1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined | undefined));
+                    peer.setDragPreviewAttribute((undefined as CustomBuilder | DragItemInfo | string | undefined), (undefined as PreviewConfiguration | undefined));
                 }
             }
         }
-        if (flagArray[192] != 0)
-        {
-            switch (flagArray[192] as int32) {
+        if (flagArray[192] != 0) {
+            switch (flagArray[192]) {
                 case 1: {
-                    peer.setBindContextMenu0Attribute((this._bindContextMenu_0_0value as CustomBuilder | undefined), (this._bindContextMenu_0_1value as ResponseType | undefined), (this._bindContextMenu_0_2value as ContextMenuOptions | undefined | undefined));
+                    hookDragPreviewOptions(peer, (this._dragPreviewOptions_0_0value as DragPreviewOptions | undefined), (this._dragPreviewOptions_0_1value as DragInteractionOptions | undefined));
                     flagArray[192] = 2;
                     break;
                 }
@@ -3840,15 +3626,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[192] = 0;
-                    peer.setBindContextMenu0Attribute((undefined as CustomBuilder | undefined), (undefined as ResponseType | undefined), (undefined as ContextMenuOptions | undefined | undefined));
+                    hookDragPreviewOptions(peer, (undefined as DragPreviewOptions | undefined), (undefined as DragInteractionOptions | undefined));
                 }
             }
         }
-        if (flagArray[193] != 0)
-        {
-            switch (flagArray[193] as int32) {
+        if (flagArray[193] != 0) {
+            switch (flagArray[193]) {
                 case 1: {
-                    peer.setBindContextMenuWithResponseAttribute((this._bindContextMenuWithResponse_0_0value as CustomBuilderT<ResponseType> | undefined), (this._bindContextMenuWithResponse_0_1value as ContextMenuOptions | undefined));
+                    peer.setOverlayAttribute((this._overlay_0_0value as string | CustomBuilder | ComponentContent<Object> | undefined), (this._overlay_0_1value as OverlayOptions | undefined));
                     flagArray[193] = 2;
                     break;
                 }
@@ -3858,15 +3643,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[193] = 0;
-                    peer.setBindContextMenuWithResponseAttribute((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
+                    peer.setOverlayAttribute((undefined as string | CustomBuilder | ComponentContent<Object> | undefined), (undefined as OverlayOptions | undefined));
                 }
             }
         }
-        if (flagArray[194] != 0)
-        {
-            switch (flagArray[194] as int32) {
+        if (flagArray[194] != 0) {
+            switch (flagArray[194]) {
                 case 1: {
-                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as boolean | Bindable<boolean> | undefined), (this._bindContextMenu_1_1value as CustomBuilder | undefined), (this._bindContextMenu_1_2value as ContextMenuOptions | undefined | undefined));
+                    peer.setBlendModeAttribute((this._blendMode_0_0value as BlendMode | undefined), (this._blendMode_0_1value as BlendApplyType | undefined));
                     flagArray[194] = 2;
                     break;
                 }
@@ -3876,15 +3660,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[194] = 0;
-                    peer.setBindContextMenu1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
+                    peer.setBlendModeAttribute((undefined as BlendMode | undefined), (undefined as BlendApplyType | undefined));
                 }
             }
         }
-        if (flagArray[195] != 0)
-        {
-            switch (flagArray[195] as int32) {
+        if (flagArray[195] != 0) {
+            switch (flagArray[195]) {
                 case 1: {
-                    peer.setBindContentCover0Attribute((this._bindContentCover_0_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_0_1value as CustomBuilder | undefined), (this._bindContentCover_0_2value as ModalTransition | undefined | undefined));
+                    peer.setAdvancedBlendModeAttribute((this._advancedBlendMode_0_0value as BlendMode | Blender | undefined), (this._advancedBlendMode_0_1value as BlendApplyType | undefined));
                     flagArray[195] = 2;
                     break;
                 }
@@ -3894,15 +3677,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[195] = 0;
-                    peer.setBindContentCover0Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ModalTransition | undefined | undefined));
+                    peer.setAdvancedBlendModeAttribute((undefined as BlendMode | Blender | undefined), (undefined as BlendApplyType | undefined));
                 }
             }
         }
-        if (flagArray[196] != 0)
-        {
-            switch (flagArray[196] as int32) {
+        if (flagArray[196] != 0) {
+            switch (flagArray[196]) {
                 case 1: {
-                    peer.setBindContentCover1Attribute((this._bindContentCover_1_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_1_1value as CustomBuilder | undefined), (this._bindContentCover_1_2value as ContentCoverOptions | undefined | undefined));
+                    peer.setGeometryTransitionAttribute((this._geometryTransition_0_0value as string | undefined), (this._geometryTransition_0_1value as GeometryTransitionOptions | undefined));
                     flagArray[196] = 2;
                     break;
                 }
@@ -3912,15 +3694,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[196] = 0;
-                    peer.setBindContentCover1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContentCoverOptions | undefined | undefined));
+                    peer.setGeometryTransitionAttribute((undefined as string | undefined), (undefined as GeometryTransitionOptions | undefined));
                 }
             }
         }
-        if (flagArray[197] != 0)
-        {
-            switch (flagArray[197] as int32) {
+        if (flagArray[197] != 0) {
+            switch (flagArray[197]) {
                 case 1: {
-                    peer.setBindSheetAttribute((this._bindSheet_0_0value as boolean | Bindable<boolean> | undefined), (this._bindSheet_0_1value as CustomBuilder | undefined), (this._bindSheet_0_2value as SheetOptions | undefined | undefined));
+                    peer.setBindTipsAttribute((this._bindTips_0_0value as TipsMessageType | undefined), (this._bindTips_0_1value as TipsOptions | undefined));
                     flagArray[197] = 2;
                     break;
                 }
@@ -3930,15 +3711,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[197] = 0;
-                    peer.setBindSheetAttribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as SheetOptions | undefined | undefined));
+                    peer.setBindTipsAttribute((undefined as TipsMessageType | undefined), (undefined as TipsOptions | undefined));
                 }
             }
         }
-        if (flagArray[198] != 0)
-        {
-            switch (flagArray[198] as int32) {
+        if (flagArray[198] != 0) {
+            switch (flagArray[198]) {
                 case 1: {
-                    peer.setOnVisibleAreaChangeAttribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
+                    peer.setBindPopupAttribute((this._bindPopup_0_0value as boolean | undefined), (this._bindPopup_0_1value as PopupOptions | CustomPopupOptions | undefined));
                     flagArray[198] = 2;
                     break;
                 }
@@ -3948,15 +3728,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[198] = 0;
-                    peer.setOnVisibleAreaChangeAttribute((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    peer.setBindPopupAttribute((undefined as boolean | undefined), (undefined as PopupOptions | CustomPopupOptions | undefined));
                 }
             }
         }
-        if (flagArray[199] != 0)
-        {
-            switch (flagArray[199] as int32) {
+        if (flagArray[199] != 0) {
+            switch (flagArray[199]) {
                 case 1: {
-                    peer.setOnVisibleAreaApproximateChangeAttribute((this._onVisibleAreaApproximateChange_0_0value as VisibleAreaEventOptions | undefined), (this._onVisibleAreaApproximateChange_0_1value as VisibleAreaChangeCallback | undefined));
+                    peer.setBindMenu0Attribute((this._bindMenu_0_0value as Array<MenuElement> | CustomBuilder | undefined), (this._bindMenu_0_1value as MenuOptions | undefined));
                     flagArray[199] = 2;
                     break;
                 }
@@ -3966,15 +3745,16 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[199] = 0;
-                    peer.setOnVisibleAreaApproximateChangeAttribute((undefined as VisibleAreaEventOptions | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                    peer.setBindMenu0Attribute((undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined));
                 }
             }
         }
-        if (flagArray[200] != 0)
-        {
-            switch (flagArray[200] as int32) {
+    }
+    applyModifierPatch10(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
+        if (flagArray[200] != 0) {
+            switch (flagArray[200]) {
                 case 1: {
-                    hookKeyboardShortcut(peer, this._keyboardShortcutList);
+                    peer.setBindMenu1Attribute((this._bindMenu_1_0value as boolean | Bindable<boolean> | undefined), (this._bindMenu_1_1value as Array<MenuElement> | CustomBuilder | undefined), (this._bindMenu_1_2value as MenuOptions | undefined));
                     flagArray[200] = 2;
                     break;
                 }
@@ -3984,17 +3764,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[200] = 0;
-                    peer.setKeyboardShortcutAttribute((undefined as string | FunctionKey | undefined), (undefined as Array<ModifierKey> | undefined), (undefined as (() => void) | undefined | undefined));
+                    peer.setBindMenu1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined));
                 }
             }
         }
-    }
-    applyModifierPatch10(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
-        if (flagArray[201] != 0)
-        {
-            switch (flagArray[201] as int32) {
+        if (flagArray[201] != 0) {
+            switch (flagArray[201]) {
                 case 1: {
-                    peer.setAccessibilityGroupWithConfigAttribute((this._accessibilityGroup_1_0value as boolean | undefined), (this._accessibilityGroup_1_1value as AccessibilityOptions | undefined));
+                    peer.setBindContextMenu0Attribute((this._bindContextMenu_0_0value as CustomBuilder | undefined), (this._bindContextMenu_0_1value as ResponseType | undefined), (this._bindContextMenu_0_2value as ContextMenuOptions | undefined));
                     flagArray[201] = 2;
                     break;
                 }
@@ -4004,15 +3781,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[201] = 0;
-                    peer.setAccessibilityGroupWithConfigAttribute((undefined as boolean | undefined), (undefined as AccessibilityOptions | undefined));
+                    peer.setBindContextMenu0Attribute((undefined as CustomBuilder | undefined), (undefined as ResponseType | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
-        if (flagArray[202] != 0)
-        {
-            switch (flagArray[202] as int32) {
+        if (flagArray[202] != 0) {
+            switch (flagArray[202]) {
                 case 1: {
-                    peer.setOnGestureRecognizerJudgeBegin1Attribute((this._onGestureRecognizerJudgeBegin_1_0value as GestureRecognizerJudgeBeginCallback | undefined), (this._onGestureRecognizerJudgeBegin_1_1value as boolean | undefined));
+                    peer.setBindContextMenuWithResponseAttribute((this._bindContextMenuWithResponse_0_0value as CustomBuilderT<ResponseType> | undefined), (this._bindContextMenuWithResponse_0_1value as ContextMenuOptions | undefined));
                     flagArray[202] = 2;
                     break;
                 }
@@ -4022,15 +3798,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[202] = 0;
-                    peer.setOnGestureRecognizerJudgeBegin1Attribute((undefined as GestureRecognizerJudgeBeginCallback | undefined), (undefined as boolean | undefined));
+                    peer.setBindContextMenuWithResponseAttribute((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
-        if (flagArray[203] != 0)
-        {
-            switch (flagArray[203] as int32) {
+        if (flagArray[203] != 0) {
+            switch (flagArray[203]) {
                 case 1: {
-                    peer.setSystemMaterialAttribute((this._systemMaterial_0_0value as uiMaterial.Material | undefined));
+                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as boolean | Bindable<boolean> | undefined), (this._bindContextMenu_1_1value as CustomBuilder | undefined), (this._bindContextMenu_1_2value as ContextMenuOptions | undefined));
                     flagArray[203] = 2;
                     break;
                 }
@@ -4040,14 +3815,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[203] = 0;
-                    peer.setSystemMaterialAttribute((undefined as uiMaterial.Material | undefined));
+                    peer.setBindContextMenu1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
         if (flagArray[204] != 0) {
-            switch (flagArray[204] as int32) {
+            switch (flagArray[204]) {
                 case 1: {
-                    peer.setAccessibilityStateDescriptionAttribute((this._accessibilityStateDescription_0_0value as string | Resource | undefined));
+                    peer.setBindContentCover0Attribute((this._bindContentCover_0_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_0_1value as CustomBuilder | undefined), (this._bindContentCover_0_2value as ModalTransition | undefined));
                     flagArray[204] = 2;
                     break;
                 }
@@ -4057,15 +3832,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[204] = 0;
-                    peer.setAccessibilityStateDescriptionAttribute((undefined as string | Resource | undefined));
+                    peer.setBindContentCover0Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ModalTransition | undefined));
                 }
             }
         }
-        if (flagArray[205] != 0)
-        {
-            switch (flagArray[205] as int32) {
+        if (flagArray[205] != 0) {
+            switch (flagArray[205]) {
                 case 1: {
-                    peer.setAccessibilityActionOptionsAttribute((this._accessibilityActionOptions_0_0value as AccessibilityActionOptions | undefined));
+                    peer.setBindContentCover1Attribute((this._bindContentCover_1_0value as boolean | Bindable<boolean> | undefined), (this._bindContentCover_1_1value as CustomBuilder | undefined), (this._bindContentCover_1_2value as ContentCoverOptions | undefined));
                     flagArray[205] = 2;
                     break;
                 }
@@ -4075,15 +3849,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[205] = 0;
-                    peer.setAccessibilityActionOptionsAttribute((undefined as AccessibilityActionOptions | undefined));
+                    peer.setBindContentCover1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContentCoverOptions | undefined));
                 }
             }
         }
-        if (flagArray[206] != 0)
-        {
-            switch (flagArray[206] as int32) {
+        if (flagArray[206] != 0) {
+            switch (flagArray[206]) {
                 case 1: {
-                    peer.setUseUnionEffectAttribute((this._useUnionEffect_0_0value as boolean | undefined));
+                    peer.setBindSheetAttribute((this._bindSheet_0_0value as boolean | Bindable<boolean> | undefined), (this._bindSheet_0_1value as CustomBuilder | undefined), (this._bindSheet_0_2value as SheetOptions | undefined));
                     flagArray[206] = 2;
                     break;
                 }
@@ -4093,15 +3866,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[206] = 0;
-                    peer.setUseUnionEffectAttribute((undefined as boolean | undefined));
+                    peer.setBindSheetAttribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as SheetOptions | undefined));
                 }
             }
         }
-        if (flagArray[207] != 0)
-        {
-            switch (flagArray[207] as int32) {
+        if (flagArray[207] != 0) {
+            switch (flagArray[207]) {
                 case 1: {
-                    peer.setMaterialFilterAttribute((this._materialFilter_0_0value as uiEffect.Filter | undefined));
+                    peer.setOnVisibleAreaChangeAttribute((this._onVisibleAreaChange_0_0value as Array<double> | undefined), (this._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
                     flagArray[207] = 2;
                     break;
                 }
@@ -4111,15 +3883,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[207] = 0;
-                    peer.setMaterialFilterAttribute((undefined as uiEffect.Filter | undefined));
+                    peer.setOnVisibleAreaChangeAttribute((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
                 }
             }
         }
-        if (flagArray[208] != 0)
-        {
-            switch (flagArray[208] as int32) {
+        if (flagArray[208] != 0) {
+            switch (flagArray[208]) {
                 case 1: {
-                    peer.setOnDragSpringLoadingAttribute((this._onDragSpringLoading_0_0value as ((value0: dragController.SpringLoadingContext) => void) | null | undefined), (this._onDragSpringLoading_0_1value as dragController.DragSpringLoadingConfiguration | undefined));
+                    peer.setOnVisibleAreaApproximateChangeAttribute((this._onVisibleAreaApproximateChange_0_0value as VisibleAreaEventOptions | undefined), (this._onVisibleAreaApproximateChange_0_1value as VisibleAreaChangeCallback | undefined));
                     flagArray[208] = 2;
                     break;
                 }
@@ -4129,14 +3900,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[208] = 0;
-                    peer.setOnDragSpringLoadingAttribute((undefined as ((value0: dragController.SpringLoadingContext) => void) | null | undefined), (undefined as dragController.DragSpringLoadingConfiguration | undefined));
+                    peer.setOnVisibleAreaApproximateChangeAttribute((undefined as VisibleAreaEventOptions | undefined), (undefined as VisibleAreaChangeCallback | undefined));
                 }
             }
         }
         if (flagArray[209] != 0) {
             switch (flagArray[209]) {
                 case 1: {
-                    peer.setExcludeFromRenderGroupAttribute((this._excludeFromRenderGroup_0_0value as boolean | undefined));
+                    peer.setKeyboardShortcutAttribute((this._keyboardShortcut_0_0value as string | FunctionKey | undefined), (this._keyboardShortcut_0_1value as Array<ModifierKey> | undefined), (this._keyboardShortcut_0_2value as (() => void) | undefined));
                     flagArray[209] = 2;
                     break;
                 }
@@ -4146,15 +3917,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[209] = 0;
-                    peer.setExcludeFromRenderGroupAttribute((undefined as boolean | undefined));
+                    peer.setKeyboardShortcutAttribute((undefined as string | FunctionKey | undefined), (undefined as Array<ModifierKey> | undefined), (undefined as (() => void) | undefined));
                 }
             }
         }
-        if (flagArray[210] != 0)
-        {
+        if (flagArray[210] != 0) {
             switch (flagArray[210]) {
                 case 1: {
-                    peer.setEnableClickSoundEffectAttribute((this._enableClickSoundEffect_0_0value as boolean | undefined));
+                    peer.setAccessibilityGroupAttribute((this._accessibilityGroup_0_0value as boolean | undefined), (this._accessibilityGroup_0_1value as AccessibilityOptions | undefined));
                     flagArray[210] = 2;
                     break;
                 }
@@ -4164,15 +3934,14 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[210] = 0;
-                    peer.setEnableClickSoundEffectAttribute((undefined as boolean | undefined));
+                    peer.setAccessibilityGroupAttribute((undefined as boolean | undefined), (undefined as AccessibilityOptions | undefined));
                 }
             }
         }
-        if (flagArray[211] != 0)
-        {
+        if (flagArray[211] != 0) {
             switch (flagArray[211]) {
                 case 1: {
-                    peer.setOnNeedSoftkeyboardAttribute((this._onNeedSoftkeyboard_0_0value as OnNeedSoftkeyboardCallback | undefined));
+                    peer.setOnGestureRecognizerJudgeBegin1Attribute((this._onGestureRecognizerJudgeBegin_1_0value as GestureRecognizerJudgeBeginCallback | undefined), (this._onGestureRecognizerJudgeBegin_1_1value as boolean | undefined));
                     flagArray[211] = 2;
                     break;
                 }
@@ -4182,7 +3951,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[211] = 0;
-                    peer.setOnNeedSoftkeyboardAttribute((undefined as OnNeedSoftkeyboardCallback | undefined));
+                    peer.setOnGestureRecognizerJudgeBegin1Attribute((undefined as GestureRecognizerJudgeBeginCallback | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -4203,12 +3972,11 @@ export class CommonMethodModifier implements CommonMethod {
         this.mergeModifier10(modifier, flagArray);
     }
     mergeModifier0(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[0] != 0)
-        {
-            switch (flagArray[0] as int32) {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
                 case 1:
                 case 3: {
-                    this.width(modifier._width_0_0value);
+                    this.width((modifier._width_0_0value as Length | LayoutPolicy | undefined));
                     break;
                 }
                 default: {
@@ -4216,12 +3984,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[1] != 0)
-        {
-            switch (flagArray[1] as int32) {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
                 case 1:
                 case 3: {
-                    this.height(modifier._height_0_0value);
+                    this.height((modifier._height_0_0value as Length | LayoutPolicy | undefined));
                     break;
                 }
                 default: {
@@ -4229,12 +3996,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[2] != 0)
-        {
-            switch (flagArray[2] as int32) {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
                 case 1:
                 case 3: {
-                    this.responseRegion(modifier._responseRegion_0_0value);
+                    this.drawModifier((modifier._drawModifier_0_0value as DrawModifier | undefined));
+                    break;
+                }
+                default: {
+                    this.drawModifier((undefined as DrawModifier | undefined));
+                }
+            }
+        }
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
+                    this.responseRegion((modifier._responseRegion_0_0value as Array<Rectangle> | Rectangle | undefined));
                     break;
                 }
                 default: {
@@ -4242,12 +4020,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[3] != 0)
-        {
-            switch (flagArray[3] as int32) {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
                 case 1:
                 case 3: {
-                    this.mouseResponseRegion(modifier._mouseResponseRegion_0_0value);
+                    this.mouseResponseRegion((modifier._mouseResponseRegion_0_0value as Array<Rectangle> | Rectangle | undefined));
                     break;
                 }
                 default: {
@@ -4255,12 +4032,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[4] != 0)
-        {
-            switch (flagArray[4] as int32) {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
                 case 1:
                 case 3: {
-                    this.responseRegionList(modifier._responseRegionList_0_0value);
+                    this.responseRegionList((modifier._responseRegionList_0_0value as Array<ResponseRegion> | undefined));
                     break;
                 }
                 default: {
@@ -4268,12 +4044,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[5] != 0)
-        {
-            switch (flagArray[5] as int32) {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
                 case 1:
                 case 3: {
-                    this.size(modifier._size_0_0value);
+                    this.size((modifier._size_0_0value as SizeOptions | undefined));
                     break;
                 }
                 default: {
@@ -4281,12 +4056,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[6] != 0)
-        {
-            switch (flagArray[6] as int32) {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
                 case 1:
                 case 3: {
-                    this.constraintSize(modifier._constraintSize_0_0value);
+                    this.constraintSize((modifier._constraintSize_0_0value as ConstraintSizeOptions | undefined));
                     break;
                 }
                 default: {
@@ -4294,12 +4068,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[7] != 0)
-        {
-            switch (flagArray[7] as int32) {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
                 case 1:
                 case 3: {
-                    this.hitTestBehavior(modifier._hitTestBehavior_0_0value);
+                    this.hitTestBehavior((modifier._hitTestBehavior_0_0value as HitTestMode | undefined));
                     break;
                 }
                 default: {
@@ -4307,12 +4080,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[8] != 0)
-        {
-            switch (flagArray[8] as int32) {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
                 case 1:
                 case 3: {
-                    this.onChildTouchTest(modifier._onChildTouchTest_0_0value);
+                    this.onChildTouchTest((modifier._onChildTouchTest_0_0value as ((value: Array<TouchTestInfo>) => TouchResult) | undefined));
                     break;
                 }
                 default: {
@@ -4320,25 +4092,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[9] != 0)
-        {
-            switch (flagArray[9] as int32) {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
                 case 1:
                 case 3: {
-                    this.layoutWeight(modifier._layoutWeight_0_0value);
+                    this.layoutWeight((modifier._layoutWeight_0_0value as double | string | undefined));
                     break;
                 }
                 default: {
-                    this.layoutWeight((undefined as number | string | undefined));
+                    this.layoutWeight((undefined as double | string | undefined));
                 }
             }
         }
-        if (flagArray[10] != 0)
-        {
-            switch (flagArray[10] as int32) {
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
                 case 1:
                 case 3: {
-                    this.chainWeight(modifier._chainWeight_0_0value);
+                    this.chainWeight((modifier._chainWeight_0_0value as ChainWeightOptions | undefined));
                     break;
                 }
                 default: {
@@ -4346,12 +4116,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[11] != 0)
-        {
-            switch (flagArray[11] as int32) {
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
                 case 1:
                 case 3: {
-                    this.padding(modifier._padding_0_0value);
+                    this.padding((modifier._padding_0_0value as Padding | Length | LocalizedPadding | undefined));
                     break;
                 }
                 default: {
@@ -4359,51 +4128,47 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[12] != 0)
-        {
-            switch (flagArray[12] as int32) {
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
                 case 1:
                 case 3: {
-                    this.safeAreaPadding(modifier._safeAreaPadding_0_0value);
+                    this.safeAreaPadding((modifier._safeAreaPadding_0_0value as Padding | arkui_Graphics_LengthMetrics | LocalizedPadding | undefined));
                     break;
                 }
                 default: {
-                    this.safeAreaPadding((undefined as Padding | LengthMetrics | LocalizedPadding | undefined));
+                    this.safeAreaPadding((undefined as Padding | arkui_Graphics_LengthMetrics | LocalizedPadding | undefined));
                 }
             }
         }
-        if (flagArray[13] != 0)
-        {
-            switch (flagArray[13] as int32) {
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
                 case 1:
                 case 3: {
-                    this.margin(modifier._margin_0_0value);
+                    this.margin((modifier._margin_0_0value as Margin | Length | LocalizedMargin | undefined));
                     break;
                 }
                 default: {
-                    this.margin((undefined as Padding | Length | LocalizedPadding | undefined));
+                    this.margin((undefined as Margin | Length | LocalizedMargin | undefined));
                 }
             }
         }
-        if (flagArray[14] != 0)
-        {
-            switch (flagArray[14] as int32) {
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
                 case 1:
                 case 3: {
-                    this.backgroundColor(modifier._backgroundColor_0_0value);
+                    this.backgroundColor((modifier._backgroundColor_0_0value as ResourceColor | arkui_component_units_ColorMetrics | undefined));
                     break;
                 }
                 default: {
-                    this.backgroundColor((undefined as ResourceColor | ColorMetrics | undefined));
+                    this.backgroundColor((undefined as ResourceColor | arkui_component_units_ColorMetrics | undefined));
                 }
             }
         }
-        if (flagArray[15] != 0)
-        {
-            switch (flagArray[15] as int32) {
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
                 case 1:
                 case 3: {
-                    this.pixelRound(modifier._pixelRound_0_0value);
+                    this.pixelRound((modifier._pixelRound_0_0value as PixelRoundPolicy | undefined));
                     break;
                 }
                 default: {
@@ -4411,25 +4176,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[16] != 0)
-        {
-            switch (flagArray[16] as int32) {
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
                 case 1:
                 case 3: {
-                    this.backgroundImage(modifier._backgroundImage_0_0value);
+                    this.backgroundImage((modifier._backgroundImage_0_0value as ResourceStr | PixelMap | undefined));
                     break;
                 }
                 default: {
-                    this.backgroundImage((undefined as ResourceStr | image.PixelMap | undefined));
+                    this.backgroundImage((undefined as ResourceStr | PixelMap | undefined));
                 }
             }
         }
-        if (flagArray[17] != 0)
-        {
-            switch (flagArray[17] as int32) {
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
                 case 1:
                 case 3: {
-                    this.backgroundImageSize(modifier._backgroundImageSize_0_0value);
+                    this.backgroundImageSize((modifier._backgroundImageSize_0_0value as SizeOptions | ImageSize | undefined));
                     break;
                 }
                 default: {
@@ -4437,12 +4200,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[18] != 0)
-        {
-            switch (flagArray[18] as int32) {
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
                 case 1:
                 case 3: {
-                    this.backgroundImagePosition(modifier._backgroundImagePosition_0_0value);
+                    this.backgroundImagePosition((modifier._backgroundImagePosition_0_0value as Position | Alignment | undefined));
                     break;
                 }
                 default: {
@@ -4450,27 +4212,13 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[19] != 0)
-        {
-            switch (flagArray[19] as int32) {
-                case 1:
-                case 3: {
-                    this.backgroundEffect(modifier._backgroundEffect_0_0value);
-                    break;
-                }
-                default: {
-                    this.backgroundEffect((undefined as BackgroundEffectOptions | undefined));
-                }
-            }
-        }
     }
     mergeModifier1(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[20] != 0)
-        {
-            switch (flagArray[20] as int32) {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
                 case 1:
                 case 3: {
-                    this.backgroundImageResizable(modifier._backgroundImageResizable_0_0value);
+                    this.backgroundImageResizable((modifier._backgroundImageResizable_0_0value as ResizableOptions | undefined));
                     break;
                 }
                 default: {
@@ -4478,12 +4226,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[21] != 0)
-        {
-            switch (flagArray[21] as int32) {
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
                 case 1:
                 case 3: {
-                    this.foregroundEffect(modifier._foregroundEffect_0_0value);
+                    this.foregroundEffect((modifier._foregroundEffect_0_0value as ForegroundEffectOptions | undefined));
                     break;
                 }
                 default: {
@@ -4491,77 +4238,83 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[22] != 0)
-        {
-            switch (flagArray[22] as int32) {
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
                 case 1:
                 case 3: {
-                    this.visualEffect(modifier._visualEffect_0_0value);
+                    this.visualEffect((modifier._visualEffect_0_0value as VisualEffect | undefined));
                     break;
                 }
                 default: {
-                    this.visualEffect((undefined as uiEffect.VisualEffect | undefined));
+                    this.visualEffect((undefined as VisualEffect | undefined));
                 }
             }
         }
-        if (flagArray[23] != 0)
-        {
-            switch (flagArray[23] as int32) {
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
                 case 1:
                 case 3: {
-                    this.backgroundFilter(modifier._backgroundFilter_0_0value);
+                    this.backgroundFilter((modifier._backgroundFilter_0_0value as Filter | undefined));
                     break;
                 }
                 default: {
-                    this.backgroundFilter((undefined as uiEffect.Filter | undefined));
+                    this.backgroundFilter((undefined as Filter | undefined));
                 }
             }
         }
-        if (flagArray[24] != 0)
-        {
-            switch (flagArray[24] as int32) {
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
                 case 1:
                 case 3: {
-                    this.foregroundFilter(modifier._foregroundFilter_0_0value);
+                    this.foregroundFilter((modifier._foregroundFilter_0_0value as Filter | undefined));
                     break;
                 }
                 default: {
-                    this.foregroundFilter((undefined as uiEffect.Filter | undefined));
+                    this.foregroundFilter((undefined as Filter | undefined));
                 }
             }
         }
-        if (flagArray[25] != 0)
-        {
-            switch (flagArray[25] as int32) {
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
                 case 1:
                 case 3: {
-                    this.compositingFilter(modifier._compositingFilter_0_0value);
+                    this.compositingFilter((modifier._compositingFilter_0_0value as Filter | undefined));
                     break;
                 }
                 default: {
-                    this.compositingFilter((undefined as uiEffect.Filter | undefined));
+                    this.compositingFilter((undefined as Filter | undefined));
                 }
             }
         }
-        if (flagArray[26] != 0)
-        {
-            switch (flagArray[26] as int32) {
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
                 case 1:
                 case 3: {
-                    this.opacity(modifier._opacity_0_0value);
+                    this.materialFilter((modifier._materialFilter_0_0value as Filter | undefined));
                     break;
                 }
                 default: {
-                    this.opacity((undefined as double | Resource | undefined));
+                    this.materialFilter((undefined as Filter | undefined));
                 }
             }
         }
-        if (flagArray[27] != 0)
-        {
-            switch (flagArray[27] as int32) {
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
                 case 1:
                 case 3: {
-                    this.border(modifier._border_0_0value);
+                    this.opacity((modifier._opacity_0_0value as double | global_resource_Resource | undefined));
+                    break;
+                }
+                default: {
+                    this.opacity((undefined as double | global_resource_Resource | undefined));
+                }
+            }
+        }
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
+                case 1:
+                case 3: {
+                    this.border((modifier._border_0_0value as BorderOptions | undefined));
                     break;
                 }
                 default: {
@@ -4569,12 +4322,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[28] != 0)
-        {
-            switch (flagArray[28] as int32) {
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
                 case 1:
                 case 3: {
-                    this.borderStyle(modifier._borderStyle_0_0value);
+                    this.borderStyle((modifier._borderStyle_0_0value as BorderStyle | EdgeStyles | undefined));
                     break;
                 }
                 default: {
@@ -4582,12 +4334,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[29] != 0)
-        {
-            switch (flagArray[29] as int32) {
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
                 case 1:
                 case 3: {
-                    this.borderWidth(modifier._borderWidth_0_0value);
+                    this.borderWidth((modifier._borderWidth_0_0value as Length | EdgeWidths | LocalizedEdgeWidths | undefined));
                     break;
                 }
                 default: {
@@ -4595,12 +4346,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[30] != 0)
-        {
-            switch (flagArray[30] as int32) {
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
                 case 1:
                 case 3: {
-                    this.borderColor(modifier._borderColor_0_0value);
+                    this.borderColor((modifier._borderColor_0_0value as ResourceColor | EdgeColors | LocalizedEdgeColors | undefined));
                     break;
                 }
                 default: {
@@ -4608,25 +4358,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[31] != 0)
-        {
-            switch (flagArray[31] as int32) {
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
                 case 1:
                 case 3: {
-                    this.borderRadius(modifier._borderRadius_0_0value);
-                    break;
-                }
-                default: {
-                    this.borderRadius((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined));
-                }
-            }
-        }
-        if (flagArray[32] != 0)
-        {
-            switch (flagArray[32] as int32) {
-                case 1:
-                case 3: {
-                    this.borderImage(modifier._borderImage_0_0value);
+                    this.borderImage((modifier._borderImage_0_0value as BorderImageOption | undefined));
                     break;
                 }
                 default: {
@@ -4634,12 +4370,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[33] != 0)
-        {
-            switch (flagArray[33] as int32) {
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
                 case 1:
                 case 3: {
-                    this.outline(modifier._outline_0_0value);
+                    this.outline((modifier._outline_0_0value as OutlineOptions | undefined));
                     break;
                 }
                 default: {
@@ -4647,12 +4382,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[34] != 0)
-        {
-            switch (flagArray[34] as int32) {
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
                 case 1:
                 case 3: {
-                    this.outlineStyle(modifier._outlineStyle_0_0value);
+                    this.outlineStyle((modifier._outlineStyle_0_0value as OutlineStyle | EdgeOutlineStyles | undefined));
                     break;
                 }
                 default: {
@@ -4660,12 +4394,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[35] != 0)
-        {
-            switch (flagArray[35] as int32) {
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
                 case 1:
                 case 3: {
-                    this.outlineWidth(modifier._outlineWidth_0_0value);
+                    this.outlineWidth((modifier._outlineWidth_0_0value as Dimension | EdgeOutlineWidths | undefined));
                     break;
                 }
                 default: {
@@ -4673,12 +4406,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[36] != 0)
-        {
-            switch (flagArray[36] as int32) {
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
                 case 1:
                 case 3: {
-                    this.outlineColor(modifier._outlineColor_0_0value);
+                    this.outlineColor((modifier._outlineColor_0_0value as ResourceColor | EdgeColors | LocalizedEdgeColors | undefined));
                     break;
                 }
                 default: {
@@ -4686,12 +4418,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[37] != 0)
-        {
-            switch (flagArray[37] as int32) {
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
                 case 1:
                 case 3: {
-                    this.outlineRadius(modifier._outlineRadius_0_0value);
+                    this.outlineRadius((modifier._outlineRadius_0_0value as Dimension | OutlineRadiuses | undefined));
                     break;
                 }
                 default: {
@@ -4699,12 +4430,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[38] != 0)
-        {
-            switch (flagArray[38] as int32) {
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
                 case 1:
                 case 3: {
-                    this.foregroundColor(modifier._foregroundColor_0_0value);
+                    this.foregroundColor((modifier._foregroundColor_0_0value as ResourceColor | ColoringStrategy | undefined));
                     break;
                 }
                 default: {
@@ -4712,12 +4442,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[39] != 0)
-        {
-            switch (flagArray[39] as int32) {
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
                 case 1:
                 case 3: {
-                    this.onClick(modifier._onClick_0_0value);
+                    this.onClick((modifier._onClick_0_0value as ((event: ClickEvent) => void) | undefined));
                     break;
                 }
                 default: {
@@ -4727,12 +4456,11 @@ export class CommonMethodModifier implements CommonMethod {
         }
     }
     mergeModifier2(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[40] != 0)
-        {
-            switch (flagArray[40] as int32) {
+        if (flagArray[40] != 0) {
+            switch (flagArray[40]) {
                 case 1:
                 case 3: {
-                    this.onHover(modifier._onHover_0_0value);
+                    this.onHover((modifier._onHover_0_0value as ((isHover: boolean,event: HoverEvent) => void) | undefined));
                     break;
                 }
                 default: {
@@ -4740,25 +4468,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[41] != 0)
-        {
-            switch (flagArray[41] as int32) {
+        if (flagArray[41] != 0) {
+            switch (flagArray[41]) {
                 case 1:
                 case 3: {
-                    this.onHoverMove(modifier._onHoverMove_0_0value);
+                    this.onHoverMove((modifier._onHoverMove_0_0value as arkui_component_common_Callback<HoverEvent, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onHoverMove((undefined as ((value0: HoverEvent) => void) | undefined));
+                    this.onHoverMove((undefined as arkui_component_common_Callback<HoverEvent, void> | undefined));
                 }
             }
         }
-        if (flagArray[42] != 0)
-        {
-            switch (flagArray[42] as int32) {
+        if (flagArray[42] != 0) {
+            switch (flagArray[42]) {
                 case 1:
                 case 3: {
-                    this.onAccessibilityHover(modifier._onAccessibilityHover_0_0value);
+                    this.onAccessibilityHover((modifier._onAccessibilityHover_0_0value as AccessibilityCallback | undefined));
                     break;
                 }
                 default: {
@@ -4766,12 +4492,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[43] != 0)
-        {
-            switch (flagArray[43] as int32) {
+        if (flagArray[43] != 0) {
+            switch (flagArray[43]) {
                 case 1:
                 case 3: {
-                    this.onAccessibilityHoverTransparent(modifier._onAccessibilityHoverTransparent_0_0value);
+                    this.onAccessibilityHoverTransparent((modifier._onAccessibilityHoverTransparent_0_0value as AccessibilityTransparentCallback | undefined));
                     break;
                 }
                 default: {
@@ -4779,12 +4504,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[44] != 0)
-        {
-            switch (flagArray[44] as int32) {
+        if (flagArray[44] != 0) {
+            switch (flagArray[44]) {
                 case 1:
                 case 3: {
-                    this.hoverEffect(modifier._hoverEffect_0_0value);
+                    this.hoverEffect((modifier._hoverEffect_0_0value as HoverEffect | undefined));
                     break;
                 }
                 default: {
@@ -4792,12 +4516,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[45] != 0)
-        {
-            switch (flagArray[45] as int32) {
+        if (flagArray[45] != 0) {
+            switch (flagArray[45]) {
                 case 1:
                 case 3: {
-                    this.onMouse(modifier._onMouse_0_0value);
+                    this.onMouse((modifier._onMouse_0_0value as ((event: MouseEvent) => void) | undefined));
                     break;
                 }
                 default: {
@@ -4805,12 +4528,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[46] != 0)
-        {
-            switch (flagArray[46] as int32) {
+        if (flagArray[46] != 0) {
+            switch (flagArray[46]) {
                 case 1:
                 case 3: {
-                    this.onTouch(modifier._onTouch_0_0value);
+                    this.onTouch((modifier._onTouch_0_0value as ((event: TouchEvent) => void) | undefined));
                     break;
                 }
                 default: {
@@ -4818,90 +4540,83 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[47] != 0)
-        {
-            switch (flagArray[47] as int32) {
+        if (flagArray[47] != 0) {
+            switch (flagArray[47]) {
                 case 1:
                 case 3: {
-                    this.onKeyEvent(modifier._onKeyEvent_0_0value);
+                    this.onKeyEvent((modifier._onKeyEvent_0_0value as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                     break;
                 }
                 default: {
-                    this.onKeyEvent((undefined as ((value0: KeyEvent) => boolean) | undefined));
+                    this.onKeyEvent((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                 }
             }
         }
-        if (flagArray[48] != 0)
-        {
-            switch (flagArray[48] as int32) {
+        if (flagArray[48] != 0) {
+            switch (flagArray[48]) {
                 case 1:
                 case 3: {
-                    this.onDigitalCrown(modifier._onDigitalCrown_0_0value);
+                    this.onDigitalCrown((modifier._onDigitalCrown_0_0value as arkui_component_common_Callback<CrownEvent, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onDigitalCrown((undefined as ((value0: CrownEvent) => void) | undefined));
+                    this.onDigitalCrown((undefined as arkui_component_common_Callback<CrownEvent, void> | undefined));
                 }
             }
         }
-        if (flagArray[49] != 0)
-        {
-            switch (flagArray[49] as int32) {
+        if (flagArray[49] != 0) {
+            switch (flagArray[49]) {
                 case 1:
                 case 3: {
-                    this.onKeyPreIme(modifier._onKeyPreIme_0_0value);
+                    this.onKeyPreIme((modifier._onKeyPreIme_0_0value as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                     break;
                 }
                 default: {
-                    this.onKeyPreIme((undefined as ((value0: KeyEvent) => boolean) | undefined));
+                    this.onKeyPreIme((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                 }
             }
         }
-        if (flagArray[50] != 0)
-        {
-            switch (flagArray[50] as int32) {
+        if (flagArray[50] != 0) {
+            switch (flagArray[50]) {
                 case 1:
                 case 3: {
-                    this.onKeyEventDispatch(modifier._onKeyEventDispatch_0_0value);
+                    this.onKeyEventDispatch((modifier._onKeyEventDispatch_0_0value as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                     break;
                 }
                 default: {
-                    this.onKeyEventDispatch((undefined as ((value0: KeyEvent) => boolean) | undefined));
+                    this.onKeyEventDispatch((undefined as arkui_component_common_Callback<KeyEvent, boolean> | undefined));
                 }
             }
         }
-        if (flagArray[51] != 0)
-        {
-            switch (flagArray[51] as int32) {
+        if (flagArray[51] != 0) {
+            switch (flagArray[51]) {
                 case 1:
                 case 3: {
-                    this.onFocusAxisEvent(modifier._onFocusAxisEvent_0_0value);
+                    this.onFocusAxisEvent((modifier._onFocusAxisEvent_0_0value as arkui_component_common_Callback<FocusAxisEvent, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onFocusAxisEvent((undefined as ((value0: FocusAxisEvent) => void) | undefined));
+                    this.onFocusAxisEvent((undefined as arkui_component_common_Callback<FocusAxisEvent, void> | undefined));
                 }
             }
         }
-        if (flagArray[52] != 0)
-        {
-            switch (flagArray[52] as int32) {
+        if (flagArray[52] != 0) {
+            switch (flagArray[52]) {
                 case 1:
                 case 3: {
-                    this.onAxisEvent(modifier._onAxisEvent_0_0value);
+                    this.onAxisEvent((modifier._onAxisEvent_0_0value as arkui_component_common_Callback<AxisEvent, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onAxisEvent((undefined as ((value0: AxisEvent) => void) | undefined));
+                    this.onAxisEvent((undefined as arkui_component_common_Callback<AxisEvent, void> | undefined));
                 }
             }
         }
-        if (flagArray[53] != 0)
-        {
-            switch (flagArray[53] as int32) {
+        if (flagArray[53] != 0) {
+            switch (flagArray[53]) {
                 case 1:
                 case 3: {
-                    this.focusable(modifier._focusable_0_0value);
+                    this.focusable((modifier._focusable_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -4909,12 +4624,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[54] != 0)
-        {
-            switch (flagArray[54] as int32) {
+        if (flagArray[54] != 0) {
+            switch (flagArray[54]) {
                 case 1:
                 case 3: {
-                    this.nextFocus(modifier._nextFocus_0_0value);
+                    this.nextFocus((modifier._nextFocus_0_0value as FocusMovement | undefined));
                     break;
                 }
                 default: {
@@ -4922,12 +4636,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[55] != 0)
-        {
-            switch (flagArray[55] as int32) {
+        if (flagArray[55] != 0) {
+            switch (flagArray[55]) {
                 case 1:
                 case 3: {
-                    this.tabStop(modifier._tabStop_0_0value);
+                    this.tabStop((modifier._tabStop_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -4935,12 +4648,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[56] != 0)
-        {
-            switch (flagArray[56] as int32) {
+        if (flagArray[56] != 0) {
+            switch (flagArray[56]) {
                 case 1:
                 case 3: {
-                    this.onFocus(modifier._onFocus_0_0value);
+                    this.onFocus((modifier._onFocus_0_0value as (() => void) | undefined));
                     break;
                 }
                 default: {
@@ -4948,12 +4660,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[57] != 0)
-        {
-            switch (flagArray[57] as int32) {
+        if (flagArray[57] != 0) {
+            switch (flagArray[57]) {
                 case 1:
                 case 3: {
-                    this.onBlur(modifier._onBlur_0_0value);
+                    this.onBlur((modifier._onBlur_0_0value as (() => void) | undefined));
                     break;
                 }
                 default: {
@@ -4961,12 +4672,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[58] != 0)
-        {
-            switch (flagArray[58] as int32) {
+        if (flagArray[58] != 0) {
+            switch (flagArray[58]) {
                 case 1:
                 case 3: {
-                    this.tabIndex(modifier._tabIndex_0_0value);
+                    this.tabIndex((modifier._tabIndex_0_0value as int32 | undefined));
                     break;
                 }
                 default: {
@@ -4974,12 +4684,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[59] != 0)
-        {
-            switch (flagArray[59] as int32) {
+        if (flagArray[59] != 0) {
+            switch (flagArray[59]) {
                 case 1:
                 case 3: {
-                    this.defaultFocus(modifier._defaultFocus_0_0value);
+                    this.defaultFocus((modifier._defaultFocus_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -4989,12 +4698,11 @@ export class CommonMethodModifier implements CommonMethod {
         }
     }
     mergeModifier3(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[60] != 0)
-        {
-            switch (flagArray[60] as int32) {
+        if (flagArray[60] != 0) {
+            switch (flagArray[60]) {
                 case 1:
                 case 3: {
-                    this.groupDefaultFocus(modifier._groupDefaultFocus_0_0value);
+                    this.groupDefaultFocus((modifier._groupDefaultFocus_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -5002,12 +4710,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[61] != 0)
-        {
-            switch (flagArray[61] as int32) {
+        if (flagArray[61] != 0) {
+            switch (flagArray[61]) {
                 case 1:
                 case 3: {
-                    this.focusOnTouch(modifier._focusOnTouch_0_0value);
+                    this.focusOnTouch((modifier._focusOnTouch_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -5015,12 +4722,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[62] != 0)
-        {
-            switch (flagArray[62] as int32) {
+        if (flagArray[62] != 0) {
+            switch (flagArray[62]) {
                 case 1:
                 case 3: {
-                    this.focusBox(modifier._focusBox_0_0value);
+                    this.focusBox((modifier._focusBox_0_0value as FocusBoxStyle | undefined));
                     break;
                 }
                 default: {
@@ -5028,12 +4734,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[63] != 0)
-        {
-            switch (flagArray[63] as int32) {
+        if (flagArray[63] != 0) {
+            switch (flagArray[63]) {
                 case 1:
                 case 3: {
-                    this.animation(modifier._animation_0_0value);
+                    this.animation((modifier._animation_0_0value as AnimateParam | undefined));
                     break;
                 }
                 default: {
@@ -5041,12 +4746,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[64] != 0)
-        {
-            switch (flagArray[64] as int32) {
+        if (flagArray[64] != 0) {
+            switch (flagArray[64]) {
                 case 1:
                 case 3: {
-                    this.transition(modifier._transition_0_0value);
+                    this.transition((modifier._transition_0_0value as TransitionEffect | undefined));
                     break;
                 }
                 default: {
@@ -5054,12 +4758,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[65] != 0)
-        {
-            switch (flagArray[65] as int32) {
+        if (flagArray[65] != 0) {
+            switch (flagArray[65]) {
                 case 1:
                 case 3: {
-                    this.motionBlur(modifier._motionBlur_0_0value);
+                    this.motionBlur((modifier._motionBlur_0_0value as MotionBlurOptions | undefined));
                     break;
                 }
                 default: {
@@ -5067,12 +4770,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[66] != 0)
-        {
-            switch (flagArray[66] as int32) {
+        if (flagArray[66] != 0) {
+            switch (flagArray[66]) {
                 case 1:
                 case 3: {
-                    this.brightness(modifier._brightness_0_0value);
+                    this.brightness((modifier._brightness_0_0value as double | undefined));
                     break;
                 }
                 default: {
@@ -5080,12 +4782,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[67] != 0)
-        {
-            switch (flagArray[67] as int32) {
+        if (flagArray[67] != 0) {
+            switch (flagArray[67]) {
                 case 1:
                 case 3: {
-                    this.contrast(modifier._contrast_0_0value);
+                    this.contrast((modifier._contrast_0_0value as double | undefined));
                     break;
                 }
                 default: {
@@ -5093,12 +4794,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[68] != 0)
-        {
-            switch (flagArray[68] as int32) {
+        if (flagArray[68] != 0) {
+            switch (flagArray[68]) {
                 case 1:
                 case 3: {
-                    this.grayscale(modifier._grayscale_0_0value);
+                    this.grayscale((modifier._grayscale_0_0value as double | undefined));
                     break;
                 }
                 default: {
@@ -5106,25 +4806,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[69] != 0)
-        {
-            switch (flagArray[69] as int32) {
+        if (flagArray[69] != 0) {
+            switch (flagArray[69]) {
                 case 1:
                 case 3: {
-                    this.colorBlend(modifier._colorBlend_0_0value);
+                    this.colorBlend((modifier._colorBlend_0_0value as arkui_component_enums_Color | string | global_resource_Resource | undefined));
                     break;
                 }
                 default: {
-                    this.colorBlend((undefined as Color | string | Resource | undefined));
+                    this.colorBlend((undefined as arkui_component_enums_Color | string | global_resource_Resource | undefined));
                 }
             }
         }
-        if (flagArray[70] != 0)
-        {
-            switch (flagArray[70] as int32) {
+        if (flagArray[70] != 0) {
+            switch (flagArray[70]) {
                 case 1:
                 case 3: {
-                    this.saturate(modifier._saturate_0_0value);
+                    this.saturate((modifier._saturate_0_0value as double | undefined));
                     break;
                 }
                 default: {
@@ -5132,12 +4830,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[71] != 0)
-        {
-            switch (flagArray[71] as int32) {
+        if (flagArray[71] != 0) {
+            switch (flagArray[71]) {
                 case 1:
                 case 3: {
-                    this.sepia(modifier._sepia_0_0value);
+                    this.sepia((modifier._sepia_0_0value as double | undefined));
                     break;
                 }
                 default: {
@@ -5145,12 +4842,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[72] != 0)
-        {
-            switch (flagArray[72] as int32) {
+        if (flagArray[72] != 0) {
+            switch (flagArray[72]) {
                 case 1:
                 case 3: {
-                    this.invert(modifier._invert_0_0value);
+                    this.invert((modifier._invert_0_0value as double | InvertOptions | undefined));
                     break;
                 }
                 default: {
@@ -5158,12 +4854,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[73] != 0)
-        {
-            switch (flagArray[73] as int32) {
+        if (flagArray[73] != 0) {
+            switch (flagArray[73]) {
                 case 1:
                 case 3: {
-                    this.hueRotate(modifier._hueRotate_0_0value);
+                    this.hueRotate((modifier._hueRotate_0_0value as double | string | undefined));
                     break;
                 }
                 default: {
@@ -5171,12 +4866,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[74] != 0)
-        {
-            switch (flagArray[74] as int32) {
+        if (flagArray[74] != 0) {
+            switch (flagArray[74]) {
                 case 1:
                 case 3: {
-                    this.useShadowBatching(modifier._useShadowBatching_0_0value);
+                    this.useShadowBatching((modifier._useShadowBatching_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -5184,12 +4878,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[75] != 0)
-        {
-            switch (flagArray[75] as int32) {
+        if (flagArray[75] != 0) {
+            switch (flagArray[75]) {
                 case 1:
                 case 3: {
-                    this.useEffect(modifier._useEffect_0_0value);
+                    this.useEffect((modifier._useEffect_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -5197,12 +4890,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[76] != 0)
-        {
-            switch (flagArray[76] as int32) {
+        if (flagArray[76] != 0) {
+            switch (flagArray[76]) {
                 case 1:
                 case 3: {
-                    this.renderGroup(modifier._renderGroup_0_0value);
+                    this.useUnionEffect((modifier._useUnionEffect_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.useUnionEffect((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[77] != 0) {
+            switch (flagArray[77]) {
+                case 1:
+                case 3: {
+                    this.renderGroup((modifier._renderGroup_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -5210,12 +4914,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[77] != 0)
-        {
-            switch (flagArray[77] as int32) {
+        if (flagArray[78] != 0) {
+            switch (flagArray[78]) {
                 case 1:
                 case 3: {
-                    this.freeze(modifier._freeze_0_0value);
+                    this.excludeFromRenderGroup((modifier._excludeFromRenderGroup_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.excludeFromRenderGroup((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[79] != 0) {
+            switch (flagArray[79]) {
+                case 1:
+                case 3: {
+                    this.freeze((modifier._freeze_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -5223,12 +4938,13 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[78] != 0)
-        {
-            switch (flagArray[78] as int32) {
+    }
+    mergeModifier4(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
+        if (flagArray[80] != 0) {
+            switch (flagArray[80]) {
                 case 1:
                 case 3: {
-                    this.translate(modifier._translate_0_0value);
+                    this.translate((modifier._translate_0_0value as TranslateOptions | undefined));
                     break;
                 }
                 default: {
@@ -5236,12 +4952,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[79] != 0)
-        {
-            switch (flagArray[79] as int32) {
+        if (flagArray[81] != 0) {
+            switch (flagArray[81]) {
                 case 1:
                 case 3: {
-                    this.scale(modifier._scale_0_0value);
+                    this.scale((modifier._scale_0_0value as ScaleOptions | undefined));
                     break;
                 }
                 default: {
@@ -5249,14 +4964,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-    }
-    mergeModifier4(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[80] != 0)
-        {
-            switch (flagArray[80] as int32) {
+        if (flagArray[82] != 0) {
+            switch (flagArray[82]) {
                 case 1:
                 case 3: {
-                    this.rotate(modifier._rotate_0_0value);
+                    this.rotate((modifier._rotate_0_0value as RotateOptions | RotateAngleOptions | undefined));
                     break;
                 }
                 default: {
@@ -5264,38 +4976,35 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[81] != 0)
-        {
-            switch (flagArray[81] as int32) {
+        if (flagArray[83] != 0) {
+            switch (flagArray[83]) {
                 case 1:
                 case 3: {
-                    this.transform(modifier._transform_0_0value);
+                    this.transform((modifier._transform_0_0value as Matrix4Transit | undefined));
                     break;
                 }
                 default: {
-                    this.transform((undefined as matrix4.Matrix4Transit | undefined));
+                    this.transform((undefined as Matrix4Transit | undefined));
                 }
             }
         }
-        if (flagArray[82] != 0)
-        {
-            switch (flagArray[82] as int32) {
+        if (flagArray[84] != 0) {
+            switch (flagArray[84]) {
                 case 1:
                 case 3: {
-                    this.transform3D(modifier._transform3D_0_0value);
+                    this.transform3D((modifier._transform3D_0_0value as Matrix4Transit | undefined));
                     break;
                 }
                 default: {
-                    this.transform3D((undefined as matrix4.Matrix4Transit | undefined));
+                    this.transform3D((undefined as Matrix4Transit | undefined));
                 }
             }
         }
-        if (flagArray[83] != 0)
-        {
-            switch (flagArray[83] as int32) {
+        if (flagArray[85] != 0) {
+            switch (flagArray[85]) {
                 case 1:
                 case 3: {
-                    this.onAppear(modifier._onAppear_0_0value);
+                    this.onAppear((modifier._onAppear_0_0value as (() => void) | undefined));
                     break;
                 }
                 default: {
@@ -5303,12 +5012,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[84] != 0)
-        {
-            switch (flagArray[84] as int32) {
+        if (flagArray[86] != 0) {
+            switch (flagArray[86]) {
                 case 1:
                 case 3: {
-                    this.onDisAppear(modifier._onDisAppear_0_0value);
+                    this.onDisAppear((modifier._onDisAppear_0_0value as (() => void) | undefined));
                     break;
                 }
                 default: {
@@ -5316,12 +5024,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[85] != 0)
-        {
-            switch (flagArray[85] as int32) {
+        if (flagArray[87] != 0) {
+            switch (flagArray[87]) {
                 case 1:
                 case 3: {
-                    this.onAttach(modifier._onAttach_0_0value);
+                    this.onAttach((modifier._onAttach_0_0value as VoidCallback | undefined));
                     break;
                 }
                 default: {
@@ -5329,12 +5036,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[86] != 0)
-        {
-            switch (flagArray[86] as int32) {
+        if (flagArray[88] != 0) {
+            switch (flagArray[88]) {
                 case 1:
                 case 3: {
-                    this.onDetach(modifier._onDetach_0_0value);
+                    this.onDetach((modifier._onDetach_0_0value as VoidCallback | undefined));
                     break;
                 }
                 default: {
@@ -5342,12 +5048,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[87] != 0)
-        {
-            switch (flagArray[87] as int32) {
+        if (flagArray[89] != 0) {
+            switch (flagArray[89]) {
                 case 1:
                 case 3: {
-                    this.onAreaChange(modifier._onAreaChange_0_0value);
+                    this.onAreaChange((modifier._onAreaChange_0_0value as ((oldValue: Area,newValue: Area) => void) | undefined));
                     break;
                 }
                 default: {
@@ -5355,12 +5060,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[88] != 0)
-        {
-            switch (flagArray[88] as int32) {
+        if (flagArray[90] != 0) {
+            switch (flagArray[90]) {
                 case 1:
                 case 3: {
-                    this.visibility(modifier._visibility_0_0value);
+                    this.visibility((modifier._visibility_0_0value as Visibility | undefined));
                     break;
                 }
                 default: {
@@ -5368,51 +5072,47 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[89] != 0)
-        {
-            switch (flagArray[89] as int32) {
+        if (flagArray[91] != 0) {
+            switch (flagArray[91]) {
                 case 1:
                 case 3: {
-                    this.flexGrow(modifier._flexGrow_0_0value);
+                    this.flexGrow((modifier._flexGrow_0_0value as double | undefined));
                     break;
                 }
                 default: {
-                    this.flexGrow((undefined as number | undefined));
+                    this.flexGrow((undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[90] != 0)
-        {
-            switch (flagArray[90] as int32) {
+        if (flagArray[92] != 0) {
+            switch (flagArray[92]) {
                 case 1:
                 case 3: {
-                    this.flexShrink(modifier._flexShrink_0_0value);
+                    this.flexShrink((modifier._flexShrink_0_0value as double | undefined));
                     break;
                 }
                 default: {
-                    this.flexShrink((undefined as number | undefined));
+                    this.flexShrink((undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[91] != 0)
-        {
-            switch (flagArray[91] as int32) {
+        if (flagArray[93] != 0) {
+            switch (flagArray[93]) {
                 case 1:
                 case 3: {
-                    this.flexBasis(modifier._flexBasis_0_0value);
+                    this.flexBasis((modifier._flexBasis_0_0value as double | string | undefined));
                     break;
                 }
                 default: {
-                    this.flexBasis((undefined as number | string | undefined));
+                    this.flexBasis((undefined as double | string | undefined));
                 }
             }
         }
-        if (flagArray[92] != 0)
-        {
-            switch (flagArray[92] as int32) {
+        if (flagArray[94] != 0) {
+            switch (flagArray[94]) {
                 case 1:
                 case 3: {
-                    this.alignSelf(modifier._alignSelf_0_0value);
+                    this.alignSelf((modifier._alignSelf_0_0value as ItemAlign | undefined));
                     break;
                 }
                 default: {
@@ -5420,12 +5120,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[93] != 0)
-        {
-            switch (flagArray[93] as int32) {
+        if (flagArray[95] != 0) {
+            switch (flagArray[95]) {
                 case 1:
                 case 3: {
-                    this.layoutGravity(modifier._layoutGravity_0_0value);
+                    this.layoutGravity((modifier._layoutGravity_0_0value as LocalizedAlignment | undefined));
                     break;
                 }
                 default: {
@@ -5433,25 +5132,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[94] != 0)
-        {
-            switch (flagArray[94] as int32) {
+        if (flagArray[96] != 0) {
+            switch (flagArray[96]) {
                 case 1:
                 case 3: {
-                    this.displayPriority(modifier._displayPriority_0_0value);
+                    this.displayPriority((modifier._displayPriority_0_0value as double | undefined));
                     break;
                 }
                 default: {
-                    this.displayPriority((undefined as number | undefined));
+                    this.displayPriority((undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[95] != 0)
-        {
-            switch (flagArray[95] as int32) {
+        if (flagArray[97] != 0) {
+            switch (flagArray[97]) {
                 case 1:
                 case 3: {
-                    this.zIndex(modifier._zIndex_0_0value);
+                    this.zIndex((modifier._zIndex_0_0value as int32 | undefined));
                     break;
                 }
                 default: {
@@ -5459,12 +5156,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[96] != 0)
-        {
-            switch (flagArray[96] as int32) {
+        if (flagArray[98] != 0) {
+            switch (flagArray[98]) {
                 case 1:
                 case 3: {
-                    this.direction(modifier._direction_0_0value);
+                    this.direction((modifier._direction_0_0value as Direction | undefined));
                     break;
                 }
                 default: {
@@ -5472,12 +5168,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[97] != 0)
-        {
-            switch (flagArray[97] as int32) {
+        if (flagArray[99] != 0) {
+            switch (flagArray[99]) {
                 case 1:
                 case 3: {
-                    this.align(modifier._align_0_0value);
+                    this.align((modifier._align_0_0value as Alignment | LocalizedAlignment | undefined));
                     break;
                 }
                 default: {
@@ -5485,12 +5180,13 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[98] != 0)
-        {
-            switch (flagArray[98] as int32) {
+    }
+    mergeModifier5(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
+        if (flagArray[100] != 0) {
+            switch (flagArray[100]) {
                 case 1:
                 case 3: {
-                    this.position(modifier._position_0_0value);
+                    this.position((modifier._position_0_0value as Position | Edges | LocalizedEdges | undefined));
                     break;
                 }
                 default: {
@@ -5498,12 +5194,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[99] != 0)
-        {
-            switch (flagArray[99] as int32) {
+        if (flagArray[101] != 0) {
+            switch (flagArray[101]) {
                 case 1:
                 case 3: {
-                    this.markAnchor(modifier._markAnchor_0_0value);
+                    this.markAnchor((modifier._markAnchor_0_0value as Position | LocalizedPosition | undefined));
                     break;
                 }
                 default: {
@@ -5511,14 +5206,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-    }
-    mergeModifier5(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[100] != 0)
-        {
-            switch (flagArray[100] as int32) {
+        if (flagArray[102] != 0) {
+            switch (flagArray[102]) {
                 case 1:
                 case 3: {
-                    this.offset(modifier._offset_0_0value);
+                    this.offset((modifier._offset_0_0value as Position | Edges | LocalizedEdges | undefined));
                     break;
                 }
                 default: {
@@ -5526,12 +5218,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[101] != 0)
-        {
-            switch (flagArray[101] as int32) {
+        if (flagArray[103] != 0) {
+            switch (flagArray[103]) {
                 case 1:
                 case 3: {
-                    this.enabled(modifier._enabled_0_0value);
+                    this.enabled((modifier._enabled_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -5539,12 +5230,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[102] != 0)
-        {
-            switch (flagArray[102] as int32) {
+        if (flagArray[104] != 0) {
+            switch (flagArray[104]) {
                 case 1:
                 case 3: {
-                    this.alignRules(modifier._alignRules_0_0value);
+                    this.alignRules((modifier._alignRules_0_0value as AlignRuleOption | LocalizedAlignRuleOptions | undefined));
                     break;
                 }
                 default: {
@@ -5552,25 +5242,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[103] != 0)
-        {
-            switch (flagArray[103] as int32) {
+        if (flagArray[105] != 0) {
+            switch (flagArray[105]) {
                 case 1:
                 case 3: {
-                    this.aspectRatio(modifier._aspectRatio_0_0value);
+                    this.aspectRatio((modifier._aspectRatio_0_0value as double | undefined));
                     break;
                 }
                 default: {
-                    this.aspectRatio((undefined as number | undefined));
+                    this.aspectRatio((undefined as double | undefined));
                 }
             }
         }
-        if (flagArray[104] != 0)
-        {
-            switch (flagArray[104] as int32) {
+        if (flagArray[106] != 0) {
+            switch (flagArray[106]) {
                 case 1:
                 case 3: {
-                    this.clickEffect(modifier._clickEffect_0_0value);
+                    this.clickEffect((modifier._clickEffect_0_0value as ClickEffect | null | undefined));
                     break;
                 }
                 default: {
@@ -5578,12 +5266,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[105] != 0)
-        {
-            switch (flagArray[105] as int32) {
+        if (flagArray[107] != 0) {
+            switch (flagArray[107]) {
                 case 1:
                 case 3: {
-                    this.onDragStart(modifier._onDragStart_0_0value);
+                    this.enableClickSoundEffect((modifier._enableClickSoundEffect_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.enableClickSoundEffect((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[108] != 0) {
+            switch (flagArray[108]) {
+                case 1:
+                case 3: {
+                    this.onDragStart((modifier._onDragStart_0_0value as ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined));
                     break;
                 }
                 default: {
@@ -5591,12 +5290,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[106] != 0)
-        {
-            switch (flagArray[106] as int32) {
+        if (flagArray[109] != 0) {
+            switch (flagArray[109]) {
                 case 1:
                 case 3: {
-                    this.onDragEnter(modifier._onDragEnter_0_0value);
+                    this.onDragEnter((modifier._onDragEnter_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
                     break;
                 }
                 default: {
@@ -5604,12 +5302,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[107] != 0)
-        {
-            switch (flagArray[107] as int32) {
+        if (flagArray[110] != 0) {
+            switch (flagArray[110]) {
                 case 1:
                 case 3: {
-                    this.onDragMove(modifier._onDragMove_0_0value);
+                    this.onDragMove((modifier._onDragMove_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
                     break;
                 }
                 default: {
@@ -5617,12 +5314,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[108] != 0)
-        {
-            switch (flagArray[108] as int32) {
+        if (flagArray[111] != 0) {
+            switch (flagArray[111]) {
                 case 1:
                 case 3: {
-                    this.onDragLeave(modifier._onDragLeave_0_0value);
+                    this.onDragLeave((modifier._onDragLeave_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
                     break;
                 }
                 default: {
@@ -5630,12 +5326,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[109] != 0)
-        {
-            switch (flagArray[109] as int32) {
+        if (flagArray[112] != 0) {
+            switch (flagArray[112]) {
                 case 1:
                 case 3: {
-                    this.onDrop(modifier._onDrop_0_0value);
+                    this.onDrop((modifier._onDrop_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
                     break;
                 }
                 default: {
@@ -5643,12 +5338,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[110] != 0)
-        {
-            switch (flagArray[110] as int32) {
+        if (flagArray[113] != 0) {
+            switch (flagArray[113]) {
                 case 1:
                 case 3: {
-                    this.onDragEnd(modifier._onDragEnd_0_0value);
+                    this.onDragEnd((modifier._onDragEnd_0_0value as ((event: DragEvent,extraParams?: string) => void) | undefined));
                     break;
                 }
                 default: {
@@ -5656,25 +5350,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[111] != 0)
-        {
-            switch (flagArray[111] as int32) {
+        if (flagArray[114] != 0) {
+            switch (flagArray[114]) {
                 case 1:
                 case 3: {
-                    this.allowDrop(modifier._allowDrop_0_0value);
+                    this.allowDrop((modifier._allowDrop_0_0value as Array<UniformDataType> | Array<string> | null | undefined));
                     break;
                 }
                 default: {
-                    this.allowDrop((undefined as Array<uniformTypeDescriptor.UniformDataType> | Array<string> | null | undefined));
+                    this.allowDrop((undefined as Array<UniformDataType> | Array<string> | null | undefined));
                 }
             }
         }
-        if (flagArray[112] != 0)
-        {
-            switch (flagArray[112] as int32) {
+        if (flagArray[115] != 0) {
+            switch (flagArray[115]) {
                 case 1:
                 case 3: {
-                    this.draggable(modifier._draggable_0_0value);
+                    this.draggable((modifier._draggable_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -5682,38 +5374,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[113] != 0)
-        {
-            switch (flagArray[113] as int32) {
+        if (flagArray[116] != 0) {
+            switch (flagArray[116]) {
                 case 1:
                 case 3: {
-                    this.dragPreview(modifier._dragPreview_0_0value);
+                    this.onPreDrag((modifier._onPreDrag_0_0value as arkui_component_common_Callback<PreDragStatus, void> | undefined));
                     break;
                 }
                 default: {
-                    this.dragPreview((undefined as CustomBuilder | DragItemInfo | string | undefined));
+                    this.onPreDrag((undefined as arkui_component_common_Callback<PreDragStatus, void> | undefined));
                 }
             }
         }
-        if (flagArray[114] != 0)
-        {
-            switch (flagArray[114] as int32) {
+        if (flagArray[117] != 0) {
+            switch (flagArray[117]) {
                 case 1:
                 case 3: {
-                    this.onPreDrag(modifier._onPreDrag_0_0value);
-                    break;
-                }
-                default: {
-                    this.onPreDrag((undefined as ((value0: PreDragStatus) => void) | undefined));
-                }
-            }
-        }
-        if (flagArray[115] != 0)
-        {
-            switch (flagArray[115] as int32) {
-                case 1:
-                case 3: {
-                    this.linearGradient(modifier._linearGradient_0_0value);
+                    this.linearGradient((modifier._linearGradient_0_0value as LinearGradientOptions | undefined));
                     break;
                 }
                 default: {
@@ -5721,12 +5398,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[116] != 0)
-        {
-            switch (flagArray[116] as int32) {
+        if (flagArray[118] != 0) {
+            switch (flagArray[118]) {
                 case 1:
                 case 3: {
-                    this.sweepGradient(modifier._sweepGradient_0_0value);
+                    this.sweepGradient((modifier._sweepGradient_0_0value as SweepGradientOptions | undefined));
                     break;
                 }
                 default: {
@@ -5734,12 +5410,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[117] != 0)
-        {
-            switch (flagArray[117] as int32) {
+        if (flagArray[119] != 0) {
+            switch (flagArray[119]) {
                 case 1:
                 case 3: {
-                    this.radialGradient(modifier._radialGradient_0_0value);
+                    this.radialGradient((modifier._radialGradient_0_0value as RadialGradientOptions | undefined));
                     break;
                 }
                 default: {
@@ -5747,12 +5422,13 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[118] != 0)
-        {
-            switch (flagArray[118] as int32) {
+    }
+    mergeModifier6(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
+        if (flagArray[120] != 0) {
+            switch (flagArray[120]) {
                 case 1:
                 case 3: {
-                    this.motionPath(modifier._motionPath_0_0value);
+                    this.motionPath((modifier._motionPath_0_0value as MotionPathOptions | undefined));
                     break;
                 }
                 default: {
@@ -5760,12 +5436,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[119] != 0)
-        {
-            switch (flagArray[119] as int32) {
+        if (flagArray[121] != 0) {
+            switch (flagArray[121]) {
                 case 1:
                 case 3: {
-                    this.shadow(modifier._shadow_0_0value);
+                    this.shadow((modifier._shadow_0_0value as ShadowOptions | ShadowStyle | undefined));
                     break;
                 }
                 default: {
@@ -5773,14 +5448,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-    }
-    mergeModifier6(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[120] != 0)
-        {
-            switch (flagArray[120] as int32) {
+        if (flagArray[122] != 0) {
+            switch (flagArray[122]) {
                 case 1:
                 case 3: {
-                    this.clip(modifier._clip_0_0value);
+                    this.clip((modifier._clip_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -5788,12 +5460,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[121] != 0)
-        {
-            switch (flagArray[121] as int32) {
+        if (flagArray[123] != 0) {
+            switch (flagArray[123]) {
                 case 1:
                 case 3: {
-                    this.clipShape(modifier._clipShape_0_0value);
+                    this.clipShape((modifier._clipShape_0_0value as CircleShape | EllipseShape | PathShape | RectShape | undefined));
                     break;
                 }
                 default: {
@@ -5801,12 +5472,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[122] != 0)
-        {
-            switch (flagArray[122] as int32) {
+        if (flagArray[124] != 0) {
+            switch (flagArray[124]) {
                 case 1:
                 case 3: {
-                    this.mask(modifier._mask_0_0value);
+                    this.mask((modifier._mask_0_0value as ProgressMask | undefined));
                     break;
                 }
                 default: {
@@ -5814,12 +5484,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[123] != 0)
-        {
-            switch (flagArray[123] as int32) {
+        if (flagArray[125] != 0) {
+            switch (flagArray[125]) {
                 case 1:
                 case 3: {
-                    this.maskShape(modifier._maskShape_0_0value);
+                    this.maskShape((modifier._maskShape_0_0value as CircleShape | EllipseShape | PathShape | RectShape | undefined));
                     break;
                 }
                 default: {
@@ -5827,12 +5496,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[124] != 0)
-        {
-            switch (flagArray[124] as int32) {
+        if (flagArray[126] != 0) {
+            switch (flagArray[126]) {
                 case 1:
                 case 3: {
-                    this.key(modifier._key_0_0value);
+                    this.key((modifier._key_0_0value as string | undefined));
                     break;
                 }
                 default: {
@@ -5840,12 +5508,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[125] != 0)
-        {
-            switch (flagArray[125] as int32) {
+        if (flagArray[127] != 0) {
+            switch (flagArray[127]) {
                 case 1:
                 case 3: {
-                    this.id(modifier._id_0_0value);
+                    this.id((modifier._id_0_0value as string | undefined));
                     break;
                 }
                 default: {
@@ -5853,25 +5520,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[126] != 0)
-        {
-            switch (flagArray[126] as int32) {
+        if (flagArray[128] != 0) {
+            switch (flagArray[128]) {
                 case 1:
                 case 3: {
-                    this.geometryTransition(modifier._geometryTransition_0_0value);
+                    this.stateStyles((modifier._stateStyles_0_0value as StateStyles | undefined));
                     break;
                 }
                 default: {
-                    this.geometryTransition((undefined as string | undefined));
+                    this.stateStyles((undefined as StateStyles | undefined));
                 }
             }
         }
-        if (flagArray[127] != 0)
-        {
-            switch (flagArray[127] as int32) {
+        if (flagArray[129] != 0) {
+            switch (flagArray[129]) {
                 case 1:
                 case 3: {
-                    this.restoreId(modifier._restoreId_0_0value);
+                    this.restoreId((modifier._restoreId_0_0value as int32 | undefined));
                     break;
                 }
                 default: {
@@ -5879,12 +5544,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[128] != 0)
-        {
-            switch (flagArray[128] as int32) {
+        if (flagArray[130] != 0) {
+            switch (flagArray[130]) {
                 case 1:
                 case 3: {
-                    this.sphericalEffect(modifier._sphericalEffect_0_0value);
+                    this.sphericalEffect((modifier._sphericalEffect_0_0value as double | undefined));
                     break;
                 }
                 default: {
@@ -5892,12 +5556,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[129] != 0)
-        {
-            switch (flagArray[129] as int32) {
+        if (flagArray[131] != 0) {
+            switch (flagArray[131]) {
                 case 1:
                 case 3: {
-                    this.lightUpEffect(modifier._lightUpEffect_0_0value);
+                    this.lightUpEffect((modifier._lightUpEffect_0_0value as double | undefined));
                     break;
                 }
                 default: {
@@ -5905,12 +5568,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[130] != 0)
-        {
-            switch (flagArray[130] as int32) {
+        if (flagArray[132] != 0) {
+            switch (flagArray[132]) {
                 case 1:
                 case 3: {
-                    this.pixelStretchEffect(modifier._pixelStretchEffect_0_0value);
+                    this.pixelStretchEffect((modifier._pixelStretchEffect_0_0value as PixelStretchEffectOptions | undefined));
                     break;
                 }
                 default: {
@@ -5918,38 +5580,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[131] != 0)
-        {
-            switch (flagArray[131] as int32) {
+        if (flagArray[133] != 0) {
+            switch (flagArray[133]) {
                 case 1:
                 case 3: {
-                    this.accessibilityGroup(modifier._accessibilityGroup_0_0value);
-                    break;
-                }
-                default: {
-                    this.accessibilityGroup((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (flagArray[132] != 0)
-        {
-            switch (flagArray[132] as int32) {
-                case 1:
-                case 3: {
-                    this.accessibilityText(modifier._accessibilityTextOfStringType_0_0value);
-                    break;
-                }
-                default: {
-                    this.accessibilityText((undefined as string | undefined));
-                }
-            }
-        }
-        if (flagArray[133] != 0)
-        {
-            switch (flagArray[133] as int32) {
-                case 1:
-                case 3: {
-                    this.accessibilityNextFocusId(modifier._accessibilityNextFocusId_0_0value);
+                    this.accessibilityNextFocusId((modifier._accessibilityNextFocusId_0_0value as string | undefined));
                     break;
                 }
                 default: {
@@ -5957,12 +5592,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[134] != 0)
-        {
-            switch (flagArray[134] as int32) {
+        if (flagArray[134] != 0) {
+            switch (flagArray[134]) {
                 case 1:
                 case 3: {
-                    this.accessibilityDefaultFocus(modifier._accessibilityDefaultFocus_0_0value);
+                    this.accessibilityDefaultFocus((modifier._accessibilityDefaultFocus_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -5970,12 +5604,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[135] != 0)
-        {
-            switch (flagArray[135] as int32) {
+        if (flagArray[135] != 0) {
+            switch (flagArray[135]) {
                 case 1:
                 case 3: {
-                    this.accessibilityUseSamePage(modifier._accessibilityUseSamePage_0_0value);
+                    this.accessibilityUseSamePage((modifier._accessibilityUseSamePage_0_0value as AccessibilitySamePageMode | undefined));
                     break;
                 }
                 default: {
@@ -5983,12 +5616,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[136] != 0)
-        {
-            switch (flagArray[136] as int32) {
+        if (flagArray[136] != 0) {
+            switch (flagArray[136]) {
                 case 1:
                 case 3: {
-                    this.accessibilityScrollTriggerable(modifier._accessibilityScrollTriggerable_0_0value);
+                    this.accessibilityScrollTriggerable((modifier._accessibilityScrollTriggerable_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -5996,25 +5628,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[137] != 0)
-        {
-            switch (flagArray[137] as int32) {
+        if (flagArray[137] != 0) {
+            switch (flagArray[137]) {
                 case 1:
                 case 3: {
-                    this.accessibilityText(modifier._accessibilityTextOfResourceType_0_0value);
+                    this.accessibilityText((modifier._accessibilityText_0_0value as global_resource_Resource | string | undefined));
                     break;
                 }
                 default: {
-                    this.accessibilityText((undefined as Resource | undefined));
+                    this.accessibilityText((undefined as global_resource_Resource | string | undefined));
                 }
             }
         }
-        if (flagArray[138] != 0)
-        {
-            switch (flagArray[138] as int32) {
+        if (flagArray[138] != 0) {
+            switch (flagArray[138]) {
                 case 1:
                 case 3: {
-                    this.accessibilityRole(modifier._accessibilityRole_0_0value);
+                    this.accessibilityRole((modifier._accessibilityRole_0_0value as AccessibilityRoleType | undefined));
                     break;
                 }
                 default: {
@@ -6022,12 +5652,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[139] != 0)
-        {
-            switch (flagArray[139] as int32) {
+        if (flagArray[139] != 0) {
+            switch (flagArray[139]) {
                 case 1:
                 case 3: {
-                    this.onAccessibilityFocus(modifier._onAccessibilityFocus_0_0value);
+                    this.onAccessibilityFocus((modifier._onAccessibilityFocus_0_0value as AccessibilityFocusCallback | undefined));
                     break;
                 }
                 default: {
@@ -6037,12 +5666,11 @@ export class CommonMethodModifier implements CommonMethod {
         }
     }
     mergeModifier7(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[140] != 0)
-        {
-            switch (flagArray[140] as int32) {
+        if (flagArray[140] != 0) {
+            switch (flagArray[140]) {
                 case 1:
                 case 3: {
-                    this.onAccessibilityActionIntercept(modifier._onAccessibilityActionIntercept_0_0value);
+                    this.onAccessibilityActionIntercept((modifier._onAccessibilityActionIntercept_0_0value as AccessibilityActionInterceptCallback | undefined));
                     break;
                 }
                 default: {
@@ -6050,12 +5678,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[141] != 0)
-        {
-            switch (flagArray[141] as int32) {
+        if (flagArray[141] != 0) {
+            switch (flagArray[141]) {
                 case 1:
                 case 3: {
-                    this.accessibilityTextHint(modifier._accessibilityTextHint_0_0value);
+                    this.accessibilityTextHint((modifier._accessibilityTextHint_0_0value as string | undefined));
                     break;
                 }
                 default: {
@@ -6063,38 +5690,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[142] != 0)
-        {
-            switch (flagArray[142] as int32) {
+        if (flagArray[142] != 0) {
+            switch (flagArray[142]) {
                 case 1:
                 case 3: {
-                    this.accessibilityDescription(modifier._accessibilityDescriptionOfStringType_0_0value);
+                    this.accessibilityDescription((modifier._accessibilityDescription_0_0value as global_resource_Resource | string | undefined));
                     break;
                 }
                 default: {
-                    this.accessibilityDescription((undefined as string | undefined));
+                    this.accessibilityDescription((undefined as global_resource_Resource | string | undefined));
                 }
             }
         }
-        if (flagArray[143] != 0)
-        {
-            switch (flagArray[143] as int32) {
+        if (flagArray[143] != 0) {
+            switch (flagArray[143]) {
                 case 1:
                 case 3: {
-                    this.accessibilityDescription(modifier._accessibilityDescriptionOfResourceType_0_0value);
-                    break;
-                }
-                default: {
-                    this.accessibilityDescription((undefined as Resource | undefined));
-                }
-            }
-        }
-        if (flagArray[144] != 0)
-        {
-            switch (flagArray[144] as int32) {
-                case 1:
-                case 3: {
-                    this.accessibilityLevel(modifier._accessibilityLevel_0_0value);
+                    this.accessibilityLevel((modifier._accessibilityLevel_0_0value as string | undefined));
                     break;
                 }
                 default: {
@@ -6102,12 +5714,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[145] != 0)
-        {
-            switch (flagArray[145] as int32) {
+        if (flagArray[144] != 0) {
+            switch (flagArray[144]) {
                 case 1:
                 case 3: {
-                    this.accessibilityVirtualNode(modifier._accessibilityVirtualNode_0_0value);
+                    this.accessibilityVirtualNode((modifier._accessibilityVirtualNode_0_0value as CustomBuilder | undefined));
                     break;
                 }
                 default: {
@@ -6115,12 +5726,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[146] != 0)
-        {
-            switch (flagArray[146] as int32) {
+        if (flagArray[145] != 0) {
+            switch (flagArray[145]) {
                 case 1:
                 case 3: {
-                    this.accessibilityChecked(modifier._accessibilityChecked_0_0value);
+                    this.accessibilityChecked((modifier._accessibilityChecked_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -6128,12 +5738,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[147] != 0)
-        {
-            switch (flagArray[147] as int32) {
+        if (flagArray[146] != 0) {
+            switch (flagArray[146]) {
                 case 1:
                 case 3: {
-                    this.accessibilitySelected(modifier._accessibilitySelected_0_0value);
+                    this.accessibilitySelected((modifier._accessibilitySelected_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -6141,12 +5750,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[148] != 0)
-        {
-            switch (flagArray[148] as int32) {
+        if (flagArray[147] != 0) {
+            switch (flagArray[147]) {
                 case 1:
                 case 3: {
-                    this.obscured(modifier._obscured_0_0value);
+                    this.obscured((modifier._obscured_0_0value as Array<ObscuredReasons> | undefined));
                     break;
                 }
                 default: {
@@ -6154,12 +5762,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[149] != 0)
-        {
-            switch (flagArray[149] as int32) {
+        if (flagArray[148] != 0) {
+            switch (flagArray[148]) {
                 case 1:
                 case 3: {
-                    this.reuseId(modifier._reuseId_0_0value);
+                    this.reuseId((modifier._reuseId_0_0value as string | undefined));
                     break;
                 }
                 default: {
@@ -6167,12 +5774,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[150] != 0)
-        {
-            switch (flagArray[150] as int32) {
+        if (flagArray[149] != 0) {
+            switch (flagArray[149]) {
                 case 1:
                 case 3: {
-                    this.reuse(modifier._reuse_0_0value);
+                    this.reuse((modifier._reuse_0_0value as ReuseOptions | undefined));
                     break;
                 }
                 default: {
@@ -6180,12 +5786,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[151] != 0)
-        {
-            switch (flagArray[151] as int32) {
+        if (flagArray[150] != 0) {
+            switch (flagArray[150]) {
                 case 1:
                 case 3: {
-                    this.renderFit(modifier._renderFit_0_0value);
+                    this.renderFit((modifier._renderFit_0_0value as RenderFit | undefined));
                     break;
                 }
                 default: {
@@ -6193,12 +5798,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[152] != 0)
-        {
-            switch (flagArray[152] as int32) {
+        if (flagArray[151] != 0) {
+            switch (flagArray[151]) {
                 case 1:
                 case 3: {
-                    this.backgroundBrightness(modifier._backgroundBrightness_0_0value);
+                    this.gestureModifier((modifier._gestureModifier_0_0value as GestureModifier | undefined));
+                    break;
+                }
+                default: {
+                    this.gestureModifier((undefined as GestureModifier | undefined));
+                }
+            }
+        }
+        if (flagArray[152] != 0) {
+            switch (flagArray[152]) {
+                case 1:
+                case 3: {
+                    this.backgroundBrightness((modifier._backgroundBrightness_0_0value as BackgroundBrightnessOptions | undefined));
                     break;
                 }
                 default: {
@@ -6206,12 +5822,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[153] != 0)
-        {
-            switch (flagArray[153] as int32) {
+        if (flagArray[153] != 0) {
+            switch (flagArray[153]) {
                 case 1:
                 case 3: {
-                    this.onGestureJudgeBegin(modifier._onGestureJudgeBegin_0_0value);
+                    this.onGestureJudgeBegin((modifier._onGestureJudgeBegin_0_0value as ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined));
                     break;
                 }
                 default: {
@@ -6219,12 +5834,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[154] != 0)
-        {
-            switch (flagArray[154] as int32) {
+        if (flagArray[154] != 0) {
+            switch (flagArray[154]) {
                 case 1:
                 case 3: {
-                    this.onGestureRecognizerJudgeBegin(modifier._onGestureRecognizerJudgeBegin_0_0value);
+                    this.onGestureRecognizerJudgeBegin((modifier._onGestureRecognizerJudgeBegin_0_0value as GestureRecognizerJudgeBeginCallback | undefined));
                     break;
                 }
                 default: {
@@ -6232,12 +5846,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[155] != 0)
-        {
-            switch (flagArray[155] as int32) {
+        if (flagArray[155] != 0) {
+            switch (flagArray[155]) {
                 case 1:
                 case 3: {
-                    this.shouldBuiltInRecognizerParallelWith(modifier._shouldBuiltInRecognizerParallelWith_0_0value);
+                    this.shouldBuiltInRecognizerParallelWith((modifier._shouldBuiltInRecognizerParallelWith_0_0value as ShouldBuiltInRecognizerParallelWithCallback | undefined));
                     break;
                 }
                 default: {
@@ -6245,12 +5858,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[156] != 0)
-        {
-            switch (flagArray[156] as int32) {
+        if (flagArray[156] != 0) {
+            switch (flagArray[156]) {
                 case 1:
                 case 3: {
-                    this.monopolizeEvents(modifier._monopolizeEvents_0_0value);
+                    this.monopolizeEvents((modifier._monopolizeEvents_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -6258,25 +5870,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[157] != 0)
-        {
-            switch (flagArray[157] as int32) {
+        if (flagArray[157] != 0) {
+            switch (flagArray[157]) {
                 case 1:
                 case 3: {
-                    this.onTouchIntercept(modifier._onTouchIntercept_0_0value);
+                    this.onTouchIntercept((modifier._onTouchIntercept_0_0value as arkui_component_common_Callback<TouchEvent, HitTestMode> | undefined));
                     break;
                 }
                 default: {
-                    this.onTouchIntercept((undefined as ((value0: TouchEvent) => HitTestMode) | undefined));
+                    this.onTouchIntercept((undefined as arkui_component_common_Callback<TouchEvent, HitTestMode> | undefined));
                 }
             }
         }
-        if (flagArray[158] != 0)
-        {
-            switch (flagArray[158] as int32) {
+        if (flagArray[158] != 0) {
+            switch (flagArray[158]) {
                 case 1:
                 case 3: {
-                    this.onSizeChange(modifier._onSizeChange_0_0value);
+                    this.onSizeChange((modifier._onSizeChange_0_0value as SizeChangeCallback | undefined));
                     break;
                 }
                 default: {
@@ -6284,12 +5894,11 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[159] != 0)
-        {
-            switch (flagArray[159] as int32) {
+        if (flagArray[159] != 0) {
+            switch (flagArray[159]) {
                 case 1:
                 case 3: {
-                    this.accessibilityFocusDrawLevel(modifier._accessibilityFocusDrawLevel_0_0value);
+                    this.accessibilityFocusDrawLevel((modifier._accessibilityFocusDrawLevel_0_0value as FocusDrawLevel | undefined));
                     break;
                 }
                 default: {
@@ -6299,270 +5908,11 @@ export class CommonMethodModifier implements CommonMethod {
         }
     }
     mergeModifier8(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[160] != 0)
-        {
-            switch (flagArray[160] as int32) {
+        if (flagArray[160] != 0) {
+            switch (flagArray[160]) {
                 case 1:
                 case 3: {
-                    break;
-                }
-                default: {
-                }
-            }
-        }
-        if (flagArray[161] != 0)
-        {
-            switch (flagArray[161] as int32) {
-                case 1:
-                case 3: {
-                    this.expandSafeArea(modifier._expandSafeArea_0_0value, modifier._expandSafeArea_0_1value);
-                    break;
-                }
-                default: {
-                    this.expandSafeArea((undefined as Array<SafeAreaType> | undefined | undefined), (undefined as Array<SafeAreaEdge> | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[162] != 0)
-        {
-            switch (flagArray[162] as int32) {
-                case 1:
-                case 3: {
-                    this.ignoreLayoutSafeArea(modifier._ignoreLayoutSafeArea_0_0value, modifier._ignoreLayoutSafeArea_0_1value);
-                    break;
-                }
-                default: {
-                    this.ignoreLayoutSafeArea((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[163] != 0)
-        {
-            switch (flagArray[163] as int32) {
-                case 1:
-                case 3: {
-                    this.background(modifier._background_0_0value, modifier._background_0_1value);
-                    break;
-                }
-                default: {
-                    this.background((undefined as CustomBuilder | ResourceColor | undefined), (undefined as BackgroundOptions | undefined));
-                }
-            }
-        }
-        if (flagArray[164] != 0)
-        {
-            switch (flagArray[164] as int32) {
-                case 1:
-                case 3: {
-                    this.backgroundImage(modifier._backgroundImage_1_0value, modifier._backgroundImage_1_1value);
-                    break;
-                }
-                default: {
-                    this.backgroundImage((undefined as ResourceStr | image.PixelMap | undefined), (undefined as BackgroundImageOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[165] != 0)
-        {
-            switch (flagArray[165] as int32) {
-                case 1:
-                case 3: {
-                    this.backgroundImage(modifier._backgroundImage_2_0value, modifier._backgroundImage_2_1value);
-                    break;
-                }
-                default: {
-                    this.backgroundImage((undefined as ResourceStr | image.PixelMap | undefined), (undefined as ImageRepeat | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[166] != 0)
-        {
-            switch (flagArray[166] as int32) {
-                case 1:
-                case 3: {
-                    this.backgroundBlurStyle(modifier._backgroundBlurStyle_0_0value, modifier._backgroundBlurStyle_0_1value, modifier._backgroundBlurStyle_0_2value);
-                    break;
-                }
-                default: {
-                    this.backgroundBlurStyle((undefined as BlurStyle | undefined), (undefined as BackgroundBlurStyleOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[167] != 0)
-        {
-            switch (flagArray[167] as int32) {
-                case 1:
-                case 3: {
-                    this.backgroundEffect(modifier._backgroundEffect_1_0value, modifier._backgroundEffect_1_1value);
-                    break;
-                }
-                default: {
-                    this.backgroundEffect((undefined as BackgroundEffectOptions | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[168] != 0)
-        {
-            switch (flagArray[168] as int32) {
-                case 1:
-                case 3: {
-                    this.foregroundBlurStyle(modifier._foregroundBlurStyle_0_0value, modifier._foregroundBlurStyle_0_1value, modifier._foregroundBlurStyle_0_2value);
-                    break;
-                }
-                default: {
-                    this.foregroundBlurStyle((undefined as BlurStyle | undefined), (undefined as ForegroundBlurStyleOptions | undefined | undefined), (undefined as SystemAdaptiveOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[169] != 0)
-        {
-            switch (flagArray[169] as int32) {
-                case 1:
-                case 3: {
-                    this.borderRadius(modifier._borderRadius_1_0value, modifier._borderRadius_1_1value);
-                    break;
-                }
-                default: {
-                    this.borderRadius((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[170] != 0)
-        {
-            switch (flagArray[170] as int32) {
-                case 1:
-                case 3: {
-                    this.onClick(modifier._onClick_1_0value, modifier._onClick_1_1value);
-                    break;
-                }
-                default: {
-                    this.onClick((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
-                }
-            }
-        }
-        if (flagArray[171] != 0)
-        {
-            switch (flagArray[171] as int32) {
-                case 1:
-                case 3: {
-                    this.focusScopeId(modifier._focusScopeId_0_0value, modifier._focusScopeId_0_1value, modifier._focusScopeId_0_2value);
-                    break;
-                }
-                default: {
-                    this.focusScopeId((undefined as string | undefined), (undefined as boolean | undefined | undefined), (undefined as boolean | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[172] != 0)
-        {
-            switch (flagArray[172] as int32) {
-                case 1:
-                case 3: {
-                    this.focusScopePriority(modifier._focusScopePriority_0_0value, modifier._focusScopePriority_0_1value);
-                    break;
-                }
-                default: {
-                    this.focusScopePriority((undefined as string | undefined), (undefined as FocusPriority | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[173] != 0)
-        {
-            switch (flagArray[173] as int32) {
-                case 1:
-                case 3: {
-                    this.transition(modifier._transition_1_0value, modifier._transition_1_1value);
-                    break;
-                }
-                default: {
-                    this.transition((undefined as TransitionEffect | undefined), (undefined as TransitionFinishCallback | undefined));
-                }
-            }
-        }
-        if (flagArray[174] != 0)
-        {
-            switch (flagArray[174] as int32) {
-                case 1:
-                case 3: {
-                    this.blur(modifier._blur_0_0value, modifier._blur_0_1value, modifier._blur_0_2value);
-                    break;
-                }
-                default: {
-                    this.blur((undefined as double | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
-                }
-            }
-        }
-        if (flagArray[175] != 0)
-        {
-            switch (flagArray[175] as int32) {
-                case 1:
-                case 3: {
-                    this.linearGradientBlur(modifier._linearGradientBlur_0_0value, modifier._linearGradientBlur_0_1value);
-                    break;
-                }
-                default: {
-                    this.linearGradientBlur((undefined as double | undefined), (undefined as LinearGradientBlurOptions | undefined));
-                }
-            }
-        }
-        if (flagArray[176] != 0)
-        {
-            switch (flagArray[176] as int32) {
-                case 1:
-                case 3: {
-                    this.systemBarEffect();
-                    break;
-                }
-                default: {
-                    this.systemBarEffect();
-                }
-            }
-        }
-        if (flagArray[177] != 0)
-        {
-            switch (flagArray[177] as int32) {
-                case 1:
-                case 3: {
-                    this.useEffect(modifier._useEffect_1_0value, modifier._useEffect_1_1value);
-                    break;
-                }
-                default: {
-                    this.useEffect((undefined as boolean | undefined), (undefined as EffectType | undefined));
-                }
-            }
-        }
-        if (flagArray[178] != 0)
-        {
-            switch (flagArray[178] as int32) {
-                case 1:
-                case 3: {
-                    this.backdropBlur(modifier._backdropBlur_0_0value, modifier._backdropBlur_0_1value, modifier._backdropBlur_0_2value);
-                    break;
-                }
-                default: {
-                    this.backdropBlur((undefined as double | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
-                }
-            }
-        }
-        if (flagArray[179] != 0)
-        {
-            switch (flagArray[179] as int32) {
-                case 1:
-                case 3: {
-                    this.sharedTransition(modifier._sharedTransition_0_0value, modifier._sharedTransition_0_1value);
-                    break;
-                }
-                default: {
-                    this.sharedTransition((undefined as string | undefined), (undefined as sharedTransitionOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[211] != 0)
-        {
-            switch (flagArray[211]) {
-                case 1:
-                case 3: {
-                    this.onTouchTestDone(modifier._onTouchTestDone_0_0value);
+                    this.onTouchTestDone((modifier._onTouchTestDone_0_0value as TouchTestDoneCallback | undefined));
                     break;
                 }
                 default: {
@@ -6570,418 +5920,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-    }
-    mergeModifier9(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[180] != 0)
-        {
-            switch (flagArray[180] as int32) {
+        if (flagArray[161] != 0) {
+            switch (flagArray[161]) {
                 case 1:
                 case 3: {
-                    this.chainMode(modifier._chainMode_0_0value, modifier._chainMode_0_1value);
+                    this.systemMaterial((modifier._systemMaterial_0_0value as SystemUiMaterial | undefined));
                     break;
                 }
                 default: {
-                    this.chainMode((undefined as Axis | undefined), (undefined as ChainStyle | undefined));
+                    this.systemMaterial((undefined as SystemUiMaterial | undefined));
                 }
             }
         }
-        if (flagArray[181] != 0)
-        {
-            switch (flagArray[181] as int32) {
+        if (flagArray[162] != 0) {
+            switch (flagArray[162]) {
                 case 1:
                 case 3: {
-                    this.onDrop(modifier._onDrop_1_0value, modifier._onDrop_1_1value);
-                    break;
-                }
-                default: {
-                    this.onDrop((undefined as OnDragEventCallback | undefined), (undefined as DropOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[182] != 0)
-        {
-            switch (flagArray[182] as int32) {
-                case 1:
-                case 3: {
-                    this.dragPreview(modifier._dragPreview_1_0value, modifier._dragPreview_1_1value);
-                    break;
-                }
-                default: {
-                    this.dragPreview((undefined as CustomBuilder | DragItemInfo | string | undefined), (undefined as PreviewConfiguration | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[183] != 0)
-        {
-            switch (flagArray[183] as int32) {
-                case 1:
-                case 3: {
-                    this.dragPreviewOptions(modifier._dragPreviewOptions_0_0value, modifier._dragPreviewOptions_0_1value);
-                    break;
-                }
-                default: {
-                    this.dragPreviewOptions((undefined as DragPreviewOptions | undefined), (undefined as DragInteractionOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[184] != 0)
-        {
-            switch (flagArray[184] as int32) {
-                case 1:
-                case 3: {
-                    this.overlay(modifier._overlay_0_0value, modifier._overlay_0_1value);
-                    break;
-                }
-                default: {
-                    this.overlay((undefined as string | CustomBuilder | ComponentContent | undefined), (undefined as OverlayOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[185] != 0)
-        {
-            switch (flagArray[185] as int32) {
-                case 1:
-                case 3: {
-                    this.blendMode(modifier._blendMode_0_0value, modifier._blendMode_0_1value);
-                    break;
-                }
-                default: {
-                    this.blendMode((undefined as BlendMode | undefined), (undefined as BlendApplyType | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[186] != 0)
-        {
-            switch (flagArray[186] as int32) {
-                case 1:
-                case 3: {
-                    this.advancedBlendMode(modifier._advancedBlendMode_0_0value, modifier._advancedBlendMode_0_1value);
-                    break;
-                }
-                default: {
-                    this.advancedBlendMode((undefined as BlendMode | uiEffect.Blender | undefined), (undefined as BlendApplyType | undefined));
-                }
-            }
-        }
-        if (flagArray[187] != 0)
-        {
-            switch (flagArray[187] as int32) {
-                case 1:
-                case 3: {
-                    this.geometryTransition(modifier._geometryTransition_1_0value, modifier._geometryTransition_1_1value);
-                    break;
-                }
-                default: {
-                    this.geometryTransition((undefined as string | undefined), (undefined as GeometryTransitionOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[188] != 0)
-        {
-            switch (flagArray[188] as int32) {
-                case 1:
-                case 3: {
-                    this.bindTips(modifier._bindTips_0_0value, modifier._bindTips_0_1value);
-                    break;
-                }
-                default: {
-                    this.bindTips((undefined as TipsMessageType | undefined), (undefined as TipsOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[189] != 0)
-        {
-            switch (flagArray[189] as int32) {
-                case 1:
-                case 3: {
-                    this.bindPopup(modifier._bindPopup_0_0value, modifier._bindPopup_0_1value);
-                    break;
-                }
-                default: {
-                    this.bindPopup((undefined as boolean | undefined), (undefined as PopupOptions | CustomPopupOptions | undefined));
-                }
-            }
-        }
-        if (flagArray[190] != 0)
-        {
-            switch (flagArray[190] as int32) {
-                case 1:
-                case 3: {
-                    this.bindMenu(modifier._bindMenu_0_0value, modifier._bindMenu_0_1value);
-                    break;
-                }
-                default: {
-                    this.bindMenu((undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[191] != 0)
-        {
-            switch (flagArray[191] as int32) {
-                case 1:
-                case 3: {
-                    this.bindMenu(modifier._bindMenu_1_0value, modifier._bindMenu_1_1value, modifier._bindMenu_1_2value);
-                    break;
-                }
-                default: {
-                    this.bindMenu((undefined as boolean | Bindable<boolean> | undefined), (undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[192] != 0)
-        {
-            switch (flagArray[192] as int32) {
-                case 1:
-                case 3: {
-                    this.bindContextMenu(modifier._bindContextMenu_0_0value, modifier._bindContextMenu_0_1value, modifier._bindContextMenu_0_2value);
-                    break;
-                }
-                default: {
-                    this.bindContextMenu((undefined as CustomBuilder | undefined), (undefined as ResponseType | undefined), (undefined as ContextMenuOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[193] != 0)
-        {
-            switch (flagArray[193] as int32) {
-                case 1:
-                case 3: {
-                    this.bindContextMenuWithResponse(modifier._bindContextMenuWithResponse_0_0value, modifier._bindContextMenuWithResponse_0_1value);
-                    break;
-                }
-                default: {
-                    this.bindContextMenuWithResponse((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
-                }
-            }
-        }
-        if (flagArray[194] != 0)
-        {
-            switch (flagArray[194] as int32) {
-                case 1:
-                case 3: {
-                    this.bindContextMenu(modifier._bindContextMenu_1_0value, modifier._bindContextMenu_1_1value, modifier._bindContextMenu_1_2value);
-                    break;
-                }
-                default: {
-                    this.bindContextMenu((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[195] != 0)
-        {
-            switch (flagArray[195] as int32) {
-                case 1:
-                case 3: {
-                    this.bindContentCover(modifier._bindContentCover_0_0value, modifier._bindContentCover_0_1value, modifier._bindContentCover_0_2value);
-                    break;
-                }
-                default: {
-                    this.bindContentCover((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ModalTransition | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[196] != 0)
-        {
-            switch (flagArray[196] as int32) {
-                case 1:
-                case 3: {
-                    this.bindContentCover(modifier._bindContentCover_1_0value, modifier._bindContentCover_1_1value, modifier._bindContentCover_1_2value);
-                    break;
-                }
-                default: {
-                    this.bindContentCover((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContentCoverOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[197] != 0)
-        {
-            switch (flagArray[197] as int32) {
-                case 1:
-                case 3: {
-                    this.bindSheet(modifier._bindSheet_0_0value, modifier._bindSheet_0_1value, modifier._bindSheet_0_2value);
-                    break;
-                }
-                default: {
-                    this.bindSheet((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as SheetOptions | undefined | undefined));
-                }
-            }
-        }
-        if (flagArray[198] != 0)
-        {
-            switch (flagArray[198] as int32) {
-                case 1:
-                case 3: {
-                    this.onVisibleAreaChange(modifier._onVisibleAreaChange_0_0value, modifier._onVisibleAreaChange_0_1value);
-                    break;
-                }
-                default: {
-                    this.onVisibleAreaChange((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
-                }
-            }
-        }
-        if (flagArray[199] != 0)
-        {
-            switch (flagArray[199] as int32) {
-                case 1:
-                case 3: {
-                    this.onVisibleAreaApproximateChange(modifier._onVisibleAreaApproximateChange_0_0value, modifier._onVisibleAreaApproximateChange_0_1value);
-                    break;
-                }
-                default: {
-                    this.onVisibleAreaApproximateChange((undefined as VisibleAreaEventOptions | undefined), (undefined as VisibleAreaChangeCallback | undefined));
-                }
-            }
-        }
-        if (flagArray[200] != 0)
-        {
-            switch (flagArray[200] as int32) {
-                case 1:
-                case 3: {
-                    hookMergeKeyboardShortcuts(this, modifier._keyboardShortcutList);
-                    break;
-                }
-                default: {
-                    this.keyboardShortcut((undefined as string | FunctionKey | undefined), (undefined as Array<ModifierKey> | undefined), (undefined as (() => void) | undefined | undefined));
-                }
-            }
-        }
-    }
-    mergeModifier10(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
-        if (flagArray[201] != 0)
-        {
-            switch (flagArray[201] as int32) {
-                case 1:
-                case 3: {
-                    this.accessibilityGroup(modifier._accessibilityGroup_1_0value, modifier._accessibilityGroup_1_1value);
-                    break;
-                }
-                default: {
-                    this.accessibilityGroup((undefined as boolean | undefined), (undefined as AccessibilityOptions | undefined));
-                }
-            }
-        }
-        if (flagArray[202] != 0)
-        {
-            switch (flagArray[202] as int32) {
-                case 1:
-                case 3: {
-                    this.onGestureRecognizerJudgeBegin(modifier._onGestureRecognizerJudgeBegin_1_0value, modifier._onGestureRecognizerJudgeBegin_1_1value);
-                    break;
-                }
-                default: {
-                    this.onGestureRecognizerJudgeBegin((undefined as GestureRecognizerJudgeBeginCallback | undefined), (undefined as boolean | undefined));
-                }
-            }
-        }
-        if (flagArray[203] != 0)
-        {
-            switch (flagArray[203] as int32) {
-                case 1:
-                case 3: {
-                    this.systemMaterial(modifier._systemMaterial_0_0value);
-                    break;
-                }
-                default: {
-                    this.systemMaterial((undefined as uiMaterial.Material | undefined));
-                }
-            }
-        }
-        if (flagArray[204] != 0)
-        {
-            switch (flagArray[204] as int32) {
-                case 1:
-                case 3: {
-                    this.accessibilityStateDescription(modifier._accessibilityStateDescription_0_0value);
-                    break;
-                }
-                default: {
-                    this.accessibilityStateDescription((undefined as string | Resource | undefined));
-                }
-            }
-        }
-        if (flagArray[205] != 0)
-        {
-            switch (flagArray[205] as int32) {
-                case 1:
-                case 3: {
-                    this.accessibilityActionOptions(modifier._accessibilityActionOptions_0_0value);
-                    break;
-                }
-                default: {
-                    this.accessibilityActionOptions((undefined as AccessibilityActionOptions | undefined));
-                }
-            }
-        }
-        if (flagArray[206] != 0)
-        {
-            switch (flagArray[206] as int32) {
-                case 1:
-                case 3: {
-                    this.useUnionEffect(modifier._useUnionEffect_0_0value);
-                    break;
-                }
-                default: {
-                    this.useUnionEffect((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (flagArray[207] != 0)
-        {
-            switch (flagArray[207] as int32) {
-                case 1:
-                case 3: {
-                    this.materialFilter(modifier._materialFilter_0_0value);
-                    break;
-                }
-                default: {
-                    this.materialFilter((undefined as uiEffect.Filter | undefined));
-                }
-            }
-        }
-        if (flagArray[208] != 0)
-        {
-            switch (flagArray[208] as int32) {
-                case 1:
-                case 3: {
-                    this.onDragSpringLoading(modifier._onDragSpringLoading_0_0value, modifier._onDragSpringLoading_0_1value);
-                    break;
-                }
-                default: {
-                    this.onDragSpringLoading((undefined as ((value0: dragController.SpringLoadingContext) => void) | null | undefined), (undefined as dragController.DragSpringLoadingConfiguration | undefined));
-                }
-            }
-        }
-        if (flagArray[209] != 0) {
-            switch (flagArray[209]) {
-                case 1:
-                case 3: {
-                    this.excludeFromRenderGroup(modifier._excludeFromRenderGroup_0_0value);
-                    break;
-                }
-                default: {
-                    this.excludeFromRenderGroup((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (flagArray[210] != 0)
-        {
-            switch (flagArray[210]) {
-                case 1:
-                case 3: {
-                    this.enableClickSoundEffect(modifier._enableClickSoundEffect_0_0value);
-                    break;
-                }
-                default: {
-                    this.enableClickSoundEffect((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (flagArray[211] != 0)
-        {
-            switch (flagArray[211]) {
-                case 1:
-                case 3: {
-                    this.onNeedSoftkeyboard(modifier._onNeedSoftkeyboard_0_0value);
+                    this.onNeedSoftkeyboard((modifier._onNeedSoftkeyboard_0_0value as OnNeedSoftkeyboardCallback | undefined));
                     break;
                 }
                 default: {
@@ -6989,2678 +5944,2772 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[163] != 0) {
+            switch (flagArray[163]) {
+                case 1:
+                case 3: {
+                    this.accessibilityStateDescription((modifier._accessibilityStateDescription_0_0value as string | global_resource_Resource | undefined));
+                    break;
+                }
+                default: {
+                    this.accessibilityStateDescription((undefined as string | global_resource_Resource | undefined));
+                }
+            }
+        }
+        if (flagArray[164] != 0) {
+            switch (flagArray[164]) {
+                case 1:
+                case 3: {
+                    this.accessibilityActionOptions((modifier._accessibilityActionOptions_0_0value as AccessibilityActionOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.accessibilityActionOptions((undefined as AccessibilityActionOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[165] != 0) {
+            switch (flagArray[165]) {
+                case 1:
+                case 3: {
+                    this.customProperty((modifier._customProperty_0_0value as string), (modifier._customProperty_0_1value as CustomProperty));
+                    break;
+                }
+                default: {
+                }
+            }
+        }
+        if (flagArray[166] != 0) {
+            switch (flagArray[166]) {
+                case 1:
+                case 3: {
+                    this.expandSafeArea((modifier._expandSafeArea_0_0value as Array<SafeAreaType> | undefined), (modifier._expandSafeArea_0_1value as Array<SafeAreaEdge> | undefined));
+                    break;
+                }
+                default: {
+                    this.expandSafeArea((undefined as Array<SafeAreaType> | undefined), (undefined as Array<SafeAreaEdge> | undefined));
+                }
+            }
+        }
+        if (flagArray[167] != 0) {
+            switch (flagArray[167]) {
+                case 1:
+                case 3: {
+                    this.ignoreLayoutSafeArea((modifier._ignoreLayoutSafeArea_0_0value as Array<LayoutSafeAreaType> | undefined), (modifier._ignoreLayoutSafeArea_0_1value as Array<LayoutSafeAreaEdge> | undefined));
+                    break;
+                }
+                default: {
+                    this.ignoreLayoutSafeArea((undefined as Array<LayoutSafeAreaType> | undefined | undefined), (undefined as Array<LayoutSafeAreaEdge> | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[168] != 0) {
+            switch (flagArray[168]) {
+                case 1:
+                case 3: {
+                    this.background((modifier._background_0_0value as CustomBuilder | ResourceColor | undefined), (modifier._background_0_1value as BackgroundOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.background((undefined as CustomBuilder | ResourceColor | undefined), (undefined as BackgroundOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[169] != 0) {
+            switch (flagArray[169]) {
+                case 1:
+                case 3: {
+                    this.backgroundImage((modifier._backgroundImage_1_0value as ResourceStr | PixelMap | undefined), (modifier._backgroundImage_1_1value as BackgroundImageOptions));
+                    break;
+                }
+                default: {
+                    // instructive change start
+                    this.backgroundImage(undefined as ResourceStr | PixelMap | undefined)
+                    // instructive change end
+                }
+            }
+        }
+        if (flagArray[170] != 0) {
+            switch (flagArray[170]) {
+                case 1:
+                case 3: {
+                    this.backgroundImage((modifier._backgroundImage_2_0value as ResourceStr | PixelMap | undefined), (modifier._backgroundImage_2_1value as ImageRepeat));
+                    break;
+                }
+                default: {
+                    // instructive change start
+                    this.backgroundImage(undefined as ResourceStr | PixelMap | undefined)
+                    // instructive change end
+                }
+            }
+        }
+        if (flagArray[171] != 0) {
+            switch (flagArray[171]) {
+                case 1:
+                case 3: {
+                    this.backgroundBlurStyle((modifier._backgroundBlurStyle_0_0value as BlurStyle | undefined), (modifier._backgroundBlurStyle_0_1value as BackgroundBlurStyleOptions | undefined), (modifier._backgroundBlurStyle_0_2value as SystemAdaptiveOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.backgroundBlurStyle((undefined as BlurStyle | undefined), (undefined as BackgroundBlurStyleOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[172] != 0) {
+            switch (flagArray[172]) {
+                case 1:
+                case 3: {
+                    this.backgroundEffect((modifier._backgroundEffect_0_0value as BackgroundEffectOptions | undefined), (modifier._backgroundEffect_0_1value as SystemAdaptiveOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.backgroundEffect((undefined as BackgroundEffectOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[173] != 0) {
+            switch (flagArray[173]) {
+                case 1:
+                case 3: {
+                    this.foregroundBlurStyle((modifier._foregroundBlurStyle_0_0value as BlurStyle | undefined), (modifier._foregroundBlurStyle_0_1value as ForegroundBlurStyleOptions | undefined), (modifier._foregroundBlurStyle_0_2value as SystemAdaptiveOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.foregroundBlurStyle((undefined as BlurStyle | undefined), (undefined as ForegroundBlurStyleOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[174] != 0) {
+            switch (flagArray[174]) {
+                case 1:
+                case 3: {
+                    this.borderRadius((modifier._borderRadius_0_0value as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (modifier._borderRadius_0_1value as RenderStrategy | undefined));
+                    break;
+                }
+                default: {
+                    this.borderRadius((undefined as Length | BorderRadiuses | LocalizedBorderRadiuses | undefined), (undefined as RenderStrategy | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[175] != 0) {
+            switch (flagArray[175]) {
+                case 1:
+                case 3: {
+                    this.onClick((modifier._onClick_1_0value as ((event: ClickEvent) => void) | undefined), (modifier._onClick_1_1value as double | undefined));
+                    break;
+                }
+                default: {
+                    this.onClick((undefined as ((event: ClickEvent) => void) | undefined), (undefined as double | undefined));
+                }
+            }
+        }
+        if (flagArray[176] != 0) {
+            switch (flagArray[176]) {
+                case 1:
+                case 3: {
+                    this.focusScopeId((modifier._focusScopeId_0_0value as string | undefined), (modifier._focusScopeId_0_1value as boolean | undefined), (modifier._focusScopeId_0_2value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.focusScopeId((undefined as string | undefined), (undefined as boolean | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[177] != 0) {
+            switch (flagArray[177]) {
+                case 1:
+                case 3: {
+                    this.focusScopePriority((modifier._focusScopePriority_0_0value as string | undefined), (modifier._focusScopePriority_0_1value as FocusPriority | undefined));
+                    break;
+                }
+                default: {
+                    this.focusScopePriority((undefined as string | undefined), (undefined as FocusPriority | undefined));
+                }
+            }
+        }
+        if (flagArray[178] != 0) {
+            switch (flagArray[178]) {
+                case 1:
+                case 3: {
+                    this.transition((modifier._transition_1_0value as TransitionEffect | undefined), (modifier._transition_1_1value as TransitionFinishCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.transition((undefined as TransitionEffect | undefined), (undefined as TransitionFinishCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[179] != 0) {
+            switch (flagArray[179]) {
+                case 1:
+                case 3: {
+                    this.gesture((modifier._gesture_0_0value as GestureType), (modifier._gesture_0_1value as GestureMask | undefined));
+                    break;
+                }
+                default: {
+                }
+            }
+        }
+    }
+    mergeModifier9(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
+        if (flagArray[180] != 0) {
+            switch (flagArray[180]) {
+                case 1:
+                case 3: {
+                    this.priorityGesture((modifier._priorityGesture_0_0value as GestureType), (modifier._priorityGesture_0_1value as GestureMask | undefined));
+                    break;
+                }
+                default: {
+                }
+            }
+        }
+        if (flagArray[181] != 0) {
+            switch (flagArray[181]) {
+                case 1:
+                case 3: {
+                    this.parallelGesture((modifier._parallelGesture_0_0value as GestureType), (modifier._parallelGesture_0_1value as GestureMask | undefined));
+                    break;
+                }
+                default: {
+                }
+            }
+        }
+        if (flagArray[182] != 0) {
+            switch (flagArray[182]) {
+                case 1:
+                case 3: {
+                    this.blur((modifier._blur_0_0value as double | undefined), (modifier._blur_0_1value as BlurOptions | undefined), (modifier._blur_0_2value as SystemAdaptiveOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.blur((undefined as double | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[183] != 0) {
+            switch (flagArray[183]) {
+                case 1:
+                case 3: {
+                    this.linearGradientBlur((modifier._linearGradientBlur_0_0value as double | undefined), (modifier._linearGradientBlur_0_1value as LinearGradientBlurOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.linearGradientBlur((undefined as double | undefined), (undefined as LinearGradientBlurOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[184] != 0) {
+            switch (flagArray[184]) {
+                case 1:
+                case 3: {
+                    this.systemBarEffect();
+                    break;
+                }
+                default: {
+                    this.systemBarEffect();
+                }
+            }
+        }
+        if (flagArray[185] != 0) {
+            switch (flagArray[185]) {
+                case 1:
+                case 3: {
+                    this.useEffect((modifier._useEffect_1_0value as boolean | undefined), (modifier._useEffect_1_1value as EffectType | undefined));
+                    break;
+                }
+                default: {
+                    this.useEffect((undefined as boolean | undefined), (undefined as EffectType | undefined));
+                }
+            }
+        }
+        if (flagArray[186] != 0) {
+            switch (flagArray[186]) {
+                case 1:
+                case 3: {
+                    this.backdropBlur((modifier._backdropBlur_0_0value as double | undefined), (modifier._backdropBlur_0_1value as BlurOptions | undefined), (modifier._backdropBlur_0_2value as SystemAdaptiveOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.backdropBlur((undefined as double | undefined), (undefined as BlurOptions | undefined), (undefined as SystemAdaptiveOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[187] != 0) {
+            switch (flagArray[187]) {
+                case 1:
+                case 3: {
+                    this.sharedTransition((modifier._sharedTransition_0_0value as string | undefined), (modifier._sharedTransition_0_1value as sharedTransitionOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.sharedTransition((undefined as string | undefined), (undefined as sharedTransitionOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[188] != 0) {
+            switch (flagArray[188]) {
+                case 1:
+                case 3: {
+                    this.chainMode((modifier._chainMode_0_0value as Axis | undefined), (modifier._chainMode_0_1value as ChainStyle | undefined));
+                    break;
+                }
+                default: {
+                    this.chainMode((undefined as Axis | undefined), (undefined as ChainStyle | undefined));
+                }
+            }
+        }
+        if (flagArray[189] != 0) {
+            switch (flagArray[189]) {
+                case 1:
+                case 3: {
+                    this.onDrop((modifier._onDrop_1_0value as OnDragEventCallback | undefined), (modifier._onDrop_1_1value as DropOptions));
+                    break;
+                }
+                default: {
+                    // instructive change start
+                    this.onDrop(modifier._onDrop_1_0value as OnDragEventCallback | undefined);
+                    // instructive change end
+                }
+            }
+        }
+        if (flagArray[190] != 0) {
+            switch (flagArray[190]) {
+                case 1:
+                case 3: {
+                    this.onDragSpringLoading((modifier._onDragSpringLoading_0_0value as arkui_component_common_Callback<SpringLoadingContext, void> | null | undefined), (modifier._onDragSpringLoading_0_1value as DragSpringLoadingConfiguration | undefined));
+                    break;
+                }
+                default: {
+                    this.onDragSpringLoading((undefined as arkui_component_common_Callback<SpringLoadingContext, void> | null | undefined), (undefined as DragSpringLoadingConfiguration | undefined));
+                }
+            }
+        }
+        if (flagArray[191] != 0) {
+            switch (flagArray[191]) {
+                case 1:
+                case 3: {
+                    this.dragPreview((modifier._dragPreview_0_0value as CustomBuilder | DragItemInfo | string | undefined), (modifier._dragPreview_0_1value as PreviewConfiguration | undefined));
+                    break;
+                }
+                default: {
+                    this.dragPreview((undefined as CustomBuilder | DragItemInfo | string | undefined), (undefined as PreviewConfiguration | undefined));
+                }
+            }
+        }
+        if (flagArray[192] != 0) {
+            switch (flagArray[192]) {
+                case 1:
+                case 3: {
+                    this.dragPreviewOptions((modifier._dragPreviewOptions_0_0value as DragPreviewOptions | undefined), (modifier._dragPreviewOptions_0_1value as DragInteractionOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.dragPreviewOptions((undefined as DragPreviewOptions | undefined), (undefined as DragInteractionOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[193] != 0) {
+            switch (flagArray[193]) {
+                case 1:
+                case 3: {
+                    this.overlay((modifier._overlay_0_0value as string | CustomBuilder | ComponentContent<Object> | undefined), (modifier._overlay_0_1value as OverlayOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.overlay((undefined as string | CustomBuilder | ComponentContent<Object> | undefined), (undefined as OverlayOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[194] != 0) {
+            switch (flagArray[194]) {
+                case 1:
+                case 3: {
+                    this.blendMode((modifier._blendMode_0_0value as BlendMode | undefined), (modifier._blendMode_0_1value as BlendApplyType | undefined));
+                    break;
+                }
+                default: {
+                    this.blendMode((undefined as BlendMode | undefined), (undefined as BlendApplyType | undefined));
+                }
+            }
+        }
+        if (flagArray[195] != 0) {
+            switch (flagArray[195]) {
+                case 1:
+                case 3: {
+                    this.advancedBlendMode((modifier._advancedBlendMode_0_0value as BlendMode | Blender | undefined), (modifier._advancedBlendMode_0_1value as BlendApplyType | undefined));
+                    break;
+                }
+                default: {
+                    this.advancedBlendMode((undefined as BlendMode | Blender | undefined), (undefined as BlendApplyType | undefined));
+                }
+            }
+        }
+        if (flagArray[196] != 0) {
+            switch (flagArray[196]) {
+                case 1:
+                case 3: {
+                    this.geometryTransition((modifier._geometryTransition_0_0value as string | undefined), (modifier._geometryTransition_0_1value as GeometryTransitionOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.geometryTransition((undefined as string | undefined), (undefined as GeometryTransitionOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[197] != 0) {
+            switch (flagArray[197]) {
+                case 1:
+                case 3: {
+                    this.bindTips((modifier._bindTips_0_0value as TipsMessageType | undefined), (modifier._bindTips_0_1value as TipsOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindTips((undefined as TipsMessageType | undefined), (undefined as TipsOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[198] != 0) {
+            switch (flagArray[198]) {
+                case 1:
+                case 3: {
+                    this.bindPopup((modifier._bindPopup_0_0value as boolean | undefined), (modifier._bindPopup_0_1value as PopupOptions | CustomPopupOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindPopup((undefined as boolean | undefined), (undefined as PopupOptions | CustomPopupOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[199] != 0) {
+            switch (flagArray[199]) {
+                case 1:
+                case 3: {
+                    this.bindMenu((modifier._bindMenu_0_0value as Array<MenuElement> | CustomBuilder | undefined), (modifier._bindMenu_0_1value as MenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindMenu((undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined));
+                }
+            }
+        }
+    }
+    mergeModifier10(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
+        if (flagArray[200] != 0) {
+            switch (flagArray[200]) {
+                case 1:
+                case 3: {
+                    this.bindMenu((modifier._bindMenu_1_0value as boolean | Bindable<boolean> | undefined), (modifier._bindMenu_1_1value as Array<MenuElement> | CustomBuilder | undefined), (modifier._bindMenu_1_2value as MenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindMenu((undefined as boolean | Bindable<boolean> | undefined), (undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[201] != 0) {
+            switch (flagArray[201]) {
+                case 1:
+                case 3: {
+                    this.bindContextMenu((modifier._bindContextMenu_0_0value as CustomBuilder | undefined), (modifier._bindContextMenu_0_1value as ResponseType | undefined), (modifier._bindContextMenu_0_2value as ContextMenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindContextMenu((undefined as CustomBuilder | undefined), (undefined as ResponseType | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[202] != 0) {
+            switch (flagArray[202]) {
+                case 1:
+                case 3: {
+                    this.bindContextMenuWithResponse((modifier._bindContextMenuWithResponse_0_0value as CustomBuilderT<ResponseType> | undefined), (modifier._bindContextMenuWithResponse_0_1value as ContextMenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindContextMenuWithResponse((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[203] != 0) {
+            switch (flagArray[203]) {
+                case 1:
+                case 3: {
+                    this.bindContextMenu((modifier._bindContextMenu_1_0value as boolean | Bindable<boolean> | undefined), (modifier._bindContextMenu_1_1value as CustomBuilder | undefined), (modifier._bindContextMenu_1_2value as ContextMenuOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindContextMenu((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[204] != 0) {
+            switch (flagArray[204]) {
+                case 1:
+                case 3: {
+                    this.bindContentCover((modifier._bindContentCover_0_0value as boolean | Bindable<boolean> | undefined), (modifier._bindContentCover_0_1value as CustomBuilder | undefined), (modifier._bindContentCover_0_2value as ModalTransition | undefined));
+                    break;
+                }
+                default: {
+                    this.bindContentCover((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ModalTransition | undefined));
+                }
+            }
+        }
+        if (flagArray[205] != 0) {
+            switch (flagArray[205]) {
+                case 1:
+                case 3: {
+                    this.bindContentCover((modifier._bindContentCover_1_0value as boolean | Bindable<boolean> | undefined), (modifier._bindContentCover_1_1value as CustomBuilder | undefined), (modifier._bindContentCover_1_2value as ContentCoverOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindContentCover((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContentCoverOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[206] != 0) {
+            switch (flagArray[206]) {
+                case 1:
+                case 3: {
+                    this.bindSheet((modifier._bindSheet_0_0value as boolean | Bindable<boolean> | undefined), (modifier._bindSheet_0_1value as CustomBuilder | undefined), (modifier._bindSheet_0_2value as SheetOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.bindSheet((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as SheetOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[207] != 0) {
+            switch (flagArray[207]) {
+                case 1:
+                case 3: {
+                    this.onVisibleAreaChange((modifier._onVisibleAreaChange_0_0value as Array<double> | undefined), (modifier._onVisibleAreaChange_0_1value as VisibleAreaChangeCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.onVisibleAreaChange((undefined as Array<double> | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[208] != 0) {
+            switch (flagArray[208]) {
+                case 1:
+                case 3: {
+                    this.onVisibleAreaApproximateChange((modifier._onVisibleAreaApproximateChange_0_0value as VisibleAreaEventOptions | undefined), (modifier._onVisibleAreaApproximateChange_0_1value as VisibleAreaChangeCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.onVisibleAreaApproximateChange((undefined as VisibleAreaEventOptions | undefined), (undefined as VisibleAreaChangeCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[209] != 0) {
+            switch (flagArray[209]) {
+                case 1:
+                case 3: {
+                    this.keyboardShortcut((modifier._keyboardShortcut_0_0value as string | FunctionKey | undefined), (modifier._keyboardShortcut_0_1value as Array<ModifierKey> | undefined), (modifier._keyboardShortcut_0_2value as (() => void) | undefined));
+                    break;
+                }
+                default: {
+                    this.keyboardShortcut((undefined as string | FunctionKey | undefined), (undefined as Array<ModifierKey> | undefined), (undefined as (() => void) | undefined));
+                }
+            }
+        }
+        if (flagArray[210] != 0) {
+            switch (flagArray[210]) {
+                case 1:
+                case 3: {
+                    this.accessibilityGroup((modifier._accessibilityGroup_0_0value as boolean | undefined), (modifier._accessibilityGroup_0_1value as AccessibilityOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.accessibilityGroup((undefined as boolean | undefined), (undefined as AccessibilityOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[211] != 0) {
+            switch (flagArray[211]) {
+                case 1:
+                case 3: {
+                    this.onGestureRecognizerJudgeBegin((modifier._onGestureRecognizerJudgeBegin_1_0value as GestureRecognizerJudgeBeginCallback | undefined), (modifier._onGestureRecognizerJudgeBegin_1_1value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.onGestureRecognizerJudgeBegin((undefined as GestureRecognizerJudgeBeginCallback | undefined), (undefined as boolean | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
-        if (((this._flagArray[0]) == (0)) || (true))
-        {
+        if (((this._flagArray[0]) == (0)) || (true)) {
             this._flagArray[0] = 1
             this._width_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[0] = 3
         }
         return this
     }
     height(value: Length | LayoutPolicy | undefined): this {
-        if (((this._flagArray[1]) == (0)) || (true))
-        {
+        if (((this._flagArray[1]) == (0)) || (true)) {
             this._flagArray[1] = 1
             this._height_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[1] = 3
         }
         return this
     }
-    responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
-        if (((this._flagArray[2]) == (0)) || (true))
-        {
+    drawModifier(value: DrawModifier | undefined): this {
+        if (((this._flagArray[2]) == (0)) || (true)) {
             this._flagArray[2] = 1
-            this._responseRegion_0_0value = value
+            this._drawModifier_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[2] = 3
         }
         return this
     }
-    mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
-        if (((this._flagArray[3]) == (0)) || (true))
-        {
+    responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+        if (((this._flagArray[3]) == (0)) || (true)) {
             this._flagArray[3] = 1
-            this._mouseResponseRegion_0_0value = value
+            this._responseRegion_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[3] = 3
         }
         return this
     }
-    responseRegionList(value: Array<ResponseRegion> | undefined): this {
-        if (((this._flagArray[4]) == (0)) || (true))
-        {
+    mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+        if (((this._flagArray[4]) == (0)) || (true)) {
             this._flagArray[4] = 1
-            this._responseRegionList_0_0value = value
+            this._mouseResponseRegion_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[4] = 3
         }
         return this
     }
-    size(value: SizeOptions | undefined): this {
-        if (((this._flagArray[5]) == (0)) || (true))
-        {
+    responseRegionList(value: Array<ResponseRegion> | undefined): this {
+        if (((this._flagArray[5]) == (0)) || (true)) {
             this._flagArray[5] = 1
-            this._size_0_0value = value
+            this._responseRegionList_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[5] = 3
         }
         return this
     }
-    constraintSize(value: ConstraintSizeOptions | undefined): this {
-        if (((this._flagArray[6]) == (0)) || (true))
-        {
+    size(value: SizeOptions | undefined): this {
+        if (((this._flagArray[6]) == (0)) || (true)) {
             this._flagArray[6] = 1
-            this._constraintSize_0_0value = value
+            this._size_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[6] = 3
         }
         return this
     }
-    hitTestBehavior(value: HitTestMode | undefined): this {
-        if (((this._flagArray[7]) == (0)) || (true))
-        {
+    constraintSize(value: ConstraintSizeOptions | undefined): this {
+        if (((this._flagArray[7]) == (0)) || (true)) {
             this._flagArray[7] = 1
-            this._hitTestBehavior_0_0value = value
+            this._constraintSize_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[7] = 3
         }
         return this
     }
-    onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this {
-        if (((this._flagArray[8]) == (0)) || (true))
-        {
+    hitTestBehavior(value: HitTestMode | undefined): this {
+        if (((this._flagArray[8]) == (0)) || (true)) {
             this._flagArray[8] = 1
-            this._onChildTouchTest_0_0value = value
+            this._hitTestBehavior_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[8] = 3
         }
         return this
     }
-    layoutWeight(value: number | string | undefined): this {
-        if (((this._flagArray[9]) == (0)) || ((this._layoutWeight_0_0value) !== (value)))
-        {
+    onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this {
+        if (((this._flagArray[9]) == (0)) || (true)) {
             this._flagArray[9] = 1
-            this._layoutWeight_0_0value = value
+            this._onChildTouchTest_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[9] = 3
         }
         return this
     }
-    chainWeight(value: ChainWeightOptions | undefined): this {
-        if (((this._flagArray[10]) == (0)) || (true))
-        {
+    layoutWeight(value: double | string | undefined): this {
+        if (((this._flagArray[10]) == (0)) || ((this._layoutWeight_0_0value) !== (value))) {
             this._flagArray[10] = 1
-            this._chainWeight_0_0value = value
+            this._layoutWeight_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[10] = 3
         }
         return this
     }
-    padding(value: Padding | Length | LocalizedPadding | undefined): this {
-        if (((this._flagArray[11]) == (0)) || (true))
-        {
+    chainWeight(value: ChainWeightOptions | undefined): this {
+        if (((this._flagArray[11]) == (0)) || (true)) {
             this._flagArray[11] = 1
-            this._padding_0_0value = value
+            this._chainWeight_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[11] = 3
         }
         return this
     }
-    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this {
-        if (((this._flagArray[12]) == (0)) || (true))
-        {
+    padding(value: Padding | Length | LocalizedPadding | undefined): this {
+        if (((this._flagArray[12]) == (0)) || (true)) {
             this._flagArray[12] = 1
-            this._safeAreaPadding_0_0value = value
+            this._padding_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[12] = 3
         }
         return this
     }
-    margin(value: Padding | Length | LocalizedPadding | undefined): this {
-        if (((this._flagArray[13]) == (0)) || (true))
-        {
+    safeAreaPadding(value: Padding | arkui_Graphics_LengthMetrics | LocalizedPadding | undefined): this {
+        if (((this._flagArray[13]) == (0)) || (true)) {
             this._flagArray[13] = 1
-            this._margin_0_0value = value
+            this._safeAreaPadding_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[13] = 3
         }
         return this
     }
-    backgroundColor(value: ResourceColor | ColorMetrics | undefined): this {
-        if (((this._flagArray[14]) == (0)) || (true))
-        {
+    margin(value: Margin | Length | LocalizedMargin | undefined): this {
+        if (((this._flagArray[14]) == (0)) || (true)) {
             this._flagArray[14] = 1
-            this._backgroundColor_0_0value = value
+            this._margin_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[14] = 3
         }
         return this
     }
-    pixelRound(value: PixelRoundPolicy | undefined): this {
-        if (((this._flagArray[15]) == (0)) || (true))
-        {
+    backgroundColor(value: ResourceColor | arkui_component_units_ColorMetrics | undefined): this {
+        if (((this._flagArray[15]) == (0)) || (true)) {
             this._flagArray[15] = 1
-            this._pixelRound_0_0value = value
+            this._backgroundColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[15] = 3
         }
         return this
     }
-    backgroundImage(value: ResourceStr | image.PixelMap | undefined): this {
-        if (((this._flagArray[16]) == (0)) || (true))
-        {
+    pixelRound(value: PixelRoundPolicy | undefined): this {
+        if (((this._flagArray[16]) == (0)) || (true)) {
             this._flagArray[16] = 1
-            this._backgroundImage_0_0value = value
+            this._pixelRound_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[16] = 3
         }
         return this
     }
-    backgroundImageSize(value: SizeOptions | ImageSize | undefined): this {
-        if (((this._flagArray[17]) == (0)) || (true))
-        {
+    backgroundImage(value: ResourceStr | PixelMap | undefined): this {
+        if (((this._flagArray[17]) == (0)) || (true)) {
             this._flagArray[17] = 1
-            this._backgroundImageSize_0_0value = value
+            this._backgroundImage_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[17] = 3
         }
         return this
     }
-    backgroundImagePosition(value: Position | Alignment | undefined): this {
-        if (((this._flagArray[18]) == (0)) || (true))
-        {
+    backgroundImageSize(value: SizeOptions | ImageSize | undefined): this {
+        if (((this._flagArray[18]) == (0)) || (true)) {
             this._flagArray[18] = 1
-            this._backgroundImagePosition_0_0value = value
+            this._backgroundImageSize_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[18] = 3
         }
         return this
     }
-    backgroundEffect(value: BackgroundEffectOptions | undefined): this {
-        // instructive change start
-        this.backgroundEffectClear();
-        // instructive change end
-        if (((this._flagArray[19]) == (0)) || (true))
-        {
+    backgroundImagePosition(value: Position | Alignment | undefined): this {
+        if (((this._flagArray[19]) == (0)) || (true)) {
             this._flagArray[19] = 1
-            this._backgroundEffect_0_0value = value
+            this._backgroundImagePosition_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[19] = 3
         }
         return this
     }
     backgroundImageResizable(value: ResizableOptions | undefined): this {
-        if (((this._flagArray[20]) == (0)) || (true))
-        {
+        if (((this._flagArray[20]) == (0)) || (true)) {
             this._flagArray[20] = 1
             this._backgroundImageResizable_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[20] = 3
         }
         return this
     }
     foregroundEffect(value: ForegroundEffectOptions | undefined): this {
-        if (((this._flagArray[21]) == (0)) || (true))
-        {
+        if (((this._flagArray[21]) == (0)) || (true)) {
             this._flagArray[21] = 1
             this._foregroundEffect_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[21] = 3
         }
         return this
     }
-    visualEffect(value: uiEffect.VisualEffect | undefined): this {
-        if (((this._flagArray[22]) == (0)) || (true))
-        {
+    visualEffect(value: VisualEffect | undefined): this {
+        if (((this._flagArray[22]) == (0)) || (true)) {
             this._flagArray[22] = 1
             this._visualEffect_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[22] = 3
         }
         return this
     }
-    backgroundFilter(value: uiEffect.Filter | undefined): this {
-        if (((this._flagArray[23]) == (0)) || (true))
-        {
+    backgroundFilter(value: Filter | undefined): this {
+        if (((this._flagArray[23]) == (0)) || (true)) {
             this._flagArray[23] = 1
             this._backgroundFilter_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[23] = 3
         }
         return this
     }
-    foregroundFilter(value: uiEffect.Filter | undefined): this {
-        if (((this._flagArray[24]) == (0)) || (true))
-        {
+    foregroundFilter(value: Filter | undefined): this {
+        if (((this._flagArray[24]) == (0)) || (true)) {
             this._flagArray[24] = 1
             this._foregroundFilter_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[24] = 3
         }
         return this
     }
-    compositingFilter(value: uiEffect.Filter | undefined): this {
-        if (((this._flagArray[25]) == (0)) || (true))
-        {
+    compositingFilter(value: Filter | undefined): this {
+        if (((this._flagArray[25]) == (0)) || (true)) {
             this._flagArray[25] = 1
             this._compositingFilter_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[25] = 3
         }
         return this
     }
-    opacity(value: double | Resource | undefined): this {
-        if (((this._flagArray[26]) == (0)) || (true))
-        {
+    materialFilter(value: Filter | undefined): this {
+        if (((this._flagArray[26]) == (0)) || (true)) {
             this._flagArray[26] = 1
-            this._opacity_0_0value = value
+            this._materialFilter_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[26] = 3
         }
         return this
     }
-    border(value: BorderOptions | undefined): this {
-        if (((this._flagArray[27]) == (0)) || (true))
-        {
+    opacity(value: double | global_resource_Resource | undefined): this {
+        if (((this._flagArray[27]) == (0)) || (true)) {
             this._flagArray[27] = 1
-            this._border_0_0value = value
+            this._opacity_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[27] = 3
         }
         return this
     }
-    borderStyle(value: BorderStyle | EdgeStyles | undefined): this {
-        if (((this._flagArray[28]) == (0)) || (true))
-        {
+    border(value: BorderOptions | undefined): this {
+        if (((this._flagArray[28]) == (0)) || (true)) {
             this._flagArray[28] = 1
-            this._borderStyle_0_0value = value
+            this._border_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[28] = 3
         }
         return this
     }
-    borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {
-        if (((this._flagArray[29]) == (0)) || (true))
-        {
+    borderStyle(value: BorderStyle | EdgeStyles | undefined): this {
+        if (((this._flagArray[29]) == (0)) || (true)) {
             this._flagArray[29] = 1
-            this._borderWidth_0_0value = value
+            this._borderStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[29] = 3
         }
         return this
     }
-    borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
-        if (((this._flagArray[30]) == (0)) || (true))
-        {
+    borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {
+        if (((this._flagArray[30]) == (0)) || (true)) {
             this._flagArray[30] = 1
-            this._borderColor_0_0value = value
+            this._borderWidth_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[30] = 3
         }
         return this
     }
-    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {
-        if (((this._flagArray[31]) == (0)) || (true))
-        {
+    borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
+        if (((this._flagArray[31]) == (0)) || (true)) {
             this._flagArray[31] = 1
-            this._borderRadius_0_0value = value
+            this._borderColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[31] = 3
         }
         return this
     }
     borderImage(value: BorderImageOption | undefined): this {
-        if (((this._flagArray[32]) == (0)) || (true))
-        {
+        if (((this._flagArray[32]) == (0)) || (true)) {
             this._flagArray[32] = 1
             this._borderImage_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[32] = 3
         }
         return this
     }
     outline(value: OutlineOptions | undefined): this {
-        if (((this._flagArray[33]) == (0)) || (true))
-        {
+        if (((this._flagArray[33]) == (0)) || (true)) {
             this._flagArray[33] = 1
             this._outline_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[33] = 3
         }
         return this
     }
     outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this {
-        if (((this._flagArray[34]) == (0)) || (true))
-        {
+        if (((this._flagArray[34]) == (0)) || (true)) {
             this._flagArray[34] = 1
             this._outlineStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[34] = 3
         }
         return this
     }
     outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this {
-        if (((this._flagArray[35]) == (0)) || (true))
-        {
+        if (((this._flagArray[35]) == (0)) || (true)) {
             this._flagArray[35] = 1
             this._outlineWidth_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[35] = 3
         }
         return this
     }
     outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
-        if (((this._flagArray[36]) == (0)) || (true))
-        {
+        if (((this._flagArray[36]) == (0)) || (true)) {
             this._flagArray[36] = 1
             this._outlineColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[36] = 3
         }
         return this
     }
     outlineRadius(value: Dimension | OutlineRadiuses | undefined): this {
-        if (((this._flagArray[37]) == (0)) || (true))
-        {
+        if (((this._flagArray[37]) == (0)) || (true)) {
             this._flagArray[37] = 1
             this._outlineRadius_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[37] = 3
         }
         return this
     }
     foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
-        if (((this._flagArray[38]) == (0)) || (true))
-        {
+        if (((this._flagArray[38]) == (0)) || (true)) {
             this._flagArray[38] = 1
             this._foregroundColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[38] = 3
         }
         return this
     }
     onClick(value: ((event: ClickEvent) => void) | undefined): this {
-        if (((this._flagArray[39]) == (0)) || (true))
-        {
+        if (((this._flagArray[39]) == (0)) || (true)) {
             this._flagArray[39] = 1
             this._onClick_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[39] = 3
         }
         return this
     }
     onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {
-        if (((this._flagArray[40]) == (0)) || (true))
-        {
+        if (((this._flagArray[40]) == (0)) || (true)) {
             this._flagArray[40] = 1
             this._onHover_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[40] = 3
         }
         return this
     }
-    onHoverMove(value: ((value0: HoverEvent) => void) | undefined): this {
-        if (((this._flagArray[41]) == (0)) || (true))
-        {
+    onHoverMove(value: arkui_component_common_Callback<HoverEvent, void> | undefined): this {
+        if (((this._flagArray[41]) == (0)) || (true)) {
             this._flagArray[41] = 1
             this._onHoverMove_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[41] = 3
         }
         return this
     }
     onAccessibilityHover(value: AccessibilityCallback | undefined): this {
-        if (((this._flagArray[42]) == (0)) || (true))
-        {
+        if (((this._flagArray[42]) == (0)) || (true)) {
             this._flagArray[42] = 1
             this._onAccessibilityHover_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[42] = 3
         }
         return this
     }
     onAccessibilityHoverTransparent(value: AccessibilityTransparentCallback | undefined): this {
-        if (((this._flagArray[43]) == (0)) || (true))
-        {
+        if (((this._flagArray[43]) == (0)) || (true)) {
             this._flagArray[43] = 1
             this._onAccessibilityHoverTransparent_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[43] = 3
         }
         return this
     }
     hoverEffect(value: HoverEffect | undefined): this {
-        if (((this._flagArray[44]) == (0)) || (true))
-        {
+        if (((this._flagArray[44]) == (0)) || (true)) {
             this._flagArray[44] = 1
             this._hoverEffect_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[44] = 3
         }
         return this
     }
     onMouse(value: ((event: MouseEvent) => void) | undefined): this {
-        if (((this._flagArray[45]) == (0)) || (true))
-        {
+        if (((this._flagArray[45]) == (0)) || (true)) {
             this._flagArray[45] = 1
             this._onMouse_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[45] = 3
         }
         return this
     }
     onTouch(value: ((event: TouchEvent) => void) | undefined): this {
-        if (((this._flagArray[46]) == (0)) || (true))
-        {
+        if (((this._flagArray[46]) == (0)) || (true)) {
             this._flagArray[46] = 1
             this._onTouch_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[46] = 3
         }
         return this
     }
-    onKeyEvent(value: ((value0: KeyEvent) => boolean) | undefined): this {
-        if (((this._flagArray[47]) == (0)) || (true))
-        {
+    onKeyEvent(value: arkui_component_common_Callback<KeyEvent, boolean> | undefined): this {
+        if (((this._flagArray[47]) == (0)) || (true)) {
             this._flagArray[47] = 1
             this._onKeyEvent_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[47] = 3
         }
         return this
     }
-    onDigitalCrown(value: ((value0: CrownEvent) => void) | undefined): this {
-        if (((this._flagArray[48]) == (0)) || (true))
-        {
+    onDigitalCrown(value: arkui_component_common_Callback<CrownEvent, void> | undefined): this {
+        if (((this._flagArray[48]) == (0)) || (true)) {
             this._flagArray[48] = 1
             this._onDigitalCrown_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[48] = 3
         }
         return this
     }
-    onKeyPreIme(value: ((value0: KeyEvent) => boolean) | undefined): this {
-        if (((this._flagArray[49]) == (0)) || (true))
-        {
+    onKeyPreIme(value: arkui_component_common_Callback<KeyEvent, boolean> | undefined): this {
+        if (((this._flagArray[49]) == (0)) || (true)) {
             this._flagArray[49] = 1
             this._onKeyPreIme_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[49] = 3
         }
         return this
     }
-    onKeyEventDispatch(value: ((value0: KeyEvent) => boolean) | undefined): this {
-        if (((this._flagArray[50]) == (0)) || (true))
-        {
+    onKeyEventDispatch(value: arkui_component_common_Callback<KeyEvent, boolean> | undefined): this {
+        if (((this._flagArray[50]) == (0)) || (true)) {
             this._flagArray[50] = 1
             this._onKeyEventDispatch_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[50] = 3
         }
         return this
     }
-    onFocusAxisEvent(value: ((value0: FocusAxisEvent) => void) | undefined): this {
-        if (((this._flagArray[51]) == (0)) || (true))
-        {
+    onFocusAxisEvent(value: arkui_component_common_Callback<FocusAxisEvent, void> | undefined): this {
+        if (((this._flagArray[51]) == (0)) || (true)) {
             this._flagArray[51] = 1
             this._onFocusAxisEvent_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[51] = 3
         }
         return this
     }
-    onAxisEvent(value: ((value0: AxisEvent) => void) | undefined): this {
-        if (((this._flagArray[52]) == (0)) || (true))
-        {
+    onAxisEvent(value: arkui_component_common_Callback<AxisEvent, void> | undefined): this {
+        if (((this._flagArray[52]) == (0)) || (true)) {
             this._flagArray[52] = 1
             this._onAxisEvent_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[52] = 3
         }
         return this
     }
     focusable(value: boolean | undefined): this {
-        if (((this._flagArray[53]) == (0)) || ((this._focusable_0_0value) !== (value)))
-        {
+        if (((this._flagArray[53]) == (0)) || ((this._focusable_0_0value) !== (value))) {
             this._flagArray[53] = 1
             this._focusable_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[53] = 3
         }
         return this
     }
     nextFocus(value: FocusMovement | undefined): this {
-        if (((this._flagArray[54]) == (0)) || (true))
-        {
+        if (((this._flagArray[54]) == (0)) || (true)) {
             this._flagArray[54] = 1
             this._nextFocus_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[54] = 3
         }
         return this
     }
     tabStop(value: boolean | undefined): this {
-        if (((this._flagArray[55]) == (0)) || ((this._tabStop_0_0value) !== (value)))
-        {
+        if (((this._flagArray[55]) == (0)) || ((this._tabStop_0_0value) !== (value))) {
             this._flagArray[55] = 1
             this._tabStop_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[55] = 3
         }
         return this
     }
     onFocus(value: (() => void) | undefined): this {
-        if (((this._flagArray[56]) == (0)) || (true))
-        {
+        if (((this._flagArray[56]) == (0)) || (true)) {
             this._flagArray[56] = 1
             this._onFocus_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[56] = 3
         }
         return this
     }
     onBlur(value: (() => void) | undefined): this {
-        if (((this._flagArray[57]) == (0)) || (true))
-        {
+        if (((this._flagArray[57]) == (0)) || (true)) {
             this._flagArray[57] = 1
             this._onBlur_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[57] = 3
         }
         return this
     }
     tabIndex(value: int32 | undefined): this {
-        if (((this._flagArray[58]) == (0)) || ((this._tabIndex_0_0value) !== (value)))
-        {
+        if (((this._flagArray[58]) == (0)) || ((this._tabIndex_0_0value) !== (value))) {
             this._flagArray[58] = 1
             this._tabIndex_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[58] = 3
         }
         return this
     }
     defaultFocus(value: boolean | undefined): this {
-        if (((this._flagArray[59]) == (0)) || ((this._defaultFocus_0_0value) !== (value)))
-        {
+        if (((this._flagArray[59]) == (0)) || ((this._defaultFocus_0_0value) !== (value))) {
             this._flagArray[59] = 1
             this._defaultFocus_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[59] = 3
         }
         return this
     }
     groupDefaultFocus(value: boolean | undefined): this {
-        if (((this._flagArray[60]) == (0)) || ((this._groupDefaultFocus_0_0value) !== (value)))
-        {
+        if (((this._flagArray[60]) == (0)) || ((this._groupDefaultFocus_0_0value) !== (value))) {
             this._flagArray[60] = 1
             this._groupDefaultFocus_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[60] = 3
         }
         return this
     }
     focusOnTouch(value: boolean | undefined): this {
-        if (((this._flagArray[61]) == (0)) || ((this._focusOnTouch_0_0value) !== (value)))
-        {
+        if (((this._flagArray[61]) == (0)) || ((this._focusOnTouch_0_0value) !== (value))) {
             this._flagArray[61] = 1
             this._focusOnTouch_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[61] = 3
         }
         return this
     }
     focusBox(value: FocusBoxStyle | undefined): this {
-        if (((this._flagArray[62]) == (0)) || (true))
-        {
+        if (((this._flagArray[62]) == (0)) || (true)) {
             this._flagArray[62] = 1
             this._focusBox_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[62] = 3
         }
         return this
     }
     animation(value: AnimateParam | undefined): this {
-        if (((this._flagArray[63]) == (0)) || (true))
-        {
+        if (((this._flagArray[63]) == (0)) || (true)) {
             this._flagArray[63] = 1
             this._animation_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[63] = 3
         }
         return this
     }
     transition(value: TransitionEffect | undefined): this {
-        if (((this._flagArray[64]) == (0)) || (true))
-        {
+        if (((this._flagArray[64]) == (0)) || (true)) {
             this._flagArray[64] = 1
             this._transition_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[64] = 3
         }
         return this
     }
     motionBlur(value: MotionBlurOptions | undefined): this {
-        if (((this._flagArray[65]) == (0)) || (true))
-        {
+        if (((this._flagArray[65]) == (0)) || (true)) {
             this._flagArray[65] = 1
             this._motionBlur_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[65] = 3
         }
         return this
     }
     brightness(value: double | undefined): this {
-        if (((this._flagArray[66]) == (0)) || ((this._brightness_0_0value) !== (value)))
-        {
+        if (((this._flagArray[66]) == (0)) || ((this._brightness_0_0value) !== (value))) {
             this._flagArray[66] = 1
             this._brightness_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[66] = 3
         }
         return this
     }
     contrast(value: double | undefined): this {
-        if (((this._flagArray[67]) == (0)) || ((this._contrast_0_0value) !== (value)))
-        {
+        if (((this._flagArray[67]) == (0)) || ((this._contrast_0_0value) !== (value))) {
             this._flagArray[67] = 1
             this._contrast_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[67] = 3
         }
         return this
     }
     grayscale(value: double | undefined): this {
-        if (((this._flagArray[68]) == (0)) || ((this._grayscale_0_0value) !== (value)))
-        {
+        if (((this._flagArray[68]) == (0)) || ((this._grayscale_0_0value) !== (value))) {
             this._flagArray[68] = 1
             this._grayscale_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[68] = 3
         }
         return this
     }
-    colorBlend(value: Color | string | Resource | undefined): this {
-        if (((this._flagArray[69]) == (0)) || (true))
-        {
+    colorBlend(value: arkui_component_enums_Color | string | global_resource_Resource | undefined): this {
+        if (((this._flagArray[69]) == (0)) || (true)) {
             this._flagArray[69] = 1
             this._colorBlend_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[69] = 3
         }
         return this
     }
     saturate(value: double | undefined): this {
-        if (((this._flagArray[70]) == (0)) || ((this._saturate_0_0value) !== (value)))
-        {
+        if (((this._flagArray[70]) == (0)) || ((this._saturate_0_0value) !== (value))) {
             this._flagArray[70] = 1
             this._saturate_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[70] = 3
         }
         return this
     }
     sepia(value: double | undefined): this {
-        if (((this._flagArray[71]) == (0)) || ((this._sepia_0_0value) !== (value)))
-        {
+        if (((this._flagArray[71]) == (0)) || ((this._sepia_0_0value) !== (value))) {
             this._flagArray[71] = 1
             this._sepia_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[71] = 3
         }
         return this
     }
     invert(value: double | InvertOptions | undefined): this {
-        if (((this._flagArray[72]) == (0)) || (true))
-        {
+        if (((this._flagArray[72]) == (0)) || (true)) {
             this._flagArray[72] = 1
             this._invert_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[72] = 3
         }
         return this
     }
     hueRotate(value: double | string | undefined): this {
-        if (((this._flagArray[73]) == (0)) || ((this._hueRotate_0_0value) !== (value)))
-        {
+        if (((this._flagArray[73]) == (0)) || ((this._hueRotate_0_0value) !== (value))) {
             this._flagArray[73] = 1
             this._hueRotate_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[73] = 3
         }
         return this
     }
     useShadowBatching(value: boolean | undefined): this {
-        if (((this._flagArray[74]) == (0)) || ((this._useShadowBatching_0_0value) !== (value)))
-        {
+        if (((this._flagArray[74]) == (0)) || ((this._useShadowBatching_0_0value) !== (value))) {
             this._flagArray[74] = 1
             this._useShadowBatching_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[74] = 3
         }
         return this
     }
     useEffect(value: boolean | undefined): this {
-        if (((this._flagArray[75]) == (0)) || ((this._useEffect_0_0value) !== (value)))
-        {
+        if (((this._flagArray[75]) == (0)) || ((this._useEffect_0_0value) !== (value))) {
             this._flagArray[75] = 1
             this._useEffect_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[75] = 3
         }
         return this
     }
-    renderGroup(value: boolean | undefined): this {
-        if (((this._flagArray[76]) == (0)) || ((this._renderGroup_0_0value) !== (value)))
-        {
+    useUnionEffect(value: boolean | undefined): this {
+        if (((this._flagArray[76]) == (0)) || ((this._useUnionEffect_0_0value) !== (value))) {
             this._flagArray[76] = 1
-            this._renderGroup_0_0value = value
+            this._useUnionEffect_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[76] = 3
         }
         return this
     }
-    freeze(value: boolean | undefined): this {
-        if (((this._flagArray[77]) == (0)) || ((this._freeze_0_0value) !== (value)))
-        {
+    renderGroup(value: boolean | undefined): this {
+        if (((this._flagArray[77]) == (0)) || ((this._renderGroup_0_0value) !== (value))) {
             this._flagArray[77] = 1
-            this._freeze_0_0value = value
+            this._renderGroup_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[77] = 3
         }
         return this
     }
-    translate(value: TranslateOptions | undefined): this {
-        if (((this._flagArray[78]) == (0)) || (true))
-        {
+    excludeFromRenderGroup(value: boolean | undefined): this {
+        if (((this._flagArray[78]) == (0)) || ((this._excludeFromRenderGroup_0_0value) !== (value))) {
             this._flagArray[78] = 1
-            this._translate_0_0value = value
+            this._excludeFromRenderGroup_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[78] = 3
         }
         return this
     }
-    scale(value: ScaleOptions | undefined): this {
-        if (((this._flagArray[79]) == (0)) || (true))
-        {
+    freeze(value: boolean | undefined): this {
+        if (((this._flagArray[79]) == (0)) || ((this._freeze_0_0value) !== (value))) {
             this._flagArray[79] = 1
-            this._scale_0_0value = value
+            this._freeze_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[79] = 3
         }
         return this
     }
-    rotate(value: RotateOptions | RotateAngleOptions | undefined): this {
-        if (((this._flagArray[80]) == (0)) || (true))
-        {
+    translate(value: TranslateOptions | undefined): this {
+        if (((this._flagArray[80]) == (0)) || (true)) {
             this._flagArray[80] = 1
-            this._rotate_0_0value = value
+            this._translate_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[80] = 3
         }
         return this
     }
-    transform(value: matrix4.Matrix4Transit | undefined): this {
-        if (((this._flagArray[81]) == (0)) || (true))
-        {
+    scale(value: ScaleOptions | undefined): this {
+        if (((this._flagArray[81]) == (0)) || (true)) {
             this._flagArray[81] = 1
-            this._transform_0_0value = value
+            this._scale_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[81] = 3
         }
         return this
     }
-    transform3D(value: matrix4.Matrix4Transit | undefined): this {
-        if (((this._flagArray[82]) == (0)) || (true))
-        {
+    rotate(value: RotateOptions | RotateAngleOptions | undefined): this {
+        if (((this._flagArray[82]) == (0)) || (true)) {
             this._flagArray[82] = 1
-            this._transform3D_0_0value = value
+            this._rotate_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[82] = 3
         }
         return this
     }
-    onAppear(value: (() => void) | undefined): this {
-        if (((this._flagArray[83]) == (0)) || (true))
-        {
+    transform(value: Matrix4Transit | undefined): this {
+        if (((this._flagArray[83]) == (0)) || (true)) {
             this._flagArray[83] = 1
-            this._onAppear_0_0value = value
+            this._transform_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[83] = 3
         }
         return this
     }
-    onDisAppear(value: (() => void) | undefined): this {
-        if (((this._flagArray[84]) == (0)) || (true))
-        {
+    transform3D(value: Matrix4Transit | undefined): this {
+        if (((this._flagArray[84]) == (0)) || (true)) {
             this._flagArray[84] = 1
-            this._onDisAppear_0_0value = value
+            this._transform3D_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[84] = 3
         }
         return this
     }
-    onAttach(value: VoidCallback | undefined): this {
-        if (((this._flagArray[85]) == (0)) || (true))
-        {
+    onAppear(value: (() => void) | undefined): this {
+        if (((this._flagArray[85]) == (0)) || (true)) {
             this._flagArray[85] = 1
-            this._onAttach_0_0value = value
+            this._onAppear_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[85] = 3
         }
         return this
     }
-    onDetach(value: VoidCallback | undefined): this {
-        if (((this._flagArray[86]) == (0)) || (true))
-        {
+    onDisAppear(value: (() => void) | undefined): this {
+        if (((this._flagArray[86]) == (0)) || (true)) {
             this._flagArray[86] = 1
-            this._onDetach_0_0value = value
+            this._onDisAppear_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[86] = 3
         }
         return this
     }
-    onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {
-        if (((this._flagArray[87]) == (0)) || (true))
-        {
+    onAttach(value: VoidCallback | undefined): this {
+        if (((this._flagArray[87]) == (0)) || (true)) {
             this._flagArray[87] = 1
-            this._onAreaChange_0_0value = value
+            this._onAttach_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[87] = 3
         }
         return this
     }
-    visibility(value: Visibility | undefined): this {
-        if (((this._flagArray[88]) == (0)) || (true))
-        {
+    onDetach(value: VoidCallback | undefined): this {
+        if (((this._flagArray[88]) == (0)) || (true)) {
             this._flagArray[88] = 1
-            this._visibility_0_0value = value
+            this._onDetach_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[88] = 3
         }
         return this
     }
-    flexGrow(value: number | undefined): this {
-        if (((this._flagArray[89]) == (0)) || ((this._flexGrow_0_0value) !== (value)))
-        {
+    onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {
+        if (((this._flagArray[89]) == (0)) || (true)) {
             this._flagArray[89] = 1
-            this._flexGrow_0_0value = value
+            this._onAreaChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[89] = 3
         }
         return this
     }
-    flexShrink(value: number | undefined): this {
-        if (((this._flagArray[90]) == (0)) || ((this._flexShrink_0_0value) !== (value)))
-        {
+    visibility(value: Visibility | undefined): this {
+        if (((this._flagArray[90]) == (0)) || (true)) {
             this._flagArray[90] = 1
-            this._flexShrink_0_0value = value
+            this._visibility_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[90] = 3
         }
         return this
     }
-    flexBasis(value: number | string | undefined): this {
-        if (((this._flagArray[91]) == (0)) || ((this._flexBasis_0_0value) !== (value)))
-        {
+    flexGrow(value: double | undefined): this {
+        if (((this._flagArray[91]) == (0)) || ((this._flexGrow_0_0value) !== (value))) {
             this._flagArray[91] = 1
-            this._flexBasis_0_0value = value
+            this._flexGrow_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[91] = 3
         }
         return this
     }
-    alignSelf(value: ItemAlign | undefined): this {
-        if (((this._flagArray[92]) == (0)) || (true))
-        {
+    flexShrink(value: double | undefined): this {
+        if (((this._flagArray[92]) == (0)) || ((this._flexShrink_0_0value) !== (value))) {
             this._flagArray[92] = 1
-            this._alignSelf_0_0value = value
+            this._flexShrink_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[92] = 3
         }
         return this
     }
-    layoutGravity(value: LocalizedAlignment | undefined): this {
-        if (((this._flagArray[93]) == (0)) || (true))
-        {
+    flexBasis(value: double | string | undefined): this {
+        if (((this._flagArray[93]) == (0)) || ((this._flexBasis_0_0value) !== (value))) {
             this._flagArray[93] = 1
-            this._layoutGravity_0_0value = value
+            this._flexBasis_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[93] = 3
         }
         return this
     }
-    displayPriority(value: number | undefined): this {
-        if (((this._flagArray[94]) == (0)) || ((this._displayPriority_0_0value) !== (value)))
-        {
+    alignSelf(value: ItemAlign | undefined): this {
+        if (((this._flagArray[94]) == (0)) || (true)) {
             this._flagArray[94] = 1
-            this._displayPriority_0_0value = value
+            this._alignSelf_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[94] = 3
         }
         return this
     }
-    zIndex(value: int32 | undefined): this {
-        if (((this._flagArray[95]) == (0)) || ((this._zIndex_0_0value) !== (value)))
-        {
+    layoutGravity(value: LocalizedAlignment | undefined): this {
+        if (((this._flagArray[95]) == (0)) || (true)) {
             this._flagArray[95] = 1
-            this._zIndex_0_0value = value
+            this._layoutGravity_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[95] = 3
         }
         return this
     }
-    direction(value: Direction | undefined): this {
-        if (((this._flagArray[96]) == (0)) || (true))
-        {
+    displayPriority(value: double | undefined): this {
+        if (((this._flagArray[96]) == (0)) || ((this._displayPriority_0_0value) !== (value))) {
             this._flagArray[96] = 1
-            this._direction_0_0value = value
+            this._displayPriority_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[96] = 3
         }
         return this
     }
-    align(value: Alignment | LocalizedAlignment | undefined): this {
-        if (((this._flagArray[97]) == (0)) || (true))
-        {
+    zIndex(value: int32 | undefined): this {
+        if (((this._flagArray[97]) == (0)) || ((this._zIndex_0_0value) !== (value))) {
             this._flagArray[97] = 1
-            this._align_0_0value = value
+            this._zIndex_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[97] = 3
         }
         return this
     }
-    position(value: Position | Edges | LocalizedEdges | undefined): this {
-        if (((this._flagArray[98]) == (0)) || (true))
-        {
+    direction(value: Direction | undefined): this {
+        if (((this._flagArray[98]) == (0)) || (true)) {
             this._flagArray[98] = 1
-            this._position_0_0value = value
+            this._direction_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[98] = 3
         }
         return this
     }
-    markAnchor(value: Position | LocalizedPosition | undefined): this {
-        if (((this._flagArray[99]) == (0)) || (true))
-        {
+    align(value: Alignment | LocalizedAlignment | undefined): this {
+        if (((this._flagArray[99]) == (0)) || (true)) {
             this._flagArray[99] = 1
-            this._markAnchor_0_0value = value
+            this._align_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[99] = 3
         }
         return this
     }
-    offset(value: Position | Edges | LocalizedEdges | undefined): this {
-        if (((this._flagArray[100]) == (0)) || (true))
-        {
+    position(value: Position | Edges | LocalizedEdges | undefined): this {
+        if (((this._flagArray[100]) == (0)) || (true)) {
             this._flagArray[100] = 1
-            this._offset_0_0value = value
+            this._position_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[100] = 3
         }
         return this
     }
-    enabled(value: boolean | undefined): this {
-        if (((this._flagArray[101]) == (0)) || ((this._enabled_0_0value) !== (value)))
-        {
+    markAnchor(value: Position | LocalizedPosition | undefined): this {
+        if (((this._flagArray[101]) == (0)) || (true)) {
             this._flagArray[101] = 1
-            this._enabled_0_0value = value
+            this._markAnchor_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[101] = 3
         }
         return this
     }
-    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
-        if (((this._flagArray[102]) == (0)) || (true))
-        {
+    offset(value: Position | Edges | LocalizedEdges | undefined): this {
+        if (((this._flagArray[102]) == (0)) || (true)) {
             this._flagArray[102] = 1
-            this._alignRules_0_0value = value
+            this._offset_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[102] = 3
         }
         return this
     }
-    aspectRatio(value: number | undefined): this {
-        if (((this._flagArray[103]) == (0)) || ((this._aspectRatio_0_0value) !== (value)))
-        {
+    enabled(value: boolean | undefined): this {
+        if (((this._flagArray[103]) == (0)) || ((this._enabled_0_0value) !== (value))) {
             this._flagArray[103] = 1
-            this._aspectRatio_0_0value = value
+            this._enabled_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[103] = 3
         }
         return this
     }
-    clickEffect(value: ClickEffect | null | undefined): this {
-        if (((this._flagArray[104]) == (0)) || (true))
-        {
+    alignRules(value: AlignRuleOption | LocalizedAlignRuleOptions | undefined): this {
+        if (((this._flagArray[104]) == (0)) || (true)) {
             this._flagArray[104] = 1
-            this._clickEffect_0_0value = value
+            this._alignRules_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[104] = 3
         }
         return this
     }
-    onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
-        if (((this._flagArray[105]) == (0)) || (true))
-        {
+    aspectRatio(value: double | undefined): this {
+        if (((this._flagArray[105]) == (0)) || ((this._aspectRatio_0_0value) !== (value))) {
             this._flagArray[105] = 1
-            this._onDragStart_0_0value = value
+            this._aspectRatio_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[105] = 3
         }
         return this
     }
-    onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
-        if (((this._flagArray[106]) == (0)) || (true))
-        {
+    clickEffect(value: ClickEffect | null | undefined): this {
+        if (((this._flagArray[106]) == (0)) || (true)) {
             this._flagArray[106] = 1
-            this._onDragEnter_0_0value = value
+            this._clickEffect_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[106] = 3
         }
         return this
     }
-    onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
-        if (((this._flagArray[107]) == (0)) || (true))
-        {
+    enableClickSoundEffect(value: boolean | undefined): this {
+        if (((this._flagArray[107]) == (0)) || ((this._enableClickSoundEffect_0_0value) !== (value))) {
             this._flagArray[107] = 1
-            this._onDragMove_0_0value = value
+            this._enableClickSoundEffect_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[107] = 3
         }
         return this
     }
-    onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
-        if (((this._flagArray[108]) == (0)) || (true))
-        {
+    onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
+        if (((this._flagArray[108]) == (0)) || (true)) {
             this._flagArray[108] = 1
-            this._onDragLeave_0_0value = value
+            this._onDragStart_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[108] = 3
         }
         return this
     }
-    onDrop(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
-        if (((this._flagArray[109]) == (0)) || (true))
-        {
+    onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        if (((this._flagArray[109]) == (0)) || (true)) {
             this._flagArray[109] = 1
-            this._onDrop_0_0value = value
+            this._onDragEnter_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[109] = 3
         }
         return this
     }
-    onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
-        if (((this._flagArray[110]) == (0)) || (true))
-        {
+    onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        if (((this._flagArray[110]) == (0)) || (true)) {
             this._flagArray[110] = 1
-            this._onDragEnd_0_0value = value
+            this._onDragMove_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[110] = 3
         }
         return this
     }
-    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | Array<string> | null | undefined): this {
-        if (((this._flagArray[111]) == (0)) || (true))
-        {
+    onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        if (((this._flagArray[111]) == (0)) || (true)) {
             this._flagArray[111] = 1
-            this._allowDrop_0_0value = value
+            this._onDragLeave_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[111] = 3
         }
         return this
     }
-    draggable(value: boolean | undefined): this {
-        if (((this._flagArray[112]) == (0)) || ((this._draggable_0_0value) !== (value)))
-        {
+    onDrop(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        if (((this._flagArray[112]) == (0)) || (true)) {
             this._flagArray[112] = 1
-            this._draggable_0_0value = value
+            this._onDrop_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[112] = 3
         }
         return this
     }
-    dragPreview(value: CustomBuilder | DragItemInfo | string | undefined): this {
-        if (((this._flagArray[113]) == (0)) || (true))
-        {
+    onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        if (((this._flagArray[113]) == (0)) || (true)) {
             this._flagArray[113] = 1
-            this._dragPreview_0_0value = value
+            this._onDragEnd_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[113] = 3
         }
         return this
     }
-    onPreDrag(value: ((value0: PreDragStatus) => void) | undefined): this {
-        if (((this._flagArray[114]) == (0)) || (true))
-        {
+    allowDrop(value: Array<UniformDataType> | Array<string> | null | undefined): this {
+        if (((this._flagArray[114]) == (0)) || (true)) {
             this._flagArray[114] = 1
-            this._onPreDrag_0_0value = value
+            this._allowDrop_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[114] = 3
         }
         return this
     }
-    linearGradient(value: LinearGradientOptions | undefined): this {
-        if (((this._flagArray[115]) == (0)) || (true))
-        {
+    draggable(value: boolean | undefined): this {
+        if (((this._flagArray[115]) == (0)) || ((this._draggable_0_0value) !== (value))) {
             this._flagArray[115] = 1
-            this._linearGradient_0_0value = value
+            this._draggable_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[115] = 3
         }
         return this
     }
-    sweepGradient(value: SweepGradientOptions | undefined): this {
-        if (((this._flagArray[116]) == (0)) || (true))
-        {
+    onPreDrag(value: arkui_component_common_Callback<PreDragStatus, void> | undefined): this {
+        if (((this._flagArray[116]) == (0)) || (true)) {
             this._flagArray[116] = 1
-            this._sweepGradient_0_0value = value
+            this._onPreDrag_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[116] = 3
         }
         return this
     }
-    radialGradient(value: RadialGradientOptions | undefined): this {
-        if (((this._flagArray[117]) == (0)) || (true))
-        {
+    linearGradient(value: LinearGradientOptions | undefined): this {
+        if (((this._flagArray[117]) == (0)) || (true)) {
             this._flagArray[117] = 1
-            this._radialGradient_0_0value = value
+            this._linearGradient_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[117] = 3
         }
         return this
     }
-    motionPath(value: MotionPathOptions | undefined): this {
-        if (((this._flagArray[118]) == (0)) || (true))
-        {
+    sweepGradient(value: SweepGradientOptions | undefined): this {
+        if (((this._flagArray[118]) == (0)) || (true)) {
             this._flagArray[118] = 1
-            this._motionPath_0_0value = value
+            this._sweepGradient_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[118] = 3
         }
         return this
     }
-    shadow(value: ShadowOptions | ShadowStyle | undefined): this {
-        if (((this._flagArray[119]) == (0)) || (true))
-        {
+    radialGradient(value: RadialGradientOptions | undefined): this {
+        if (((this._flagArray[119]) == (0)) || (true)) {
             this._flagArray[119] = 1
-            this._shadow_0_0value = value
+            this._radialGradient_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[119] = 3
         }
         return this
     }
-    clip(value: boolean | undefined): this {
-        if (((this._flagArray[120]) == (0)) || ((this._clip_0_0value) !== (value)))
-        {
+    motionPath(value: MotionPathOptions | undefined): this {
+        if (((this._flagArray[120]) == (0)) || (true)) {
             this._flagArray[120] = 1
-            this._clip_0_0value = value
+            this._motionPath_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[120] = 3
         }
         return this
     }
-    clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
-        if (((this._flagArray[121]) == (0)) || (true))
-        {
+    shadow(value: ShadowOptions | ShadowStyle | undefined): this {
+        if (((this._flagArray[121]) == (0)) || (true)) {
             this._flagArray[121] = 1
-            this._clipShape_0_0value = value
+            this._shadow_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[121] = 3
         }
         return this
     }
-    mask(value: ProgressMask | undefined): this {
-        if (((this._flagArray[122]) == (0)) || (true))
-        {
+    clip(value: boolean | undefined): this {
+        if (((this._flagArray[122]) == (0)) || ((this._clip_0_0value) !== (value))) {
             this._flagArray[122] = 1
-            this._mask_0_0value = value
+            this._clip_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[122] = 3
         }
         return this
     }
-    maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
-        if (((this._flagArray[123]) == (0)) || (true))
-        {
+    clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
+        if (((this._flagArray[123]) == (0)) || (true)) {
             this._flagArray[123] = 1
-            this._maskShape_0_0value = value
+            this._clipShape_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[123] = 3
         }
         return this
     }
-    key(value: string | undefined): this {
-        if (((this._flagArray[124]) == (0)) || ((this._key_0_0value) !== (value)))
-        {
+    mask(value: ProgressMask | undefined): this {
+        if (((this._flagArray[124]) == (0)) || (true)) {
             this._flagArray[124] = 1
-            this._key_0_0value = value
+            this._mask_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[124] = 3
         }
         return this
     }
-    id(value: string | undefined): this {
-        if (((this._flagArray[125]) == (0)) || ((this._id_0_0value) !== (value)))
-        {
+    maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
+        if (((this._flagArray[125]) == (0)) || (true)) {
             this._flagArray[125] = 1
-            this._id_0_0value = value
+            this._maskShape_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[125] = 3
         }
         return this
     }
-    geometryTransition(value: string | undefined): this {
-        if (((this._flagArray[126]) == (0)) || ((this._geometryTransition_0_0value) !== (value)))
-        {
+    key(value: string | undefined): this {
+        if (((this._flagArray[126]) == (0)) || ((this._key_0_0value) !== (value))) {
             this._flagArray[126] = 1
-            this._geometryTransition_0_0value = value
+            this._key_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[126] = 3
         }
         return this
     }
-    restoreId(value: int32 | undefined): this {
-        if (((this._flagArray[127]) == (0)) || ((this._restoreId_0_0value) !== (value)))
-        {
+    id(value: string | undefined): this {
+        if (((this._flagArray[127]) == (0)) || ((this._id_0_0value) !== (value))) {
             this._flagArray[127] = 1
-            this._restoreId_0_0value = value
+            this._id_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[127] = 3
         }
         return this
     }
-    sphericalEffect(value: double | undefined): this {
-        if (((this._flagArray[128]) == (0)) || ((this._sphericalEffect_0_0value) !== (value)))
-        {
+    stateStyles(value: StateStyles | undefined): this {
+        if (((this._flagArray[128]) == (0)) || (true)) {
             this._flagArray[128] = 1
-            this._sphericalEffect_0_0value = value
+            this._stateStyles_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[128] = 3
         }
         return this
     }
-    lightUpEffect(value: double | undefined): this {
-        if (((this._flagArray[129]) == (0)) || ((this._lightUpEffect_0_0value) !== (value)))
-        {
+    restoreId(value: int32 | undefined): this {
+        if (((this._flagArray[129]) == (0)) || ((this._restoreId_0_0value) !== (value))) {
             this._flagArray[129] = 1
-            this._lightUpEffect_0_0value = value
+            this._restoreId_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[129] = 3
         }
         return this
     }
-    pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
-        if (((this._flagArray[130]) == (0)) || (true))
-        {
+    sphericalEffect(value: double | undefined): this {
+        if (((this._flagArray[130]) == (0)) || ((this._sphericalEffect_0_0value) !== (value))) {
             this._flagArray[130] = 1
-            this._pixelStretchEffect_0_0value = value
+            this._sphericalEffect_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[130] = 3
         }
         return this
     }
-    accessibilityGroup(value: boolean | undefined): this {
-        if (((this._flagArray[131]) == (0)) || ((this._accessibilityGroup_0_0value) !== (value)))
-        {
+    lightUpEffect(value: double | undefined): this {
+        if (((this._flagArray[131]) == (0)) || ((this._lightUpEffect_0_0value) !== (value))) {
             this._flagArray[131] = 1
-            this._accessibilityGroup_0_0value = value
+            this._lightUpEffect_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[131] = 3
         }
         return this
     }
-    accessibilityText(value: Resource | undefined): this {
-        if (((this._flagArray[137]) == (0)) || (true)) {
-            this._flagArray[137] = 1
-            this._accessibilityTextOfResourceType_0_0value = value
-            this._state.fireChange()
-        } else {
-            this._flagArray[137] = 3
-        }
-        return this
-    }
-    accessibilityText(value: string | undefined): this {
-        if (((this._flagArray[132]) == (0)) || ((this._accessibilityTextOfStringType_0_0value) !== (value))) {
+    pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
+        if (((this._flagArray[132]) == (0)) || (true)) {
             this._flagArray[132] = 1
-            this._accessibilityTextOfStringType_0_0value = value
+            this._pixelStretchEffect_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[132] = 3
         }
         return this
     }
-    accessibilityText(value: Resource | string | undefined): this {
-        if (value instanceof Resource) {
-            const value_casted = value as (Resource | undefined)
-            this.accessibilityText(value_casted)
-            this._state.fireChange()
-            return this
-        } else {
-            const value_casted = value as (string | undefined)
-            this.accessibilityText(value_casted)
-            return this
-        }
-    }
     accessibilityNextFocusId(value: string | undefined): this {
-        if (((this._flagArray[133]) == (0)) || ((this._accessibilityNextFocusId_0_0value) !== (value)))
-        {
+        if (((this._flagArray[133]) == (0)) || ((this._accessibilityNextFocusId_0_0value) !== (value))) {
             this._flagArray[133] = 1
             this._accessibilityNextFocusId_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[133] = 3
         }
         return this
     }
     accessibilityDefaultFocus(value: boolean | undefined): this {
-        if (((this._flagArray[134]) == (0)) || ((this._accessibilityDefaultFocus_0_0value) !== (value)))
-        {
+        if (((this._flagArray[134]) == (0)) || ((this._accessibilityDefaultFocus_0_0value) !== (value))) {
             this._flagArray[134] = 1
             this._accessibilityDefaultFocus_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[134] = 3
         }
         return this
     }
     accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this {
-        if (((this._flagArray[135]) == (0)) || (true))
-        {
+        if (((this._flagArray[135]) == (0)) || (true)) {
             this._flagArray[135] = 1
             this._accessibilityUseSamePage_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[135] = 3
         }
         return this
     }
     accessibilityScrollTriggerable(value: boolean | undefined): this {
-        if (((this._flagArray[136]) == (0)) || ((this._accessibilityScrollTriggerable_0_0value) !== (value)))
-        {
+        if (((this._flagArray[136]) == (0)) || ((this._accessibilityScrollTriggerable_0_0value) !== (value))) {
             this._flagArray[136] = 1
             this._accessibilityScrollTriggerable_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[136] = 3
         }
         return this
     }
-    accessibilityTextOfResourceType(value: Resource | undefined): this {
-        if (((this._flagArray[137]) == (0)) || (true))
-        {
+    accessibilityText(value: global_resource_Resource | string | undefined): this {
+        if (((this._flagArray[137]) == (0)) || (true)) {
             this._flagArray[137] = 1
-            this._accessibilityTextOfResourceType_0_0value = value
+            this._accessibilityText_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[137] = 3
         }
         return this
     }
     accessibilityRole(value: AccessibilityRoleType | undefined): this {
-        if (((this._flagArray[138]) == (0)) || (true))
-        {
+        if (((this._flagArray[138]) == (0)) || (true)) {
             this._flagArray[138] = 1
             this._accessibilityRole_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[138] = 3
         }
         return this
     }
     onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
-        if (((this._flagArray[139]) == (0)) || (true))
-        {
+        if (((this._flagArray[139]) == (0)) || (true)) {
             this._flagArray[139] = 1
             this._onAccessibilityFocus_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[139] = 3
         }
         return this
     }
     onAccessibilityActionIntercept(value: AccessibilityActionInterceptCallback | undefined): this {
-        if (((this._flagArray[140]) == (0)) || (true))
-        {
+        if (((this._flagArray[140]) == (0)) || (true)) {
             this._flagArray[140] = 1
             this._onAccessibilityActionIntercept_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[140] = 3
         }
         return this
     }
     accessibilityTextHint(value: string | undefined): this {
-        if (((this._flagArray[141]) == (0)) || ((this._accessibilityTextHint_0_0value) !== (value)))
-        {
+        if (((this._flagArray[141]) == (0)) || ((this._accessibilityTextHint_0_0value) !== (value))) {
             this._flagArray[141] = 1
             this._accessibilityTextHint_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[141] = 3
         }
         return this
     }
-    accessibilityDescription(value: string | undefined): this {
-        if (((this._flagArray[142]) == (0)) || ((this._accessibilityDescriptionOfStringType_0_0value) !== (value))) {
+    accessibilityDescription(value: global_resource_Resource | string | undefined): this {
+        if (((this._flagArray[142]) == (0)) || (true)) {
             this._flagArray[142] = 1
-            this._accessibilityDescriptionOfStringType_0_0value = value
+            this._accessibilityDescription_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[142] = 3
         }
         return this
     }
-    accessibilityDescription(value: Resource | undefined): this {
-        if (((this._flagArray[143]) == (0)) || (true)) {
+    accessibilityLevel(value: string | undefined): this {
+        if (((this._flagArray[143]) == (0)) || ((this._accessibilityLevel_0_0value) !== (value))) {
             this._flagArray[143] = 1
-            this._accessibilityDescriptionOfResourceType_0_0value = value
+            this._accessibilityLevel_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[143] = 3
         }
         return this
     }
-    accessibilityDescription(value: Resource | string | undefined): this {
-        if (value instanceof Resource) {
-            const value_casted = value as (Resource | undefined)
-            this.accessibilityDescription(value_casted)
-            this._state.fireChange()
-            return this
-        } else {
-            const value_casted = value as (string | undefined)
-            this.accessibilityDescription(value_casted)
-            return this
-        }
-    }
-    accessibilityLevel(value: string | undefined): this {
-        if (((this._flagArray[144]) == (0)) || ((this._accessibilityLevel_0_0value) !== (value)))
-        {
+    accessibilityVirtualNode(value: CustomBuilder | undefined): this {
+        if (((this._flagArray[144]) == (0)) || (true)) {
             this._flagArray[144] = 1
-            this._accessibilityLevel_0_0value = value
+            this._accessibilityVirtualNode_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[144] = 3
         }
         return this
     }
-    accessibilityVirtualNode(value: CustomBuilder | undefined): this {
-        if (((this._flagArray[145]) == (0)) || (true))
-        {
+    accessibilityChecked(value: boolean | undefined): this {
+        if (((this._flagArray[145]) == (0)) || ((this._accessibilityChecked_0_0value) !== (value))) {
             this._flagArray[145] = 1
-            this._accessibilityVirtualNode_0_0value = value
+            this._accessibilityChecked_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[145] = 3
         }
         return this
     }
-    accessibilityChecked(value: boolean | undefined): this {
-        if (((this._flagArray[146]) == (0)) || ((this._accessibilityChecked_0_0value) !== (value)))
-        {
+    accessibilitySelected(value: boolean | undefined): this {
+        if (((this._flagArray[146]) == (0)) || ((this._accessibilitySelected_0_0value) !== (value))) {
             this._flagArray[146] = 1
-            this._accessibilityChecked_0_0value = value
+            this._accessibilitySelected_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[146] = 3
         }
         return this
     }
-    accessibilitySelected(value: boolean | undefined): this {
-        if (((this._flagArray[147]) == (0)) || ((this._accessibilitySelected_0_0value) !== (value)))
-        {
+    obscured(value: Array<ObscuredReasons> | undefined): this {
+        if (((this._flagArray[147]) == (0)) || (true)) {
             this._flagArray[147] = 1
-            this._accessibilitySelected_0_0value = value
+            this._obscured_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[147] = 3
         }
         return this
     }
-    obscured(value: Array<ObscuredReasons> | undefined): this {
-        if (((this._flagArray[148]) == (0)) || (true))
-        {
+    reuseId(value: string | undefined): this {
+        if (((this._flagArray[148]) == (0)) || ((this._reuseId_0_0value) !== (value))) {
             this._flagArray[148] = 1
-            this._obscured_0_0value = value
+            this._reuseId_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[148] = 3
         }
         return this
     }
-    reuseId(value: string | undefined): this {
-        if (((this._flagArray[149]) == (0)) || ((this._reuseId_0_0value) !== (value)))
-        {
+    reuse(value: ReuseOptions | undefined): this {
+        if (((this._flagArray[149]) == (0)) || (true)) {
             this._flagArray[149] = 1
-            this._reuseId_0_0value = value
+            this._reuse_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[149] = 3
         }
         return this
     }
-    reuse(value: ReuseOptions | undefined): this {
-        if (((this._flagArray[150]) == (0)) || (true))
-        {
+    renderFit(value: RenderFit | undefined): this {
+        if (((this._flagArray[150]) == (0)) || (true)) {
             this._flagArray[150] = 1
-            this._reuse_0_0value = value
+            this._renderFit_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[150] = 3
         }
         return this
     }
-    renderFit(value: RenderFit | undefined): this {
-        if (((this._flagArray[151]) == (0)) || (true))
-        {
+    gestureModifier(value: GestureModifier | undefined): this {
+        if (((this._flagArray[151]) == (0)) || (true)) {
             this._flagArray[151] = 1
-            this._renderFit_0_0value = value
+            this._gestureModifier_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[151] = 3
         }
         return this
     }
     backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this {
-        if (((this._flagArray[152]) == (0)) || (true))
-        {
+        if (((this._flagArray[152]) == (0)) || (true)) {
             this._flagArray[152] = 1
             this._backgroundBrightness_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[152] = 3
         }
         return this
     }
     onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {
-        if (((this._flagArray[153]) == (0)) || (true))
-        {
+        if (((this._flagArray[153]) == (0)) || (true)) {
             this._flagArray[153] = 1
             this._onGestureJudgeBegin_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[153] = 3
         }
         return this
     }
     onGestureRecognizerJudgeBegin(value: GestureRecognizerJudgeBeginCallback | undefined): this {
-        if (((this._flagArray[154]) == (0)) || (true))
-        {
+        if (((this._flagArray[154]) == (0)) || (true)) {
             this._flagArray[154] = 1
             this._onGestureRecognizerJudgeBegin_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[154] = 3
         }
         return this
     }
     shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {
-        if (((this._flagArray[155]) == (0)) || (true))
-        {
+        if (((this._flagArray[155]) == (0)) || (true)) {
             this._flagArray[155] = 1
             this._shouldBuiltInRecognizerParallelWith_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[155] = 3
         }
         return this
     }
     monopolizeEvents(value: boolean | undefined): this {
-        if (((this._flagArray[156]) == (0)) || ((this._monopolizeEvents_0_0value) !== (value)))
-        {
+        if (((this._flagArray[156]) == (0)) || ((this._monopolizeEvents_0_0value) !== (value))) {
             this._flagArray[156] = 1
             this._monopolizeEvents_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[156] = 3
         }
         return this
     }
-    onTouchIntercept(value: ((value0: TouchEvent) => HitTestMode) | undefined): this {
-        if (((this._flagArray[157]) == (0)) || (true))
-        {
+    onTouchIntercept(value: arkui_component_common_Callback<TouchEvent, HitTestMode> | undefined): this {
+        if (((this._flagArray[157]) == (0)) || (true)) {
             this._flagArray[157] = 1
             this._onTouchIntercept_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[157] = 3
         }
         return this
     }
     onSizeChange(value: SizeChangeCallback | undefined): this {
-        if (((this._flagArray[158]) == (0)) || (true))
-        {
+        if (((this._flagArray[158]) == (0)) || (true)) {
             this._flagArray[158] = 1
             this._onSizeChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[158] = 3
         }
         return this
     }
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
-        if (((this._flagArray[159]) == (0)) || (true))
-        {
+        if (((this._flagArray[159]) == (0)) || (true)) {
             this._flagArray[159] = 1
             this._accessibilityFocusDrawLevel_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[159] = 3
         }
         return this
     }
-    customProperty(name: string, value: CustomProperty): this {
-        // instructive change start
-        hookCommonMethodModifierCustomProperty(this, name, value)
-        // instructive change end
-        if (((this._flagArray[160]) == (0)) || ((this._customProperty_0_0value) !== (name)) || (true))
-        {
+    onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
+        if (((this._flagArray[160]) == (0)) || (true)) {
             this._flagArray[160] = 1
-            this._customProperty_0_0value = name
-            this._customProperty_0_1value = value
+            this._onTouchTestDone_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[160] = 3
         }
         return this
     }
-    expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
-        if (((this._flagArray[161]) == (0)) || (true) || (true))
-        {
+    systemMaterial(value: SystemUiMaterial | undefined): this {
+        if (((this._flagArray[161]) == (0)) || (true)) {
             this._flagArray[161] = 1
-            this._expandSafeArea_0_0value = types
-            this._expandSafeArea_0_1value = edges
+            this._systemMaterial_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[161] = 3
         }
         return this
     }
-    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
-        if (((this._flagArray[162]) == (0)) || (true) || (true))
-        {
+    onNeedSoftkeyboard(value: OnNeedSoftkeyboardCallback | undefined): this {
+        if (((this._flagArray[162]) == (0)) || (true)) {
             this._flagArray[162] = 1
-            this._ignoreLayoutSafeArea_0_0value = types
-            this._ignoreLayoutSafeArea_0_1value = edges
+            this._onNeedSoftkeyboard_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[162] = 3
         }
         return this
     }
-    background(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): this {
-        if (((this._flagArray[163]) == (0)) || (true) || (true))
-        {
+    accessibilityStateDescription(value: string | global_resource_Resource | undefined): this {
+        if (((this._flagArray[163]) == (0)) || (true)) {
             this._flagArray[163] = 1
-            this._background_0_0value = content
-            this._background_0_1value = options
+            this._accessibilityStateDescription_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[163] = 3
         }
         return this
     }
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, options: BackgroundImageOptions): this {
-        if (((this._flagArray[164]) == (0)) || (true) || (true))
-        {
+    accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
+        if (((this._flagArray[164]) == (0)) || (true)) {
             this._flagArray[164] = 1
-            this._backgroundImage_1_0value = src
-            this._backgroundImage_1_1value = options
+            this._accessibilityActionOptions_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[164] = 3
         }
         return this
     }
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat: ImageRepeat): this {
-        if (((this._flagArray[165]) == (0)) || (true) || (true))
-        {
-            this._flagArray[165] = 1
-            this._backgroundImage_2_0value = src
-            this._backgroundImage_2_1value = repeat
-            this._state.fireChange()
-        } else
-        {
-            this._flagArray[165] = 3
-        }
+    customProperty(name: string, value: CustomProperty): this {
+        hookCommonMethodModifierCustomProperty(this, name, value)
         return this
     }
-
-    // instructive change start
-    backgroundEffectClear() {
-        // backgroundBlurStyle clear
-        this._flagArray[166] = 0;
-
-        // backgroundEffect clear
-        this._flagArray[167] = 0;
-        this._flagArray[19] = 0;
-
-        // backdropBlur clear
-        this._flagArray[178] = 0;
-    }
-    // instructive change end
-    backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
-        // instructive change start
-        this.backgroundEffectClear();
-        // instructive change end
-        if (((this._flagArray[166]) == (0)) || (true) || (true) || (true))
-        {
+    expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+        if (((this._flagArray[166]) == (0)) || (true) || (true)) {
             this._flagArray[166] = 1
-            this._backgroundBlurStyle_0_0value = style
-            this._backgroundBlurStyle_0_1value = options
-            this._backgroundBlurStyle_0_2value = sysOptions
+            this._expandSafeArea_0_0value = types
+            this._expandSafeArea_0_1value = edges
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[166] = 3
         }
         return this
     }
-    backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {
-        // instructive change start
-        this.backgroundEffectClear();
-        // instructive change end
-        if (((this._flagArray[167]) == (0)) || (true) || (true))
-        {
+    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        if (((this._flagArray[167]) == (0)) || (true) || (true)) {
             this._flagArray[167] = 1
-            this._backgroundEffect_1_0value = options
-            this._backgroundEffect_1_1value = sysOptions
+            this._ignoreLayoutSafeArea_0_0value = types
+            this._ignoreLayoutSafeArea_0_1value = edges
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[167] = 3
         }
         return this
     }
-    foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
-        if (((this._flagArray[168]) == (0)) || (true) || (true) || (true))
-        {
+    background(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): this {
+        if (((this._flagArray[168]) == (0)) || (true) || (true)) {
             this._flagArray[168] = 1
-            this._foregroundBlurStyle_0_0value = style
-            this._foregroundBlurStyle_0_1value = options
-            this._foregroundBlurStyle_0_2value = sysOptions
+            this._background_0_0value = content
+            this._background_0_1value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[168] = 3
         }
         return this
     }
-    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined, type?: RenderStrategy): this {
-        if (((this._flagArray[169]) == (0)) || (true) || (true))
-        {
+    backgroundImage(src: ResourceStr | PixelMap | undefined, options: BackgroundImageOptions): this {
+        if (((this._flagArray[169]) == (0)) || (true) || (true)) {
             this._flagArray[169] = 1
-            this._borderRadius_1_0value = value
-            this._borderRadius_1_1value = type
+            this._backgroundImage_1_0value = src
+            this._backgroundImage_1_1value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[169] = 3
         }
         return this
     }
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
-        if (((this._flagArray[170]) == (0)) || (true) || ((this._onClick_1_1value) !== (distanceThreshold)))
-        {
+    backgroundImage(src: ResourceStr | PixelMap | undefined, repeat: ImageRepeat): this {
+        if (((this._flagArray[170]) == (0)) || (true) || (true)) {
             this._flagArray[170] = 1
-            this._onClick_1_0value = event
-            this._onClick_1_1value = distanceThreshold
+            this._backgroundImage_2_0value = src
+            this._backgroundImage_2_1value = repeat
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[170] = 3
         }
         return this
     }
-    focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
-        if (((this._flagArray[171]) == (0)) || ((this._focusScopeId_0_0value) !== (id)) || ((this._focusScopeId_0_1value) !== (isGroup)) || ((this._focusScopeId_0_2value) !== (arrowStepOut)))
-        {
+    backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+        if (((this._flagArray[171]) == (0)) || (true) || (true) || (true)) {
             this._flagArray[171] = 1
-            this._focusScopeId_0_0value = id
-            this._focusScopeId_0_1value = isGroup
-            this._focusScopeId_0_2value = arrowStepOut
+            this._backgroundBlurStyle_0_0value = style
+            this._backgroundBlurStyle_0_1value = options
+            this._backgroundBlurStyle_0_2value = sysOptions
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[171] = 3
         }
         return this
     }
-    focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this {
-        if (((this._flagArray[172]) == (0)) || ((this._focusScopePriority_0_0value) !== (scopeId)) || (true))
-        {
+    backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {
+        if (((this._flagArray[172]) == (0)) || (true) || (true)) {
             this._flagArray[172] = 1
-            this._focusScopePriority_0_0value = scopeId
-            this._focusScopePriority_0_1value = priority
+            this._backgroundEffect_0_0value = options
+            this._backgroundEffect_0_1value = sysOptions
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[172] = 3
         }
         return this
     }
-    transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
-        if (((this._flagArray[173]) == (0)) || (true) || (true))
-        {
+    foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+        if (((this._flagArray[173]) == (0)) || (true) || (true) || (true)) {
             this._flagArray[173] = 1
-            this._transition_1_0value = effect
-            this._transition_1_1value = onFinish
+            this._foregroundBlurStyle_0_0value = style
+            this._foregroundBlurStyle_0_1value = options
+            this._foregroundBlurStyle_0_2value = sysOptions
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[173] = 3
         }
         return this
     }
-    blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
-        if (((this._flagArray[174]) == (0)) || ((this._blur_0_0value) !== (blurRadius)) || (true) || (true))
-        {
+    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined, type?: RenderStrategy): this {
+        if (((this._flagArray[174]) == (0)) || (true) || (true)) {
             this._flagArray[174] = 1
-            this._blur_0_0value = blurRadius
-            this._blur_0_1value = options
-            this._blur_0_2value = sysOptions
+            this._borderRadius_0_0value = value
+            this._borderRadius_0_1value = type
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[174] = 3
         }
         return this
     }
-    linearGradientBlur(value: double | undefined, options: LinearGradientBlurOptions | undefined): this {
-        if (((this._flagArray[175]) == (0)) || ((this._linearGradientBlur_0_0value) !== (value)) || (true))
-        {
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: double | undefined): this {
+        if (((this._flagArray[175]) == (0)) || (true) || ((this._onClick_1_1value) !== (distanceThreshold))) {
             this._flagArray[175] = 1
-            this._linearGradientBlur_0_0value = value
-            this._linearGradientBlur_0_1value = options
+            this._onClick_1_0value = event
+            this._onClick_1_1value = distanceThreshold
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[175] = 3
         }
         return this
     }
-    systemBarEffect(): this {
-        if ((this._flagArray[176]) == (0))
-        {
+    focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
+        if (((this._flagArray[176]) == (0)) || ((this._focusScopeId_0_0value) !== (id)) || ((this._focusScopeId_0_1value) !== (isGroup)) || ((this._focusScopeId_0_2value) !== (arrowStepOut))) {
             this._flagArray[176] = 1
+            this._focusScopeId_0_0value = id
+            this._focusScopeId_0_1value = isGroup
+            this._focusScopeId_0_2value = arrowStepOut
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[176] = 3
         }
         return this
     }
-    useEffect(useEffect: boolean | undefined, effectType: EffectType | undefined): this {
-        if (((this._flagArray[177]) == (0)) || ((this._useEffect_1_0value) !== (useEffect)) || (true))
-        {
+    focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this {
+        if (((this._flagArray[177]) == (0)) || ((this._focusScopePriority_0_0value) !== (scopeId)) || (true)) {
             this._flagArray[177] = 1
-            this._useEffect_1_0value = useEffect
-            this._useEffect_1_1value = effectType
+            this._focusScopePriority_0_0value = scopeId
+            this._focusScopePriority_0_1value = priority
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[177] = 3
         }
         return this
     }
-    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
-        // instructive change start
-        this.backgroundEffectClear();
-        // instructive change end
-        if (((this._flagArray[178]) == (0)) || ((this._backdropBlur_0_0value) !== (radius)) || (true) || (true))
-        {
+    transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
+        if (((this._flagArray[178]) == (0)) || (true) || (true)) {
             this._flagArray[178] = 1
-            this._backdropBlur_0_0value = radius
-            this._backdropBlur_0_1value = options
-            this._backdropBlur_0_2value = sysOptions
+            this._transition_1_0value = effect
+            this._transition_1_1value = onFinish
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[178] = 3
         }
         return this
     }
-    sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
-        if (((this._flagArray[179]) == (0)) || ((this._sharedTransition_0_0value) !== (id)) || (true))
-        {
+    gesture(gesture: GestureType, mask?: GestureMask): this {
+        if (((this._flagArray[179]) == (0)) || (true) || (true)) {
             this._flagArray[179] = 1
-            this._sharedTransition_0_0value = id
-            this._sharedTransition_0_1value = options
+            this._gesture_0_0value = gesture
+            this._gesture_0_1value = mask
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[179] = 3
         }
         return this
     }
-    onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
-        if (((this._flagArray[211]) == (0)) || (true))
-        {
-            this._flagArray[211] = 1
-            this._onTouchTestDone_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._flagArray[211] = 3
-        }
-        return this
-    }
-    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
-        if (((this._flagArray[180]) == (0)) || (true) || (true))
-        {
+    priorityGesture(gesture: GestureType, mask?: GestureMask): this {
+        if (((this._flagArray[180]) == (0)) || (true) || (true)) {
             this._flagArray[180] = 1
-            this._chainMode_0_0value = direction
-            this._chainMode_0_1value = style
+            this._priorityGesture_0_0value = gesture
+            this._priorityGesture_0_1value = mask
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[180] = 3
         }
         return this
     }
-    onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
-        if (((this._flagArray[181]) == (0)) || (true) || (true))
-        {
+    parallelGesture(gesture: GestureType, mask?: GestureMask): this {
+        if (((this._flagArray[181]) == (0)) || (true) || (true)) {
             this._flagArray[181] = 1
-            this._onDrop_1_0value = eventCallback
-            this._onDrop_1_1value = dropOptions
+            this._parallelGesture_0_0value = gesture
+            this._parallelGesture_0_1value = mask
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[181] = 3
         }
         return this
     }
-    dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
-        if (((this._flagArray[182]) == (0)) || (true) || (true))
-        {
+    blur(blurRadius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+        if (((this._flagArray[182]) == (0)) || ((this._blur_0_0value) !== (blurRadius)) || (true) || (true)) {
             this._flagArray[182] = 1
-            this._dragPreview_1_0value = preview
-            this._dragPreview_1_1value = config
+            this._blur_0_0value = blurRadius
+            this._blur_0_1value = options
+            this._blur_0_2value = sysOptions
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[182] = 3
         }
         return this
     }
-    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
-        if (((this._flagArray[183]) == (0)) || (true) || (true))
-        {
+    linearGradientBlur(value: double | undefined, options: LinearGradientBlurOptions | undefined): this {
+        if (((this._flagArray[183]) == (0)) || ((this._linearGradientBlur_0_0value) !== (value)) || (true)) {
             this._flagArray[183] = 1
-            this._dragPreviewOptions_0_0value = value
-            this._dragPreviewOptions_0_1value = options
+            this._linearGradientBlur_0_0value = value
+            this._linearGradientBlur_0_1value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[183] = 3
         }
         return this
     }
-    overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
-        if (((this._flagArray[184]) == (0)) || (true) || (true))
-        {
+    systemBarEffect(): this {
+        if ((this._flagArray[184]) == (0)) {
             this._flagArray[184] = 1
-            this._overlay_0_0value = value
-            this._overlay_0_1value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[184] = 3
         }
         return this
     }
-    blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
-        if (((this._flagArray[185]) == (0)) || (true) || (true))
-        {
+    useEffect(useEffect: boolean | undefined, effectType: EffectType | undefined): this {
+        if (((this._flagArray[185]) == (0)) || ((this._useEffect_1_0value) !== (useEffect)) || (true)) {
             this._flagArray[185] = 1
-            this._blendMode_0_0value = value
-            this._blendMode_0_1value = type
+            this._useEffect_1_0value = useEffect
+            this._useEffect_1_1value = effectType
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[185] = 3
         }
         return this
     }
-    advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
-        if (((this._flagArray[186]) == (0)) || (true) || (true))
-        {
+    backdropBlur(radius: double | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+        if (((this._flagArray[186]) == (0)) || ((this._backdropBlur_0_0value) !== (radius)) || (true) || (true)) {
             this._flagArray[186] = 1
-            this._advancedBlendMode_0_0value = effect
-            this._advancedBlendMode_0_1value = type
+            this._backdropBlur_0_0value = radius
+            this._backdropBlur_0_1value = options
+            this._backdropBlur_0_2value = sysOptions
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[186] = 3
         }
         return this
     }
-    geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
-        if (((this._flagArray[187]) == (0)) || ((this._geometryTransition_1_0value) !== (id)) || (true))
-        {
+    sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
+        if (((this._flagArray[187]) == (0)) || ((this._sharedTransition_0_0value) !== (id)) || (true)) {
             this._flagArray[187] = 1
-            this._geometryTransition_1_0value = id
-            this._geometryTransition_1_1value = options
+            this._sharedTransition_0_0value = id
+            this._sharedTransition_0_1value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[187] = 3
         }
         return this
     }
-    bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {
-        if (((this._flagArray[188]) == (0)) || (true) || (true))
-        {
+    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
+        if (((this._flagArray[188]) == (0)) || (true) || (true)) {
             this._flagArray[188] = 1
-            this._bindTips_0_0value = message
-            this._bindTips_0_1value = options
+            this._chainMode_0_0value = direction
+            this._chainMode_0_1value = style
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[188] = 3
         }
         return this
     }
-    bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {
-        if (((this._flagArray[189]) == (0)) || ((this._bindPopup_0_0value) !== (show)) || (true))
-        {
+    onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions: DropOptions): this {
+        if (((this._flagArray[189]) == (0)) || (true) || (true)) {
             this._flagArray[189] = 1
-            this._bindPopup_0_0value = show
-            this._bindPopup_0_1value = popup
+            this._onDrop_1_0value = eventCallback
+            this._onDrop_1_1value = dropOptions
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[189] = 3
         }
         return this
     }
-    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
-        if (((this._flagArray[190]) == (0)) || (true) || (true))
-        {
+    onDragSpringLoading(callback_: arkui_component_common_Callback<SpringLoadingContext, void> | null | undefined, configuration?: DragSpringLoadingConfiguration): this {
+        if (((this._flagArray[190]) == (0)) || (true) || (true)) {
             this._flagArray[190] = 1
-            this._bindMenu_0_0value = content
-            this._bindMenu_0_1value = options
+            this._onDragSpringLoading_0_0value = callback_
+            this._onDragSpringLoading_0_1value = configuration
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[190] = 3
         }
         return this
     }
-    bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
-        if (((this._flagArray[191]) == (0)) || (true) || (true) || (true))
-        {
+    dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
+        if (((this._flagArray[191]) == (0)) || (true) || (true)) {
             this._flagArray[191] = 1
-            this._bindMenu_1_0value = isShow
-            this._bindMenu_1_1value = content
-            this._bindMenu_1_2value = options
+            this._dragPreview_0_0value = preview
+            this._dragPreview_0_1value = config
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[191] = 3
         }
         return this
     }
-    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
-        if (((this._flagArray[192]) == (0)) || (true) || (true) || (true))
-        {
+    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
+        if (((this._flagArray[192]) == (0)) || (true) || (true)) {
             this._flagArray[192] = 1
-            this._bindContextMenu_0_0value = content
-            this._bindContextMenu_0_1value = responseType
-            this._bindContextMenu_0_2value = options
+            this._dragPreviewOptions_0_0value = value
+            this._dragPreviewOptions_0_1value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[192] = 3
         }
         return this
     }
-    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
-        if (((this._flagArray[193]) == (0)) || (true) || (true))
-        {
+    overlay(value: string | CustomBuilder | ComponentContent<Object> | undefined, options?: OverlayOptions): this {
+        if (((this._flagArray[193]) == (0)) || (true) || (true)) {
             this._flagArray[193] = 1
-            this._bindContextMenuWithResponse_0_0value = content
-            this._bindContextMenuWithResponse_0_1value = options
+            this._overlay_0_0value = value
+            this._overlay_0_1value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[193] = 3
         }
         return this
     }
-    bindContextMenu(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
-        if (((this._flagArray[194]) == (0)) || (true) || (true) || (true))
-        {
+    blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
+        if (((this._flagArray[194]) == (0)) || (true) || (true)) {
             this._flagArray[194] = 1
-            this._bindContextMenu_1_0value = isShown
-            this._bindContextMenu_1_1value = content
-            this._bindContextMenu_1_2value = options
+            this._blendMode_0_0value = value
+            this._blendMode_0_1value = type
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[194] = 3
         }
         return this
     }
-    bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
-        if (((this._flagArray[195]) == (0)) || (true) || (true) || (true))
-        {
+    advancedBlendMode(effect: BlendMode | Blender | undefined, type?: BlendApplyType): this {
+        if (((this._flagArray[195]) == (0)) || (true) || (true)) {
             this._flagArray[195] = 1
-            this._bindContentCover_0_0value = isShow
-            this._bindContentCover_0_1value = builder
-            this._bindContentCover_0_2value = type
+            this._advancedBlendMode_0_0value = effect
+            this._advancedBlendMode_0_1value = type
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[195] = 3
         }
         return this
     }
-    bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: ContentCoverOptions): this {
-        if (((this._flagArray[196]) == (0)) || (true) || (true) || (true))
-        {
+    geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
+        if (((this._flagArray[196]) == (0)) || ((this._geometryTransition_0_0value) !== (id)) || (true)) {
             this._flagArray[196] = 1
-            this._bindContentCover_1_0value = isShow
-            this._bindContentCover_1_1value = builder
-            this._bindContentCover_1_2value = options
+            this._geometryTransition_0_0value = id
+            this._geometryTransition_0_1value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[196] = 3
         }
         return this
     }
-    bindSheet(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
-        if (((this._flagArray[197]) == (0)) || (true) || (true) || (true))
-        {
+    bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {
+        if (((this._flagArray[197]) == (0)) || (true) || (true)) {
             this._flagArray[197] = 1
-            this._bindSheet_0_0value = isShow
-            this._bindSheet_0_1value = builder
-            this._bindSheet_0_2value = options
+            this._bindTips_0_0value = message
+            this._bindTips_0_1value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[197] = 3
         }
         return this
     }
-    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
-        if (((this._flagArray[198]) == (0)) || ((this._onVisibleAreaChange_0_0value) !== (ratios)) || (true))
-        {
+    bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {
+        if (((this._flagArray[198]) == (0)) || ((this._bindPopup_0_0value) !== (show)) || (true)) {
             this._flagArray[198] = 1
-            this._onVisibleAreaChange_0_0value = ratios
-            this._onVisibleAreaChange_0_1value = event
+            this._bindPopup_0_0value = show
+            this._bindPopup_0_1value = popup
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[198] = 3
         }
         return this
     }
-    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
-        if (((this._flagArray[199]) == (0)) || (true) || (true))
-        {
+    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+        if (((this._flagArray[199]) == (0)) || (true) || (true)) {
             this._flagArray[199] = 1
-            this._onVisibleAreaApproximateChange_0_0value = options
-            this._onVisibleAreaApproximateChange_0_1value = event
+            this._bindMenu_0_0value = content
+            this._bindMenu_0_1value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[199] = 3
         }
         return this
     }
-    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
-        if (((this._flagArray[200]) == (0)) || (true) || (true) || (true))
-        {
+    bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+        if (((this._flagArray[200]) == (0)) || (true) || (true) || (true)) {
             this._flagArray[200] = 1
-            this._keyboardShortcutList.push({value: value, keys: keys, action: action})
-            this._keyboardShortcut_0_0value = value
-            this._keyboardShortcut_0_1value = keys
-            this._keyboardShortcut_0_2value = action
+            this._bindMenu_1_0value = isShow
+            this._bindMenu_1_1value = content
+            this._bindMenu_1_2value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[200] = 3
         }
         return this
     }
-    accessibilityGroup(isGroup: boolean | undefined, config: AccessibilityOptions | undefined): this {
-        if (((this._flagArray[201]) == (0)) || ((this._accessibilityGroup_1_0value) !== (isGroup)) || (true))
-        {
+    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[201]) == (0)) || (true) || (true) || (true)) {
             this._flagArray[201] = 1
-            this._accessibilityGroup_1_0value = isGroup
-            this._accessibilityGroup_1_1value = config
+            this._bindContextMenu_0_0value = content
+            this._bindContextMenu_0_1value = responseType
+            this._bindContextMenu_0_2value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[201] = 3
         }
         return this
     }
-    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
-        if (((this._flagArray[202]) == (0)) || (true) || ((this._onGestureRecognizerJudgeBegin_1_1value) !== (exposeInnerGesture)))
-        {
+    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[202]) == (0)) || (true) || (true)) {
             this._flagArray[202] = 1
-            this._onGestureRecognizerJudgeBegin_1_0value = callback_
-            this._onGestureRecognizerJudgeBegin_1_1value = exposeInnerGesture
+            this._bindContextMenuWithResponse_0_0value = content
+            this._bindContextMenuWithResponse_0_1value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[202] = 3
         }
         return this
     }
-    systemMaterial(value: uiMaterial.Material | undefined): this {
-        if (((this._flagArray[203]) == (0)) || (true))
-        {
+    bindContextMenu(isShow: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[203]) == (0)) || (true) || (true) || (true)) {
             this._flagArray[203] = 1
-            this._systemMaterial_0_0value = value
+            this._bindContextMenu_1_0value = isShow
+            this._bindContextMenu_1_1value = content
+            this._bindContextMenu_1_2value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[203] = 3
         }
         return this
     }
-    accessibilityStateDescription(value: string | Resource | undefined): this {
-        if (((this._flagArray[204]) == (0)) || (true))
-        {
+    bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
+        if (((this._flagArray[204]) == (0)) || (true) || (true) || (true)) {
             this._flagArray[204] = 1
-            this._accessibilityStateDescription_0_0value = value
+            this._bindContentCover_0_0value = isShow
+            this._bindContentCover_0_1value = builder
+            this._bindContentCover_0_2value = type
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[204] = 3
         }
         return this
     }
-    accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
-        if (((this._flagArray[205]) == (0)) || (true))
-        {
+    bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: ContentCoverOptions): this {
+        if (((this._flagArray[205]) == (0)) || (true) || (true) || (true)) {
             this._flagArray[205] = 1
-            this._accessibilityActionOptions_0_0value = value
+            this._bindContentCover_1_0value = isShow
+            this._bindContentCover_1_1value = builder
+            this._bindContentCover_1_2value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[205] = 3
         }
         return this
     }
-    useUnionEffect(value: boolean | undefined): this {
-        if (((this._flagArray[206]) == (0)) || ((this._useUnionEffect_0_0value) !== (value)))
-        {
+    bindSheet(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
+        if (((this._flagArray[206]) == (0)) || (true) || (true) || (true)) {
             this._flagArray[206] = 1
-            this._useUnionEffect_0_0value = value
+            this._bindSheet_0_0value = isShow
+            this._bindSheet_0_1value = builder
+            this._bindSheet_0_2value = options
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[206] = 3
         }
         return this
     }
-    materialFilter(value: uiEffect.Filter | undefined): this {
-        if (((this._flagArray[207]) == (0)) || (true))
-        {
+    onVisibleAreaChange(ratios: Array<double> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+        if (((this._flagArray[207]) == (0)) || ((this._onVisibleAreaChange_0_0value) !== (ratios)) || (true)) {
             this._flagArray[207] = 1
-            this._materialFilter_0_0value = value
+            this._onVisibleAreaChange_0_0value = ratios
+            this._onVisibleAreaChange_0_1value = event
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[207] = 3
         }
         return this
     }
-    onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
-        if (((this._flagArray[208]) == (0)) || (true) || (true))
-        {
+    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
+        if (((this._flagArray[208]) == (0)) || (true) || (true)) {
             this._flagArray[208] = 1
-            this._onDragSpringLoading_0_0value = callback_
-            this._onDragSpringLoading_0_1value = configuration
+            this._onVisibleAreaApproximateChange_0_0value = options
+            this._onVisibleAreaApproximateChange_0_1value = event
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[208] = 3
         }
         return this
     }
-    excludeFromRenderGroup(value: boolean | undefined): this {
-        if (((this._flagArray[209]) == (0)) || ((this._excludeFromRenderGroup_0_0value) !== (value)))
-        {
+    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
+        if (((this._flagArray[209]) == (0)) || (true) || (true) || (true)) {
             this._flagArray[209] = 1
-            this._excludeFromRenderGroup_0_0value = value
+            this._keyboardShortcut_0_0value = value
+            this._keyboardShortcut_0_1value = keys
+            this._keyboardShortcut_0_2value = action
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[209] = 3
         }
         return this
     }
-    enableClickSoundEffect(value: boolean | undefined): this {
-        if (((this._flagArray[210]) == (0)) || ((this._enableClickSoundEffect_0_0value) !== (value)))
-        {
+    accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {
+        if (((this._flagArray[210]) == (0)) || ((this._accessibilityGroup_0_0value) !== (isGroup)) || (true)) {
             this._flagArray[210] = 1
-            this._enableClickSoundEffect_0_0value = value
+            this._accessibilityGroup_0_0value = isGroup
+            this._accessibilityGroup_0_1value = accessibilityOptions
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[210] = 3
         }
         return this
     }
-    onNeedSoftkeyboard(value: OnNeedSoftkeyboardCallback | undefined): this {
-        if (((this._flagArray[211]) == (0)) || (true))
-        {
+    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
+        if (((this._flagArray[211]) == (0)) || (true) || ((this._onGestureRecognizerJudgeBegin_1_1value) !== (exposeInnerGesture))) {
             this._flagArray[211] = 1
-            this._onNeedSoftkeyboard_0_0value = value
+            this._onGestureRecognizerJudgeBegin_1_0value = callback_
+            this._onGestureRecognizerJudgeBegin_1_1value = exposeInnerGesture
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[211] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

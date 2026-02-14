@@ -288,11 +288,13 @@ void ResetContentModifierGaugeImpl(Ark_NativePointer node)
     GaugeModelNG::SetBuilderFunc(frameNode, nullptr);
 }
 
-void SetIndicatorImpl(Ark_NativePointer node, const Opt_GaugeIndicatorOptions* value)
+namespace GaugeExtenderAccessor {
+void SetIndicatorImpl(Ark_NativePointer node,
+                      const Opt_GaugeIndicatorOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto indicator = Converter::OptConvertPtr<Converter::GaugeIndicatorOptions>(value);
+    auto indicator = Converter::OptConvertPtr<Converter::GaugeIndicatorOptions>(options);
     if (indicator) {
         if (indicator->icon) {
             GaugeModelNG::SetIndicatorIconPath(frameNode, indicator->icon->GetSrc(), indicator->icon->GetBundleName(),
@@ -361,6 +363,7 @@ void NullTrackShadowImpl(Ark_NativePointer node)
     shadow.isShadowVisible = false;
     GaugeModelNG::SetShadowOptions(frameNode, shadow);
 }
+} // GaugeExtenderAccessor
 
 const GENERATED_ArkUIGaugeModifier* GetGaugeStaticModifier()
 {
@@ -387,12 +390,12 @@ const GENERATED_ArkUIGaugeContentModifier* GetGaugeStaticContentModifier()
 const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeStaticExtenderAccessor()
 {
     static const GENERATED_ArkUIGaugeExtenderAccessor GaugeExtenderAccessorImpl {
-        SetIndicatorImpl,
-        NullIndicatorImpl,
-        SetTrackShadowImpl,
-        NullTrackShadowImpl,
-        SetDescriptionImpl,
-        NullDescriptionImpl
+        GaugeExtenderAccessor::SetIndicatorImpl,
+        GaugeExtenderAccessor::NullIndicatorImpl,
+        GaugeExtenderAccessor::SetTrackShadowImpl,
+        GaugeExtenderAccessor::NullTrackShadowImpl,
+        GaugeExtenderAccessor::SetDescriptionImpl,
+        GaugeExtenderAccessor::NullDescriptionImpl
     };
     return &GaugeExtenderAccessorImpl;
 }

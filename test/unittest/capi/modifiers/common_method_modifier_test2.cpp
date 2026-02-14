@@ -116,9 +116,8 @@ namespace Converter {
     Ark_BlurOptions ArkCreate(double v0, double v1)
     {
         Ark_BlurOptions result;
-        auto value0 = Converter::ArkValue<Ark_Float64>(v0);
-        auto value1 = Converter::ArkValue<Ark_Float64>(v1);
-        result.grayscale = Converter::ArkValue<Opt_Tuple_F64_F64>(Ark_Tuple_F64_F64{value0, value1});
+        Ark_Tuple_F64_F64 grayscale = { ArkValue<Ark_Float64>(v0), ArkValue<Ark_Float64>(v1) };
+        result.grayscale = ArkValue<Opt_Tuple_F64_F64>(grayscale);
         return result;
     }
 }
@@ -524,7 +523,7 @@ HWTEST_F(CommonMethodModifierTest2, setPixelRoundTest, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setBackgroundEffect0, nullptr);
+    ASSERT_NE(modifier_->setBackgroundEffect, nullptr);
 
     EffectOption expectedBgEffect {
         .radius = 123.45_vp,
@@ -552,7 +551,8 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues,
         .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
     };
     auto inputValValid = Converter::ArkValue<Opt_BackgroundEffectOptions>(arkInputValValid);
-    modifier_->setBackgroundEffect0(node_, &inputValValid);
+    auto sysOptions = Converter::ArkValue<Opt_SystemAdaptiveOptions>(Ark_Empty());
+    modifier_->setBackgroundEffect(node_, &inputValValid, &sysOptions);
     EXPECT_EQ(renderMock->GetOrCreateBackground()->propEffectOption, expectedBgEffect);
 }
 
@@ -842,12 +842,12 @@ HWTEST_F(CommonMethodModifierTest2, setConstraintSize, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setLayoutWeight, TestSize.Level1)
 {
-    auto inputValue = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(1.1001f);
+    auto inputValue = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.1001f);
     modifier_->setLayoutWeight(node_, &inputValue);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_LAYOUT_WEIGHT_NAME);
     EXPECT_EQ(strResult.substr(0, 3), "1.1");
 
-    inputValue = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("17");
+    inputValue = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("17");
     modifier_->setLayoutWeight(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_LAYOUT_WEIGHT_NAME);
     EXPECT_EQ(strResult, "17");
@@ -1026,12 +1026,12 @@ HWTEST_F(CommonMethodModifierTest2, setAlignSelf, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setDisplayPriority, TestSize.Level1)
 {
-    auto value = Converter::ArkValue<Opt_Number>(0.7001);
+    auto value = Converter::ArkValue<Opt_Float64>(0.7001);
     modifier_->setDisplayPriority(node_, &value);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_DISPLAY_PRIORITY_NAME);
     EXPECT_EQ(strResult, "0");
 
-    value = Converter::ArkValue<Opt_Number>(12);
+    value = Converter::ArkValue<Opt_Float64>(12);
     modifier_->setDisplayPriority(node_, &value);
     strResult = GetStringAttribute(node_, ATTRIBUTE_DISPLAY_PRIORITY_NAME);
     EXPECT_EQ(strResult, "12");
@@ -1171,12 +1171,12 @@ HWTEST_F(CommonMethodModifierTest2, setEnabled, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setAspectRatio, TestSize.Level1)
 {
-    auto inputValue = Converter::ArkValue<Opt_Number>(1);
+    auto inputValue = Converter::ArkValue<Opt_Float64>(1);
     modifier_->setAspectRatio(node_, &inputValue);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_ASPECT_RATIO_NAME);
     EXPECT_EQ(strResult, "1");
 
-    inputValue = Converter::ArkValue<Opt_Number>(16.0f / 9);
+    inputValue = Converter::ArkValue<Opt_Float64>(16.0f / 9);
     modifier_->setAspectRatio(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ASPECT_RATIO_NAME);
     EXPECT_EQ(strResult.substr(0, 4), "1.78");
@@ -1499,7 +1499,8 @@ HWTEST_F(CommonMethodModifierTest2, setBorderRadius, TestSize.Level1)
     };
     auto radius = Converter::ArkUnion<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses, Ark_BorderRadiuses>(
         arkRadius);
-    modifier_->setBorderRadius0(node_, &radius);
+    auto renderStrategy = Converter::ArkValue<Opt_RenderStrategy>(Ark_Empty());
+    modifier_->setBorderRadius(node_, &radius, &renderStrategy);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_BORDER_RADIUS_NAME);
     EXPECT_EQ(strResult, "{\"topLeft\":\"8.00%\",\"topRight\":\"7.00px\",\"bottomLeft\":\"5.00fp\","
                          "\"bottomRight\":\"6.00vp\"}");

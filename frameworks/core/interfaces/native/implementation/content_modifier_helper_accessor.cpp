@@ -209,7 +209,7 @@ void ContentModifierDataPanelImpl(Ark_NativePointer node,
         Ark_DataPanelConfiguration arkConfig;
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.values = Converter::ArkValue<Array_Float64>(config.values_, Converter::FC);
+        arkConfig.values = Converter::ArkValue<Array_F64>(config.values_, Converter::FC);
         arkConfig.maxValue = Converter::ArkValue<Ark_Float64>(config.maxValue_);
         auto boxNode = GeneratedApiImpl::GetContentNode(node);
         if (boxNode == nullptr) {
@@ -517,11 +517,10 @@ void ContentModifierToggleImpl(Ark_NativePointer node,
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.isOn = Converter::ArkValue<Ark_Boolean>(config.isOn_);
-        arkConfig.toggleEnabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         auto handler = [frameNode](Ark_Boolean retValue) {
             ToggleModelStatic::TriggerChange(frameNode, Converter::Convert<bool>(retValue));
         };
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
+        auto triggerCallback = CallbackKeeper::Claim<arkui_component_common_Callback_Boolean_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
         auto boxNode = GeneratedApiImpl::GetContentNode(node);
         if (boxNode == nullptr) {

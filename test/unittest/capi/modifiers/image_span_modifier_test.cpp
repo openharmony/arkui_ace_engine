@@ -16,14 +16,12 @@
 #include <gtest/gtest.h>
 #include <sstream>
 #include <vector>
-
 #include "image_common_methods_test.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
-#include "arkoala_api_generated.h"
 
 using namespace testing;
 using namespace testing::ext;

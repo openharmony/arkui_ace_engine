@@ -16,42 +16,42 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookCircleAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { Length } from "./units"
-import { Resource } from "global.resource"
-import { ModifierStateManager } from "./../CommonModifier"
-import { CircleModifier } from "./../CircleModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource_serializer } from "./../framework/resource"
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonShapeMethodPeer, CommonShapeMethod as arkui_component_common_CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookCircleAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { Length, Resource as arkui_component_units_Resource } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { CircleModifier } from './../CircleModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkCirclePeer extends ArkCommonShapeMethodPeer {
     attributeSet?: CircleModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkCirclePeer {
-        const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._Circle_construct(peerId, flags)
-        const _peer  = new ArkCirclePeer(_peerPtr, peerId, 'Circle', flags)
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._Circle_construct(peerId, flags)
+        const _peer = new ArkCirclePeer(_peerPtr, peerId, 'Circle', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setCircleOptionsAttribute(options?: CircleOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
+            const optionsTmpValue = options!
             CircleOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -64,41 +64,26 @@ export interface CircleOptions {
     width?: Length;
     height?: Length;
 }
-export interface CircleAttribute extends CommonShapeMethod {
+export interface CircleAttribute extends arkui_component_common_CommonShapeMethod {
     setCircleOptions(options?: CircleOptions): this {
-        throw new Error("Unimplemented method setCircleOptions")
+        throw new Error('Unimplemented method setCircleOptions')
     }
-    attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkCircleStyle extends ArkCommonShapeMethodStyle implements CircleAttribute {
-    attributeModifier_value?: AttributeModifier<CircleAttribute> | AttributeModifier<CommonMethod> | undefined
-    setCircleOptions(options?: CircleOptions): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+    attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements CircleAttribute {
     getPeer(): ArkCirclePeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkCirclePeer)
     }
     public setCircleOptions(options?: CircleOptions): this {
-        if (this.checkPriority("setCircleOptions")) {
-            const options_casted = options as (CircleOptions | undefined)
-            this.getPeer()?.setCircleOptionsAttribute(options_casted)
-            this.applyOptionsFinish('CircleAttribute');
-            return this
-        }
+        const options_casted = options as (CircleOptions | undefined)
+        this.getPeer()?.setCircleOptionsAttribute(options_casted)
+        this.applyOptionsFinish('CircleAttribute');
         return this
     }
-    public attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+    public attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookCircleAttributeModifier(this, value);
         })
@@ -115,100 +100,98 @@ export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements
 
 @memo
 export function CircleImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: CircleAttribute) => void) | undefined,
 ): void {
     const receiver = remember<ArkCircleComponent>((): ArkCircleComponent => {
         return new ArkCircleComponent()
     })
-    NodeAttach<ArkCirclePeer>((): ArkCirclePeer => ArkCirclePeer.create(receiver), (peer: ArkCirclePeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkCirclePeer>((): ArkCirclePeer => ArkCirclePeer.create(receiver), (_: ArkCirclePeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
     })
 }
 
 export class CircleOptions_serializer {
     public static write(buffer: SerializerBase, value: CircleOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForWidth  = value.width
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForWidth = value.width
         if (valueHolderForWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            const valueHolderForWidthTmpValue = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
+                const valueHolderForWidthTmpValueForIdx0 = valueHolderForWidthTmpValue as string
                 valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
             } else if (valueHolderForWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
+                const valueHolderForWidthTmpValueForIdx1 = valueHolderForWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
-            } else if (valueHolderForWidthTmpValue instanceof Resource) {
+            } else if (valueHolderForWidthTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
+                const valueHolderForWidthTmpValueForIdx2 = valueHolderForWidthTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForHeight  = value.height
+        const valueHolderForHeight = value.height
         if (valueHolderForHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForHeightTmpValue  = valueHolderForHeight!
+            const valueHolderForHeightTmpValue = valueHolderForHeight!
             if (valueHolderForHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
+                const valueHolderForHeightTmpValueForIdx0 = valueHolderForHeightTmpValue as string
                 valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
             } else if (valueHolderForHeightTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as double
+                const valueHolderForHeightTmpValueForIdx1 = valueHolderForHeightTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx1)
-            } else if (valueHolderForHeightTmpValue instanceof Resource) {
+            } else if (valueHolderForHeightTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
+                const valueHolderForHeightTmpValueForIdx2 = valueHolderForHeightTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): CircleOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let widthTmpBuf : Length | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const widthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let widthTmpBuf: Length | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | double | Resource | undefined
-            if (widthTmpBuf_UnionSelector == (0).toByte()) {
-                widthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (widthTmpBuf_UnionSelector == (1).toByte()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (widthTmpBuf_UnionSelector == (2).toByte()) {
-                widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const widthTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let widthTmpBufOpt: string | double | arkui_component_units_Resource | undefined
+            if (widthTmpBufOptUnionSelector == (0).toByte()) {
+                widthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
+                widthTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (widthTmpBufOptUnionSelector == (2).toByte()) {
+                widthTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for widthTmpBufOpt has to be chosen through deserialisation.')
             }
-            widthTmpBuf = (widthTmpBuf_ as string | double | Resource)
+            widthTmpBuf = (widthTmpBufOpt as string | double | arkui_component_units_Resource)
         }
-        const widthTmpResult : Length | undefined = widthTmpBuf
-        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightTmpBuf : Length | undefined = undefined
+        const widthTmpResult: Length | undefined = widthTmpBuf
+        const heightTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let heightTmpBuf: Length | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : string | double | Resource | undefined
-            if (heightTmpBuf_UnionSelector == (0).toByte()) {
-                heightTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (heightTmpBuf_UnionSelector == (1).toByte()) {
-                heightTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (heightTmpBuf_UnionSelector == (2).toByte()) {
-                heightTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const heightTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let heightTmpBufOpt: string | double | arkui_component_units_Resource | undefined
+            if (heightTmpBufOptUnionSelector == (0).toByte()) {
+                heightTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (heightTmpBufOptUnionSelector == (1).toByte()) {
+                heightTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (heightTmpBufOptUnionSelector == (2).toByte()) {
+                heightTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for heightTmpBufOpt has to be chosen through deserialisation.')
             }
-            heightTmpBuf = (heightTmpBuf_ as string | double | Resource)
+            heightTmpBuf = (heightTmpBufOpt as string | double | arkui_component_units_Resource)
         }
-        const heightTmpResult : Length | undefined = heightTmpBuf
-        let value : CircleOptions = ({width: widthTmpResult, height: heightTmpResult} as CircleOptions)
+        const heightTmpResult: Length | undefined = heightTmpBuf
+        let value: CircleOptions = ({width: widthTmpResult, height: heightTmpResult} as CircleOptions)
         return value
     }
 }

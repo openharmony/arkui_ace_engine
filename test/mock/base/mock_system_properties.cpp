@@ -126,6 +126,10 @@ bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::isOpenYuvDecode_ = false;
 int32_t SystemProperties::previewStatus_ = 0;
+bool SystemProperties::isDeviceAccess_ = false;
+std::atomic<bool> SystemProperties::unZipHap_(true);
+float SystemProperties::fontScale_ = 1.0f;
+float SystemProperties::fontWeightScale_ = 1.0f;
 
 float SystemProperties::GetFontWeightScale()
 {

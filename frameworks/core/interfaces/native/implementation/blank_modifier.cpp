@@ -32,7 +32,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // BlankModifier
 namespace BlankInterfaceModifier {
 void SetBlankOptionsImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String* min)
+                         const Opt_Union_F64_String* min)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

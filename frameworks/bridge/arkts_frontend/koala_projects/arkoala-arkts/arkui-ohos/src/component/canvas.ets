@@ -27,7 +27,7 @@ export class ImageData {
     private data_val: Uint8ClampedArray | undefined = undefined
     private finalWidth: int = 0
     private finalHeight: int = 0
-    private unit_val: LengthMetricsUnit = LengthMetricsUnit.DEFAULT
+    private unit_val: arkui_Graphics_LengthMetricsUnit = arkui_Graphics_LengthMetricsUnit.DEFAULT
 
     get data(): Uint8ClampedArray | undefined {
         return this.data_val
@@ -38,7 +38,7 @@ export class ImageData {
     get width(): int {
         return this.finalWidth
     }
-    constructor(width: number, height: number, data?: Uint8ClampedArray, unit?: LengthMetricsUnit) {
+    constructor(width: number, height: number, data?: Uint8ClampedArray, unit?: arkui_Graphics_LengthMetricsUnit) {
         if (width == undefined || height == undefined) {
             return
         }
@@ -61,7 +61,7 @@ export class ImageData {
         if (data == undefined) {
             this.data_val = new Uint8ClampedArray(length)
         } else {
-            if (this.unit_val == LengthMetricsUnit.PX && data.length != length) {
+            if (this.unit_val == arkui_Graphics_LengthMetricsUnit.PX && data.length != length) {
                 return
             }
             this.data_val = data
@@ -69,7 +69,7 @@ export class ImageData {
     }
     private GetDensity(): number {
         const density = getSystemDensity()
-        if ((this.unit_val == LengthMetricsUnit.DEFAULT) && density !== 0.0) {
+        if ((this.unit_val == arkui_Graphics_LengthMetricsUnit.DEFAULT) && density !== 0.0) {
             return density
         } else {
             return 1.0

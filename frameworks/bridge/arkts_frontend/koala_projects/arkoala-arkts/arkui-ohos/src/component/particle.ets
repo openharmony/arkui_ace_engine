@@ -19,7 +19,7 @@ import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, AttributeModifier } from "./common"
 import { VP, Dimension, ResourceStr, ResourceColor } from "./units"
 import { SizeT, PositionT, LengthMetrics, Vector2T } from "../Graphics"
 import { ParticleHelper, ParticlesInner, ParticleOptionsInner, EmitterOptionsInner, ParticleColorPropertyOptionsInner } from "./idlize"
@@ -75,11 +75,6 @@ export interface ParticleColorPropertyOptions {
 export interface Particles {
     particles: Array<ParticleOptions>;
 }
-export interface FieldRegion {
-    shape?: DisturbanceFieldShape;
-    position?: PositionT<double>;
-    size?: SizeT<double>;
-}
 export interface DisturbanceFieldOptions {
     strength?: double;
     shape?: DisturbanceFieldShape;
@@ -89,18 +84,6 @@ export interface DisturbanceFieldOptions {
     noiseScale?: double;
     noiseFrequency?: double;
     noiseAmplitude?: double;
-}
-export interface RippleFieldOptions {
-    amplitude?: double;
-    wavelength?: double;
-    waveSpeed?: double;
-    attenuation?: double;
-    center?: PositionT<double>;
-    region?: FieldRegion;
-}
-export interface VelocityFieldOptions {
-    velocity?: Vector2T<double>;
-    region?: FieldRegion;
 }
 
 export interface ParticleAttribute extends CommonMethod {
@@ -390,32 +373,6 @@ export class ArkParticlePeer extends ArkCommonMethodPeer {
         ParticleHelper.SetVelocityFields(this.peer.ptr, valueInner);
     }
 }
-export class ArkParticleStyle extends ArkCommonMethodStyle implements ParticleAttribute {
-    disturbanceFields_value?: Array<DisturbanceFieldOptions> | undefined
-    emitter_value?: Array<EmitterProperty> | undefined
-    attributeModifier_value?: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined
-    rippleFields_value?: Array<RippleFieldOptions> | undefined
-    velocityFields_value?: Array<VelocityFieldOptions> | undefined
-    public disturbanceFields(value: Array<DisturbanceFieldOptions> | undefined): this {
-        return this
-    }
-    public emitter(value: Array<EmitterProperty> | undefined): this {
-        return this
-    }
-    public attributeModifier(modifier: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        return this
-    }
-    public setParticleOptions(particles: Particles): this {
-        return this
-    }
-    public rippleFields(value: Array<RippleFieldOptions> | undefined): this {
-        return this
-    }
-    public velocityFields(value: Array<VelocityFieldOptions> | undefined): this {
-        return this
-    }
-}
-
 export class ArkParticleComponent extends ArkCommonMethodComponent implements ParticleAttribute {
     getPeer(): ArkParticlePeer {
         return (this.peer as ArkParticlePeer)

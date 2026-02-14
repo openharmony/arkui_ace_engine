@@ -157,7 +157,7 @@ void SetOnPatternCompleteImpl(Ark_NativePointer node,
     auto call = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* info) {
         const auto* eventInfo = TypeInfoHelper::DynamicCast<V2::PatternCompleteEvent>(info);
         CHECK_NULL_VOID(eventInfo);
-        Converter::ArkArrayHolder<Array_Int32> arrayHolder(eventInfo->GetInput());
+        Converter::ArkArrayHolder<Array_I32> arrayHolder(eventInfo->GetInput());
         arkCallback.Invoke(arrayHolder.ArkValue());
     };
     PatternLockModelNG::SetPatternComplete(frameNode, std::move(call));
@@ -175,7 +175,7 @@ void SetAutoResetImpl(Ark_NativePointer node,
     PatternLockModelStatic::SetAutoReset(frameNode, convValue);
 }
 void SetOnDotConnectImpl(Ark_NativePointer node,
-                         const Opt_Callback_I32_Void* value)
+                         const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

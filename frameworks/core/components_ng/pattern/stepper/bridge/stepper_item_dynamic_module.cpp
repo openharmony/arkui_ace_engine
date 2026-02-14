@@ -34,7 +34,9 @@ const ArkUIStepperItemModifier* GetStepperItemDynamicModifier();
 const CJUIStepperItemModifier* GetCJUIStepperItemModifier();
 #ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
+#ifdef WRONG_GEN_v140
 const GENERATED_ArkUIStepperItemModifier* GetStepperItemStaticModifier();
+#endif // WRONG_GEN_v140
 } // namespace GeneratedModifier
 #endif
 } // namespace NG
@@ -52,7 +54,11 @@ const void* StepperItemDynamicModule::GetDynamicModifier()
 const void* StepperItemDynamicModule::GetStaticModifier()
 {
 #ifdef INCLUDE_GENERATED_SOURCES
+#ifdef WRONG_GEN_v140
     return NG::GeneratedModifier::GetStepperItemStaticModifier();
+#else // WRONG_GEN_v140
+    return nullptr;
+#endif // WRONG_GEN_v140
 #else
     return nullptr;
 #endif

@@ -96,7 +96,8 @@ void SetCanvasOptions1Impl(Ark_NativePointer node, const Ark_CanvasParams* param
 }
 } // namespace CanvasInterfaceModifier
 namespace CanvasAttributeModifier {
-void SetOnReadyImpl(Ark_NativePointer node, const Opt_Callback_Union_DrawingRenderingContext_Undefined_Void* value)
+void SetOnReadyImpl(Ark_NativePointer node,
+                    const Opt_Callback_Opt_DrawingRenderingContext_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

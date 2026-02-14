@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,49 +16,50 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { ColorMetrics_serializer } from "./../Graphics"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ColorMetrics } from "arkui.Graphics"
-import { AttributeModifier, hookScrollBarAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { Scroller, Scroller_serializer } from "./scroll"
-import { BarState } from "./enums"
-import { ScrollBarModifier } from "./../ScrollBarModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { ColorMetricsExt, ColorMetricsExt_serializer } from './idlize'
+import { extractors, AttributeModifier, hookScrollBarAttributeModifier, AttributeUpdater } from '#handwritten'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
+import { CustomBuilder } from './builder'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { Scroller, Scroller_serializer } from './scroll'
+import { BarState } from './enums'
+import { ScrollBarModifier } from './../ScrollBarModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkScrollBarPeer extends ArkCommonMethodPeer {
     attributeSet?: ScrollBarModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkScrollBarPeer {
-        const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._ScrollBar_construct(peerId, flags)
-        const _peer  = new ArkScrollBarPeer(_peerPtr, peerId, 'ScrollBar', flags)
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._ScrollBar_construct(peerId, flags)
+        const _peer = new ArkScrollBarPeer(_peerPtr, peerId, 'ScrollBar', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setScrollBarOptionsAttribute(value: ScrollBarOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         ScrollBarOptions_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._ScrollBarInterface_setScrollBarOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEnableNestedScrollAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeBoolean(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -66,12 +67,13 @@ export class ArkScrollBarPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollBarAttribute_setEnableNestedScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarColorAttribute(value: ColorMetrics | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setScrollBarColorAttribute(value: arkui_Graphics_ColorMetrics | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            ColorMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValue = value!
+            const valueTmpValueTransformed: ColorMetricsExt = extractors.transform_Ark_ColorMetrics_to_Ark_ColorMetricsExt(valueTmpValue)
+            ColorMetricsExt_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -80,9 +82,7 @@ export class ArkScrollBarPeer extends ArkCommonMethodPeer {
     }
 }
 export enum ScrollBarDirection {
-    VERTICAL = 0,
     Vertical = 0,
-    HORIZONTAL = 1,
     Horizontal = 1
 }
 export interface ScrollBarOptions {
@@ -92,71 +92,42 @@ export interface ScrollBarOptions {
 }
 export interface ScrollBarAttribute extends CommonMethod {
     setScrollBarOptions(value: ScrollBarOptions): this {
-        throw new Error("Unimplemented method setScrollBarOptions")
+        throw new Error('Unimplemented method setScrollBarOptions')
     }
     enableNestedScroll(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableNestedScroll")
+        throw new Error('Unimplemented method enableNestedScroll')
     }
-    scrollBarColor(value: ColorMetrics | undefined): this {
-        throw new Error("Unimplemented method scrollBarColor")
+    scrollBarColor(value: arkui_Graphics_ColorMetrics | undefined): this {
+        throw new Error('Unimplemented method scrollBarColor')
     }
     attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkScrollBarStyle extends ArkCommonMethodStyle implements ScrollBarAttribute {
-    enableNestedScroll_value?: boolean | undefined
-    scrollBarColor_value?: ColorMetrics | undefined
-    attributeModifier_value?: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined
-    setScrollBarOptions(value: ScrollBarOptions): this {
-        return this
-    }
-    enableNestedScroll(value: boolean | undefined): this {
-        return this
-    }
-    scrollBarColor(value: ColorMetrics | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkScrollBarComponent extends ArkCommonMethodComponent implements ScrollBarAttribute {
     getPeer(): ArkScrollBarPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkScrollBarPeer)
     }
     public setScrollBarOptions(value: ScrollBarOptions): this {
-        if (this.checkPriority("setScrollBarOptions")) {
-            const value_casted = value as (ScrollBarOptions)
-            this.getPeer()?.setScrollBarOptionsAttribute(value_casted)
-            this.applyOptionsFinish('ScrollBarAttribute');
-            return this
-        }
+        const value_casted = value as (ScrollBarOptions)
+        this.getPeer()?.setScrollBarOptionsAttribute(value_casted)
+        this.applyOptionsFinish('ScrollBarAttribute');
         return this
     }
     public enableNestedScroll(value: boolean | undefined): this {
-        if (this.checkPriority("enableNestedScroll")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setEnableNestedScrollAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setEnableNestedScrollAttribute(value_casted)
         return this
     }
-    public scrollBarColor(value: ColorMetrics | undefined): this {
-        if (this.checkPriority("scrollBarColor")) {
-            const value_casted = value as (ColorMetrics | undefined)
-            this.getPeer()?.setScrollBarColorAttribute(value_casted)
-            return this
-        }
+    public scrollBarColor(value: arkui_Graphics_ColorMetrics | undefined): this {
+        const value_casted = value as (arkui_Graphics_ColorMetrics | undefined)
+        this.getPeer()?.setScrollBarColorAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookScrollBarAttributeModifier(this, value);
+            hookScrollBarAttributeModifier(this, value);
         })
         return this
     }
@@ -171,60 +142,58 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements S
 
 @memo
 export function ScrollBarImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: ScrollBarAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkScrollBarComponent>((): ArkScrollBarComponent => {
         return new ArkScrollBarComponent()
     })
-    NodeAttach<ArkScrollBarPeer>((): ArkScrollBarPeer => ArkScrollBarPeer.create(receiver), (peer: ArkScrollBarPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkScrollBarPeer>((): ArkScrollBarPeer => ArkScrollBarPeer.create(receiver), (_: ArkScrollBarPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
 export class ScrollBarOptions_serializer {
     public static write(buffer: SerializerBase, value: ScrollBarOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForScroller  = value.scroller
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForScroller = value.scroller
         Scroller_serializer.write(valueSerializer, valueHolderForScroller)
-        const valueHolderForDirection  = value.direction
+        const valueHolderForDirection = value.direction
         if (valueHolderForDirection !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForDirectionTmpValue  = (valueHolderForDirection as ScrollBarDirection)
+            const valueHolderForDirectionTmpValue = (valueHolderForDirection as ScrollBarDirection)
             valueSerializer.writeInt32(valueHolderForDirectionTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForState  = value.state
+        const valueHolderForState = value.state
         if (valueHolderForState !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForStateTmpValue  = (valueHolderForState as BarState)
+            const valueHolderForStateTmpValue = (valueHolderForState as BarState)
             valueSerializer.writeInt32(valueHolderForStateTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ScrollBarOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const scrollerTmpResult : Scroller = (Scroller_serializer.read(valueDeserializer) as Scroller)
-        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let directionTmpBuf : ScrollBarDirection | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const scrollerTmpResult: Scroller = (Scroller_serializer.read(valueDeserializer) as Scroller)
+        const directionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let directionTmpBuf: ScrollBarDirection | undefined = undefined
         if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             directionTmpBuf = ScrollBarDirection.fromValue(valueDeserializer.readInt32())
         }
-        const directionTmpResult : ScrollBarDirection | undefined = directionTmpBuf
-        const stateTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let stateTmpBuf : BarState | undefined = undefined
+        const directionTmpResult: ScrollBarDirection | undefined = directionTmpBuf
+        const stateTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let stateTmpBuf: BarState | undefined = undefined
         if ((stateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             stateTmpBuf = BarState.fromValue(valueDeserializer.readInt32())
         }
-        const stateTmpResult : BarState | undefined = stateTmpBuf
-        let value : ScrollBarOptions = ({scroller: scrollerTmpResult, direction: directionTmpResult, state: stateTmpResult} as ScrollBarOptions)
+        const stateTmpResult: BarState | undefined = stateTmpBuf
+        let value: ScrollBarOptions = ({scroller: scrollerTmpResult, direction: directionTmpResult, state: stateTmpResult} as ScrollBarOptions)
         return value
     }
 }

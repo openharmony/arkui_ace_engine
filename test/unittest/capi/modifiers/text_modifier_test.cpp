@@ -372,7 +372,7 @@ HWTEST_F(TextModifierTest, setFontWeight, TestSize.Level1)
     EXPECT_EQ(checkVal2, "FontWeight.Medium");
 
     const auto w3 = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_ResourceStr>(
-        ArkUnion<Ark_ResourceStr, Ark_String>("normal"));
+        Converter::ArkUnion<Ark_ResourceStr, Ark_String>("normal"));
     modifier_->setFontWeight(node_, &w3, nullptr);
     auto checkVal3 = GetStringAttribute(node_, FONT_WEIGHT_ATTR);
     EXPECT_EQ(checkVal3, "FontWeight.Normal");
@@ -693,7 +693,7 @@ HWTEST_F(TextModifierTest, setOnCopyTest, TestSize.Level1)
                 .value =  Converter::Convert<std::u16string>(param)
             };
         };
-    auto func = Converter::ArkCallback<Opt_Callback_String_Void>(checkCallback, CONTEXT_ID);
+    auto func = Converter::ArkCallback<Opt_synthetic_Callback_String_Void>(checkCallback, CONTEXT_ID);
 
     modifier_->setOnCopy(node_, &func);
 
@@ -762,7 +762,7 @@ HWTEST_F(TextModifierTest, setFontWeightTestVariableFontWeightValidValues, TestS
     for (auto& [input, value, expected] : testFixtureVariableFontWeightNumbersValidValues) {
         checkValue(input, ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(value), expected);
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
+    for (auto& [input, value, expected] : testFixtureVariableFontWeightStringsValidValues) {
         checkValue(input, ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_ResourceStr>(
             ArkUnion<Ark_ResourceStr, Ark_String>(value)), expected);
     }
@@ -798,7 +798,7 @@ HWTEST_F(TextModifierTest, setFontWeightTestVariableFontWeightInvalidValues, Tes
     for (auto& [input, value] : testFixtureFontWeightNumbersInvalidValues) {
         checkValue(input, ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(value));
     }
-    for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
+    for (auto& [input, value] : testFixtureVariableFontWeightStringsInvalidValues) {
         checkValue(input, ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_ResourceStr>(
             ArkUnion<Ark_ResourceStr, Ark_String>(value)));
     }

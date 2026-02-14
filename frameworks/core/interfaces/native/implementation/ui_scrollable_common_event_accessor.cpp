@@ -30,12 +30,9 @@ void DestroyPeerImpl(Ark_UIScrollableCommonEvent peer)
     CHECK_NULL_VOID(peer);
     PeerUtils::DestroyPeer(peer);
 }
-Ark_UIScrollableCommonEvent ConstructImpl(Ark_NativePointer node)
+Ark_UIScrollableCommonEvent ConstructImpl()
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
     auto eventPeer = PeerUtils::CreatePeer<UIScrollableCommonEventPeer>();
-    eventPeer->node = frameNode;
     return eventPeer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -43,7 +40,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetOnReachStartImpl(Ark_UIScrollableCommonEvent peer,
-                         const Opt_Callback_Void* callback_)
+                         const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
@@ -58,7 +55,7 @@ void SetOnReachStartImpl(Ark_UIScrollableCommonEvent peer,
     }
 }
 void SetOnReachEndImpl(Ark_UIScrollableCommonEvent peer,
-                       const Opt_Callback_Void* callback_)
+                       const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
@@ -73,7 +70,7 @@ void SetOnReachEndImpl(Ark_UIScrollableCommonEvent peer,
     }
 }
 void SetOnScrollStartImpl(Ark_UIScrollableCommonEvent peer,
-                          const Opt_Callback_Void* callback_)
+                          const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
@@ -88,7 +85,7 @@ void SetOnScrollStartImpl(Ark_UIScrollableCommonEvent peer,
     }
 }
 void SetOnScrollStopImpl(Ark_UIScrollableCommonEvent peer,
-                         const Opt_Callback_Void* callback_)
+                         const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();

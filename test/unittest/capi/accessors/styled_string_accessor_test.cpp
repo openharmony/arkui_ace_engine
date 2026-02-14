@@ -1054,7 +1054,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringMarshalling0Unmarshall
 
     static RefPtr<OHOS::Ace::SpanString> checkSpanString = nullptr;
     auto unmarshallUserDataFunc = [](Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Buffer buf,
-        const Callback_StyledStringMarshallingValue_Void continuation) {
+        const Callback_UserDataSpan_Void continuation) {
             EXPECT_EQ(resourceId, EXPECTED_NODE_ID);
             EXPECT_EQ(std::memcmp(marshallResult, buf.data, marshallResultLen), 0);
             Ark_UserDataSpan arkUserDataSpan = {

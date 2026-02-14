@@ -48,6 +48,7 @@
 #include "arkoala_api_generated.h"
 #include "generated/converter_generated.h"
 #include "peer_utils.h"
+#include "patch.h"
 
 // Forward declarations
 namespace OHOS::Ace {
@@ -322,7 +323,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& src);
     void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src);
-    void AssignArkValue(Ark_Color& dst, const Color& src);
+    void AssignArkValue(Ark_arkui_component_enums_Color& dst, const Color& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Date& dst, const std::string& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Dimension& dst, const Dimension& src, ConvContext *ctx);

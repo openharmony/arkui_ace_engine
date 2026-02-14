@@ -103,7 +103,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ImageModifier
 namespace ImageInterfaceModifier {
 void SetImageOptionsImpl(Ark_NativePointer node,
-                         const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
+                         const Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
                          const Opt_ImageAIOptions* imageAIOptions)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -131,7 +131,8 @@ void SetImageOptionsImpl(Ark_NativePointer node,
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
-void SetAltImpl(Ark_NativePointer node, const Opt_Union_String_Resource_PixelMap_ImageAlt* value)
+void SetAltImpl(Ark_NativePointer node,
+                const Opt_Union_String_Resource_image_PixelMap_ImageAlt* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -179,7 +180,7 @@ void SetFitOriginalSizeImpl(Ark_NativePointer node,
     ImageModelNG::SetFitOriginSize(frameNode, *convValue);
 }
 void SetFillColorImpl(Ark_NativePointer node,
-                      const Opt_Union_ResourceColor_ColorContent_ColorMetrics* value)
+                      const Opt_Union_ResourceColor_ColorContent_ColorMetricsExt* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -285,7 +286,7 @@ void SetSyncLoadImpl(Ark_NativePointer node,
     ImageModelNG::SetSyncMode(frameNode, *convValue);
 }
 void SetColorFilterImpl(Ark_NativePointer node,
-                        const Opt_Union_ColorFilter_DrawingColorFilter* value)
+                        const Opt_Union_ColorFilter_drawing_ColorFilter* value)
 {
     ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
@@ -396,7 +397,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
     ImageModelNG::SetOnError(frameNode, std::move(onError));
 }
 void SetOnFinishImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -500,7 +501,8 @@ void SetContentTransitionImpl(Ark_NativePointer node, const Opt_ContentTransitio
         ImageModelStatic::SetContentTransition(frameNode, peer->type_);
     }
 }
-void SetAntialiasedImpl(Ark_NativePointer node, const Opt_Boolean* value)
+void SetAntialiasedImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

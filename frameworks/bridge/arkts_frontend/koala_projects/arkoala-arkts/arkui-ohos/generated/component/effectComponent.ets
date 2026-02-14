@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,40 +16,40 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { ArkThemeScopeManager } from "#arktheme"
-import { int32, int64, float32 } from "@koalaui/common"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookEffectComponentAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { EffectComponentModifier } from "./../EffectComponentModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookEffectComponentAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CustomBuilder } from './builder'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { EffectComponentModifier } from './../EffectComponentModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
     attributeSet?: EffectComponentModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkEffectComponentPeer {
-        const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._EffectComponent_construct(peerId, flags)
-        const _peer  = new ArkEffectComponentPeer(_peerPtr, peerId, 'EffectComponent', flags)
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._EffectComponent_construct(peerId, flags)
+        const _peer = new ArkEffectComponentPeer(_peerPtr, peerId, 'EffectComponent', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setEffectComponentOptionsAttribute(options?: EffectComponentOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
+            const optionsTmpValue = options!
             EffectComponentOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -58,7 +58,7 @@ export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setAlwaysSnapshotAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
@@ -70,30 +70,6 @@ export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
 }
-export interface EffectComponentAttribute extends CommonMethod {
-    alwaysSnapshot(value: boolean | undefined): this {
-        throw new Error("Unimplemented method alwaysSnapshot")
-    }
-    setEffectComponentOptions(options?: EffectComponentOptions): this {
-        throw new Error("Unimplemented method setEffectComponentOptions")
-    }
-    attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkEffectComponentStyle extends ArkCommonMethodStyle implements EffectComponentAttribute {
-    alwaysSnapshot_value?: boolean | undefined
-    attributeModifier_value?: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    alwaysSnapshot(value: boolean | undefined): this {
-        return this
-    }
-    setEffectComponentOptions(options?: EffectComponentOptions): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
-}
 export enum EffectLayer {
     NONE = 0,
     CHARGE_MOTION = 1,
@@ -102,33 +78,36 @@ export enum EffectLayer {
 export interface EffectComponentOptions {
     effectLayer?: EffectLayer;
 }
+export interface EffectComponentAttribute extends CommonMethod {
+    setEffectComponentOptions(options?: EffectComponentOptions): this {
+        throw new Error('Unimplemented method setEffectComponentOptions')
+    }
+    alwaysSnapshot(value: boolean | undefined): this {
+        throw new Error('Unimplemented method alwaysSnapshot')
+    }
+    attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
+    }
+}
 
 export class ArkEffectComponentComponent extends ArkCommonMethodComponent implements EffectComponentAttribute {
     getPeer(): ArkEffectComponentPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkEffectComponentPeer)
     }
     public setEffectComponentOptions(options?: EffectComponentOptions): this {
-        if (this.checkPriority("setEffectComponentOptions")) {
-            const options_casted = options as (EffectComponentOptions | undefined)
-            this.getPeer()?.setEffectComponentOptionsAttribute(options_casted)
-            return this
-        }
+        const options_casted = options as (EffectComponentOptions | undefined)
+        this.getPeer()?.setEffectComponentOptionsAttribute(options_casted)
+        this.applyOptionsFinish('EffectComponentAttribute');
         return this
     }
     public alwaysSnapshot(value: boolean | undefined): this {
-        if (this.checkPriority("alwaysSnapshot")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setAlwaysSnapshotAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setAlwaysSnapshotAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookEffectComponentAttributeModifier(this, value);
+            hookEffectComponentAttributeModifier(this, value);
         })
         return this
     }
@@ -143,43 +122,41 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
 
 @memo
 export function EffectComponentImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: EffectComponentAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkEffectComponentComponent>((): ArkEffectComponentComponent => {
         return new ArkEffectComponentComponent()
     })
-    NodeAttach<ArkEffectComponentPeer>((): ArkEffectComponentPeer => ArkEffectComponentPeer.create(receiver), (peer: ArkEffectComponentPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkEffectComponentPeer>((): ArkEffectComponentPeer => ArkEffectComponentPeer.create(receiver), (_: ArkEffectComponentPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
 export class EffectComponentOptions_serializer {
     public static write(buffer: SerializerBase, value: EffectComponentOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForEffectLayer  = value.effectLayer
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForEffectLayer = value.effectLayer
         if (valueHolderForEffectLayer !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEffectLayerTmpValue  = (valueHolderForEffectLayer as EffectLayer)
+            const valueHolderForEffectLayerTmpValue = (valueHolderForEffectLayer as EffectLayer)
             valueSerializer.writeInt32(valueHolderForEffectLayerTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): EffectComponentOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const effectLayerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let effectLayerTmpBuf : EffectLayer | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const effectLayerTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let effectLayerTmpBuf: EffectLayer | undefined = undefined
         if ((effectLayerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             effectLayerTmpBuf = EffectLayer.fromValue(valueDeserializer.readInt32())
         }
-        const effectLayerTmpResult : EffectLayer | undefined = effectLayerTmpBuf
-        let value : EffectComponentOptions = ({effectLayer: effectLayerTmpResult} as EffectComponentOptions)
+        const effectLayerTmpResult: EffectLayer | undefined = effectLayerTmpBuf
+        let value: EffectComponentOptions = ({effectLayer: effectLayerTmpResult} as EffectComponentOptions)
         return value
     }
 }

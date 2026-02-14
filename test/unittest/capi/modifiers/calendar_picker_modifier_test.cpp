@@ -298,11 +298,11 @@ HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontSizeTest, TestSize
     }
 }
 
-typedef std::pair<Ark_Union_Number_Resource, PickerDate> OptionsArgsStepTest;
+typedef std::pair<Opt_Union_F64_Resource, PickerDate> OptionsArgsStepTest;
 typedef std::pair<std::string, std::string> PickerOptionsStringStepTest;
 typedef std::pair<OptionsArgsStepTest, PickerOptionsStringStepTest> PickerDateOptionsStepTest;
 const std::vector<PickerDateOptionsStepTest> OPTIONS_TEST_PLAN = {
-    { { {.selector = 0, .value0 = Converter::ArkValue<Ark_Number>(0.7) }, PickerDate(2023, 7, 21) },
+    { { Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.7), PickerDate(2023, 7, 21) },
         { "0.7", "2023-7-21" } }
 };
 
@@ -317,7 +317,7 @@ HWTEST_F(CalendarPickerModifierTest, DISABLED_setCalendarPickerOptionsTest, Test
 
     for (const auto& [actual, expected] : OPTIONS_TEST_PLAN) {
         Ark_CalendarOptions arkOptions = {
-            .hintRadius = Converter::ArkValue<Opt_Union_Number_Resource>(std::get<0>(actual)),
+            .hintRadius = Converter::ArkValue<Opt_Union_F64_Resource>(std::get<0>(actual)),
             .selected = Converter::ArkValue<Opt_Date>(std::get<1>(actual)),
         };
         auto optOptions = Converter::ArkValue<Opt_CalendarOptions>(arkOptions);

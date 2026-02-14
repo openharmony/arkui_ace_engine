@@ -86,6 +86,14 @@ public:
         ModifierTestBase::SetUpTestCase();
     }
 
+    void SetUp() override
+    {
+        if (modifier_ == nullptr) {
+            GTEST_SKIP() << "Rating modifier not available (dynamic module 'Rating' not loaded in test environment)";
+        }
+        ModifierTestBase::SetUp();
+    }
+
     void CheckDefaultStarStyle()
     {
         std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);

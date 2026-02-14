@@ -664,7 +664,7 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorColo
 {
     // color as ark_color
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto colorArkColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_BLUE);
+    auto colorArkColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
     Ark_PopupMaskType literalColor = { .color = colorArkColor };
     auto arkUnionMask = Converter::ArkUnion<
         Ark_Union_Boolean_PopupMaskType, Ark_PopupMaskType>(literalColor);

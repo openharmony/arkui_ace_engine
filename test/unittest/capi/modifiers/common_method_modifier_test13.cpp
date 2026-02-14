@@ -466,9 +466,13 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     // valid value
-    auto arkUnionRadius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.0f);
+    auto arkRadius = Converter::ArkValue<Ark_Float64>(1.0f);
+    Ark_Union_F64_Resource arkUnionRadius;
+    TypeHelper::WriteToUnion<Ark_Float64>(arkUnionRadius) = arkRadius;
 
-    Ark_ShadowOptions arkShadowOptions = { .radius = arkUnionRadius };
+    Ark_ShadowOptions arkShadowOptions = {
+        .radius = Converter::ArkValue<Opt_Union_F64_Resource>(arkUnionRadius)
+    };
 
     Ark_Union_ShadowOptions_ShadowStyle arkUnionShadow;
     TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
@@ -497,9 +501,12 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
     EXPECT_EQ(checkValue, "1.000000");
 
     // negative value
-    arkUnionRadius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-1.0f);
+    arkRadius = Converter::ArkValue<Ark_Float64>(-1.0f);
+    TypeHelper::WriteToUnion<Ark_Float64>(arkUnionRadius) = arkRadius;
 
-    arkShadowOptions = { .radius = arkUnionRadius };
+    arkShadowOptions = {
+        .radius = Converter::ArkValue<Opt_Union_F64_Resource>(arkUnionRadius)
+    };
     TypeHelper::WriteToUnion<Ark_ShadowOptions>(arkUnionShadow) = arkShadowOptions;
 
     arkOptions = {
@@ -530,10 +537,11 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto arkUnionRadius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(TEST_FLOAT_RESOURCE);
+    Ark_Union_F64_Resource arkUnionRadius;
+    TypeHelper::WriteToUnion<Ark_Resource>(arkUnionRadius) = TEST_FLOAT_RESOURCE;
 
     Ark_ShadowOptions arkShadowOptions = {
-        .radius = arkUnionRadius
+        .radius = Converter::ArkValue<Opt_Union_F64_Resource>(arkUnionRadius)
     };
 
     auto arkUnionShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
@@ -909,7 +917,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptionsColorColorTest, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto colorArkColor = Converter::ArkValue<Ark_Color>(Ark_Color::ARK_COLOR_BLUE);
+    auto colorArkColor = Converter::ArkValue<Ark_Color>(ARK_COLOR_BLUE);
     auto arkUnionColor = Converter::ArkUnion<Ark_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
         colorArkColor);
 
@@ -1148,7 +1156,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsMessageOption
 HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsMessageOptionsTextColorColorTest, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto color = Converter::ArkValue<Ark_Color>(Ark_Color::ARK_COLOR_BLUE);
+    auto color = Converter::ArkValue<Ark_Color>(ARK_COLOR_BLUE);
     auto arkUnionColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(color);
 
     Ark_PopupMessageOptions arkMessageOptions = {

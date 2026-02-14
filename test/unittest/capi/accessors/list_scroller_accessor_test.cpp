@@ -517,8 +517,10 @@ HWTEST_F(ListScrollerAccessorTest, CloseAllSwipeActionsImplTest, TestSize.Level1
     ASSERT_FALSE(checkData.has_value());
 
     // setup the callback object via C-API
-    auto callbackVoid = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(callbackVoid);
+    auto callbackVoid = Converter::ArkValue<
+        synthetic_Callback_Void>(checkCallback, contextId);
+    auto optCallback = Converter::ArkValue<
+        Opt_synthetic_Callback_Void>(callbackVoid);
     Ark_CloseSwipeActionOptions arkClose = {.onFinish = optCallback};
     auto arkCloseOpt = Converter::ArkValue<Opt_CloseSwipeActionOptions>(arkClose);
     accessor_->closeAllSwipeActions(vmContext_, peer_, &arkCloseOpt);

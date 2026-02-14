@@ -744,7 +744,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsMaskCol
 {
     // color as ark_color
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto colorArkColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_BLUE);
+    auto colorArkColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
     Ark_PopupMaskType literalColor = { .color = colorArkColor };
     Ark_Union_Boolean_PopupMaskType arkUnionMask;
     TypeHelper::WriteToUnion<Ark_PopupMaskType>(arkUnionMask) = literalColor;
@@ -953,7 +953,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsPopupCo
 {
     // color as arkcolor
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto colorArkColor = Converter::ArkValue<Ark_Color>(Ark_Color::ARK_COLOR_BLUE);
+    auto colorArkColor = Converter::ArkValue<Ark_Color>(ARK_COLOR_BLUE);
     Ark_Union_Color_String_Resource_I64 arkUnionPopupColor;
     TypeHelper::WriteToUnion<Ark_Color>(arkUnionPopupColor) = colorArkColor;
 

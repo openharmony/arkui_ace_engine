@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 
 #include "arkoala_api_generated.h"
+#include "../capi_gen140_compat.h"
 
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "test/mock/base/mock_system_properties.h"

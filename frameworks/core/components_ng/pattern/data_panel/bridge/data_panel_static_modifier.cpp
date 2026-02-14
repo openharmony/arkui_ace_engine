@@ -234,7 +234,7 @@ void ContentModifierDataPanelImpl(Ark_NativePointer node,
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.maxValue = Converter::ArkValue<Ark_Float64>(config.maxValue_);
-        arkConfig.values = Converter::ArkValue<Array_Float64>(config.values_, Converter::FC);
+        arkConfig.values = Converter::ArkValue<Array_F64>(config.values_, Converter::FC);
         auto boxNode = GeneratedApiImpl::GetContentNode(node);
         if (boxNode == nullptr) {
             boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());

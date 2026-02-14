@@ -30,12 +30,9 @@ void DestroyPeerImpl(Ark_UIGridEvent peer)
     CHECK_NULL_VOID(peer);
     PeerUtils::DestroyPeer(peer);
 }
-Ark_UIGridEvent ConstructImpl(Ark_NativePointer node)
+Ark_UIGridEvent ConstructImpl()
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
     auto eventPeer = PeerUtils::CreatePeer<UIGridEventPeer>();
-    eventPeer->node = frameNode;
     return eventPeer;
 }
 Ark_NativePointer GetFinalizerImpl()

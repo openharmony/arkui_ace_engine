@@ -49,7 +49,9 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void*>(&DestroyPeerImpl);
 }
-void CreateImpl(Ark_BuilderNodeOps peer, const Callback_Void* buildFunc)
+void CreateImpl(Ark_VMContext vmContext,
+                Ark_BuilderNodeOps peer,
+                const synthetic_Callback_Void* buildFunc)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(buildFunc);
@@ -97,7 +99,8 @@ void DisposeNodeImpl(Ark_BuilderNodeOps peer)
     peer->viewNode_.Reset();
     peer->realNode_.Reset();
 }
-void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer, const Callback_Void* configurationUpdateFunc)
+void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer,
+                                        const synthetic_Callback_Void* configurationUpdateFunc)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->viewNode_);

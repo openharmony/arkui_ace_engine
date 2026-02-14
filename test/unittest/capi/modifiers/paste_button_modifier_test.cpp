@@ -325,7 +325,7 @@ HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event,
-        Ark_PasteButtonOnClickResult result, Opt_BusinessError error) {
+        Ark_PasteButtonOnClickResult result, Opt_BusinessErrorInterface_Void error) {
         auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();

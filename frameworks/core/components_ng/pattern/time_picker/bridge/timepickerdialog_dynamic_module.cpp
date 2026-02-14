@@ -43,7 +43,9 @@ const ArkUITimePickerDialogModifier* GetTimePickerDialogStaticModifier();
 } // namespace TimePickerUtil
 namespace GeneratedModifier {
 #ifdef INCLUDE_GENERATED_SOURCES
+#ifdef WRONG_GEN_v140
 GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogStaticAccessor();
+#endif // WRONG_GEN_v140
 #endif
 } // namespace GeneratedModifier
 } // namespace NG
@@ -81,7 +83,11 @@ const void* TimePickerDialogDynamicModule::GetCustomModifier(const std::string& 
     }
 #ifdef INCLUDE_GENERATED_SOURCES
     if (name == "configurationAccessor") {
+#ifdef WRONG_GEN_v140
         return NG::GeneratedModifier::GetTimePickerDialogStaticAccessor();
+#else // WRONG_GEN_v140
+    return nullptr;
+#endif // WRONG_GEN_v140
     }
 #else
     return nullptr;

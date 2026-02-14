@@ -217,22 +217,22 @@ void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& 
 }
 
 template<>
-ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const enum Ark_arkui_component_enums_Color& src)
 {
     switch (src) {
-        case ARK_COLOR_WHITE: dst = Color(0xffffffff); break; // White
-        case ARK_COLOR_BLACK: dst = Color(0xff000000); break; // Black
-        case ARK_COLOR_BLUE: dst = Color(0xff0000ff); break; // Blue
-        case ARK_COLOR_BROWN: dst = Color(0xffa52a2a); break; // Brown
-        case ARK_COLOR_GRAY: dst = Color(0xff808080); break; // Gray
-        case ARK_COLOR_GREEN: dst = Color(0xff008000); break; // Green
-        case ARK_COLOR_GREY: dst = Color(0xff808080); break; // Grey
-        case ARK_COLOR_ORANGE: dst = Color(0xffffa500); break; // Orange
-        case ARK_COLOR_PINK: dst = Color(0xffffc0cb); break; // Pink
-        case ARK_COLOR_RED: dst = Color(0xffff0000); break; // Red
-        case ARK_COLOR_YELLOW: dst = Color(0xffffff00); break; // Yellow
-        case ARK_COLOR_TRANSPARENT: dst = Color(0x00000000); break; // Transparent
-        default: LOGE("Unexpected enum value in Ark_Color: %{public}d", src);
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE: dst = Color(0xffffffff); break; // White
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK: dst = Color(0xff000000); break; // Black
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE: dst = Color(0xff0000ff); break; // Blue
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN: dst = Color(0xffa52a2a); break; // Brown
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY: dst = Color(0xff808080); break; // Gray
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN: dst = Color(0xff008000); break; // Green
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY: dst = Color(0xff808080); break; // Grey
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE: dst = Color(0xffffa500); break; // Orange
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK: dst = Color(0xffffc0cb); break; // Pink
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED: dst = Color(0xffff0000); break; // Red
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW: dst = Color(0xffffff00); break; // Yellow
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT: dst = Color(0x00000000); break; // Transparent
+        default: LOGE("Unexpected enum value in Ark_arkui_component_enums_Color: %{public}d", src);
     }
 }
 

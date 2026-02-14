@@ -19,6 +19,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "../capi_gen140_compat.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -120,7 +121,7 @@ HWTEST_F(ConvertorTest, ListOptionalConversion, TestSize.Level1)
  */
 HWTEST_F(ConvertorTest, GetOptTestValue, TestSize.Level1)
 {
-    auto unionValue = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(5.2f);
+    auto unionValue = Converter::ArkUnion<Ark_Union_Number_String, Ark_Float64>(5.2f);
     auto value = Converter::ArkValue<Opt_Union_Number_String>(unionValue);
     std::optional<Ark_Union_Number_String> result = Converter::GetOpt(value);
     ASSERT_TRUE(result);

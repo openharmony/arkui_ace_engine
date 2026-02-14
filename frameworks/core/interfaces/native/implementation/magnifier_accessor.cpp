@@ -20,13 +20,13 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MagnifierAccessor {
-void DestroyPeerImpl(Ark_Magnifier peer)
+void DestroyPeerImpl(Ark_arkui_component_idlize_Magnifier peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_Magnifier ConstructImpl()
+Ark_arkui_component_idlize_Magnifier ConstructImpl()
 {
-    auto peer = OHOS::Ace::NG::PeerUtils::CreatePeer<MagnifierPeer>();
+    auto peer = OHOS::Ace::NG::PeerUtils::CreatePeer<arkui_component_idlize_MagnifierPeer>();
     CHECK_NULL_RETURN(peer, {});
     return peer;
 }
@@ -34,14 +34,14 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void BindImpl(Ark_Magnifier peer,
+void BindImpl(Ark_arkui_component_idlize_Magnifier peer,
               const Ark_String* id)
 {
     CHECK_NULL_VOID(peer);
     auto idStr = Converter::Convert<std::string>(*id);
     peer->Bind(idStr);
 }
-void ShowImpl(Ark_Magnifier peer,
+void ShowImpl(Ark_arkui_component_idlize_Magnifier peer,
               Ark_Float64 x,
               Ark_Float64 y)
 {
@@ -50,7 +50,7 @@ void ShowImpl(Ark_Magnifier peer,
     auto optY = Converter::OptConvert<float>(y);
     peer->Show(optX, optY);
 }
-void UnbindImpl(Ark_Magnifier peer)
+void UnbindImpl(Ark_arkui_component_idlize_Magnifier peer)
 {
     CHECK_NULL_VOID(peer);
     peer->Unbind();
@@ -69,7 +69,4 @@ const GENERATED_ArkUIMagnifierAccessor* GetMagnifierAccessor()
     return &MagnifierAccessorImpl;
 }
 
-struct MagnifierPeer {
-    virtual ~MagnifierPeer() = default;
-};
 }

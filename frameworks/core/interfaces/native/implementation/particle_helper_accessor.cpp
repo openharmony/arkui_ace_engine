@@ -136,7 +136,7 @@ void ParseFloatInitRange(const Ark_Tuple_Double_Double & arkRange, ParticleFloat
     floatOption.SetRange(range);
 }
 
-RefPtr<Curve> ParseCurve(const Opt_Union_Curve_ICurve arkCurve)
+RefPtr<Curve> ParseCurve(const Opt_Union_curves_Curve_curves_ICurve arkCurve)
 {
     std::optional<RefPtr<Curve>> curveOpt = Converter::OptConvert<RefPtr<Curve>>(arkCurve);
     if (curveOpt && *curveOpt) {

@@ -30,7 +30,7 @@ import { ArkSliderComponent, ArkSliderPeer, SliderConfiguration } from '#generat
 import { ArkTextClockComponent, ArkTextClockPeer, TextClockConfiguration } from "#generated"
 import { ArkTextTimerComponent, ArkTextTimerPeer, TextTimerConfiguration } from "#generated"
 import { ArkToggleComponent, ArkTogglePeer, ToggleConfiguration } from '#generated'
-import { ArkCheckboxGroupComponent, CheckBoxGroupConfiguration } from "#generated"
+import { ArkCheckboxGroupComponent, ArkCheckboxGroupPeer, CheckBoxGroupConfiguration } from "#generated"
 import { CustomBuilder } from "#generated"
 import { CallbackTransformer } from "../../CallbackTransformer"
 
@@ -396,7 +396,12 @@ export function hookToggleContentModifier(
 
 export function hookCheckBoxGroupContentModifier(
     receiver: ArkCheckboxGroupComponent, value?: ContentModifier<CheckBoxGroupConfiguration>) {
-    const ptr = receiver.getPeer().peer.ptr
+    hookCheckBoxGroupContentModifier(receiver.getPeer(), value)
+}
+
+export function hookCheckBoxGroupContentModifier(
+    peer: ArkCheckboxGroupPeer, value?: ContentModifier<CheckBoxGroupConfiguration>) {
+    const ptr = peer.peer.ptr
     if (!value) {
         ContentModifierHelper.resetContentModifierCheckBoxGroup(ptr)
         return

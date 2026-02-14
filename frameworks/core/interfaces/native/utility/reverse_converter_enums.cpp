@@ -958,34 +958,34 @@ ACE_FORCE_EXPORT void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ac
     }
 }
 
-void AssignArkValue(Ark_Color& dst, const Color& src)
+void AssignArkValue(Ark_arkui_component_enums_Color& dst, const Color& src)
 {
     if (src == OHOS::Ace::Color::WHITE) {
-        dst = ARK_COLOR_WHITE;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE;
     } else if (src == OHOS::Ace::Color::BLACK) {
-        dst = ARK_COLOR_BLACK;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK;
     } else if (src == OHOS::Ace::Color::BLUE) {
-        dst = ARK_COLOR_BLUE;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE;
     } else if (src == Color(0xffa52a2a)) {
-        dst = ARK_COLOR_BROWN;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN;
     } else if (src == OHOS::Ace::Color::GRAY) {
-        dst = ARK_COLOR_GRAY;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY;
     } else if (src == OHOS::Ace::Color::GREEN) {
-        dst = ARK_COLOR_GREEN;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN;
     } else if (src == Color(0xff808080)) {
-        dst = ARK_COLOR_GREY;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY;
     } else if (src == Color(0xffffa500)) {
-        dst = ARK_COLOR_ORANGE;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE;
     } else if (src == Color(0xffffc0cb)) {
-        dst = ARK_COLOR_PINK;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK;
     } else if (src == OHOS::Ace::Color::RED) {
-        dst = ARK_COLOR_RED;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED;
     } else if (src == Color(0xFFFFFF00)) {
-        dst = ARK_COLOR_YELLOW;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW;
     } else if (src == OHOS::Ace::Color::TRANSPARENT) {
-        dst = ARK_COLOR_TRANSPARENT;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT;
     } else {
-        dst = static_cast<Ark_Color>(-1);
+        dst = static_cast<Ark_arkui_component_enums_Color>(-1);
     }
 }
 void AssignArkValue(Ark_FlipDirection& dst, const TextFlipDirection& src)
@@ -1039,8 +1039,8 @@ void AssignArkValue(Ark_SourceType& dst, const SourceType& src)
         case SourceType::TOUCH: dst = Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN; break;
         case SourceType::KEYBOARD: dst = Ark_SourceType::ARK_SOURCE_TYPE_KEY; break;
         case SourceType::JOYSTICK: dst = Ark_SourceType::ARK_SOURCE_TYPE_JOYSTICK; break;
-        default: dst = static_cast<Ark_SourceType>(-1);
-            LOGE("Unexpected enum value in SourceType: %{public}d", src);
+        default: dst = Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN;
+            LOGE("Unexpected enum value in SourceType");
     }
 }
 

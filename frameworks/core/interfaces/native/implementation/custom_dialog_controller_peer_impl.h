@@ -48,6 +48,7 @@ public:
     void SetCornerRadius(Opt_Union_Dimension_BorderRadiuses cornerRadius);
     void SetIsModal(Opt_Boolean isModal);
     void SetDismiss(Opt_Callback_DismissDialogAction_Void onWillDismiss);
+    void SetDismiss(Opt_synthetic_Callback_DismissDialogAction_Void onWillDismiss);
     void SetWidth(Opt_Dimension width);
     void SetHeight(Opt_Dimension height);
     void SetBorderWidth(Opt_Union_Dimension_EdgeWidths borderWidth);
@@ -55,7 +56,7 @@ public:
     void SetBorderStyle(Opt_Union_BorderStyle_EdgeStyles borderStyle);
     void SetShadow(Opt_Union_ShadowOptions_ShadowStyle shadow);
     void SetBlurStyle(Opt_BlurStyle backgroundBlurStyle);
-    void SetKeyboardAvoidMode(Opt_KeyboardAvoidMode keyboardAvoidMode);
+    void SetKeyboardAvoidMode(Opt_arkui_component_common_KeyboardAvoidMode keyboardAvoidMode);
     void SetEnableHoverMode(Opt_Boolean enableHoverMode);
     void SetHoverModeArea(Opt_HoverModeAreaType hoverModeArea);
     void SetBackgroundBlurStyleOptions(Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions);

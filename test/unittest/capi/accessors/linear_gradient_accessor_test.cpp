@@ -33,8 +33,8 @@ namespace {
     };
 
     std::vector<std::pair<Ark_Color, float>> validValues2 = {
-        std::make_pair(Ark_Color::ARK_COLOR_BLUE, 0.5f),
-        std::make_pair(Ark_Color::ARK_COLOR_RED, 1.f),
+        std::make_pair(ARK_COLOR_BLUE, 0.5f),
+        std::make_pair(ARK_COLOR_RED, 1.f),
     };
 
     std::vector<std::pair<int32_t, float>> validValues3 = {

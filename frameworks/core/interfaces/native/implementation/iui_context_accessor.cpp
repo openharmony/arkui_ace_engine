@@ -317,7 +317,7 @@ void HandleUnbindTabsFromScrollable(Ark_TabsController arkTabsController, Ark_Sc
     }
 }
 
-std::optional<std::string> ConvertString(const Ark_Union_Number_String& src)
+std::optional<std::string> ConvertString(const Ark_Union_I32_String& src)
 {
     std::optional<std::string> value;
     auto selector = src.selector;
@@ -326,7 +326,7 @@ std::optional<std::string> ConvertString(const Ark_Union_Number_String& src)
     }
     return value;
 }
-std::optional<int32_t> ConvertNumber(const Ark_Union_Number_String& src)
+std::optional<int32_t> ConvertNumber(const Ark_Union_I32_String& src)
 {
     std::optional<int32_t> value;
     auto selector = src.selector;
@@ -337,18 +337,8 @@ std::optional<int32_t> ConvertNumber(const Ark_Union_Number_String& src)
 }
 } // namespace
 namespace IUIContextAccessor {
-void DestroyPeerImpl(Ark_IUIContext peer)
-{
-}
-Ark_IUIContext ConstructImpl()
-{
-    return {};
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-void FreezeUINode0Impl(const Ark_String* id, Ark_Boolean isFrozen)
+void FreezeUINode0Impl(const Ark_String* id,
+                       Ark_Boolean isFrozen)
 {
     CHECK_NULL_VOID(id);
     ViewAbstract::FreezeUINodeById(Converter::Convert<std::string>(*id), Converter::Convert<bool>(isFrozen));
@@ -357,7 +347,8 @@ void FreezeUINode1Impl(Ark_Int32 id, Ark_Boolean isFrozen)
 {
     ViewAbstract::FreezeUINodeByUniqueId(static_cast<int32_t>(id), Converter::Convert<bool>(isFrozen));
 }
-Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node, Ark_KeyEvent event)
+Ark_Boolean DispatchKeyEventImpl(const Ark_Union_I32_String* node,
+                                 Ark_KeyEvent event)
 {
     auto result = false;
     RefPtr<NG::FrameNode> frameNode = nullptr;
@@ -500,17 +491,14 @@ void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feat
     bool value = (featureVal == NG::CustomKeyboardContinueFeature::ENABLED);
     textFieldManager->SetCustomKeyboardContinueFeature(value);
 }
-Ark_Magnifier GetMagnifierImpl(Ark_IUIContext peer)
+Ark_arkui_component_idlize_Magnifier GetMagnifierImpl()
 {
     return {};
 }
-} // namespace IUIContextAccessor
+} // IUIContextAccessor
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
     static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
-        IUIContextAccessor::DestroyPeerImpl,
-        IUIContextAccessor::ConstructImpl,
-        IUIContextAccessor::GetFinalizerImpl,
         IUIContextAccessor::FreezeUINode0Impl,
         IUIContextAccessor::FreezeUINode1Impl,
         IUIContextAccessor::DispatchKeyEventImpl,

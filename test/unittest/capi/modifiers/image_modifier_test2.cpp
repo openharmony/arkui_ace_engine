@@ -15,10 +15,9 @@
 
 #include <gtest/gtest.h>
 
-#include "arkoala_api_generated.h"
+#include "modifier_test_base.h"
 #include "generated/test_fixtures.h"
 #include "generated/type_helpers.h"
-#include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "point_light_test.h"
 

@@ -50,8 +50,8 @@ Map_String_Opt_Object SendSyncImpl(Ark_UIExtensionProxy peer,
     LOGE("UIExtensionProxyAccessor::SendSyncImpl - is not supported");
     return {};
 }
-void OnAsyncReceiverRegisterAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
-                                                      const Callback_UIExtensionProxy_Void* callback_)
+void OnAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
+                                 const Callback_UIExtensionProxy* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -74,8 +74,8 @@ void OnAsyncReceiverRegisterAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
     pattern->SetAsyncCallbacks(std::move(funcList));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnSyncReceiverRegisterSyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
-                                                    const Callback_UIExtensionProxy_Void* callback_)
+void OnSyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
+                                const Callback_UIExtensionProxy* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -98,8 +98,8 @@ void OnSyncReceiverRegisterSyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
     pattern->SetSyncCallbacks(std::move(funcList));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OffAsyncReceiverRegisterAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
-                                                       const Opt_Callback_UIExtensionProxy_Void* callback_)
+void OffAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
+                                  const Opt_Callback_UIExtensionProxy* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -116,8 +116,8 @@ void OffAsyncReceiverRegisterAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer
     pattern->SetAsyncCallbacks(std::move(funcList));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OffSyncReceiverRegisterSyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
-                                                     const Opt_Callback_UIExtensionProxy_Void* callback_)
+void OffSyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
+                                 const Opt_Callback_UIExtensionProxy* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -143,10 +143,10 @@ const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor()
         UIExtensionProxyAccessor::GetFinalizerImpl,
         UIExtensionProxyAccessor::SendImpl,
         UIExtensionProxyAccessor::SendSyncImpl,
-        UIExtensionProxyAccessor::OnAsyncReceiverRegisterAsyncReceiverRegisterImpl,
-        UIExtensionProxyAccessor::OnSyncReceiverRegisterSyncReceiverRegisterImpl,
-        UIExtensionProxyAccessor::OffAsyncReceiverRegisterAsyncReceiverRegisterImpl,
-        UIExtensionProxyAccessor::OffSyncReceiverRegisterSyncReceiverRegisterImpl,
+        UIExtensionProxyAccessor::OnAsyncReceiverRegisterImpl,
+        UIExtensionProxyAccessor::OnSyncReceiverRegisterImpl,
+        UIExtensionProxyAccessor::OffAsyncReceiverRegisterImpl,
+        UIExtensionProxyAccessor::OffSyncReceiverRegisterImpl,
     };
     return &UIExtensionProxyAccessorImpl;
 }

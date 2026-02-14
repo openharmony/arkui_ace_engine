@@ -164,14 +164,15 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityGroupTestDefaultValues, Test
  */
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityGroupTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setAccessibilityGroupWithValue, nullptr);
+    ASSERT_NE(modifier_->setAccessibilityGroup, nullptr);
     using OneTestStep = std::tuple<Opt_Boolean, std::string>;
-    const std::vector<OneTestStep> testPlan = {
+    static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_Boolean>(true), "true"},
         {Converter::ArkValue<Opt_Boolean>(false), "false"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityGroupWithValue(node_, &inputValue);
+        Opt_AccessibilityOptions accessOpt = Converter::ArkValue<Opt_AccessibilityOptions>(Ark_Empty());
+        modifier_->setAccessibilityGroup(node_, &inputValue, &accessOpt);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GROUP_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -197,14 +198,14 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityTextTestDefaultValues, TestS
  */
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextOfStringTypeTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setAccessibilityTextOfStringType, nullptr);
-    using OneTestStep = std::tuple<Opt_String, std::string>;
-    const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_String>("test string 1"), "test string 1"},
-        {Converter::ArkValue<Opt_String>("test string 2"), "test string 2"},
+    ASSERT_NE(modifier_->setAccessibilityText, nullptr);
+    using OneTestStep = std::tuple<Opt_Union_Resource_String, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkUnion<Opt_Union_Resource_String, Ark_String>("test string 1"), "test string 1"},
+        {Converter::ArkUnion<Opt_Union_Resource_String, Ark_String>("test string 2"), "test string 2"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityTextOfStringType(node_, &inputValue);
+        modifier_->setAccessibilityText(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TEXT_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -218,17 +219,17 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextOfStringTypeTes
  */
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextOfResourceTypeTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setAccessibilityTextOfResourceType, nullptr);
+    ASSERT_NE(modifier_->setAccessibilityText, nullptr);
     using OneTestStep = std::tuple<Ark_Resource, std::string>;
     std::string inputVal1 {"test string 1"}, inputVal2 {"test string 2"};
-    const std::vector<OneTestStep> testPlan = {
+    static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Ark_Resource>(inputVal1, nullptr), inputVal1},
         {Converter::ArkValue<Ark_Resource>(inputVal2, nullptr), inputVal2},
     };
-    Opt_Resource optInputValue;
+    Opt_Union_Resource_String optInputValue;
     for (auto [inputValue, expectedValue]: testPlan) {
-        optInputValue = Converter::ArkValue<Opt_Resource>(inputValue);
-        modifier_->setAccessibilityTextOfResourceType(node_, &optInputValue);
+        optInputValue = Converter::ArkUnion<Opt_Union_Resource_String, Ark_Resource>(inputValue);
+        modifier_->setAccessibilityText(node_, &optInputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TEXT_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -258,7 +259,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextHintTestValidVa
 {
     ASSERT_NE(modifier_->setAccessibilityTextHint, nullptr);
     using OneTestStep = std::tuple<Opt_String, std::string>;
-    const std::vector<OneTestStep> testPlan = {
+    static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_String>("test string 1"), "test string 1"},
         {Converter::ArkValue<Opt_String>("test string 2"), "test string 2"},
     };
@@ -289,14 +290,14 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescriptionTestDefaultValues
  */
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription0TestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setAccessibilityDescriptionOfStringType, nullptr);
-    using OneTestStep = std::tuple<Opt_String, std::string>;
-    const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_String>("test string 1"), "test string 1"},
-        {Converter::ArkValue<Opt_String>("test string 2"), "test string 2"},
+    ASSERT_NE(modifier_->setAccessibilityDescription, nullptr);
+    using OneTestStep = std::tuple<Opt_Union_Resource_String, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkUnion<Opt_Union_Resource_String, Ark_String>("test string 1"), "test string 1"},
+        {Converter::ArkUnion<Opt_Union_Resource_String, Ark_String>("test string 2"), "test string 2"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityDescriptionOfStringType(node_, &inputValue);
+        modifier_->setAccessibilityDescription(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_DESCRIPTION_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -310,11 +311,11 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription0TestVal
  */
 HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription1TestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setAccessibilityDescriptionOfResourceType, nullptr);
+    ASSERT_NE(modifier_->setAccessibilityDescription, nullptr);
     auto resName = NamedResourceId(ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST, ResourceType::STRING);
-    auto src = Converter::ArkValue<Opt_Resource>(CreateResource(resName));
+    auto src = Converter::ArkUnion<Opt_Union_Resource_String, Ark_Resource>(CreateResource(resName));
 
-    modifier_->setAccessibilityDescriptionOfResourceType(node_, &src);
+    modifier_->setAccessibilityDescription(node_, &src);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_DESCRIPTION_NAME_TEST);
     EXPECT_EQ(strResult, ATTRIBUTE_DESCRIPTION_RESOURCE_VALUE_TEST);
 }

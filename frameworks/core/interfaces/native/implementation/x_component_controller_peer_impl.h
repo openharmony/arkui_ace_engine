@@ -32,13 +32,13 @@ struct XComponentControllerPeerImpl : public Referenced {
 #ifdef XCOMPONENT_SUPPORTED
     void TriggerStartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
         const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
-    void SetOnSurfaceCreatedEvent(const Callback_String_Void& callback);
+    void SetOnSurfaceCreatedEvent(const synthetic_Callback_String_Void& callback);
     void SetOnSurfaceChangedEvent(const Callback_String_SurfaceRect_Void& callback);
-    void SetOnSurfaceDestroyedEvent(const Callback_String_Void& callback);
+    void SetOnSurfaceDestroyedEvent(const synthetic_Callback_String_Void& callback);
     std::shared_ptr<drawing_CanvasPeer> GetCanvas();
-    Callback_String_Void arkOnSurfaceCreated = {};
+    synthetic_Callback_String_Void arkOnSurfaceCreated = {};
     Callback_String_SurfaceRect_Void arkOnSurfaceChanged = {};
-    Callback_String_Void arkOnSurfaceDestroyed = {};
+    synthetic_Callback_String_Void arkOnSurfaceDestroyed = {};
     SurfaceCreatedEvent onSurfaceCreatedEvent = nullptr;
     SurfaceChangedEvent onSurfaceChangedEvent = nullptr;
     SurfaceDestroyedEvent onSurfaceDestroyedEvent = nullptr;

@@ -128,10 +128,6 @@ Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
     unifiedPeer->unifiedData = data;
     return Converter::ArkValue<Opt_unifiedDataChannel_UnifiedData>(unifiedPeer);
 }
-Opt_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
-{
-    return Converter::ArkValue<Opt_unifiedDataChannel_Summary>();
-}
 void SetResultImpl(Ark_DragEvent peer,
                    Ark_DragResult dragResult)
 {
@@ -184,7 +180,7 @@ Ark_Float64 GetVelocityImpl(Ark_DragEvent peer)
     return Converter::ArkValue<Ark_Float64>(value);
 }
 void ExecuteDropAnimationImpl(Ark_DragEvent peer,
-                              const Callback_Void* customDropAnimation)
+                              const VoidCallback* customDropAnimation)
 {
     CHECK_NULL_VOID(customDropAnimation);
     CHECK_NULL_VOID(peer);
@@ -220,14 +216,6 @@ Ark_Boolean IsRemoteImpl(Ark_DragEvent peer)
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
     auto isRemote = peer->dragInfo->isRemoteDev();
     return Converter::ArkValue<Ark_Boolean>(isRemote);
-}
-void SetDataLoadParamsImpl(Ark_DragEvent peer,
-                           const Ark_unifiedDataChannel_DataLoadParams* dataLoadParams)
-{
-}
-void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
-                                     const Ark_String* configuration)
-{
 }
 Ark_Float64 GetGlobalDisplayXImpl(Ark_DragEvent peer)
 {
@@ -279,22 +267,6 @@ void SetUseCustomDropAnimationImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(peer->dragInfo);
     peer->dragInfo->UseCustomAnimation(Convert<bool>(useCustomDropAnimation));
 }
-Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_DragEvent peer)
-{
-    const auto invalid = Converter::ArkValue<Opt_ModifierKeyStateGetter>(Ark_Empty());
-    CHECK_NULL_RETURN(peer, invalid);
-    auto info = peer->dragInfo;
-    CHECK_NULL_RETURN(info, invalid);
-    auto getter = CallbackKeeper::ReturnReverseCallback<ModifierKeyStateGetter,
-            std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
-            (const Array_String keys, const Callback_Boolean_Void continuation) {
-        auto eventKeys = info->GetPressedKeyCodes();
-        auto keysStr = Converter::Convert<std::vector<std::string>>(keys);
-        Ark_Boolean arkResult = Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
-        CallbackHelper(continuation).InvokeSync(arkResult);
-    });
-    return Converter::ArkValue<Opt_ModifierKeyStateGetter, ModifierKeyStateGetter>(getter);
-}
 void SetGetModifierKeyStateImpl(Ark_DragEvent peer,
                                 const Opt_ModifierKeyStateGetter* getModifierKeyState)
 {
@@ -313,26 +285,22 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetWindowYImpl,
         DragEventAccessor::SetDataImpl,
         DragEventAccessor::GetDataImpl,
-        DragEventAccessor::GetSummaryImpl,
         DragEventAccessor::SetResultImpl,
         DragEventAccessor::GetResultImpl,
         DragEventAccessor::GetPreviewRectImpl,
         DragEventAccessor::GetVelocityXImpl,
         DragEventAccessor::GetVelocityYImpl,
         DragEventAccessor::GetVelocityImpl,
+        DragEventAccessor::ExecuteDropAnimationImpl,
         DragEventAccessor::GetDisplayIdImpl,
         DragEventAccessor::GetDragSourceImpl,
         DragEventAccessor::IsRemoteImpl,
-        DragEventAccessor::SetDataLoadParamsImpl,
-        DragEventAccessor::ExecuteDropAnimationImpl,
-        DragEventAccessor::EnableInternalDropAnimationImpl,
         DragEventAccessor::GetGlobalDisplayXImpl,
         DragEventAccessor::GetGlobalDisplayYImpl,
         DragEventAccessor::GetDragBehaviorImpl,
         DragEventAccessor::SetDragBehaviorImpl,
         DragEventAccessor::GetUseCustomDropAnimationImpl,
         DragEventAccessor::SetUseCustomDropAnimationImpl,
-        DragEventAccessor::GetGetModifierKeyStateImpl,
         DragEventAccessor::SetGetModifierKeyStateImpl,
     };
     return &DragEventAccessorImpl;

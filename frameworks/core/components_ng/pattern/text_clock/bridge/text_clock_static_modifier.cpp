@@ -123,7 +123,7 @@ void SetFormatImpl(Ark_NativePointer node, const Opt_ResourceStr* value)
     }
     TextClockModelStatic::SetFormat(frameNode, convValue);
 }
-void SetOnDateChangeImpl(Ark_NativePointer node, const Opt_Callback_I64_Void* value)
+void SetOnDateChangeImpl(Ark_NativePointer node, const Opt_arkui_component_common_Callback_I64_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

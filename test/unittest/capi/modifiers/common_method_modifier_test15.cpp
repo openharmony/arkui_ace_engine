@@ -146,7 +146,10 @@ public:
             checkNestedEvent = {
                 .resourceId = resourceId,
             };
+            auto accessors = fullAPI_->getAccessors();
+            auto accessor = accessors->getSheetDismissAccessor();
             checkNestedEvent->fired = true;
+            accessor->dismiss(parameter);
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_SheetDismiss_Void>(dismissCallback, frameNode->GetId());
@@ -169,10 +172,14 @@ public:
     {
         checkNestedEvent.reset();
         auto dismissCallback = [](const Ark_Int32 resourceId, const Ark_DismissSheetAction parameter) {
+            auto accessors = fullAPI_->getAccessors();
+            auto accessor = accessors->getDismissSheetActionAccessor();
             checkNestedEvent = {
                 .resourceId = resourceId,
+                .reason = Converter::OptConvert<BindSheetDismissReason>(accessor->getReason(parameter)),
             };
             checkNestedEvent->fired = true;
+            accessor->dismiss(parameter);
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_DismissSheetAction_Void>(dismissCallback, frameNode->GetId());
@@ -239,11 +246,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnAppearTest, TestSize
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
+    auto optOnAppearCallback = CreateOnAppearCallback<Opt_VoidCallback, VoidCallback>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onAppear = optOnAppearCallback,
-        .onWillAppear = Converter::ArkValue<Opt_Callback_Void>(Ark_Empty()) };
+        .onWillAppear = Converter::ArkValue<Opt_VoidCallback>(Ark_Empty()) };
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(arkOptions);
 
     checkBuilderEvent.reset();
@@ -279,7 +286,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnDisAppearTest, TestS
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
+    auto optOnAppearCallback = CreateOnAppearCallback<Opt_VoidCallback, VoidCallback>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions {
@@ -323,7 +330,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWillAppearTest, Test
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
+    auto optOnAppearCallback = CreateOnAppearCallback<Opt_VoidCallback, VoidCallback>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions {
@@ -363,7 +370,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWillDisAppearTest, T
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
+    auto optOnAppearCallback = CreateOnAppearCallback<Opt_VoidCallback, VoidCallback>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions {
@@ -478,6 +485,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetWillDismissTest, TestS
 
         EXPECT_TRUE(checkNestedEvent.has_value());
         EXPECT_EQ(checkNestedEvent->resourceId, frameNode->GetId());
+        EXPECT_EQ(checkNestedEvent->reason, expected);
         EXPECT_TRUE(checkNestedEvent->fired);
     }
 }

@@ -1006,9 +1006,9 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1Test, TestSize.Lev
     auto builder = getBuilderCb();
     auto arkBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto options = getContextMenuOptions();
-    auto isShown = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     CommonMethodModifierTest16::SetSubwindow();
-    modifier_->setBindContextMenu1(node_, &isShown, &arkBuilder, &options);
+    modifier_->setBindContextMenu1(node_, &arkShow, &arkBuilder, &options);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);
     CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
@@ -1030,9 +1030,9 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestPlacementTest,
             .placement = getPlacement(value),
         };
         auto options = getContextMenuOptions(optionsPlacement);
-        auto isShown = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+        auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
         CommonMethodModifierTest16::SetSubwindow();
-        modifier_->setBindContextMenu1(node_, &isShown, &arkBuilder, &options);
+        modifier_->setBindContextMenu1(node_, &arkShow, &arkBuilder, &options);
         ASSERT_TRUE(checkEvent);
         EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);
         CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
@@ -1056,9 +1056,9 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestEnableArrow, T
             .enableArrow = ArkValue<Opt_Boolean>(value),
         };
         auto options = getContextMenuOptions(optionsPlacement);
-        auto isShown = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+        auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
         CommonMethodModifierTest16::SetSubwindow();
-        modifier_->setBindContextMenu1(node_, &isShown, &arkBuilder, &options);
+        modifier_->setBindContextMenu1(node_, &arkShow, &arkBuilder, &options);
         ASSERT_TRUE(menuParams);
         EXPECT_EQ(menuParams->enableArrow, expected) << "Passed value is: " << text;
         std::optional<Placement> expectedPlacement = std::nullopt;
@@ -1086,9 +1086,9 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestArrowOffset, T
             .arrowOffset = ArkValue<Opt_Length>(value),
         };
         auto options = getContextMenuOptions(optionsPlacement);
-        auto isShown = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+        auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
         CommonMethodModifierTest16::SetSubwindow();
-        modifier_->setBindContextMenu1(node_, &isShown, &arkBuilder, &options);
+        modifier_->setBindContextMenu1(node_, &arkShow, &arkBuilder, &options);
         ASSERT_TRUE(menuParams);
         EXPECT_EQ(menuParams->arrowOffset, expected) << "Passed value is: " << text;
         CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
@@ -1111,9 +1111,9 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestPreviewPreview
             .preview = ArkUnion<Opt_Union_MenuPreviewMode_CustomBuilder, Ark_MenuPreviewMode>(value),
         };
         auto options = getContextMenuOptions(optionsPlacement);
-        auto isShown = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+        auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
         CommonMethodModifierTest16::SetSubwindow();
-        modifier_->setBindContextMenu1(node_, &isShown, &arkBuilder, &options);
+        modifier_->setBindContextMenu1(node_, &arkShow, &arkBuilder, &options);
         ASSERT_TRUE(menuParams);
         EXPECT_EQ(menuParams->previewMode, expected) << "Passed value is: " << text;
         CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
@@ -1135,9 +1135,9 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestPreviewCustomB
         .preview = getPreviewCustomBuilder(),
     };
     auto options = getContextMenuOptions(optionsPlacement);
-    auto isShown = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     CommonMethodModifierTest16::SetSubwindow();
-    modifier_->setBindContextMenu1(node_, &isShown, &arkBuilder, &options);
+    modifier_->setBindContextMenu1(node_, &arkShow, &arkBuilder, &options);
     ASSERT_TRUE(menuParams);
     EXPECT_EQ(menuParams->previewMode, MenuPreviewMode::CUSTOM) <<
         "Passed value is: " << static_cast<int>(MenuPreviewMode::CUSTOM);
@@ -1163,9 +1163,9 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestBorderRadiusLe
         .borderRadius = ArkValue<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses>(radiuses),
     };
     auto options = getContextMenuOptions(optionsPlacement);
-    auto isShown = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     CommonMethodModifierTest16::SetSubwindow();
-    modifier_->setBindContextMenu1(node_, &isShown, &arkBuilder, &options);
+    modifier_->setBindContextMenu1(node_, &arkShow, &arkBuilder, &options);
     ASSERT_TRUE(menuParams);
     ASSERT_TRUE(menuParams->borderRadius);
     EXPECT_THAT(menuParams->borderRadius.value(), CompareBorderRadius(LENGTH_TEST_VALUE, false));
@@ -1195,9 +1195,9 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestBorderRadiusBo
         .borderRadius = ArkValue<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses>(radiuses),
     };
     auto options = getContextMenuOptions(optionsPlacement);
-    auto isShown = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     CommonMethodModifierTest16::SetSubwindow();
-    modifier_->setBindContextMenu1(node_, &isShown, &arkBuilder, &options);
+    modifier_->setBindContextMenu1(node_, &arkShow, &arkBuilder, &options);
     ASSERT_TRUE(menuParams);
     ASSERT_TRUE(menuParams->borderRadius);
     EXPECT_THAT(menuParams->borderRadius.value(), CompareBorderRadius(LENGTH_TEST_VALUE, false));
@@ -1228,9 +1228,9 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestBorderRadiusLo
         .borderRadius = ArkValue<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses>(radiuses),
     };
     auto options = getContextMenuOptions(optionsPlacement);
-    auto isShown = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     CommonMethodModifierTest16::SetSubwindow();
-    modifier_->setBindContextMenu1(node_, &isShown, &arkBuilder, &options);
+    modifier_->setBindContextMenu1(node_, &arkShow, &arkBuilder, &options);
     ASSERT_TRUE(menuParams);
     ASSERT_TRUE(menuParams->borderRadius);
     EXPECT_THAT(menuParams->borderRadius.value(), CompareBorderRadius(LENGTH_TEST_VALUE, true));
@@ -1399,9 +1399,9 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestLayoutRegionMa
         .layoutRegionMargin = ArkValue<Opt_Padding>(arkPadding),
     };
     auto options = getContextMenuOptions(optionsPlacement);
-    auto isShown = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     CommonMethodModifierTest16::SetSubwindow();
-    modifier_->setBindContextMenu1(node_, &isShown, &arkBuilder, &options);
+    modifier_->setBindContextMenu1(node_, &arkShow, &arkBuilder, &options);
     ASSERT_TRUE(menuParams);
     ASSERT_TRUE(menuParams->layoutRegionMargin);
     EXPECT_THAT(menuParams->layoutRegionMargin.value(), CompareMarginPadding(CalcLength(LENGTH_TEST_VALUE)));
@@ -1547,9 +1547,9 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestTransition, Te
         .transition = getTransitionEffect(),
     };
     auto options = getContextMenuOptions(optionsPlacement);
-    auto isShown = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     CommonMethodModifierTest16::SetSubwindow();
-    modifier_->setBindContextMenu1(node_, &isShown, &arkBuilder, &options);
+    modifier_->setBindContextMenu1(node_, &arkShow, &arkBuilder, &options);
     ASSERT_TRUE(menuParams);
     EXPECT_TRUE(menuParams->hasTransitionEffect);
     EXPECT_EQ(menuParams->transition, effect->handler);

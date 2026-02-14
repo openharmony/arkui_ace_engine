@@ -17,6 +17,7 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_COMMON_MODIFIERS_TEST_POINT_LIGHT_H
 #include <tuple>
 
+#include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -73,21 +74,21 @@ namespace OHOS::Ace::NG::PointLight {
         { "-80.00%", ArkValue<Ark_Dimension>("-80.00%"), "-80.00%" },
     };
 
-    // Fixture 'NumberAnything' for type 'Ark_Number'
-    const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureIntensityValidValues = {
-        { "1.0", ArkValue<Ark_Number>(1.0f), 1.f },
-        { "0.0", ArkValue<Ark_Number>(0), 0.f },
-        { "0.1", ArkValue<Ark_Number>(0.1f), 0.1f },
-        { "0.99", ArkValue<Ark_Number>(0.99f), 0.99f },
-        { "1.0", ArkValue<Ark_Number>(1), 1.f },
+    // Fixture 'NumberAnything' for type 'Ark_Float64' (lightSource.intensity)
+    const std::vector<std::tuple<std::string, Ark_Float64, double>> testFixtureIntensityValidValues = {
+        { "1.0", ArkValue<Ark_Float64>(1.0), 1.f },
+        { "0.0", ArkValue<Ark_Float64>(0), 0.f },
+        { "0.1", ArkValue<Ark_Float64>(0.1), 0.1f },
+        { "0.99", ArkValue<Ark_Float64>(0.99), 0.99f },
+        { "1.0", ArkValue<Ark_Float64>(1), 1.f },
     };
 
-    const std::vector<std::tuple<std::string, Ark_Number>> testFixtureIntensityInvalidValues = {
-        { "100", ArkValue<Ark_Number>(100) },
-        { "-0.01", ArkValue<Ark_Number>(-0.01f) },
-        { "-100", ArkValue<Ark_Number>(-100) },
-        { "12.34", ArkValue<Ark_Number>(12.34f) },
-        { "-56.78", ArkValue<Ark_Number>(-56.78f) },
+    const std::vector<std::tuple<std::string, Ark_Float64>> testFixtureIntensityInvalidValues = {
+        { "100", ArkValue<Ark_Float64>(100) },
+        { "-0.01", ArkValue<Ark_Float64>(-0.01) },
+        { "-100", ArkValue<Ark_Float64>(-100) },
+        { "12.34", ArkValue<Ark_Float64>(12.34) },
+        { "-56.78", ArkValue<Ark_Float64>(-56.78) },
     };
 
     const std::vector<std::tuple<std::string,
@@ -108,13 +109,13 @@ namespace OHOS::Ace::NG::PointLight {
         { "INT_MAX", static_cast<Ark_IlluminatedType>(INT_MAX) },
     };
 
-    // Fixture 'NumberAnything' for type 'Ark_Number'
-    const std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureBloomValidValues = {
-        { "100", ArkValue<Ark_Number>(100), "100" },
-        { "0", ArkValue<Ark_Number>(0), "0" },
-        { "-100", ArkValue<Ark_Number>(-100), "-100" },
-        { "12.34", ArkValue<Ark_Number>(12.34), "12.34" },
-        { "-56.78", ArkValue<Ark_Number>(-56.78), "-56.78" },
+    // Fixture 'NumberAnything' for type Opt_Float64 (pointLight.bloom)
+    const std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureBloomValidValues = {
+        { "100", ArkValue<Ark_Float64>(100), "100" },
+        { "0", ArkValue<Ark_Float64>(0), "0" },
+        { "-100", ArkValue<Ark_Float64>(-100), "-100" },
+        { "12.34", ArkValue<Ark_Float64>(12.34), "12.34" },
+        { "-56.78", ArkValue<Ark_Float64>(-56.78), "-56.78" },
     };
 
     // Fixture 'ColorsEnum' for type 'Ark_Color'

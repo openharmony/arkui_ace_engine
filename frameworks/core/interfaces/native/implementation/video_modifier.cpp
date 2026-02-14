@@ -365,7 +365,7 @@ void SetOnUpdateImpl(Ark_NativePointer node,
     VideoModelStatic::SetOnUpdate(frameNode, onUpdate);
 }
 void SetOnErrorImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+                    const Opt_Union_VoidCallback_ErrorCallback_BusinessErrorInterface_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -374,13 +374,20 @@ void SetOnErrorImpl(Ark_NativePointer node,
         VideoModelStatic::SetOnError(frameNode, nullptr);
         return;
     }
-    auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+    Converter::VisitUnion(optValue.value(),
+        [frameNode](const VoidCallback& src) {
+                auto onError = [arkCallback = CallbackHelper(src)](const std::string& param) {
 #ifndef ACE_UNITTEST
-        CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
-#endif
-        arkCallback.InvokeSync();
-    };
-    VideoModelStatic::SetOnError(frameNode, onError);
+                CHECK_NULL_VOID(CallbackHelper<VoidCallback>::GetVMContext());
+#endif // ACE_UNITTEST
+                arkCallback.InvokeSync();
+            };
+            VideoModelStatic::SetOnError(frameNode, onError);
+        },
+        [](const ErrorCallback_BusinessErrorInterface_Void& src) {
+            LOGI("VideoAttributeModifier::SetOnErrorImpl is not implemented for ErrorCallback");
+        },
+        [] {});
 }
 void SetOnStopImpl(Ark_NativePointer node,
                    const Opt_VoidCallback* value)
@@ -423,7 +430,7 @@ void SetAnalyzerConfigImpl(Ark_NativePointer node,
     VideoModelNG::SetImageAnalyzerConfig(frameNode, reinterpret_cast<void*>(optValue->types.array));
 }
 void SetSurfaceBackgroundColorImpl(Ark_NativePointer node,
-                                   const Opt_ColorMetrics* value)
+                                   const Opt_ColorMetricsExt* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

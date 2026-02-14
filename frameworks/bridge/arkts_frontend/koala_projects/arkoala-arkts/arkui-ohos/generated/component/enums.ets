@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from "@koalaui/interop"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { default as curves } from "@ohos.curves"
+import { int32, int64, float32 } from '@koalaui/common'
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from '@koalaui/interop'
+import { memo, memo_stable } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { default as curves } from '@ohos.curves'
 export enum CheckBoxShape {
     CIRCLE = 0,
     ROUNDED_SQUARE = 1
@@ -45,17 +45,11 @@ export enum ColoringStrategy {
     PRIMARY = 'primary'
 }
 export enum ImageFit {
-    FILL = 0,
     Fill = 0,
-    CONTAIN = 1,
     Contain = 1,
-    COVER = 2,
     Cover = 2,
-    AUTO = 3,
     Auto = 3,
-    NONE = 5,
     None = 5,
-    SCALE_DOWN = 6,
     ScaleDown = 6,
     TOP_START = 7,
     TOP = 8,
@@ -69,11 +63,8 @@ export enum ImageFit {
     MATRIX = 16
 }
 export enum BorderStyle {
-    DOTTED = 2,
     Dotted = 2,
-    DASHED = 1,
     Dashed = 1,
-    SOLID = 0,
     Solid = 0
 }
 export enum RenderStrategy {
@@ -81,21 +72,14 @@ export enum RenderStrategy {
     OFFSCREEN = 1
 }
 export enum LineJoinStyle {
-    MITER = 0,
     Miter = 0,
-    ROUND = 1,
     Round = 1,
-    BEVEL = 2,
     Bevel = 2
 }
 export enum TouchType {
-    DOWN = 0,
     Down = 0,
-    UP = 1,
     Up = 1,
-    MOVE = 2,
     Move = 2,
-    CANCEL = 3,
     Cancel = 3,
     HOVER_ENTER = 9,
     HOVER_MOVE = 10,
@@ -108,163 +92,105 @@ export enum InteractionHand {
     RIGHT = 2
 }
 export enum MouseButton {
-    LEFT = 1,
     Left = 1,
-    RIGHT = 2,
     Right = 2,
-    MIDDLE = 4,
     Middle = 4,
-    BACK = 8,
     Back = 8,
-    FORWARD = 16,
     Forward = 16,
-    NONE = 0,
     None = 0
 }
 export enum MouseAction {
-    PRESS = 1,
     Press = 1,
-    RELEASE = 2,
     Release = 2,
-    MOVE = 3,
     Move = 3,
-    HOVER = 4,
     Hover = 4,
     ENTER_WINDOW = 4,
     LEAVE_WINDOW = 5,
     CANCEL = 13
 }
 export enum AnimationStatus {
-    INITIAL = 0,
     Initial = 0,
-    RUNNING = 1,
     Running = 1,
-    PAUSED = 2,
     Paused = 2,
-    STOPPED = 3,
     Stopped = 3
 }
 export type Curve = curves.Curve;
 export enum FillMode {
-    NONE = 0,
     None = 0,
-    FORWARDS = 1,
     Forwards = 1,
-    BACKWARDS = 2,
     Backwards = 2,
-    BOTH = 3,
     Both = 3
 }
 export enum PlayMode {
-    NORMAL = 0,
     Normal = 0,
-    REVERSE = 1,
     Reverse = 1,
-    ALTERNATE = 2,
     Alternate = 2,
-    ALTERNATE_REVERSE = 3,
     AlternateReverse = 3
 }
 export enum KeyType {
-    DOWN = 0,
     Down = 0,
-    UP = 1,
     Up = 1
 }
 export enum KeySource {
-    UNKNOWN = 0,
     Unknown = 0,
-    KEYBOARD = 4,
     Keyboard = 4,
     JOYSTICK = 5
 }
 export enum Edge {
-    TOP = 0,
     Top = 0,
-    BOTTOM = 1,
-    Bottom = 1,
-    START = 2,
-    Start = 2,
-    END = 3,
-    End = 3
+    Bottom = 2,
+    Start = 4,
+    End = 6
 }
 export enum Week {
-    MON = 0,
     Mon = 0,
-    TUE = 1,
     Tue = 1,
-    WED = 2,
     Wed = 2,
-    THUR = 3,
     Thur = 3,
-    FRI = 4,
     Fri = 4,
-    SAT = 5,
     Sat = 5,
-    SUN = 6,
     Sun = 6
 }
 export enum Direction {
-    LTR = 0,
     Ltr = 0,
-    RTL = 1,
     Rtl = 1,
-    AUTO = 2,
     Auto = 2
 }
 export enum BarState {
-    OFF = 0,
     Off = 0,
-    AUTO = 1,
     Auto = 1,
-    ON = 2,
     On = 2
 }
 export enum EdgeEffect {
-    SPRING = 0,
     Spring = 0,
-    FADE = 1,
     Fade = 1,
-    NONE = 2,
     None = 2
 }
 export enum Alignment {
-    TOP_START = 0,
     TopStart = 0,
-    TOP = 1,
     Top = 1,
-    TOP_END = 2,
     TopEnd = 2,
-    START = 3,
     Start = 3,
-    CENTER = 4,
     Center = 4,
-    END = 5,
     End = 5,
-    BOTTOM_START = 6,
     BottomStart = 6,
-    BOTTOM = 7,
     Bottom = 7,
-    BOTTOM_END = 8,
     BottomEnd = 8
 }
 export enum LocalizedAlignment {
-    TOP_START = "'top_start'",
-    TOP = "'top'",
-    TOP_END = "'top_end'",
-    START = "'start'",
-    CENTER = "'center'",
-    END = "'end'",
-    BOTTOM_START = "'bottom_start'",
-    BOTTOM = "'bottom'",
-    BOTTOM_END = "'bottom_end'"
+    TOP_START = 'top_start',
+    TOP = 'top',
+    TOP_END = 'top_end',
+    START = 'start',
+    CENTER = 'center',
+    END = 'end',
+    BOTTOM_START = 'bottom_start',
+    BOTTOM = 'bottom',
+    BOTTOM_END = 'bottom_end'
 }
 export enum TransitionType {
-    ALL = 0,
     All = 0,
-    INSERT = 1,
     Insert = 1,
-    DELETE = 2,
     Delete = 2
 }
 export enum RelateType {
@@ -272,71 +198,44 @@ export enum RelateType {
     FIT = 1
 }
 export enum Visibility {
-    VISIBLE = 0,
     Visible = 0,
-    HIDDEN = 1,
     Hidden = 1,
-    NONE = 2,
     None = 2
 }
 export enum LineCapStyle {
-    BUTT = 0,
     Butt = 0,
-    ROUND = 1,
     Round = 1,
-    SQUARE = 2,
     Square = 2
 }
 export enum Axis {
-    VERTICAL = 0,
     Vertical = 0,
-    HORIZONTAL = 1,
     Horizontal = 1
 }
 export enum HorizontalAlign {
-    START = 0,
     Start = 0,
-    CENTER = 1,
     Center = 1,
-    END = 2,
     End = 2
 }
 export enum FlexAlign {
-    START = 0,
     Start = 0,
-    CENTER = 1,
     Center = 1,
-    END = 2,
     End = 2,
-    SPACE_BETWEEN = 3,
     SpaceBetween = 3,
-    SPACE_AROUND = 4,
     SpaceAround = 4,
-    SPACE_EVENLY = 5,
     SpaceEvenly = 5
 }
 export enum ItemAlign {
-    AUTO = 0,
     Auto = 0,
-    START = 1,
     Start = 1,
-    CENTER = 2,
     Center = 2,
-    END = 3,
     End = 3,
-    BASELINE = 4,
     Baseline = 4,
-    STRETCH = 5,
     Stretch = 5
 }
 export enum FlexDirection {
-    ROW = 0,
     Row = 0,
-    COLUMN = 1,
     Column = 1,
-    ROW_REVERSE = 2,
     RowReverse = 2,
-    COLUMN_REVERSE = 3,
     ColumnReverse = 3
 }
 export enum PixelRoundCalcPolicy {
@@ -349,119 +248,77 @@ export enum PixelRoundMode {
     PIXEL_ROUND_AFTER_MEASURE = 1
 }
 export enum FlexWrap {
-    NO_WRAP = 0,
     NoWrap = 0,
-    WRAP = 1,
     Wrap = 1,
-    WRAP_REVERSE = 2,
     WrapReverse = 2
 }
 export enum VerticalAlign {
-    TOP = 0,
     Top = 0,
-    CENTER = 1,
     Center = 1,
-    BOTTOM = 2,
     Bottom = 2
 }
 export enum ImageRepeat {
-    NO_REPEAT = 0,
     NoRepeat = 0,
     X = 1,
     Y = 2,
     XY = 3
 }
 export enum ImageSize {
-    AUTO = 2,
     Auto = 2,
-    COVER = 1,
     Cover = 1,
-    CONTAIN = 0,
     Contain = 0,
     FILL = 3
 }
 export enum GradientDirection {
-    LEFT = 0,
     Left = 0,
-    TOP = 1,
     Top = 1,
-    RIGHT = 2,
     Right = 2,
-    BOTTOM = 3,
     Bottom = 3,
-    LEFT_TOP = 4,
     LeftTop = 4,
-    LEFT_BOTTOM = 5,
     LeftBottom = 5,
-    RIGHT_TOP = 6,
     RightTop = 6,
-    RIGHT_BOTTOM = 7,
     RightBottom = 7,
-    NONE = 8,
     None = 8
 }
 export enum SharedTransitionEffectType {
-    STATIC = 0,
     Static = 0,
-    EXCHANGE = 1,
     Exchange = 1
 }
 export enum FontStyle {
-    NORMAL = 0,
     Normal = 0,
-    ITALIC = 1,
     Italic = 1
 }
 export enum FontWeight {
-    LIGHTER = 0,
     Lighter = 0,
-    NORMAL = 1,
     Normal = 1,
-    REGULAR = 2,
     Regular = 2,
-    MEDIUM = 3,
     Medium = 3,
-    BOLD = 4,
     Bold = 4,
-    BOLDER = 5,
     Bolder = 5
 }
 export enum TextAlign {
-    CENTER = 1,
     Center = 1,
-    START = 0,
     Start = 0,
-    END = 2,
     End = 2,
     JUSTIFY = 3,
     LEFT = 4,
     RIGHT = 5
 }
 export enum TextOverflow {
-    NONE = 0,
     None = 0,
-    CLIP = 1,
     Clip = 1,
-    ELLIPSIS = 2,
     Ellipsis = 2,
     MARQUEE = 3
 }
 export enum TextDecorationType {
-    NONE = 0,
     None = 0,
-    UNDERLINE = 1,
     Underline = 1,
-    OVERLINE = 2,
     Overline = 2,
-    LINE_THROUGH = 3,
     LineThrough = 3
 }
 export enum TextCase {
-    NORMAL = 0,
     Normal = 0,
-    LOWER_CASE = 1,
     LowerCase = 1,
-    UPPER_CASE = 2,
     UpperCase = 2
 }
 export enum TextHeightAdaptivePolicy {
@@ -470,45 +327,27 @@ export enum TextHeightAdaptivePolicy {
     LAYOUT_CONSTRAINT_FIRST = 2
 }
 export enum ResponseType {
-    RIGHT_CLICK = 0,
     RightClick = 0,
-    LONG_PRESS = 1,
     LongPress = 1
 }
 export enum HoverEffect {
-    AUTO = 0,
-    Auto = 0,
-    SCALE = 1,
-    Scale = 1,
-    HIGHLIGHT = 2,
-    Highlight = 2,
-    NONE = 3,
-    None = 3
+    None = 0,
+    Scale = 2,
+    Highlight = 3,
+    Auto = 4
 }
 export enum Placement {
-    LEFT = 0,
     Left = 0,
-    RIGHT = 1,
     Right = 1,
-    TOP = 2,
     Top = 2,
-    BOTTOM = 3,
     Bottom = 3,
-    TOP_LEFT = 4,
     TopLeft = 4,
-    TOP_RIGHT = 5,
     TopRight = 5,
-    BOTTOM_LEFT = 6,
     BottomLeft = 6,
-    BOTTOM_RIGHT = 7,
     BottomRight = 7,
-    LEFT_TOP = 8,
     LeftTop = 8,
-    LEFT_BOTTOM = 9,
     LeftBottom = 9,
-    RIGHT_TOP = 10,
     RightTop = 10,
-    RIGHT_BOTTOM = 11,
     RightBottom = 11
 }
 export enum ArrowPointPosition {
@@ -517,11 +356,8 @@ export enum ArrowPointPosition {
     END = 'End'
 }
 export enum CopyOptions {
-    NONE = 0,
     None = 0,
-    IN_APP = 1,
     InApp = 1,
-    LOCAL_DEVICE = 2,
     LocalDevice = 2
 }
 export enum ResponseRegionSupportedTool {
@@ -531,21 +367,15 @@ export enum ResponseRegionSupportedTool {
     MOUSE = 3
 }
 export enum HitTestMode {
-    DEFAULT = 0,
     Default = 0,
-    BLOCK = 1,
     Block = 1,
-    TRANSPARENT = 2,
     Transparent = 2,
-    NONE = 3,
     None = 3,
     BLOCK_HIERARCHY = 4,
     BLOCK_DESCENDANTS = 5
 }
 export enum TitleHeight {
-    MAIN_ONLY = 0,
     MainOnly = 0,
-    MAIN_WITH_SUB = 1,
     MainWithSub = 1
 }
 export enum ModifierKey {
@@ -594,7 +424,7 @@ export enum ClickEffectLevel {
 }
 export enum XComponentType {
     SURFACE = 0,
-    TEXTURE = 1
+    TEXTURE = 2
 }
 export enum NestedScrollMode {
     SELF_ONLY = 0,
@@ -660,7 +490,7 @@ export enum EllipsisMode {
     MULTILINE_START = 3,
     MULTILINE_CENTER = 4
 }
-export type Nullable<T = void> = T | undefined;
+export type Nullable<T> = T | undefined;
 export enum OptionWidthMode {
     FIT_CONTENT = 'fit_content',
     FIT_TRIGGER = 'fit_trigger'
@@ -765,11 +595,19 @@ export enum DividerMode {
     EMBEDDED_IN_MENU = 1
 }
 export enum EventQueryType {
- 	ON_CLICK = 0
+    ON_CLICK = 0
 }
 export enum TipsAnchorType {
     TARGET = 0,
     CURSOR = 1
+}
+export enum DialogDisplayMode {
+    SCREEN_BASED = 0,
+    WINDOW_BASED = 1
+}
+export enum FocusWrapMode {
+    DEFAULT = 0,
+    WRAP_WITH_ARROW = 1
 }
 export enum AnimationPropertyType {
     ROTATION = 0,
@@ -786,12 +624,23 @@ export enum AxisType {
     HORIZONTAL_AXIS = 1,
     PINCH_AXIS = 2
 }
-export enum FocusWrapMode {
-    DEFAULT = 0,
-    WRAP_WITH_ARROW = 1
+export enum AttributeModifierState {
+    NORMAL = 0,
+    PRESSED = 1,
+    FOCUSED = 2,
+    DISABLED = 3,
+    SELECTED = 4,
+    ALL = 5
 }
 export enum PresetFillType {
     BREAKPOINT_DEFAULT = 0,
     BREAKPOINT_SM1MD2LG3 = 1,
     BREAKPOINT_SM2MD3LG5 = 2
+}
+export enum SystemProperties {
+    BREAK_POINT = 'system.arkui.breakpoint',
+    WINDOW_AVOID_AREA = 'system.window.avoidarea',
+    WINDOW_AVOID_AREA_PX = 'system.window.avoidarea.px',
+    WINDOW_SIZE = 'system.window.size',
+    WINDOW_SIZE_PX = 'system.window.size.px'
 }
