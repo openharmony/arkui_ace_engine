@@ -126,9 +126,9 @@ protected:
     const std::string newAppWindowName_ = "NewAppWindow";
     bool attachToFrameNodeFlag_ = false;
     bool isBlankForSnapshot_ = false;
-    std::atomic_bool isPrelaunch_ = false;
     bool syncStartingWindow_ = false;
     bool dmaReclaimEnabled_ = false;
+    std::atomic_bool isPrelaunch_ = false;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
@@ -137,9 +137,9 @@ protected:
 
 private:
     void UpdateSnapshotWindowProperty();
-    bool IsSnapshotSizeChanged();
     void UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
         Color &color, ImageSourceInfo &sourceInfo);
+    bool IsSnapshotSizeChanged();
     bool CheckAndHandleRestartApp();
     bool CheckAndAddStartingWindowAboveLocked();
     bool CheckSnapshotWindow();
