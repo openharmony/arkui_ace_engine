@@ -1665,7 +1665,7 @@ void MovingPhotoPattern::RsContextUpdateTransformScale(const RefPtr<RenderContex
         isRefreshMovingPhoto_ || !isEnableTransition_) {
         videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
         imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-       } else {
+    } else {
 #if defined(PLAYER_FRAMEWORK_EXISTS)
         float scale = isEnableTransition_ ? GetGlobalInfo() : ZOOM_IN_SCALE;
         if (isXmageMode_) {
