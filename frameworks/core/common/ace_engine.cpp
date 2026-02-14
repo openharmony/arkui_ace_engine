@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 
 #include <csignal>
 #include "base/thread/background_task_executor.h"
+#include "base/utils/time_util.h"
+#include <chrono>
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -76,7 +78,22 @@ void HandleSignal(int signal, [[maybe_unused]] siginfo_t *siginfo, void *context
 }
 #endif
 
+// Maximum number of destroyed UIContext instances to cache for error reporting
+// When cache is full, oldest entries (by destroyTime) are evicted first
+constexpr size_t MAX_DESTROYED_CACHE_SIZE = 10;
+
 } // namespace
+
+std::string UIContextCacheInfo::ToString() const
+{
+    std::stringstream ss;
+    ss << "DestroyedUIContextCacheInfo: "
+       << "instanceId[" << instanceId_ << "], "
+       << "createTime[" << ConvertTimestampToStr(createTime_) << "], "
+       << "destroyTime[" << ConvertTimestampToStr(destroyTime_) << "], "
+       << "windowInfo: [id: " << windowId_ << ", windowName: " << windowName_ << "]";
+    return ss.str();
+}
 
 AceEngine::AceEngine()
 {
@@ -107,19 +124,43 @@ void AceEngine::InitJsDumpHeadSignal()
 void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& container)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
+    // If this instanceId was previously destroyed and cached, remove the stale cache entry
+    // This prevents confusion when an instanceId is reused after destruction
+    auto cacheIt = destroyedUIContextCache_.find(instanceId);
+    if (cacheIt != destroyedUIContextCache_.end()) {
+        destroyedUIContextCache_.erase(cacheIt);
+        LOGW("Re-adding instanceId=%{public}d that was previously destroyed", instanceId);
+    }
     containerMap_.try_emplace(instanceId, container);
 }
 
 void AceEngine::RemoveContainer(int32_t instanceId)
 {
-    size_t num = 0;
-    {
-        std::unique_lock<std::shared_mutex> lock(mutex_);
-        num = containerMap_.erase(instanceId);
-    }
-    if (num == 0) {
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    auto it = containerMap_.find(instanceId);
+    if (it == containerMap_.end()) {
         LOGW("container not found with instance id: %{public}d", instanceId);
+        return;
     }
+    RefPtr<Container> container = it->second;
+    int32_t windowId = container->GetWindowId();
+    int64_t destroyTime = GetCurrentTimestamp();
+    UIContextCacheInfo info { instanceId, container->GetCreateTime(), destroyTime,
+        windowId, container->GetWindowName() };
+    if (destroyedUIContextCache_.size() >= MAX_DESTROYED_CACHE_SIZE) {
+        auto oldestIt = std::min_element(destroyedUIContextCache_.begin(), destroyedUIContextCache_.end(),
+            [](const auto& a, const auto& b) { return a.second.destroyTime_ < b.second.destroyTime_; });
+        if (oldestIt != destroyedUIContextCache_.end()) {
+            LOGD("UIContext cache full (size=%{public}zu), removing oldest entry: "
+                 "instanceId=%{public}d, destroyTime=%{public}lld",
+                destroyedUIContextCache_.size(), oldestIt->first,
+                static_cast<long long>(oldestIt->second.destroyTime_));
+            destroyedUIContextCache_.erase(oldestIt);
+        }
+    }
+    destroyedUIContextCache_[instanceId] = info;
+    containerMap_.erase(it);
+    LOGD("UIContext destroyed and cached: instanceId=%{public}d, windowId=%{public}d", instanceId, windowId);
 }
 
 RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
@@ -268,4 +309,27 @@ void AceEngine::ForceFullGC() const
     }
 }
 
+// Get cached information about a destroyed UIContext by instanceId
+// Returns formatted string with instance details or "not found" message
+std::string AceEngine::GetDestroyedUIContextInfo(int32_t instanceId) const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    auto it = destroyedUIContextCache_.find(instanceId);
+    if (it != destroyedUIContextCache_.end()) {
+        return it->second.ToString();
+    }
+    return "InstanceId not found in destroyed cache.";
+}
+
+// Build enhanced error message when ContainerScope fails to find a valid instance
+// Combines instanceId, reason description, and cached destroyed context info
+// This helps developers understand which instance was requested and why it failed
+std::string AceEngine::GetEnhancedContextBNotFoundMessage(InstanceIdGenReason reason, int32_t instanceId)
+{
+    std::string message = "";
+    message += "instanceId=" + std::to_string(instanceId);
+    message += ", reason=" + ContainerScope::ReasonToDescription(reason);
+    message += ", " + AceEngine::Get().GetDestroyedUIContextInfo(instanceId);
+    return message;
+}
 } // namespace OHOS::Ace
