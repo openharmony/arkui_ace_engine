@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "frameworks/core/accessibility/utils/accessibility_property_utils.h"
+#include "accessibility_property_utils.h"
 
 #include "base/log/log_wrapper.h"
-#include "frameworks/core/accessibility/accessibility_manager.h"
-#include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
-#include "frameworks/core/accessibility/static/accessibility_static_utils.h"
-#include "frameworks/core/pipeline_ng/pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
+#include "core/accessibility/static/accessibility_static_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -69,7 +69,7 @@ bool CheckAndGetController(const RefPtr<FrameNode>& node,
             NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(node);
             return node->GetAccessibilityVisible();
         };
-        controllerNode = NG::AccessibilityFrameNodeUtils::GetFramenodeByCondition(node, condition);
+        controllerNode = AccessibilityFrameNodeUtils::GetFramenodeByCondition(node, condition);
         CHECK_NE_RETURN(controllerNode, nullptr, true);
     }
 
@@ -85,6 +85,39 @@ bool CheckAndGetController(const RefPtr<FrameNode>& node,
     CHECK_NE_RETURN(controllerNode, nullptr, true);
     return false;
 }
+}
+
+StateControllerType AccessibilityPropertyUtils::CheckAndGetStateController(const RefPtr<FrameNode>& node,
+    RefPtr<FrameNode>& controllerNode)
+{
+    CHECK_NULL_RETURN(node, StateControllerType::CONTROLLER_NONE);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, StateControllerType::CONTROLLER_NONE);
+    CHECK_NE_RETURN(accessibilityProperty->IsAccessibilityGroup(), true, StateControllerType::CONTROLLER_NONE);
+    auto groupOptions = accessibilityProperty->GetAccessibilityGroupOptions();
+    if (CheckAndGetController(
+        node, controllerNode, groupOptions.stateControllerByType, groupOptions.stateControllerByInspector)) {
+        if (IsNodeOfExtraType(controllerNode)) {
+            return StateControllerType::CONTROLLER_CHECK_WITH_EXTRA;
+        }
+        return StateControllerType::CONTROLLER_CHECK;
+    }
+    return StateControllerType::CONTROLLER_NONE;
+}
+
+ActionControllerType AccessibilityPropertyUtils::CheckAndGetActionController(const RefPtr<FrameNode>& node,
+    RefPtr<FrameNode>& controllerNode)
+{
+    CHECK_NULL_RETURN(node, ActionControllerType::CONTROLLER_NONE);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, ActionControllerType::CONTROLLER_NONE);
+    CHECK_NE_RETURN(accessibilityProperty->IsAccessibilityGroup(), true, ActionControllerType::CONTROLLER_NONE);
+    auto groupOptions = accessibilityProperty->GetAccessibilityGroupOptions();
+    if (CheckAndGetController(
+        node, controllerNode, groupOptions.actionControllerByType, groupOptions.actionControllerByInspector)) {
+        return ActionControllerType::CONTROLLER_CLICK;
+    }
+    return ActionControllerType::CONTROLLER_NONE;
 }
 
 std::string AccessibilityPropertyUtils::GetContent(const RefPtr<AccessibilityProperty>& accessibilityProperty)
@@ -122,39 +155,6 @@ std::string AccessibilityPropertyUtils::GetComponentType(
         type = accessibilityProperty->GetAccessibilityCustomRole();
     }
     return type;
-}
-
-StateControllerType AccessibilityPropertyUtils::CheckAndGetStateController(const RefPtr<FrameNode>& node,
-    RefPtr<FrameNode>& controllerNode)
-{
-    CHECK_NULL_RETURN(node, StateControllerType::CONTROLLER_NONE);
-    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_RETURN(accessibilityProperty, StateControllerType::CONTROLLER_NONE);
-    CHECK_NE_RETURN(accessibilityProperty->IsAccessibilityGroup(), true, StateControllerType::CONTROLLER_NONE);
-    auto groupOptions = accessibilityProperty->GetAccessibilityGroupOptions();
-    if (CheckAndGetController(
-        node, controllerNode, groupOptions.stateControllerByType, groupOptions.stateControllerByInspector)) {
-        if (IsNodeOfExtraType(controllerNode)) {
-            return StateControllerType::CONTROLLER_CHECK_WITH_EXTRA;
-        }
-        return StateControllerType::CONTROLLER_CHECK;
-    }
-    return StateControllerType::CONTROLLER_NONE;
-}
-
-ActionControllerType AccessibilityPropertyUtils::CheckAndGetActionController(const RefPtr<FrameNode>& node,
-    RefPtr<FrameNode>& controllerNode)
-{
-    CHECK_NULL_RETURN(node, ActionControllerType::CONTROLLER_NONE);
-    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_RETURN(accessibilityProperty, ActionControllerType::CONTROLLER_NONE);
-    CHECK_NE_RETURN(accessibilityProperty->IsAccessibilityGroup(), true, ActionControllerType::CONTROLLER_NONE);
-    auto groupOptions = accessibilityProperty->GetAccessibilityGroupOptions();
-    if (CheckAndGetController(
-        node, controllerNode, groupOptions.actionControllerByType, groupOptions.actionControllerByInspector)) {
-        return ActionControllerType::CONTROLLER_CLICK;
-    }
-    return ActionControllerType::CONTROLLER_NONE;
 }
 
 bool AccessibilityPropertyUtils::NeedRemoveControllerTextFromGroup(const RefPtr<FrameNode>& controllerNode)
