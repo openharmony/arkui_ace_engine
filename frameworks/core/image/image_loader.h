@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,6 @@
 #include <condition_variable>
 #include <regex>
 #include <string>
-
-#include "include/core/SkImage.h"
 
 #include "base/geometry/size.h"
 #include "base/image/image_defines.h"
@@ -49,8 +47,8 @@ public:
         return nullptr;
     }
 
-    RefPtr<NG::ImageData> GetImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo, const WeakPtr<PipelineBase>& context = nullptr);
+    RefPtr<NG::ImageData> GetImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
+        const WeakPtr<PipelineBase>& context = nullptr);
 
     static std::string RemovePathHead(const std::string& uri);
     static RefPtr<ImageLoader> CreateImageLoader(const ImageSourceInfo& imageSourceInfo);
@@ -71,9 +69,9 @@ public:
     FileImageLoader() = default;
     ~FileImageLoader() override = default;
     std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& loadResultInfo,
-        const WeakPtr<PipelineBase>& context = nullptr) override;
+        NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
     std::shared_ptr<RSData> BuildImageData(const std::shared_ptr<RSData>& result);
+
 private:
     std::string ParseFilePath(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& loadResultInfo);
 };
@@ -83,8 +81,7 @@ class DataProviderImageLoader : public ImageLoader {
 public:
     DataProviderImageLoader() = default;
     ~DataProviderImageLoader() override = default;
-    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
+    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
         const WeakPtr<PipelineBase>& context = nullptr) override;
 };
 
@@ -92,12 +89,10 @@ class DecodedDataProviderImageLoader : public ImageLoader {
 public:
     DecodedDataProviderImageLoader() = default;
     ~DecodedDataProviderImageLoader() override = default;
-    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
+    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
         const WeakPtr<PipelineBase>& context = nullptr) override;
     RefPtr<NG::ImageData> LoadDecodedImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
-        const WeakPtr<PipelineBase>& context = nullptr) override;
+        NG::ImageLoadResultInfo& errorInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
 
 private:
     static std::string GetThumbnailOrientation(const ImageSourceInfo& src);
@@ -107,8 +102,7 @@ class ACE_FORCE_EXPORT AssetImageLoader final : public ImageLoader {
 public:
     AssetImageLoader() = default;
     ~AssetImageLoader() override = default;
-    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
+    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
         const WeakPtr<PipelineBase>& context = nullptr) override;
     std::string LoadJsonData(const std::string& src, const WeakPtr<PipelineBase> context = nullptr);
 };
@@ -118,8 +112,7 @@ class NetworkImageLoader final : public ImageLoader {
 public:
     NetworkImageLoader() = default;
     ~NetworkImageLoader() override = default;
-    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
+    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
         const WeakPtr<PipelineBase>& context = nullptr) override;
     static bool DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync);
 };
@@ -128,8 +121,7 @@ class InternalImageLoader final : public ImageLoader {
 public:
     InternalImageLoader() = default;
     ~InternalImageLoader() override = default;
-    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
+    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
         const WeakPtr<PipelineBase>& context = nullptr) override;
 };
 
@@ -138,8 +130,7 @@ public:
     Base64ImageLoader() = default;
     ~Base64ImageLoader() override = default;
     static std::string_view GetBase64ImageCode(const std::string& uri);
-    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
+    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
         const WeakPtr<PipelineBase>& context = nullptr) override;
 };
 
@@ -149,8 +140,7 @@ class ResourceImageLoader final : public ImageLoader {
 public:
     ResourceImageLoader() = default;
     ~ResourceImageLoader() override = default;
-    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
+    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
         const WeakPtr<PipelineBase>& context = nullptr) override;
 
 private:
@@ -163,12 +153,10 @@ class PixelMapImageLoader : public ImageLoader {
 public:
     PixelMapImageLoader() = default;
     ~PixelMapImageLoader() override = default;
-    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
+    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
         const WeakPtr<PipelineBase>& context = nullptr) override;
     RefPtr<NG::ImageData> LoadDecodedImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
-        const WeakPtr<PipelineBase>& context = nullptr) override;
+        NG::ImageLoadResultInfo& errorInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
 };
 
 class SharedMemoryImageLoader : public ImageLoader, public ImageProviderLoader {
@@ -177,8 +165,8 @@ class SharedMemoryImageLoader : public ImageLoader, public ImageProviderLoader {
 public:
     SharedMemoryImageLoader() = default;
     ~SharedMemoryImageLoader() override = default;
-    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo, const WeakPtr<PipelineBase>& context) override;
+    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
+        const WeakPtr<PipelineBase>& context) override;
     void UpdateData(const std::string& uri, const std::vector<uint8_t>& memData) override;
 
 private:
@@ -191,12 +179,10 @@ class AstcImageLoader : public ImageLoader {
 public:
     AstcImageLoader() = default;
     ~AstcImageLoader() override = default;
-    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
+    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
         const WeakPtr<PipelineBase>& context = nullptr) override;
     RefPtr<NG::ImageData> LoadDecodedImageData(const ImageSourceInfo& imageSourceInfo,
-        NG::ImageLoadResultInfo& errorInfo,
-        const WeakPtr<PipelineBase>& context = nullptr) override;
+        NG::ImageLoadResultInfo& errorInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
 
 private:
     static std::string GetThumbnailOrientation(const ImageSourceInfo& src);
