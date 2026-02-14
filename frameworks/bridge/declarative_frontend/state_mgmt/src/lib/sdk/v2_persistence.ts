@@ -20,7 +20,7 @@ const enum PersistError {
 };
 
 type PersistErrorType = PersistError.Quota | PersistError.Serialization | PersistError.Unknown;
-type PersistErrorCallback = ((key: string, reason: PersistErrorType, message: string) => void) | undefined;
+type PersistErrorCallback = ((key: string, reason: PersistErrorType, error: Error | string) => void) | undefined;
 type StorageDefaultCreator<T> = () => T;
 
 interface TypeConstructorWithArgs<T> {
@@ -70,7 +70,7 @@ const enum MapType {
 class StorageHelper {
   protected static readonly INVALID_DEFAULT_VALUE: string = 'The default creator should be function when first connect';
   protected static readonly DELETE_NOT_EXIST_KEY: string = 'The key to be deleted does not exist';
-  protected static readonly INVALID_TYPE: string = 'Not supported type! The type should have function constructor signature when use storage';
+  protected static readonly INVALID_TYPE: string = 'Not supported type! The type should have function constructor signature.';
   protected static readonly INVALID_KEY: string = 'The key is invalid, key must be a string type';
   protected static readonly EMPTY_STRING_KEY: string = 'Cannot use empty string as the key';
   protected static readonly INVALID_LENGTH_KEY: string = 'Cannot use the key! The length of key should be 2 to 255';
@@ -530,7 +530,7 @@ class PersistenceV2Impl extends StorageHelper {
       const areaMode = this.globalMapAreaMode_.get(key);
       try {
         const data = this.globalMap_.get(key);
-        const stringified = DataCoder.stringify(data);
+        const stringified = DataCoder.stringify(data, false);
         PersistenceV2Impl.storage_.set(key, stringified, areaMode);
       } catch (err) {
         this.errorHelper(key, PersistError.Serialization, err);
@@ -539,7 +539,7 @@ class PersistenceV2Impl extends StorageHelper {
       // find in module path
       try {
         const data = this.map_.get(key);
-        const stringified = DataCoder.stringify(data);
+        const stringified = DataCoder.stringify(data, true);
         PersistenceV2Impl.storage_.set(key, stringified);
       } catch (err) {
         this.errorHelper(key, PersistError.Serialization, err);
@@ -683,7 +683,7 @@ class PersistenceV2Impl extends StorageHelper {
     areaMode?: number
   ): [T | undefined, boolean] {
     let newObservedValue: T;
-    let json: string = "";
+    let json: string = '';
 
     try {
       json = PersistenceV2Impl.storage_.get(key, areaMode);
@@ -749,7 +749,7 @@ class PersistenceV2Impl extends StorageHelper {
           const value: object = keyType === MapType.GLOBAL_MAP ? this.globalMap_.get(key) : this.map_.get(key);
 
           ObserveV2.getObserve().startRecordDependencies(this, id);
-          const json = DataCoder.stringify(value);
+          const json = DataCoder.stringify(value, keyType !== MapType.GLOBAL_MAP);
           ObserveV2.getObserve().stopRecordDependencies();
 
           if (keyType === MapType.GLOBAL_MAP) {
@@ -872,15 +872,18 @@ class PersistenceV2Impl extends StorageHelper {
     PersistenceV2Impl.storage_.set(PersistenceV2Impl.KEYS_ARR_, JSON.stringify(Array.from(keysArr)), areaMode);
   }
 
-  protected errorHelper(key: string, reason: PersistError, message: string): void {
+  protected errorHelper(key: string, reason: PersistError, error: Error | string): void {
     if (this.cb_ && typeof this.cb_ === 'function') {
-      this.cb_(key, reason, message);
+      this.cb_(key, reason, error);
       return;
     }
 
     if (!key) {
       key = 'unknown';
     }
-    throw new Error(`For '${key}' key: ` + message);
+    if (error instanceof BusinessError) {
+      throw error;
+    }
+    throw new Error(`For '${key}' key: ` + error);
   }
 }
