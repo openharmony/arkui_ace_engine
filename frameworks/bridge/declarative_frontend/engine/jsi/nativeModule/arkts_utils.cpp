@@ -408,7 +408,7 @@ bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRe
     } else if (value->IsString(vm)) {
         Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
     } else if (value->IsObject(vm)) {
-        ParseJsColorFromResource(vm, value, result, resourceObject);
+        ParseJsColorFromResourceForMaterial(vm, value, result, resourceObject);
     }
     CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
     return true;
@@ -456,6 +456,32 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
             return true;
         }
         state = ParseJsColorFromResource(vm, value, result, resourceObject);
+        CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
+        return state;
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseJsColorAlphaForMaterial(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
+    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo)
+{
+    bool state = false;
+    if (value->IsNumber()) {
+        result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
+        CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
+        return true;
+    }
+    if (value->IsString(vm)) {
+        state = Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
+        CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
+        return state;
+    }
+    if (value->IsObject(vm)) {
+        if (ParseColorMetricsToColor(vm, value, result, resourceObject)) {
+            CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
+            return true;
+        }
+        state = ParseJsColorFromResourceForMaterial(vm, value, result, resourceObject);
         CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
         return state;
     }
@@ -869,6 +895,61 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
     if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber(vm)->Value());
         result.SetResourceId(resId->Int32Value(vm));
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseJsColorFromResourceForMaterial(
+    const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result, RefPtr<ResourceObject>& resourceObject)
+{
+    auto obj = jsObj->ToObject(vm);
+    auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    if (!resId->IsNumber()) {
+        return false;
+    }
+
+    CompleteResourceObject(vm, obj);
+    resourceObject = GetResourceObject(vm, jsObj);
+    auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+
+    auto resIdNum = resId->Int32Value(vm);
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(vm, jsObj)) {
+            return false;
+        }
+        auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+        if (!args->IsArray(vm)) {
+            return false;
+        }
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+        result = resourceWrapper->GetColorByName(param->ToString(vm)->ToString(vm));
+        return true;
+    }
+    auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+    if (type->IsNull() || !type->IsNumber()) {
+        return false;
+    }
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(resId->Int32Value(vm));
+        return Color::ParseColorString(value, result);
+    }
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto value = resourceWrapper->GetInt(resId->Int32Value(vm));
+        result = Color(ColorAlphaAdapt(value));
+        return true;
+    }
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::COLOR)) {
+        result = resourceWrapper->GetColor(resId->ToNumber(vm)->Value());
+        result.SetResourceId(resId->Int32Value(vm));
+        auto iter = g_specialResourceHolderMap.find(resIdNum);
+        if (iter != g_specialResourceHolderMap.end()) {
+            result.SetPlaceholder(iter->second);
+        }
         return true;
     }
     return false;

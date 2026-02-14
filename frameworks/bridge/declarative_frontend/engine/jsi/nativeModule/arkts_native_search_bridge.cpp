@@ -210,12 +210,10 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderColor(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    uint32_t result;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
-        result = color.GetValue();
+    if (ArkTSUtils::ParseJsColorAlphaForMaterial(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getSearchModifier()->setSearchPlaceholderColor(
-            nativeNode, result, AceType::RawPtr(resourceObject));
+            nativeNode, reinterpret_cast<ArkUI_InnerColor*>(&color), AceType::RawPtr(resourceObject));
     } else {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchPlaceholderColor(nativeNode);
     }
@@ -279,16 +277,16 @@ ArkUINativeModuleValue SearchBridge::SetCaretStyle(ArkUIRuntimeCallInfo* runtime
         caretWidth = textFieldTheme->GetCursorWidth();
     }
     Color color;
-    uint32_t caretColor;
+    Color caretColor;
     RefPtr<ResourceObject> colorObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color, colorObject, nodeInfo)) {
-        caretColor = color.GetValue();
+    if (ArkTSUtils::ParseJsColorAlphaForMaterial(vm, caretColorArg, color, colorObject, nodeInfo)) {
+        caretColor = color;
     } else {
-        caretColor = textFieldTheme->GetCursorColor().GetValue();
+        caretColor = textFieldTheme->GetCursorColor();
     }
-    GetArkUINodeModifiers()->getSearchModifier()->setSearchCaretStyle(
-        nativeNode, caretWidth.Value(), static_cast<int8_t>(caretWidth.Unit()), caretColor,
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchCaretStyle(nativeNode, caretWidth.Value(),
+        static_cast<int8_t>(caretWidth.Unit()), reinterpret_cast<ArkUI_InnerColor*>(&caretColor),
         AceType::RawPtr(widthObject), AceType::RawPtr(colorObject));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -410,14 +408,14 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     size.value = iconSize.Value();
     size.unit = static_cast<int8_t>(iconSize.Unit());
     Color value;
-    uint32_t color;
+    Color color;
     RefPtr<ResourceObject> colorObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!forthArg->IsUndefined() && !forthArg->IsNull() &&
-        ArkTSUtils::ParseJsColorAlpha(vm, forthArg, value, colorObject, nodeInfo)) {
-        color = value.GetValue();
+        ArkTSUtils::ParseJsColorAlphaForMaterial(vm, forthArg, value, colorObject, nodeInfo)) {
+        color = value;
     } else {
-        color = theme->GetSearchIconColor().GetValue();
+        color = theme->GetSearchIconColor();
     }
     std::string srcStr;
     RefPtr<ResourceObject> srcObject;
@@ -431,7 +429,7 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     searchButtonIconObj.colorObj = AceType::RawPtr(colorObject);
     searchButtonIconObj.srcObj = AceType::RawPtr(srcObject);
     GetArkUINodeModifiers()->getSearchModifier()->setSearchCancelButton(
-        nativeNode, style, &size, color, src, &searchButtonIconObj);
+        nativeNode, style, &size, reinterpret_cast<ArkUI_InnerColor*>(&color), src, &searchButtonIconObj);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -560,7 +558,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    struct ArkUIIconOptionsStruct value = {0.0, 0, INVALID_COLOR_VALUE, nullptr};
+    struct ArkUIIconOptionsStruct value = {0.0, 0, INVALID_COLOR_VALUE, 0, nullptr};
 
     CalcDimension size;
     auto container = Container::Current();
@@ -586,8 +584,9 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
     Color color;
     RefPtr<ResourceObject> colorObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (ArkTSUtils::ParseJsColorAlpha(vm, threeArg, color, colorObject, nodeInfo)) {
+    if (ArkTSUtils::ParseJsColorAlphaForMaterial(vm, threeArg, color, colorObject, nodeInfo)) {
         value.color = static_cast<int32_t>(color.GetValue());
+        value.colorPlaceholder = static_cast<int32_t>(color.GetPlaceholder());
     } else {
         value.color = INVALID_COLOR_VALUE;
     }
@@ -744,13 +743,13 @@ ArkUINativeModuleValue SearchBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     Color value;
     RefPtr<ResourceObject> resourceObject;
-    uint32_t color = theme->GetTextColor().GetValue();
+    Color color = theme->GetTextColor();
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, value, resourceObject, nodeInfo)) {
-        color = value.GetValue();
+    if (ArkTSUtils::ParseJsColorAlphaForMaterial(vm, secondArg, value, resourceObject, nodeInfo)) {
+        color = value;
     }
     GetArkUINodeModifiers()->getSearchModifier()->setSearchFontColor(
-        nativeNode, color, AceType::RawPtr(resourceObject));
+        nativeNode, reinterpret_cast<ArkUI_InnerColor*>(&color), AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
 

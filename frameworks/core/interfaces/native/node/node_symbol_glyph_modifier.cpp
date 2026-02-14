@@ -55,6 +55,18 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32* color, int32_t size)
     SymbolModelNG::SetFontColor(frameNode, colorArray);
 }
 
+void SetFontColorPtr(ArkUINodeHandle node, const ArkUI_InnerColor* color, int32_t size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto* colorPtr = reinterpret_cast<const Color*>(color);
+    std::vector<Color> colorArray;
+    for (int32_t i = 0; i < size; i++) {
+        colorArray.emplace_back(colorPtr[i]);
+    }
+    SymbolModelNG::SetFontColor(frameNode, colorArray);
+}
+
 void ResetFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -276,6 +288,7 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         .resetMaxFontScale = ResetMaxFontScale,
         .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
         .setFontColorWithPlaceholder = SetFontColorWithPlaceholder,
+        .setFontColorPtr = SetFontColorPtr,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

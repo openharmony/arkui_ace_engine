@@ -429,6 +429,8 @@ public:
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsColorFromResourceForMaterial(
+        const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
         RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
@@ -437,6 +439,7 @@ public:
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
         const Color& defaultColor, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsColorForMaterial(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, ShadowColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
@@ -846,7 +849,8 @@ public:
         const JSRef<JSVal>& jsValue);
     static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result,
         bool enableResourceUpdate = false,
-        std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr = DEFAULT_RESOURCE_PAIR_ARRAY);
+        std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr = DEFAULT_RESOURCE_PAIR_ARRAY,
+        bool supportMaterial = false);
     static bool ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
     static bool ParseBorderWidthProps(const JSRef<JSVal>& args,
         NG::BorderWidthProperty& borderWidthProperty, RefPtr<ResourceObject>& resourceObj);
