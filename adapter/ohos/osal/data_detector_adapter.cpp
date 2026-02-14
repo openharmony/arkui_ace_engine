@@ -19,9 +19,9 @@
 #include "base/utils/utf_helper.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ai/data_url_analyzer_mgr.h"
-#include "core/common/statistic_event_reporter.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace {
 
@@ -38,26 +38,6 @@ const std::string ALL_TEXT_DETECT_TYPES = "phoneNum,url,email,location,datetime"
 const std::string TEXT_DETECT_TYPES_WITHOUT_URL = "phoneNum,email,location,datetime";
 const std::string ASK_CELIA_TAG = "askCelia";
 const std::u16string DETECT_NULL_STRING = u"NULL";
-
-const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
-    { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
-    { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
-    { TextDataDetectType::DATE_TIME, "datetime" }
-};
-const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERSE = {
-    { "phoneNum", TextDataDetectType::PHONE_NUMBER }, { "url", TextDataDetectType::URL },
-    { "email", TextDataDetectType::EMAIL }, { "location", TextDataDetectType::ADDRESS },
-    { "datetime", TextDataDetectType::DATE_TIME }
-};
-
-static const std::unordered_map<TextDataDetectType, StatisticEventType> REPORT_TYPE_MAP = {
-    { TextDataDetectType::PHONE_NUMBER, StatisticEventType::CLICK_AI_MENU_PHONE_NUMBER },
-    { TextDataDetectType::URL, StatisticEventType::CLICK_AI_MENU_URL },
-    { TextDataDetectType::EMAIL, StatisticEventType::CLICK_AI_MENU_EMAIL },
-    { TextDataDetectType::ADDRESS, StatisticEventType::CLICK_AI_MENU_ADDRESS },
-    { TextDataDetectType::DATE_TIME, StatisticEventType::CLICK_AI_MENU_DATE_TIME },
-    { TextDataDetectType::ASK_CELIA, StatisticEventType::CLICK_AI_MENU_ASK_CELIA },
-};
 
 void DataDetectorAdapter::GetAIEntityMenu()
 {
@@ -591,9 +571,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
     return [aiSpanMap, weak = WeakClaim(this), taskId]() {
         TAG_LOGD(AceLogTag::ACE_TEXT, "startDetectDelayTask, taskId=%{public}" PRIu64 "", taskId);
         auto dataDetectorAdapter = weak.Upgrade();
-        CHECK_NULL_VOID(dataDetectorAdapter);
-        dataDetectorAdapter->aiSpanMap_.clear();
-        CHECK_NULL_VOID(!dataDetectorAdapter->textForAI_.empty());
+        CHECK_NULL_VOID(dataDetectorAdapter && !dataDetectorAdapter->textForAI_.empty());
         TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter, delayed whole task executed, id: %{public}i",
             dataDetectorAdapter->GetHost() ? dataDetectorAdapter->GetHost()->GetId() : -1);
         dataDetectorAdapter->lastTextForAI_ = dataDetectorAdapter->textForAI_;
@@ -657,6 +635,7 @@ void DataDetectorAdapter::StartAITask(bool clearAISpanMap, bool isSelectDetect)
         aiSpanMapCopy = aiSpanMap_;
     }
     detectTexts_.clear();
+    aiSpanMap_.clear();
     typeChanged_ = false;
     startDetectorTimeStamp_ = std::chrono::high_resolution_clock::now();
     auto context = PipelineContext::GetCurrentContextSafely();
