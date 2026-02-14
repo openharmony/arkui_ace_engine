@@ -283,24 +283,6 @@ int32_t OH_NativeXComponent_DetachNativeRootNode(
     return component->DetachNativeRootNode(root->uiNodeHandle);
 }
 
-int32_t OH_NativeXComponent_RegisterUIInputEventCallback(OH_NativeXComponent* component,
-    void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type),
-    ArkUI_UIInputEvent_Type type)
-{
-    if ((component == nullptr) || (callback == nullptr)) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    if (type == ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS) {
-        return component->RegisterUIAxisEventCallback(callback);
-    }
-    return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-}
-
-int32_t OH_NativeXComponent_SetNeedSoftKeyboard(OH_NativeXComponent* component, bool needSoftKeyboard)
-{
-    return component ? component->SetNeedSoftKeyboard(needSoftKeyboard) : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
-}
-
 int32_t OH_NativeXComponent_RegisterSurfaceShowCallback(
     OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
 {
@@ -315,6 +297,19 @@ int32_t OH_NativeXComponent_RegisterSurfaceHideCallback(
         : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
 }
 
+int32_t OH_NativeXComponent_RegisterUIInputEventCallback(OH_NativeXComponent* component,
+    void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type),
+    ArkUI_UIInputEvent_Type type)
+{
+    if ((component == nullptr) || (callback == nullptr)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (type == ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS) {
+        return component->RegisterUIAxisEventCallback(callback);
+    }
+    return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+}
+
 int32_t OH_NativeXComponent_RegisterOnTouchInterceptCallback(
     OH_NativeXComponent* component, HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event))
 {
@@ -322,6 +317,11 @@ int32_t OH_NativeXComponent_RegisterOnTouchInterceptCallback(
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     return component->RegisterOnTouchInterceptCallback(callback);
+}
+
+int32_t OH_NativeXComponent_SetNeedSoftKeyboard(OH_NativeXComponent* component, bool needSoftKeyboard)
+{
+    return component ? component->SetNeedSoftKeyboard(needSoftKeyboard) : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
 }
 
 int32_t OH_NativeXComponent_GetTouchEventSourceType(

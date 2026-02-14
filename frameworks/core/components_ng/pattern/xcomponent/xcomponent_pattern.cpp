@@ -19,6 +19,7 @@
 #include <cstdlib>
 
 #include "interfaces/inner_api/ace/ui_content.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
 
@@ -77,24 +78,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
-#ifdef ENABLE_ROSEN_BACKEND
-constexpr char X_COMPONENT_COMPENSATION_ANGLE[] = "xcomponentCompensationAngle";
-const int32_t ROTATION_0 = 0;
-const int32_t ROTATION_90 = 90;
-const int32_t ROTATION_180 = 180;
-const int32_t ROTATION_270 = 270;
-constexpr char UNKNOWN[] = "0";
-constexpr char FULL[] = "1";
-constexpr char MAIN[] = "2";
-constexpr char SUB[] = "3";
-constexpr char COORDINATION[] = "4";
-#endif
-
-#if defined(RENDER_EXTRACT_SUPPORTED) && defined(IOS_PLATFORM)
-const int TEXTURETYPE_XCOMPONENT = 1;
-#endif
-
 void SendStatisticEvent(RefPtr<FrameNode> frameNode, StatisticEventType type)
 {
     CHECK_NULL_VOID(frameNode);
@@ -118,6 +101,25 @@ void SendStatisticEvent(RefPtr<FrameNode> frameNode, std::list<StatisticEventTyp
     }
     types.clear();
 }
+
+const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+#ifdef ENABLE_ROSEN_BACKEND
+constexpr char X_COMPONENT_COMPENSATION_ANGLE[] = "xcomponentCompensationAngle";
+const int32_t ROTATION_0 = 0;
+const int32_t ROTATION_90 = 90;
+const int32_t ROTATION_180 = 180;
+const int32_t ROTATION_270 = 270;
+constexpr char UNKNOWN[] = "0";
+constexpr char FULL[] = "1";
+constexpr char MAIN[] = "2";
+constexpr char SUB[] = "3";
+constexpr char COORDINATION[] = "4";
+#endif
+
+#if defined(RENDER_EXTRACT_SUPPORTED) && defined(IOS_PLATFORM)
+const int TEXTURETYPE_XCOMPONENT = 1;
+#endif
+
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComponentType type,
@@ -354,6 +356,8 @@ void XComponentPattern::OnDetachFromMainTree()
         }
     }
     displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
     host->UnregisterNodeChangeListener();
 }
 
@@ -366,7 +370,7 @@ std::string FoldDisplayModeToString(FoldDisplayMode foldDisplayMode)
         case FoldDisplayMode::MAIN: return MAIN;
         case FoldDisplayMode::SUB: return SUB;
         case FoldDisplayMode::COORDINATION: return COORDINATION;
-        default: return "0";
+        default: return UNKNOWN;
     }
 }
  
@@ -384,7 +388,7 @@ Rosen::ScreenRotation RotationIntToScreenRotation(int32_t rotation)
 std::unique_ptr<JsonValue> GetXComponentCompensationAngle(const std::string& angleConfigJson)
 {
     if (angleConfigJson == "") {
-        LOGE("UIContent set compensation angle empty");
+        LOGE("UIContent set compensasion angle empty");
         return nullptr;
     }
     auto jsonConfig = JsonUtil::ParseJsonString(angleConfigJson);
@@ -405,7 +409,6 @@ std::unique_ptr<JsonValue> GetXComponentCompensationAngle(const std::string& ang
 void SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext, FoldDisplayMode foldDisplayMode,
     const std::string& xcomponentId)
 {
-#ifndef CROSS_PLATFORM
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
     CHECK_NULL_VOID(context);
     std::shared_ptr<Rosen::RSNode> rsNode = context->GetRSNode();
@@ -427,7 +430,6 @@ void SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext, FoldDi
     TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s set rotation %{public}d",
         xcomponentId.c_str(), rotationInt);
     rsSurfaceNode->SetAppRotationCorrection(rotation);
-#endif
 }
 #endif
 
@@ -579,7 +581,11 @@ void XComponentPattern::AddLayoutTask()
 
     surfaceOffset_.SetX((overlapWidth - surfaceSize_.Width()) / 2.0f + overlapOffsetX);
     surfaceOffset_.SetY((overlapHeight - surfaceSize_.Height()) / 2.0f + overlapOffsetY);
-    paintRect_ = { surfaceOffset_, surfaceSize_ };
+    RectF newPaintRect = { surfaceOffset_, surfaceSize_ };
+    if (paintRect_ == newPaintRect) {
+        return;
+    }
+    paintRect_ = newPaintRect;
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetBounds(
         paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
@@ -894,6 +900,9 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
         AddAfterLayoutTaskForExportTexture();
     }
     host->MarkNeedSyncRenderTree();
+    if (context->GetXComponentDisplayConstraintEnabled()) {
+        AddLayoutTask();
+    }
 }
 
 void XComponentPattern::DumpInfo()
@@ -1066,7 +1075,7 @@ void XComponentPattern::UninitializeAccessibility(FrameNode* frameNode)
 
 ArkUI_AccessibilityProvider* XComponentPattern::GetNativeProvider()
 {
-    if(useNodeHandleAccessibilityProvider_) {
+    if (useNodeHandleAccessibilityProvider_) {
         return arkuiAccessibilityProvider_;
     }
     auto pair = GetNativeXComponent();
@@ -1392,6 +1401,30 @@ void XComponentPattern::InitMouseHoverEvent(const RefPtr<InputEventHub>& inputHu
     inputHub->AddOnHoverEvent(mouseHoverEvent_);
 }
 
+void XComponentPattern::ReportChangeEvent(const TouchEventInfo& info, const Offset& screenOffset,
+    const TouchLocationInfo& touchInfo) {
+    auto type = touchInfo.GetTouchType();
+    if (info.GetSourceDevice() == SourceType::TOUCH) {
+        return;
+    }
+    if ((type != TouchType::DOWN) && (type != TouchType::UP)) {
+        return;
+    }
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    auto host = GetHost();
+    if (!host) {
+        return;
+    }
+    json->Put("id", host->GetId());
+    const auto timeStamp = info.GetTimeStamp().time_since_epoch().count();
+    json->Put("fingerId", touchInfo.GetFingerId());
+    json->Put("timeStamp", static_cast<double>(timeStamp));
+    json->Put("offset", screenOffset.ToString().c_str());
+    json->Put("type", static_cast<double>(type));
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString(),
+        ComponentEventType::COMPONENT_EVENT_GESTURE);
+}
+
 void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     auto touchInfoList = info.GetChangedTouches();
@@ -1401,6 +1434,7 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     const auto& touchInfo = touchInfoList.front();
     const auto& screenOffset = touchInfo.GetGlobalLocation();
     const auto& localOffset = touchInfo.GetLocalLocation();
+    ReportChangeEvent(info, screenOffset, touchInfo);
     touchEventPoint_.id = touchInfo.GetFingerId();
     touchEventPoint_.screenX = static_cast<float>(screenOffset.GetX());
     touchEventPoint_.screenY = static_cast<float>(screenOffset.GetY());
@@ -2280,7 +2314,7 @@ void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onA
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto* context = host->GetContext();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask(
@@ -2517,5 +2551,10 @@ void XComponentPattern::SetSurfaceIsOpaque(bool isOpaque)
         CHECK_NULL_VOID(renderSurface_);
         renderSurface_->SetSurfaceBufferOpaque(isOpaque);
     }
+}
+
+void XComponentPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    json->Put("$SurfaceId", surfaceId_.c_str());
 }
 } // namespace OHOS::Ace::NG

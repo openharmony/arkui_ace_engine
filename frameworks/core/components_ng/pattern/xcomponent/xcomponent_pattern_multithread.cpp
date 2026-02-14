@@ -77,8 +77,7 @@ void XComponentPattern::InitSurfaceMultiThread(const RefPtr<FrameNode>& host)
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
-    std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext(true);
         if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -110,12 +109,12 @@ void XComponentPattern::InitSurfaceMultiThread(const RefPtr<FrameNode>& host)
 void XComponentPattern::InitControllerMultiThread()
 {
     CHECK_NULL_VOID(xcomponentController_);
-    if (!isTypedNode_) {
-        xcomponentController_->SetSurfaceId(surfaceId_);
-    }
     auto* controllerNG = static_cast<XComponentControllerNG*>(xcomponentController_.get());
     CHECK_NULL_VOID(controllerNG);
     controllerNG->SetPattern(AceType::Claim(this));
+    if (!isTypedNode_) {
+        xcomponentController_->SetSurfaceId(surfaceId_);
+    }
 }
 
 void XComponentPattern::RegisterContextEventMultiThread(const RefPtr<FrameNode>& host)
@@ -202,12 +201,14 @@ void XComponentPattern::OnDetachFromFrameNodeMultiThread(FrameNode* frameNode)
             auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
             CHECK_NULL_VOID(eventHub);
             {
+                ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
                 eventHub->FireDestroyEvent(GetId());
             }
             if (id_.has_value()) {
                 eventHub->FireDetachEvent(id_.value());
             }
             {
+                ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
                 eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
             }
 #ifdef RENDER_EXTRACT_SUPPORTED

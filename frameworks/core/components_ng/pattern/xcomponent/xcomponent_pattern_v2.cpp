@@ -20,18 +20,18 @@
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/common/statistic_event_reporter.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_surface_config_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_utils.h"
 #ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 #include "transaction/rs_transaction.h"
 #include "transaction/rs_transaction_handler.h"
 #include "transaction/rs_transaction_proxy.h"
-#include "transaction/rs_sync_transaction_controller.h"
-#include "transaction/rs_sync_transaction_handler.h"
 #include "ui/rs_ui_context.h"
 #include "ui/rs_ui_director.h"
 #endif
@@ -358,10 +358,10 @@ void XComponentPatternV2::DisposeSurface()
 std::shared_ptr<Rosen::RSTransactionHandler> XComponentPatternV2::GetRSTransactionHandler(
     const RefPtr<FrameNode>& frameNode)
 {
-#ifdef ENABLE_ROSEN_BACKEND
     if (!SystemProperties::GetMultiInstanceEnabled()) {
         return nullptr;
     }
+#ifdef ENABLE_ROSEN_BACKEND
     auto rsUIContext = GetRSUIContext(frameNode);
     CHECK_NULL_RETURN(rsUIContext, nullptr);
     return rsUIContext->GetRSTransaction();
@@ -388,10 +388,14 @@ std::shared_ptr<Rosen::RSUIContext> XComponentPatternV2::GetRSUIContext(const Re
 void XComponentPatternV2::FlushImplicitTransaction(const RefPtr<FrameNode>& frameNode)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (auto transactionHandler = GetRSTransactionHandler(frameNode)) {
+    if (!SystemProperties::GetMultiInstanceEnabled()) {
+        auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        }
+    }
+    else if (auto transactionHandler = GetRSTransactionHandler(frameNode)) {
         transactionHandler->FlushImplicitTransaction();
-    } else {
-        Rosen::RSTransactionProxy::GetInstance()->FlushImplicitTransaction();
     }
 #endif
 }

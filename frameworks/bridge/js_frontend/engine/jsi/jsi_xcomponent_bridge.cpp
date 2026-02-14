@@ -101,18 +101,18 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
         return;
     }
 
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    LocalScope scope(pandaRuntime->GetEcmaVm());
     auto arkObjectRef = nativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true,
                                                        args, OH_NATIVE_XCOMPONENT_OBJ,
                                                        reinterpret_cast<void*>(nativeXComponent_));
 
-    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     if (arkObjectRef.IsEmpty() || pandaRuntime->HasPendingException()) {
         LOGE("LoadModuleByName failed.");
         return;
     }
     renderContext_ = runtime->NewObject();
     auto renderContext = std::static_pointer_cast<ArkJSValue>(renderContext_);
-    LocalScope scope(pandaRuntime->GetEcmaVm());
     Local<ObjectRef> obj = arkObjectRef->ToObject(pandaRuntime->GetEcmaVm());
     if (obj.IsEmpty() || pandaRuntime->HasPendingException()) {
         LOGE("Get local object failed.");
