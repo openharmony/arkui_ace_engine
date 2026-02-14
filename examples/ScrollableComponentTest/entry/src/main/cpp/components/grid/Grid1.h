@@ -60,10 +60,8 @@ public:
     {
         return _adapter;
     }
-    void ReleaseAdapter()
-    {
-        return _adapter.reset();
-    }
+    void ReleaseAdapter() { return _adapter.reset(); }
+    void SetLayoutOptions(ArkUI_GridLayoutOptions *option);
 
 private:
     std::shared_ptr<ItemAdapter<GridItemComponent>> _adapter;
