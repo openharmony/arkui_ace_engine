@@ -97,16 +97,11 @@ void ScreenPattern::OnAttachToFrameNode()
 
 void ScreenPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    if (screenSession_) {
-        auto instance = WindowSceneLayoutManager::GetInstance();
-        if (instance) {
-            instance->UnregisterScreenNode(screenSession_->GetScreenId());
-        }
+    CHECK_NULL_VOID(screenSession_);
+    auto instance = WindowSceneLayoutManager::GetInstance();
+    if (instance) {
+        instance->UnregisterScreenNode(screenSession_->GetScreenId());
     }
-    CHECK_NULL_VOID(frameNode);
-    auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
-    CHECK_NULL_VOID(context);
-    context->ClearModifiers();
 }
 
 void ScreenPattern::UpdateDisplayInfo()
@@ -229,7 +224,9 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         CHECK_NULL_RETURN(rootScene, false);
         rootScene->SetDisplayDensity(density);
         int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
+        uint64_t displayId = screenSession_->GetScreenId();
         rootScene->SetDisplayOrientation(orientation);
+        rootScene->SetDisplayId(displayId);
         rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::ROOT_SCENE_CHANGE);
     } else if (rsWindow->GetClassType() == "ScreenScene") {
         auto screenScene = static_cast<Rosen::ScreenScene*>(rsWindow.GetRefPtr());

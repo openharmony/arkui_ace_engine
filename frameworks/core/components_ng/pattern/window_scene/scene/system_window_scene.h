@@ -21,7 +21,6 @@
 
 #include "core/common/container.h"
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -38,7 +37,6 @@ public:
             .type = RenderContext::ContextType::EXTERNAL,
             .surfaceName = std::nullopt};
     }
-
     sptr<Rosen::Session> GetSession();
 
     void OnVisibleChange(bool visible) override;

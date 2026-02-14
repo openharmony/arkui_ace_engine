@@ -33,9 +33,18 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr uint32_t ROTATION_COUNT = 4;
+constexpr uint32_t ROTATION_COUNT_SNAPSHOT = 2;
 constexpr uint32_t ADD_BACKGROUND_COLOR_MS = 50;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
+constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
+constexpr uint32_t COLOR_TRANSLUCENT_BLACK = 0x66000000;
+constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
+constexpr uint32_t SNAPSHOT_LOAD_COMPLETE = 1;
+constexpr uint32_t STARTING_WINDOW_TIMEOUT_MS = 10000;
+constexpr uint32_t DMA_RECLAIM_TIMEOUT_MS = 500;
+constexpr const char* DMA_DEVICE_FILE = "/dev/dma_reclaim";
 
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
 constexpr uint32_t ASENGINE_ATTRIBUTIONS_COUNT = 3;
@@ -55,16 +64,6 @@ constexpr Dimension IMAGE_NODE_OFFSET = Dimension(-36, DimensionUnit::VP);
 const Rosen::RSAnimationTimingCurve NODE_ANIMATION_TIMING_CURVE =
     Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.40f, 0.08f, 0.60f, 0.92f);
 #endif
-
-constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
-constexpr uint32_t COLOR_TRANSLUCENT_BLACK = 0x66000000;
-constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
-constexpr uint32_t SNAPSHOT_LOAD_COMPLETE = 1;
-constexpr uint32_t ROTATION_COUNT = 4;
-constexpr uint32_t ROTATION_COUNT_SNAPSHOT = 2;
-constexpr uint32_t STARTING_WINDOW_TIMEOUT_MS = 10000;
-constexpr uint32_t DMA_RECLAIM_TIMEOUT_MS = 500;
-constexpr const char* DMA_DEVICE_FILE = "/dev/dma_reclaim";
 
 struct DmaBufIoctlSwPara {
     pid_t pid = 0;
@@ -227,11 +226,11 @@ void WindowPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
     TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
-        "name: %{public}s, state: %{public}u, in recents: %{public}d, prelaunch: %{public}d, "
-        "isAppLock: %{public}d",
-        session_->GetPersistentId(), host->GetId(), session_->GetSessionInfo().bundleName_.c_str(),
-        state, session_->GetShowRecent(), session_->IsPrelaunch(), session_->GetAppLockControl());
-    
+        "name: %{public}s, state: %{public}u, in recents: %{public}d, appLockControl: %{public}d, "
+        "prelaunch: %{public}d", session_->GetPersistentId(), host->GetId(),
+        session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent(),
+        session_->GetAppLockControl(), session_->IsPrelaunch());
+
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowForPrelaunch(), true);
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_VOID(HasStartingPage(), false);
@@ -496,9 +495,9 @@ void WindowPattern::CreateASStartingWindow()
     std::string circleIcon = "";
 
 #ifdef ACE_ENGINE_PLUGIN_PATH
-    appNameInfo = sessionInfo.atomicServiceInfo_.appNameInfo;
-    eyelashRingIcon = sessionInfo.atomicServiceInfo_.eyelashRingIcon;
-    circleIcon = sessionInfo.atomicServiceInfo_.circleIcon;
+    appNameInfo = sessionInfo.atomicServiceInfo_.appNameInfo_;
+    eyelashRingIcon = sessionInfo.atomicServiceInfo_.eyelashRingIcon_;
+    circleIcon = sessionInfo.atomicServiceInfo_.circleIcon_;
 #endif // ACE_ENGINE_PLUGIN_PATH
 
     startingWindow_ = FrameNode::CreateFrameNode(
@@ -637,7 +636,8 @@ void WindowPattern::CreateStartingWindow()
     startingWindowInfo.backgroundColorEarlyVersion_ =
         context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startingWindowInfo);
-    if (startingWindowInfo.configFileEnabled_) {
+    if (!(sessionInfo.startWindowOption != nullptr && sessionInfo.startWindowOption->hasStartWindow) &&
+        startingWindowInfo.configFileEnabled_) {
         CHECK_NULL_VOID(startingWindowLayoutHelper_);
         lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
