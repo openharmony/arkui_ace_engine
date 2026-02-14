@@ -173,7 +173,7 @@ public:
     {
         return -1;
     }
-    virtual int32_t GetGlobalInfo(std::shared_ptr<OHOS.Media.Meta> &globalInfo)
+    virtual int32_t GetGlobalInfo(std::shared_ptr<OHOS::Media::Meta> &globalInfo)
     {
         (void)globalInfo;
         return 0;
