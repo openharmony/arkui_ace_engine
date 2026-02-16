@@ -263,11 +263,11 @@ static std::vector<std::tuple<std::string, Ark_SymbolEffectStrategy, std::string
 };
 
 /*
- * @tc.name: setEffectStrategytTestValidValues
+ * @tc.name: setEffectStrategyTestValidValues
  * @tc.desc: effectStrategy valid
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolGlyphModifierTest, setEffectStrategytTestValidValues, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setEffectStrategyTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -296,11 +296,11 @@ static std::vector<std::tuple<std::string, Ark_SymbolEffectStrategy, std::string
 };
 
 /*
- * @tc.name: setEffectStrategytTestInvalidValues
+ * @tc.name: setEffectStrategyTestInvalidValues
  * @tc.desc: effectStrategy invalid
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolGlyphModifierTest, setEffectStrategytTestInvalidValues, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setEffectStrategyTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -348,11 +348,11 @@ static std::vector<std::tuple<std::string, Ark_SymbolRenderingStrategy, std::str
 };
 
 /*
- * @tc.name: setRenderingStrategytTestValidValues
+ * @tc.name: setRenderingStrategyTestValidValues
  * @tc.desc: renderingStrategy valid
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategytTestValidValues, TestSize.Level1)
+HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -379,7 +379,7 @@ static std::vector<std::tuple<std::string, Ark_SymbolRenderingStrategy, std::str
 };
 
 /*
- * @tc.name: setRenderingStrategytTestInvalidValues
+ * @tc.name: setRenderingStrategyTestInvalidValues
  * @tc.desc: renderingStrategy valid
  * @tc.type: FUNC
  */
@@ -584,7 +584,7 @@ HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestReplaceScope, TestSize.Lev
 }
 
 /*
- * @tc.name: setMinFontScaleDefaultValues
+ * @tc.name: setMinFontScaleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -655,7 +655,7 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setMinFontScaleTestInvalidValues, Tes
 }
 
 /*
- * @tc.name: setMaxFontScaleDefaultValues
+ * @tc.name: setMaxFontScaleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */

@@ -121,7 +121,7 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestInvalidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavigatorModifierTest, DISABLED_setNavigatorOptions1, TestSize.Level1)
+HWTEST_F(NavigatorModifierTest, DISABLED_setNavigatorOptions1Test, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -288,7 +288,7 @@ HWTEST_F(NavigatorModifierTest, setTargetTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setParamsTest
+ * @tc.name: setParamsTest
  * @tc.desc:
  * @tc.type: FUNC
  */

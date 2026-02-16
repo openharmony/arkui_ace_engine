@@ -39,11 +39,11 @@ public:
 };
 
 /**
- * @tc.name: CtorAndGetUrlTest
+ * @tc.name: getUrlTestCtorAndGetUrl
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(UrlStyleAccessorTest, CtorAndGetUrlTest, TestSize.Level1)
+HWTEST_F(UrlStyleAccessorTest, getUrlTestCtorAndGetUrl, TestSize.Level1)
 {
     const std::vector<std::string> TEST_PLAN = {
         "http://example.com", "http://url.com", "http://example.com:20000", "https://gitee.com"

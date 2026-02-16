@@ -258,11 +258,11 @@ HWTEST_F(ScrollerAccessorTest, scrollEdgeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollEdgeOptionsValidTest
+ * @tc.name: scrollEdgeTestOptionsValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollEdgeOptionsValidTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollEdgeTestOptionsValid, TestSize.Level1)
 {
     auto mockScrollerController2 = new MockScrollController2();
     auto mockScrollerControllerKeeper2 = AceType::Claim(mockScrollerController2);
@@ -286,11 +286,11 @@ HWTEST_F(ScrollerAccessorTest, scrollEdgeOptionsValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollEdgeOptionsInvalidTest
+ * @tc.name: scrollEdgeTestOptionsInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollEdgeOptionsInvalidTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollEdgeTestOptionsInvalid, TestSize.Level1)
 {
     constexpr float velocityInvalid = -100.45f;
 
@@ -305,11 +305,11 @@ HWTEST_F(ScrollerAccessorTest, scrollEdgeOptionsInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollByXTest
+ * @tc.name: scrollByTestX
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollByXTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollByTestX, TestSize.Level1)
 {
     ASSERT_NE(accessor_->scrollBy, nullptr);
 
@@ -342,11 +342,11 @@ HWTEST_F(ScrollerAccessorTest, scrollByXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollByYTest
+ * @tc.name: scrollByTestY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollByYTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollByTestY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->scrollBy, nullptr);
 
@@ -406,11 +406,11 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollToIndexSmoothTest
+ * @tc.name: scrollToIndexTestSmooth
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollToIndexSmoothTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollToIndexTestSmooth, TestSize.Level1)
 {
     constexpr int32_t index = 100;
     std::optional<float> emptyOptionsRes = std::nullopt;
@@ -434,11 +434,11 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexSmoothTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollToIndexAlignTest
+ * @tc.name: scrollToIndexTestAlign
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollToIndexAlignTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollToIndexTestAlign, TestSize.Level1)
 {
     constexpr int32_t index = 100;
     std::optional<float> emptyOptionsRes = std::nullopt;
@@ -481,11 +481,11 @@ static Opt_ScrollToIndexOptions GetOptions(Ark_LengthUnit unit, float value)
 }
 
 /**
- * @tc.name: scrollToIndexOptionsTest
+ * @tc.name: scrollToIndexTestOptions
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollToIndexOptionsTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollToIndexTestOptions, TestSize.Level1)
 {
     constexpr int32_t index = 0;
     const auto arkIndex = Converter::ArkValue<Ark_Number>(index);
@@ -549,7 +549,7 @@ HWTEST_F(ScrollerAccessorTest, getItemIndexTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_currentOffsetTest
+ * @tc.name: currentOffsetTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -568,7 +568,7 @@ HWTEST_F(ScrollerAccessorTest, currentOffsetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_getItemRectTest
+ * @tc.name: getItemRectTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -593,11 +593,11 @@ HWTEST_F(ScrollerAccessorTest, getItemRectTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollToPositionTest
+ * @tc.name: scrollToTestPosition
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollToPositionTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollToTestPosition, TestSize.Level1)
 {
     float duration = 0.0f;
     bool smooth = false;
@@ -643,11 +643,11 @@ HWTEST_F(ScrollerAccessorTest, scrollToPositionTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollToAnimationTest
+ * @tc.name: scrollToTestAnimation
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollToAnimationTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollToTestAnimation, TestSize.Level1)
 {
     Dimension position = Dimension(1, DimensionUnit::VP);
     float duration = 0.0f;
@@ -688,11 +688,11 @@ HWTEST_F(ScrollerAccessorTest, scrollToAnimationTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollToCanOverScrollTest
+ * @tc.name: scrollToTestCanOverScroll
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollToCanOverScrollTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollToTestCanOverScroll, TestSize.Level1)
 {
     Dimension position = Dimension(1, DimensionUnit::VP);
     float duration = 1000.0f;
@@ -725,11 +725,11 @@ HWTEST_F(ScrollerAccessorTest, scrollToCanOverScrollTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollToDurationTest
+ * @tc.name: scrollToTestDuration
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollToDurationTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollToTestDuration, TestSize.Level1)
 {
     Dimension position = Dimension(1, DimensionUnit::VP);
     bool canOverScroll = false;
@@ -761,11 +761,11 @@ HWTEST_F(ScrollerAccessorTest, scrollToDurationTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollToCurveTest
+ * @tc.name: scrollToTestCurve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollToCurveTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollToTestCurve, TestSize.Level1)
 {
     Dimension position = Dimension(1, DimensionUnit::VP);
     float duration = 1000.0f;
@@ -814,11 +814,11 @@ HWTEST_F(ScrollerAccessorTest, scrollToCurveTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollToICurveTest
+ * @tc.name: scrollToTestICurve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollToICurveTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollToTestICurve, TestSize.Level1)
 {
     Dimension position = Dimension(1, DimensionUnit::VP);
     float duration = 1000.0f;

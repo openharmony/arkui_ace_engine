@@ -76,7 +76,7 @@ public:
 };
 
 /*
- * @tc.name: setStrokeWidthTestValidValues
+ * @tc.name: setStrokeWidthTestResources
  * @tc.desc: check setStrokeWidth from resource
  * @tc.type: FUNC
  */
@@ -99,7 +99,7 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, setStrokeWidthTestResources, Te
 }
 
 /**
- * @tc.name: setFillOpacityTest
+ * @tc.name: setFillOpacityTestResources
  * @tc.desc: Check the functionality of setFillOpacity
  * @tc.type: FUNC
  */
@@ -117,7 +117,7 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, setFillOpacityTestResources, Te
 }
 
 /**
- * @tc.name: setStrokeOpacityTest
+ * @tc.name: setStrokeOpacityTestResources
  * @tc.desc: Check the functionality of setStrokeOpacity
  * @tc.type: FUNC
  */

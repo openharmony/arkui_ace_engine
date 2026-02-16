@@ -154,11 +154,11 @@ public:
 };
 
 /*
- * @tc.name: setResponseRegionTest
+ * @tc.name: setResponseRegionTestBasic
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegionTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegionTestBasic, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setResponseRegion, nullptr);
 
@@ -378,11 +378,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyPreImeTest, TestSize.Level1
 
 
 /*
- * @tc.name: setOnKeyEvent0Test
+ * @tc.name: setOnKeyEventTestVariant0
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEventTestVariant0, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyEvent, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -429,11 +429,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1
 }
 
 /*
- * @tc.name: setOnKeyEvent1Test
+ * @tc.name: setOnKeyEventTestVariant1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent1Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEventTestVariant1, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyEvent, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -557,12 +557,13 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues,
 }
 
 /*
- * @tc.name: DISABLED_setBackgroundEffectTestInvalidValues
+ * @tc.name: setBackgroundEffectTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestInvalidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setBackgroundEffect, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -633,151 +634,165 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestValidValu
 }
 
 /*
- * @tc.name: DISABLED_setBackgroundBlurStyleTestInvalidValues
+ * @tc.name: setBackgroundBlurStyleTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestInvalidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setBackgroundBlurStyle, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_setBackgroundTest
+ * @tc.name: setBackgroundTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setBackground, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_setBackgroundImageResizableTest
+ * @tc.name: setBackgroundImageResizableTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundImageResizableTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setBackgroundImageResizable, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_setBackgroundBrightnessTest
+ * @tc.name: setBackgroundBrightnessTest
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBrightnessTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setBackgroundBrightness, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_OutlineTestDefaultValues
+ * @tc.name: outlineTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_outlineTestDefaultValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOutline, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_OutlineTestValidValues
+ * @tc.name: setOutlineTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOutlineTestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOutline, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_OutlineStyleTestDefaultValues
+ * @tc.name: outlineStyleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_outlineStyleTestDefaultValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOutlineStyle, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_OutlineStyleTestOutlineStyleValidValues
+ * @tc.name: setOutlineStyleTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineStyleTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOutlineStyleTestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOutlineStyle, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_OutlineWidthTestDefaultValues
+ * @tc.name: outlineWidthTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_outlineWidthTestDefaultValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOutlineWidth, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_OutlineWidthTestValidValues
+ * @tc.name: setOutlineWidthTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineWidthTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOutlineWidthTestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOutlineWidth, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_OutlineColorTestDefaultValues
+ * @tc.name: outlineColorTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_outlineColorTestDefaultValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOutlineColor, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_OutlineColorTestOutlineColorTopValidValues
+ * @tc.name: setOutlineColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineColorTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOutlineColorTestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOutlineColor, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_OutlineRadiusTestDefaultValues
+ * @tc.name: outlineRadiusTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_outlineRadiusTestDefaultValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setOutlineRadius, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_OutlineRadiusTestValidValues
+ * @tc.name: setResponseRegionTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_OutlineRadiusTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegionTestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setResponseRegion, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: setResponseRegion
+ * @tc.name: setResponseRegionTestNumericValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegion, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegionTestNumericValues, TestSize.Level1)
 {
     Ark_Union_Array_Rectangle_Rectangle inputValue;
     inputValue.selector = 1;
@@ -817,11 +832,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setResponseRegion, TestSize.Level1)
 }
 
 /*
- * @tc.name: setConstraintSize
+ * @tc.name: setConstraintSizeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setConstraintSize, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setConstraintSizeTest, TestSize.Level1)
 {
     Ark_ConstraintSizeOptions inputValue;
     inputValue.minWidth = Converter::ArkValue<Opt_Length>("10.0vp");
@@ -836,11 +851,11 @@ HWTEST_F(CommonMethodModifierTest2, setConstraintSize, TestSize.Level1)
 }
 
 /*
- * @tc.name: setLayoutWeight
+ * @tc.name: setLayoutWeightTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setLayoutWeight, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setLayoutWeightTest, TestSize.Level1)
 {
     auto inputValue = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.1001f);
     modifier_->setLayoutWeight(node_, &inputValue);
@@ -854,11 +869,11 @@ HWTEST_F(CommonMethodModifierTest2, setLayoutWeight, TestSize.Level1)
 }
 
 /*
- * @tc.name: setHitTestBehavior
+ * @tc.name: setHitTestBehaviorTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setHitTestBehavior, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setHitTestBehaviorTest, TestSize.Level1)
 {
     typedef std::pair<Opt_HitTestMode, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -876,11 +891,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setHitTestBehavior, TestSize.Level1
 }
 
 /*
- * @tc.name: setOpacity
+ * @tc.name: setOpacityTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setOpacity, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOpacityTest, TestSize.Level1)
 {
     auto inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.7001);
     modifier_->setOpacity(node_, &inputValue);
@@ -893,7 +908,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOpacity, TestSize.Level1)
  * @tc.desc: Check the functionality of CommonMethodModifierTest2.setForegroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColor, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColorTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_Union_ResourceColor_ColoringStrategy, std::string>;
     constexpr auto propName = "foregroundColor";
@@ -933,11 +948,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColor, TestSize.Level1
 }
 
 /*
- * @tc.name: setHoverEffect
+ * @tc.name: setHoverEffectTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setHoverEffect, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setHoverEffectTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_HoverEffect, std::string>;
     const std::vector<OneTestStep> testPlan = {
@@ -957,11 +972,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setHoverEffect, TestSize.Level1)
 }
 
 /*
- * @tc.name: setVisibility
+ * @tc.name: setVisibilityTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setVisibility, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setVisibilityTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_Visibility, std::string>;
     const std::vector<OneTestStep> testPlan = {
@@ -978,11 +993,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setVisibility, TestSize.Level1)
 }
 
 /*
- * @tc.name: setFocusable
+ * @tc.name: setFocusableTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusable, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusableTest, TestSize.Level1)
 {
     auto inputValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setFocusable(node_, &inputValue);
@@ -996,11 +1011,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusable, TestSize.Level1)
 }
 
 /*
- * @tc.name: setAlignSelf
+ * @tc.name: setAlignSelfTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setAlignSelf, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setAlignSelfTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_ItemAlign, std::string>;
     const std::vector<OneTestStep> testPlan = {
@@ -1020,11 +1035,11 @@ HWTEST_F(CommonMethodModifierTest2, setAlignSelf, TestSize.Level1)
 }
 
 /*
- * @tc.name: setDisplayPriority
+ * @tc.name: setDisplayPriorityTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setDisplayPriority, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setDisplayPriorityTest, TestSize.Level1)
 {
     auto value = Converter::ArkValue<Opt_Float64>(0.7001);
     modifier_->setDisplayPriority(node_, &value);
@@ -1038,11 +1053,11 @@ HWTEST_F(CommonMethodModifierTest2, setDisplayPriority, TestSize.Level1)
 }
 
 /*
- * @tc.name: setZIndex
+ * @tc.name: setZIndexTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setZIndex, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setZIndexTest, TestSize.Level1)
 {
     auto value = Converter::ArkValue<Opt_Int32>(0.7001);
     modifier_->setZIndex(node_, &value);
@@ -1056,11 +1071,11 @@ HWTEST_F(CommonMethodModifierTest2, setZIndex, TestSize.Level1)
 }
 
 /*
- * @tc.name: setDirection
+ * @tc.name: setDirectionTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setDirection, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setDirectionTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_Direction, std::string>;
     const std::vector<OneTestStep> testPlan = {
@@ -1077,11 +1092,11 @@ HWTEST_F(CommonMethodModifierTest2, setDirection, TestSize.Level1)
 }
 
 /*
- * @tc.name: setAlign
+ * @tc.name: setAlignTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setAlign, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setAlignTest, TestSize.Level1)
 {
     const std::vector<std::pair<Ark_Alignment, std::string>> testPlan = {
         { ArkValue<Ark_Alignment>(ARK_ALIGNMENT_TOP_START), "Alignment.TopStart" },
@@ -1104,11 +1119,11 @@ HWTEST_F(CommonMethodModifierTest2, setAlign, TestSize.Level1)
 }
 
 /*
- * @tc.name: setPosition
+ * @tc.name: setPositionTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setPosition, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setPositionTest, TestSize.Level1)
 {
     auto position = Ark_Position {
         .x = Converter::ArkUnion<Opt_Length, Ark_String>(Converter::ArkValue<Ark_String>("42.0vp")),
@@ -1147,11 +1162,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setPosition, TestSize.Level1)
 }
 
 /*
- * @tc.name: setEnabled
+ * @tc.name: setEnabledTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setEnabled, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setEnabledTest, TestSize.Level1)
 {
     auto inputValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setEnabled(node_, &inputValue);
@@ -1165,11 +1180,11 @@ HWTEST_F(CommonMethodModifierTest2, setEnabled, TestSize.Level1)
 }
 
 /*
- * @tc.name: setAspectRatio
+ * @tc.name: setAspectRatioTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setAspectRatio, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setAspectRatioTest, TestSize.Level1)
 {
     auto inputValue = Converter::ArkValue<Opt_Float64>(1);
     modifier_->setAspectRatio(node_, &inputValue);
@@ -1183,11 +1198,11 @@ HWTEST_F(CommonMethodModifierTest2, setAspectRatio, TestSize.Level1)
 }
 
 /*
- * @tc.name: setShadow
+ * @tc.name: setShadowTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setShadow, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setShadowTest, TestSize.Level1)
 {
     auto arkShadowOptions = Ark_ShadowOptions {
         .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(ARK_COLOR_GREEN),
@@ -1205,11 +1220,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setShadow, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBackgroundBlurStyle
+ * @tc.name: setBackgroundBlurStyleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyle, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTest, TestSize.Level1)
 {
     auto style = Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN);
     auto options = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(Ark_BackgroundBlurStyleOptions {
@@ -1229,11 +1244,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyle, TestSize.Le
 }
 
 /*
- * @tc.name: setForegroundBlurStyle
+ * @tc.name: setForegroundBlurStyleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setForegroundBlurStyle, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setForegroundBlurStyleTest, TestSize.Level1)
 {
     auto style = Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN);
     auto options = Ark_ForegroundBlurStyleOptions {
@@ -1249,11 +1264,11 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundBlurStyle, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBlurValid1
+ * @tc.name: setBlurTestValid1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBlurValid1, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBlurTestValid1, TestSize.Level1)
 {
     double blurRadiusBefore = 3.1415;
     auto value = Converter::ArkValue<Opt_Float64>(blurRadiusBefore);
@@ -1268,11 +1283,11 @@ HWTEST_F(CommonMethodModifierTest2, setBlurValid1, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBlurValid2
+ * @tc.name: setBlurTestValid2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBlurValid2, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBlurTestValid2, TestSize.Level1)
 {
     double blurRadiusBefore = 3.1415;
     double grayCoeff1 = 7;
@@ -1291,11 +1306,11 @@ HWTEST_F(CommonMethodModifierTest2, setBlurValid2, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBlurInvalid1
+ * @tc.name: setBlurTestInvalid1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBlurInvalid1, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBlurTestInvalid1, TestSize.Level1)
 {
     double blurRadiusBefore = 3.1415;
     double grayCoeff1 = GRAYSCALE_MIN - 1;
@@ -1314,11 +1329,11 @@ HWTEST_F(CommonMethodModifierTest2, setBlurInvalid1, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBlurInvalid2
+ * @tc.name: setBlurTestInvalid2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBlurInvalid2, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBlurTestInvalid2, TestSize.Level1)
 {
     double blurRadiusBefore = 3.1415;
     double grayCoeff1 = GRAYSCALE_MAX + 1;
@@ -1337,11 +1352,11 @@ HWTEST_F(CommonMethodModifierTest2, setBlurInvalid2, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOverlay
+ * @tc.name: setOverlayTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setOverlay, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setOverlayTest, TestSize.Level1)
 {
     auto value = Converter::ArkUnion<Opt_Union_String_CustomBuilder_ComponentContent, Ark_String>("TEST_OVERLAY");
     auto options = Converter::ArkValue<Opt_OverlayOptions>(
@@ -1362,11 +1377,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOverlay, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBorder
+ * @tc.name: setBorderTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBorder, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBorderTest, TestSize.Level1)
 {
     Ark_BorderOptions arkInputValue = {
         .color = ArkUnion<Opt_Union_EdgeColors_ResourceColor_LocalizedEdgeColors, Ark_ResourceColor>(
@@ -1421,11 +1436,11 @@ HWTEST_F(CommonMethodModifierTest2, setBorder, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBorderStyle
+ * @tc.name: setBorderStyleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBorderStyle, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBorderStyleTest, TestSize.Level1)
 {
     auto arkStyle = Ark_EdgeStyles {
         .left = Converter::ArkValue<Opt_BorderStyle>(ARK_BORDER_STYLE_DOTTED),
@@ -1441,11 +1456,11 @@ HWTEST_F(CommonMethodModifierTest2, setBorderStyle, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBorderWidth
+ * @tc.name: setBorderWidthTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBorderWidth, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBorderWidthTest, TestSize.Level1)
 {
     auto arkWidth = Ark_EdgeWidths {
         .left = Converter::ArkValue<Opt_Length>("8.00%"),
@@ -1470,11 +1485,11 @@ HWTEST_F(CommonMethodModifierTest2, setBorderWidth, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBorderColor
+ * @tc.name: setBorderColorTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBorderColor, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBorderColorTest, TestSize.Level1)
 {
     auto arkResourceColor = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_ORANGE);
     auto color = Converter::ArkUnion<Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors, Ark_ResourceColor>(
@@ -1485,11 +1500,11 @@ HWTEST_F(CommonMethodModifierTest2, setBorderColor, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBorderRadius
+ * @tc.name: setBorderRadiusTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBorderRadius, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBorderRadiusTest, TestSize.Level1)
 {
     auto arkRadius =  Ark_BorderRadiuses {
         .topLeft = Converter::ArkValue<Opt_Length>("8.00%"),
@@ -1507,11 +1522,11 @@ HWTEST_F(CommonMethodModifierTest2, setBorderRadius, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBorderImage
+ * @tc.name: setBorderImageTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setBorderImage, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBorderImageTest, TestSize.Level1)
 {
     auto arkImage = Ark_BorderImageOption {
         .fill =  Converter::ArkValue<Opt_Boolean>(true),
@@ -1530,11 +1545,11 @@ HWTEST_F(CommonMethodModifierTest2, setBorderImage, TestSize.Level1)
 }
 
 /*
- * @tc.name: setLinearGradient
+ * @tc.name: setLinearGradientTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setLinearGradient, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setLinearGradientTest, TestSize.Level1)
 {
     // color stops
     std::vector<ColorStep> colorSteps {
@@ -1557,11 +1572,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setLinearGradient, TestSize.Level1)
                          "[\"#FFFFFF00\",\"0.700000\"],[\"#FF0000FF\",\"0.900000\"]],\"repeating\":\"true\"}");
 }
 /*
- * @tc.name: setSweepGradient
+ * @tc.name: setSweepGradientTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setSweepGradient, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setSweepGradientTest, TestSize.Level1)
 {
     // color stops
     std::vector<ColorStep> colorSteps {
@@ -1588,11 +1603,11 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setSweepGradient, TestSize.Level1)
 }
 
 /*
- * @tc.name: backdropBlur0_setValues
+ * @tc.name: setBackdropBlurTestSetValues0
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetValues0, TestSize.Level1)
 {
     // see ./components_ng/render/adapter/rosen_render_context.cpp for details or possible operation
     double blurRadiusBefore = 3.1415;
@@ -1615,11 +1630,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: backdropBlur0_setNullRadiusValue
+ * @tc.name: setBackdropBlurTestSetNullRadiusValue0
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setNullRadiusValue, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetNullRadiusValue0, TestSize.Level1)
 {
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1635,11 +1650,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setNullRadiusValue, TestSize.L
 }
 
 /*
- * @tc.name: backdropBlur0_setBadRadiusValue
+ * @tc.name: setBackdropBlurTestSetBadRadiusValue0
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setBadRadiusValue, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetBadRadiusValue0, TestSize.Level1)
 {
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1657,11 +1672,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setBadRadiusValue, TestSize.Le
 }
 
 /*
- * @tc.name: backdropBlur0_setNullOption
+ * @tc.name: setBackdropBlurTestSetNullOption0
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setNullOption, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetNullOption0, TestSize.Level1)
 {
     auto renderMock = GetMockRenderContext();
     double blurRadiusBefore = 3.1415;
@@ -1678,11 +1693,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setNullOption, TestSize.Level1
 }
 
 /*
- * @tc.name: backdropBlur0_setValues
+ * @tc.name: setBackdropBlurTestSetShortOption0
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setShortOption, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetShortOption0, TestSize.Level1)
 {
     auto renderMock = GetMockRenderContext();
     double blurRadiusBefore = 3.1415;
@@ -1731,11 +1746,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur0_setShortOption, TestSize.Level
 }
 
 /*
- * @tc.name: backdropBlur1_setValues
+ * @tc.name: setBackdropBlurTestSetValues1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetValues1, TestSize.Level1)
 {
     // see ./components_ng/render/adapter/rosen_render_context.cpp for details or possible operation
     double blurRadiusBefore = 3.1415;
@@ -1760,11 +1775,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: backdropBlur1_setNullRadiusValue
+ * @tc.name: setBackdropBlurTestSetNullRadiusValue1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullRadiusValue, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetNullRadiusValue1, TestSize.Level1)
 {
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1782,11 +1797,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullRadiusValue, TestSize.L
 }
 
 /*
- * @tc.name: backdropBlur1_setBadRadiusValue
+ * @tc.name: setBackdropBlurTestSetBadRadiusValue1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setBadRadiusValue, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetBadRadiusValue1, TestSize.Level1)
 {
     auto json = GetJsonValue(node_);
     ASSERT_NE(json, nullptr);
@@ -1806,11 +1821,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setBadRadiusValue, TestSize.Le
 }
 
 /*
- * @tc.name: backdropBlur1_setNullOption
+ * @tc.name: setBackdropBlurTestSetNullOption1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullOption, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetNullOption1, TestSize.Level1)
 {
     auto renderMock = GetMockRenderContext();
     double blurRadiusBefore = 3.1415;
@@ -1829,11 +1844,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullOption, TestSize.Level1
 }
 
 /*
- * @tc.name: backdropBlur1_setShortOption
+ * @tc.name: setBackdropBlurTestSetShortOption1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setShortOption, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetShortOption1, TestSize.Level1)
 {
     auto renderMock = GetMockRenderContext();
     double blurRadiusBefore = 3.1415;
@@ -1885,11 +1900,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setShortOption, TestSize.Level
 }
 
 /*
- * @tc.name: backdropBlur1_setNullSysOption
+ * @tc.name: setBackdropBlurTestSetNullSysOption1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullSysOption, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetNullSysOption1, TestSize.Level1)
 {
     auto renderMock = GetMockRenderContext();
     double blurRadiusBefore = 3.1415;
@@ -1908,11 +1923,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setNullSysOption, TestSize.Lev
 }
 
 /*
- * @tc.name: backdropBlur1_setSysOption
+ * @tc.name: setBackdropBlurTestSetSysOption1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setSysOption, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBackdropBlurTestSetSysOption1, TestSize.Level1)
 {
     auto renderMock = GetMockRenderContext();
     double blurRadiusBefore = 3.1415;
@@ -1933,11 +1948,11 @@ HWTEST_F(CommonMethodModifierTest2, backdropBlur1_setSysOption, TestSize.Level1)
 }
 
 /*
- * @tc.name: ChainModeImpl_SetValues
+ * @tc.name: setChainModeTestImplSetGoodValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetGoodValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setChainModeTestImplSetGoodValues, TestSize.Level1)
 {
     auto direction = Converter::ArkValue<Opt_Axis>(Ark_Axis::ARK_AXIS_HORIZONTAL);
     auto style = Converter::ArkValue<Opt_ChainStyle>(Ark_ChainStyle::ARK_CHAIN_STYLE_SPREAD_INSIDE);
@@ -1992,11 +2007,11 @@ HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetGoodValues, TestSize.Level1
 }
 
 /*
- * @tc.name: ChainModeImpl_SetBadDirectionValues
+ * @tc.name: setChainModeTestImplSetBadDirectionValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetBadDirectionValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setChainModeTestImplSetBadDirectionValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -2021,11 +2036,11 @@ HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetBadDirectionValues, TestSiz
 }
 
 /*
- * @tc.name: ChainModeImpl_SetBadStyleValues
+ * @tc.name: setChainModeTestImplSetBadStyleValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetBadStyleValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setChainModeTestImplSetBadStyleValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -2049,11 +2064,11 @@ HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetBadStyleValues, TestSize.Le
 }
 
 /*
- * @tc.name: ChainModeImpl_SetBadBothValues
+ * @tc.name: setChainModeTestImplSetBadBothValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, ChainModeImpl_SetBadBothValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setChainModeTestImplSetBadBothValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

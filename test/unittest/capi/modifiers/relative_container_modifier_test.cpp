@@ -236,7 +236,7 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setGuideLineTestValidValues3, T
 }
 
 /*
- * @tc.name: GuideLineImplTestInvalidValues
+ * @tc.name: setGuideLineTestInvalidValues
  * @tc.desc: vector of directions is less then vecId, so GetGuideLineStyle is called with
  * empty axis. The default value is AXIS_VERTICAL
  * @tc.type: FUNC
@@ -265,7 +265,7 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setGuideLineTestInvalidValues, 
 }
 
 /*
- * @tc.name: GuideLineImplTestInvalidValues2
+ * @tc.name: setGuideLineTestInvalidValues2
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -316,7 +316,7 @@ HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrierTestValidValues, Test
 }
 
 /*
- * @tc.name: setBarrier0TestValidValues2
+ * @tc.name: setBarrierTestValidValues2
  * @tc.desc:
  * @tc.type: FUNC
  */

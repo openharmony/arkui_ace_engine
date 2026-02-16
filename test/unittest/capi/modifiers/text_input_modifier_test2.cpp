@@ -190,11 +190,11 @@ HWTEST_F(TextInputModifierTest2, setOnPasteTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCustomKeyboard_CustomNodeBuilder
+ * @tc.name: setCustomKeyboardTestCustomNodeBuilder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.Level1)
+HWTEST_F(TextInputModifierTest2, setCustomKeyboardTestCustomNodeBuilder, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCustomKeyboard, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -213,11 +213,11 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.L
 }
 
 /*
- * @tc.name: setCustomKeyboard_CustomNodeBuilder_KeyboardOptions
+ * @tc.name: setCustomKeyboardTestCustomNodeBuilderKeyboardOptions
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOptions, TestSize.Level1)
+HWTEST_F(TextInputModifierTest2, setCustomKeyboardTestCustomNodeBuilderKeyboardOptions, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCustomKeyboard, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -239,11 +239,11 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
 }
 
 /**
- * @tc.name: OnSubmitTest
+ * @tc.name: setOnSubmitTestOnSubmit
  * @tc.desc: setOnSubmit test
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
+HWTEST_F(TextInputModifierTest2, setOnSubmitTestOnSubmit, TestSize.Level1)
 {
     static const int expectedResId = 123;
     static const std::u16string testValue = u"string text";

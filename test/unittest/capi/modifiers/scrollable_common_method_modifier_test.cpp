@@ -355,11 +355,11 @@ std::vector<std::tuple<std::string, Opt_CrownSensitivity, std::string>> testFixt
         "1" },
 };
 /*
- * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
+ * @tc.name: setDigitalCrownSensitivityTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableCommonMethodModifierTest, setDigitalCrownSensitivityDefaultValuesTest, TestSize.Level1)
+HWTEST_F(ScrollableCommonMethodModifierTest, setDigitalCrownSensitivityTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
@@ -368,11 +368,11 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setDigitalCrownSensitivityDefaultVa
 }
 
 /*
- * @tc.name: setDigitalCrownSensitivityValidValuesTest
+ * @tc.name: setDigitalCrownSensitivityTestValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableCommonMethodModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.Level1)
+HWTEST_F(ScrollableCommonMethodModifierTest, setDigitalCrownSensitivityTestValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
     auto checkValue = [this](

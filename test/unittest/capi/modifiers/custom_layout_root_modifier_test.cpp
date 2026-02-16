@@ -94,11 +94,11 @@ public:
 };
 
 /*
- * @tc.name: SubscribeOnMeasureSizeTest
+ * @tc.name: setSubscribeOnMeasureSizeTestSubscribeOnMeasureSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomLayoutRootModifierTest, SubscribeOnMeasureSizeTest, TestSize.Level1)
+HWTEST_F(CustomLayoutRootModifierTest, setSubscribeOnMeasureSizeTestSubscribeOnMeasureSize, TestSize.Level1)
 {
     static const int32_t resourceIdTest = 123;
     LayoutConstraintF layoutConstraintTest = {
@@ -144,11 +144,11 @@ HWTEST_F(CustomLayoutRootModifierTest, SubscribeOnMeasureSizeTest, TestSize.Leve
 }
 
 /*
- * @tc.name: SubscribeOnPlaceChildrenTest
+ * @tc.name: setSubscribeOnPlaceChildrenTestSubscribeOnPlaceChildren
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomLayoutRootModifierTest, SubscribeOnPlaceChildrenTest, TestSize.Level1)
+HWTEST_F(CustomLayoutRootModifierTest, setSubscribeOnPlaceChildrenTestSubscribeOnPlaceChildren, TestSize.Level1)
 {
     static const int32_t resourceIdTest = 123;
     LayoutConstraintF layoutConstraintTest = {

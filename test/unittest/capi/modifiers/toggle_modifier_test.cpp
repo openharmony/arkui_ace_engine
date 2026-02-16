@@ -121,7 +121,7 @@ static std::vector<std::tuple<std::string, IsOnType, std::string>> setToggleOpti
 };
 
 /*
- * @tc.name: setToggleOptionsTestValidValues
+ * @tc.name: setToggleOptionsTestTypeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -150,7 +150,7 @@ HWTEST_F(ToggleModifierTest, DISABLED_setToggleOptionsTestTypeValidValues, TestS
 }
 
 /*
- * @tc.name: setToggleOptionsTestValidValues
+ * @tc.name: setToggleOptionsTestIsOnValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -189,7 +189,7 @@ static std::vector<std::tuple<std::string, IsOnType>> setToggleOptionsIsOnInvali
 };
 
 /*
- * @tc.name: setToggleOptionsTestInvalidValues
+ * @tc.name: setToggleOptionsTestTypeInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -219,7 +219,7 @@ HWTEST_F(ToggleModifierTest, setToggleOptionsTestTypeInvalidValues, TestSize.Lev
 }
 
 /*
- * @tc.name: setToggleOptionsTestInvalidValues
+ * @tc.name: setToggleOptionsTestIsOnInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -808,11 +808,11 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusInvalidValues, T
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventIsOnImpl
+ * @tc.name: set_onChangeEvent_isOnTestOnChangeEventIsOnImpl
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleModifierTest, setOnChangeEventIsOnImpl, TestSize.Level1)
+HWTEST_F(ToggleModifierTest, set_onChangeEvent_isOnTestOnChangeEventIsOnImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<SwitchEventHub>();

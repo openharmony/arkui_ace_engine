@@ -314,7 +314,7 @@ struct CheckEvent {
 } // namespace
 
 /*
- * @tc.name: setOnClickTestSecurity
+ * @tc.name: setOnClickTest
  * @tc.desc:
  * @tc.type: FUNC
  */

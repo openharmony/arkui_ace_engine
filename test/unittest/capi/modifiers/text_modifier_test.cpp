@@ -250,7 +250,7 @@ std::vector<std::tuple<std::string, Ark_Int32, std::string>> testFixtureNumberNo
 };
 } //namespace
 
-HWTEST_F(TextModifierTest, setFontColor, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontColorTest, TestSize.Level1)
 {
     const auto color1 = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREEN);
     modifier_->setFontColor(node_, &color1);
@@ -263,7 +263,7 @@ HWTEST_F(TextModifierTest, setFontColor, TestSize.Level1)
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 }
 
-HWTEST_F(TextModifierTest, setFontSize, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontSizeTest, TestSize.Level1)
 {
     auto checkVal0 = GetStringAttribute(node_, FONT_SIZE_ATTR);
     EXPECT_EQ(checkVal0, FONT_SIZE_ATTR_DEFAULT_VALUE);
@@ -284,7 +284,7 @@ HWTEST_F(TextModifierTest, setFontSize, TestSize.Level1)
     EXPECT_EQ(checkVal3, FONT_SIZE_ATTR_DEFAULT_VALUE);
 }
 
-HWTEST_F(TextModifierTest, setMinFontSize, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMinFontSizeTest, TestSize.Level1)
 {
     const auto size1 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(11.25);
     modifier_->setMinFontSize(node_, &size1);
@@ -302,7 +302,7 @@ HWTEST_F(TextModifierTest, setMinFontSize, TestSize.Level1)
     EXPECT_EQ(checkVal3, "10.00px");
 }
 
-HWTEST_F(TextModifierTest, setMaxFontSize, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMaxFontSizeTest, TestSize.Level1)
 {
     const auto size1 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(11.25);
     modifier_->setMaxFontSize(node_, &size1);
@@ -320,7 +320,7 @@ HWTEST_F(TextModifierTest, setMaxFontSize, TestSize.Level1)
     EXPECT_EQ(checkVal3, "10.00px");
 }
 
-HWTEST_F(TextModifierTest, setMinFontScale, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMinFontScaleTest, TestSize.Level1)
 {
     const auto scale1 = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.825);
     modifier_->setMinFontScale(node_, &scale1);
@@ -333,7 +333,7 @@ HWTEST_F(TextModifierTest, setMinFontScale, TestSize.Level1)
     EXPECT_EQ(checkVal2, "0.705000");
 }
 
-HWTEST_F(TextModifierTest, setMaxFontScale, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMaxFontScaleTest, TestSize.Level1)
 {
     const auto scale1 = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.25);
     modifier_->setMaxFontScale(node_, &scale1);
@@ -346,7 +346,7 @@ HWTEST_F(TextModifierTest, setMaxFontScale, TestSize.Level1)
     EXPECT_EQ(checkVal2, "5.200000");
 }
 
-HWTEST_F(TextModifierTest, setFontStyle, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontStyleTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL);
     modifier_->setFontStyle(node_, &inputVal);
@@ -359,7 +359,7 @@ HWTEST_F(TextModifierTest, setFontStyle, TestSize.Level1)
     EXPECT_EQ(checkVal2, "FontStyle.Italic");
 }
 
-HWTEST_F(TextModifierTest, setFontWeight, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontWeightTest, TestSize.Level1)
 {
     const auto w1 = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(100);
     modifier_->setFontWeight(node_, &w1, nullptr);
@@ -378,7 +378,7 @@ HWTEST_F(TextModifierTest, setFontWeight, TestSize.Level1)
     EXPECT_EQ(checkVal3, "FontWeight.Normal");
 }
 
-HWTEST_F(TextModifierTest, setTextAlign, TestSize.Level1)
+HWTEST_F(TextModifierTest, setTextAlignTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_TextAlign>(ARK_TEXT_ALIGN_START);
     modifier_->setTextAlign(node_, &inputVal);
@@ -401,7 +401,7 @@ HWTEST_F(TextModifierTest, setTextAlign, TestSize.Level1)
     EXPECT_EQ(checkVal4, "TextAlign.Justify");
 }
 
-HWTEST_F(TextModifierTest, setLineHeight, TestSize.Level1)
+HWTEST_F(TextModifierTest, setLineHeightTest, TestSize.Level1)
 {
     const auto size1 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(11.);
     modifier_->setLineHeight(node_, &size1);
@@ -419,7 +419,7 @@ HWTEST_F(TextModifierTest, setLineHeight, TestSize.Level1)
     EXPECT_EQ(checkVal3, "10.00px");
 }
 
-HWTEST_F(TextModifierTest, setTextOverflow, TestSize.Level1)
+HWTEST_F(TextModifierTest, setTextOverflowTest, TestSize.Level1)
 {
     Ark_TextOverflowOptions v1 = { .overflow = Converter::ArkValue<Opt_TextOverflow>(ARK_TEXT_OVERFLOW_NONE) };
     auto inputVal = Converter::ArkValue<Opt_TextOverflowOptions>(v1);
@@ -466,7 +466,7 @@ HWTEST_F(TextModifierTest, setTextOverflowTestInvalidValue, TestSize.Level1)
     EXPECT_EQ(checkVal1, TEXT_OVERFLOW_ATTR_DEFAULT_VALUE);
 }
 
-HWTEST_F(TextModifierTest, setFontFamily, TestSize.Level1)
+HWTEST_F(TextModifierTest, setFontFamilyTest, TestSize.Level1)
 {
     auto v1 = Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>("testFontFamily");
     modifier_->setFontFamily(node_, &v1);
@@ -474,7 +474,7 @@ HWTEST_F(TextModifierTest, setFontFamily, TestSize.Level1)
     EXPECT_EQ(checkVal1, "testFontFamily");
 }
 
-HWTEST_F(TextModifierTest, setMaxLines, TestSize.Level1)
+HWTEST_F(TextModifierTest, setMaxLinesTest, TestSize.Level1)
 {
     auto v1 = Converter::ArkValue<Opt_Int32>(10);
     modifier_->setMaxLines(node_, &v1);
@@ -482,7 +482,7 @@ HWTEST_F(TextModifierTest, setMaxLines, TestSize.Level1)
     EXPECT_EQ(checkVal1, "10");
 }
 
-HWTEST_F(TextModifierTest, setDecoration, TestSize.Level1)
+HWTEST_F(TextModifierTest, setDecorationTest, TestSize.Level1)
 {
     Ark_DecorationStyleInterface v1 = {
         .type = Converter::ArkValue<Opt_TextDecorationType>(ARK_TEXT_DECORATION_TYPE_UNDERLINE),
@@ -496,7 +496,7 @@ HWTEST_F(TextModifierTest, setDecoration, TestSize.Level1)
         "{\"type\":\"TextDecorationType.Underline\",\"color\":\"#FF008000\",\"style\":\"TextDecorationStyle.DASHED\"}");
 }
 
-HWTEST_F(TextModifierTest, setLetterSpacing, TestSize.Level1)
+HWTEST_F(TextModifierTest, setLetterSpacingTest, TestSize.Level1)
 {
     auto v1 = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(11.25);
     modifier_->setLetterSpacing(node_, &v1);
@@ -509,7 +509,7 @@ HWTEST_F(TextModifierTest, setLetterSpacing, TestSize.Level1)
     EXPECT_EQ(checkVal2, "12.25vp");
 }
 
-HWTEST_F(TextModifierTest, setTextCase, TestSize.Level1)
+HWTEST_F(TextModifierTest, setTextCaseTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_TextCase>(ARK_TEXT_CASE_NORMAL);
     modifier_->setTextCase(node_, &inputVal);
@@ -527,7 +527,7 @@ HWTEST_F(TextModifierTest, setTextCase, TestSize.Level1)
     EXPECT_EQ(checkVal3, "TextCase.UpperCase");
 }
 
-HWTEST_F(TextModifierTest, setBaselineOffset, TestSize.Level1)
+HWTEST_F(TextModifierTest, setBaselineOffsetTest, TestSize.Level1)
 {
     auto v1 = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(11.);
     modifier_->setBaselineOffset(node_, &v1);
@@ -540,7 +540,7 @@ HWTEST_F(TextModifierTest, setBaselineOffset, TestSize.Level1)
     EXPECT_EQ(checkVal2, "12");
 }
 
-HWTEST_F(TextModifierTest, setCopyOption, TestSize.Level1)
+HWTEST_F(TextModifierTest, setCopyOptionTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_CopyOptions>(ARK_COPY_OPTIONS_NONE);
     modifier_->setCopyOption(node_, &inputVal);
@@ -558,7 +558,7 @@ HWTEST_F(TextModifierTest, setCopyOption, TestSize.Level1)
     EXPECT_EQ(checkVal3, "CopyOptions.Local");
 }
 
-HWTEST_F(TextModifierTest, setTextShadow, TestSize.Level1)
+HWTEST_F(TextModifierTest, setTextShadowTest, TestSize.Level1)
 {
     Ark_ShadowOptions shadow = {
         .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.5),
@@ -576,7 +576,7 @@ HWTEST_F(TextModifierTest, setTextShadow, TestSize.Level1)
         "\"offsetX\":\"2.500000\",\"offsetY\":\"3.500000\",\"type\":\"0\"}");
 }
 
-HWTEST_F(TextModifierTest, setHeightAdaptivePolicy, TestSize.Level1)
+HWTEST_F(TextModifierTest, setHeightAdaptivePolicyTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_TextHeightAdaptivePolicy>(ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST);
     modifier_->setHeightAdaptivePolicy(node_, &inputVal);
@@ -595,7 +595,7 @@ HWTEST_F(TextModifierTest, setHeightAdaptivePolicy, TestSize.Level1)
     EXPECT_EQ(checkVal5, "TextHeightAdaptivePolicy.LAYOUT_CONSTRAINT_FIRST");
 }
 
-HWTEST_F(TextModifierTest, DISABLED_setTextIndent, TestSize.Level1)
+HWTEST_F(TextModifierTest, DISABLED_setTextIndentTest, TestSize.Level1)
 {
     auto v1 = Converter::ArkValue<Opt_Length>("11.25px");
     modifier_->setTextIndent(node_, &v1);
@@ -603,7 +603,7 @@ HWTEST_F(TextModifierTest, DISABLED_setTextIndent, TestSize.Level1)
     EXPECT_EQ(checkVal1, "11.25px");
 }
 
-HWTEST_F(TextModifierTest, setWordBreak, TestSize.Level1)
+HWTEST_F(TextModifierTest, setWordBreakTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_WordBreak>(ARK_WORD_BREAK_NORMAL);
     modifier_->setWordBreak(node_, &inputVal);
@@ -621,7 +621,7 @@ HWTEST_F(TextModifierTest, setWordBreak, TestSize.Level1)
     EXPECT_EQ(checkVal3, "break-word");
 }
 
-HWTEST_F(TextModifierTest, setLineBreakStrategy, TestSize.Level1)
+HWTEST_F(TextModifierTest, setLineBreakStrategyTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_LineBreakStrategy>(ARK_LINE_BREAK_STRATEGY_GREEDY);
     modifier_->setLineBreakStrategy(node_, &inputVal);
@@ -639,7 +639,7 @@ HWTEST_F(TextModifierTest, setLineBreakStrategy, TestSize.Level1)
     EXPECT_EQ(checkVal5, "balanced");
 }
 
-HWTEST_F(TextModifierTest, setEllipsisMode, TestSize.Level1)
+HWTEST_F(TextModifierTest, setEllipsisModeTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_EllipsisMode>(ARK_ELLIPSIS_MODE_START);
     modifier_->setEllipsisMode(node_, &inputVal);
@@ -657,7 +657,7 @@ HWTEST_F(TextModifierTest, setEllipsisMode, TestSize.Level1)
     EXPECT_EQ(checkVal3, "EllipsisMode.END");
 }
 
-HWTEST_F(TextModifierTest, setSelectableMode, TestSize.Level1)
+HWTEST_F(TextModifierTest, setTextSelectableTestSelectableMode, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_TextSelectableMode>(ARK_TEXT_SELECTABLE_MODE_SELECTABLE_UNFOCUSABLE);
     modifier_->setTextSelectable(node_, &inputVal);
@@ -705,7 +705,7 @@ HWTEST_F(TextModifierTest, setOnCopyTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->value, u"test_string");
 }
 
-HWTEST_F(TextModifierTest, setOnSelectionChange, TestSize.Level1)
+HWTEST_F(TextModifierTest, setOnTextSelectionChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
@@ -739,7 +739,7 @@ HWTEST_F(TextModifierTest, setOnSelectionChange, TestSize.Level1)
 }
 
 /*
- * @tc.name: setFontWeight0TestVariableFontWeightValidValues
+ * @tc.name: setFontWeightTestVariableFontWeightValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -769,7 +769,7 @@ HWTEST_F(TextModifierTest, setFontWeightTestVariableFontWeightValidValues, TestS
 }
 
 /*
- * @tc.name: setFontWeight0TestVariableFontWeightInvalidValues
+ * @tc.name: setFontWeightTestVariableFontWeightInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -808,7 +808,7 @@ HWTEST_F(TextModifierTest, setFontWeightTestVariableFontWeightInvalidValues, Tes
 }
 
 /*
- * @tc.name: setFontWeight1TestDefaultValues
+ * @tc.name: setFontWeightTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -829,7 +829,7 @@ HWTEST_F(TextModifierTest, setFontWeightTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setFontWeight1TestFontWeightValidValues
+ * @tc.name: setFontWeightTestFontWeightValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -866,7 +866,7 @@ HWTEST_F(TextModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Leve
 }
 
 /*
- * @tc.name: setFontWeight1TestFontWeightInvalidValues
+ * @tc.name: setFontWeightTestFontWeightInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -904,7 +904,7 @@ HWTEST_F(TextModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.Le
 }
 
 /*
- * @tc.name: setFontWeight1TestOptionsEnableVariableFontWeightValidValues
+ * @tc.name: setFontWeightTestOptionsEnableVariableFontWeightValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1109,11 +1109,11 @@ HWTEST_F(TextModifierTest, setTextOptionsTestValueNull, TestSize.Level1)
 }
 
 /*
- * @tc.name: setDataDetectorConfig
+ * @tc.name: setDataDetectorConfigTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, setDataDetectorConfig, TestSize.Level1)
+HWTEST_F(TextModifierTest, setDataDetectorConfigTest, TestSize.Level1)
 {
     Ark_TextDataDetectorConfig config;
     config.color = ArkUnion<Opt_ResourceColor, Ark_String>("#FFAABBCC");

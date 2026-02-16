@@ -89,11 +89,11 @@ class TextPickerDialogAccessorTest : public StaticAccessorTest<GENERATED_ArkUITe
 };
 
 /**
- * @tc.name: textPickerDialogAccessorDialogPropertiesTest
+ * @tc.name: showTestProperties
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorDialogPropertiesTest, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestProperties, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -138,11 +138,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorDialogPropertiesT
 }
 
 /**
- * @tc.name: textPickerDialogAccessorDialogPropertiesCallbacksTest
+ * @tc.name: showTestPropertiesCallbacks
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorDialogPropertiesCallbacksTest, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestPropertiesCallbacks, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -194,11 +194,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorDialogPropertiesC
 }
 
 /**
- * @tc.name: textPickerDialogAccessorSettingDataCommonTest
+ * @tc.name: showTestSettingDataCommon
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCommonTest, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestSettingDataCommon, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -228,11 +228,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCommon
 }
 
 /**
- * @tc.name: textPickerDialogAccessorSettingDataRangeTest
+ * @tc.name: showTestSettingDataRange
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataRangeTest, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestSettingDataRange, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -263,11 +263,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataRangeT
 }
 
 /**
- * @tc.name: textPickerDialogAccessorSettingDataCascadeTest001
+ * @tc.name: showTestSettingDataCascade001
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCascadeTest001, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestSettingDataCascade001, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -300,11 +300,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCascad
 }
 
 /**
- * @tc.name: textPickerDialogAccessorSettingDataCascadeTest002
+ * @tc.name: showTestSettingDataCascade002
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCascadeTest002, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestSettingDataCascade002, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
     Ark_TextPickerDialogOptions arkOptions;
@@ -357,11 +357,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCascad
 }
 
 /**
- * @tc.name: textPickerDialogAccessorSettingDataCascadeTest003
+ * @tc.name: showTestSettingDataCascade003
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCascadeTest003, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestSettingDataCascade003, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
     Ark_TextPickerDialogOptions arkOptions;
@@ -419,11 +419,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorSettingDataCascad
 }
 
 /**
- * @tc.name: textPickerDialogAccessorButtonInfosTest
+ * @tc.name: showTestButtonInfos
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorButtonInfosTest, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestButtonInfos, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -451,11 +451,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorButtonInfosTest, 
 }
 
 /**
- * @tc.name: textPickerDialogAccessorCancelCallbackTest
+ * @tc.name: showTestCancelCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorCancelCallbackTest, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestCancelCallback, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -478,11 +478,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorCancelCallbackTes
 }
 
 /**
- * @tc.name: textPickerDialogAccessorAcceptCallbackTest001
+ * @tc.name: showTestAcceptCallback001
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorAcceptCallbackTest001, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestAcceptCallback001, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -511,11 +511,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorAcceptCallbackTes
 }
 
 /**
- * @tc.name: textPickerDialogAccessorAcceptCallbackTest002
+ * @tc.name: showTestAcceptCallback002
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorAcceptCallbackTest002, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestAcceptCallback002, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -550,11 +550,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorAcceptCallbackTes
 }
 
 /**
- * @tc.name: textPickerDialogAccessorChangeCallbackTest001
+ * @tc.name: showTestChangeCallback001
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorChangeCallbackTest001, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestChangeCallback001, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -583,11 +583,11 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorChangeCallbackTes
 }
 
 /**
- * @tc.name: textPickerDialogAccessorChangeCallbackTest002
+ * @tc.name: showTestChangeCallback002
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorChangeCallbackTest002, TestSize.Level1)
+HWTEST_F(TextPickerDialogAccessorTest, showTestChangeCallback002, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 

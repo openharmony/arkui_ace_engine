@@ -89,11 +89,11 @@ std::string GetStringAttribute(const RefPtr<PaintProperty>& property, const std:
 }
 
 /**
- * @tc.name: RectModifierSetRectOptionsTest001
+ * @tc.name: setRectOptionsTestRectModifierSetRectOptions
  * @tc.desc: setRectOptions test
  * @tc.type: FUNC
  */
-HWTEST_F(RectModifierTest, DISABLED_RectModifierSetRectOptionsTest, TestSize.Level1)
+HWTEST_F(RectModifierTest, DISABLED_setRectOptionsTestRectModifierSetRectOptions, TestSize.Level1)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     auto options = BuildRectOptions(WIDTH, HEIGHT, RADIUS_X);
@@ -113,11 +113,11 @@ HWTEST_F(RectModifierTest, DISABLED_RectModifierSetRectOptionsTest, TestSize.Lev
 }
 
 /**
- * @tc.name: RectModifierSetRadiusWidthTest
+ * @tc.name: setRadiusWidthTestRectModifierSetRadiusWidth
  * @tc.desc: setRadiusWidth test
  * @tc.type: FUNC
  */
-HWTEST_F(RectModifierTest, RectModifierSetRadiusWidthTest, TestSize.Level1)
+HWTEST_F(RectModifierTest, setRadiusWidthTestRectModifierSetRadiusWidth, TestSize.Level1)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -137,11 +137,11 @@ HWTEST_F(RectModifierTest, RectModifierSetRadiusWidthTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: RectModifierSetRadiusHeightTest
+ * @tc.name: setRadiusHeightTestRectModifierSetRadiusHeight
  * @tc.desc: setRadiusHeight test
  * @tc.type: FUNC
  */
-HWTEST_F(RectModifierTest, RectModifierSetRadiusHeightTest, TestSize.Level1)
+HWTEST_F(RectModifierTest, setRadiusHeightTestRectModifierSetRadiusHeight, TestSize.Level1)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -161,11 +161,11 @@ HWTEST_F(RectModifierTest, RectModifierSetRadiusHeightTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: RectModifierSetRadiusTest
+ * @tc.name: setRadiusTestRectModifierSetRadius
  * @tc.desc: setRadius test
  * @tc.type: FUNC
  */
-HWTEST_F(RectModifierTest, RectModifierSetRadiusTest, TestSize.Level1)
+HWTEST_F(RectModifierTest, setRadiusTestRectModifierSetRadius, TestSize.Level1)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

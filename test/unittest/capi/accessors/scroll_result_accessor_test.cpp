@@ -44,11 +44,11 @@ public:
 };
 
 /**
- * @tc.name: setGetOffsetRemain
+ * @tc.name: setOffsetRemainTestSetGetOffsetRemain
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollResultAccessorTest, setGetOffsetRemain, TestSize.Level1)
+HWTEST_F(ScrollResultAccessorTest, setOffsetRemainTestSetGetOffsetRemain, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getOffsetRemain, nullptr);
     ASSERT_NE(accessor_->setOffsetRemain, nullptr);

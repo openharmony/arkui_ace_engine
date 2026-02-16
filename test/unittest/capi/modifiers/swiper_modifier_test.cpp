@@ -129,7 +129,7 @@ HWTEST_F(SwiperModifierTest, setIndexTest, TestSize.Level1)
     EXPECT_EQ(checkVal5, defaultValue);
 }
 /**
- * @tc.name: setAutoPlayTest
+ * @tc.name: setAutoPlay0Test
  * @tc.desc: Check the functionality of SwiperModifier.AutoPlayImpl
  * @tc.type: FUNC
  */
@@ -151,11 +151,11 @@ HWTEST_F(SwiperModifierTest, setAutoPlay0Test, TestSize.Level1)
     EXPECT_EQ(checkVal3, EXPECTED_FALSE);
 }
 /**
- * @tc.name: setAutoPlayTest
+ * @tc.name: setAutoPlay1TestVariant2Arg
  * @tc.desc: Check the functionality of SwiperModifier.AutoPlay1Impl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setAutoPlay1Test2Arg, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setAutoPlay1TestVariant2Arg, TestSize.Level1)
 {
     const std::string propNameAutoPlay("autoPlay");
     const std::string &autoPlayDefault(EXPECTED_FALSE);
@@ -620,11 +620,11 @@ HWTEST_F(SwiperModifierTest, DISABLED_setDisplayModeTest, TestSize.Level1)
     EXPECT_EQ(checkVal2, "SwiperDisplayMode.Stretch");
 }
 /**
- * @tc.name: setCachedCountTest
+ * @tc.name: setCachedCount0Test
  * @tc.desc: Check the functionality of SwiperModifier.CachedCountImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, DISABLED_setCachedCountTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setCachedCount0Test, TestSize.Level1)
 {
     constexpr auto propName = "cachedCount";
     const int defaultValue(DEFAULT_SWIPER_CACHED_SIZE);
@@ -1263,11 +1263,11 @@ HWTEST_F(SwiperModifierTest, DISABLED_setNestedScrollTest, TestSize.Level1)
     // that is provided by the SwiperPattern::ToJsonValue and SwiperLayoutProperty::ToJsonValue
 }
 /**
- * @tc.name: setCustomContentTransition
+ * @tc.name: setCustomContentTransitionTest
  * @tc.desc: Check the functionality of SwiperModifier.CustomContentTransitionImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setCustomContentTransition, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setCustomContentTransitionTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCustomContentTransition, nullptr);
 
@@ -1410,11 +1410,11 @@ HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorInteractiveTest, TestSize.Leve
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventIndexImpl
+ * @tc.name: set_onChangeEvent_indexTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, set_onChangeEvent_indexTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<SwiperEventHub>();

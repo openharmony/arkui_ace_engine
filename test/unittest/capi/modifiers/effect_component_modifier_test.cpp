@@ -27,11 +27,11 @@ class EffectComponentModifierTest : public ModifierTestBase<GENERATED_ArkUIEffec
 };
 
 /**
- * @tc.name: effectComponentModifierTest
+ * @tc.name: setEffectComponentOptionsTestEffectComponentModifier
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(EffectComponentModifierTest, effectComponentModifierTest, TestSize.Level1)
+HWTEST_F(EffectComponentModifierTest, setEffectComponentOptionsTestEffectComponentModifier, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setEffectComponentOptions, nullptr);
 }

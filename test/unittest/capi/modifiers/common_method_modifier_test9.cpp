@@ -192,11 +192,11 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityTextTestDefaultValues, TestS
 }
 
 /*
- * @tc.name: setAccessibilityTextTestValidValues
+ * @tc.name: setAccessibilityTextTestOfStringTypeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextOfStringTypeTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextTestOfStringTypeValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityText, nullptr);
     using OneTestStep = std::tuple<Opt_Union_Resource_String, std::string>;
@@ -213,11 +213,11 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextOfStringTypeTes
 }
 
 /*
- * @tc.name: setAccessibilityTextTestValidValues
+ * @tc.name: setAccessibilityTextTestOfResourceTypeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextOfResourceTypeTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextTestOfResourceTypeValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityText, nullptr);
     using OneTestStep = std::tuple<Ark_Resource, std::string>;
@@ -284,11 +284,11 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescriptionTestDefaultValues
 }
 
 /*
- * @tc.name: setAccessibilityDescriptionTestValidValues
+ * @tc.name: setAccessibilityDescriptionTestOfStringTypeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription0TestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescriptionTestOfStringTypeValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityDescription, nullptr);
     using OneTestStep = std::tuple<Opt_Union_Resource_String, std::string>;
@@ -305,11 +305,11 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription0TestVal
 }
 
 /*
- * @tc.name: setAccessibilityDescriptionTestValidValues
+ * @tc.name: setAccessibilityDescriptionTestOfResourceTypeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription1TestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescriptionTestOfResourceTypeValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityDescription, nullptr);
     auto resName = NamedResourceId(ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST, ResourceType::STRING);
@@ -420,11 +420,11 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilitySelectedTestValidVa
 }
 
 /*
- * @tc.name: SetOnHover
+ * @tc.name: setOnHoverTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, setOnHoverTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -482,11 +482,11 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: SetOnAccessibilityHover
+ * @tc.name: setOnAccessibilityHoverTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnAccessibilityHoverTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setOnAccessibilityHoverTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -543,11 +543,11 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnAccessibilityHoverTest, TestSi
 }
 
 /*
- * @tc.name: SetOnMouse
+ * @tc.name: setOnMouseTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, setOnMouseTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -586,11 +586,11 @@ HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: SetOnTouchIntercept
+ * @tc.name: setOnTouchInterceptTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, setOnTouchInterceptTest, TestSize.Level1)
 {
     static const int expectedResId = 123;
     static const std::string expectedType = "xxx";
@@ -632,11 +632,11 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: SetOnTouchTest
+ * @tc.name: setOnTouchTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnTouchTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, DISABLED_setOnTouchTest, TestSize.Level1)
 {
 #ifdef WRONG_PRIVATE
     static const int expectedResId = 123;
@@ -678,11 +678,11 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnTouchTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: SetOnAttach
+ * @tc.name: setOnAttachTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, SetOnAttachTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, setOnAttachTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -722,11 +722,11 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAttachTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: SetOnDetach
+ * @tc.name: setOnDetachTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, setOnDetachTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();

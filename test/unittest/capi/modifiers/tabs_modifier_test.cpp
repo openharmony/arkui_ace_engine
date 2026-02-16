@@ -843,11 +843,11 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarHeightTestDefaultValues, TestSize.Leve
 }
 
 /*
- * @tc.name: setBarHeightTestValidValues
+ * @tc.name: setBarHeight1TestValidValues
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarHeight
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, DISABLED_setBarHeightTestValidValues, TestSize.Level1)
+HWTEST_F(TabsModifierTest, DISABLED_setBarHeight1TestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -865,11 +865,11 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarHeightTestValidValues, TestSize.Level1
 }
 
 /*
- * @tc.name: setBarHeightTestInvalidValues
+ * @tc.name: setBarHeight1TestInvalidValues
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarHeight
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, DISABLED_setBarHeightTestInvalidValues, TestSize.Level1)
+HWTEST_F(TabsModifierTest, DISABLED_setBarHeight1TestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -936,11 +936,11 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerUndefinedTest
+ * @tc.name: setDividerTestUndefined
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, setDividerUndefinedTest, TestSize.Level1)
+HWTEST_F(TabsModifierTest, setDividerTestUndefined, TestSize.Level1)
 {
     // set undefined values
     Ark_DividerStyle dividerOptions = {
@@ -964,11 +964,11 @@ HWTEST_F(TabsModifierTest, setDividerUndefinedTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerColorStringTest
+ * @tc.name: setDividerTestColorString
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, setDividerColorStringTest, TestSize.Level1)
+HWTEST_F(TabsModifierTest, setDividerTestColorString, TestSize.Level1)
 {
     // set color as Ark_String
     Ark_DividerStyle dividerOptions = {
@@ -992,11 +992,11 @@ HWTEST_F(TabsModifierTest, setDividerColorStringTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerNullTest
+ * @tc.name: setDividerTestNull
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, setDividerNullTest, TestSize.Level1)
+HWTEST_F(TabsModifierTest, setDividerTestNull, TestSize.Level1)
 {
     auto divider = Converter::ArkValue<Opt_DividerStyle>();
     modifier_->setDivider(node_, &divider);
@@ -1105,12 +1105,13 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundEffectTestValidValues, TestS
 }
 
 /*
- * @tc.name: DISABLED_setBarBackgroundEffectTestInvalidValues
+ * @tc.name: setBarBackgroundEffectTestInvalidValues
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundEffect
  * @tc.type: FUNC
  */
 HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundEffectTestInvalidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setBarBackgroundEffect, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -1197,12 +1198,13 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundBlurStyle1TestValidValues, T
 }
 
 /*
- * @tc.name: DISABLED_setBarBackgroundBlurStyle1TestInvalidValues
+ * @tc.name: setBarBackgroundBlurStyle1TestInvalidValues
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundBlurStyle1
  * @tc.type: FUNC
  */
 HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundBlurStyle1TestInvalidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setBarBackgroundBlurStyle1, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -1598,11 +1600,11 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestInvalidValues2, TestSize.Level1)
 
 #ifdef WRONG_OLD_CALLBACK
 /*
- * @tc.name: setOnChangeEventIndexImpl
+ * @tc.name: set_onChangeEvent_indexTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
+HWTEST_F(TabsModifierTest, set_onChangeEvent_indexTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -1774,11 +1776,11 @@ HWTEST_F(TabsModifierTest, setOnUnselectedTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setCachedMaxCountValues
+ * @tc.name: setCachedMaxCountTestValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, setCachedMaxCountValues, TestSize.Level1)
+HWTEST_F(TabsModifierTest, setCachedMaxCountTestValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

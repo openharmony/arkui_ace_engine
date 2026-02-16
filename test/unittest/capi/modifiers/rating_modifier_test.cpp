@@ -556,11 +556,11 @@ HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventRatingImpl
+ * @tc.name: set_onChangeEvent_ratingTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RatingModifierTest, setOnChangeEventRatingImpl, TestSize.Level1)
+HWTEST_F(RatingModifierTest, set_onChangeEvent_ratingTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<RatingEventHub>();

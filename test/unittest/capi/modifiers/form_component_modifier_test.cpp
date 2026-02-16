@@ -620,11 +620,11 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setOnRouterTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setFormComponentOptionsModuleNameValues
+ * @tc.name: setFormComponentOptionsTestModuleNameValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, DISABLED_setFormComponentOptionsModuleNameValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setFormComponentOptionsTestModuleNameValues, TestSize.Level1)
 {
     Ark_FormInfo initValue;
     // Initial setup
@@ -656,11 +656,11 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setFormComponentOptionsModuleNameVa
 }
 
 /*
- * @tc.name: setFormComponentOptionsDimensionValues
+ * @tc.name: setFormComponentOptionsTestDimensionValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, DISABLED_setFormComponentOptionsDimensionValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setFormComponentOptionsTestDimensionValues, TestSize.Level1)
 {
     Ark_FormInfo initValue;
     // Initial setup

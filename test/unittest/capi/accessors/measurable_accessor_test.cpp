@@ -154,11 +154,11 @@ public:
 };
 
 /**
- * @tc.name: MeasureTestNoConstraint
+ * @tc.name: measureTestNoConstraint
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MeasurableAccessorTest, MeasureTestNoConstraint, TestSize.Level1)
+HWTEST_F(MeasurableAccessorTest, measureTestNoConstraint, TestSize.Level1)
 {
     Opt_ConstraintSizeOptions constraint = Converter::ArkValue<Opt_ConstraintSizeOptions>(Ark_ConstraintSizeOptions {
         .minWidth = Converter::ArkValue<Opt_Length>(),
@@ -179,11 +179,11 @@ HWTEST_F(MeasurableAccessorTest, MeasureTestNoConstraint, TestSize.Level1)
 }
 
 /**
- * @tc.name: MeasureTest
+ * @tc.name: measureTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MeasurableAccessorTest, MeasureTest, TestSize.Level1)
+HWTEST_F(MeasurableAccessorTest, measureTest, TestSize.Level1)
 {
     Opt_ConstraintSizeOptions constraint = Converter::ArkValue<Opt_ConstraintSizeOptions>(Ark_ConstraintSizeOptions {
         .minWidth = Converter::ArkValue<Opt_Length>("45vp"),
@@ -226,11 +226,11 @@ HWTEST_F(MeasurableAccessorTest, MeasureTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetMarginTest
+ * @tc.name: getMarginTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MeasurableAccessorTest, GetMarginTest, TestSize.Level1)
+HWTEST_F(MeasurableAccessorTest, getMarginTest, TestSize.Level1)
 {
     MarginProperty margin = {
         .top = CalcLength(70.0f, DimensionUnit::VP),
@@ -251,11 +251,11 @@ HWTEST_F(MeasurableAccessorTest, GetMarginTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetMarginTestRTL
+ * @tc.name: getMarginTestRTL
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MeasurableAccessorTest, GetMarginTestRTL, TestSize.Level1)
+HWTEST_F(MeasurableAccessorTest, getMarginTestRTL, TestSize.Level1)
 {
     MarginProperty margin = {
         .left = CalcLength(40.0f, DimensionUnit::VP),
@@ -272,11 +272,11 @@ HWTEST_F(MeasurableAccessorTest, GetMarginTestRTL, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPaddingTest
+ * @tc.name: getPaddingTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MeasurableAccessorTest, GetPaddingTest, TestSize.Level1)
+HWTEST_F(MeasurableAccessorTest, getPaddingTest, TestSize.Level1)
 {
     PaddingProperty padding = {
         .top = CalcLength(70.0f, DimensionUnit::VP),
@@ -296,11 +296,11 @@ HWTEST_F(MeasurableAccessorTest, GetPaddingTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetBorderWidthTest
+ * @tc.name: getBorderWidthTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MeasurableAccessorTest, GetBorderWidthTest, TestSize.Level1)
+HWTEST_F(MeasurableAccessorTest, getBorderWidthTest, TestSize.Level1)
 {
     BorderWidthProperty borderWidth = {
         .topDimen = Dimension(6.0, DimensionUnit::VP),
@@ -320,11 +320,11 @@ HWTEST_F(MeasurableAccessorTest, GetBorderWidthTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetBorderWidthTestRTL
+ * @tc.name: getBorderWidthTestRTL
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MeasurableAccessorTest, GetBorderWidthTestRTL, TestSize.Level1)
+HWTEST_F(MeasurableAccessorTest, getBorderWidthTestRTL, TestSize.Level1)
 {
     BorderWidthProperty borderWidth = {
         .leftDimen = Dimension(10.0, DimensionUnit::VP),
@@ -341,11 +341,11 @@ HWTEST_F(MeasurableAccessorTest, GetBorderWidthTestRTL, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetUniqueIdTest
+ * @tc.name: getUniqueIdTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MeasurableAccessorTest, GetUniqueIdTest, TestSize.Level1)
+HWTEST_F(MeasurableAccessorTest, getUniqueIdTest, TestSize.Level1)
 {
     auto id = accessor_->getUniqueId(peer_);
     auto res = Converter::OptConvert<int32_t>(id);

@@ -57,11 +57,11 @@ const std::vector<OneColorStep> COLOR_TEST_PLAN = {
 };
 
 /**
- * @tc.name: DividerModifierTest001
+ * @tc.name: setColorTestVariant001
  * @tc.desc: Check the functionality of DividerModifier.setColor
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DISABLED_DividerModifierTest001, TestSize.Level1)
+HWTEST_F(DividerModifierTest, DISABLED_setColorTestVariant001, TestSize.Level1)
 {
     constexpr auto propName = "color";
     ASSERT_NE(modifier_->setColor, nullptr);
@@ -91,11 +91,11 @@ HWTEST_F(DividerModifierTest, DISABLED_DividerModifierTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DividerModifierTest002
+ * @tc.name: setVerticalTestVariant002
  * @tc.desc: Check the functionality of DividerModifier.setVertical
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DividerModifierTest002, TestSize.Level1)
+HWTEST_F(DividerModifierTest, setVerticalTestVariant002, TestSize.Level1)
 {
     constexpr auto propName = "vertical";
     ASSERT_NE(modifier_->setVertical, nullptr);
@@ -130,11 +130,11 @@ HWTEST_F(DividerModifierTest, DividerModifierTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: DividerModifierTest003
+ * @tc.name: setLineCapTestVariant003
  * @tc.desc: Check the functionality of DividerModifier.setLineCap
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DividerModifierTest003, TestSize.Level1)
+HWTEST_F(DividerModifierTest, setLineCapTestVariant003, TestSize.Level1)
 {
     constexpr auto propName = "lineCap";
     ASSERT_NE(modifier_->setLineCap, nullptr);
@@ -164,11 +164,11 @@ HWTEST_F(DividerModifierTest, DividerModifierTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: DividerModifierTest004
+ * @tc.name: setStrokeWidthTestVariant004
  * @tc.desc: Check the functionality of DividerModifier.setStrokeWidth
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DividerModifierTest004, TestSize.Level1)
+HWTEST_F(DividerModifierTest, setStrokeWidthTestVariant004, TestSize.Level1)
 {
     constexpr auto propName = "strokeWidth";
     ASSERT_NE(modifier_->setStrokeWidth, nullptr);
@@ -223,11 +223,11 @@ const std::vector<OneWidthStep> WIDTH_TEST_PLAN = {
 };
 
 /**
- * @tc.name: DividerModifierTest005
+ * @tc.name: setStrokeWidthTestVariant005
  * @tc.desc: Check the functionality of DividerModifier.setStrokeWidth for negative values
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DividerModifierTest005, TestSize.Level1)
+HWTEST_F(DividerModifierTest, setStrokeWidthTestVariant005, TestSize.Level1)
 {
     constexpr auto propName = "strokeWidth";
     ASSERT_NE(modifier_->setStrokeWidth, nullptr);

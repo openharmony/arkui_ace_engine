@@ -285,11 +285,11 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Lev
 }
 
 /**
- * @tc.name: setGridOptionsGetSizeByIndex
+ * @tc.name: setGridOptionsTestGetSizeByIndex
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setGridOptionsGetSizeByIndex, TestSize.Level1)
+HWTEST_F(GridModifierTest, setGridOptionsTestGetSizeByIndex, TestSize.Level1)
 {
     static const int32_t expectedResId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -333,11 +333,11 @@ HWTEST_F(GridModifierTest, setGridOptionsGetSizeByIndex, TestSize.Level1)
 }
 
 /**
- * @tc.name: setGridOptionsGetRectByIndex
+ * @tc.name: setGridOptionsTestGetRectByIndex
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, setGridOptionsGetRectByIndex, TestSize.Level1)
+HWTEST_F(GridModifierTest, setGridOptionsTestGetRectByIndex, TestSize.Level1)
 {
     static const int32_t expectedResId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

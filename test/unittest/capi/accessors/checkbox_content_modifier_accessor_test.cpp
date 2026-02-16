@@ -44,11 +44,11 @@ static const std::string TEST_DEFAULT_NAME = "";
 static constexpr bool TEST_DEFAULT_SELECTED = false;
 
 /**
- * @tc.name: checkBoxContentModifierHelperAccessorTest
+ * @tc.name: contentModifierCheckBoxTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(CheckBoxContentModifierHelperAccessor, contentModifierCheckBoxTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierCheckBox, nullptr);
 
@@ -71,10 +71,8 @@ HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAcc
 
     auto obj = Converter::ArkCreate<Ark_Object>(TEST_OBJ_ID);
 
-    auto modifierCallback = [](const Ark_Int32 resourceId,
-        const Ark_NativePointer parentNode,
-        const Ark_CheckBoxConfiguration config,
-        const Callback_Pointer_Void continuation) {
+    auto modifierCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+        const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation) {
             auto navigationNode = reinterpret_cast<FrameNode *>(parentNode);
             checkEvent = {
                 .nodeId = navigationNode->GetId(),
@@ -89,9 +87,8 @@ HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAcc
 
     EXPECT_CALL(*MockContainer::Current(), GetFrontend()).WillRepeatedly(Return(nullptr));
 
-    auto builder = Converter::ArkValue<CheckBoxModifierBuilder>(modifierCallback, TEST_BUILDER_ID);
-    Ark_NativePointer nodePtr = reinterpret_cast<Ark_NativePointer>(checkBoxNode.GetRawPtr());
-    accessor_->contentModifierCheckBox(nodePtr, &obj, &builder);
+    auto builder = Converter::ArkCallback<CheckBoxModifierBuilder>(modifierCallback, TEST_BUILDER_ID);
+    accessor_->contentModifierCheckBox(checkBoxNode.GetRawPtr(), &obj, &builder);
 
     FireBuilder(pattern.GetRawPtr());
     auto builtNode1 = checkBoxNode->GetChildAtIndex(0);

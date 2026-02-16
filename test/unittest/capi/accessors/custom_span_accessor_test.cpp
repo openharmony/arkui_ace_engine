@@ -47,11 +47,11 @@ class CustomSpanAccessorTest : public AccessorTestBase<GENERATED_ArkUICustomSpan
                                     &GENERATED_ArkUIAccessors::getCustomSpanAccessor, CustomSpanPeer> {};
 
 /**
- * @tc.name: CustomSpanAccessor.OnMeasureTest
+ * @tc.name: setOnMeasure_callbackTestOnMeasure.OnMeasureTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomSpanAccessorTest, OnMeasureTest, TestSize.Level1)
+HWTEST_F(CustomSpanAccessorTest, setOnMeasure_callbackTestOnMeasure, TestSize.Level1)
 {
     ASSERT_TRUE(accessor_);
     ASSERT_TRUE(accessor_->getOnMeasure_callback);
@@ -89,11 +89,11 @@ HWTEST_F(CustomSpanAccessorTest, OnMeasureTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomSpanAccessor.OnDrawTest
+ * @tc.name: setOnDraw_callbackTestOnDraw.OnDrawTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomSpanAccessorTest, DISABLED_OnDrawTest, TestSize.Level1)
+HWTEST_F(CustomSpanAccessorTest, DISABLED_setOnDraw_callbackTestOnDraw, TestSize.Level1)
 {
     ASSERT_TRUE(accessor_);
     ASSERT_TRUE(accessor_->getOnDraw_callback);
@@ -127,11 +127,11 @@ HWTEST_F(CustomSpanAccessorTest, DISABLED_OnDrawTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomSpanAccessorTest.InvalidateTest
+ * @tc.name: invalidateTest.InvalidateTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomSpanAccessorTest, InvalidateTest, TestSize.Level1)
+HWTEST_F(CustomSpanAccessorTest, invalidateTest, TestSize.Level1)
 {
     auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpan>(peer_);
     auto inputStyles = Converter::ArkValue<Opt_Array_StyleOptions>();

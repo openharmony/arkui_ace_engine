@@ -41,7 +41,7 @@ class PathModifierTest : public ModifierTestBase<GENERATED_ArkUIPathModifier,
 };
 
 /*
- * @tc.name: setPathOptionsTestSizeDefaultValues
+ * @tc.name: setPathOptionsTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -146,7 +146,7 @@ HWTEST_F(PathModifierTest, setPathOptionsTestSizeInvalidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCommandsTestValidValues
+ * @tc.name: setPathOptionsTestCmdValid
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -172,7 +172,7 @@ HWTEST_F(PathModifierTest, setPathOptionsTestCmdValid, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCommandsTestValidValues
+ * @tc.name: setPathOptionsTestCmdInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -250,7 +250,7 @@ HWTEST_F(PathModifierTest, setCommandsTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCommandsTestValidValues
+ * @tc.name: setCommandsTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */

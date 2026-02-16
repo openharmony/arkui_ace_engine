@@ -303,11 +303,11 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setInvertTestInvalidValues, TestSiz
 }
 
 /*
- * @tc.name: setHueRotateDefaultValues
+ * @tc.name: setHueRotateTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setHueRotateDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setHueRotateTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetInt(ATTRIBUTE_HUE_ROTATE_NAME, ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE);
@@ -315,11 +315,11 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setHueRotateValidValues
+ * @tc.name: setHueRotateTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setHueRotateTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setHueRotate, nullptr);
     using OneTestStep = std::tuple<Opt_Union_F64_String, float>;
@@ -344,11 +344,11 @@ HWTEST_F(CommonMethodModifierTest4, setHueRotateValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setHueRotateInvalidValues
+ * @tc.name: setHueRotateTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setHueRotateInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setHueRotateTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setHueRotate, nullptr);
     using OneTestStep = std::tuple<Opt_Union_F64_String, float>;
@@ -417,11 +417,11 @@ HWTEST_F(CommonMethodModifierTest4, setUseEffect1Test, TestSize.Level1)
 }
 ////////////// RenderGroup
 /*
- * @tc.name: setRenderGroupDefaultValues
+ * @tc.name: setRenderGroupTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setRenderGroupDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setRenderGroupTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetBool(ATTRIBUTE_RENDER_GROUP_NAME, ATTRIBUTE_RENDER_GROUP_DEFAULT_VALUE);
@@ -429,11 +429,11 @@ HWTEST_F(CommonMethodModifierTest4, setRenderGroupDefaultValues, TestSize.Level1
 }
 
 /*
- * @tc.name: setRenderGroupValidValues
+ * @tc.name: setRenderGroupTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setRenderGroupValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setRenderGroupTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setRenderGroup, nullptr);
     using OneTestStep = std::tuple<Opt_Boolean, bool>;
@@ -450,11 +450,11 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setRenderGroupValidValues, TestSize
 }
 ////////////// Freeze
 /*
- * @tc.name: setFreezeDefaultValues
+ * @tc.name: setFreezeTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setFreezeDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setFreezeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetBool(ATTRIBUTE_FREEZE_NAME, ATTRIBUTE_FREEZE_DEFAULT_VALUE);
@@ -462,11 +462,11 @@ HWTEST_F(CommonMethodModifierTest4, setFreezeDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setFreezeValidValues
+ * @tc.name: setFreezeTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setFreezeValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setFreezeTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFreeze, nullptr);
     using OneTestStep = std::tuple<Opt_Boolean, bool>;
@@ -483,11 +483,11 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setFreezeValidValues, TestSize.Leve
 }
 ////////////// SphericalEffect
 /*
- * @tc.name: setSphericalEffectDefaultValues
+ * @tc.name: setSphericalEffectTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setSphericalEffectDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setSphericalEffectTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetBool(ATTRIBUTE_SPHERICAL_EFFECT_NAME, ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE);
@@ -495,11 +495,11 @@ HWTEST_F(CommonMethodModifierTest4, setSphericalEffectDefaultValues, TestSize.Le
 }
 
 /*
- * @tc.name: setSphericalEffectValidValues
+ * @tc.name: setSphericalEffectTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setSphericalEffectValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSphericalEffectTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSphericalEffect, nullptr);
     using OneTestStep = std::tuple<Opt_Float64, float>;
@@ -520,11 +520,11 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSphericalEffectValidValues, Test
 }
 
 /*
- * @tc.name: setSphericalEffectInvalidValues
+ * @tc.name: setSphericalEffectTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setSphericalEffectInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setSphericalEffectTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSphericalEffect, nullptr);
     const std::vector<std::tuple<std::string, Opt_Float64, float>> testPlan = {
@@ -543,11 +543,11 @@ HWTEST_F(CommonMethodModifierTest4, setSphericalEffectInvalidValues, TestSize.Le
 }
 ////////////// LightUpEffect
 /*
- * @tc.name: setLightUpEffectDefaultValues
+ * @tc.name: setLightUpEffectTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setLightUpEffectDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setLightUpEffectTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = jsonValue->GetDouble(ATTRIBUTE_LIGHT_UP_EFFECT_NAME, ATTRIBUTE_LIGHT_UP_EFFECT_DEFAULT_VALUE);
@@ -555,11 +555,11 @@ HWTEST_F(CommonMethodModifierTest4, setLightUpEffectDefaultValues, TestSize.Leve
 }
 
 /*
- * @tc.name: setLightUpEffectValidValues
+ * @tc.name: setLightUpEffectTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setLightUpEffectValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setLightUpEffectTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLightUpEffect, nullptr);
     using OneTestStep = std::tuple<Opt_Float64, float>;
@@ -579,11 +579,11 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setLightUpEffectValidValues, TestSi
 }
 
 /*
- * @tc.name: setLightUpEffectInvalidValues
+ * @tc.name: setLightUpEffectTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setLightUpEffectInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setLightUpEffectTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLightUpEffect, nullptr);
     using OneTestStep = std::tuple<Opt_Float64, float>;
@@ -602,11 +602,11 @@ HWTEST_F(CommonMethodModifierTest4, setLightUpEffectInvalidValues, TestSize.Leve
 }
 ////////////// PixelStretchEffect
 /*
- * @tc.name: setPixelStretchEffectDefaultValues
+ * @tc.name: setPixelStretchEffectTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME);
@@ -614,11 +614,11 @@ HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectDefaultValues, TestSize
 }
 
 /*
- * @tc.name: setPixelStretchEffectValidValues
+ * @tc.name: setPixelStretchEffectTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setPixelStretchEffectValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setPixelStretchEffectTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPixelStretchEffect, nullptr);
     using OneTestStep = std::tuple<Opt_PixelStretchEffectOptions, std::string>;
@@ -642,11 +642,11 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setPixelStretchEffectValidValues, T
 }
 
 /*
- * @tc.name: setPixelStretchEffectInvalidValues
+ * @tc.name: setPixelStretchEffectTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPixelStretchEffect, nullptr);
     using OneTestStep = std::tuple<Opt_PixelStretchEffectOptions, std::string>;
@@ -971,11 +971,11 @@ std::vector<LengthMetricsOneTestStep> testLengthMetricsValues = {
     { Converter::ArkValue<Ark_LengthMetrics>(0.0_pct), "0.00%" },
 };
 /*
- * @tc.name: setSafeAreaPaddingLengthMetricsTestValues
+ * @tc.name: setSafeAreaPaddingTestLengthMetricsValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingLengthMetricsTestValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestLengthMetricsValues, TestSize.Level1)
 {
     std::string strResult;
     strResult = GetStringAttribute(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
@@ -1005,11 +1005,11 @@ std::vector<lengthOneTestStep> testLengthValues = {
     { Converter::ArkValue<Ark_Length>("0%"), "0.00%" },
 };
 /*
- * @tc.name: setSafeAreaPaddingLeftArkPaddingTestValues
+ * @tc.name: setSafeAreaPaddingTestLeftArkPaddingValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingLeftArkPaddingTestValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestLeftArkPaddingValues, TestSize.Level1)
 {
     auto initVal = Converter::ArkValue<Opt_Length>(Ark_Empty());
     Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
@@ -1030,11 +1030,11 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingLeftArkPaddingTes
 }
 
 /*
- * @tc.name: setSafeAreaPaddingTopArkPaddingTestValues
+ * @tc.name: setSafeAreaPaddingTestTopArkPaddingValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTopArkPaddingTestValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestTopArkPaddingValues, TestSize.Level1)
 {
     auto initVal = Converter::ArkValue<Opt_Length>(Ark_Empty());
     Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
@@ -1055,11 +1055,11 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTopArkPaddingTest
 }
 
 /*
- * @tc.name: setSafeAreaPaddingRightArkPaddingTestValues
+ * @tc.name: setSafeAreaPaddingTestRightArkPaddingValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingRightArkPaddingTestValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestRightArkPaddingValues, TestSize.Level1)
 {
     auto initVal = Converter::ArkValue<Opt_Length>(Ark_Empty());
     Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
@@ -1080,11 +1080,11 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingRightArkPaddingTe
 }
 
 /*
- * @tc.name: setSafeAreaPaddingBottomArkPaddingTestValues
+ * @tc.name: setSafeAreaPaddingTestBottomArkPaddingValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingBottomArkPaddingTestValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestBottomArkPaddingValues, TestSize.Level1)
 {
     auto initVal = Converter::ArkValue<Opt_Length>(Ark_Empty());
     Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
@@ -1369,11 +1369,11 @@ struct AutoTransitionEffectPeer {
 };
 
 /*
- * @tc.name: CommonMethod Transition0TransitionEffectTest
+ * @tc.name: setTransition0TestTransitionEffect Transition0TransitionEffectTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_Transition0TransitionEffectTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setTransition0TestTransitionEffect, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1389,11 +1389,11 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_Transition0TransitionEffectTest, Te
 }
 
 /*
- * @tc.name: CommonMethod Transition0TransitionEffect2Test
+ * @tc.name: setTransition0TestTransition0TransitionEffect2 Transition0TransitionEffect2Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_Transition0TransitionEffect2Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setTransition0TestTransition0TransitionEffect2, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1409,11 +1409,11 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_Transition0TransitionEffect2Test, T
 }
 
 /*
- * @tc.name: CommonMethod Transition1TransitionEffectCbTest
+ * @tc.name: setTransition1TestTransitionEffectCb Transition1TransitionEffectCbTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, DISABLED_Transition1TransitionEffectCbTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setTransition1TestTransitionEffectCb, TestSize.Level1)
 {
     struct CheckEvent {
         int32_t nodeId;

@@ -190,7 +190,7 @@ HWTEST_F(MarqueeModifierTest, DISABLED_setFontColorTestInvalidValues, TestSize.L
 }
 
 /*
- * @tc.name: setFontFamilyTestValidValueson
+ * @tc.name: setFontFamilyTestValidValues
  * @tc.desc: Check the functionality of MarqueeModifier.setFontFamily
  * @tc.type: FUNC
  */
@@ -230,11 +230,11 @@ HWTEST_F(MarqueeModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setFontSizeDefaultValues
+ * @tc.name: setFontSizeTestDefaultValues
  * @tc.desc: Check the functionality of MarqueeModifier.setFontSize
  * @tc.type: FUNC
  */
-HWTEST_F(MarqueeModifierTest, setFontSizeDefaultValues, TestSize.Level1)
+HWTEST_F(MarqueeModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto size = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
@@ -270,11 +270,11 @@ HWTEST_F(MarqueeModifierTest, DISABLED_setFontSizeTestValidValues, TestSize.Leve
     }
 }
 /*
- * @tc.name: setFontSizeInvalidValues
+ * @tc.name: setFontSizeTestInvalidValues
  * @tc.desc: Check the functionality of MarqueeModifier.setFontSize
  * @tc.type: FUNC
  */
-HWTEST_F(MarqueeModifierTest, DISABLED_setFontSizeInvalidValues, TestSize.Level1)
+HWTEST_F(MarqueeModifierTest, DISABLED_setFontSizeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -397,11 +397,11 @@ HWTEST_F(MarqueeModifierTest, setUpdateStrategyTestDefaultValues, TestSize.Level
 }
 
 /*
- * @tc.name: setUpdateStrategyTestValidValues
+ * @tc.name: setMarqueeUpdateStrategyTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MarqueeModifierTest, setUpdateStrategyTestValidValues, TestSize.Level1)
+HWTEST_F(MarqueeModifierTest, setMarqueeUpdateStrategyTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -446,11 +446,11 @@ HWTEST_F(MarqueeModifierTest, setMarqueeOptionsTestDefaultValues, TestSize.Level
 }
 
 /**
- * @tc.name: SetMarqueeOptionsValidTest
+ * @tc.name: setMarqueeOptionsTestValid
  * @tc.desc: Check the functionality of MarqueeModifier.SetScrollAmount
  * @tc.type: FUNC
  */
-HWTEST_F(MarqueeModifierTest, DISABLED_SetMarqueeOptionsValidTest, TestSize.Level1)
+HWTEST_F(MarqueeModifierTest, DISABLED_setMarqueeOptionsTestValid, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     Ark_MarqueeOptions inputValueOptions;

@@ -458,11 +458,11 @@ HWTEST_F(GridItemModifierTest, setOnSelectTest, TestSize.Level1)
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventSelectedImpl
+ * @tc.name: set_onChangeEvent_selectedTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
+HWTEST_F(GridItemModifierTest, set_onChangeEvent_selectedTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridItemEventHub>();

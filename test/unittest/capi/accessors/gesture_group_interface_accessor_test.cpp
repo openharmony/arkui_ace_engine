@@ -67,11 +67,11 @@ public:
 };
 
 /**
- * @tc.name: CtorTestInvalid
+ * @tc.name: constructTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
+HWTEST_F(GestureGroupInterfaceAccessorTest, constructTestInvalid, TestSize.Level1)
 {
     auto peer = accessor_->construct(static_cast<Ark_GestureMode>(100), nullptr);
     ASSERT_NE(peer, nullptr);
@@ -84,11 +84,11 @@ HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestMode
+ * @tc.name: constructTestMode
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestMode, TestSize.Level1)
+HWTEST_F(GestureGroupInterfaceAccessorTest, constructTestMode, TestSize.Level1)
 {
     const std::vector<std::pair<Ark_GestureMode, GestureMode>> TEST_PLAN = {
         { Ark_GestureMode::ARK_GESTURE_MODE_EXCLUSIVE, GestureMode::Exclusive },
@@ -109,11 +109,11 @@ HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestMode, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestGestures
+ * @tc.name: constructTestGestures
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestGestures, TestSize.Level1)
+HWTEST_F(GestureGroupInterfaceAccessorTest, constructTestGestures, TestSize.Level1)
 {
     Ark_GestureMode someMode = Ark_GestureMode::ARK_GESTURE_MODE_PARALLEL;
     std::vector<Ark_GestureType> vectorData;
@@ -151,11 +151,11 @@ HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestGestures, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnCancelTest
+ * @tc.name: onCancelTest
  * @tc.desc: setOnCancel test
  * @tc.type: FUNC
  */
-HWTEST_F(GestureGroupInterfaceAccessorTest, OnCancelTest, TestSize.Level1)
+HWTEST_F(GestureGroupInterfaceAccessorTest, onCancelTest, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto testCallback = [](const Ark_Int32 resourceId) {

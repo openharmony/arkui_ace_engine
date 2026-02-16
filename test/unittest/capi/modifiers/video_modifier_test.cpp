@@ -89,11 +89,11 @@ HWTEST_F(VideoModifierTest, setOptionsSrcTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOptionsSrcTestValidValues
+ * @tc.name: setVideoOptionsTestOptionsSrcValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, DISABLED_setOptionsSrcTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setVideoOptionsTestOptionsSrcValidValues, TestSize.Level1)
 {
     Ark_VideoOptions options;
     options.src = Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>(
@@ -185,11 +185,11 @@ static std::vector<std::tuple<std::string, Opt_Union_F64_String_PlaybackSpeed, d
 };
 
 /*
- * @tc.name: setOptionsProgressRateTestValidValues
+ * @tc.name: setVideoOptionsTestOptionsProgressRateValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, DISABLED_setOptionsProgressRateTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setVideoOptionsTestOptionsProgressRateValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
 
@@ -230,11 +230,11 @@ HWTEST_F(VideoModifierTest, setOptionsPreviewUriTestDefaultValues, TestSize.Leve
 }
 
 /*
- * @tc.name: setOptionsPreviewUriTestValidValues
+ * @tc.name: setVideoOptionsTestOptionsPreviewUriValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, DISABLED_setOptionsPreviewUriTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setVideoOptionsTestOptionsPreviewUriValidValues, TestSize.Level1)
 {
     Ark_VideoOptions options;
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
@@ -258,11 +258,11 @@ HWTEST_F(VideoModifierTest, DISABLED_setOptionsPreviewUriTestValidValues, TestSi
 }
 
 /*
- * @tc.name: setOptionsVideoControllerTestValidValues
+ * @tc.name: setVideoOptionsTestOptionsVideoControllerValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, setVideoOptionsTestOptionsVideoControllerValidValues, TestSize.Level1)
 {
     Ark_VideoOptions options;
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
@@ -296,11 +296,11 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestValidValues, TestSize.L
 }
 
 /*
- * @tc.name: setOptionsVideoControllerTestInvalidValues
+ * @tc.name: setVideoOptionsTestOptionsVideoControllerInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestInvalidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, setVideoOptionsTestOptionsVideoControllerInvalidValues, TestSize.Level1)
 {
     Ark_VideoOptions options;
     options.src = Converter::ArkValue<Opt_Union_String_Resource>(Ark_Empty());
@@ -321,12 +321,13 @@ HWTEST_F(VideoModifierTest, setOptionsVideoControllerTestInvalidValues, TestSize
 }
 
 /*
- * @tc.name: DISABLED_setImageAIOptionsTestValidValues
+ * @tc.name: setVideoOptionsTestImageAIOptionsValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, DISABLED_setImageAIOptionsTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setVideoOptionsTestImageAIOptionsValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setVideoOptions, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -1032,32 +1033,35 @@ HWTEST_F(VideoModifierTest, DISABLED_setEnableAnalyzerTestValidValues, TestSize.
 }
 
 /*
- * @tc.name: DISABLED_setAnalyzerConfigTestDefaultValues
+ * @tc.name: setAnalyzerConfigTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(VideoModifierTest, DISABLED_setAnalyzerConfigTestDefaultValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setAnalyzerConfig, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_setAnalyzerConfigTestValidValues
+ * @tc.name: setAnalyzerConfigTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(VideoModifierTest, DISABLED_setAnalyzerConfigTestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setAnalyzerConfig, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_setAnalyzerConfigTestInvalidValues
+ * @tc.name: setAnalyzerConfigTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(VideoModifierTest, DISABLED_setAnalyzerConfigTestInvalidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setAnalyzerConfig, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -1067,11 +1071,11 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> enableShor
 };
 
 /*
- * @tc.name: setEnableShortcutKey
+ * @tc.name: setEnableShortcutKeyTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setEnableShortcutKey, TestSize.Level1)
+HWTEST_F(VideoModifierTest, setEnableShortcutKeyTest, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SHORTCUT_KEY_NAME);
@@ -1097,11 +1101,11 @@ static std::vector<std::tuple<std::string, uint32_t, std::string>> setSurfaceBac
 };
 
 /*
- * @tc.name: setSurfaceBackgroundColor
+ * @tc.name: setSurfaceBackgroundColorTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, DISABLED_setSurfaceBackgroundColor, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setSurfaceBackgroundColorTest, TestSize.Level1)
 {
 #ifdef WRONG_SDK
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);

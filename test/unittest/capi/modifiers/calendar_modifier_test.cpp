@@ -226,11 +226,11 @@ HWTEST_F(CalendarModifierTest, setCalendarOptionsTestValidValues1, TestSize.Leve
 }
 
 /*
- * @tc.name: setCalendarOptionsControllerTest
+ * @tc.name: setCalendarOptionsTestController
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, setCalendarOptionsControllerTest, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setCalendarOptionsTestController, TestSize.Level1)
 {
     const auto mockController = Referenced::MakeRefPtr<MockCalendarController>();
     CalendarControllerPeer mockControllerPeer { .controller = mockController };
@@ -310,11 +310,11 @@ HWTEST_F(CalendarModifierTest, showLunarTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: showLunarTestNeedSlideValidValues
+ * @tc.name: setShowLunarTestNeedSlideValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, showLunarTestNeedSlideValidValues, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setShowLunarTestNeedSlideValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueShowLunar;
 
@@ -374,11 +374,11 @@ HWTEST_F(CalendarModifierTest, showHolidayTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: showHolidayTestNeedSlideValidValues
+ * @tc.name: setShowHolidayTestNeedSlideValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, showHolidayTestNeedSlideValidValues, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setShowHolidayTestNeedSlideValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueShowHoliday;
     initValueShowHoliday = std::get<1>(testFixtureBooleanValidValues[0]);
@@ -436,11 +436,11 @@ HWTEST_F(CalendarModifierTest, startOfWeekTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: startOfWeekTestNeedSlideValidValues
+ * @tc.name: setStartOfWeekTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, startOfWeekTestValidValues, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setStartOfWeekTestValidValues, TestSize.Level1)
 {
     Ark_Number initValuestartOfWeek;
     initValuestartOfWeek = std::get<1>(testFixtureStartOfWeekValidValues[0]);
@@ -498,11 +498,11 @@ HWTEST_F(CalendarModifierTest, offDaysTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: offDaysTestNeedSlideValidValues
+ * @tc.name: setOffDaysTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, offDaysTestValidValues, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setOffDaysTestValidValues, TestSize.Level1)
 {
     Ark_Number initValueOffDays;
     initValueOffDays = std::get<1>(testFixtureOffDaysValidValues[0]);
@@ -601,11 +601,11 @@ HWTEST_F(CalendarModifierTest, setDirectionTestDirectionInvalidValues, TestSize.
 }
 
 /*
- * @tc.name: currentDayStyleTestValidValues
+ * @tc.name: setCurrentDayStyleTestCurrentDayStyle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, currentDayStyleTest, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setCurrentDayStyleTestCurrentDayStyle, TestSize.Level1)
 {
     Ark_CurrentDayStyle initValue;
     initValue.dayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
@@ -657,11 +657,11 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: currentDayStyleTest2
+ * @tc.name: setCurrentDayStyleTestVariant2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, currentDayStyleTest2, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setCurrentDayStyleTestVariant2, TestSize.Level1)
 {
     Ark_CurrentDayStyle initValue;
     initValue.underscoreXAxisOffset = Converter::ArkValue<Opt_Number>(7);
@@ -701,11 +701,11 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest2, TestSize.Level1)
 }
 
 /*
- * @tc.name: currentDayStyleTest3
+ * @tc.name: setCurrentDayStyleTestVariant3
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, currentDayStyleTest3, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setCurrentDayStyleTestVariant3, TestSize.Level1)
 {
     Ark_CurrentDayStyle initValue;
     initValue.dailySixRowSpace = Converter::ArkValue<Opt_Number>(13);
@@ -748,11 +748,11 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest3, TestSize.Level1)
 }
 
 /*
- * @tc.name: nonCurrentDayStyleTestValidValues
+ * @tc.name: setNonCurrentDayStyleTestNonCurrentDayStyle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, nonCurrentDayStyleTest, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setNonCurrentDayStyleTestNonCurrentDayStyle, TestSize.Level1)
 {
     Ark_NonCurrentDayStyle initValue;
     initValue.nonCurrentMonthDayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
@@ -786,11 +786,11 @@ HWTEST_F(CalendarModifierTest, nonCurrentDayStyleTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: todayStyleTestValidValues
+ * @tc.name: setTodayStyleTestTodayStyle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, todayStyleTest, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setTodayStyleTestTodayStyle, TestSize.Level1)
 {
     Ark_TodayStyle initValue;
     initValue.focusedDayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
@@ -825,11 +825,11 @@ HWTEST_F(CalendarModifierTest, todayStyleTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: weekStyleTestValidValues
+ * @tc.name: setWeekStyleTestWeekStyle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, weekStyleTest, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setWeekStyleTestWeekStyle, TestSize.Level1)
 {
     Ark_WeekStyle initValue;
     initValue.weekColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
@@ -873,11 +873,11 @@ HWTEST_F(CalendarModifierTest, weekStyleTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: workStateStyleTest
+ * @tc.name: setWorkStateStyleTestWorkStateStyle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, workStateStyleTest, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setWorkStateStyleTestWorkStateStyle, TestSize.Level1)
 {
     Ark_WorkStateStyle initValue;
     initValue.workDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);

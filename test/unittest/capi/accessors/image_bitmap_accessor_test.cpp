@@ -95,11 +95,11 @@ public:
 };
 
 /**
- * @tc.name: close_success
+ * @tc.name: closeTestSuccess
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, closeTestSuccess, TestSize.Level1)
 {
     Converter::ConvContext ctx;
     auto imageResource = Converter::ArkUnion<Ark_Union_image_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
@@ -118,11 +118,11 @@ HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
 }
 
 /**
- * @tc.name: getHeight
+ * @tc.name: getHeightTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, getHeightTest, TestSize.Level1)
 {
     Converter::ConvContext ctx;
     auto imageResource = Converter::ArkUnion<Ark_Union_image_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
@@ -138,11 +138,11 @@ HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
 }
 
 /**
- * @tc.name: getWidth
+ * @tc.name: getWidthTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, getWidth, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, getWidthTest, TestSize.Level1)
 {
     Converter::ConvContext ctx;
     auto imageResource = Converter::ArkUnion<Ark_Union_image_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
@@ -158,11 +158,11 @@ HWTEST_F(ImageBitmapAccessorTest, getWidth, TestSize.Level1)
 }
 
 /**
- * @tc.name: closeImpl_NullPointer
+ * @tc.name: closeTestNullPointer
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, closeImpl_NullPointer, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, closeTestNullPointer, TestSize.Level1)
 {
     ASSERT_NE(accessor_->close, nullptr);
 
@@ -170,11 +170,11 @@ HWTEST_F(ImageBitmapAccessorTest, closeImpl_NullPointer, TestSize.Level1)
 }
 
 /**
- * @tc.name: getHeightImpl_NullPointer
+ * @tc.name: getHeightTestNullPointer
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, getHeightImpl_NullPointer, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, getHeightTestNullPointer, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getHeight, nullptr);
 
@@ -183,11 +183,11 @@ HWTEST_F(ImageBitmapAccessorTest, getHeightImpl_NullPointer, TestSize.Level1)
 }
 
 /**
- * @tc.name: getWidthImpl_NullPointer
+ * @tc.name: getWidthTestNullPointer
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, getWidthImpl_NullPointer, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, getWidthTestNullPointer, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getWidth, nullptr);
 

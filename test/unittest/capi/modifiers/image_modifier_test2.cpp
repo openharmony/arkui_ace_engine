@@ -76,11 +76,11 @@ HWTEST_F(ImageModifierTest2, setAltTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setAlt_ArkStringUnion_Test
+ * @tc.name: setAltTestArkStringUnion
  * @tc.desc: Check functionality of ImageModifier.setAlt
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest2, setAlt_ArkStringUnion_Test, TestSize.Level1)
+HWTEST_F(ImageModifierTest2, setAltTestArkStringUnion, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlt, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -95,11 +95,11 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkStringUnion_Test, TestSize.Level1)
 }
 
 /*
- * @tc.name: setAlt_ArkResourceUnion_Test
+ * @tc.name: setAltTestArkResourceUnion
  * @tc.desc: Check functionality of ImageModifier.setAlt
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest2, setAlt_ArkResourceUnion_Test, TestSize.Level1)
+HWTEST_F(ImageModifierTest2, setAltTestArkResourceUnion, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlt, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -116,11 +116,11 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkResourceUnion_Test, TestSize.Level1)
 }
 
 /*
- * @tc.name: setAlt_PixelMapUnion_Test
+ * @tc.name: setAltTestPixelMapUnion
  * @tc.desc: Check functionality of ImageModifier.setAlt
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
+HWTEST_F(ImageModifierTest2, setAltTestPixelMapUnion, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlt, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -146,11 +146,11 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: setImageMatrixTestDefualtValue
+ * @tc.name: setImageMatrixTestDefaultValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest2, setImageMatrixTestDefualtValue, TestSize.Level1)
+HWTEST_F(ImageModifierTest2, setImageMatrixTestDefaultValue, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

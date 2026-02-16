@@ -293,11 +293,11 @@ HWTEST_F(StepperModifierTest, DISABLED_setOnPreviousTest, TestSize.Level1)
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventIndexImpl
+ * @tc.name: set_onChangeEvent_indexTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StepperModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
+HWTEST_F(StepperModifierTest, set_onChangeEvent_indexTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<StepperEventHub>();

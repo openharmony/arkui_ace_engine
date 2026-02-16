@@ -833,11 +833,11 @@ HWTEST_F(SliderModifierTest, setTrackColorTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setTrackColorResourceColorTestValidValues
+ * @tc.name: setTrackColorTestResourceColorValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, DISABLED_setTrackColorResourceColorTestValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestResourceColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueTrackColor;
 
@@ -879,11 +879,11 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorResourceColorTestValidValues,
 }
 
 /*
- * @tc.name: setTrackColorResourceColorTestInvalidValues
+ * @tc.name: setTrackColorTestResourceColorInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestInvalidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setTrackColorTestResourceColorInvalidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueTrackColor;
 
@@ -922,11 +922,11 @@ HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestInvalidValues, TestSi
 // Slider's component owner won't fix an issue in ToJsonValue (slider_paint_property.cpp) because of compatibility,
 // so the test is disabled.
 /*
- * @tc.name: setTrackColorLinearGradientTestValidValues
+ * @tc.name: setTrackColorTestLinearGradientValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, DISABLED_setTrackColorLinearGradientTestValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestLinearGradientValidValues, TestSize.Level1)
 {
     std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
         std::make_pair(Color::RED, Dimension(0.5f)),
@@ -953,11 +953,11 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorLinearGradientTestValidValues
 }
 
 /*
- * @tc.name: setTrackColorLinearGradientTestInvalidValues
+ * @tc.name: setTrackColorTestLinearGradientInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setTrackColorLinearGradientTestInvalidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setTrackColorTestLinearGradientInvalidValues, TestSize.Level1)
 {
     std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
         std::make_pair(std::nullopt, Dimension(0.5f)),
@@ -987,11 +987,11 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setSelectedColorResourceColorTestValidValues
+ * @tc.name: setSelectedColorTestResourceColorValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorResourceColorTestValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorTestResourceColorValidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueTrackColor;
 
@@ -1033,11 +1033,11 @@ HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorResourceColorTestValidValu
 }
 
 /*
- * @tc.name: setSelectedColorResourceColorTestInvalidValues
+ * @tc.name: setSelectedColorTestResourceColorInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setSelectedColorResourceColorTestInvalidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setSelectedColorTestResourceColorInvalidValues, TestSize.Level1)
 {
     Ark_ResourceColor initValueTrackColor;
 
@@ -1074,11 +1074,11 @@ HWTEST_F(SliderModifierTest, setSelectedColorResourceColorTestInvalidValues, Tes
 }
 
 /*
- * @tc.name: setSelectedColorLinearGradientTestValidValues
+ * @tc.name: setSelectedColorTestLinearGradientValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setSelectedColorLinearGradientTestValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setSelectedColorTestLinearGradientValidValues, TestSize.Level1)
 {
     std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
         std::make_pair(Color::RED, Dimension(0.5f)),
@@ -1105,11 +1105,11 @@ HWTEST_F(SliderModifierTest, setSelectedColorLinearGradientTestValidValues, Test
 }
 
 /*
- * @tc.name: setTrackColor1LinearGradientTestInvalidValues
+ * @tc.name: setSelectedColorTestLinearGradientInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setTrackColor1LinearGradientTestInvalidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setSelectedColorTestLinearGradientInvalidValues, TestSize.Level1)
 {
     std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
         std::make_pair(std::nullopt, Dimension(0.5f)),
@@ -1139,11 +1139,11 @@ HWTEST_F(SliderModifierTest, setShowStepsTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setShowStepsTestShowStepsValidValues
+ * @tc.name: setShowSteps0TestShowStepsValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setShowStepsTestShowStepsValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setShowSteps0TestShowStepsValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueShowSteps;
 
@@ -2052,11 +2052,11 @@ HWTEST_F(SliderModifierTest, setMinResponsiveDistanceTestDefaultValues, TestSize
 }
 
 /*
- * @tc.name: setMinResponsiveDistanceValidValues
+ * @tc.name: setMinResponsiveDistanceTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setMinResponsiveDistanceValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setMinResponsiveDistanceTestValidValues, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const Opt_Float64& value, const std::string& expectedStr) {
         modifier_->setMinResponsiveDistance(node_, &value);
@@ -2072,11 +2072,11 @@ HWTEST_F(SliderModifierTest, setMinResponsiveDistanceValidValues, TestSize.Level
 }
 
 /*
- * @tc.name: setMinResponsiveDistanceValidValues
+ * @tc.name: setMinResponsiveDistanceTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setMinResponsiveDistanceInvalidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setMinResponsiveDistanceTestInvalidValues, TestSize.Level1)
 {
     // Initial setup
     auto initValueMinResponsiveDistance = Converter::ArkValue<Opt_Float64>(
@@ -2303,11 +2303,11 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventValueImpl
+ * @tc.name: set_onChangeEvent_valueTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, DISABLED_setOnChangeEventValueImpl, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_set_onChangeEvent_valueTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -2362,11 +2362,11 @@ std::vector<std::tuple<std::string, Opt_CrownSensitivity, std::string>> crownSen
 #endif
 
 /*
- * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
+ * @tc.name: setDigitalCrownSensitivityTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityDefaultValuesTest, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
@@ -2375,11 +2375,11 @@ HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityDefaultValuesTest, TestSi
 }
 
 /*
- * @tc.name: setDigitalCrownSensitivityValidValuesTest
+ * @tc.name: setDigitalCrownSensitivityTestValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityTestValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
     auto checkValue = [this](

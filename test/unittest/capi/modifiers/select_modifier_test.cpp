@@ -1223,11 +1223,11 @@ HWTEST_F(SelectModifierTest, DISABLED_setDividerTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerUndefinedTest
+ * @tc.name: setDividerTestUndefined
  * @tc.desc: Check the functionality of SelectModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, DISABLED_setDividerUndefinedTest, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setDividerTestUndefined, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     // set undefined values
@@ -1260,11 +1260,11 @@ HWTEST_F(SelectModifierTest, DISABLED_setDividerUndefinedTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerColorStringTest
+ * @tc.name: setDividerTestColorString
  * @tc.desc: Check the functionality of SelectModifier.setDivider
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, DISABLED_setDividerColorStringTest, TestSize.Level1)
+HWTEST_F(SelectModifierTest, DISABLED_setDividerTestColorString, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     // set color as Ark_String
@@ -1285,11 +1285,11 @@ HWTEST_F(SelectModifierTest, DISABLED_setDividerColorStringTest, TestSize.Level1
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventSelectedImpl
+ * @tc.name: set_onChangeEvent_selectedTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
+HWTEST_F(SelectModifierTest, set_onChangeEvent_selectedTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<SelectEventHub>();
@@ -1327,11 +1327,11 @@ HWTEST_F(SelectModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnChangeEventValueImpl
+ * @tc.name: set_onChangeEvent_valueTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
+HWTEST_F(SelectModifierTest, set_onChangeEvent_valueTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<SelectEventHub>();

@@ -293,11 +293,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestValidValues, TestSize.Level1
 }
 
 /*
- * @tc.name: setLinearStyleDefaultValues
+ * @tc.name: setStyleLinearTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, setLinearStyleDefaultValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, setStyleLinearTestDefaultValues, TestSize.Level1)
 {
     std::string strResult;
 
@@ -311,11 +311,11 @@ HWTEST_F(ProgressModifierTest, setLinearStyleDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setLinearStyleValidValues
+ * @tc.name: setStyleTestLinearValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, DISABLED_setLinearStyleValidValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestLinearValidValues, TestSize.Level1)
 {
     Ark_LinearStyleOptions linearStyle;
     linearStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(true);
@@ -336,11 +336,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setLinearStyleValidValues, TestSize.Leve
 }
 
 /*
- * @tc.name: setLinearStyleStrokeRadiusValidValues
+ * @tc.name: setStyleTestLinearStrokeRadiusValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, DISABLED_setLinearStyleStrokeRadiusValidValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestLinearStrokeRadiusValidValues, TestSize.Level1)
 {
     Ark_LinearStyleOptions linearStyle;
     linearStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
@@ -376,11 +376,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setLinearStyleStrokeRadiusValidValues, T
 }
 
 /*
- * @tc.name: setRingStyleDefaultValues
+ * @tc.name: setStyleRingTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, setRingStyleDefaultValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, setStyleRingTestDefaultValues, TestSize.Level1)
 {
     std::string strResult;
 
@@ -396,11 +396,11 @@ HWTEST_F(ProgressModifierTest, setRingStyleDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setRingStyleValidValues
+ * @tc.name: setStyleTestRingValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, DISABLED_setRingStyleValidValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestRingValidValues, TestSize.Level1)
 {
     Ark_RingStyleOptions ringStyle;
     ringStyle.enableScanEffect = Converter::ArkValue<Opt_Boolean>(true);
@@ -426,11 +426,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setRingStyleValidValues, TestSize.Level1
 }
 
 /*
- * @tc.name: setCapsuleStyleDefaultValues
+ * @tc.name: setStyleCapsuleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, setCapsuleStyleDefaultValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, setStyleCapsuleTestDefaultValues, TestSize.Level1)
 {
     std::string strResult;
 
@@ -459,11 +459,11 @@ HWTEST_F(ProgressModifierTest, setCapsuleStyleDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCapsuleStyleValidValues
+ * @tc.name: setStyleTestCapsuleValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestCapsuleValidValues, TestSize.Level1)
 {
     Ark_ProgressOptions progressOptions;
     progressOptions.value = Converter::ArkValue<Ark_Float64>(5.);
@@ -500,11 +500,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidValues, TestSize.Lev
 }
 
 /*
- * @tc.name: setCapsuleStyleValidContentValues
+ * @tc.name: setStyleTestCapsuleValidContentValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, setCapsuleStyleValidContentValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, setStyleTestCapsuleValidContentValues, TestSize.Level1)
 {
     Ark_ProgressOptions progressOptions = getCapsuleProgressOptions();
     modifier_->setProgressOptions(node_, &progressOptions);
@@ -522,11 +522,11 @@ HWTEST_F(ProgressModifierTest, setCapsuleStyleValidContentValues, TestSize.Level
 }
 
 /*
- * @tc.name: setCapsuleStyleValidFontValues
+ * @tc.name: setStyleTestCapsuleValidFontValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidFontValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestCapsuleValidFontValues, TestSize.Level1)
 {
     Ark_ProgressOptions progressOptions;
     progressOptions.value = Converter::ArkValue<Ark_Float64>(5.);
@@ -563,11 +563,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidFontValues, TestSize
 }
 
 /*
- * @tc.name: setProgressStyleDefaultValues
+ * @tc.name: setStyleProgressTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, setProgressStyleDefaultValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, setStyleProgressTestDefaultValues, TestSize.Level1)
 {
     std::string strResult;
 
@@ -583,11 +583,11 @@ HWTEST_F(ProgressModifierTest, setProgressStyleDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setProgressStyleValidValues
+ * @tc.name: setStyleTestProgressValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, DISABLED_setProgressStyleValidValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestProgressValidValues, TestSize.Level1)
 {
     Ark_ProgressStyleOptions progressStyle;
     progressStyle.enableSmoothEffect = Converter::ArkValue<Opt_Boolean>(false);
@@ -613,11 +613,11 @@ HWTEST_F(ProgressModifierTest, DISABLED_setProgressStyleValidValues, TestSize.Le
 }
 
 /*
-* @tc.name: setCapsuleStyleValidBorderRadiusValues
+* @tc.name: setStyleTestCapsuleValidBorderRadiusValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(ProgressModifierTest, setCapsuleStyleValidBorderRadiusValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, setStyleTestCapsuleValidBorderRadiusValues, TestSize.Level1)
 {
     Ark_ProgressOptions progressOptions;
     progressOptions.value = Converter::ArkValue<Ark_Float64>(5.);

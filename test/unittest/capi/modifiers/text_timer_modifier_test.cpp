@@ -1301,7 +1301,7 @@ HWTEST_F(TextTimerModifierTest, DISABLED_setTextShadowTestTextShadowFillInvalidV
 }
 
 /*
- * @tc.name: setOnScrollIndexTest
+ * @tc.name: setOnTimerTest
  * @tc.desc:
  * @tc.type: FUNC
  */

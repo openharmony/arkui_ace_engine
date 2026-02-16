@@ -81,7 +81,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollBarUpdateTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setOnScrollBarUpdateTestInvalid
+ * @tc.name: setOnScrollBarUpdateTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -267,11 +267,11 @@ HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnItemDragStartTest, TestSize.Le
 }
 
 /*
- * @tc.name: setOnItemDragStartInvalidTest
+ * @tc.name: setOnItemDragStartTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartInvalidTest, TestSize.Level1)
+HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartTestInvalid, TestSize.Level1)
 {
     using namespace Converter;
     static const int32_t expectedX = 357;

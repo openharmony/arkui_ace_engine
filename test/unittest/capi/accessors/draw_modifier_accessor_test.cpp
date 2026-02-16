@@ -67,11 +67,11 @@ HWTEST_F(DrawModifierTest, invalidateTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DrawBehindTest
+ * @tc.name: getDrawBehind_callbackTestDrawBehind
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DrawModifierTest, DrawBehindTest, TestSize.Level1)
+HWTEST_F(DrawModifierTest, getDrawBehind_callbackTestDrawBehind, TestSize.Level1)
 {
     ASSERT_TRUE(accessor_->getDrawBehind_callback);
     ASSERT_TRUE(accessor_->setDrawBehind_callback);
@@ -112,11 +112,11 @@ HWTEST_F(DrawModifierTest, DrawBehindTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DrawContentTest
+ * @tc.name: getDrawContent_callbackTestDrawContent
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DrawModifierTest, DrawContentTest, TestSize.Level1)
+HWTEST_F(DrawModifierTest, getDrawContent_callbackTestDrawContent, TestSize.Level1)
 {
     ASSERT_TRUE(accessor_->getDrawContent_callback);
     ASSERT_TRUE(accessor_->setDrawContent_callback);

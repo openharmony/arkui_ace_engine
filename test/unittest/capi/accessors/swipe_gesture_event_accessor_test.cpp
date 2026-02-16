@@ -43,11 +43,11 @@ public:
 };
 
 /**
- * @tc.name: GetAngleTest
+ * @tc.name: getAngleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SwipeGestureEventAccessorTest, GetAngleTest, TestSize.Level1)
+HWTEST_F(SwipeGestureEventAccessorTest, getAngleTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
         eventInfo_->SetAngle(value);
@@ -58,11 +58,11 @@ HWTEST_F(SwipeGestureEventAccessorTest, GetAngleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetAngleTest
+ * @tc.name: setAngleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SwipeGestureEventAccessorTest, SetAngleTest, TestSize.Level1)
+HWTEST_F(SwipeGestureEventAccessorTest, setAngleTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberValues) {
         accessor_->setAngle(peer_, &value);
@@ -72,11 +72,11 @@ HWTEST_F(SwipeGestureEventAccessorTest, SetAngleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSpeedTest
+ * @tc.name: getSpeedTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SwipeGestureEventAccessorTest, GetSpeedTest, TestSize.Level1)
+HWTEST_F(SwipeGestureEventAccessorTest, getSpeedTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
         eventInfo_->SetSpeed(value);
@@ -87,11 +87,11 @@ HWTEST_F(SwipeGestureEventAccessorTest, GetSpeedTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSpeedTest
+ * @tc.name: setSpeedTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SwipeGestureEventAccessorTest, SetSpeedTest, TestSize.Level1)
+HWTEST_F(SwipeGestureEventAccessorTest, setSpeedTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberValues) {
         accessor_->setSpeed(peer_, &value);

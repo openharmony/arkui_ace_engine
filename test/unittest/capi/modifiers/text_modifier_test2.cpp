@@ -104,11 +104,6 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestDefaultValues, TestSize.Level1)
         "Default value for attribute 'BindSelectionMenu'";
 }
 
-/*
- * @tc.name: bindSelectionMenuTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
 using OneTestTextSpanTypeStep = std::tuple<Ark_TextSpanType, Ark_TextResponseType>;
 static const std::vector<OneTestTextSpanTypeStep> testPlan = {
     {ARK_TEXT_SPAN_TYPE_TEXT, ARK_TEXT_RESPONSE_TYPE_SELECT},
@@ -121,6 +116,7 @@ static const std::vector<OneTestTextSpanTypeStep> testPlan = {
     {ARK_TEXT_SPAN_TYPE_MIXED, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
     {ARK_TEXT_SPAN_TYPE_IMAGE, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
 };
+
 std::optional<SelectOverlayInfo> GetSelectionMenuParams_Patched(FrameNode* frameNode, Ark_TextSpanType arkSpanType,
                                                                 Ark_TextResponseType arkResponseType)
 {
@@ -135,7 +131,13 @@ std::optional<SelectOverlayInfo> GetSelectionMenuParams_Patched(FrameNode* frame
     pattern->CopySelectionMenuParams(selectInfo);
     return selectInfo;
 }
-HWTEST_F(TextModifierTest2, DISABLED_bindSelectionMenuTestValidValues, TestSize.Level1)
+
+/*
+ * @tc.name: setBindSelectionMenuTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest2, DISABLED_setBindSelectionMenuTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -192,11 +194,11 @@ HWTEST_F(TextModifierTest2, DISABLED_bindSelectionMenuTestValidValues, TestSize.
 }
 
 /*
- * @tc.name: DISABLED_bindSelectionMenu_MenuTypeTestValidValues
+ * @tc.name: setBindSelectionMenuTestMenuTypeValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest2, DISABLED_bindSelectionMenu_MenuTypeTestValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest2, DISABLED_setBindSelectionMenuTestMenuTypeValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

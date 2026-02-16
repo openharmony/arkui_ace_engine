@@ -178,11 +178,11 @@ HWTEST_F(ShapeModifierTest, setFillTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setStrokeDashOffset
+ * @tc.name: setStrokeDashOffsetTest
  * @tc.desc: check setStrokeDashOffset
  * @tc.type: FUNC
  */
-HWTEST_F(ShapeModifierTest, DISABLED_setStrokeDashOffset, TestSize.Level1)
+HWTEST_F(ShapeModifierTest, DISABLED_setStrokeDashOffsetTest, TestSize.Level1)
 {
     using OneTestStep = std::pair<Opt_Length, std::string>;
     static const std::vector<OneTestStep> testPlan = {
@@ -530,11 +530,11 @@ HWTEST_F(ShapeModifierTest, setStrokeDashArrayTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setStrokeDashArrayInavlidTest
+ * @tc.name: setStrokeDashArrayTestInvalid
  * @tc.desc: Check the invalid cases for setStrokeDashArray
  * @tc.type: FUNC
  */
-HWTEST_F(ShapeModifierTest, setStrokeDashArrayInavlidTest, TestSize.Level1)
+HWTEST_F(ShapeModifierTest, setStrokeDashArrayTestInvalid, TestSize.Level1)
 {
     const std::string propName("strokeDashArray");
     ASSERT_NE(modifier_->setStrokeDashArray, nullptr);
@@ -591,16 +591,16 @@ HWTEST_F(ShapeModifierTest, setMeshTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setMeshInvalidTest
+ * @tc.name: setMeshTestInvalid
  * @tc.desc: Check the invalid values for setMesh
  * @tc.type: FUNC
  */
-HWTEST_F(ShapeModifierTest, DISABLED_setMeshInvalidTest, TestSize.Level1)
+HWTEST_F(ShapeModifierTest, DISABLED_setMeshTestInvalid, TestSize.Level1)
 {
     const std::string propName("mesh");
     const std::string propNameValue("value");
     const std::string propNameRow("row");
-    const std::string propNameColum("column");
+    const std::string propNameColumn("column");
 
     int32_t column = 2;
     int32_t row = 3;
@@ -645,7 +645,7 @@ HWTEST_F(ShapeModifierTest, DISABLED_setMeshInvalidTest, TestSize.Level1)
     EXPECT_EQ(valueSize, 0);
     auto rowJson = GetAttrValue<std::string>(checkVal, propNameRow);
     EXPECT_EQ(rowJson, "0");
-    auto columnJson = GetAttrValue<std::string>(checkVal, propNameColum);
+    auto columnJson = GetAttrValue<std::string>(checkVal, propNameColumn);
     EXPECT_EQ(columnJson, "0");
 }
 

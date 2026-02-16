@@ -236,11 +236,11 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestInvalidValues, TestSize.L
 }
 
 /*
- * @tc.name: setOnDateChange
+ * @tc.name: setOnDateChangeTest
  * @tc.desc: Check the functionality of DatePickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockModifierTest, setOnDateChange, TestSize.Level1)
+HWTEST_F(TextClockModifierTest, setOnDateChangeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnDateChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

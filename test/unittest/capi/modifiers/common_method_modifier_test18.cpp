@@ -95,11 +95,11 @@ public:
 };
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowDefaultTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowDefault
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowDefaultTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowDefault, TestSize.Level1)
 {
     // default value
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -143,11 +143,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowD
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowStyleTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowStyle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowStyleTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowStyle, TestSize.Level1)
 {
     // valid value
     auto arkShadowStyle = ARK_SHADOW_STYLE_OUTER_FLOATING_MD;
@@ -200,11 +200,12 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowS
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsRadiusNumberTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsRadiusNumber
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsRadiusNumberTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsRadiusNumber,
+    TestSize.Level1)
 {
     // valid value
     Ark_ShadowOptions arkShadowOptions = {
@@ -262,11 +263,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsRadiusResourceTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsRadiusResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsRadiusResourceTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsRadiusResource,
     TestSize.Level1)
 {
     // valid value
@@ -305,11 +306,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetXNumberTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXNumber
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetXNumberTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXNumber,
     TestSize.Level1)
 {
     // valid value
@@ -347,11 +348,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetXNumberTest2
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXNumber2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetXNumberTest2,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXNumber2,
     TestSize.Level1)
 {
     // negative value
@@ -390,11 +391,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetXResourceTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetXResourceTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXResource,
     TestSize.Level1)
 {
     // valid value
@@ -433,11 +434,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetYNumberValidTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYNumberValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetYNumberValidTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYNumberValid,
     TestSize.Level1)
 {
     // valid value
@@ -476,11 +477,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetYNumberInvalidTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYNumberInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetYNumberInvalidTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYNumberInvalid,
     TestSize.Level1)
 {
     // valid value
@@ -519,11 +520,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetYResourceTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetYResourceTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYResource,
     TestSize.Level1)
 {
     // valid value
@@ -562,11 +563,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsFillTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsFill
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsFillTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsFill, TestSize.Level1)
 {
     // true value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -622,11 +623,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsTypeTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsType
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsTypeTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsType, TestSize.Level1)
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -684,11 +685,12 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsColorColorTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsColorColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorColorTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsColorColor,
+    TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     Ark_ShadowOptions arkShadowOptions = {
@@ -725,11 +727,12 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsColorStringTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsColorString
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorStringTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsColorString,
+    TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     Ark_ShadowOptions arkShadowOptions = {
@@ -767,11 +770,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsColorResourceTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsColorResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorResourceTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsColorResource,
     TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -810,11 +813,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsColorStrategyValidTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsColorStrategyValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorStrategyValidTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsColorStrategyValid,
     TestSize.Level1)
 {
     // valid value
@@ -854,11 +857,11 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsColorStrategyInvalidTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsColorStrategyInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorStrategyInvalidTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsColorStrategyInvalid,
     TestSize.Level1)
 {
     // invalid value

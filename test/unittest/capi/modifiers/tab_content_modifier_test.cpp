@@ -65,7 +65,7 @@ class TabContentModifierTest : public ModifierTestBase<GENERATED_ArkUITabContent
 };
 
 /*
- * @tc.name: setTabBarTest
+ * @tc.name: setTabBarTestLabel
  * @tc.desc: check setTabBar interface work with only label
  * @tc.type: FUNC
  */
@@ -92,7 +92,7 @@ HWTEST_F(TabContentModifierTest, setTabBarTestLabel, TestSize.Level1)
 }
 
 /*
- * @tc.name: setTabBarTest_CustomNodeBuilder
+ * @tc.name: setTabBarTestCustomNodeBuilder
  * @tc.desc: check setTabBar interface work with CustomBuilder
  * @tc.type: FUNC
  */
@@ -116,7 +116,7 @@ HWTEST_F(TabContentModifierTest, DISABLED_setTabBarTestCustomNodeBuilder, TestSi
 }
 
 /*
- * @tc.name: setTabBarTest
+ * @tc.name: setTabBarTestLabelIcon
  * @tc.desc: check setTabBar interface work with label and icon
  * @tc.type: FUNC
  */
@@ -154,11 +154,11 @@ HWTEST_F(TabContentModifierTest, setTabBarTestLabelIcon, TestSize.Level1)
 }
 
 /*
- * @tc.name: setTabBarBottomStyleTestText
+ * @tc.name: setTabBarTestBottomTabBarStyleText
  * @tc.desc: check setTabBar interface work with only text in BottomStyle
  * @tc.type: FUNC
  */
-HWTEST_F(TabContentModifierTest, setTabBarBottomStyleTestText, TestSize.Level1)
+HWTEST_F(TabContentModifierTest, setTabBarTestBottomTabBarStyleText, TestSize.Level1)
 {
     constexpr auto propName = "text";
     constexpr auto textValue = "test";

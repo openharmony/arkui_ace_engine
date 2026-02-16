@@ -733,11 +733,11 @@ HWTEST_F(GaugeModifierTest, DISABLED_setDescriptionTestDefaultValues, TestSize.L
 }
 
 /*
- * @tc.name: setDescriptionTest_CustomNodeBuilder
+ * @tc.name: setDescriptionTestCustomNodeBuilder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, DISABLED_setDescriptionTest_CustomNodeBuilder, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setDescriptionTestCustomNodeBuilder, TestSize.Level1)
 {
 #ifdef WRONG_API // setDescription not in GENERATED_ArkUIGaugeModifier
     ASSERT_NE(modifier_->setDescription, nullptr);

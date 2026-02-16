@@ -37,7 +37,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ReverseConvertorTest, SimpleTypes, TestSize.Level1)
+HWTEST_F(ReverseConvertorTest, simpleTypesTest, TestSize.Level1)
 {
     auto booleanResult = Converter::ArkValue<Ark_Boolean>(true);
     EXPECT_TRUE(booleanResult);
@@ -89,7 +89,7 @@ HWTEST_F(ReverseConvertorTest, SimpleTypes, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ReverseConvertorTest, ArrayTypes, TestSize.Level1)
+HWTEST_F(ReverseConvertorTest, arrayTypesTest, TestSize.Level1)
 {
     std::vector<std::string> vec{"abc", "1234"};
     Converter::ArkArrayHolder<Array_String> vecHolder(vec);
@@ -137,7 +137,7 @@ HWTEST_F(ReverseConvertorTest, ArrayTypes, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ReverseConvertorTest, OptionalTypes, TestSize.Level1)
+HWTEST_F(ReverseConvertorTest, optionalTypesTest, TestSize.Level1)
 {
     auto emptyOpt = std::optional<int>{};
     auto optNumber = Converter::ArkValue<Opt_Number>(emptyOpt);
@@ -192,7 +192,7 @@ HWTEST_F(ReverseConvertorTest, OptionalTypes, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ReverseConvertorTest, UnionTypes, TestSize.Level1)
+HWTEST_F(ReverseConvertorTest, unionTypesTest, TestSize.Level1)
 {
     auto unionResult = Converter::ArkUnion<Ark_Union_Number_String, Ark_Float64>(123);
     EXPECT_EQ(unionResult.selector, 0);
@@ -232,7 +232,7 @@ HWTEST_F(ReverseConvertorTest, UnionTypes, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ReverseConvertorTest, WithContext, TestSize.Level1)
+HWTEST_F(ReverseConvertorTest, withContextTest, TestSize.Level1)
 {
     Converter::ConvContext ctx;
 

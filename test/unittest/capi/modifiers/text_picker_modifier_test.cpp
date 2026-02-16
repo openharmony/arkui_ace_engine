@@ -416,31 +416,28 @@ static std::vector<TextPickerOptionsTestTuple> textPickerOptionsAsStringArray = 
 };
 
 /*
- * @tc.name: setTextPickerOptionsAsStringArray
+ * @tc.name: setTextPickerOptionsTestAsStringArray
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringArray, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsStringArray, TestSize.Level1)
 {
+    Converter::ConvContext ctx;
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    std::string expectedStr;
-    auto valueCheck = [&resultStr, &jsonValue](const std::string& attrName,
+    auto valueCheck = [&jsonValue](const std::string& attrName,
         const TextPickerOptionsTestTuple& value, const std::string& expectedStr) {
-        resultStr = GetAttrValue<std::string>(jsonValue, attrName);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, attrName);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
     };
 
     for (auto&& value: textPickerOptionsAsStringArray) {
         Ark_TextPickerOptions arkTextPickerOptions;
-        Converter::ArkArrayHolder<Array_String> stringHolder(std::get<RANGE_ID>(value));
-        Array_String stringHolderValue = stringHolder.ArkValue();
         arkTextPickerOptions.range = Converter::ArkUnion<
             Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent,
-            Array_String>(stringHolderValue);
+            Array_String>(std::get<RANGE_ID>(value), &ctx);
 
         if (std::get<HAS_VALUES_ID>(value)) {
-            auto arkValue = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(std::get<VALUES_ID>(value));
+            auto arkValue = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(std::get<VALUES_ID>(value), &ctx);
             auto bindableStr = Converter::ArkUnion<Ark_BindableResourceStr, Ark_ResourceStr>(arkValue);
             arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable,
                 Ark_BindableResourceStr>(bindableStr);
@@ -540,11 +537,11 @@ static std::vector<TextPickerOptionsAsRangeArrayTestTuple> textPickerOptionsAsRa
 };
 
 /*
- * @tc.name: setTextPickerOptionsAsRangeArray
+ * @tc.name: setTextPickerOptionsTestAsRangeArray
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsRangeArray, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsRangeArray, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -707,11 +704,11 @@ void MultiArrayPickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, Multi
 } // namespace
 
 /*
- * @tc.name: setTextPickerOptionsAsStringMultiArray
+ * @tc.name: setTextPickerOptionsTestAsStringMultiArray
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringMultiArray, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsStringMultiArray, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextPickerOptions, nullptr);
     std::unique_ptr<JsonValue> jsonValue;
@@ -857,11 +854,11 @@ void CascadePickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, cascade_
     }
 }
 /*
- * @tc.name: setTextPickerOptionsAsCascadeArray
+ * @tc.name: setTextPickerOptionsTestAsCascadeArray
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsCascadeArray, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsCascadeArray, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextPickerOptions, nullptr);
     std::vector<Ark_TextCascadePickerRangeContent> subcategoryVector;
@@ -978,11 +975,11 @@ HWTEST_F(TextPickerModifierTest, setOnChangeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDefaultItemHeight
+ * @tc.name: setDefaultPickerItemHeightTest
  * @tc.desc: Check the functionality of TextPickerModifier.DefaultPickerItemHeightImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setDefaultItemHeight, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDefaultPickerItemHeightTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDefaultPickerItemHeight, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DEFAULT_PICKER_ITEM_HEIGHT_NAME);
@@ -996,11 +993,11 @@ HWTEST_F(TextPickerModifierTest, setDefaultItemHeight, TestSize.Level1)
 }
 
 /**
- * @tc.name: setCanLoop
+ * @tc.name: setCanLoopTest
  * @tc.desc: Check the functionality of TextPickerModifier.CanLoopImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setCanLoop, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setCanLoopTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCanLoop, nullptr);
 
@@ -1017,11 +1014,11 @@ HWTEST_F(TextPickerModifierTest, setCanLoop, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDisappearTextStyle
+ * @tc.name: setDisappearTextStyleTest
  * @tc.desc: Check the functionality of TextPickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextStyle, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextStyleTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -1056,11 +1053,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextStyle, TestSize.Level1
 }
 
 /**
- * @tc.name: setDisappearTextWeight
+ * @tc.name: setDisappearTextStyleTestWeight
  * @tc.desc: Check the functionality of TextPickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setDisappearTextWeight, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDisappearTextStyleTestWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -1102,11 +1099,11 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextWeight, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDisappearTextFamily
+ * @tc.name: setDisappearTextStyleTestFamily
  * @tc.desc: Check the functionality of TextPickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextStyleTestFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -1141,11 +1138,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level
 }
 
 /**
- * @tc.name: setDisappearTextSize
+ * @tc.name: setDisappearTextStyleTestSize
  * @tc.desc: Check the functionality of TextPickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setDisappearTextSize, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDisappearTextStyleTestSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     Ark_Font font = {
@@ -1174,11 +1171,11 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDisappearTextColor
+ * @tc.name: setDisappearTextStyleTestColor
  * @tc.desc: Check the functionality of TextPickerModifier.DisappearTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextColor, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextStyleTestColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -1200,11 +1197,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextColor, TestSize.Level1
 }
 
 /**
- * @tc.name: setTextStyle
+ * @tc.name: setTextStyleTest
  * @tc.desc: Check the functionality of TextPickerModifier.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_setTextStyle, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setTextStyleTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -1233,11 +1230,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setTextStyle, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTextWeight
+ * @tc.name: setTextStyleTestWeight
  * @tc.desc: Check the functionality of TextPickerModifier.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setTextWeight, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setTextStyleTestWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -1279,11 +1276,11 @@ HWTEST_F(TextPickerModifierTest, setTextWeight, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTextFamily
+ * @tc.name: setTextStyleTestFamily
  * @tc.desc: Check the functionality of TextPickerModifier.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setTextStyleTestFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -1312,11 +1309,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTextSize
+ * @tc.name: setTextStyleTestSize
  * @tc.desc: Check the functionality of TextPickerModifier.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setTextSize, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setTextStyleTestSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -1345,11 +1342,11 @@ HWTEST_F(TextPickerModifierTest, setTextSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTextColor
+ * @tc.name: setTextStyleTestColor
  * @tc.desc: Check the functionality of TextPickerModifier.TextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_setTextColor, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setTextStyleTestColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -1371,11 +1368,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setTextColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSelectedTextStyle
+ * @tc.name: setSelectedTextStyleTest
  * @tc.desc: Check the functionality of TextPickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextStyle, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextStyleTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -1404,11 +1401,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextStyle, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSelectedTextWeight
+ * @tc.name: setSelectedTextStyleTestWeight
  * @tc.desc: Check the functionality of TextPickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setSelectedTextWeight, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setSelectedTextStyleTestWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -1450,11 +1447,11 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextWeight, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSelectedTextFamily
+ * @tc.name: setSelectedTextStyleTestFamily
  * @tc.desc: Check the functionality of TextPickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextStyleTestFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -1483,11 +1480,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1
 }
 
 /**
- * @tc.name: setSelectedTextSize
+ * @tc.name: setSelectedTextStyleTestSize
  * @tc.desc: Check the functionality of TextPickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setSelectedTextSize, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setSelectedTextStyleTestSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     Ark_Font font = {
@@ -1516,11 +1513,11 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSelectedTextColor
+ * @tc.name: setSelectedTextStyleTestColor
  * @tc.desc: Check the functionality of TextPickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextColor, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextStyleTestColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -1542,11 +1539,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSelectedIndex
+ * @tc.name: setSelectedIndexTest
  * @tc.desc: Check the functionality of TextPickerModifier.SelectedIndexImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setSelectedIndex, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setSelectedIndexTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedIndex, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME);
@@ -1571,11 +1568,11 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndex, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSelectedIndexMulti
+ * @tc.name: setSelectedIndexTestMulti
  * @tc.desc: Check the functionality of TextPickerModifier.SelectedIndexImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setSelectedIndexMulti, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setSelectedIndexTestMulti, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedIndex, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTEDS_NAME);
@@ -1604,11 +1601,11 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexMulti, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSelectedIndexMultiCascade
+ * @tc.name: setSelectedIndexTestMultiCascade
  * @tc.desc: Check the functionality of TextPickerModifier.SelectedIndexImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setSelectedIndexMultiCascade, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setSelectedIndexTestMultiCascade, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedIndex, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTEDS_NAME);
@@ -1645,11 +1642,11 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexMultiCascade, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerStrokeWidth
+ * @tc.name: setDividerTestStrokeWidth
  * @tc.desc: Check the functionality of TextPickerModifier.DividerImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setDividerStrokeWidth, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDividerTestStrokeWidth, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
     Ark_DividerOptions options;
@@ -1672,11 +1669,11 @@ HWTEST_F(TextPickerModifierTest, setDividerStrokeWidth, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerColor
+ * @tc.name: setDividerTestColor
  * @tc.desc: Check the functionality of TextPickerModifier.DividerImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_setDividerColor, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setDividerTestColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
     Ark_DividerOptions options;
@@ -1701,11 +1698,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDividerColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerStartMargin
+ * @tc.name: setDividerTestStartMargin
  * @tc.desc: Check the functionality of TextPickerModifier.DividerImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setDividerStartMargin, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDividerTestStartMargin, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
     Ark_DividerOptions options;
@@ -1728,11 +1725,11 @@ HWTEST_F(TextPickerModifierTest, setDividerStartMargin, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerEndMargin
+ * @tc.name: setDividerTestEndMargin
  * @tc.desc: Check the functionality of TextPickerModifier.DividerImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setDividerEndMargin, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDividerTestEndMargin, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
     Ark_DividerOptions options;
@@ -1755,11 +1752,11 @@ HWTEST_F(TextPickerModifierTest, setDividerEndMargin, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDividerEndMargin
+ * @tc.name: setDividerTestUndefined
  * @tc.desc: Check the functionality of TextPickerModifier.DividerImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setDividerUndefined, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDividerTestUndefined, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDivider, nullptr);
     auto unionOptions = Converter::ArkValue<Opt_DividerOptions>();
@@ -1777,11 +1774,11 @@ HWTEST_F(TextPickerModifierTest, setDividerUndefined, TestSize.Level1)
 }
 
 /**
- * @tc.name: setGradientHeight
+ * @tc.name: setGradientHeightTest
  * @tc.desc: Check the functionality of TextPickerModifier.GradientHeightImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_setGradientHeight, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setGradientHeightTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGradientHeight, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_GRADIENT_HEIGHT_NAME);
@@ -1796,11 +1793,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setGradientHeight, TestSize.Level1)
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventSelected1Impl
+ * @tc.name: set_onChangeEvent_selectedTestValidCallback1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected1Impl, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, set_onChangeEvent_selectedTestValidCallback1, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
@@ -1849,11 +1846,11 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected1Impl, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnChangeEventSelected2Impl
+ * @tc.name: set_onChangeEvent_selectedTestValidCallback2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected2Impl, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, set_onChangeEvent_selectedTestValidCallback2, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
@@ -1906,11 +1903,11 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventSelected2Impl, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnChangeEventValue1Impl
+ * @tc.name: set_onChangeEvent_valueTestValidCallback1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setOnChangeEventValue1Impl, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, set_onChangeEvent_valueTestValidCallback1, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
@@ -1959,11 +1956,11 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventValue1Impl, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnChangeEventValue2Impl
+ * @tc.name: set_onChangeEvent_valueTestValidCallback2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setOnChangeEventValue2Impl, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, set_onChangeEvent_valueTestValidCallback2, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
@@ -2017,11 +2014,11 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventValue2Impl, TestSize.Level1)
 #endif
 
 /**
- * @tc.name: setEnableHapticFeedback
+ * @tc.name: setEnableHapticFeedbackTest
  * @tc.desc: Check the functionality of TextPickerModifierTest.EnableHapticFeedbackImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setEnableHapticFeedback, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setEnableHapticFeedbackTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
 
@@ -2036,11 +2033,11 @@ HWTEST_F(TextPickerModifierTest, setEnableHapticFeedback, TestSize.Level1)
 }
 
 /**
- * @tc.name: disableTextStyleAnimation
+ * @tc.name: setDisableTextStyleAnimationTestDisableTextStyleAnimation
  * @tc.desc: Check the functionality of TextPickerModifierTest.disableTextStyleAnimation
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, disableTextStyleAnimation, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDisableTextStyleAnimationTestDisableTextStyleAnimation, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisableTextStyleAnimation, nullptr);
 
@@ -2055,11 +2052,11 @@ HWTEST_F(TextPickerModifierTest, disableTextStyleAnimation, TestSize.Level1)
 }
 
 /**
- * @tc.name: defaultTextWeight
+ * @tc.name: setDefaultTextStyleTestDefaultTextWeight
  * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, defaultTextWeight, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDefaultTextStyleTestDefaultTextWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
     Ark_Font font = {
@@ -2099,11 +2096,11 @@ HWTEST_F(TextPickerModifierTest, defaultTextWeight, TestSize.Level1)
 }
 
 /**
- * @tc.name: defaultTextSize
+ * @tc.name: setDefaultTextStyleTestDefaultTextSize
  * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, defaultTextSize, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDefaultTextStyleTestDefaultTextSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
     Ark_Font font = {
@@ -2131,11 +2128,11 @@ HWTEST_F(TextPickerModifierTest, defaultTextSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: defaultTextColor
+ * @tc.name: setDefaultTextStyleTestDefaultTextColor
  * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, DISABLED_defaultTextColor, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, DISABLED_setDefaultTextStyleTestDefaultTextColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
@@ -2156,11 +2153,11 @@ HWTEST_F(TextPickerModifierTest, DISABLED_defaultTextColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: defaultTextStyleMinMaxFontSize
+ * @tc.name: setDefaultTextStyleTestMinMaxFontSize
  * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, defaultTextStyleMinMaxFontSize, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDefaultTextStyleTestMinMaxFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
     Ark_TextPickerTextStyle pickerStyle;
@@ -2180,11 +2177,11 @@ HWTEST_F(TextPickerModifierTest, defaultTextStyleMinMaxFontSize, TestSize.Level1
 }
 
 /**
- * @tc.name: defaultTextStyleTextOverflow
+ * @tc.name: setDefaultTextStyleTestTextOverflow
  * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, defaultTextStyleTextOverflow, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setDefaultTextStyleTestTextOverflow, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
     Ark_TextPickerTextStyle pickerStyle;
@@ -2201,11 +2198,11 @@ HWTEST_F(TextPickerModifierTest, defaultTextStyleTextOverflow, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnScrollStop
+ * @tc.name: setOnScrollStopTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setOnScrollStop, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setOnScrollStopTest, TestSize.Level1)
 {
     const std::vector<std::string> values = {"ab", "cd"};
     const std::vector<double> indexes = {0.0, 1.0};
@@ -2251,11 +2248,11 @@ HWTEST_F(TextPickerModifierTest, setOnScrollStop, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnEnterSelectedArea
+ * @tc.name: setOnEnterSelectedAreaTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerModifierTest, setOnEnterSelectedArea, TestSize.Level1)
+HWTEST_F(TextPickerModifierTest, setOnEnterSelectedAreaTest, TestSize.Level1)
 {
     const std::vector<std::string> values = {"ab", "cd"};
     const std::vector<double> indexes = {2.0, 3.0};

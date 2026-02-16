@@ -92,11 +92,11 @@ HWTEST_F(SearchModifierTest2, setAutoCapitalizationModeTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCustomKeyboard_CustomNodeBuilder
+ * @tc.name: setCustomKeyboardTestCustomNodeBuilder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.Level1)
+HWTEST_F(SearchModifierTest2, setCustomKeyboardTestCustomNodeBuilder, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCustomKeyboard, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -119,11 +119,11 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.Leve
 }
 
 /*
- * @tc.name: setCustomKeyboard_CustomNodeBuilder_KeyboardOptions
+ * @tc.name: setCustomKeyboardTestCustomNodeBuilderKeyboardOptions
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOptions, TestSize.Level1)
+HWTEST_F(SearchModifierTest2, setCustomKeyboardTestCustomNodeBuilderKeyboardOptions, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCustomKeyboard, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -148,11 +148,11 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOption
 }
 
 /*
- * @tc.name: setKeyboardAppearanceDefaultValuesTest
+ * @tc.name: setKeyboardAppearanceTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest2, setKeyboardAppearanceDefaultValuesTest, TestSize.Level1)
+HWTEST_F(SearchModifierTest2, setKeyboardAppearanceTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
@@ -174,11 +174,11 @@ std::vector<std::tuple<std::string, Opt_KeyboardAppearance, std::string>> testFi
 };
 
 /*
- * @tc.name: setKeyboardAppearanceValuesTest
+ * @tc.name: setKeyboardAppearanceTestValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest2, setKeyboardAppearanceValuesTest, TestSize.Level1)
+HWTEST_F(SearchModifierTest2, setKeyboardAppearanceTestValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setKeyboardAppearance, nullptr);
     auto checkValue = [this](

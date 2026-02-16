@@ -217,11 +217,11 @@ HWTEST_F(ButtonModifierTest, setButtonOptionsTestDefaultValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetButtonOptions0Test
+ * @tc.name: setButtonOptions0Test
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions0
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions0Test, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions0Test, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     ASSERT_NE(modifier_->setButtonOptions0, nullptr);
@@ -242,11 +242,11 @@ HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions0Test, TestSize.Level1)
 #endif
 }
 /*
- * @tc.name: SetButtonOptions1TestStateEffect
+ * @tc.name: setButtonOptions1TestStateEffect
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions1
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1TestStateEffect, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions1TestStateEffect, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     std::unique_ptr<JsonValue> jsonValue;
@@ -281,11 +281,11 @@ HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1TestStateEffect, TestSize
 #endif
 }
 /*
- * @tc.name: SetButtonOptions1TestButtonStyleMode
+ * @tc.name: setButtonOptions1TestButtonStyleMode
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions1
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1ButtonTypeTestButtonStyleMode, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions1TestButtonStyleMode, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     std::unique_ptr<JsonValue> jsonValue;
@@ -320,11 +320,11 @@ HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1ButtonTypeTestButtonStyle
 #endif
 }
 /*
- * @tc.name: SetButtonOptions1TestControlSize
+ * @tc.name: setButtonOptions1TestControlSize
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions1
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1TestControlSize, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions1TestControlSize, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     std::unique_ptr<JsonValue> jsonValue;
@@ -359,11 +359,11 @@ HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1TestControlSize, TestSize
 #endif
 }
 /*
- * @tc.name: SetButtonOptions1TestButtonRole
+ * @tc.name: setButtonOptions1TestButtonRole
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions1
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1TestButtonRole, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions1TestButtonRole, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     std::unique_ptr<JsonValue> jsonValue;
@@ -399,11 +399,11 @@ HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1TestButtonRole, TestSize.
 }
 
 /*
- * @tc.name: SetButtonOptions2TestStateEffect
+ * @tc.name: setButtonOptions2TestStateEffect
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions2
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions2TestStateEffect, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions2TestStateEffect, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     std::unique_ptr<JsonValue> jsonValue;
@@ -443,11 +443,11 @@ HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions2TestStateEffect, TestSize
 #endif
 }
 /*
- * @tc.name: SetButtonOptions2ButtonTypeTestButtonStyleMode
+ * @tc.name: setButtonOptions2TestButtonStyleMode
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions2
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions2ButtonTypeTestButtonStyleMode, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions2TestButtonStyleMode, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     std::unique_ptr<JsonValue> jsonValue;
@@ -486,11 +486,11 @@ HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions2ButtonTypeTestButtonStyle
 #endif
 }
 /*
- * @tc.name: SetButtonOptions2TestControlSize
+ * @tc.name: setButtonOptions2TestControlSize
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions2
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions2TestControlSize, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions2TestControlSize, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     std::unique_ptr<JsonValue> jsonValue;
@@ -529,11 +529,11 @@ HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions2TestControlSize, TestSize
 #endif
 }
 /*
- * @tc.name: SetButtonOptions2TestButtonRole
+ * @tc.name: setButtonOptions2TestButtonRole
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions2
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions2TestButtonRole, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions2TestButtonRole, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     std::unique_ptr<JsonValue> jsonValue;
@@ -1273,7 +1273,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setLabelStyleTestValidValues
+ * @tc.name: setLabelStyleTestOverflow
  * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
  * @tc.type: FUNC
  */
@@ -1315,7 +1315,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestOverflow, TestSize.Level1)
 }
 
 /*
- * @tc.name: setLabelStyleTestValidValues
+ * @tc.name: setLabelStyleTestMaxLines
  * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
  * @tc.type: FUNC
  */
@@ -1348,7 +1348,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMaxLines, TestSize.Level1)
 }
 
 /*
- * @tc.name: setLabelStyleTestValidValues
+ * @tc.name: setLabelStyleTestMinFontSize
  * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
  * @tc.type: FUNC
  */
@@ -1384,7 +1384,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMinFontSize, TestSize.Level1)
     }
 }
 /*
- * @tc.name: setLabelStyleTestValidValues
+ * @tc.name: setLabelStyleTestMaxFontSize
  * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
  * @tc.type: FUNC
  */
@@ -1417,7 +1417,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMaxFontSize, TestSize.Level1)
     }
 }
 /*
- * @tc.name: setLabelStyleTestValidValues
+ * @tc.name: setLabelStyleTestHeightAdaptivePolicy
  * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
  * @tc.type: FUNC
  */
@@ -1453,7 +1453,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestHeightAdaptivePolicy, TestSize.Lev
     }
 }
 /*
- * @tc.name: setLabelStyleTestValidValues
+ * @tc.name: setLabelStyleTestFontWeightValidValues
  * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
  * @tc.type: FUNC
  */
@@ -1567,7 +1567,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontStyleInvalidValues, TestSize.L
 }
 
 /*
- * @tc.name: setLabelStyleTestValidValues
+ * @tc.name: setLabelStyleTestFontSizeValidValues
  * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
  * @tc.type: FUNC
  */
@@ -1604,7 +1604,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeValidValues, TestSize.Leve
     }
 }
 /*
- * @tc.name: setLabelStyleTestValidValues
+ * @tc.name: setLabelStyleTestFontSizeInvalidValues
  * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
  * @tc.type: FUNC
  */
@@ -1639,7 +1639,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestFontSizeInvalidValues, Te
     }
 }
 /*
- * @tc.name: setLabelStyleTestValidValues
+ * @tc.name: setLabelStyleTestFontFamily
  * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
  * @tc.type: FUNC
  */
@@ -1694,7 +1694,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
 }
 
 /*
- * @tc.name: setMinFontScaleDefaultValues
+ * @tc.name: setMinFontScaleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1762,7 +1762,7 @@ HWTEST_F(ButtonModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setMaxFontScaleDefaultValues
+ * @tc.name: setMaxFontScaleTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */

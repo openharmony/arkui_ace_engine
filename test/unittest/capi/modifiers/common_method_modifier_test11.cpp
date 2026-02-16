@@ -85,41 +85,26 @@ public:
 };
 
 /*
- * @tc.name: bindPopupPopupOptionsInitialPopupInfoTest
+ * @tc.name: setBindPopupTestPopupOptionsMessage
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, bindPopupPopupOptionsInitialPopupInfoTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsMessage, TestSize.Level1)
 {
     UINode* blankNode = reinterpret_cast<UINode *>(node_);
-    RefPtr<UINode> blankRef = AceType::Claim(blankNode);
     auto context = blankNode->GetContext();
     ASSERT_NE(context, nullptr);
     auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
-    EXPECT_FALSE(overlayManager->HasPopupInfo(blankRef->GetId()));
-}
+    EXPECT_FALSE(overlayManager->HasPopupInfo(blankNode->GetId()));
 
-/*
- * @tc.name: bindPopupPopupOptionsMessageTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMessageTest, TestSize.Level1)
-{
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
         .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
     });
     modifier_->setBindPopup(node_, &arkShow, &arkUnion);
 
-    UINode* blankNode = reinterpret_cast<UINode *>(node_);
-    RefPtr<UINode> blankRef = AceType::Claim(blankNode);
-    auto context = blankNode->GetContext();
-    ASSERT_NE(context, nullptr);
-    auto overlayManager = context->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
+    auto popupInfo = overlayManager->GetPopupInfo(blankNode->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     auto checkValue = GetAttrValue<std::string>(
@@ -129,11 +114,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMessageTest, 
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsPlacementDefaultValueTest
+ * @tc.name: setBindPopupTestPopupOptionsPlacementDefaultValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPlacementDefaultValueTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsPlacementDefaultValue, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -158,11 +143,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPlacementDefa
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsPlacementValidValueTest
+ * @tc.name: setBindPopupTestPopupOptionsPlacementValidValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPlacementValidValueTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsPlacementValidValue, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -188,11 +173,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPlacementVali
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsPlacementInvalidValueTest
+ * @tc.name: setBindPopupTestPopupOptionsPlacementInvalidValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPlacementInvalidValueTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsPlacementInvalidValue, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -218,11 +203,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPlacementInva
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsArrowOffsetTest
+ * @tc.name: setBindPopupTestPopupOptionsArrowOffset
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsArrowOffsetTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsArrowOffset, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -266,11 +251,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsArrowOffsetTe
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsArrowOffsetPointPositionTest
+ * @tc.name: setBindPopupTestPopupOptionsArrowOffsetPointPosition
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsArrowOffsetPointPositionTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsArrowOffsetPointPosition, TestSize.Level1)
 {
     // default value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -316,11 +301,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsArrowOffsetPo
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsTargetSpaceTest
+ * @tc.name: setBindPopupTestPopupOptionsTargetSpace
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsTargetSpaceTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsTargetSpace, TestSize.Level1)
 {
     // default value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -376,11 +361,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsTargetSpaceTe
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsEnableArrowTest
+ * @tc.name: setBindPopupTestPopupOptionsEnableArrow
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsEnableArrowTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsEnableArrow, TestSize.Level1)
 {
     // default value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -421,11 +406,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsEnableArrowTe
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsEnableHoverModeDefaultValueTest
+ * @tc.name: setBindPopupTestPopupOptionsEnableHoverModeDefaultValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsEnableHoverModeDefaultValueTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsEnableHoverModeDefaultValue, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -450,11 +435,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsEnableHoverMo
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsEnableHoverModeTest
+ * @tc.name: setBindPopupTestPopupOptionsEnableHoverMode
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsEnableHoverModeTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsEnableHoverMode, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -479,11 +464,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsEnableHoverMo
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsFollowTransformOfTargetTest
+ * @tc.name: setBindPopupTestPopupOptionsFollowTransformOfTarget
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsFollowTransformOfTargetTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsFollowTransformOfTarget, TestSize.Level1)
 {
     // default value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -524,11 +509,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsFollowTransfo
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsAutoCancelDefaultValueTest
+ * @tc.name: setBindPopupTestPopupOptionsAutoCancelDefaultValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsAutoCancelDefaultValueTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsAutoCancelDefaultValue, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -553,11 +538,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsAutoCancelDef
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsAutoCancelTest
+ * @tc.name: setBindPopupTestPopupOptionsAutoCancel
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsAutoCancelTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsAutoCancel, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -582,11 +567,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsAutoCancelTes
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsMaskBlockEventTest
+ * @tc.name: setBindPopupTestPopupOptionsMaskBlockEvent
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskBlockEventTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsMaskBlockEvent, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -627,11 +612,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskBlockEven
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsMaskColorDefaultTest
+ * @tc.name: setBindPopupTestPopupOptionsMaskColorDefault
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorDefaultTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsMaskColorDefault, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -656,11 +641,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorDefa
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsMaskColorColorNumberTest
+ * @tc.name: setBindPopupTestPopupOptionsMaskColorColorNumber
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorColorNumberTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsMaskColorColorNumber, TestSize.Level1)
 {
     // color as ark_color
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -708,11 +693,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorColo
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsMaskColorStringResourceTest
+ * @tc.name: setBindPopupTestPopupOptionsMaskColorStringResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorStringResourceTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsMaskColorStringResource, TestSize.Level1)
 {
     // color as string
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -761,11 +746,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsMaskColorStri
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsOffsetTest
+ * @tc.name: setBindPopupTestPopupOptionsOffset
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsOffsetTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsOffset, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -810,11 +795,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsOffsetTest, T
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsPopupColorDefaultTest
+ * @tc.name: setBindPopupTestPopupOptionsPopupColorDefault
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorDefaultTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsPopupColorDefault, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {
@@ -839,11 +824,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorDef
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsPopupColorColorStringTest
+ * @tc.name: setBindPopupTestPopupOptionsPopupColorColorString
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorColorStringTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsPopupColorColorString, TestSize.Level1)
 {
     // color as arkcolor
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -887,11 +872,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorCol
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsPopupColorNumberResourceTest
+ * @tc.name: setBindPopupTestPopupOptionsPopupColorNumberResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorNumberResourceTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsPopupColorNumberResource, TestSize.Level1)
 {
     // color as number
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -935,11 +920,11 @@ HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsPopupColorNum
 }
 
 /*
- * @tc.name: bindPopupPopupOptionsShowInSubWindowTest
+ * @tc.name: setBindPopupTestPopupOptionsShowInSubWindow
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest11, DISABLED_bindPopupPopupOptionsShowInSubWindowTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest11, DISABLED_setBindPopupTestPopupOptionsShowInSubWindow, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto arkUnion = Converter::ArkUnion<Opt_Union_PopupOptions_CustomPopupOptions, Ark_PopupOptions>(Ark_PopupOptions {

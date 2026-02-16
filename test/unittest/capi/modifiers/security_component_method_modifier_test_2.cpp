@@ -374,11 +374,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidLocaliz
 }
 
 /*
- * @tc.name: alignTestValidValues
+ * @tc.name: setAlignTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, alignTestValidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setAlignTestValidValues, TestSize.Level1)
 {
     std::vector<std::tuple<std::string, Ark_Alignment, Alignment>> testFixtureEnumAlignmentValidValues = {
         { "ARK_ALIGNMENT_TOP_START", ARK_ALIGNMENT_TOP_START, Alignment::TOP_LEFT },
@@ -413,11 +413,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, alignTestValidValues, TestSize.Lev
 }
 
 /*
- * @tc.name: alignTestInvalidValues
+ * @tc.name: setAlignTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, alignTestInvalidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setAlignTestInvalidValues, TestSize.Level1)
 {
     const auto initialValue = Converter::ArkValue<Opt_Alignment>(ARK_ALIGNMENT_TOP_START);
 
@@ -889,11 +889,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setHeightAdaptivePolicyTestInvalid
 }
 
 /*
- * @tc.name: ChainModeTest
+ * @tc.name: setChainModeTestChainMode
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, ChainModeTest, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setChainModeTestChainMode, TestSize.Level1)
 {
     Ark_Axis direction = Ark_Axis::ARK_AXIS_HORIZONTAL;
     Ark_ChainStyle style = Ark_ChainStyle::ARK_CHAIN_STYLE_SPREAD_INSIDE;
@@ -953,11 +953,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, ChainModeTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: ChainModeImpl_SetBadDirectionValues
+ * @tc.name: setChainModeTestImplSetBadDirectionValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, ChainModeImpl_SetBadDirectionValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setChainModeTestImplSetBadDirectionValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -982,11 +982,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, ChainModeImpl_SetBadDirectionValue
 }
 
 /*
- * @tc.name: ChainModeImpl_SetBadStyleValues
+ * @tc.name: setChainModeTestImplSetBadStyleValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, ChainModeImpl_SetBadStyleValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setChainModeTestImplSetBadStyleValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1010,11 +1010,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, ChainModeImpl_SetBadStyleValues, T
 }
 
 /*
- * @tc.name: ChainModeImpl_SetBadBothValues
+ * @tc.name: setChainModeTestImplSetBadBothValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, ChainModeImpl_SetBadBothValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setChainModeTestImplSetBadBothValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

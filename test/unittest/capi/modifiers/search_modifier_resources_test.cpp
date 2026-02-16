@@ -169,12 +169,12 @@ public:
 };
 
 /**
- * @tc.name: setSearchOptionsResources
+ * @tc.name: setSearchOptionsTestResources
  * @tc.desc: Check the default values of setSearchOptions
  *
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, setSearchOptionsResources, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setSearchOptionsTestResources, TestSize.Level1)
 {
     Ark_SearchOptions options = {};
 
@@ -242,7 +242,7 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setCancelButtonTestIconSrc, TestS
 }
 
 /**
- * @tc.name: setSearchIconTest
+ * @tc.name: setSearchIconTestResources
  * @tc.desc: Check the functionality of setSearchIcon
  * This test disabled because set icon src and color always return default value
  * @tc.type: FUNC
@@ -312,7 +312,7 @@ HWTEST_F(SearchModifierResourcesTest, setFontColorTestResources, TestSize.Level1
 }
 
 /**
- * @tc.name: setSearchButtonTest
+ * @tc.name: setSearchButtonTestResources
  * @tc.desc: Check the functionality of setSearchButton with Resources
  * @tc.type: FUNC
  */
@@ -402,7 +402,7 @@ HWTEST_F(SearchModifierResourcesTest, setCaretStyleTestResources, TestSize.Level
 }
 
 /**
- * @tc.name: setInputFilterTestResources
+ * @tc.name: setInputFilterTest
  * @tc.desc: Check the functionality of setInputFilter
  * @tc.type: FUNC
  */
@@ -441,11 +441,11 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setInputFilterTest, TestSize.Leve
 }
 
 /**
- * @tc.name: selectedBackgroundColorTest
+ * @tc.name: setSelectedBackgroundColorTestResource
  * @tc.desc: Check the functionality of selectedBackgroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_selectedBackgroundColorTestResource, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, DISABLED_setSelectedBackgroundColorTestResource, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -460,7 +460,7 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_selectedBackgroundColorTestResour
 }
 
 /**
- * @tc.name: setMaxFontSizeTest
+ * @tc.name: setMaxFontSizeTestResource
  * @tc.desc: Check the functionality of setMaxFontSize
  * @tc.type: FUNC
  */
@@ -478,7 +478,7 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setMaxFontSizeTestResource, TestS
 }
 
 /**
- * @tc.name: setMinFontSizeTest
+ * @tc.name: setMinFontSizeTestResource
  * @tc.desc: Check the functionality of setMinFontSize
  * @tc.type: FUNC
  */
@@ -574,7 +574,7 @@ HWTEST_F(SearchModifierResourcesTest, setTextFontTestFontFamily, TestSize.Level1
 }
 
 /**
- * @tc.name: setTextFontTestFontSize
+ * @tc.name: setTextFontTestFontSizeResource
  * @tc.desc: Check the functionality of setTextFont.
  * @tc.type: FUNC
  */

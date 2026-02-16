@@ -122,12 +122,13 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setNavBarWidthTestValidResourceValues
+ * @tc.name: setNavBarWidthTestValidResourceValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setNavBarWidthTestValidResourceValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setNavBarWidth, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -161,12 +162,13 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthTestInvalidValues, TestSize.Level
 }
 
 /*
- * @tc.name: DISABLED_setNavBarWidthTestInvalidResourceValues
+ * @tc.name: setNavBarWidthTestInvalidResourceValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setNavBarWidthTestInvalidResourceValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setNavBarWidth, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -305,12 +307,13 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestValidMaxValues, TestSize
 }
 
 /*
- * @tc.name: DISABLED_setNavBarWidthRangeTestValidResourceValues
+ * @tc.name: setNavBarWidthRangeTestValidResourceValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setNavBarWidthRangeTestValidResourceValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setNavBarWidthRange, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -377,12 +380,13 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestInvalidMaxValues, TestSi
 }
 
 /*
- * @tc.name: DISABLED_setNavBarWidthRangeTestValidResourceValues
+ * @tc.name: setNavBarWidthRangeTestInvalidResourceValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setNavBarWidthRangeTestInvalidResourceValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setNavBarWidthRange, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -427,12 +431,13 @@ HWTEST_F(NavigationModifierTest, setMinContentWidthTestValidValues, TestSize.Lev
 }
 
 /*
- * @tc.name: DISABLED_MinContentWidthTestValidResourceValues
+ * @tc.name: setMinContentWidthTestValidResourceValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationModifierTest, DISABLED_MinContentWidthTestValidResourceValues, TestSize.Level1)
+HWTEST_F(NavigationModifierTest, DISABLED_setMinContentWidthTestValidResourceValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setMinContentWidth, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -648,22 +653,24 @@ HWTEST_F(NavigationModifierTest, setHideTitleBar0TestValidValues, TestSize.Level
 }
 
 /*
- * @tc.name: DISABLED_setHideTitleBar1TestDefaultValues
+ * @tc.name: setHideTitleBar1TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setHideTitleBar1TestDefaultValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setHideTitleBar1, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_setHideTitleBar1TestValidValues
+ * @tc.name: setHideTitleBar1TestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setHideTitleBar1TestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setHideTitleBar1, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -802,22 +809,24 @@ HWTEST_F(NavigationModifierTest, setHideToolBar0TestValidValues, TestSize.Level1
 }
 
 /*
- * @tc.name: DISABLED_setHideToolBar1TestDefaultValues
+ * @tc.name: setHideToolBar1TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setHideToolBar1TestDefaultValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setHideToolBar1, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: DISABLED_setHideToolBar1TestValidValues
+ * @tc.name: setHideToolBar1TestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationModifierTest, DISABLED_setHideToolBar1TestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setHideToolBar1, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -946,13 +955,13 @@ HWTEST_F(NavigationModifierTest, setRecoverableTestInvalidValues, TestSize.Level
 }
 
 /*
- * @tc.name: DISABLED_setIgnoreLayoutSafeAreaDefaultValues
+ * @tc.name: setIgnoreLayoutSafeAreaTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  *
  * DISABLED due to nothing values in the json
  */
-HWTEST_F(NavigationModifierTest, DISABLED_setIgnoreLayoutSafeAreaDefaultValues, TestSize.Level1)
+HWTEST_F(NavigationModifierTest, DISABLED_setIgnoreLayoutSafeAreaTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -967,13 +976,13 @@ HWTEST_F(NavigationModifierTest, DISABLED_setIgnoreLayoutSafeAreaDefaultValues, 
 }
 
 /*
- * @tc.name: DISABLED_setIgnoreLayoutSafeAreaType
+ * @tc.name: setIgnoreLayoutSafeAreaTestType
  * @tc.desc:
  * @tc.type: FUNC
  *
  * DISABLED due to nothing values in the json
  */
-HWTEST_F(NavigationModifierTest, DISABLED_setIgnoreLayoutSafeAreaType, TestSize.Level1)
+HWTEST_F(NavigationModifierTest, DISABLED_setIgnoreLayoutSafeAreaTestType, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -1007,7 +1016,7 @@ HWTEST_F(NavigationModifierTest, DISABLED_setIgnoreLayoutSafeAreaType, TestSize.
 }
 
 /*
- * @tc.name: DISABLED_setMenusTestDefault
+ * @tc.name: setMenusTestDefault
  * @tc.desc:
  * @tc.type: FUNC
  *
@@ -1020,7 +1029,7 @@ HWTEST_F(NavigationModifierTest, DISABLED_setMenusTestDefault, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setMenusTest
+ * @tc.name: setMenusTest
  * @tc.desc:
  * @tc.type: FUNC
  *
@@ -1055,11 +1064,11 @@ HWTEST_F(NavigationModifierTest, DISABLED_setMenusTest, TestSize.Level1)
     EXPECT_EQ(resultStr, "{\"items\":[[\"iconPath\",\"\"]]}");
 }
 /**
- * @tc.name: onTitleModeChangeTest
+ * @tc.name: setOnTitleModeChangeTestOnTitleModeChange
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationModifierTest, onTitleModeChangeTest, TestSize.Level1)
+HWTEST_F(NavigationModifierTest, setOnTitleModeChangeTestOnTitleModeChange, TestSize.Level1)
 {
     const int32_t contextId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

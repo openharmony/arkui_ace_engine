@@ -57,11 +57,11 @@ public:
 };
 
 /**
- * @tc.name: CtorTest
+ * @tc.name: constructTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageDataAccessorTest, CtorTest, TestSize.Level1)
+HWTEST_F(ImageDataAccessorTest, constructTestValidValues, TestSize.Level1)
 {
     const Ark_Number arkWidth = Converter::ArkValue<Ark_Number>(WIDTH);
     const Ark_Number arkHeight = Converter::ArkValue<Ark_Number>(HEIGHT);
@@ -81,11 +81,11 @@ HWTEST_F(ImageDataAccessorTest, CtorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorInvalidValuesTest
+ * @tc.name: constructTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageDataAccessorTest, CtorInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ImageDataAccessorTest, constructTestInvalidValues, TestSize.Level1)
 {
     const Ark_Number arkWidth = Converter::ArkValue<Ark_Number>(WIDTH);
     const Ark_Number arkHeight = Converter::ArkValue<Ark_Number>(HEIGHT);
@@ -105,11 +105,11 @@ HWTEST_F(ImageDataAccessorTest, CtorInvalidValuesTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetWidthTest
+ * @tc.name: getWidthTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageDataAccessorTest, GetWidthTest, TestSize.Level1)
+HWTEST_F(ImageDataAccessorTest, getWidthTest, TestSize.Level1)
 {
     const Ark_Number arkWidth = Converter::ArkValue<Ark_Number>(WIDTH);
     const Ark_Number arkHeight = Converter::ArkValue<Ark_Number>(HEIGHT);
@@ -121,11 +121,11 @@ HWTEST_F(ImageDataAccessorTest, GetWidthTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetWidthTest
+ * @tc.name: setWidthTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageDataAccessorTest, SetWidthTest, TestSize.Level1)
+HWTEST_F(ImageDataAccessorTest, setWidthTest, TestSize.Level1)
 {
     const Ark_Number arkWidth = Converter::ArkValue<Ark_Number>(WIDTH);
     const Ark_Number arkHeight = Converter::ArkValue<Ark_Number>(HEIGHT);
@@ -138,11 +138,11 @@ HWTEST_F(ImageDataAccessorTest, SetWidthTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetHeightTest
+ * @tc.name: getHeightTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageDataAccessorTest, GetHeightTest, TestSize.Level1)
+HWTEST_F(ImageDataAccessorTest, getHeightTest, TestSize.Level1)
 {
     const Ark_Number arkWidth = Converter::ArkValue<Ark_Number>(WIDTH);
     const Ark_Number arkHeight = Converter::ArkValue<Ark_Number>(HEIGHT);
@@ -154,11 +154,11 @@ HWTEST_F(ImageDataAccessorTest, GetHeightTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetHeightTest
+ * @tc.name: setHeightTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageDataAccessorTest, SetHeightTest, TestSize.Level1)
+HWTEST_F(ImageDataAccessorTest, setHeightTest, TestSize.Level1)
 {
     const Ark_Number arkWidth = Converter::ArkValue<Ark_Number>(WIDTH);
     const Ark_Number arkHeight = Converter::ArkValue<Ark_Number>(HEIGHT);
@@ -171,11 +171,11 @@ HWTEST_F(ImageDataAccessorTest, SetHeightTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetGetDataTest
+ * @tc.name: setDataTestSetGetData
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageDataAccessorTest, SetGetDataTest, TestSize.Level1)
+HWTEST_F(ImageDataAccessorTest, setDataTestSetGetData, TestSize.Level1)
 {
     const Ark_Number arkWidth = Converter::ArkValue<Ark_Number>(WIDTH);
     const Ark_Number arkHeight = Converter::ArkValue<Ark_Number>(HEIGHT);

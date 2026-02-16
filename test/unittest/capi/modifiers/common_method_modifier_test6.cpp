@@ -306,6 +306,7 @@ HWTEST_F(CommonMethodModifierTest6, setTransformTestDefaultValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setTransform, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -314,8 +315,9 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues2, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setTransform, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 

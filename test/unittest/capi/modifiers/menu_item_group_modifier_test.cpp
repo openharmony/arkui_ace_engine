@@ -83,11 +83,11 @@ public:
 };
 
 /*
- * @tc.name: setMenuItemGroupOptionsStringTest
+ * @tc.name: setMenuItemGroupOptionsTestString
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemGroupOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsStringTest, TestSize.Level1)
+HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsTestString, TestSize.Level1)
 {
     auto headerValue = GetAttrValue<std::string>(node_, "header");
     auto footerValue = GetAttrValue<std::string>(node_, "footer");
@@ -110,11 +110,11 @@ HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsStringTest, 
 }
 
 /*
- * @tc.name: setMenuItemGroupOptionsResourceTest
+ * @tc.name: setMenuItemGroupOptionsTestResource
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemGroupOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsResourceTest, TestSize.Level1)
+HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsTestResource, TestSize.Level1)
 {
     auto headerValue = GetAttrValue<std::string>(node_, "header");
     auto footerValue = GetAttrValue<std::string>(node_, "footer");
@@ -139,11 +139,11 @@ HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsResourceTest
 }
 
 /*
- * @tc.name: setMenuItemGroupOptionsCustomBuilderTest
+ * @tc.name: setMenuItemGroupOptionsTestCustomBuilder
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemGroupOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsCustomBuilderTest, TestSize.Level1)
+HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsTestCustomBuilder, TestSize.Level1)
 {
     uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto builder = getBuilderCb();

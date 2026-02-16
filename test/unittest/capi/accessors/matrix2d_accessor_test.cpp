@@ -360,11 +360,11 @@ HWTEST_F(Matrix2DAccessorTest,  rotateTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: rotateTest
+ * @tc.name: rotateTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Matrix2DAccessorTest,  rotateInvalidValuesTest, TestSize.Level1)
+HWTEST_F(Matrix2DAccessorTest, rotateTestInvalidValues, TestSize.Level1)
 {
     auto param = ARRAY_NUMBER_TEST_PLAN[0];
     ASSERT_NE(accessor_->rotate, nullptr);

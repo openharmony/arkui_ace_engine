@@ -28,11 +28,11 @@ class BlankModifierTest : public ModifierTestBase<GENERATED_ArkUIBlankModifier,
 };
 
 /**
- * @tc.name: BlankModifierTest001
+ * @tc.name: setColorTestVariant001
  * @tc.desc: Check the functionality of BlankModifier.setColor
  * @tc.type: FUNC
  */
-HWTEST_F(BlankModifierTest, DISABLED_BlankModifierTest001, TestSize.Level1)
+HWTEST_F(BlankModifierTest, DISABLED_setColorTestVariant001, TestSize.Level1)
 {
     constexpr auto propName = "color";
     ASSERT_NE(modifier_->setColor, nullptr);
@@ -77,11 +77,11 @@ HWTEST_F(BlankModifierTest, DISABLED_BlankModifierTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: BlankModifierTest002
+ * @tc.name: setBlankOptionsTestVariant002
  * @tc.desc: Check the functionality of BlankModifier.setBlankOptions
  * @tc.type: FUNC
  */
-HWTEST_F(BlankModifierTest, DISABLED_BlankModifierTest002, TestSize.Level1)
+HWTEST_F(BlankModifierTest, DISABLED_setBlankOptionsTestVariant002, TestSize.Level1)
 {
     constexpr auto propName = "min";
     ASSERT_NE(modifier_->setBlankOptions, nullptr);

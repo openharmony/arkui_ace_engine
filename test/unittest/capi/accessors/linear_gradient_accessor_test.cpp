@@ -82,11 +82,11 @@ public:
 };
 
 /**
- * @tc.name: CtorColorArkStringTest
+ * @tc.name: constructTestColorArkString
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LinearGradientAccessorTest, CtorColorArkStringTest, TestSize.Level1)
+HWTEST_F(LinearGradientAccessorTest, constructTestColorArkString, TestSize.Level1)
 {
     std::vector<Ark_ColorStop> vectorData;
     for (const auto& pairItem : validValues) {
@@ -110,11 +110,11 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkStringTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorColorArkColorTest
+ * @tc.name: constructTestColorArkColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LinearGradientAccessorTest, CtorColorArkColorTest, TestSize.Level1)
+HWTEST_F(LinearGradientAccessorTest, constructTestColorArkColor, TestSize.Level1)
 {
     std::vector<Ark_ColorStop> vectorData;
     for (const auto& pairItem : validValues2) {
@@ -138,11 +138,11 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkColorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorColorArkNumberTest
+ * @tc.name: constructTestColorArkNumber
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LinearGradientAccessorTest, CtorColorArkNumberTest, TestSize.Level1)
+HWTEST_F(LinearGradientAccessorTest, constructTestColorArkNumber, TestSize.Level1)
 {
     std::vector<Ark_ColorStop> vectorData;
     for (const auto& pairItem : validValues3) {
@@ -166,11 +166,11 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkNumberTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorColorArkResourceTest
+ * @tc.name: constructTestColorArkResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LinearGradientAccessorTest, CtorColorArkResourceTest, TestSize.Level1)
+HWTEST_F(LinearGradientAccessorTest, constructTestColorArkResource, TestSize.Level1)
 {
     std::vector<Ark_ColorStop> vectorData;
     for (const auto& pairItem : validValues4) {
@@ -194,11 +194,11 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkResourceTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorInvalidValuesTest
+ * @tc.name: constructTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LinearGradientAccessorTest, CtorInvalidValuesTest, TestSize.Level1)
+HWTEST_F(LinearGradientAccessorTest, constructTestInvalidValues, TestSize.Level1)
 {
     std::vector<Ark_ColorStop> vectorData;
 

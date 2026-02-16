@@ -868,11 +868,11 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setEnterKeyTypeTest2
+ * @tc.name: setEnterKeyTypeTestVariant2
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setEnterKeyType
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTest2, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTestVariant2, TestSize.Level1)
 {
     static const std::string propName("enterKeyType");
     ASSERT_NE(modifier_->setEnterKeyType, nullptr);
@@ -1382,11 +1382,11 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTestInvalidValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: setPlaceholderFontTest1
+ * @tc.name: setPlaceholderFontTestVariant1
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setPlaceholderFont.
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest1, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestVariant1, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
@@ -1418,11 +1418,11 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest1, TestSize.Level1)
 }
 
 /**
- * @tc.name: setPlaceholderFontTest2
+ * @tc.name: setPlaceholderFontTestVariant2
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setPlaceholderFont.
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest2, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestVariant2, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
@@ -1454,11 +1454,11 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest2, TestSize.Level1)
 }
 
 /**
- * @tc.name: setPlaceholderFontTest3
+ * @tc.name: setPlaceholderFontTestVariant3
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setPlaceholderFont.
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest3, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestVariant3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
@@ -1490,11 +1490,11 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest3, TestSize.Level1)
 }
 
 /**
- * @tc.name: setPlaceholderFontTest4
+ * @tc.name: setPlaceholderFontTestVariant4
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setPlaceholderFont.
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTest4, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestVariant4, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
@@ -1704,11 +1704,11 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTextAreaOptionsTest2
+ * @tc.name: setTextAreaOptionsTestVariant2
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setTextAreaOptions
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest2, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTestVariant2, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextAreaOptions, nullptr);
     auto checkValue = [this](const std::string& input,
@@ -1817,7 +1817,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setOnPasteTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setTextOverflowTestTextOverflowValidValues
+ * @tc.name: setTextOverflowTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1845,11 +1845,11 @@ HWTEST_F(TextAreaModifierTest, setTextOverflowTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCustomKeyboardDefaultValues
+ * @tc.name: setCustomKeyboardTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setCustomKeyboardDefaultValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setCustomKeyboardTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1859,11 +1859,11 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCustomKeyboardValidValues
+ * @tc.name: setCustomKeyboardTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setCustomKeyboardTestValidValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1900,11 +1900,11 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
 
 #ifdef WRONG_OLD_CALLBACK
 /*
- * @tc.name: setOnChangeEventTextImpl
+ * @tc.name: set_onChangeEvent_textTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, set_onChangeEvent_textTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();

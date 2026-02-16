@@ -101,7 +101,7 @@ HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestValidValues, TestSi
 }
 
 /*
- * @tc.name: setLinearGradientBlurTestValidValues
+ * @tc.name: setLinearGradientBlurTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -155,7 +155,7 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestDefaultValues, TestSize.Leve
 }
 
 /*
- * @tc.name: setBlendModeTestValidValues
+ * @tc.name: setBlendModeTestValidValues1
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -201,7 +201,7 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues1, TestSize.Level
 }
 
 /*
- * @tc.name: setBlendModeTestValidValues
+ * @tc.name: setBlendModeTestValidValues2
  * @tc.desc:
  * @tc.type: FUNC
  */

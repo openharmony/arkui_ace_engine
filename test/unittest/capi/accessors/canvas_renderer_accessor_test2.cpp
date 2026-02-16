@@ -313,11 +313,11 @@ public:
 };
 
 /**
- * @tc.name: getTransformScaleTest
+ * @tc.name: getTransformTestScale
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, getTransformScaleTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, getTransformTestScale, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTransform, nullptr);
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
@@ -338,11 +338,11 @@ HWTEST_F(CanvasRendererAccessorTest2, getTransformScaleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getTransformRotateTest
+ * @tc.name: getTransformTestRotate
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, getTransformRotateTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, getTransformTestRotate, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTransform, nullptr);
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
@@ -363,11 +363,11 @@ HWTEST_F(CanvasRendererAccessorTest2, getTransformRotateTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getTransformTranslateTest
+ * @tc.name: getTransformTestTranslate
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, getTransformTranslateTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, getTransformTestTranslate, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTransform, nullptr);
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
@@ -431,11 +431,11 @@ HWTEST_F(CanvasRendererAccessorTest2, setLineJoinTest, TestSize.Level1)
 
 #ifdef PIXEL_MAP_SUPPORTED
 /**
- * @tc.name: setPixelMapTest
+ * @tc.name: setPixelMapTestWithSupport
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setPixelMapTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, setPixelMapTestWithSupport, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setPixelMap, nullptr);
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
@@ -450,11 +450,11 @@ HWTEST_F(CanvasRendererAccessorTest2, setPixelMapTest, TestSize.Level1)
 #else
 
 /**
- * @tc.name: setPixelMapTest
+ * @tc.name: setPixelMapTestWithoutSupport
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setPixelMapTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, setPixelMapTestWithoutSupport, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setPixelMap, nullptr);
     accessor_->setPixelMap(peer_, nullptr);
@@ -567,11 +567,11 @@ HWTEST_F(CanvasRendererAccessorTest2, setTextBaselineTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage0BitmapTest
+ * @tc.name: drawImage0TestBitmap
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage0BitmapTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage0TestBitmap, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage0, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -618,11 +618,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage0BitmapTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage0SvgTest
+ * @tc.name: drawImage0TestSvg
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage0SvgTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage0TestSvg, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage0, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -651,11 +651,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage0SvgTest, TestSize.Level1)
 
 #if !defined(PREVIEW)
 /**
- * @tc.name: drawImage0PixelMapTest
+ * @tc.name: drawImage0TestPixelMap
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage0PixelMapTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage0TestPixelMap, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage0, nullptr);
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
@@ -680,11 +680,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage0PixelMapTest, TestSize.Level1)
 #endif
 
 /**
- * @tc.name: drawImage1BitmapXYTest
+ * @tc.name: drawImage1TestBitmapXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage1BitmapXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage1TestBitmapXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage1, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -732,11 +732,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1BitmapXYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage1BitmapXYTest
+ * @tc.name: drawImage1TestBitmapWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage1BitmapWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage1TestBitmapWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage1, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -784,11 +784,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1BitmapWHTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage1SvgXYTest
+ * @tc.name: drawImage1TestSvgXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage1SvgXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage1TestSvgXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage1, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -817,11 +817,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1SvgXYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage1SvgWHTest
+ * @tc.name: drawImage1TestSvgWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage1SvgWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage1TestSvgWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage1, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -851,11 +851,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1SvgWHTest, TestSize.Level1)
 
 #if !defined(PREVIEW)
 /**
- * @tc.name: drawImage1PixelMapXYTest
+ * @tc.name: drawImage1TestPixelMapXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage1TestPixelMapXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage1, nullptr);
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
@@ -880,11 +880,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapXYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage1PixelMapWHTest
+ * @tc.name: drawImage1TestPixelMapWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage1TestPixelMapWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage1, nullptr);
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
@@ -910,11 +910,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage1PixelMapWHTest, TestSize.Level1)
 #endif
 
 /**
- * @tc.name: drawImage2BitmapSXYTest
+ * @tc.name: drawImage2TestBitmapSXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapSXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestBitmapSXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -962,11 +962,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapSXYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage2BitmapSWHTest
+ * @tc.name: drawImage2TestBitmapSWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapSWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestBitmapSWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -1014,11 +1014,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapSWHTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage2BitmapXYTest
+ * @tc.name: drawImage2TestBitmapXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestBitmapXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -1066,11 +1066,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapXYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage2BitmapWHTest
+ * @tc.name: drawImage2TestBitmapWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestBitmapWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -1118,11 +1118,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2BitmapWHTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage2SvgSXYTest
+ * @tc.name: drawImage2TestSvgSXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgSXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestSvgSXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -1151,11 +1151,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgSXYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage2SvgSWHTest
+ * @tc.name: drawImage2TestSvgSWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgSWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestSvgSWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -1184,11 +1184,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgSWHTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage2SvgXYTest
+ * @tc.name: drawImage2TestSvgXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestSvgXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -1217,11 +1217,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgXYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage2SvgWHTest
+ * @tc.name: drawImage2TestSvgWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestSvgWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
@@ -1251,11 +1251,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2SvgWHTest, TestSize.Level1)
 
 #if !defined(PREVIEW)
 /**
- * @tc.name: drawImage2PixelMapSXYTest
+ * @tc.name: drawImage2TestPixelMapSXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestPixelMapSXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
@@ -1280,11 +1280,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSXYTest, TestSize.Level1
 }
 
 /**
- * @tc.name: drawImage2PixelMapSWHTest
+ * @tc.name: drawImage2TestPixelMapSWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestPixelMapSWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
@@ -1309,11 +1309,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapSWHTest, TestSize.Level1
 }
 
 /**
- * @tc.name: drawImage2PixelMapXYTest
+ * @tc.name: drawImage2TestPixelMapXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestPixelMapXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
@@ -1338,11 +1338,11 @@ HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapXYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: drawImage2PixelMapWHTest
+ * @tc.name: drawImage2TestPixelMapWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, drawImage2PixelMapWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, drawImage2TestPixelMapWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->drawImage2, nullptr);
     Ark_image_PixelMap arkPixelMap = PeerUtils::CreatePeer<image_PixelMapPeer>();
@@ -1435,11 +1435,11 @@ HWTEST_F(CanvasRendererAccessorTest2, measureTextTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFillStyleStringTest
+ * @tc.name: setFillStyleTestString
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setFillStyleStringTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, setFillStyleTestString, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFillStyle, nullptr);
     for (const auto& [actual, expected, pass] : STYLE_STRING_TEST_PLAN) {
@@ -1463,11 +1463,11 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStyleStringTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFillStyleNumberTest
+ * @tc.name: setFillStyleTestNumber
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setFillStyleNumberTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setFillStyleTestNumber, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFillStyle, nullptr);
     for (const auto& [actual, expected] : STYLE_NUMBER_TEST_PLAN) {
@@ -1482,11 +1482,11 @@ HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setFillStyleNumberTest, TestSize.
 }
 
 /**
- * @tc.name: setFillStyleColorTest
+ * @tc.name: setFillStyleTestColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setFillStyleColorTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setFillStyleTestColor, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     ASSERT_NE(accessor_->setFillStyle, nullptr);
@@ -1503,11 +1503,11 @@ HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setFillStyleColorTest, TestSize.L
 }
 
 /**
- * @tc.name: setFillStyleGradientTest
+ * @tc.name: setFillStyleTestGradient
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setFillStyleGradientTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, setFillStyleTestGradient, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFillStyle, nullptr);
     Ark_CanvasGradient arkGradient = new CanvasGradientPeer();
@@ -1523,11 +1523,11 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStyleGradientTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFillStylePatternStrTest
+ * @tc.name: setFillStyleTestPatternStr
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setFillStylePatternStrTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, setFillStyleTestPatternStr, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFillStyle, nullptr);
     RefPtr<MockImageBitmapPeerStyle> bitmap = AceType::MakeRefPtr<MockImageBitmapPeerStyle>();
@@ -1572,11 +1572,11 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStylePatternStrTest, TestSize.Level
 }
 
 /**
- * @tc.name: setFillStylePatternWHTest
+ * @tc.name: setFillStyleTestPatternWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setFillStylePatternWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, setFillStyleTestPatternWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFillStyle, nullptr);
     RefPtr<MockImageBitmapPeerStyle> bitmap = AceType::MakeRefPtr<MockImageBitmapPeerStyle>();
@@ -1622,11 +1622,11 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStylePatternWHTest, TestSize.Level1
 }
 
 /**
- * @tc.name: setStrokeStyleStringTest
+ * @tc.name: setStrokeStyleTestString
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleStringTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleTestString, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setStrokeStyle, nullptr);
     for (const auto& [actual, expected, pass] : STYLE_STRING_TEST_PLAN) {
@@ -1650,11 +1650,11 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleStringTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setStrokeStyleNumberTest
+ * @tc.name: setStrokeStyleTestNumber
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setStrokeStyleNumberTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setStrokeStyleTestNumber, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setStrokeStyle, nullptr);
     for (const auto& [actual, expected] : STYLE_NUMBER_TEST_PLAN) {
@@ -1670,11 +1670,11 @@ HWTEST_F(CanvasRendererAccessorTest2, DISABLED_setStrokeStyleNumberTest, TestSiz
 }
 
 /**
- * @tc.name: setStrokeStyleColorTest
+ * @tc.name: setStrokeStyleTestColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleColorTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleTestColor, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setStrokeStyle, nullptr);
     for (const auto& [actual, expected] : STYLE_COLOR_TEST_PLAN) {
@@ -1690,11 +1690,11 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleColorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setStrokeStyleGradientTest
+ * @tc.name: setStrokeStyleTestGradient
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleGradientTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleTestGradient, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setStrokeStyle, nullptr);
     Ark_CanvasGradient arkGradient = new CanvasGradientPeer();
@@ -1709,11 +1709,11 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleGradientTest, TestSize.Level
 }
 
 /**
- * @tc.name: setStrokeStylePatternStrTest
+ * @tc.name: setStrokeStyleTestPatternStr
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setStrokeStylePatternStrTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleTestPatternStr, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setStrokeStyle, nullptr);
     RefPtr<MockImageBitmapPeerStyle> bitmap = AceType::MakeRefPtr<MockImageBitmapPeerStyle>();
@@ -1758,11 +1758,11 @@ HWTEST_F(CanvasRendererAccessorTest2, setStrokeStylePatternStrTest, TestSize.Lev
 }
 
 /**
- * @tc.name: setStrokeStylePatternWHTest
+ * @tc.name: setStrokeStyleTestPatternWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest2, setStrokeStylePatternWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest2, setStrokeStyleTestPatternWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setStrokeStyle, nullptr);
     RefPtr<MockImageBitmapPeerStyle> bitmap = AceType::MakeRefPtr<MockImageBitmapPeerStyle>();

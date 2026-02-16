@@ -300,11 +300,11 @@ HWTEST_F(MenuModifierTest, DISABLED_setRadiusTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setRadiusRadiusesValidTest
+ * @tc.name: setRadiusTestRadiusesValid
  * @tc.desc: Check the functionality of MenuModifier.setRadius
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, DISABLED_setRadiusRadiusesValidTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, DISABLED_setRadiusTestRadiusesValid, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
     auto radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
@@ -336,11 +336,11 @@ HWTEST_F(MenuModifierTest, DISABLED_setRadiusRadiusesValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setRadiusRadiusesNegativeOrEmptyTest
+ * @tc.name: setRadiusTestRadiusesNegativeOrEmpty
  * @tc.desc: Check the functionality of MenuModifier.setRadius
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, DISABLED_setRadiusRadiusesNegativeOrEmptyTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, DISABLED_setRadiusTestRadiusesNegativeOrEmpty, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
     auto radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
@@ -390,11 +390,11 @@ HWTEST_F(MenuModifierTest, DISABLED_setRadiusRadiusesNegativeOrEmptyTest, TestSi
 }
 
 /**
- * @tc.name: setMenuItemDividerColorTest
+ * @tc.name: setMenuItemDividerTestColor
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerColorTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTestColor, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -447,11 +447,11 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerColorTest, TestSize.Level1
 }
 
 /**
- * @tc.name: setMenuItemDividerStrokeTest
+ * @tc.name: setMenuItemDividerTestStroke
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemDividerStrokeTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemDividerTestStroke, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -480,11 +480,11 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerStrokeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setMenuItemDividerStartMarginTest
+ * @tc.name: setMenuItemDividerTestStartMargin
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemDividerStartMarginTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemDividerTestStartMargin, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -513,11 +513,11 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerStartMarginTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setMenuItemDividerEndMarginTest
+ * @tc.name: setMenuItemDividerTestEndMargin
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemDividerEndMarginTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemDividerTestEndMargin, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -546,11 +546,11 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerEndMarginTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setMenuItemDividerUndefinedValuesTest
+ * @tc.name: setMenuItemDividerTestUndefined
  * @tc.desc: Check the functionality of ListModifier.setMenuItemDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemDividerUndefinedTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemDividerTestUndefined, TestSize.Level1)
 {
     Opt_DividerStyleOptions divider =
         Converter::ArkValue<Opt_DividerStyleOptions>();
@@ -588,11 +588,11 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerUndefinedTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setMenuItemGroupDividerColorTest
+ * @tc.name: setMenuItemGroupDividerTestColor
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemGroupDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerColorTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerTestColor, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -645,11 +645,11 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerColorTest, TestSize.L
 }
 
 /**
- * @tc.name: setMenuItemGroupDividerStrokeTest
+ * @tc.name: setMenuItemGroupDividerTestStroke
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemGroupDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemGroupDividerStrokeTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTestStroke, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -678,11 +678,11 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerStrokeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setMenuItemGroupDividerStartMarginTest
+ * @tc.name: setMenuItemGroupDividerTestStartMargin
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemGroupDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemGroupDividerStartMarginTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTestStartMargin, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -711,11 +711,11 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerStartMarginTest, TestSize.Leve
 }
 
 /**
- * @tc.name: setMenuItemGroupDividerEndMarginTest
+ * @tc.name: setMenuItemGroupDividerTestEndMargin
  * @tc.desc: Check the functionality of MenuModifier.setMenuItemGroupDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemGroupDividerEndMarginTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTestEndMargin, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -744,11 +744,11 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerEndMarginTest, TestSize.Level1
 }
 
 /**
- * @tc.name: setMenuItemGroupDividerUndefinedValuesTest
+ * @tc.name: setMenuItemGroupDividerTestUndefined
  * @tc.desc: Check the functionality of ListModifier.setMenuItemGroupDivider
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setMenuItemGroupDividerUndefinedTest, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTestUndefined, TestSize.Level1)
 {
     Opt_DividerStyleOptions divider =
         Converter::ArkValue<Opt_DividerStyleOptions>();
@@ -786,11 +786,11 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerUndefinedTest, TestSize.Level1
 }
 
 /**
- * @tc.name: setFontTest1
+ * @tc.name: setFontTestVariant1
  * @tc.desc: Check the functionality of MenuModifier.setFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setFontTest1, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setFontTestVariant1, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
     Ark_Font font = {
@@ -821,11 +821,11 @@ HWTEST_F(MenuModifierTest, setFontTest1, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFontTest2
+ * @tc.name: setFontTestVariant2
  * @tc.desc: Check the functionality of MenuModifier.setFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setFontTest2, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setFontTestVariant2, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
     Ark_Font font = {
@@ -856,11 +856,11 @@ HWTEST_F(MenuModifierTest, setFontTest2, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFontTest3
+ * @tc.name: setFontTestVariant3
  * @tc.desc: Check the functionality of MenuModifier.setFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setFontTest3, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setFontTestVariant3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
     Ark_Font font = {
@@ -891,11 +891,11 @@ HWTEST_F(MenuModifierTest, setFontTest3, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFontTest4
+ * @tc.name: setFontTestVariant4
  * @tc.desc: Check the functionality of MenuModifier.setFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, setFontTest4, TestSize.Level1)
+HWTEST_F(MenuModifierTest, setFontTestVariant4, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
     Ark_Font font = {
@@ -926,11 +926,11 @@ HWTEST_F(MenuModifierTest, setFontTest4, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFontTest5
+ * @tc.name: setFontTestVariant5
  * @tc.desc: Check the functionality of MenuModifier.setFont
  * @tc.type: FUNC
  */
-HWTEST_F(MenuModifierTest, DISABLED_setFontTest5, TestSize.Level1)
+HWTEST_F(MenuModifierTest, DISABLED_setFontTestVariant5, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
     Ark_Font font = {

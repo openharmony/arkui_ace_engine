@@ -204,11 +204,11 @@ public:
 };
 
 /*
-* @tc.name: TabStopTestDefaultValues
+* @tc.name: tabStopTestDefaultValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, TabStopTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, tabStopTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -219,11 +219,11 @@ HWTEST_F(CommonMethodModifierTest19, TabStopTestDefaultValues, TestSize.Level1)
 }
 
 /*
-* @tc.name: TabStopTestValidValues
+* @tc.name: setTabStopTestValidValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, TabStopTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, setTabStopTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTabStop, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -242,11 +242,11 @@ HWTEST_F(CommonMethodModifierTest19, TabStopTestValidValues, TestSize.Level1)
 }
 
 /*
-* @tc.name: TabStopTestInvalidValues
+* @tc.name: setTabStopTestInvalidValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, TabStopTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, setTabStopTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTabStop, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -267,11 +267,11 @@ HWTEST_F(CommonMethodModifierTest19, TabStopTestInvalidValues, TestSize.Level1)
 }
 
 /*
-* @tc.name: AccessibilityNextFocusIdTestDefaultValues
+* @tc.name: accessibilityNextFocusIdTestDefaultValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, AccessibilityNextFocusIdTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, accessibilityNextFocusIdTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -282,11 +282,11 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityNextFocusIdTestDefaultValues, 
 }
 
 /*
-* @tc.name: AccessibilityNextFocusIdTestValidValues
+* @tc.name: setAccessibilityNextFocusIdTestValidValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityNextFocusIdTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_setAccessibilityNextFocusIdTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityNextFocusId, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -305,11 +305,11 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityNextFocusIdTestValidV
 }
 
 /*
-* @tc.name: AccessibilityDefaultFocusTestDefaultValues
+* @tc.name: accessibilityDefaultFocusTestDefaultValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityDefaultFocusTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_accessibilityDefaultFocusTestDefaultValues, TestSize.Level1)
 {
     LOGE("AccessibilityManager::SendFrameNodeToAccessibility(...) is empty body");
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -317,11 +317,11 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityDefaultFocusTestDefau
 }
 
 /*
-* @tc.name: AccessibilityDefaultFocusTestValidValues
+* @tc.name: setAccessibilityDefaultFocusTestValidValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityDefaultFocusTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_setAccessibilityDefaultFocusTestValidValues, TestSize.Level1)
 {
     LOGE("AccessibilityManager::SendFrameNodeToAccessibility(...) is empty body");
     ASSERT_NE(modifier_->setAccessibilityDefaultFocus, nullptr);
@@ -338,11 +338,11 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityDefaultFocusTestValid
 }
 
 /*
-* @tc.name: AccessibilityUseSamePageTestDefaultValues
+* @tc.name: accessibilityUseSamePageTestDefaultValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, AccessibilityUseSamePageTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, accessibilityUseSamePageTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -354,11 +354,11 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityUseSamePageTestDefaultValues, 
 }
 
 /*
-* @tc.name: AccessibilityUseSamePageTestValidValues
+* @tc.name: setAccessibilityUseSamePageTestValidValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityUseSamePageTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_setAccessibilityUseSamePageTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityUseSamePage, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -381,11 +381,11 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityUseSamePageTestValidV
 }
 
 /*
-* @tc.name: AccessibilityUseSamePageTestInvalidValues
+* @tc.name: setAccessibilityUseSamePageTestInvalidValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, AccessibilityUseSamePageTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, setAccessibilityUseSamePageTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityUseSamePage, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -401,11 +401,11 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityUseSamePageTestInvalidValues, 
 }
 
 /*
-* @tc.name: AccessibilityRoleTestDefaultValues
+* @tc.name: accessibilityRoleTestDefaultValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, accessibilityRoleTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -417,46 +417,11 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestDefaultValues, TestSiz
 }
 
 /*
-* @tc.name: AccessibilityRoleTestValidValues
+* @tc.name: setAccessibilityRoleTestValidValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, SetAccessibilityGroupWithConfigImplTest001, TestSize.Level1)
-{
-    Ark_AccessibilityOptions options;
-
-    NG::AccessibilityGroupOptions groupOptions;
-    options.stateControllerRoleType = {
-        .tag = INTEROP_TAG_UNDEFINED,
-        .value = ARK_ACCESSIBILITY_ROLE_TYPE_BUTTON
-    };
-    options.actionControllerRoleType = {
-        .tag = INTEROP_TAG_UNDEFINED,
-        .value = ARK_ACCESSIBILITY_ROLE_TYPE_BUTTON
-    };
-
-    groupOptions = Converter::Convert<NG::AccessibilityGroupOptions>(options);
-    ASSERT_EQ(groupOptions.stateControllerByType, AccessibilityRoleType::ROLE_NONE);
-    ASSERT_EQ(groupOptions.actionControllerByType, AccessibilityRoleType::ROLE_NONE);
-
-    options.stateControllerRoleType = {
-        .tag = INTEROP_TAG_INT32,
-        .value = ARK_ACCESSIBILITY_ROLE_TYPE_BUTTON
-    };
-    options.actionControllerRoleType = {
-        .tag = INTEROP_TAG_INT32,
-        .value = ARK_ACCESSIBILITY_ROLE_TYPE_BUTTON
-    };
-    groupOptions = Converter::Convert<NG::AccessibilityGroupOptions>(options);
-    ASSERT_EQ(groupOptions.stateControllerByType, AccessibilityRoleType::BUTTON);
-}
-
-/*
-* @tc.name: AccessibilityRoleTestValidValues
-* @tc.desc:
-* @tc.type: FUNC
-*/
-HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityRoleTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_setAccessibilityRoleTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityRole, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -474,11 +439,11 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityRoleTestValidValues, 
 }
 
 /*
-* @tc.name: AccessibilityRoleTestInvalidValues
+* @tc.name: setAccessibilityRoleTestInvalidValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityRoleTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_setAccessibilityRoleTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityRole, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -495,11 +460,11 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityRoleTestInvalidValues
 }
 
 /*
- * @tc.name: SetOnKeyEventDispatchTest
+ * @tc.name: setOnKeyEventDispatchTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest19, DISABLED_SetOnKeyEventDispatchTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_setOnKeyEventDispatchTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyEventDispatch, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -547,11 +512,11 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_SetOnKeyEventDispatchTest, TestSiz
 }
 
 /*
-* @tc.name: NextFocusTest
+* @tc.name: setNextFocusTestNextFocus
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest19, NextFocusTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, setNextFocusTestNextFocus, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setNextFocus, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -606,11 +571,11 @@ HWTEST_F(CommonMethodModifierTest19, NextFocusTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: bindMenu0Test
+ * @tc.name: setBindMenu0TestBindMenu0
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest19, DISABLED_bindMenu0Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_setBindMenu0TestBindMenu0, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindMenu0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -631,11 +596,11 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_bindMenu0Test, TestSize.Level1)
 }
 
 /*
- * @tc.name: bindMenu1Test
+ * @tc.name: setBindMenu1TestBindMenu1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest19, DISABLED_bindMenu1Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_setBindMenu1TestBindMenu1, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindMenu1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

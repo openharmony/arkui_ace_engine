@@ -98,11 +98,11 @@ HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsTestDefaultValues, T
 }
 
 /*
- * @tc.name: setScrollBarOptionsScrollerTestValidValues
+ * @tc.name: setScrollBarOptionsTestScrollerValidValues
  * @tc.desc: Checking that the object is set to the pattern and peer.
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsScrollerTestValidValues, TestSize.Level1)
+HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsTestScrollerValidValues, TestSize.Level1)
 {
     const auto proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
     ScrollBarOptions options(fullAPI_, proxy);
@@ -121,11 +121,11 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsScrollerTestValidValues, Test
 }
 
 /*
- * @tc.name: setScrollBarOptionsDirectionTestValidValues
+ * @tc.name: setScrollBarOptionsTestDirectionValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsDirectionTestValidValues, TestSize.Level1)
+HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsTestDirectionValidValues, TestSize.Level1)
 {
     ScrollBarOptions optionsVertical(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(),
         ARK_SCROLL_BAR_DIRECTION_VERTICAL);
@@ -145,11 +145,11 @@ HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsDirectionTestValidVa
 }
 
 /*
- * @tc.name: setScrollBarOptionsDirectionTestInvalidValues
+ * @tc.name: setScrollBarOptionsTestDirectionInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsDirectionTestInvalidValues, TestSize.Level1)
+HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsTestDirectionInvalidValues, TestSize.Level1)
 {
     ScrollBarOptions optionsValid(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(),
         ARK_SCROLL_BAR_DIRECTION_VERTICAL);
@@ -174,11 +174,11 @@ HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsDirectionTestInvalid
 }
 
 /*
- * @tc.name: setScrollBarOptionsStateTestValidValues
+ * @tc.name: setScrollBarOptionsTestStateValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsStateTestValidValues, TestSize.Level1)
+HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsTestStateValidValues, TestSize.Level1)
 {
     ScrollBarOptions optionsOff(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(), std::nullopt, ARK_BAR_STATE_OFF);
     ScrollBarOptions optionsAuto(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(), std::nullopt,
@@ -203,11 +203,11 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsStateTestValidValues, TestSiz
 }
 
 /*
- * @tc.name: setScrollBarOptionsStateTestInvalidValues
+ * @tc.name: setScrollBarOptionsTestStateInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsStateTestInvalidValues, TestSize.Level1)
+HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsTestStateInvalidValues, TestSize.Level1)
 {
     ScrollBarOptions optionsValid(fullAPI_, AceType::MakeRefPtr<NG::ScrollBarProxy>(), std::nullopt, ARK_BAR_STATE_ON);
     const auto optionsValidStr = "BarState.On";
