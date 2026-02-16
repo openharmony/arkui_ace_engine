@@ -316,20 +316,6 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
         super.applyOptionsFinish(traceName)
     }
 }
-
-@memo
-export function SaveButtonImpl(
-    @memo @memo_skip
-    style: ((attributes: SaveButtonAttribute) => void) | undefined,
-): void {
-    const receiver = remember<ArkSaveButtonComponent>((): ArkSaveButtonComponent => {
-        return new ArkSaveButtonComponent()
-    })
-    NodeAttach<ArkSaveButtonPeer>((): ArkSaveButtonPeer => ArkSaveButtonPeer.create(receiver), (_: ArkSaveButtonPeer): void => {
-        style?.(receiver)
-    })
-}
-
 export class SaveButtonOptions_serializer {
     public static write(buffer: SerializerBase, value: SaveButtonOptions): void {
         let valueSerializer: SerializerBase = buffer
