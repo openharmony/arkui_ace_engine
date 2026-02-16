@@ -489,7 +489,7 @@ HWTEST_F(TabsModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onChange =
-        [](Ark_Int32 nodeId, const Ark_Int32 index) {
+        [](Ark_VMContext vmContext, Ark_Int32 nodeId, const Ark_Int32 index) {
             g_indexValue = Converter::Convert<int32_t>(index);
         };
     auto func = Converter::ArkCallback<Opt_Callback_I32_Void>(onChange, CONTEXT_ID);
@@ -519,7 +519,7 @@ HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onAnimationStart =
-        [](Ark_Int32 nodeId, const Ark_Int32 index, const Ark_Int32 targetIndex,
+        [](Ark_VMContext vmContext, Ark_Int32 nodeId, const Ark_Int32 index, const Ark_Int32 targetIndex,
             const Ark_TabsAnimationEvent event) {
             g_indexValue = Converter::Convert<int32_t>(index);
             g_targetIndexValue = Converter::Convert<int32_t>(targetIndex);
@@ -568,7 +568,7 @@ HWTEST_F(TabsModifierTest, setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onAnimationEnd =
-        [](Ark_Int32 nodeId, const Ark_Int32 index, const Ark_TabsAnimationEvent event) {
+        [](Ark_VMContext vmContext, Ark_Int32 nodeId, const Ark_Int32 index, const Ark_TabsAnimationEvent event) {
             g_indexValue = Converter::Convert<int32_t>(index);
             g_currentOffsetValue = Converter::Convert<float>(event.currentOffset);
             g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
@@ -614,7 +614,7 @@ HWTEST_F(TabsModifierTest, setOnGestureSwipeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onGestureSwipe =
-        [](Ark_Int32 nodeId, const Ark_Int32 index, const Ark_TabsAnimationEvent event) {
+        [](Ark_VMContext vmContext, Ark_Int32 nodeId, const Ark_Int32 index, const Ark_TabsAnimationEvent event) {
             g_indexValue = Converter::Convert<int32_t>(index);
             g_currentOffsetValue = Converter::Convert<float>(event.currentOffset);
             g_targetOffsetValue = Converter::Convert<float>(event.targetOffset);
@@ -722,7 +722,7 @@ HWTEST_F(TabsModifierTest, setOnTabBarClickTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto onTabBarClick =
-        [](Ark_Int32 nodeId, const Ark_Int32 index) {
+        [](Ark_VMContext vmContext, Ark_Int32 nodeId, const Ark_Int32 index) {
             g_indexValue = Converter::Convert<int32_t>(index);
         };
     auto func = Converter::ArkCallback<Opt_Callback_I32_Void>(onTabBarClick);
@@ -956,9 +956,9 @@ HWTEST_F(TabsModifierTest, setDividerUndefinedTest, TestSize.Level1)
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
     EXPECT_EQ(strokeWidthCheckValue, "11.00px");
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "0.00vp");
+    EXPECT_EQ(startMarginCheckValue, "0.00px");
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "0.00vp");
+    EXPECT_EQ(endMarginCheckValue, "0.00px");
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#FF000000");
 }
@@ -1003,8 +1003,14 @@ HWTEST_F(TabsModifierTest, setDividerNullTest, TestSize.Level1)
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
 
-    auto dividerCheckValue = dividerObject->ToString();
-    EXPECT_EQ(dividerCheckValue, "{}");
+    auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
+    EXPECT_EQ(strokeWidthCheckValue, "0.00px");
+    auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
+    EXPECT_EQ(startMarginCheckValue, "0.00px");
+    auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
+    EXPECT_EQ(endMarginCheckValue, "0.00px");
+    auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+    EXPECT_EQ(colorCheckValue, "#FF000000");
 }
 
 /*
@@ -1721,7 +1727,7 @@ HWTEST_F(TabsModifierTest, setOnSelectedTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto onSelected =
-        [](Ark_Int32 nodeId, const Ark_Int32 index) {
+        [](Ark_VMContext vmContext, Ark_Int32 nodeId, const Ark_Int32 index) {
             g_indexValue = Converter::Convert<int32_t>(index);
         };
     auto func = Converter::ArkCallback<Opt_Callback_I32_Void>(onSelected);
@@ -1749,7 +1755,7 @@ HWTEST_F(TabsModifierTest, setOnUnselectedTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto onUnselected =
-        [](Ark_Int32 nodeId, const Ark_Int32 index) {
+        [](Ark_VMContext vmContext, Ark_Int32 nodeId, const Ark_Int32 index) {
             g_indexValue = Converter::Convert<int32_t>(index);
         };
     auto func = Converter::ArkCallback<Opt_Callback_I32_Void>(onUnselected);

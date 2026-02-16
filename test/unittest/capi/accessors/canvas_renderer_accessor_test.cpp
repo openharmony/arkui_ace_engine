@@ -1607,11 +1607,11 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapTest, TestSize.Level1)
     auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     auto arkR = Converter::ArkValue<Ark_Float64>(DEFAULT_SCALE_VALUE);
     auto ptr = accessor_->getPixelMap(peer_, arkD, arkR, arkD, arkR);
-    auto optValue = Converter::GetOptPtr(&ptr);
-    EXPECT_EQ(optValue, nullptr);
+    auto optValue = Converter::GetOpt(ptr);
+    EXPECT_FALSE(optValue.has_value());
     ptr = accessor_->getPixelMap(peer_, arkR, arkD, arkR, arkD);
-    optValue = Converter::GetOptPtr(&ptr);
-    EXPECT_EQ(optValue, nullptr);
+    optValue = Converter::GetOpt(ptr);
+    EXPECT_FALSE(optValue.has_value());
 }
 #endif
 

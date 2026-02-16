@@ -28,12 +28,6 @@
 #include "text_picker_modifier.h"
 
 namespace OHOS::Ace::NG {
-namespace Converter {
-void AssignArkValue(Ark_ResourceStr &dst, const std::string& src, ConvContext *ctx)
-{
-    dst = ArkUnion<Ark_ResourceStr, Ark_String>(src, ctx);
-}
-} // namespace Converter
 namespace {
 std::optional<Converter::PickerValueType> ProcessBindableValue(FrameNode* frameNode,
     const Opt_Union_BindableResourceStr_BindableResourceStrArray& value)

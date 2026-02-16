@@ -810,7 +810,7 @@ void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, Con
         center.value1 = ArkUnion<Ark_Length, Ark_Float64>(50.0); // default center y: 50%
     }
     dst.center = center;
-    
+
     // Set radius
     if (radialGradient->radialHorizontalSize.has_value()) {
         AssignArkValue(dst.radius, radialGradient->radialHorizontalSize.value(), ctx);
@@ -819,7 +819,7 @@ void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, Con
     } else {
         dst.radius = ArkUnion<Ark_Length, Ark_Float64>(50.0); // default radius: 50%
     }
-    
+
     // Set colors
     std::vector<Ark_Tuple_ResourceColor_F64> colorStops;
     const auto& colors = src.GetColors();
@@ -832,7 +832,7 @@ void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, Con
         colorStops.push_back(colorStop);
     }
     dst.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorStops, ctx);
-    
+
     // Set repeating
     dst.repeating = Converter::ArkValue<Opt_Boolean>(src.GetRepeat(), ctx);
 }
@@ -847,10 +847,10 @@ void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, Con
     } else {
         dst.angle = Converter::ArkUnion<Opt_Union_F64_String>(Ark_Empty());
     }
-    
+
     // Set direction
     dst.direction = Converter::ArkValue<Opt_GradientDirection>(Ark_Empty());
-    
+
     // Set colors
     std::vector<Ark_Tuple_ResourceColor_F64> colorStops;
     const auto& colors = src.GetColors();
@@ -863,7 +863,7 @@ void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, Con
         colorStops.push_back(colorStop);
     }
     dst.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorStops, ctx);
-    
+
     // Set repeating
     dst.repeating = Converter::ArkValue<Opt_Boolean>(src.GetRepeat(), ctx);
 }
@@ -1204,5 +1204,15 @@ void AssignArkValue(Ark_InnerGestureTriggerInfo& dst, const GestureTriggerInfo& 
 
     // Set gesture action phase (enum value, not optional)
     dst.currentPhase = static_cast<Ark_GestureActionPhase>(src.currentPhase);
+}
+
+void AssignArkValue(Ark_ResourceStr &dst, const char *src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_ResourceStr, Ark_String>(src, ctx);
+}
+
+void AssignArkValue(Ark_ResourceStr &dst, const std::string& src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_ResourceStr, Ark_String>(src, ctx);
 }
 } // namespace OHOS::Ace::NG::Converter

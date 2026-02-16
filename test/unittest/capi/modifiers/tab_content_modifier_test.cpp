@@ -196,7 +196,7 @@ HWTEST_F(TabContentModifierTest, setOnWillShowTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId) {
+    auto checkCallback = [](Ark_VMContext vmContext, const Ark_Int32 resourceId) {
         checkEvent = {
             .nodeId = resourceId
         };
@@ -227,7 +227,7 @@ HWTEST_F(TabContentModifierTest, setOnWillHideTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
 
-    auto checkCallback = [](const Ark_Int32 resourceId) {
+    auto checkCallback = [](Ark_VMContext vmContext, const Ark_Int32 resourceId) {
         checkEvent = {
             .nodeId = resourceId
         };

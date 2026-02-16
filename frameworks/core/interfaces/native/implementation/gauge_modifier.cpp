@@ -20,14 +20,21 @@
 #include "frameworks/base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUIGaugeModifier* GetGaugeStaticModifier();
+#endif
 const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
 {
     static const GENERATED_ArkUIGaugeModifier* cachedModifier = nullptr;
 
     if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetGaugeStaticModifier();
+#else
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const GENERATED_ArkUIGaugeModifier*>(module->GetStaticModifier());
+#endif
     }
 
     return cachedModifier;

@@ -20,16 +20,24 @@
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUISearchModifier* GetSearchStaticModifier();
+#endif
 const GENERATED_ArkUISearchModifier* GetSearchModifier()
 {
     static const GENERATED_ArkUISearchModifier* cachedModifier = nullptr;
+
     if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetSearchStaticModifier();
+#else
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Search");
         if (module == nullptr) {
             LOGF("Can't find search dynamic module");
             abort();
         }
         cachedModifier = reinterpret_cast<const GENERATED_ArkUISearchModifier*>(module->GetStaticModifier());
+#endif
     }
     return cachedModifier;
 }
