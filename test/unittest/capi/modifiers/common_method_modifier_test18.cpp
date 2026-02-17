@@ -127,19 +127,19 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_RADIUS);
-    EXPECT_EQ(checkValue, DOUBLE_0_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_0_STR));
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, TEST_COLOR_BLACK_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLACK_STR));
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_X);
-    EXPECT_EQ(checkValue, DOUBLE_0_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_0_STR));
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_Y);
-    EXPECT_EQ(checkValue, DOUBLE_0_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_0_STR));
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_TYPE);
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_FILL);
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
 }
 
 /*
@@ -178,7 +178,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, PROP_NAME_SHADOW);
-    EXPECT_EQ(checkValue, "ShadowStyle.OuterFloatingMD");
+    EXPECT_THAT(checkValue, Eq("ShadowStyle.OuterFloatingMD"));
 
     // invalid value
     arkShadowStyle = Converter::INVALID_ENUM_VAL<Ark_ShadowStyle>;
@@ -196,7 +196,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     checkValue = GetAttrValue<std::string>(fullJson, PROP_NAME_SHADOW);
-    EXPECT_EQ(checkValue, "ShadowStyle.OuterFloatingMD");
+    EXPECT_THAT(checkValue, Eq("ShadowStyle.OuterFloatingMD"));
 }
 
 /*
@@ -236,9 +236,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_RADIUS);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 
     // negative value
     arkShadowOptions = {
@@ -257,9 +257,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_RADIUS);
-    EXPECT_EQ(checkValue, DOUBLE_0_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_0_STR));
 }
 
 /*
@@ -300,9 +300,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_RADIUS);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 }
 
 /*
@@ -342,9 +342,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_X);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 }
 
 /*
@@ -385,9 +385,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_X);
-    EXPECT_EQ(checkValue, DOUBLE_1_NEGATIVE_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_NEGATIVE_STR));
 }
 
 /*
@@ -428,9 +428,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_X);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 }
 
 /*
@@ -471,9 +471,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_Y);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 }
 
 /*
@@ -514,9 +514,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_Y);
-    EXPECT_EQ(checkValue, DOUBLE_1_NEGATIVE_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_NEGATIVE_STR));
 }
 
 /*
@@ -557,9 +557,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_Y);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 }
 
 /*
@@ -598,9 +598,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_FILL);
-    EXPECT_EQ(checkValue, "1");
+    EXPECT_THAT(checkValue, Eq("1"));
 
     // false value
     arkShadowOptions = { .fill = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)) };
@@ -617,9 +617,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_FILL);
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
 }
 
 /*
@@ -658,9 +658,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_TYPE);
-    EXPECT_EQ(checkValue, "1");
+    EXPECT_THAT(checkValue, Eq("1"));
 
     // invalid value
     arkShadowOptions = { .type = Converter::ArkValue<Opt_ShadowType>(
@@ -679,9 +679,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_TYPE);
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
 }
 
 /*
@@ -721,9 +721,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
@@ -764,9 +764,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
@@ -807,9 +807,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
@@ -851,9 +851,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, "ColoringStrategy.PRIMARY");
+    EXPECT_THAT(checkValue, Eq("ColoringStrategy.PRIMARY"));
 }
 
 /*
@@ -895,8 +895,8 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptions
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, TEST_COLOR_BLACK_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLACK_STR));
 }
 }

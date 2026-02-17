@@ -82,19 +82,16 @@ public:
  */
 HWTEST_F(CommonShapeMethodModifierResourcesTest, setStrokeWidthTestResources, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue;
-    double result;
-
     typedef std::pair<Opt_Length, double> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Opt_Length>(FAKE_RES_ID), 10 }
+        { Converter::ArkValue<Opt_Length>(FAKE_RES_ID), 10. }
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
         modifier_->setStrokeWidth(node_, &arkLength);
-        jsonValue = GetJsonValue(node_);
-        result = GetAttrValue<double>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
-        EXPECT_NEAR(result, expected, FLT_EPSILON);
+        auto jsonValue = GetJsonValue(node_);
+        auto result = GetAttrValue<double>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
+        EXPECT_THAT(result, Optional(DoubleEq(expected)));
     }
 }
 
@@ -112,7 +109,7 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, setFillOpacityTestResources, Te
         modifier_->setFillOpacity(node_, &res);
         jsonValue = GetJsonValue(node_);
         auto checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_OPACITY_NAME);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -130,7 +127,7 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, setStrokeOpacityTestResources, 
         modifier_->setStrokeOpacity(node_, &res);
         jsonValue = GetJsonValue(node_);
         auto checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_OPACITY_NAME);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 } // namespace OHOS::Ace::NG

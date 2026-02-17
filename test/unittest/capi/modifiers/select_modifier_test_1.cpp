@@ -93,7 +93,7 @@ HWTEST_F(SelectModifierTest, setSelectedTestSelectedValidValues, TestSize.Level1
         modifier_->setSelected(node_, &inputValueSelected);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setSelected, attribute: selected";
     };
 // we can check only empty selection, i.e. 0 and 1 indexes
@@ -121,7 +121,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedTestSelectedInvalidValues, Test
         modifier_->setSelected(node_, &inputValueSelected);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSelected, attribute: selected";
     };
     // Check invalid union
@@ -139,10 +139,10 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedTestSelectedInvalidValues, Test
 HWTEST_F(SelectModifierTest, setValueTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) << "Default value for attribute 'value'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_VALUE_DEFAULT_VALUE)) << "Default value for attribute 'value'";
 }
 
 /*
@@ -164,7 +164,7 @@ HWTEST_F(SelectModifierTest, setValueTestValueInvalidValues, TestSize.Level1)
         modifier_->setValue(node_, &inputValueValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_VALUE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setValue, attribute: value";
     };
 
@@ -181,20 +181,20 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestDefaultValues, TestSize.Level1)
 {
     modifier_->setFont(node_, nullptr);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultFont = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_I_SIZE_DEFAULT_VALUE) << "Default value for attribute 'font.size'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_I_SIZE_DEFAULT_VALUE)) << "Default value for attribute 'font.size'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_I_WEIGHT_DEFAULT_VALUE) << "Default value for attribute 'font.weight'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_I_WEIGHT_DEFAULT_VALUE)) << "Default value for attribute 'font.weight'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_FAMILY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_I_FAMILY_DEFAULT_VALUE) << "Default value for attribute 'font.family'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_I_FAMILY_DEFAULT_VALUE)) << "Default value for attribute 'font.family'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_I_STYLE_DEFAULT_VALUE) << "Default value for attribute 'font.style'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_I_STYLE_DEFAULT_VALUE)) << "Default value for attribute 'font.style'";
 }
 
 /*
@@ -223,9 +223,10 @@ HWTEST_F(SelectModifierTest, setFontTestFontSizeValidValues, TestSize.Level1)
         WriteTo(inputValueFont).size = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
+        auto resultFont = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setFont, attribute: font.size";
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Input value is: " << input <<
+            ", method: setFont, attribute: font.size";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
@@ -259,9 +260,9 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontSizeInvalidValues, TestSize
         WriteTo(inputValueFont).size = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
+        auto resultFont = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_I_SIZE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_I_SIZE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFont, attribute: font.size";
     };
 
@@ -298,9 +299,9 @@ HWTEST_F(SelectModifierTest, setFontTestFontWeightValidValues, TestSize.Level1)
         WriteTo(inputValueFont).weight = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
+        auto resultFont = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setFont, attribute: font.weight";
     };
 
@@ -342,9 +343,9 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontWeightInvalidValues, TestSi
         WriteTo(inputValueFont).weight = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
+        auto resultFont = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_I_WEIGHT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_I_WEIGHT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFont, attribute: font.weight";
     };
 
@@ -383,9 +384,9 @@ HWTEST_F(SelectModifierTest, setFontTestFontFamilyValidValues, TestSize.Level1)
         WriteTo(inputValueFont).family = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
+        auto resultFont = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setFont, attribute: font.family";
     };
 
@@ -423,9 +424,9 @@ HWTEST_F(SelectModifierTest, setFontTestFontFamilyInvalidValues, TestSize.Level1
         WriteTo(inputValueFont).family = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
+        auto resultFont = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_I_FAMILY_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_I_FAMILY_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFont, attribute: font.family";
     };
     // Check invalid union
@@ -460,9 +461,10 @@ HWTEST_F(SelectModifierTest, setFontTestFontStyleValidValues, TestSize.Level1)
         WriteTo(inputValueFont).style = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
+        auto resultFont = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setFont, attribute: font.style";
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Input value is: " << input <<
+            ", method: setFont, attribute: font.style";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontStyleValidValues) {
@@ -496,9 +498,9 @@ HWTEST_F(SelectModifierTest, setFontTestFontStyleInvalidValues, TestSize.Level1)
         WriteTo(inputValueFont).style = value;
         modifier_->setFont(node_, &inputValueFont);
         auto jsonValue = GetJsonValue(node_);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
+        auto resultFont = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_I_STYLE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_I_STYLE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFont, attribute: font.style";
     };
 
@@ -515,9 +517,9 @@ HWTEST_F(SelectModifierTest, setFontTestFontStyleInvalidValues, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE) << "Default value for attribute 'fontColor'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE)) << "Default value for attribute 'fontColor'";
 }
 
 /*
@@ -539,7 +541,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontColorTestFontColorValidValues, Test
         modifier_->setFontColor(node_, &inputValueFontColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setFontColor, attribute: fontColor";
     };
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
@@ -577,7 +579,7 @@ HWTEST_F(SelectModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Le
         modifier_->setFontColor(node_, &inputValueFontColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFontColor, attribute: fontColor";
     };
 
@@ -601,10 +603,10 @@ HWTEST_F(SelectModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Le
 HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_OPTION_BG_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_BG_COLOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_OPTION_BG_COLOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'selectedOptionBgColor'";
 }
 
@@ -629,7 +631,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestValidValues, T
         modifier_->setSelectedOptionBgColor(node_, &inputValueSelectedOptionBgColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_OPTION_BG_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setSelectedOptionBgColor, attribute: selectedOptionBgColor";
     };
 
@@ -669,7 +671,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestInvalidValues,
         modifier_->setSelectedOptionBgColor(node_, &inputValueSelectedOptionBgColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_OPTION_BG_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_BG_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_OPTION_BG_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSelectedOptionBgColor, attribute: selectedOptionBgColor";
     };
 
@@ -694,23 +696,23 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestDefaultValues, TestSize.Le
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultSelectedOptionFont =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
-    std::string resultStr;
+        GetAttrObject(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_FONT_I_SIZE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_OPTION_FONT_I_SIZE_DEFAULT_VALUE)) <<
         "Default value for attribute 'selectedOptionFont.size'";
 
     resultStr = GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_FONT_I_WEIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_OPTION_FONT_I_WEIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'selectedOptionFont.weight'";
 
     resultStr = GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_FAMILY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_FONT_I_FAMILY_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_OPTION_FONT_I_FAMILY_DEFAULT_VALUE)) <<
         "Default value for attribute 'selectedOptionFont.family'";
 
     resultStr = GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_FONT_I_STYLE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_OPTION_FONT_I_STYLE_DEFAULT_VALUE)) <<
         "Default value for attribute 'selectedOptionFont.style'";
 }
 
@@ -739,7 +741,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSizeValidValues, TestSize.
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultSelectedOptionFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_SIZE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -778,7 +780,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSizeInvalidValues
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultSelectedOptionFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_SIZE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_FONT_I_SIZE_DEFAULT_VALUE) <<
@@ -817,7 +819,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestWeightValidValues, TestSiz
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultSelectedOptionFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_WEIGHT_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -860,7 +862,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestWeightInvalidValu
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultSelectedOptionFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_WEIGHT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_FONT_I_WEIGHT_DEFAULT_VALUE) <<
@@ -901,7 +903,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestFamilyValidValues, TestSiz
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultSelectedOptionFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_FAMILY_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -942,7 +944,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestFamilyInvalidValues, TestS
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultSelectedOptionFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_FAMILY_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_FONT_I_FAMILY_DEFAULT_VALUE) <<
@@ -981,7 +983,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestStyleValidValues, TestSize
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultSelectedOptionFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_STYLE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1020,7 +1022,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestStyleInvalidValues, TestSi
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultSelectedOptionFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultSelectedOptionFont, ATTRIBUTE_SELECTED_OPTION_FONT_I_STYLE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_FONT_I_STYLE_DEFAULT_VALUE) <<
@@ -1040,10 +1042,10 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestStyleInvalidValues, TestSi
 HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_FONT_COLOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_OPTION_FONT_COLOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'selectedOptionFontColor'";
 }
 
@@ -1068,7 +1070,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTestValidValues,
         modifier_->setSelectedOptionFontColor(node_, &inputValueSelectedOptionFontColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input <<
             ", method: setSelectedOptionFontColor, attribute: selectedOptionFontColor";
     };
@@ -1109,7 +1111,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontColorTestSelectedOptionFontCol
         modifier_->setSelectedOptionFontColor(node_, &inputValueSelectedOptionFontColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_OPTION_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_OPTION_FONT_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_OPTION_FONT_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input <<
             ", method: setSelectedOptionFontColor, attribute: selectedOptionFontColor";
     };
@@ -1134,10 +1136,11 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontColorTestSelectedOptionFontCol
 HWTEST_F(SelectModifierTest, setOptionBgColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTION_BG_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_OPTION_BG_COLOR_DEFAULT_VALUE) << "Default value for attribute 'optionBgColor'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_OPTION_BG_COLOR_DEFAULT_VALUE)) <<
+        "Default value for attribute 'optionBgColor'";
 }
 
 /*
@@ -1161,7 +1164,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionBgColorTestOptionBgColorValidValu
         modifier_->setOptionBgColor(node_, &inputValueOptionBgColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTION_BG_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setOptionBgColor, attribute: optionBgColor";
     };
 
@@ -1200,7 +1203,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionBgColorTestOptionBgColorInvalidVa
         modifier_->setOptionBgColor(node_, &inputValueOptionBgColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTION_BG_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_OPTION_BG_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_OPTION_BG_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setOptionBgColor, attribute: optionBgColor";
     };
 

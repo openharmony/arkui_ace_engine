@@ -128,24 +128,24 @@ HWTEST_F(ListItemModifierTest, constructTestWithLazy, TestSize.Level1)
 HWTEST_F(ListItemModifierTest, DISABLED_setListItemOptionsTest, TestSize.Level1)
 {
     auto style = GetAttrValue<std::string>(node_, "itemStyle");
-    EXPECT_EQ(style, "ListItemStyle.NONE");
+    EXPECT_THAT(style, Eq("ListItemStyle.NONE"));
 
     Ark_ListItemOptions listItemOptions = {.style = Converter::ArkValue<Opt_ListItemStyle>(V2::ListItemStyle::CARD)};
     Opt_ListItemOptions arg = Converter::ArkValue<Opt_ListItemOptions>(listItemOptions);
     modifier_->setListItemOptions(node_, &arg);
     style = GetAttrValue<std::string>(node_, "itemStyle");
-    EXPECT_EQ(style, "ListItemStyle.CARD");
+    EXPECT_THAT(style, Eq("ListItemStyle.CARD"));
 
     arg = Converter::ArkValue<Opt_ListItemOptions>(Ark_Empty());
     modifier_->setListItemOptions(node_, &arg);
     style = GetAttrValue<std::string>(node_, "itemStyle");
-    EXPECT_EQ(style, "ListItemStyle.CARD");
+    EXPECT_THAT(style, Eq("ListItemStyle.CARD"));
 
     listItemOptions = {.style = Converter::ArkValue<Opt_ListItemStyle>(Ark_Empty())};
     arg = Converter::ArkValue<Opt_ListItemOptions>(listItemOptions);
     modifier_->setListItemOptions(node_, &arg);
     style = GetAttrValue<std::string>(node_, "itemStyle");
-    EXPECT_EQ(style, "ListItemStyle.NONE");
+    EXPECT_THAT(style, Eq("ListItemStyle.NONE"));
 }
 
 /*
@@ -155,12 +155,12 @@ HWTEST_F(ListItemModifierTest, DISABLED_setListItemOptionsTest, TestSize.Level1)
  */
 HWTEST_F(ListItemModifierTest, setSelectableTest, TestSize.Level1)
 {
-    bool selectable = GetAttrValue<bool>(node_, "selectable");
-    EXPECT_TRUE(selectable);
+    auto selectable = GetAttrValue<bool>(node_, "selectable");
+    EXPECT_THAT(selectable, Eq(true));
     auto optValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setSelectable(node_, &optValue);
     selectable = GetAttrValue<bool>(node_, "selectable");
-    EXPECT_FALSE(selectable);
+    EXPECT_THAT(selectable, Eq(false));
 }
 
 /*
@@ -170,12 +170,12 @@ HWTEST_F(ListItemModifierTest, setSelectableTest, TestSize.Level1)
  */
 HWTEST_F(ListItemModifierTest, setSelectedTest, TestSize.Level1)
 {
-    bool selected = GetAttrValue<bool>(node_, "selected");
-    EXPECT_FALSE(selected);
+    auto selected = GetAttrValue<bool>(node_, "selected");
+    EXPECT_THAT(selected, Eq(false));
     auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     modifier_->setSelected(node_, &optValue);
     selected = GetAttrValue<bool>(node_, "selected");
-    EXPECT_TRUE(selected);
+    EXPECT_THAT(selected, Eq(true));
 }
 
 /*
@@ -225,9 +225,9 @@ HWTEST_F(ListItemModifierTest, setOnSelectTest, TestSize.Level1)
 HWTEST_F(ListItemModifierTest, setSwipeActionTestEdgeEffect, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
-    auto swipeAction = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "swipeAction");
+    auto swipeAction = GetAttrObject(fullJson, "swipeAction");
     auto edgeEffect = GetAttrValue<std::string>(swipeAction, "edgeEffect");
-    EXPECT_EQ(edgeEffect, "");
+    EXPECT_THAT(edgeEffect, Eq(std::nullopt));
 
     Ark_SwipeActionOptions  options = {
         .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
@@ -238,9 +238,9 @@ HWTEST_F(ListItemModifierTest, setSwipeActionTestEdgeEffect, TestSize.Level1)
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(options);
     modifier_->setSwipeAction(node_, &optOptions);
     fullJson = GetJsonValue(node_);
-    swipeAction = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "swipeAction");
+    swipeAction = GetAttrObject(fullJson, "swipeAction");
     edgeEffect = GetAttrValue<std::string>(swipeAction, "edgeEffect");
-    EXPECT_EQ(edgeEffect, "SwipeEdgeEffect.None");
+    EXPECT_THAT(edgeEffect, Eq("SwipeEdgeEffect.None"));
 
     options = {
         .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
@@ -250,9 +250,9 @@ HWTEST_F(ListItemModifierTest, setSwipeActionTestEdgeEffect, TestSize.Level1)
     optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(options);
     modifier_->setSwipeAction(node_, &optOptions);
     fullJson = GetJsonValue(node_);
-    swipeAction = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "swipeAction");
+    swipeAction = GetAttrObject(fullJson, "swipeAction");
     edgeEffect = GetAttrValue<std::string>(swipeAction, "edgeEffect");
-    EXPECT_EQ(edgeEffect, "SwipeEdgeEffect.Spring");
+    EXPECT_THAT(edgeEffect, Eq("SwipeEdgeEffect.Spring"));
 
     options = {
         .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
@@ -262,9 +262,9 @@ HWTEST_F(ListItemModifierTest, setSwipeActionTestEdgeEffect, TestSize.Level1)
     optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(options);
     modifier_->setSwipeAction(node_, &optOptions);
     fullJson = GetJsonValue(node_);
-    swipeAction = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "swipeAction");
+    swipeAction = GetAttrObject(fullJson, "swipeAction");
     edgeEffect = GetAttrValue<std::string>(swipeAction, "edgeEffect");
-    EXPECT_EQ(edgeEffect, "");
+    EXPECT_THAT(edgeEffect, Eq(std::nullopt));
 }
 
 /**
@@ -651,8 +651,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistance, T
 
     auto startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     auto endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "0.00vp");
-    EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("0.00vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("0.00vp"));
 
     Ark_SwipeActionItem itemStart = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
@@ -677,8 +677,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistance, T
 
     startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "55.50vp");
-    EXPECT_EQ(endDeleteAreaDistance, "77.70vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("55.50vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("77.70vp"));
 }
 
 /**
@@ -693,8 +693,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistanceNeg
 
     auto startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     auto endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "0.00vp");
-    EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("0.00vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("0.00vp"));
 
     Ark_SwipeActionItem itemStart = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
@@ -719,8 +719,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistanceNeg
 
     startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "-55.50vp");
-    EXPECT_EQ(endDeleteAreaDistance, "-77.70vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("-55.50vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("-77.70vp"));
 }
 
 /**
@@ -735,8 +735,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistanceOpt
 
     auto startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     auto endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "0.00vp");
-    EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("0.00vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("0.00vp"));
 
     Ark_SwipeActionItem itemStart = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
@@ -761,8 +761,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistanceOpt
 
     startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "55.50vp");
-    EXPECT_EQ(endDeleteAreaDistance, "77.70vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("55.50vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("77.70vp"));
 
     // optional values
     itemStart = {
@@ -785,8 +785,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistanceOpt
 
     startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "0.00vp");
-    EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("0.00vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("0.00vp"));
 }
 
 #ifdef WRONG_OLD_GEN

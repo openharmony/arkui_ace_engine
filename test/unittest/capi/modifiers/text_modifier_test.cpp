@@ -254,169 +254,169 @@ HWTEST_F(TextModifierTest, setFontColorTest, TestSize.Level1)
 {
     const auto color1 = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREEN);
     modifier_->setFontColor(node_, &color1);
-    auto checkVal1 = GetStringAttribute(node_, FONT_COLOR_ATTR);
-    EXPECT_EQ(checkVal1, "#FF008000");
+    auto checkVal1 = GetAttrValue<std::string>(node_, FONT_COLOR_ATTR);
+    EXPECT_THAT(checkVal1, Eq("#FF008000"));
 
     auto resNameColor = CreateResourceUnion<Opt_ResourceColor>(RES_NAME);
     modifier_->setFontColor(node_, &resNameColor);
-    auto checkVal7 = GetStringAttribute(node_, FONT_COLOR_ATTR);
-    EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
+    auto checkVal7 = GetAttrValue<std::string>(node_, FONT_COLOR_ATTR);
+    EXPECT_THAT(checkVal7, Eq("#FFFF0000")); // Color::RED is result of mocked ThemeConstants::GetColorByName
 }
 
 HWTEST_F(TextModifierTest, setFontSizeTest, TestSize.Level1)
 {
-    auto checkVal0 = GetStringAttribute(node_, FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal0, FONT_SIZE_ATTR_DEFAULT_VALUE);
+    auto checkVal0 = GetAttrValue<std::string>(node_, FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal0, Eq(FONT_SIZE_ATTR_DEFAULT_VALUE));
 
     const auto size1 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(10.);
     modifier_->setFontSize(node_, &size1);
-    auto checkVal1 = GetStringAttribute(node_, FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal1, "10.00fp");
+    auto checkVal1 = GetAttrValue<std::string>(node_, FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal1, Eq("10.00fp"));
 
     const auto size2 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("20.00vp");
     modifier_->setFontSize(node_, &size2);
-    auto checkVal2 = GetStringAttribute(node_, FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal2, "20.00vp");
+    auto checkVal2 = GetAttrValue<std::string>(node_, FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("20.00vp"));
 
     auto size3 = CreateResourceUnion<Opt_Union_F64_String_Resource>(RES_NAME);
     modifier_->setFontSize(node_, &size3);
-    auto checkVal3 = GetStringAttribute(node_, FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal3, FONT_SIZE_ATTR_DEFAULT_VALUE);
+    auto checkVal3 = GetAttrValue<std::string>(node_, FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal3, Eq(FONT_SIZE_ATTR_DEFAULT_VALUE));
 }
 
 HWTEST_F(TextModifierTest, setMinFontSizeTest, TestSize.Level1)
 {
     const auto size1 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(11.25);
     modifier_->setMinFontSize(node_, &size1);
-    auto checkVal1 = GetStringAttribute(node_, MIN_FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal1, "11.25fp");
+    auto checkVal1 = GetAttrValue<std::string>(node_, MIN_FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal1, Eq("11.25fp"));
 
     const auto size2 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("11.25px");
     modifier_->setMinFontSize(node_, &size2);
-    auto checkVal2 = GetStringAttribute(node_, MIN_FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal2, "11.25px");
+    auto checkVal2 = GetAttrValue<std::string>(node_, MIN_FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("11.25px"));
 
     auto size3 = CreateResourceUnion<Opt_Union_F64_String_Resource>(RES_NAME1);
     modifier_->setMinFontSize(node_, &size3);
-    auto checkVal3 = GetStringAttribute(node_, MIN_FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal3, "10.00px");
+    auto checkVal3 = GetAttrValue<std::string>(node_, MIN_FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal3, Eq("10.00px"));
 }
 
 HWTEST_F(TextModifierTest, setMaxFontSizeTest, TestSize.Level1)
 {
     const auto size1 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(11.25);
     modifier_->setMaxFontSize(node_, &size1);
-    auto checkVal1 = GetStringAttribute(node_, MAX_FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal1, "11.25fp");
+    auto checkVal1 = GetAttrValue<std::string>(node_, MAX_FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal1, Eq("11.25fp"));
 
     const auto size2 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("11.25px");
     modifier_->setMaxFontSize(node_, &size2);
-    auto checkVal2 = GetStringAttribute(node_, MAX_FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal2, "11.25px");
+    auto checkVal2 = GetAttrValue<std::string>(node_, MAX_FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("11.25px"));
 
     auto size3 = CreateResourceUnion<Opt_Union_F64_String_Resource>(RES_NAME1);
     modifier_->setMaxFontSize(node_, &size3);
-    auto checkVal3 = GetStringAttribute(node_, MAX_FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal3, "10.00px");
+    auto checkVal3 = GetAttrValue<std::string>(node_, MAX_FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal3, Eq("10.00px"));
 }
 
 HWTEST_F(TextModifierTest, setMinFontScaleTest, TestSize.Level1)
 {
     const auto scale1 = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.825);
     modifier_->setMinFontScale(node_, &scale1);
-    auto checkVal1 = GetStringAttribute(node_, MIN_FONT_SCALE_ATTR);
-    EXPECT_EQ(checkVal1, "0.825000");
+    auto checkVal1 = GetAttrValue<std::string>(node_, MIN_FONT_SCALE_ATTR);
+    EXPECT_THAT(checkVal1, Eq("0.825000"));
 
     const auto scale2 = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(FLOAT_RES_0);
     modifier_->setMinFontScale(node_, &scale2);
-    auto checkVal2 = GetStringAttribute(node_, MIN_FONT_SCALE_ATTR);
-    EXPECT_EQ(checkVal2, "0.705000");
+    auto checkVal2 = GetAttrValue<std::string>(node_, MIN_FONT_SCALE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("0.705000"));
 }
 
 HWTEST_F(TextModifierTest, setMaxFontScaleTest, TestSize.Level1)
 {
     const auto scale1 = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.25);
     modifier_->setMaxFontScale(node_, &scale1);
-    auto checkVal1 = GetStringAttribute(node_, MAX_FONT_SCALE_ATTR);
-    EXPECT_EQ(checkVal1, "1.250000");
+    auto checkVal1 = GetAttrValue<std::string>(node_, MAX_FONT_SCALE_ATTR);
+    EXPECT_THAT(checkVal1, Eq("1.250000"));
 
     const auto scale2 = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(FLOAT_RES_1);
     modifier_->setMaxFontScale(node_, &scale2);
-    auto checkVal2 = GetStringAttribute(node_, MAX_FONT_SCALE_ATTR);
-    EXPECT_EQ(checkVal2, "5.200000");
+    auto checkVal2 = GetAttrValue<std::string>(node_, MAX_FONT_SCALE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("5.200000"));
 }
 
 HWTEST_F(TextModifierTest, setFontStyleTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL);
     modifier_->setFontStyle(node_, &inputVal);
-    auto checkVal1 = GetStringAttribute(node_, FONT_STYLE_ATTR);
-    EXPECT_EQ(checkVal1, "FontStyle.Normal");
+    auto checkVal1 = GetAttrValue<std::string>(node_, FONT_STYLE_ATTR);
+    EXPECT_THAT(checkVal1, Eq("FontStyle.Normal"));
 
     inputVal = Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC);
     modifier_->setFontStyle(node_, &inputVal);
-    auto checkVal2 = GetStringAttribute(node_, FONT_STYLE_ATTR);
-    EXPECT_EQ(checkVal2, "FontStyle.Italic");
+    auto checkVal2 = GetAttrValue<std::string>(node_, FONT_STYLE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("FontStyle.Italic"));
 }
 
 HWTEST_F(TextModifierTest, setFontWeightTest, TestSize.Level1)
 {
     const auto w1 = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_Int32>(100);
     modifier_->setFontWeight(node_, &w1, nullptr);
-    auto checkVal1 = GetStringAttribute(node_, FONT_WEIGHT_ATTR);
-    EXPECT_EQ(checkVal1, "100");
+    auto checkVal1 = GetAttrValue<std::string>(node_, FONT_WEIGHT_ATTR);
+    EXPECT_THAT(checkVal1, Eq("100"));
 
     const auto w2 = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_FontWeight>(ARK_FONT_WEIGHT_MEDIUM);
     modifier_->setFontWeight(node_, &w2, nullptr);
-    auto checkVal2 = GetStringAttribute(node_, FONT_WEIGHT_ATTR);
-    EXPECT_EQ(checkVal2, "FontWeight.Medium");
+    auto checkVal2 = GetAttrValue<std::string>(node_, FONT_WEIGHT_ATTR);
+    EXPECT_THAT(checkVal2, Eq("FontWeight.Medium"));
 
     const auto w3 = Converter::ArkUnion<Opt_Union_I32_FontWeight_ResourceStr, Ark_ResourceStr>(
         Converter::ArkUnion<Ark_ResourceStr, Ark_String>("normal"));
     modifier_->setFontWeight(node_, &w3, nullptr);
-    auto checkVal3 = GetStringAttribute(node_, FONT_WEIGHT_ATTR);
-    EXPECT_EQ(checkVal3, "FontWeight.Normal");
+    auto checkVal3 = GetAttrValue<std::string>(node_, FONT_WEIGHT_ATTR);
+    EXPECT_THAT(checkVal3, Eq("FontWeight.Normal"));
 }
 
 HWTEST_F(TextModifierTest, setTextAlignTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_TextAlign>(ARK_TEXT_ALIGN_START);
     modifier_->setTextAlign(node_, &inputVal);
-    auto checkVal1 = GetStringAttribute(node_, TEXT_ALIGN_ATTR);
-    EXPECT_EQ(checkVal1, "TextAlign.Start");
+    auto checkVal1 = GetAttrValue<std::string>(node_, TEXT_ALIGN_ATTR);
+    EXPECT_THAT(checkVal1, Eq("TextAlign.Start"));
 
     inputVal = Converter::ArkValue<Opt_TextAlign>(ARK_TEXT_ALIGN_CENTER);
     modifier_->setTextAlign(node_, &inputVal);
-    auto checkVal2 = GetStringAttribute(node_, TEXT_ALIGN_ATTR);
-    EXPECT_EQ(checkVal2, "TextAlign.Center");
+    auto checkVal2 = GetAttrValue<std::string>(node_, TEXT_ALIGN_ATTR);
+    EXPECT_THAT(checkVal2, Eq("TextAlign.Center"));
 
     inputVal = Converter::ArkValue<Opt_TextAlign>(ARK_TEXT_ALIGN_END);
     modifier_->setTextAlign(node_, &inputVal);
-    auto checkVal3 = GetStringAttribute(node_, TEXT_ALIGN_ATTR);
-    EXPECT_EQ(checkVal3, "TextAlign.End");
+    auto checkVal3 = GetAttrValue<std::string>(node_, TEXT_ALIGN_ATTR);
+    EXPECT_THAT(checkVal3, Eq("TextAlign.End"));
 
     inputVal = Converter::ArkValue<Opt_TextAlign>(ARK_TEXT_ALIGN_JUSTIFY);
     modifier_->setTextAlign(node_, &inputVal);
-    auto checkVal4 = GetStringAttribute(node_, TEXT_ALIGN_ATTR);
-    EXPECT_EQ(checkVal4, "TextAlign.Justify");
+    auto checkVal4 = GetAttrValue<std::string>(node_, TEXT_ALIGN_ATTR);
+    EXPECT_THAT(checkVal4, Eq("TextAlign.Justify"));
 }
 
 HWTEST_F(TextModifierTest, setLineHeightTest, TestSize.Level1)
 {
     const auto size1 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(11.);
     modifier_->setLineHeight(node_, &size1);
-    auto checkVal1 = GetStringAttribute(node_, LINE_HEIGHT_ATTR);
-    EXPECT_EQ(checkVal1, "11.00fp");
+    auto checkVal1 = GetAttrValue<std::string>(node_, LINE_HEIGHT_ATTR);
+    EXPECT_THAT(checkVal1, Eq("11.00fp"));
 
     const auto size2 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_String>("12.00vp");
     modifier_->setLineHeight(node_, &size2);
-    auto checkVal2 = GetStringAttribute(node_, LINE_HEIGHT_ATTR);
-    EXPECT_EQ(checkVal2, "12.00vp");
+    auto checkVal2 = GetAttrValue<std::string>(node_, LINE_HEIGHT_ATTR);
+    EXPECT_THAT(checkVal2, Eq("12.00vp"));
 
     const auto size3 = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Resource>(FLOAT_RES_2);
     modifier_->setLineHeight(node_, &size3);
-    auto checkVal3 = GetStringAttribute(node_, LINE_HEIGHT_ATTR);
-    EXPECT_EQ(checkVal3, "10.00px");
+    auto checkVal3 = GetAttrValue<std::string>(node_, LINE_HEIGHT_ATTR);
+    EXPECT_THAT(checkVal3, Eq("10.00px"));
 }
 
 HWTEST_F(TextModifierTest, setTextOverflowTest, TestSize.Level1)
@@ -424,32 +424,32 @@ HWTEST_F(TextModifierTest, setTextOverflowTest, TestSize.Level1)
     Ark_TextOverflowOptions v1 = { .overflow = Converter::ArkValue<Opt_TextOverflow>(ARK_TEXT_OVERFLOW_NONE) };
     auto inputVal = Converter::ArkValue<Opt_TextOverflowOptions>(v1);
     modifier_->setTextOverflow(node_, &inputVal);
-    auto checkVal1 = GetStringAttribute(node_, TEXT_OVERFLOW_ATTR);
-    EXPECT_EQ(checkVal1, "TextOverflow.None");
+    auto checkVal1 = GetAttrValue<std::string>(node_, TEXT_OVERFLOW_ATTR);
+    EXPECT_THAT(checkVal1, Eq("TextOverflow.None"));
 
     Ark_TextOverflowOptions v2 = { .overflow = Converter::ArkValue<Opt_TextOverflow>(ARK_TEXT_OVERFLOW_CLIP) };
     inputVal = Converter::ArkValue<Opt_TextOverflowOptions>(v2);
     modifier_->setTextOverflow(node_, &inputVal);
-    auto checkVal2 = GetStringAttribute(node_, TEXT_OVERFLOW_ATTR);
-    EXPECT_EQ(checkVal2, "TextOverflow.Clip");
+    auto checkVal2 = GetAttrValue<std::string>(node_, TEXT_OVERFLOW_ATTR);
+    EXPECT_THAT(checkVal2, Eq("TextOverflow.Clip"));
 
     Ark_TextOverflowOptions v3 = { .overflow = Converter::ArkValue<Opt_TextOverflow>(ARK_TEXT_OVERFLOW_ELLIPSIS) };
     inputVal = Converter::ArkValue<Opt_TextOverflowOptions>(v3);
     modifier_->setTextOverflow(node_, &inputVal);
-    auto checkVal3 = GetStringAttribute(node_, TEXT_OVERFLOW_ATTR);
-    EXPECT_EQ(checkVal3, "TextOverflow.Ellipsis");
+    auto checkVal3 = GetAttrValue<std::string>(node_, TEXT_OVERFLOW_ATTR);
+    EXPECT_THAT(checkVal3, Eq("TextOverflow.Ellipsis"));
 
     Ark_TextOverflowOptions v4 = { .overflow = Converter::ArkValue<Opt_TextOverflow>(ARK_TEXT_OVERFLOW_MARQUEE) };
     inputVal = Converter::ArkValue<Opt_TextOverflowOptions>(v4);
     modifier_->setTextOverflow(node_, &inputVal);
-    auto checkVal4 = GetStringAttribute(node_, TEXT_OVERFLOW_ATTR);
-    EXPECT_EQ(checkVal4, "TextOverflow.Marquee");
+    auto checkVal4 = GetAttrValue<std::string>(node_, TEXT_OVERFLOW_ATTR);
+    EXPECT_THAT(checkVal4, Eq("TextOverflow.Marquee"));
 }
 
 HWTEST_F(TextModifierTest, setTextOverflowTestDefaultValue, TestSize.Level1)
 {
-    auto checkVal1 = GetStringAttribute(node_, TEXT_OVERFLOW_ATTR);
-    EXPECT_EQ(checkVal1, TEXT_OVERFLOW_ATTR_DEFAULT_VALUE);
+    auto checkVal1 = GetAttrValue<std::string>(node_, TEXT_OVERFLOW_ATTR);
+    EXPECT_THAT(checkVal1, Eq(TEXT_OVERFLOW_ATTR_DEFAULT_VALUE));
 }
 
 HWTEST_F(TextModifierTest, setTextOverflowTestInvalidValue, TestSize.Level1)
@@ -462,24 +462,24 @@ HWTEST_F(TextModifierTest, setTextOverflowTestInvalidValue, TestSize.Level1)
     };
     inputVal = Converter::ArkValue<Opt_TextOverflowOptions>(invalidValue);
     modifier_->setTextOverflow(node_, &inputVal);
-    auto checkVal1 = GetStringAttribute(node_, TEXT_OVERFLOW_ATTR);
-    EXPECT_EQ(checkVal1, TEXT_OVERFLOW_ATTR_DEFAULT_VALUE);
+    auto checkVal1 = GetAttrValue<std::string>(node_, TEXT_OVERFLOW_ATTR);
+    EXPECT_THAT(checkVal1, Eq(TEXT_OVERFLOW_ATTR_DEFAULT_VALUE));
 }
 
 HWTEST_F(TextModifierTest, setFontFamilyTest, TestSize.Level1)
 {
     auto v1 = Converter::ArkUnion<Opt_Union_String_Resource, Ark_String>("testFontFamily");
     modifier_->setFontFamily(node_, &v1);
-    auto checkVal1 = GetStringAttribute(node_, FONT_FAMILY_ATTR);
-    EXPECT_EQ(checkVal1, "testFontFamily");
+    auto checkVal1 = GetAttrValue<std::string>(node_, FONT_FAMILY_ATTR);
+    EXPECT_THAT(checkVal1, Eq("testFontFamily"));
 }
 
 HWTEST_F(TextModifierTest, setMaxLinesTest, TestSize.Level1)
 {
     auto v1 = Converter::ArkValue<Opt_Int32>(10);
     modifier_->setMaxLines(node_, &v1);
-    auto checkVal1 = GetStringAttribute(node_, MAX_LINES_ATTR);
-    EXPECT_EQ(checkVal1, "10");
+    auto checkVal1 = GetAttrValue<std::string>(node_, MAX_LINES_ATTR);
+    EXPECT_THAT(checkVal1, Eq("10"));
 }
 
 HWTEST_F(TextModifierTest, setDecorationTest, TestSize.Level1)
@@ -491,71 +491,71 @@ HWTEST_F(TextModifierTest, setDecorationTest, TestSize.Level1)
     };
     auto inputVal = Converter::ArkValue<Opt_DecorationStyleInterface>(v1);
     modifier_->setDecoration(node_, &inputVal);
-    auto checkVal1 = GetStringAttribute(node_, DECORATION_ATTR);
-    EXPECT_EQ(checkVal1,
-        "{\"type\":\"TextDecorationType.Underline\",\"color\":\"#FF008000\",\"style\":\"TextDecorationStyle.DASHED\"}");
+    auto checkVal1 = GetAttrValue<std::string>(node_, DECORATION_ATTR);
+    EXPECT_THAT(checkVal1, Eq("{\"type\":\"TextDecorationType.Underline\","
+        "\"color\":\"#FF008000\",\"style\":\"TextDecorationStyle.DASHED\"}"));
 }
 
 HWTEST_F(TextModifierTest, setLetterSpacingTest, TestSize.Level1)
 {
     auto v1 = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(11.25);
     modifier_->setLetterSpacing(node_, &v1);
-    auto checkVal1 = GetStringAttribute(node_, LETTER_SPACING_ATTR);
-    EXPECT_EQ(checkVal1, "11.25fp");
+    auto checkVal1 = GetAttrValue<std::string>(node_, LETTER_SPACING_ATTR);
+    EXPECT_THAT(checkVal1, Eq("11.25fp"));
 
     auto v2 = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("12.25vp");
     modifier_->setLetterSpacing(node_, &v2);
-    auto checkVal2 = GetStringAttribute(node_, LETTER_SPACING_ATTR);
-    EXPECT_EQ(checkVal2, "12.25vp");
+    auto checkVal2 = GetAttrValue<std::string>(node_, LETTER_SPACING_ATTR);
+    EXPECT_THAT(checkVal2, Eq("12.25vp"));
 }
 
 HWTEST_F(TextModifierTest, setTextCaseTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_TextCase>(ARK_TEXT_CASE_NORMAL);
     modifier_->setTextCase(node_, &inputVal);
-    auto checkVal1 = GetStringAttribute(node_, TEXT_CASE_ATTR);
-    EXPECT_EQ(checkVal1, "TextCase.Normal");
+    auto checkVal1 = GetAttrValue<std::string>(node_, TEXT_CASE_ATTR);
+    EXPECT_THAT(checkVal1, Eq("TextCase.Normal"));
 
     inputVal = Converter::ArkValue<Opt_TextCase>(ARK_TEXT_CASE_LOWER_CASE);
     modifier_->setTextCase(node_, &inputVal);
-    auto checkVal2 = GetStringAttribute(node_, TEXT_CASE_ATTR);
-    EXPECT_EQ(checkVal2, "TextCase.LowerCase");
+    auto checkVal2 = GetAttrValue<std::string>(node_, TEXT_CASE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("TextCase.LowerCase"));
 
     inputVal = Converter::ArkValue<Opt_TextCase>(ARK_TEXT_CASE_UPPER_CASE);
     modifier_->setTextCase(node_, &inputVal);
-    auto checkVal3 = GetStringAttribute(node_, TEXT_CASE_ATTR);
-    EXPECT_EQ(checkVal3, "TextCase.UpperCase");
+    auto checkVal3 = GetAttrValue<std::string>(node_, TEXT_CASE_ATTR);
+    EXPECT_THAT(checkVal3, Eq("TextCase.UpperCase"));
 }
 
 HWTEST_F(TextModifierTest, setBaselineOffsetTest, TestSize.Level1)
 {
     auto v1 = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(11.);
     modifier_->setBaselineOffset(node_, &v1);
-    auto checkVal1 = GetStringAttribute(node_, BASELINE_OFFSET_ATTR);
-    EXPECT_EQ(checkVal1, "11");
+    auto checkVal1 = GetAttrValue<std::string>(node_, BASELINE_OFFSET_ATTR);
+    EXPECT_THAT(checkVal1, Eq("11"));
 
     auto v2 = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("12");
     modifier_->setBaselineOffset(node_, &v2);
-    auto checkVal2 = GetStringAttribute(node_, BASELINE_OFFSET_ATTR);
-    EXPECT_EQ(checkVal2, "12");
+    auto checkVal2 = GetAttrValue<std::string>(node_, BASELINE_OFFSET_ATTR);
+    EXPECT_THAT(checkVal2, Eq("12"));
 }
 
 HWTEST_F(TextModifierTest, setCopyOptionTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_CopyOptions>(ARK_COPY_OPTIONS_NONE);
     modifier_->setCopyOption(node_, &inputVal);
-    auto checkVal1 = GetStringAttribute(node_, COPY_OPTIONS_ATTR);
-    EXPECT_EQ(checkVal1, "CopyOptions.None");
+    auto checkVal1 = GetAttrValue<std::string>(node_, COPY_OPTIONS_ATTR);
+    EXPECT_THAT(checkVal1, Eq("CopyOptions.None"));
 
     inputVal = Converter::ArkValue<Opt_CopyOptions>(ARK_COPY_OPTIONS_IN_APP);
     modifier_->setCopyOption(node_, &inputVal);
-    auto checkVal2 = GetStringAttribute(node_, COPY_OPTIONS_ATTR);
-    EXPECT_EQ(checkVal2, "CopyOptions.InApp");
+    auto checkVal2 = GetAttrValue<std::string>(node_, COPY_OPTIONS_ATTR);
+    EXPECT_THAT(checkVal2, Eq("CopyOptions.InApp"));
 
     inputVal = Converter::ArkValue<Opt_CopyOptions>(ARK_COPY_OPTIONS_LOCAL_DEVICE);
     modifier_->setCopyOption(node_, &inputVal);
-    auto checkVal3 = GetStringAttribute(node_, COPY_OPTIONS_ATTR);
-    EXPECT_EQ(checkVal3, "CopyOptions.Local");
+    auto checkVal3 = GetAttrValue<std::string>(node_, COPY_OPTIONS_ATTR);
+    EXPECT_THAT(checkVal3, Eq("CopyOptions.Local"));
 }
 
 HWTEST_F(TextModifierTest, setTextShadowTest, TestSize.Level1)
@@ -570,109 +570,108 @@ HWTEST_F(TextModifierTest, setTextShadowTest, TestSize.Level1)
 
     auto v1 = Converter::ArkUnion<Opt_Union_ShadowOptions_Array_ShadowOptions, Ark_ShadowOptions>(shadow);
     modifier_->setTextShadow(node_, &v1);
-    auto checkVal1 = GetStringAttribute(node_, TEXT_SHADOW_ATTR);
-    EXPECT_EQ(checkVal1,
-        "{\"radius\":\"1.500000\",\"color\":\"#FF008000\","
-        "\"offsetX\":\"2.500000\",\"offsetY\":\"3.500000\",\"type\":\"0\"}");
+    auto checkVal1 = GetAttrValue<std::string>(node_, TEXT_SHADOW_ATTR);
+    EXPECT_THAT(checkVal1, Eq("{\"radius\":\"1.500000\",\"color\":\"#FF008000\","
+        "\"offsetX\":\"2.500000\",\"offsetY\":\"3.500000\",\"type\":\"0\"}"));
 }
 
 HWTEST_F(TextModifierTest, setHeightAdaptivePolicyTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_TextHeightAdaptivePolicy>(ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST);
     modifier_->setHeightAdaptivePolicy(node_, &inputVal);
-    auto checkVal3 = GetStringAttribute(node_, HEIGHT_ADAPTIVE_POLICY_ATTR);
-    EXPECT_EQ(checkVal3, "TextHeightAdaptivePolicy.MAX_LINES_FIRST");
+    auto checkVal3 = GetAttrValue<std::string>(node_, HEIGHT_ADAPTIVE_POLICY_ATTR);
+    EXPECT_THAT(checkVal3, Eq("TextHeightAdaptivePolicy.MAX_LINES_FIRST"));
 
     inputVal = Converter::ArkValue<Opt_TextHeightAdaptivePolicy>(ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MIN_FONT_SIZE_FIRST);
     modifier_->setHeightAdaptivePolicy(node_, &inputVal);
-    auto checkVal4 = GetStringAttribute(node_, HEIGHT_ADAPTIVE_POLICY_ATTR);
-    EXPECT_EQ(checkVal4, "TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST");
+    auto checkVal4 = GetAttrValue<std::string>(node_, HEIGHT_ADAPTIVE_POLICY_ATTR);
+    EXPECT_THAT(checkVal4, Eq("TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST"));
 
     inputVal = Converter::ArkValue<Opt_TextHeightAdaptivePolicy>(
         ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_LAYOUT_CONSTRAINT_FIRST);
     modifier_->setHeightAdaptivePolicy(node_, &inputVal);
-    auto checkVal5 = GetStringAttribute(node_, HEIGHT_ADAPTIVE_POLICY_ATTR);
-    EXPECT_EQ(checkVal5, "TextHeightAdaptivePolicy.LAYOUT_CONSTRAINT_FIRST");
+    auto checkVal5 = GetAttrValue<std::string>(node_, HEIGHT_ADAPTIVE_POLICY_ATTR);
+    EXPECT_THAT(checkVal5, Eq("TextHeightAdaptivePolicy.LAYOUT_CONSTRAINT_FIRST"));
 }
 
 HWTEST_F(TextModifierTest, DISABLED_setTextIndentTest, TestSize.Level1)
 {
     auto v1 = Converter::ArkValue<Opt_Length>("11.25px");
     modifier_->setTextIndent(node_, &v1);
-    auto checkVal1 = GetStringAttribute(node_, TEXT_INDENT_ATTR);
-    EXPECT_EQ(checkVal1, "11.25px");
+    auto checkVal1 = GetAttrValue<std::string>(node_, TEXT_INDENT_ATTR);
+    EXPECT_THAT(checkVal1, Eq("11.25px"));
 }
 
 HWTEST_F(TextModifierTest, setWordBreakTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_WordBreak>(ARK_WORD_BREAK_NORMAL);
     modifier_->setWordBreak(node_, &inputVal);
-    auto checkVal1 = GetStringAttribute(node_, WORD_BREAK_ATTR);
-    EXPECT_EQ(checkVal1, "normal");
+    auto checkVal1 = GetAttrValue<std::string>(node_, WORD_BREAK_ATTR);
+    EXPECT_THAT(checkVal1, Eq("normal"));
 
     inputVal = Converter::ArkValue<Opt_WordBreak>(ARK_WORD_BREAK_BREAK_ALL);
     modifier_->setWordBreak(node_, &inputVal);
-    auto checkVal2 = GetStringAttribute(node_, WORD_BREAK_ATTR);
-    EXPECT_EQ(checkVal2, "break-all");
+    auto checkVal2 = GetAttrValue<std::string>(node_, WORD_BREAK_ATTR);
+    EXPECT_THAT(checkVal2, Eq("break-all"));
 
     inputVal = Converter::ArkValue<Opt_WordBreak>(ARK_WORD_BREAK_BREAK_WORD);
     modifier_->setWordBreak(node_, &inputVal);
-    auto checkVal3 = GetStringAttribute(node_, WORD_BREAK_ATTR);
-    EXPECT_EQ(checkVal3, "break-word");
+    auto checkVal3 = GetAttrValue<std::string>(node_, WORD_BREAK_ATTR);
+    EXPECT_THAT(checkVal3, Eq("break-word"));
 }
 
 HWTEST_F(TextModifierTest, setLineBreakStrategyTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_LineBreakStrategy>(ARK_LINE_BREAK_STRATEGY_GREEDY);
     modifier_->setLineBreakStrategy(node_, &inputVal);
-    auto checkVal3 = GetStringAttribute(node_, LINE_BREAK_STRATEGY_ATTR);
-    EXPECT_EQ(checkVal3, "greedy");
+    auto checkVal3 = GetAttrValue<std::string>(node_, LINE_BREAK_STRATEGY_ATTR);
+    EXPECT_THAT(checkVal3, Eq("greedy"));
 
     inputVal = Converter::ArkValue<Opt_LineBreakStrategy>(ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY);
     modifier_->setLineBreakStrategy(node_, &inputVal);
-    auto checkVal4 = GetStringAttribute(node_, LINE_BREAK_STRATEGY_ATTR);
-    EXPECT_EQ(checkVal4, "high-quality");
+    auto checkVal4 = GetAttrValue<std::string>(node_, LINE_BREAK_STRATEGY_ATTR);
+    EXPECT_THAT(checkVal4, Eq("high-quality"));
 
     inputVal = Converter::ArkValue<Opt_LineBreakStrategy>(ARK_LINE_BREAK_STRATEGY_BALANCED);
     modifier_->setLineBreakStrategy(node_, &inputVal);
-    auto checkVal5 = GetStringAttribute(node_, LINE_BREAK_STRATEGY_ATTR);
-    EXPECT_EQ(checkVal5, "balanced");
+    auto checkVal5 = GetAttrValue<std::string>(node_, LINE_BREAK_STRATEGY_ATTR);
+    EXPECT_THAT(checkVal5, Eq("balanced"));
 }
 
 HWTEST_F(TextModifierTest, setEllipsisModeTest, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_EllipsisMode>(ARK_ELLIPSIS_MODE_START);
     modifier_->setEllipsisMode(node_, &inputVal);
-    auto checkVal1 = GetStringAttribute(node_, ELLIPSIS_MODE_ATTR);
-    EXPECT_EQ(checkVal1, "EllipsisMode.START");
+    auto checkVal1 = GetAttrValue<std::string>(node_, ELLIPSIS_MODE_ATTR);
+    EXPECT_THAT(checkVal1, Eq("EllipsisMode.START"));
 
     inputVal = Converter::ArkValue<Opt_EllipsisMode>(ARK_ELLIPSIS_MODE_CENTER);
     modifier_->setEllipsisMode(node_, &inputVal);
-    auto checkVal2 = GetStringAttribute(node_, ELLIPSIS_MODE_ATTR);
-    EXPECT_EQ(checkVal2, "EllipsisMode.CENTER");
+    auto checkVal2 = GetAttrValue<std::string>(node_, ELLIPSIS_MODE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("EllipsisMode.CENTER"));
 
     inputVal = Converter::ArkValue<Opt_EllipsisMode>(ARK_ELLIPSIS_MODE_END);
     modifier_->setEllipsisMode(node_, &inputVal);
-    auto checkVal3 = GetStringAttribute(node_, ELLIPSIS_MODE_ATTR);
-    EXPECT_EQ(checkVal3, "EllipsisMode.END");
+    auto checkVal3 = GetAttrValue<std::string>(node_, ELLIPSIS_MODE_ATTR);
+    EXPECT_THAT(checkVal3, Eq("EllipsisMode.END"));
 }
 
 HWTEST_F(TextModifierTest, setTextSelectableTestSelectableMode, TestSize.Level1)
 {
     auto inputVal = Converter::ArkValue<Opt_TextSelectableMode>(ARK_TEXT_SELECTABLE_MODE_SELECTABLE_UNFOCUSABLE);
     modifier_->setTextSelectable(node_, &inputVal);
-    auto checkVal1 = GetStringAttribute(node_, TEXT_SELECTABLE_ATTR);
-    EXPECT_EQ(checkVal1, "selectable-unfocusable");
+    auto checkVal1 = GetAttrValue<std::string>(node_, TEXT_SELECTABLE_ATTR);
+    EXPECT_THAT(checkVal1, Eq("selectable-unfocusable"));
 
     inputVal = Converter::ArkValue<Opt_TextSelectableMode>(ARK_TEXT_SELECTABLE_MODE_SELECTABLE_FOCUSABLE);
     modifier_->setTextSelectable(node_, &inputVal);
-    auto checkVal2 = GetStringAttribute(node_, TEXT_SELECTABLE_ATTR);
-    EXPECT_EQ(checkVal2, "selectable-focusable");
+    auto checkVal2 = GetAttrValue<std::string>(node_, TEXT_SELECTABLE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("selectable-focusable"));
 
     inputVal = Converter::ArkValue<Opt_TextSelectableMode>(ARK_TEXT_SELECTABLE_MODE_UNSELECTABLE);
     modifier_->setTextSelectable(node_, &inputVal);
-    auto checkVal3 = GetStringAttribute(node_, TEXT_SELECTABLE_ATTR);
-    EXPECT_EQ(checkVal3, "unselectable");
+    auto checkVal3 = GetAttrValue<std::string>(node_, TEXT_SELECTABLE_ATTR);
+    EXPECT_THAT(checkVal3, Eq("unselectable"));
 }
 
 HWTEST_F(TextModifierTest, setOnCopyTest, TestSize.Level1)
@@ -750,9 +749,9 @@ HWTEST_F(TextModifierTest, setFontWeightTestVariableFontWeightValidValues, TestS
         auto inputValueFontWeight = value;
         modifier_->setFontWeight(node_, &inputValueFontWeight, nullptr);
         auto jsonValue = GetJsonValue(node_);
-        auto font = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
+        auto font = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(font, ATTRIBUTE_VARIABLE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setFontWeight0, attribute: fontWeight";
     };
 
@@ -786,9 +785,9 @@ HWTEST_F(TextModifierTest, setFontWeightTestVariableFontWeightInvalidValues, Tes
         inputValueFontWeight = value;
         modifier_->setFontWeight(node_, &inputValueFontWeight, nullptr);
         auto jsonValue = GetJsonValue(node_);
-        auto font = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
+        auto font = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(font, ATTRIBUTE_VARIABLE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFontWeight0, attribute: fontWeight";
     };
 
@@ -815,16 +814,16 @@ HWTEST_F(TextModifierTest, setFontWeightTestVariableFontWeightInvalidValues, Tes
 HWTEST_F(TextModifierTest, setFontWeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto font = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
-    std::string resultStr;
+    auto font = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'fontWeight.weight'";
 
     resultStr =
         GetAttrValue<std::string>(font, ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'fontWeight.options.enableVariableFontWeight'";
 }
 
@@ -849,7 +848,7 @@ HWTEST_F(TextModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Leve
         modifier_->setFontWeight(node_, &inputValueWeight, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setFontWeight1, attribute: fontWeight";
     };
 
@@ -891,7 +890,7 @@ HWTEST_F(TextModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.Le
         modifier_->setFontWeight(node_, &inputValueWeight, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFontWeight1, attribute: fontWeight";
     };
 
@@ -927,9 +926,9 @@ HWTEST_F(TextModifierTest, setFontWeightTestOptionsEnableVariableFontWeightValid
         inputValueOptions.value.enableVariableFontWeight = value;
         modifier_->setFontWeight(node_, &inputValueWeight, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto font = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FONT_NAME);
+        auto font = GetAttrObject(jsonValue, ATTRIBUTE_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(font, ATTRIBUTE_ENABLE_VARIABLE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input
             << ", method: setFontWeight1, attribute: font.enableVariableFontWeight";
     };
@@ -946,7 +945,7 @@ HWTEST_F(TextModifierTest, setFontWeightTestOptionsEnableVariableFontWeightValid
  */
 HWTEST_F(TextModifierTest, setTextShadowTestArrayValues, TestSize.Level1)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Ark_ShadowOptions shadow1 = {
         .color = ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>("#FFAABB01"),
         .offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(50.),
@@ -968,7 +967,7 @@ HWTEST_F(TextModifierTest, setTextShadowTestArrayValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultTextShadow =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
+        GetAttrObject(jsonValue, ATTRIBUTE_TEXT_SHADOW_NAME);
     ASSERT_NE(resultTextShadow, nullptr);
     ASSERT_EQ(resultTextShadow->GetArraySize(), vec.size());
 
@@ -1002,10 +1001,10 @@ HWTEST_F(TextModifierTest, setTextShadowTestArrayValues, TestSize.Level1)
 HWTEST_F(TextModifierTest, setTextOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_DEFAULT_VALUE) << "Default value for attribute 'content'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONTENT_DEFAULT_VALUE)) << "Default value for attribute 'content'";
 }
 
 /*
@@ -1027,7 +1026,7 @@ HWTEST_F(TextModifierTest, setTextOptionsTestContentValidValues, TestSize.Level1
         pattern->OnModifyDone(); // Need for correct processing
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setTextOptions, attribute: content";
     };
 
@@ -1132,18 +1131,18 @@ HWTEST_F(TextModifierTest, setDataDetectorConfigTest, TestSize.Level1)
     modifier_->setDataDetectorConfig(node_, &inputVal);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
 
-    auto json = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME);
+    auto json = GetAttrObject(jsonValue, ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME);
     auto resultColor = GetAttrValue<std::string>(json, "color");
     auto resultTypes = GetAttrValue<std::string>(json, "types");
-    auto jsonDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(json, "decoration");
+    auto jsonDecoration = GetAttrObject(json, "decoration");
     auto resultDecorationType = GetAttrValue<std::string>(jsonDecoration, "type");
     auto resultDecorationColor = GetAttrValue<std::string>(jsonDecoration, "color");
     auto resultDecorationStyle = GetAttrValue<std::string>(jsonDecoration, "style");
-    EXPECT_EQ(resultColor, "#FFAABBCC");
-    EXPECT_EQ(resultTypes, "phoneNum,location");
-    EXPECT_EQ(resultDecorationType, "3");
-    EXPECT_EQ(resultDecorationColor, "#FF112233");
-    EXPECT_EQ(resultDecorationStyle, "4");
+    EXPECT_THAT(resultColor, Eq("#FFAABBCC"));
+    EXPECT_THAT(resultTypes, Eq("phoneNum,location"));
+    EXPECT_THAT(resultDecorationType, Eq("3"));
+    EXPECT_THAT(resultDecorationColor, Eq("#FF112233"));
+    EXPECT_THAT(resultDecorationStyle, Eq("4"));
 }
 
 /*
@@ -1312,7 +1311,7 @@ HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsMarqueeStartPolicy
         WriteTo(inputValueMarqueeOptions).marqueeStartPolicy = value;
         modifier_->setMarqueeOptions(node_, &inputValueMarqueeOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultMarqueeOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARQUEE_OPTIONS_NAME);
+        auto resultMarqueeOptions = GetAttrObject(jsonValue, ATTRIBUTE_MARQUEE_OPTIONS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultMarqueeOptions, ATTRIBUTE_MARQUEE_OPTIONS_I_MARQUEE_START_POLICY_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1356,7 +1355,7 @@ HWTEST_F(TextModifierTest, setMarqueeOptionsTestMarqueeOptionsMarqueeStartPolicy
         WriteTo(inputValueMarqueeOptions).marqueeStartPolicy = value;
         modifier_->setMarqueeOptions(node_, &inputValueMarqueeOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultMarqueeOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARQUEE_OPTIONS_NAME);
+        auto resultMarqueeOptions = GetAttrObject(jsonValue, ATTRIBUTE_MARQUEE_OPTIONS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultMarqueeOptions, ATTRIBUTE_MARQUEE_OPTIONS_I_MARQUEE_START_POLICY_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_MARQUEE_OPTIONS_I_MARQUEE_START_POLICY_DEFAULT_VALUE) <<

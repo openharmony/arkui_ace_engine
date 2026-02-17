@@ -149,10 +149,10 @@ INSTANTIATE_TEST_SUITE_P(Tests, ScrollableCommonMethodModifierTest2, testing::Ra
 HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLIP_CONTENT_NAME);
-    EXPECT_EQ(resultStr, GetDefaultClipContentValue()) << "Default value for attribute 'clipContent'";
+    EXPECT_THAT(resultStr, Eq(GetDefaultClipContentValue())) << "Default value for attribute 'clipContent'";
 }
 
 /*
@@ -176,7 +176,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestClipContentValid
         modifier_->setClipContent(node_, &inputValueClipContent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLIP_CONTENT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setClipContent, attribute: clipContent";
     };
 
@@ -207,7 +207,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestClipContentInval
         modifier_->setClipContent(node_, &inputValueClipContent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLIP_CONTENT_NAME);
-        EXPECT_EQ(resultStr, GetDefaultClipContentValue()) <<
+        EXPECT_THAT(resultStr, Eq(GetDefaultClipContentValue())) <<
             "Input value is: " << input << ", method: setClipContent, attribute: clipContent";
     };
 
@@ -233,8 +233,8 @@ HWTEST_P(ScrollableCommonMethodModifierTest2, DISABLED_setClipContentTestRectSha
     modifier_->setClipContent(node_, &clipContentUnion);
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLIP_CONTENT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CLIP_CONTENT_CUSTOM_VALUE);
-    auto clipRectJSON = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CLIP_CONTENT_RECT_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CLIP_CONTENT_CUSTOM_VALUE));
+    auto clipRectJSON = GetAttrObject(jsonValue, ATTRIBUTE_CLIP_CONTENT_RECT_NAME);
     EXPECT_EQ(
         shape->GetWidth().ToString(), GetAttrValue<std::string>(clipRectJSON, ATTRIBUTE_CLIP_CONTENT_RECT_WIDTH_NAME));
     EXPECT_EQ(shape->GetHeight().ToString(),
@@ -247,10 +247,10 @@ HWTEST_P(ScrollableCommonMethodModifierTest2, DISABLED_setClipContentTestRectSha
         GetAttrValue<std::string>(clipRectJSON, ATTRIBUTE_CLIP_CONTENT_RECT_BOTTOM_RIGHT_RADIUS_NAME));
     EXPECT_EQ(shape->GetBottomLeftRadius().ToString(),
         GetAttrValue<std::string>(clipRectJSON, ATTRIBUTE_CLIP_CONTENT_RECT_BOTTOM_LEFT_RADIUS_NAME));
-    auto offsetJSON = GetAttrValue<std::unique_ptr<JsonValue>>(clipRectJSON, ATTRIBUTE_CLIP_CONTENT_RECT_OFFSET_NAME);
+    auto offsetJSON = GetAttrObject(clipRectJSON, ATTRIBUTE_CLIP_CONTENT_RECT_OFFSET_NAME);
     CompareDimensionOffset(std::move(offsetJSON), shape->GetOffset());
     auto positionJSON =
-        GetAttrValue<std::unique_ptr<JsonValue>>(clipRectJSON, ATTRIBUTE_CLIP_CONTENT_RECT_POSITION_NAME);
+        GetAttrObject(clipRectJSON, ATTRIBUTE_CLIP_CONTENT_RECT_POSITION_NAME);
     CompareDimensionOffset(std::move(positionJSON), shape->GetPosition());
     EXPECT_EQ(shape->GetColor().ColorToString(),
         GetAttrValue<std::string>(clipRectJSON, ATTRIBUTE_CLIP_CONTENT_RECT_COLOR_NAME));
@@ -274,7 +274,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestRectShapeNullptr
     modifier_->setClipContent(node_, &clipContentUnion);
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLIP_CONTENT_NAME);
-    EXPECT_EQ(resultStr, GetDefaultClipContentValue());
+    EXPECT_THAT(resultStr, Eq(GetDefaultClipContentValue()));
     PeerUtils::DestroyPeer(peer);
 }
 } // namespace OHOS::Ace::NG

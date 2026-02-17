@@ -5568,7 +5568,7 @@ void SetBlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto blurRadiusOpt = Converter::OptConvertPtr<float>(blurRadius);
+    auto blurRadiusOpt = Converter::OptConvertPtr<double>(blurRadius);
     auto optionsOpt = Converter::OptConvertPtr<BlurOption>(options);
     auto sysOptionsOpt = Converter::OptConvertPtr<SysOptions>(sysOptions);
     ViewAbstractModelStatic::SetFrontBlur(frameNode, blurRadiusOpt, optionsOpt, sysOptionsOpt);
@@ -5964,9 +5964,9 @@ void CallMenuOnModifyDone(RefPtr<UINode> uiNode)
     if (menuNode && menuNode->GetTag() == V2::MENU_ETS_TAG) {
         auto menuFrameNode = AceType::DynamicCast<FrameNode>(menuNode);
         CHECK_NULL_VOID(menuFrameNode);
-        auto menuModifer = NG::NodeModifier::GetMenuInnerModifier();
-        CHECK_NULL_VOID(menuModifer);
-        menuModifer->menuOnModifyDone(menuFrameNode);
+        auto menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        CHECK_NULL_VOID(menuModifier);
+        menuModifier->menuOnModifyDone(menuFrameNode);
     }
 }
 void BindMenuBase(Ark_NativePointer node,

@@ -64,10 +64,10 @@ public:
  */
 HWTEST_F(GridItemModifierTest, setGridItemOptionsTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_STYLE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_STYLE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_STYLE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_STYLE_DEFAULT_VALUE));
 }
 
 /*
@@ -77,7 +77,7 @@ HWTEST_F(GridItemModifierTest, setGridItemOptionsTestDefaultValues, TestSize.Lev
  */
 HWTEST_F(GridItemModifierTest, setGridItemOptionsTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_GridItemOptions options;
     Opt_GridItemOptions opt_options;
 
@@ -85,15 +85,15 @@ HWTEST_F(GridItemModifierTest, setGridItemOptionsTestValidValues, TestSize.Level
     options.style = Converter::ArkValue<Opt_GridItemStyle>(ARK_GRID_ITEM_STYLE_PLAIN);
     opt_options = Converter::ArkValue<Opt_GridItemOptions>(options);
     modifier_->setGridItemOptions(node_, &opt_options);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_STYLE_NAME);
-    EXPECT_EQ(strResult, "PLAIN");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_STYLE_NAME);
+    EXPECT_THAT(strResult, Eq("PLAIN"));
 
     // check NONE style
     options.style = Converter::ArkValue<Opt_GridItemStyle>(ARK_GRID_ITEM_STYLE_NONE);
     opt_options = Converter::ArkValue<Opt_GridItemOptions>(options);
     modifier_->setGridItemOptions(node_, &opt_options);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_STYLE_NAME);
-    EXPECT_EQ(strResult, "NONE");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_STYLE_NAME);
+    EXPECT_THAT(strResult, Eq("NONE"));
 }
 
 /*
@@ -103,13 +103,13 @@ HWTEST_F(GridItemModifierTest, setGridItemOptionsTestValidValues, TestSize.Level
  */
 HWTEST_F(GridItemModifierTest, setGridItemOptionsTestInvalidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Opt_GridItemOptions inputValue = Converter::ArkValue<Opt_GridItemOptions>(Ark_Empty());
 
     // check that style is not changed
     modifier_->setGridItemOptions(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_STYLE_NAME);
-    EXPECT_EQ(strResult, "NONE");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_STYLE_NAME);
+    EXPECT_THAT(strResult, Eq("NONE"));
 }
 
 /*
@@ -119,10 +119,10 @@ HWTEST_F(GridItemModifierTest, setGridItemOptionsTestInvalidValues, TestSize.Lev
  */
 HWTEST_F(GridItemModifierTest, setRowStartTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_START_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ROW_START_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROW_START_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ROW_START_DEFAULT_VALUE));
 }
 
 /*
@@ -132,25 +132,25 @@ HWTEST_F(GridItemModifierTest, setRowStartTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, setRowStartTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
     // check positive value
     auto optInputValue = Converter::ArkValue<Opt_Int32>(1);
     modifier_->setRowStart(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_START_NAME);
-    EXPECT_EQ(strResult, "1");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROW_START_NAME);
+    EXPECT_THAT(strResult, Eq("1"));
 
     // check another positive value
     optInputValue = Converter::ArkValue<Opt_Int32>(5);
     modifier_->setRowStart(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_START_NAME);
-    EXPECT_EQ(strResult, "5");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROW_START_NAME);
+    EXPECT_THAT(strResult, Eq("5"));
 
     // check negative value
     optInputValue = Converter::ArkValue<Opt_Int32>(-10);
     modifier_->setRowStart(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_START_NAME);
-    EXPECT_EQ(strResult, "-10");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROW_START_NAME);
+    EXPECT_THAT(strResult, Eq("-10"));
 }
 
 /*
@@ -160,10 +160,10 @@ HWTEST_F(GridItemModifierTest, setRowStartTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, DISABLED_setRowStartTestInvalidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     modifier_->setRowStart(node_, nullptr);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_START_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ROW_START_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROW_START_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ROW_START_DEFAULT_VALUE));
 }
 
 /*
@@ -173,10 +173,10 @@ HWTEST_F(GridItemModifierTest, DISABLED_setRowStartTestInvalidValues, TestSize.L
  */
 HWTEST_F(GridItemModifierTest, setRowEndTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_END_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ROW_END_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROW_END_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ROW_END_DEFAULT_VALUE));
 }
 
 /*
@@ -186,25 +186,25 @@ HWTEST_F(GridItemModifierTest, setRowEndTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, setRowEndTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
     // check positive value
     auto optInputValue = Converter::ArkValue<Opt_Int32>(1);
     modifier_->setRowEnd(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_END_NAME);
-    EXPECT_EQ(strResult, "1");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROW_END_NAME);
+    EXPECT_THAT(strResult, Eq("1"));
 
     // check another positive value
     optInputValue = Converter::ArkValue<Opt_Int32>(5);
     modifier_->setRowEnd(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_END_NAME);
-    EXPECT_EQ(strResult, "5");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROW_END_NAME);
+    EXPECT_THAT(strResult, Eq("5"));
 
     // check negative value
     optInputValue = Converter::ArkValue<Opt_Int32>(-10);
     modifier_->setRowEnd(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_END_NAME);
-    EXPECT_EQ(strResult, "-10");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROW_END_NAME);
+    EXPECT_THAT(strResult, Eq("-10"));
 }
 
 /*
@@ -214,10 +214,10 @@ HWTEST_F(GridItemModifierTest, setRowEndTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, DISABLED_setRowEndTestInvalidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     modifier_->setRowEnd(node_, nullptr);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_END_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ROW_END_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROW_END_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ROW_END_DEFAULT_VALUE));
 }
 
 /*
@@ -227,10 +227,10 @@ HWTEST_F(GridItemModifierTest, DISABLED_setRowEndTestInvalidValues, TestSize.Lev
  */
 HWTEST_F(GridItemModifierTest, setColumnStartTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_START_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_COLUMN_START_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMN_START_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_COLUMN_START_DEFAULT_VALUE));
 }
 
 /*
@@ -240,25 +240,25 @@ HWTEST_F(GridItemModifierTest, setColumnStartTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, setColumnStartTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
     // check positive value
     auto optInputValue = Converter::ArkValue<Opt_Int32>(1);
     modifier_->setColumnStart(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_START_NAME);
-    EXPECT_EQ(strResult, "1");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMN_START_NAME);
+    EXPECT_THAT(strResult, Eq("1"));
 
     // check another positive value
     optInputValue = Converter::ArkValue<Opt_Int32>(5);
     modifier_->setColumnStart(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_START_NAME);
-    EXPECT_EQ(strResult, "5");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMN_START_NAME);
+    EXPECT_THAT(strResult, Eq("5"));
 
     // check negative value
     optInputValue = Converter::ArkValue<Opt_Int32>(-10);
     modifier_->setColumnStart(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_START_NAME);
-    EXPECT_EQ(strResult, "-10");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMN_START_NAME);
+    EXPECT_THAT(strResult, Eq("-10"));
 }
 
 /*
@@ -268,10 +268,10 @@ HWTEST_F(GridItemModifierTest, setColumnStartTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, DISABLED_setColumnStartTestInvalidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     modifier_->setColumnStart(node_, nullptr);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_START_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_COLUMN_START_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMN_START_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_COLUMN_START_DEFAULT_VALUE));
 }
 
 /*
@@ -281,10 +281,10 @@ HWTEST_F(GridItemModifierTest, DISABLED_setColumnStartTestInvalidValues, TestSiz
  */
 HWTEST_F(GridItemModifierTest, setColumnEndTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_END_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_COLUMN_END_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMN_END_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_COLUMN_END_DEFAULT_VALUE));
 }
 
 /*
@@ -294,25 +294,25 @@ HWTEST_F(GridItemModifierTest, setColumnEndTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, setColumnEndTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
     // check positive value
     auto optInputValue = Converter::ArkValue<Opt_Int32>(1);
     modifier_->setColumnEnd(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_END_NAME);
-    EXPECT_EQ(strResult, "1");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMN_END_NAME);
+    EXPECT_THAT(strResult, Eq("1"));
 
     // check another positive value
     optInputValue = Converter::ArkValue<Opt_Int32>(5);
     modifier_->setColumnEnd(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_END_NAME);
-    EXPECT_EQ(strResult, "5");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMN_END_NAME);
+    EXPECT_THAT(strResult, Eq("5"));
 
     // check negative value
     optInputValue = Converter::ArkValue<Opt_Int32>(-10);
     modifier_->setColumnEnd(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_END_NAME);
-    EXPECT_EQ(strResult, "-10");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMN_END_NAME);
+    EXPECT_THAT(strResult, Eq("-10"));
 }
 
 /*
@@ -322,10 +322,10 @@ HWTEST_F(GridItemModifierTest, setColumnEndTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, DISABLED_setColumnEndTestInvalidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     modifier_->setColumnEnd(node_, nullptr);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_END_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_COLUMN_END_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMN_END_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_COLUMN_END_DEFAULT_VALUE));
 }
 
 /*
@@ -335,10 +335,10 @@ HWTEST_F(GridItemModifierTest, DISABLED_setColumnEndTestInvalidValues, TestSize.
  */
 HWTEST_F(GridItemModifierTest, setForceRebuildTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_FORCE_REBUILD_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_FORCE_REBUILD_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_FORCE_REBUILD_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_FORCE_REBUILD_DEFAULT_VALUE));
 }
 
 /*
@@ -348,10 +348,10 @@ HWTEST_F(GridItemModifierTest, setForceRebuildTestDefaultValues, TestSize.Level1
  */
 HWTEST_F(GridItemModifierTest, setSelectableTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTABLE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SELECTABLE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTABLE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SELECTABLE_DEFAULT_VALUE));
 }
 
 /*
@@ -361,22 +361,22 @@ HWTEST_F(GridItemModifierTest, setSelectableTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, setSelectableTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_Boolean inputValue;
 
     // check false value
     inputValue = Converter::ArkValue<Ark_Boolean>(false);
     auto optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
     modifier_->setSelectable(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTABLE_NAME);
-    EXPECT_EQ(strResult, "false");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTABLE_NAME);
+    EXPECT_THAT(strResult, Eq("false"));
 
     // check true value
     inputValue = Converter::ArkValue<Ark_Boolean>(true);
     optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
     modifier_->setSelectable(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTABLE_NAME);
-    EXPECT_EQ(strResult, "true");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTABLE_NAME);
+    EXPECT_THAT(strResult, Eq("true"));
 }
 
 /*
@@ -386,10 +386,10 @@ HWTEST_F(GridItemModifierTest, setSelectableTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, setSelectedTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTED_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SELECTED_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SELECTED_DEFAULT_VALUE));
 }
 
 /*
@@ -399,19 +399,19 @@ HWTEST_F(GridItemModifierTest, setSelectedTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridItemModifierTest, setSelectedTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
     // check true value
     auto optInputValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     modifier_->setSelected(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTED_NAME);
-    EXPECT_EQ(strResult, "true");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME);
+    EXPECT_THAT(strResult, Eq("true"));
 
     // check false value
     optInputValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(false);
     modifier_->setSelected(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTED_NAME);
-    EXPECT_EQ(strResult, "false");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME);
+    EXPECT_THAT(strResult, Eq("false"));
 }
 
 /*

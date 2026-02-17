@@ -52,9 +52,9 @@ namespace {
     const auto ATTRIBUTE_LEVEL_NAME_TEST = "accessibilityLevel";
     const auto ATTRIBUTE_LEVEL_DEFAULT_VALUE_TEST = "auto";
     const auto ATTRIBUTE_CHECKED_NAME_TEST = "accessibilityChecked";
-    const auto ATTRIBUTE_CHECKED_DEFAULT_VALUE_TEST = "";
+    const auto ATTRIBUTE_CHECKED_DEFAULT_VALUE_TEST = std::nullopt;
     const auto ATTRIBUTE_SELECTED_NAME_TEST = "accessibilitySelected";
-    const auto ATTRIBUTE_SELECTED_DEFAULT_VALUE_TEST = "";
+    const auto ATTRIBUTE_SELECTED_DEFAULT_VALUE_TEST = std::nullopt;
 
 #ifdef SUPPORT_DIGITAL_CROWN
     constexpr int64_t SEC_TO_MICROSEC = 1000000;
@@ -153,8 +153,8 @@ public:
  */
 HWTEST_F(CommonMethodModifierTest9, setAccessibilityGroupTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_GROUP_NAME_TEST);
-    EXPECT_EQ(strResult, ATTRIBUTE_GROUP_DEFAULT_VALUE_TEST);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_GROUP_NAME_TEST);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_GROUP_DEFAULT_VALUE_TEST));
 }
 
 /*
@@ -175,7 +175,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityGroupTestValidValue
         modifier_->setAccessibilityGroup(node_, &inputValue, &accessOpt);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GROUP_NAME_TEST);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -187,8 +187,8 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityGroupTestValidValue
  */
 HWTEST_F(CommonMethodModifierTest9, setAccessibilityTextTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_TEXT_NAME_TEST);
-    EXPECT_EQ(strResult, ATTRIBUTE_TEXT_DEFAULT_VALUE_TEST);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_TEXT_NAME_TEST);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_TEXT_DEFAULT_VALUE_TEST));
 }
 
 /*
@@ -208,7 +208,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextTestOfStringTyp
         modifier_->setAccessibilityText(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TEXT_NAME_TEST);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -232,7 +232,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextTestOfResourceT
         modifier_->setAccessibilityText(node_, &optInputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TEXT_NAME_TEST);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
         // Освобождаем выделенную память
         delete[] inputValue.params.value.array;
     }
@@ -246,8 +246,8 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextTestOfResourceT
  */
 HWTEST_F(CommonMethodModifierTest9, setAccessibilityTextHintTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_TEXT_HINT_NAME_TEST);
-    EXPECT_EQ(strResult, ATTRIBUTE_TEXT_HINT_DEFAULT_VALUE_TEST);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_TEXT_HINT_NAME_TEST);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_TEXT_HINT_DEFAULT_VALUE_TEST));
 }
 
 /*
@@ -267,7 +267,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextHintTestValidVa
         modifier_->setAccessibilityTextHint(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TEXT_HINT_NAME_TEST);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -279,8 +279,8 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityTextHintTestValidVa
  */
 HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescriptionTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_DESCRIPTION_NAME_TEST);
-    EXPECT_EQ(strResult, ATTRIBUTE_DESCRIPTION_DEFAULT_VALUE_TEST);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_DESCRIPTION_NAME_TEST);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_DESCRIPTION_DEFAULT_VALUE_TEST));
 }
 
 /*
@@ -300,7 +300,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescriptionTestOfSt
         modifier_->setAccessibilityDescription(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_DESCRIPTION_NAME_TEST);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -316,8 +316,8 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescriptionTestOfRe
     auto src = Converter::ArkUnion<Opt_Union_Resource_String, Ark_Resource>(CreateResource(resName));
 
     modifier_->setAccessibilityDescription(node_, &src);
-    auto strResult = GetStringAttribute(node_, ATTRIBUTE_DESCRIPTION_NAME_TEST);
-    EXPECT_EQ(strResult, ATTRIBUTE_DESCRIPTION_RESOURCE_VALUE_TEST);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_DESCRIPTION_NAME_TEST);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_DESCRIPTION_RESOURCE_VALUE_TEST));
 }
 
 //////// AccessibilityLevel
@@ -328,8 +328,8 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescriptionTestOfRe
  */
 HWTEST_F(CommonMethodModifierTest9, setAccessibilityLevelTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_LEVEL_NAME_TEST);
-    EXPECT_EQ(strResult, ATTRIBUTE_LEVEL_DEFAULT_VALUE_TEST);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_LEVEL_NAME_TEST);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_LEVEL_DEFAULT_VALUE_TEST));
 }
 
 /*
@@ -349,7 +349,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityLevelTestValidValue
         modifier_->setAccessibilityLevel(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_LEVEL_NAME_TEST);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -361,8 +361,8 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityLevelTestValidValue
  */
 HWTEST_F(CommonMethodModifierTest9, setAccessibilityCheckedTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_CHECKED_NAME_TEST);
-    EXPECT_EQ(strResult, ATTRIBUTE_CHECKED_DEFAULT_VALUE_TEST);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_CHECKED_NAME_TEST);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_CHECKED_DEFAULT_VALUE_TEST));
 }
 
 /*
@@ -382,7 +382,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityCheckedTestValidVal
         modifier_->setAccessibilityChecked(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_CHECKED_NAME_TEST);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -394,8 +394,8 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityCheckedTestValidVal
  */
 HWTEST_F(CommonMethodModifierTest9, setAccessibilitySelectedTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_SELECTED_NAME_TEST);
-    EXPECT_EQ(strResult, ATTRIBUTE_SELECTED_DEFAULT_VALUE_TEST);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME_TEST);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SELECTED_DEFAULT_VALUE_TEST));
 }
 
 /*
@@ -415,7 +415,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilitySelectedTestValidVa
         modifier_->setAccessibilitySelected(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_SELECTED_NAME_TEST);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 

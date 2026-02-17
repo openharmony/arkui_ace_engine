@@ -60,10 +60,10 @@ public:
 HWTEST_F(NavDestinationModifierTest, setModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MODE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MODE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'mode' of method 'mode'
@@ -84,7 +84,7 @@ static std::vector<std::tuple<std::string, Ark_NavDestinationMode, std::string>>
 HWTEST_F(NavDestinationModifierTest, setModeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_NavDestinationMode inputValueMode;
     Ark_NavDestinationMode initValueMode;
@@ -101,7 +101,7 @@ HWTEST_F(NavDestinationModifierTest, setModeTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -113,13 +113,13 @@ HWTEST_F(NavDestinationModifierTest, setModeTestValidValues, TestSize.Level1)
 HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HIDE_TITLE_BAR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_HIDE_TITLE_BAR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_HIDE_TITLE_BAR_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_ANIMATED_TITLE_BAR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_IS_ANIMATED_TITLE_BAR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IS_ANIMATED_TITLE_BAR_DEFAULT_VALUE));
 }
 
 //Valid values for attribute 'hideTitleBar' of method 'hideTitleBar'
@@ -136,7 +136,7 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> hideTitleB
 HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar0TestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Boolean inputValueHideTitleBar;
     Ark_Boolean initValueHideTitleBar;
@@ -152,7 +152,7 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar0TestValidValues, T
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HIDE_TITLE_BAR_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -170,7 +170,7 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> animatedHi
 HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar1TestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Boolean inputValueHideTitleBar;
     Ark_Boolean initValueHideTitleBar;
@@ -193,10 +193,10 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar1TestValidValues, T
             jsonValue = GetJsonValue(node_);
             resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HIDE_TITLE_BAR_NAME);
             expectedStr = std::get<2>(value);
-            EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+            EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
             resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_ANIMATED_TITLE_BAR_NAME);
             expectedStr = std::get<2>(animated);
-            EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(animated);
+            EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(animated);
         }
     }
 }
@@ -302,10 +302,10 @@ HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
 HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RECOVERABLE_RECOVERABLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RECOVERABLE_RECOVERABLE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_RECOVERABLE_RECOVERABLE_DEFAULT_VALUE));
 }
 
 //Valid values for attribute 'recoverableRecoverable' of method 'recoverable'
@@ -322,7 +322,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> recoverabl
 HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Boolean realInputValue = Converter::ArkValue<Opt_Boolean>(false);
     Opt_Boolean initValueRecoverableRecoverable;
@@ -338,7 +338,7 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestValidValues, Tes
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RECOVERABLE_RECOVERABLE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -355,7 +355,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean>> recoverableRecoverableR
 HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Boolean realInputValue = Converter::ArkValue<Opt_Boolean>(false);
     Opt_Boolean initValueRecoverableRecoverable;
@@ -372,7 +372,7 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestInvalidValues, T
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RECOVERABLE_RECOVERABLE_NAME);
         expectedStr = ATTRIBUTE_RECOVERABLE_RECOVERABLE_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -384,13 +384,13 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestInvalidValues, T
 HWTEST_F(NavDestinationModifierTest, DISABLED_setIgnoreLayoutSafeAreaTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_TYPES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_TYPES_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_TYPES_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_EDGES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_EDGES_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_EDGES_DEFAULT_VALUE));
 }
 
 /*
@@ -400,7 +400,7 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setIgnoreLayoutSafeAreaTestDefault
  */
 HWTEST_F(NavDestinationModifierTest, DISABLED_setIgnoreLayoutSafeAreaTestValidValues, TestSize.Level1)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     std::unique_ptr<JsonValue> jsonValue;
 
@@ -418,10 +418,10 @@ HWTEST_F(NavDestinationModifierTest, DISABLED_setIgnoreLayoutSafeAreaTestValidVa
 
     expectedStr = "SAFE_AREA_TYPE_SYSTEM";
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_TYPES_NAME);
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 
     expectedStr = "SAFE_AREA_EDGE_TOP";
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IGNORE_LAYOUT_SAFE_AREA_EDGES_NAME);
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 } // namespace OHOS::Ace::NG

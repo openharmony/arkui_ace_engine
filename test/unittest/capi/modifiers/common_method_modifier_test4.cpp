@@ -30,7 +30,7 @@ namespace {
 const auto ATTRIBUTE_COLOR_BLEND_NAME = "colorBlend";
 const auto ATTRIBUTE_COLOR_BLEND_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_INVERT_NAME = "invert";
-const auto ATTRIBUTE_INVERT_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_INVERT_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_HUE_ROTATE_NAME = "hueRotate";
 const auto ATTRIBUTE_HUE_ROTATE_DEFAULT_VALUE = 0;
 const auto ATTRIBUTE_USE_EFFECT_NAME = "useEffect";
@@ -59,41 +59,41 @@ const auto ATTRIBUTE_ALIGN_RULES_I_START_NAME = "start";
 const auto ATTRIBUTE_ALIGN_RULES_I_END_NAME = "end";
 const auto ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME = "bias";
 const auto ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ANCHOR_NAME = "anchor";
-const auto ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ANCHOR_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ANCHOR_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ALIGN_NAME = "align";
-const auto ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ALIGN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ALIGN_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ANCHOR_NAME = "anchor";
-const auto ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ANCHOR_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ANCHOR_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ALIGN_NAME = "align";
-const auto ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ALIGN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ALIGN_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ANCHOR_NAME = "anchor";
-const auto ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ANCHOR_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ANCHOR_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_NAME = "align";
-const auto ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_TOP_I_ANCHOR_NAME = "anchor";
-const auto ATTRIBUTE_ALIGN_RULES_I_TOP_I_ANCHOR_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_TOP_I_ANCHOR_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_NAME = "align";
-const auto ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ANCHOR_NAME = "anchor";
-const auto ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ANCHOR_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ANCHOR_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ALIGN_NAME = "align";
-const auto ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ALIGN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ALIGN_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ANCHOR_NAME = "anchor";
-const auto ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ANCHOR_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ANCHOR_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_NAME = "align";
-const auto ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_BIAS_I_HORIZONTAL_NAME = "horizontal";
 const auto ATTRIBUTE_ALIGN_RULES_I_BIAS_I_HORIZONTAL_DEFAULT_VALUE = "0.5";
 const auto ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_NAME = "vertical";
 const auto ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_DEFAULT_VALUE = "0.5";
 const auto ATTRIBUTE_ALIGN_RULES_I_START_I_ANCHOR_NAME = "anchor";
-const auto ATTRIBUTE_ALIGN_RULES_I_START_I_ANCHOR_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_START_I_ANCHOR_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_NAME = "align";
-const auto ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_NAME = "anchor";
-const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_NAME = "align";
-const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_OBSCURED_NAME = "obscured";
 const auto ATTRIBUTE_EXPAND_SAFE_AREA_NAME = "expandSafeArea";
 const auto ATTRIBUTE_EXPAND_SAFE_AREA_I_TYPES_NAME = "types";
@@ -183,8 +183,8 @@ public:
  */
 HWTEST_F(CommonMethodModifierTest4, setColorBlendTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_COLOR_BLEND_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_COLOR_BLEND_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLOR_BLEND_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_COLOR_BLEND_DEFAULT_VALUE));
 }
 
 /*
@@ -215,7 +215,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setColorBlendTestValidValues, TestS
         modifier_->setColorBlend(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_COLOR_BLEND_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -236,7 +236,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setColorBlendTestInvalidValues, Tes
         modifier_->setColorBlend(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_COLOR_BLEND_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -247,8 +247,8 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setColorBlendTestInvalidValues, Tes
  */
 HWTEST_F(CommonMethodModifierTest4, setInvertTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_INVERT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_INVERT_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_INVERT_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_INVERT_DEFAULT_VALUE));
 }
 
 /*
@@ -275,7 +275,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setInvertTestValidValues, TestSize.
         modifier_->setInvert(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_INVERT_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -298,7 +298,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setInvertTestInvalidValues, TestSiz
         modifier_->setInvert(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_INVERT_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -373,9 +373,9 @@ HWTEST_F(CommonMethodModifierTest4, setUseEffectTestDefaultValues, TestSize.Leve
 {
     auto fullJson = GetJsonValue(node_);
     auto resultValue = GetAttrValue<std::string>(fullJson,  ATTRIBUTE_USE_EFFECT_NAME);
-    EXPECT_EQ(resultValue, ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE);
+    EXPECT_THAT(resultValue, Eq(ATTRIBUTE_USE_EFFECT_DEFAULT_VALUE));
     resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_TYPE_NAME);
-    EXPECT_EQ(resultValue, ATTRIBUTE_USE_EFFECT_TYPE_DEFAULT_VALUE);
+    EXPECT_THAT(resultValue, Eq(ATTRIBUTE_USE_EFFECT_TYPE_DEFAULT_VALUE));
 }
 
 /*
@@ -390,7 +390,7 @@ HWTEST_F(CommonMethodModifierTest4, setUseEffect0Test, TestSize.Level1)
         modifier_->setUseEffect0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -406,13 +406,13 @@ HWTEST_F(CommonMethodModifierTest4, setUseEffect1Test, TestSize.Level1)
         modifier_->setUseEffect1(node_, &inputValue, nullptr);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
     for (auto &[message, inputValue, expectedValue] : testFixtureEnumUseEffectType) {
         modifier_->setUseEffect1(node_, nullptr, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_EFFECT_TYPE_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 ////////////// RenderGroup
@@ -610,7 +610,7 @@ HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectTestDefaultValues, Test
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultValue = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME);
-    EXPECT_EQ(resultValue, ATTRIBUTE_PIXEL_STRETCH_EFFECT_DEFAULT_VALUE);
+    EXPECT_THAT(resultValue, Eq(ATTRIBUTE_PIXEL_STRETCH_EFFECT_DEFAULT_VALUE));
 }
 
 /*
@@ -637,7 +637,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setPixelStretchEffectTestValidValue
         modifier_->setPixelStretchEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -662,7 +662,7 @@ HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectTestInvalidValues, Test
         modifier_->setPixelStretchEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_PIXEL_STRETCH_EFFECT_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -674,50 +674,50 @@ HWTEST_F(CommonMethodModifierTest4, setPixelStretchEffectTestInvalidValues, Test
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setAlignRules1TestDefaultValues1, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
-    auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-    auto resultLeft = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_LEFT_NAME);
-    auto resultRight = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_RIGHT_NAME);
-    auto resultStart = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_START_NAME);
-    auto resultEnd = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_END_NAME);
+    auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+    auto resultLeft = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_LEFT_NAME);
+    auto resultRight = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_RIGHT_NAME);
+    auto resultStart = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_START_NAME);
+    auto resultEnd = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_END_NAME);
     auto resultMiddle =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME);
-    auto resultBias = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
-    std::string resultStr;
+        GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME);
+    auto resultBias = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(resultLeft, ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ALIGN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ALIGN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ALIGN_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.start.anchor'";
     resultStr = GetAttrValue<std::string>(resultLeft, ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ANCHOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ANCHOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_LEFT_I_ANCHOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.start.anchor'";
     resultStr = GetAttrValue<std::string>(resultRight, ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ANCHOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ANCHOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ANCHOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.start.anchor'";
     resultStr = GetAttrValue<std::string>(resultRight, ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ALIGN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ALIGN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_RIGHT_I_ALIGN_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.start.anchor'";
     resultStr = GetAttrValue<std::string>(resultStart, ATTRIBUTE_ALIGN_RULES_I_START_I_ANCHOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_START_I_ANCHOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_START_I_ANCHOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.start.anchor'";
     resultStr = GetAttrValue<std::string>(resultStart, ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.start.align'";
     resultStr = GetAttrValue<std::string>(resultEnd, ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.end.anchor'";
     resultStr = GetAttrValue<std::string>(resultEnd, ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.end.align'";
     resultStr = GetAttrValue<std::string>(resultMiddle, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ANCHOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ANCHOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ANCHOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.middle.anchor'";
     resultStr = GetAttrValue<std::string>(resultMiddle, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.middle.align'";
     resultStr = GetAttrValue<std::string>(resultBias, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_HORIZONTAL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_HORIZONTAL_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_BIAS_I_HORIZONTAL_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.bias.horizontal'";
     resultStr = GetAttrValue<std::string>(resultBias, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.bias.vertical'";
 }
 
@@ -730,40 +730,40 @@ HWTEST_F(CommonMethodModifierTest4, setAlignRules1TestDefaultValues2, TestSize.L
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultAlignRules =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
 
     std::unique_ptr<JsonValue> resultTop =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_TOP_NAME);
+        GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_TOP_NAME);
     std::unique_ptr<JsonValue> resultBottom =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_NAME);
+        GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_NAME);
     std::unique_ptr<JsonValue> resultCenter =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_CENTER_NAME);
+        GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_CENTER_NAME);
     std::unique_ptr<JsonValue> resultBias =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
-    std::string resultStr;
+        GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultTop, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ANCHOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ANCHOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_TOP_I_ANCHOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.top.anchor'";
 
     resultStr = GetAttrValue<std::string>(resultTop, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.top.align'";
 
     resultStr = GetAttrValue<std::string>(resultBottom, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ANCHOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ANCHOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ANCHOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.bottom.anchor'";
 
     resultStr = GetAttrValue<std::string>(resultBottom, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ALIGN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ALIGN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ALIGN_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.bottom.align'";
 
     resultStr = GetAttrValue<std::string>(resultCenter, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ANCHOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ANCHOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ANCHOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.center.anchor'";
 
     resultStr = GetAttrValue<std::string>(resultCenter, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_DEFAULT_VALUE)) <<
         "Default value for attribute 'alignRules.center.align'";
 }
 
@@ -775,8 +775,8 @@ HWTEST_F(CommonMethodModifierTest4, setAlignRules1TestDefaultValues2, TestSize.L
 HWTEST_F(CommonMethodModifierTest4, setObscuredTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    std::optional<std::string> resultStr;
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_OBSCURED_NAME);
     EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
 }
 
@@ -795,8 +795,8 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setObscuredTestValues, TestSize.Lev
     auto optVecArkReason = Converter::ArkValue<Opt_Array_ObscuredReasons>(vecArkReason);
     modifier_->setObscured(node_, &optVecArkReason);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    std::optional<std::string> resultStr;
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_OBSCURED_NAME);
     EXPECT_EQ(jsonArray->GetArraySize(), vecReason.size());
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
         auto itemJson = jsonArray->GetArrayItem(i);
@@ -819,8 +819,8 @@ HWTEST_F(CommonMethodModifierTest4, setObscuredTestInvalidValues, TestSize.Level
     auto optVecArkReason = Converter::ArkValue<Opt_Array_ObscuredReasons>(vecArkReason);
     modifier_->setObscured(node_, &optVecArkReason);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_OBSCURED_NAME);
+    std::optional<std::string> resultStr;
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_OBSCURED_NAME);
     EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
 }
 
@@ -828,15 +828,15 @@ void checkExpandSafeArea(Ark_NodeHandle node, std::vector<std::string> vecTypes,
     std::vector<std::string> vecEdges)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node);
-    auto jsonExpSA = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EXPAND_SAFE_AREA_NAME);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonExpSA, ATTRIBUTE_EXPAND_SAFE_AREA_I_TYPES_NAME);
+    auto jsonExpSA = GetAttrObject(jsonValue, ATTRIBUTE_EXPAND_SAFE_AREA_NAME);
+    auto jsonArray = GetAttrObject(jsonExpSA, ATTRIBUTE_EXPAND_SAFE_AREA_I_TYPES_NAME);
     ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), vecTypes.size());
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
         auto itemJson = jsonArray->GetArrayItem(i);
         EXPECT_EQ(itemJson->GetString(), vecTypes[i]);
     }
-    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonExpSA, ATTRIBUTE_EXPAND_SAFE_AREA_I_EDGES_NAME);
+    jsonArray = GetAttrObject(jsonExpSA, ATTRIBUTE_EXPAND_SAFE_AREA_I_EDGES_NAME);
     ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), vecEdges.size());
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -951,9 +951,8 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setExpandSafeAreaTestInvalidValues2
  */
 HWTEST_F(CommonMethodModifierTest4, setSafeAreaPaddingTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
 }
 
 typedef std::pair<Ark_LengthMetrics, std::string> LengthMetricsOneTestStep;
@@ -977,16 +976,15 @@ std::vector<LengthMetricsOneTestStep> testLengthMetricsValues = {
  */
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestLengthMetricsValues, TestSize.Level1)
 {
-    std::string strResult;
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
 
     for (const auto &[arkPadding, expected]: testLengthMetricsValues) {
         auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetrics_LocalizedPadding,
             Ark_LengthMetrics>(arkPadding);
         modifier_->setSafeAreaPadding(node_, &value);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 }
 
@@ -1017,15 +1015,16 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestLeftArkPaddin
         inputValue.left = Converter::ArkValue<Opt_Length>(arkPadding);
         auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetrics_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setSafeAreaPadding(node_, &value);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
-        auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_LEFT_NAME);
-        auto topResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_TOP_NAME);
-        auto rightResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_RIGHT_NAME);
-        auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_BOTTOM_NAME);
-        EXPECT_EQ(leftResult, expected);
-        EXPECT_EQ(topResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
-        EXPECT_EQ(rightResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
-        EXPECT_EQ(bottomResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
+        auto jsonValue = GetJsonValue(node_);
+        auto padding = GetAttrObject(jsonValue, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
+        auto leftResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_LEFT_NAME);
+        auto topResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_TOP_NAME);
+        auto rightResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_RIGHT_NAME);
+        auto bottomResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_BOTTOM_NAME);
+        EXPECT_THAT(leftResult, Eq(expected));
+        EXPECT_THAT(topResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
+        EXPECT_THAT(rightResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
+        EXPECT_THAT(bottomResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
     }
 }
 
@@ -1042,15 +1041,16 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestTopArkPadding
         inputValue.top = Converter::ArkValue<Opt_Length>(arkPadding);
         auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetrics_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setSafeAreaPadding(node_, &value);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
-        auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_LEFT_NAME);
-        auto topResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_TOP_NAME);
-        auto rightResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_RIGHT_NAME);
-        auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_BOTTOM_NAME);
-        EXPECT_EQ(leftResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
-        EXPECT_EQ(topResult, expected);
-        EXPECT_EQ(rightResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
-        EXPECT_EQ(bottomResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
+        auto jsonValue = GetJsonValue(node_);
+        auto padding = GetAttrObject(jsonValue, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
+        auto leftResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_LEFT_NAME);
+        auto topResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_TOP_NAME);
+        auto rightResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_RIGHT_NAME);
+        auto bottomResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_BOTTOM_NAME);
+        EXPECT_THAT(leftResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
+        EXPECT_THAT(topResult, Eq(expected));
+        EXPECT_THAT(rightResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
+        EXPECT_THAT(bottomResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
     }
 }
 
@@ -1067,15 +1067,16 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestRightArkPaddi
         inputValue.right = Converter::ArkValue<Opt_Length>(arkPadding);
         auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetrics_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setSafeAreaPadding(node_, &value);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
-        auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_LEFT_NAME);
-        auto topResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_TOP_NAME);
-        auto rightResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_RIGHT_NAME);
-        auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_BOTTOM_NAME);
-        EXPECT_EQ(leftResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
-        EXPECT_EQ(topResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
-        EXPECT_EQ(rightResult, expected);
-        EXPECT_EQ(bottomResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
+        auto jsonValue = GetJsonValue(node_);
+        auto padding = GetAttrObject(jsonValue, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
+        auto leftResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_LEFT_NAME);
+        auto topResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_TOP_NAME);
+        auto rightResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_RIGHT_NAME);
+        auto bottomResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_BOTTOM_NAME);
+        EXPECT_THAT(leftResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
+        EXPECT_THAT(topResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
+        EXPECT_THAT(rightResult, Eq(expected));
+        EXPECT_THAT(bottomResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
     }
 }
 
@@ -1092,15 +1093,16 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestBottomArkPadd
         inputValue.bottom = Converter::ArkValue<Opt_Length>(arkPadding);
         auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetrics_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setSafeAreaPadding(node_, &value);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
-        auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_LEFT_NAME);
-        auto topResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_TOP_NAME);
-        auto rightResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_RIGHT_NAME);
-        auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_SAFE_AREA_BOTTOM_NAME);
-        EXPECT_EQ(leftResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
-        EXPECT_EQ(topResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
-        EXPECT_EQ(rightResult, ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE);
-        EXPECT_EQ(bottomResult, expected);
+        auto jsonValue = GetJsonValue(node_);
+        auto padding = GetAttrObject(jsonValue, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
+        auto leftResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_LEFT_NAME);
+        auto topResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_TOP_NAME);
+        auto rightResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_RIGHT_NAME);
+        auto bottomResult = GetAttrValue<std::string>(padding, ATTRIBUTE_SAFE_AREA_BOTTOM_NAME);
+        EXPECT_THAT(leftResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
+        EXPECT_THAT(topResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
+        EXPECT_THAT(rightResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
+        EXPECT_THAT(bottomResult, Eq(expected));
     }
 }
 
@@ -1194,9 +1196,9 @@ HWTEST_F(CommonMethodModifierTest4, setRotateTestRotateCenterZValidValues, TestS
             Ark_RotateOptions>(inputValueRotate);
         modifier_->setRotate(node_, &optInputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.centerZ";
     };
 
@@ -1230,9 +1232,9 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setRotateTestRotateCenterZInvalidVa
             Ark_RotateOptions>(inputValueRotate);
         modifier_->setRotate(node_, &optInputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.centerZ";
     };
 
@@ -1281,9 +1283,9 @@ HWTEST_F(CommonMethodModifierTest4, setRotateTestRotateAngleValidValues, TestSiz
             Ark_RotateOptions>(inputValueRotate);
         modifier_->setRotate(node_, &optRotateOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.angle";
     };
 
@@ -1316,9 +1318,9 @@ HWTEST_F(CommonMethodModifierTest4, setRotateTestRotateAngleStringValidValues, T
             Ark_RotateOptions>(inputValueRotate);
         modifier_->setRotate(node_, &optRotateOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.angle";
     };
 

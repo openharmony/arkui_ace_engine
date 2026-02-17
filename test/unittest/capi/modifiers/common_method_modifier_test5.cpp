@@ -27,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
     const auto ATTRIBUTE_LINEAR_GRADIENT_BLUR_NAME = "linearGradientBlur";
-    const auto ATTRIBUTE_LINEAR_GRADIENT_BLUR_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_LINEAR_GRADIENT_BLUR_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME = "systemBarEffect";
     const auto ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_SYSTEM_BAR_EFFECT_TRUE_VALUE = "true";
@@ -65,8 +65,8 @@ public:
  */
 HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_LINEAR_GRADIENT_BLUR_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_LINEAR_GRADIENT_BLUR_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_LINEAR_GRADIENT_BLUR_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_LINEAR_GRADIENT_BLUR_DEFAULT_VALUE));
 }
 
 /*
@@ -96,7 +96,7 @@ HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestValidValues, TestSi
         modifier_->setLinearGradientBlur(node_, &inputValueNum, &inputValueGradient);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_LINEAR_GRADIENT_BLUR_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -111,7 +111,7 @@ HWTEST_F(CommonMethodModifierTest5, DISABLED_setLinearGradientBlurTestInvalidVal
     modifier_->setLinearGradientBlur(node_, nullptr, nullptr);
     auto fullJson = GetJsonValue(node_);
     auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_LINEAR_GRADIENT_BLUR_NAME);
-    EXPECT_EQ(resultValue, ATTRIBUTE_LINEAR_GRADIENT_BLUR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultValue, Eq(ATTRIBUTE_LINEAR_GRADIENT_BLUR_DEFAULT_VALUE)) <<
         "Passed value is: nullptr";
 }
 
@@ -124,7 +124,7 @@ HWTEST_F(CommonMethodModifierTest5, setSystemBarEffectTestDefaultValues, TestSiz
 {
     ASSERT_TRUE(modifier_->setSystemBarEffect);
     auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE));
 }
 
 /*
@@ -136,11 +136,11 @@ HWTEST_F(CommonMethodModifierTest5, setSystemBarEffectTestValidValues, TestSize.
 {
     ASSERT_TRUE(modifier_->setSystemBarEffect);
     auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SYSTEM_BAR_EFFECT_DEFAULT_VALUE));
 
     modifier_->setSystemBarEffect(node_);
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SYSTEM_BAR_EFFECT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SYSTEM_BAR_EFFECT_TRUE_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SYSTEM_BAR_EFFECT_TRUE_VALUE));
 }
 
 /*
@@ -150,8 +150,8 @@ HWTEST_F(CommonMethodModifierTest5, setSystemBarEffectTestValidValues, TestSize.
  */
 HWTEST_F(CommonMethodModifierTest5, setBlendModeTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BLEND_MODE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_BLEND_MODE_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_BLEND_MODE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_BLEND_MODE_DEFAULT_VALUE));
 }
 
 /*
@@ -196,7 +196,7 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues1, TestSize.Level
         modifier_->setBlendMode(node_, &inputValueMode, &inputValueType);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BLEND_MODE_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -242,7 +242,7 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestValidValues2, TestSize.Level
         modifier_->setBlendMode(node_, &inputValueMode, &inputValueType);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BLEND_MODE_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -260,7 +260,7 @@ HWTEST_F(CommonMethodModifierTest5, setBlendModeTestInvalidValues, TestSize.Leve
         modifier_->setBlendMode(node_, &blendMode, &applyType);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BLEND_MODE_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Invalid value should not change the blend mode";
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Invalid value should not change the blend mode";
     }
 }
 

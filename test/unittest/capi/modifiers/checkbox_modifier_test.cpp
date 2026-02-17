@@ -111,18 +111,18 @@ HWTEST_F(CheckboxModifierTest, setOnChangeTestSetCheckboxOnChange, TestSize.Leve
 HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     jsonValue = GetJsonValue(node_);
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GROUP_NAME);
     expectedStr = ATTRIBUTE_GROUP_DEFAULT_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NAME_NAME);
     expectedStr = ATTRIBUTE_NAME_DEFAULT_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
@@ -134,7 +134,7 @@ HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestValidValues, TestSize.Level
 {
     Ark_CheckboxOptions options;
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     options.group = Converter::ArkValue<Opt_String>(ATTRIBUTE_GROUP_TEST_VALUE);
@@ -148,11 +148,11 @@ HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestValidValues, TestSize.Level
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GROUP_NAME);
     expectedStr = ATTRIBUTE_GROUP_TEST_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NAME_NAME);
     expectedStr = ATTRIBUTE_NAME_TEST_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
@@ -206,10 +206,10 @@ HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestBuilder, TestSize.Level1)
 HWTEST_F(CheckboxModifierTest, setSelectTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECT_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'select' of method 'select'
@@ -226,7 +226,7 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> selectSele
 HWTEST_F(CheckboxModifierTest, setSelectTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     // Verifying attribute's  values
@@ -236,7 +236,7 @@ HWTEST_F(CheckboxModifierTest, setSelectTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -248,10 +248,10 @@ HWTEST_F(CheckboxModifierTest, setSelectTestValidValues, TestSize.Level1)
 HWTEST_F(CheckboxModifierTest, DISABLED_setSelectedColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'selectedColor' of method 'selectedColor'
@@ -268,7 +268,7 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> sele
 HWTEST_F(CheckboxModifierTest, setSelectedColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     for (auto&& value: selectedColorSelectedColorValidValues) {
@@ -277,7 +277,7 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -289,7 +289,7 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestValidValues, TestSize.Level1)
 HWTEST_F(CheckboxModifierTest, DISABLED_setSelectedColorTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ResourceColor inputValueSelectedColor;
 
@@ -305,7 +305,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setSelectedColorTestInvalidValues, TestS
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
     expectedStr = ATTRIBUTE_SELECTED_COLOR_INVALID_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
@@ -316,10 +316,10 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setSelectedColorTestInvalidValues, TestS
 HWTEST_F(CheckboxModifierTest, setUnselectedColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNSELECTED_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE));
 }
 
 namespace {
@@ -338,7 +338,7 @@ std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> unselectedC
 HWTEST_F(CheckboxModifierTest, setUnselectedColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ResourceColor inputValueUnselectedColor;
     Ark_ResourceColor initValueUnselectedColor;
@@ -355,7 +355,7 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestValidValues, TestSize.Level
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNSELECTED_COLOR_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -367,7 +367,7 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestValidValues, TestSize.Level
 HWTEST_F(CheckboxModifierTest, DISABLED_setUnselectedColorTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ResourceColor inputValueUnselectedColor;
 
@@ -383,7 +383,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setUnselectedColorTestInvalidValues, Tes
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNSELECTED_COLOR_NAME);
     expectedStr = ATTRIBUTE_UNSELECTED_COLOR_INVALID_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
@@ -394,10 +394,10 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setUnselectedColorTestInvalidValues, Tes
 HWTEST_F(CheckboxModifierTest, setShapeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHAPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHAPE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SHAPE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'shape' of method 'shape'
@@ -416,7 +416,7 @@ static std::vector<std::tuple<std::string, Ark_CheckBoxShape, std::string>> shap
 HWTEST_F(CheckboxModifierTest, DISABLED_setShapeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_CheckBoxShape inputValueShape;
     Ark_CheckBoxShape initValueShape;
@@ -433,7 +433,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setShapeTestValidValues, TestSize.Level1
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHAPE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -451,7 +451,7 @@ static std::vector<std::tuple<std::string, Ark_CheckBoxShape>> shapeShapeInvalid
 HWTEST_F(CheckboxModifierTest, setShapeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_CheckBoxShape inputValueShape;
     Ark_CheckBoxShape initValueShape;
@@ -470,7 +470,7 @@ HWTEST_F(CheckboxModifierTest, setShapeTestInvalidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHAPE_NAME);
         expectedStr = ATTRIBUTE_SHAPE_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -483,23 +483,23 @@ HWTEST_F(CheckboxModifierTest, setMarkTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> resultMark;
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     jsonValue = GetJsonValue(node_);
 
-    resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
+    resultMark = GetAttrObject(jsonValue, ATTRIBUTE_MARK_NAME);
     resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
     expectedStr = ATTRIBUTE_MARK_STROKE_COLOR_DEFAULT_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 
     resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
     expectedStr = ATTRIBUTE_MARK_SIZE_DEFAULT_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 
     resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
     expectedStr = ATTRIBUTE_MARK_STROKE_WIDTH_DEFAULT_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /**
@@ -518,7 +518,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestValidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> resultMark;
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     style.strokeColor.value = color;
@@ -529,18 +529,18 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestValidValues, TestSize.Level1)
 
     jsonValue = GetJsonValue(node_);
 
-    resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
+    resultMark = GetAttrObject(jsonValue, ATTRIBUTE_MARK_NAME);
     resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
     expectedStr = ATTRIBUTE_MARK_STROKE_COLOR_TEST_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 
     resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
     expectedStr = ATTRIBUTE_MARK_SIZE_TEST_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 
     resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
     expectedStr = ATTRIBUTE_MARK_STROKE_WIDTH_TEST_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /**
@@ -558,7 +558,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestInvalidValues, TestSize.Level
     Ark_Length len2 = Converter::ArkValue<Ark_Length>(0.);
     Opt_Length opt1 = Converter::ArkValue<Opt_Length>(len1);
     Opt_Length opt2 = Converter::ArkValue<Opt_Length>(len2);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     style.strokeColor.value = color;
@@ -569,18 +569,18 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setMarkTestInvalidValues, TestSize.Level
 
     jsonValue = GetJsonValue(node_);
 
-    resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
+    resultMark = GetAttrObject(jsonValue, ATTRIBUTE_MARK_NAME);
     resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
     expectedStr = "#00000000";
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 
     resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
     expectedStr = "0.00vp";
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 
     resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
     expectedStr = "0.00vp";
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 #ifdef WRONG_OLD_GEN

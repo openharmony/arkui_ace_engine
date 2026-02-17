@@ -86,11 +86,11 @@ Opt_LineOptions BuildLineOptions(double width, double height)
  */
 HWTEST_F(LineModifierTest, lineModifierTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
-    strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-    EXPECT_EQ(strResult, DEFAULT_VALUE);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-    EXPECT_EQ(strResult, DEFAULT_VALUE);
+    std::optional<std::string> strResult;
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+    EXPECT_THAT(strResult, Eq(DEFAULT_VALUE));
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+    EXPECT_THAT(strResult, Eq(DEFAULT_VALUE));
 }
 
 /**
@@ -104,11 +104,11 @@ HWTEST_F(LineModifierTest, setLineOptionsTestLineModifierSetLineOptions, TestSiz
     auto options = BuildLineOptions(WIDTH, HEIGHT);
     modifier_->setLineOptions(frameNode, &options);
 
-    std::string strResult;
-    strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-    EXPECT_EQ(strResult, WIDTH_STR);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-    EXPECT_EQ(strResult, HEIGHT_STR);
+    std::optional<std::string> strResult;
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+    EXPECT_THAT(strResult, Eq(WIDTH_STR));
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+    EXPECT_THAT(strResult, Eq(HEIGHT_STR));
 }
 
 /**
@@ -125,9 +125,9 @@ HWTEST_F(LineModifierTest, setStartPointTestLineModifierStartPoint, TestSize.Lev
     auto optArray = Converter::ArkValue<Opt_ShapePoint>(input, &ctx);
     modifier_->setStartPoint(frameNode, &optArray);
 
-    std::string strResult;
-    strResult = GetStringAttribute(node_, ATTRIBUTE_START_POINT_NAME);
-    EXPECT_EQ(strResult, START_POINT_STR);
+    std::optional<std::string> strResult;
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_START_POINT_NAME);
+    EXPECT_THAT(strResult, Eq(START_POINT_STR));
 }
 
 /**
@@ -144,8 +144,8 @@ HWTEST_F(LineModifierTest, setEndPointTestLineModifierEndPoint, TestSize.Level1)
     auto optArray = Converter::ArkValue<Opt_ShapePoint>(input, &ctx);
     modifier_->setEndPoint(frameNode, &optArray);
 
-    std::string strResult;
-    strResult = GetStringAttribute(node_, ATTRIBUTE_END_POINT_NAME);
-    EXPECT_EQ(strResult, END_POINT_STR);
+    std::optional<std::string> strResult;
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_END_POINT_NAME);
+    EXPECT_THAT(strResult, Eq(END_POINT_STR));
 }
 } // namespace OHOS::Ace::NG

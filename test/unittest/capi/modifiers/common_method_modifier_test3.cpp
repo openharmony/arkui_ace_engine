@@ -75,8 +75,8 @@ public:
  */
 HWTEST_F(CommonMethodModifierTest3, setBrightnessTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BRIGHTNESS_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_BRIGHTNESS_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_BRIGHTNESS_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_BRIGHTNESS_DEFAULT_VALUE));
 }
 
 /*
@@ -98,7 +98,7 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setBrightnessTestValidValues, TestS
         modifier_->setBrightness(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BRIGHTNESS_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -119,7 +119,7 @@ HWTEST_F(CommonMethodModifierTest3, setBrightnessTestInvalidValues, TestSize.Lev
         modifier_->setBrightness(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BRIGHTNESS_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -130,8 +130,8 @@ HWTEST_F(CommonMethodModifierTest3, setBrightnessTestInvalidValues, TestSize.Lev
  */
 HWTEST_F(CommonMethodModifierTest3, setContrastTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_CONTRAST_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_CONTRAST_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_CONTRAST_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_CONTRAST_DEFAULT_VALUE));
 }
 
 /*
@@ -153,7 +153,7 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setContrastTestValidValues, TestSiz
         modifier_->setContrast(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_CONTRAST_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -174,7 +174,7 @@ HWTEST_F(CommonMethodModifierTest3, setContrastTestInvalidValues, TestSize.Level
         modifier_->setContrast(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_CONTRAST_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -185,8 +185,8 @@ HWTEST_F(CommonMethodModifierTest3, setContrastTestInvalidValues, TestSize.Level
  */
 HWTEST_F(CommonMethodModifierTest3, setGrayScaleTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_GRAYSCALE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_GRAYSCALE_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_GRAYSCALE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_GRAYSCALE_DEFAULT_VALUE));
 }
 
 /*
@@ -208,7 +208,7 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setGrayScaleTestValidValues, TestSi
         modifier_->setGrayscale(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GRAYSCALE_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -229,7 +229,7 @@ HWTEST_F(CommonMethodModifierTest3, setGrayScaleTestInvalidValues, TestSize.Leve
         modifier_->setGrayscale(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GRAYSCALE_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -240,8 +240,8 @@ HWTEST_F(CommonMethodModifierTest3, setGrayScaleTestInvalidValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest3, setSaturateTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_SATURATE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SATURATE_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SATURATE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SATURATE_DEFAULT_VALUE));
 }
 
 /*
@@ -263,7 +263,7 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setSaturateTestValidValues, TestSiz
         modifier_->setSaturate(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_SATURATE_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -284,7 +284,7 @@ HWTEST_F(CommonMethodModifierTest3, setSaturateTestInvalidValues, TestSize.Level
         modifier_->setSaturate(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_SATURATE_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -295,8 +295,8 @@ HWTEST_F(CommonMethodModifierTest3, setSaturateTestInvalidValues, TestSize.Level
  */
 HWTEST_F(CommonMethodModifierTest3, setSepiaTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_SEPIA_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SEPIA_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SEPIA_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SEPIA_DEFAULT_VALUE));
 }
 
 /*
@@ -318,7 +318,7 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setSepiaTestValidValues, TestSize.L
         modifier_->setSepia(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_SEPIA_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -339,7 +339,7 @@ HWTEST_F(CommonMethodModifierTest3, setSepiaTestInvalidValues, TestSize.Level1)
         modifier_->setSepia(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_SEPIA_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -350,8 +350,8 @@ HWTEST_F(CommonMethodModifierTest3, setSepiaTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest3, setUseShadowBatchingTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_USE_SHADOW_BATCHING_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_USE_SHADOW_BATCHING_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_USE_SHADOW_BATCHING_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_USE_SHADOW_BATCHING_DEFAULT_VALUE));
 }
 
 /*
@@ -371,7 +371,7 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setUseShadowBatchingTestValidValues
         modifier_->setUseShadowBatching(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_USE_SHADOW_BATCHING_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -442,13 +442,13 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setMaskTestValidValues, TestSize.Le
         modifier_->setMask(node_, &materialized);
         const auto json = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_VALUE_NAME);
-        EXPECT_EQ(resultValue, plan.expectedValue);
+        EXPECT_THAT(resultValue, Eq(plan.expectedValue));
         resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_TOTAL_NAME);
-        EXPECT_EQ(resultValue, plan.expectedTotal);
+        EXPECT_THAT(resultValue, Eq(plan.expectedTotal));
         resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_COLOR_NAME);
-        EXPECT_EQ(resultValue, plan.expectedColor);
+        EXPECT_THAT(resultValue, Eq(plan.expectedColor));
         resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_ENABLE_BREATHE_NAME);
-        EXPECT_EQ(resultValue, plan.expectedEnableBreathe);
+        EXPECT_THAT(resultValue, Eq(plan.expectedEnableBreathe));
     }
 }
 
@@ -484,13 +484,13 @@ HWTEST_F(CommonMethodModifierTest3, setMask1TestPartForProgressMaskValidValues, 
         modifier_->setMask2(node_, &maskValue);
         const auto json = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_VALUE_NAME);
-        EXPECT_EQ(resultValue, plan.expectedValue);
+        EXPECT_THAT(resultValue, Eq(plan.expectedValue));
         resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_TOTAL_NAME);
-        EXPECT_EQ(resultValue, plan.expectedTotal);
+        EXPECT_THAT(resultValue, Eq(plan.expectedTotal));
         resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_COLOR_NAME);
-        EXPECT_EQ(resultValue, plan.expectedColor);
+        EXPECT_THAT(resultValue, Eq(plan.expectedColor));
         resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_ENABLE_BREATHE_NAME);
-        EXPECT_EQ(resultValue, plan.expectedEnableBreathe);
+        EXPECT_THAT(resultValue, Eq(plan.expectedEnableBreathe));
     }
 }
 #endif
@@ -510,9 +510,9 @@ HWTEST_F(CommonMethodModifierTest3, setFocusBoxTest, TestSize.Level1)
     const auto json = GetJsonValue(node_);
     auto focusbox = json->GetValue("focusBox");
     auto resultValue = GetAttrValue<std::string>(focusbox, "strokeWidth");
-    EXPECT_EQ(resultValue, "5.00px");
+    EXPECT_THAT(resultValue, Eq("5.00px"));
     resultValue = GetAttrValue<std::string>(focusbox, "margin");
-    EXPECT_EQ(resultValue, "10.00px");
+    EXPECT_THAT(resultValue, Eq("10.00px"));
 }
 
 } // namespace OHOS::Ace::NG

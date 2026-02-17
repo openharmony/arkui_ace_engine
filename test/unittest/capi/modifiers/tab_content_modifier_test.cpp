@@ -80,14 +80,14 @@ HWTEST_F(TabContentModifierTest, setTabBarTestLabel, TestSize.Level1)
     modifier_->setTabBar(node_, &args);
     jsonValue = GetJsonValue(node_);
     auto checkInitial = GetAttrValue<std::string>(jsonValue, propName);
-    EXPECT_EQ(checkInitial, textValue);
+    EXPECT_THAT(checkInitial, Eq(textValue));
 
     for (const auto &[label, checkVal]: BUTTON_LABEL_RESOURCES_TEST_PLAN) {
         auto args = ArkUnion<TestBaseUnionType, Ark_Resource>(label);
         modifier_->setTabBar(node_, &args);
         jsonValue = GetJsonValue(node_);
         auto checkInitial = GetAttrValue<std::string>(jsonValue, propName);
-        EXPECT_EQ(checkInitial, checkVal);
+        EXPECT_THAT(checkInitial, Eq(checkVal));
     }
 }
 
@@ -136,8 +136,8 @@ HWTEST_F(TabContentModifierTest, setTabBarTestLabelIcon, TestSize.Level1)
     jsonValue = GetJsonValue(node_);
     auto checkLabel = GetAttrValue<std::string>(jsonValue, propLabelName);
     auto checkIcon = GetAttrValue<std::string>(jsonValue, propIconName);
-    EXPECT_EQ(checkLabel, textValue);
-    EXPECT_EQ(checkIcon, textValue);
+    EXPECT_THAT(checkLabel, Eq(textValue));
+    EXPECT_THAT(checkIcon, Eq(textValue));
 
     for (const auto &[label, checkVal]: BUTTON_LABEL_RESOURCES_TEST_PLAN) {
         Ark_TabBarOptions labelIcon;
@@ -148,8 +148,8 @@ HWTEST_F(TabContentModifierTest, setTabBarTestLabelIcon, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         auto checkLabel = GetAttrValue<std::string>(jsonValue, propLabelName);
         auto checkIcon = GetAttrValue<std::string>(jsonValue, propIconName);
-        EXPECT_EQ(checkLabel, checkVal);
-        EXPECT_EQ(checkIcon, checkVal);
+        EXPECT_THAT(checkLabel, Eq(checkVal));
+        EXPECT_THAT(checkIcon, Eq(checkVal));
     }
 }
 
@@ -177,7 +177,7 @@ HWTEST_F(TabContentModifierTest, setTabBarTestBottomTabBarStyleText, TestSize.Le
     accessor->destroyPeer(style);
     jsonValue = GetJsonValue(node_);
     auto checkInitial = GetAttrValue<std::string>(jsonValue, propName);
-    EXPECT_EQ(checkInitial, textValue);
+    EXPECT_THAT(checkInitial, Eq(textValue));
 }
 
 /*

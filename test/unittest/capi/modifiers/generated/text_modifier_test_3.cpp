@@ -25,10 +25,10 @@ using namespace TestConst::Text;
 HWTEST_F(TextModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableHapticFeedback'";
 }
 
@@ -52,7 +52,7 @@ HWTEST_F(TextModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidV
         modifier_->setEnableHapticFeedback(node_, inputValueEnableHapticFeedback);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
     };
 
@@ -69,16 +69,15 @@ HWTEST_F(TextModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidV
 HWTEST_F(TextModifierTest, DISABLED_setSelectionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultSelection =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTION_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultSelection = GetAttrObject(jsonValue, ATTRIBUTE_SELECTION_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_START_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTION_I_SELECTION_START_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SELECTION_I_SELECTION_START_DEFAULT_VALUE)) <<
         "Default value for attribute 'selection.selectionStart'";
 
     resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_END_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTION_I_SELECTION_END_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SELECTION_I_SELECTION_END_DEFAULT_VALUE)) <<
         "Default value for attribute 'selection.selectionEnd'";
 }
 
@@ -104,9 +103,9 @@ HWTEST_F(TextModifierTest, DISABLED_setSelectionTestSelectionSelectionStartValid
         inputValueSelectionStart = value;
         modifier_->setSelection(node_, &inputValueSelectionStart, &inputValueSelectionEnd);
         auto jsonValue = GetJsonValue(node_);
-        auto resultSelection = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTION_NAME);
+        auto resultSelection = GetAttrObject(jsonValue, ATTRIBUTE_SELECTION_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_START_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSelection, attribute: selection.selectionStart";
     };
 
@@ -137,9 +136,9 @@ HWTEST_F(TextModifierTest, DISABLED_setSelectionTestSelectionSelectionEndValidVa
         inputValueSelectionEnd = value;
         modifier_->setSelection(node_, &inputValueSelectionStart, &inputValueSelectionEnd);
         auto jsonValue = GetJsonValue(node_);
-        auto resultSelection = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTION_NAME);
+        auto resultSelection = GetAttrObject(jsonValue, ATTRIBUTE_SELECTION_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSelection, ATTRIBUTE_SELECTION_I_SELECTION_END_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSelection, attribute: selection.selectionEnd";
     };
 

@@ -63,10 +63,10 @@ public:
 HWTEST_F(QRCodeModifierTest, setQRCodeOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) << "Default value for attribute 'value'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_DEFAULT_VALUE)) << "Default value for attribute 'value'";
 }
 
 /*
@@ -92,7 +92,7 @@ HWTEST_F(QRCodeModifierTest, setQRCodeOptionsTestValueValidValues, TestSize.Leve
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setQRCodeOptions, attribute: value";
     };
 
@@ -126,7 +126,7 @@ HWTEST_F(QRCodeModifierTest, setQRCodeOptionsTestValueInvalidValues, TestSize.Le
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setQRCodeOptions, attribute: value";
     };
 
@@ -142,10 +142,10 @@ HWTEST_F(QRCodeModifierTest, setQRCodeOptionsTestValueInvalidValues, TestSize.Le
 HWTEST_F(QRCodeModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) << "Default value for attribute 'color'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COLOR_DEFAULT_VALUE)) << "Default value for attribute 'color'";
 }
 
 /*
@@ -168,7 +168,8 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setColorTestColorValidValues, TestSize.Lev
         modifier_->setColor(node_, &inputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setColor, attribute: color";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setColor, attribute: color";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
@@ -205,7 +206,7 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.L
         modifier_->setColor(node_, &inputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setColor, attribute: color";
     };
 
@@ -229,10 +230,11 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.L
 HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE) << "Default value for attribute 'backgroundColor'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE)) <<
+        "Default value for attribute 'backgroundColor'";
 }
 
 /*
@@ -256,7 +258,7 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestBackgroundColorValid
         modifier_->setBackgroundColor(node_, &inputValueBackgroundColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setBackgroundColor, attribute: backgroundColor";
     };
 
@@ -295,7 +297,7 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestBackgroundColorInval
         modifier_->setBackgroundColor(node_, &inputValueBackgroundColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setBackgroundColor, attribute: backgroundColor";
     };
 
@@ -319,10 +321,11 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setBackgroundColorTestBackgroundColorInval
 HWTEST_F(QRCodeModifierTest, DISABLED_setContentOpacityTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_OPACITY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_OPACITY_DEFAULT_VALUE) << "Default value for attribute 'contentOpacity'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CONTENT_OPACITY_DEFAULT_VALUE)) <<
+        "Default value for attribute 'contentOpacity'";
 }
 
 /*
@@ -346,7 +349,7 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setContentOpacityTestContentOpacityValidVa
         modifier_->setContentOpacity(node_, &inputValueContentOpacity);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_OPACITY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setContentOpacity, attribute: contentOpacity";
     };
 
@@ -380,7 +383,7 @@ HWTEST_F(QRCodeModifierTest, DISABLED_setContentOpacityTestContentOpacityInvalid
         modifier_->setContentOpacity(node_, &inputValueContentOpacity);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_OPACITY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_OPACITY_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CONTENT_OPACITY_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setContentOpacity, attribute: contentOpacity";
     };
 

@@ -14,12 +14,13 @@
  */
 #include "test/mock/base/mock_image_perf.h"
 
+#include "gmock/gmock.h"
 #include "base/image/image_perf.h"
 
 namespace OHOS::Ace {
 ImagePerf* ImagePerf::GetPerfMonitor()
 {
-    static MockImagePerf instance;
+    static ::testing::NiceMock<MockImagePerf> instance;
     return &instance;
 }
 } // namespace OHOS::Ace

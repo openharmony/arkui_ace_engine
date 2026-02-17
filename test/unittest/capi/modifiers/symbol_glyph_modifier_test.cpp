@@ -94,7 +94,7 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontSizeTestDefaultValues, TestSiz
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto size = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-    EXPECT_EQ(size, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
+    EXPECT_THAT(size, Eq(ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE));
 }
 
 /**
@@ -122,7 +122,7 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontSizeTestFontSizeValidValues, T
         modifier_->setFontSize(node_, &value);
         jsonValue = GetJsonValue(node_);
         auto size = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(size, expectValue);
+        EXPECT_THAT(size, Eq(expectValue));
     }
 }
 
@@ -144,7 +144,7 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontSizeTestFontSizeInvalidValues,
         modifier_->setFontSize(node_, &value);
         jsonValue = GetJsonValue(node_);
         auto size = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(size, expectValue);
+        EXPECT_THAT(size, Eq(expectValue));
     }
 }
 
@@ -156,10 +156,10 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontSizeTestFontSizeInvalidValues,
 HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE) << "Default value for attribute 'fontWeight'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE)) << "Default value for attribute 'fontWeight'";
 }
 
 using  ArkFontWeightTest = std::pair<Opt_Union_I32_FontWeight_String, std::string>;
@@ -207,12 +207,12 @@ HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFontWeight, nullptr);
     std::unique_ptr<JsonValue> jsonValue;
-    std::string result;
+    std::optional<std::string> result;
     for (const auto &[weight, expectValue] : Converter::FONT_WEIGHT_TEST_PLAN) {
         modifier_->setFontWeight(node_, &weight);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(result, expectValue);
+        EXPECT_THAT(result, Eq(expectValue));
     }
 }
 
@@ -225,7 +225,7 @@ HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestInvalidValues, TestSize.Level
 {
     ASSERT_NE(modifier_->setFontWeight, nullptr);
     std::unique_ptr<JsonValue> jsonValue;
-    std::string result;
+    std::optional<std::string> result;
 
     const std::vector<ArkFontWeightTest> testPlan = {
         { Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(1000), "FontWeight.Normal" },
@@ -235,7 +235,7 @@ HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestInvalidValues, TestSize.Level
         modifier_->setFontWeight(node_, &weight);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(result, expectValue);
+        EXPECT_THAT(result, Eq(expectValue));
     }
 }
 
@@ -247,10 +247,11 @@ HWTEST_F(SymbolGlyphModifierTest, setFontWeightTestInvalidValues, TestSize.Level
 HWTEST_F(SymbolGlyphModifierTest, setEffectStrategyTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_EFFECT_STRATEGY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_EFFECT_STRATEGY_DEFAULT_VALUE) << "Default value for attribute 'effectStrategy'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_EFFECT_STRATEGY_DEFAULT_VALUE)) <<
+        "Default value for attribute 'effectStrategy'";
 }
 
 // Valid values for attribute 'effectStrategy'
@@ -270,7 +271,7 @@ static std::vector<std::tuple<std::string, Ark_SymbolEffectStrategy, std::string
 HWTEST_F(SymbolGlyphModifierTest, setEffectStrategyTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     auto inputValueEffectStrategy = Converter::ArkValue<Opt_SymbolEffectStrategy>(
         std::get<1>(effectStrategyValidValues[0]));
@@ -282,7 +283,7 @@ HWTEST_F(SymbolGlyphModifierTest, setEffectStrategyTestValidValues, TestSize.Lev
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_EFFECT_STRATEGY_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -303,7 +304,7 @@ static std::vector<std::tuple<std::string, Ark_SymbolEffectStrategy, std::string
 HWTEST_F(SymbolGlyphModifierTest, setEffectStrategyTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     auto inputValueEffectStrategy = Converter::ArkValue<Opt_SymbolEffectStrategy>(
         std::get<1>(effectStrategyInvalidValues[0]));
@@ -315,7 +316,7 @@ HWTEST_F(SymbolGlyphModifierTest, setEffectStrategyTestInvalidValues, TestSize.L
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_EFFECT_STRATEGY_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -327,9 +328,9 @@ HWTEST_F(SymbolGlyphModifierTest, setEffectStrategyTestInvalidValues, TestSize.L
 HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDERING_STRATEGY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE)) <<
         "Default value for attribute 'renderingStrategy'";
 }
 
@@ -355,7 +356,7 @@ static std::vector<std::tuple<std::string, Ark_SymbolRenderingStrategy, std::str
 HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     auto inputValueRenderingStrategy = Converter::ArkValue<Opt_SymbolRenderingStrategy>(
         std::get<1>(renderingStrategyValidValues[0]));
@@ -367,7 +368,7 @@ HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestValidValues, TestSize.
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDERING_STRATEGY_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -386,7 +387,7 @@ static std::vector<std::tuple<std::string, Ark_SymbolRenderingStrategy, std::str
 HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     auto inputValueRenderingStrategy = Converter::ArkValue<Opt_SymbolRenderingStrategy>(
         std::get<1>(renderingStrategyInvalidValues[0]));
@@ -398,7 +399,7 @@ HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestInvalidValues, TestSiz
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDERING_STRATEGY_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -410,10 +411,10 @@ HWTEST_F(SymbolGlyphModifierTest, setRenderingStrategyTestInvalidValues, TestSiz
 HWTEST_F(SymbolGlyphModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE) << "Default value for attribute 'fontColor'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE)) << "Default value for attribute 'fontColor'";
 }
 
 static std::vector<std::tuple<std::string, std::string>> fontColorVectorValues = {
@@ -439,7 +440,7 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontColorTest, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string expectedStr;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     Converter::ArkArrayHolder<Array_ResourceColor> vecHolder(fontColorVector);
     Array_ResourceColor colorArray = vecHolder.ArkValue();
@@ -447,7 +448,7 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontColorTest, TestSize.Level1)
     modifier_->setFontColor(node_, &arkColorArray);
 
     jsonValue = GetJsonValue(node_);
-    auto attrValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SYMBOL_COLOR_LIST_NAME);
+    auto attrValue = GetAttrObject(jsonValue, ATTRIBUTE_SYMBOL_COLOR_LIST_NAME);
     auto resultJson = attrValue.get();
 
     for (int i = 0; i < fontColorVector.size(); i++) {
@@ -465,9 +466,9 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setFontColorTest, TestSize.Level1)
 HWTEST_F(SymbolGlyphModifierTest, DISABLED_setSymbolGlyphOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNICODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_UNICODE_NAME_DEFAULT_VALUE) << "Default value for attribute 'value.id'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_UNICODE_NAME_DEFAULT_VALUE)) << "Default value for attribute 'value.id'";
 }
 
 // Fixture 'StringRes' for type 'Ark_Resource'
@@ -504,7 +505,7 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setSymbolGlyphOptionsTestValidValues,
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNICODE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setGlyphOptions, attribute: content";
     };
 
@@ -527,9 +528,9 @@ HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestScaleScope, TestSize.Level
         auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
         modifier_->setSymbolEffect0(node_, &arkPeer);
         auto jsonValue = GetJsonValue(node_);
-        auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
+        auto symbolEffect = GetAttrObject(jsonValue, "symbolEffect");
         auto resultStr = GetAttrValue<std::string>(symbolEffect, "scopeType");
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setSymbolEffect, attribute: symbolEffect.scope";
     };
 
@@ -552,9 +553,9 @@ HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestScaleDirection, TestSize.L
         auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
         modifier_->setSymbolEffect0(node_, &arkPeer);
         auto jsonValue = GetJsonValue(node_);
-        auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
+        auto symbolEffect = GetAttrObject(jsonValue, "symbolEffect");
         auto resultStr = GetAttrValue<std::string>(symbolEffect, "commonSubType");
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setSymbolEffect, attribute: symbolEffect.direction";
     };
 
@@ -572,9 +573,9 @@ HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestReplaceScope, TestSize.Lev
         auto arkPeer = Converter::ArkValue<Opt_SymbolEffect>(peer);
         modifier_->setSymbolEffect0(node_, &arkPeer);
         auto jsonValue = GetJsonValue(node_);
-        auto symbolEffect = GetAttrValue<std::string>(jsonValue, "symbolEffect");
+        auto symbolEffect = GetAttrObject(jsonValue, "symbolEffect");
         auto resultStr = GetAttrValue<std::string>(symbolEffect, "scopeType");
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setSymbolEffect, attribute: symbolEffect.scope";
     };
 
@@ -591,10 +592,10 @@ HWTEST_F(SymbolGlyphModifierTest, setSymbolEffect0TestReplaceScope, TestSize.Lev
 HWTEST_F(SymbolGlyphModifierTest, setMinFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'minFontScale'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE)) << "Default value for attribute 'minFontScale'";
 }
 
 /*
@@ -615,7 +616,7 @@ HWTEST_F(SymbolGlyphModifierTest, setMinFontScaleTestValidValues, TestSize.Level
         modifier_->setMinFontScale(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMinFontScaleNumValidValues) {
@@ -646,7 +647,7 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setMinFontScaleTestInvalidValues, Tes
         modifier_->setMinFontScale(node_, &inputValueMinFontScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMinFontScaleNumInvalidValues) {
@@ -662,10 +663,10 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setMinFontScaleTestInvalidValues, Tes
 HWTEST_F(SymbolGlyphModifierTest, setMaxFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'maxFontScale'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE)) << "Default value for attribute 'maxFontScale'";
 }
 
 /*
@@ -685,7 +686,7 @@ HWTEST_F(SymbolGlyphModifierTest, setMaxFontScaleTestValidValues, TestSize.Level
         modifier_->setMaxFontScale(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMaxFontScaleNumValidValues) {
@@ -717,7 +718,7 @@ HWTEST_F(SymbolGlyphModifierTest, DISABLED_setMaxFontScaleTestInvalidValues, Tes
         modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMaxFontScaleNumInvalidValues) {

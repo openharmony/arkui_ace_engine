@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gmock/gmock.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "test/mock/core/common/mock_container.h"
@@ -196,13 +197,13 @@ HWTEST_F(TabsModifierTest, setVerticalTest, TestSize.Level1)
     constexpr auto propName = "vertical";
     ASSERT_NE(modifier_->setVertical, nullptr);
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, "false");
+    EXPECT_THAT(checkVal, Eq("false"));
 
     for (const auto& [value, expectVal] : BOOL_STR_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
         modifier_->setVertical(node_, &inputValue);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -216,13 +217,13 @@ HWTEST_F(TabsModifierTest, setFadingEdgeTest, TestSize.Level1)
     constexpr auto propName = "fadingEdge";
     ASSERT_NE(modifier_->setFadingEdge, nullptr);
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, "true");
+    EXPECT_THAT(checkVal, Eq("true"));
 
     for (const auto& [value, expectVal] : BOOL_STR_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
         modifier_->setFadingEdge(node_, &inputValue);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -236,7 +237,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setScrollableTest, TestSize.Level1)
     constexpr auto propName = "scrollable";
     ASSERT_NE(modifier_->setScrollable, nullptr);
     auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, true);
+    EXPECT_THAT(checkVal, Eq(true));
 
     typedef std::pair<Ark_Boolean, bool> BoolTestStep;
     const std::vector<BoolTestStep> boolTestPlan = {
@@ -254,7 +255,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setScrollableTest, TestSize.Level1)
         modifier_->setScrollable(node_, &inputValue);
         auto json = GetJsonValue(node_);
         checkVal = GetAttrValue<bool>(json, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -268,13 +269,13 @@ HWTEST_F(TabsModifierTest, setBarOverlapTest, TestSize.Level1)
     constexpr auto propName = "barOverlap";
     ASSERT_NE(modifier_->setBarOverlap, nullptr);
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, "false");
+    EXPECT_THAT(checkVal, Eq("false"));
 
     for (const auto& [value, expectVal] : BOOL_STR_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
         modifier_->setBarOverlap(node_, &inputValue);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -288,7 +289,7 @@ HWTEST_F(TabsModifierTest, setAnimationDurationTest, TestSize.Level1)
     constexpr auto propName = "animationDuration";
     ASSERT_NE(modifier_->setAnimationDuration, nullptr);
     auto checkVal = GetAttrValue<int>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, ANIMATION_DURATION_DEFAULT);
+    EXPECT_THAT(checkVal, Eq(ANIMATION_DURATION_DEFAULT));
 
     const std::vector<std::pair<Opt_Int32, int>> arkNumberTestPlan = {
         { Converter::ArkValue<Opt_Int32>(20), 20 },
@@ -300,13 +301,13 @@ HWTEST_F(TabsModifierTest, setAnimationDurationTest, TestSize.Level1)
     for (const auto& [value, expectVal] : arkNumberTestPlan) {
         modifier_->setAnimationDuration(node_, &value);
         checkVal = GetAttrValue<int>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 
     //value should not be changed
     modifier_->setAnimationDuration(node_, nullptr);
     checkVal = GetAttrValue<int>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, arkNumberTestPlan[arkNumberTestPlan.size()-1].second);
+    EXPECT_THAT(checkVal, Eq(arkNumberTestPlan[arkNumberTestPlan.size()-1].second));
 }
 
 /**
@@ -320,7 +321,7 @@ HWTEST_F(TabsModifierTest, setAnimationModeTest, TestSize.Level1)
     const auto defaultValue = "AnimationMode.CONTENT_FIRST";
     ASSERT_NE(modifier_->setAnimationMode, nullptr);
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, defaultValue);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
 
     typedef std::pair<Opt_AnimationMode, std::string> AnimationModeTestStep;
     const std::vector<AnimationModeTestStep> animationModeTestPlan = {
@@ -334,12 +335,12 @@ HWTEST_F(TabsModifierTest, setAnimationModeTest, TestSize.Level1)
     for (const auto& [value, expectVal] : animationModeTestPlan) {
         modifier_->setAnimationMode(node_, &value);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 
     modifier_->setAnimationMode(node_, nullptr);
     checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, defaultValue);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
 }
 
 /**
@@ -353,7 +354,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setEdgeEffectTest, TestSize.Level1)
     const auto defaultValue = "EdgeEffect::SPRING";
     ASSERT_NE(modifier_->setEdgeEffect, nullptr);
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, defaultValue);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
     typedef std::pair<Opt_EdgeEffect, std::string> EdgeEffectTestStep;
     const std::vector<EdgeEffectTestStep> edgeEffectTestPlan = {
         { Converter::ArkValue<Opt_EdgeEffect>(ARK_EDGE_EFFECT_FADE), "EdgeEffect::FADE" },
@@ -366,12 +367,12 @@ HWTEST_F(TabsModifierTest, DISABLED_setEdgeEffectTest, TestSize.Level1)
     for (const auto& [value, expectVal] : edgeEffectTestPlan) {
         modifier_->setEdgeEffect(node_, &value);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 
     modifier_->setEdgeEffect(node_, nullptr);
     checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, defaultValue);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
 }
 
 /**
@@ -385,7 +386,7 @@ HWTEST_F(TabsModifierTest, setBarPositionTest, TestSize.Level1)
     const auto defaultValue = "BarPosition.Start";
     ASSERT_NE(modifier_->setBarPosition, nullptr);
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, defaultValue);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
 
     const std::vector<std::pair<Opt_BarPosition, std::string>> BarPositionTestPlan = {
         { Converter::ArkValue<Opt_BarPosition>(ARK_BAR_POSITION_END), "BarPosition.End" },
@@ -399,7 +400,7 @@ HWTEST_F(TabsModifierTest, setBarPositionTest, TestSize.Level1)
     for (const auto& [value, expectVal] : BarPositionTestPlan) {
         modifier_->setBarPosition(node_, &value);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -414,7 +415,7 @@ HWTEST_F(TabsModifierTest, setBarModeTest, TestSize.Level1)
     const std::string propName = "barMode";
     ASSERT_NE(modifier_->setBarMode, nullptr);
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, defaultValue);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
 
     std::string scrollableMode =
         "BarMode.Scrollable,{\"margin\":\"0.00vp\",\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_CENTER\"}";
@@ -430,13 +431,13 @@ HWTEST_F(TabsModifierTest, setBarModeTest, TestSize.Level1)
         auto mode = Converter::ArkValue<Opt_BarMode>(ARK_BAR_MODE_SCROLLABLE);
         modifier_->setBarMode(node_, &mode, &value);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 
     for (const auto& [value, expectVal] : BarModeTestPlan) {
         modifier_->setBarMode(node_, &value, nullptr);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -451,7 +452,7 @@ HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle0Test, TestSize.Level1)
     const auto defaultValue = "BlurStyle.NONE";
     ASSERT_NE(modifier_->setBarBackgroundBlurStyle0, nullptr);
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, defaultValue);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
 
     const std::vector<std::pair<Opt_BlurStyle, std::string>> BlurStyleTestPlan = {
         { Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_THIN), "BlurStyle.Thin" },
@@ -476,7 +477,7 @@ HWTEST_F(TabsModifierTest, setBarBackgroundBlurStyle0Test, TestSize.Level1)
     for (const auto& [value, expectVal] : BlurStyleTestPlan) {
         modifier_->setBarBackgroundBlurStyle0(node_, &value);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -749,9 +750,9 @@ HWTEST_F(TabsModifierTest, setOnTabBarClickTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, DISABLED_setBarWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BAR_WIDTH_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'barWidth' of method 'barWidth'
@@ -775,7 +776,7 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> barSizeVali
 HWTEST_F(TabsModifierTest, DISABLED_setBarWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     // Verifying attribute's  values
@@ -785,7 +786,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarWidthTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_WIDTH_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -809,7 +810,7 @@ static std::vector<std::tuple<std::string, Opt_Length>> barSizeInvalidValues = {
 HWTEST_F(TabsModifierTest, DISABLED_setBarWidthTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     // Initial setup
@@ -824,7 +825,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarWidthTestInvalidValues, TestSize.Level
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_WIDTH_NAME);
         expectedStr = ATTRIBUTE_BAR_WIDTH_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -836,10 +837,10 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarWidthTestInvalidValues, TestSize.Level
 HWTEST_F(TabsModifierTest, DISABLED_setBarHeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BAR_HEIGHT_DEFAULT_VALUE));
 }
 
 /*
@@ -850,7 +851,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarHeightTestDefaultValues, TestSize.Leve
 HWTEST_F(TabsModifierTest, DISABLED_setBarHeight1TestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     // Verifying attribute's  values
@@ -860,7 +861,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarHeight1TestValidValues, TestSize.Level
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_HEIGHT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -872,7 +873,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarHeight1TestValidValues, TestSize.Level
 HWTEST_F(TabsModifierTest, DISABLED_setBarHeight1TestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     // Initial setup
@@ -887,7 +888,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarHeight1TestInvalidValues, TestSize.Lev
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_HEIGHT_NAME);
         expectedStr = ATTRIBUTE_BAR_HEIGHT_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -900,7 +901,7 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerObject = GetAttrObject(fullJson, "divider");
     auto dividerCheckValue = dividerObject->ToString();
     EXPECT_EQ(dividerCheckValue, "{}");
 
@@ -914,15 +915,15 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    dividerObject = GetAttrObject(fullJson, "divider");
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "11.00px");
+    EXPECT_THAT(strokeWidthCheckValue, Eq("11.00px"));
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "55.50vp");
+    EXPECT_THAT(startMarginCheckValue, Eq("55.50vp"));
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "77.00px");
+    EXPECT_THAT(endMarginCheckValue, Eq("77.00px"));
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#FFFFFFFF");
+    EXPECT_THAT(colorCheckValue, Eq("#FFFFFFFF"));
 
     // set color as Ark_Number
     dividerOptions.color = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456);
@@ -930,9 +931,9 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
     divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    dividerObject = GetAttrObject(fullJson, "divider");
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#FF123456");
+    EXPECT_THAT(colorCheckValue, Eq("#FF123456"));
 }
 
 /**
@@ -952,15 +953,15 @@ HWTEST_F(TabsModifierTest, setDividerTestUndefined, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerObject = GetAttrObject(fullJson, "divider");
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "11.00px");
+    EXPECT_THAT(strokeWidthCheckValue, Eq("11.00px"));
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "0.00px");
+    EXPECT_THAT(startMarginCheckValue, Eq("0.00px"));
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "0.00px");
+    EXPECT_THAT(endMarginCheckValue, Eq("0.00px"));
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#FF000000");
+    EXPECT_THAT(colorCheckValue, Eq("#FF000000"));
 }
 
 /**
@@ -980,15 +981,15 @@ HWTEST_F(TabsModifierTest, setDividerTestColorString, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerObject = GetAttrObject(fullJson, "divider");
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "11.00px");
+    EXPECT_THAT(strokeWidthCheckValue, Eq("11.00px"));
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "55.50vp");
+    EXPECT_THAT(startMarginCheckValue, Eq("55.50vp"));
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "77.00px");
+    EXPECT_THAT(endMarginCheckValue, Eq("77.00px"));
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#11223344");
+    EXPECT_THAT(colorCheckValue, Eq("#11223344"));
 }
 
 /**
@@ -1001,16 +1002,16 @@ HWTEST_F(TabsModifierTest, setDividerTestNull, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_DividerStyle>();
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerObject = GetAttrObject(fullJson, "divider");
 
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "0.00px");
+    EXPECT_THAT(strokeWidthCheckValue, Eq("0.00px"));
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "0.00px");
+    EXPECT_THAT(startMarginCheckValue, Eq("0.00px"));
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "0.00px");
+    EXPECT_THAT(endMarginCheckValue, Eq("0.00px"));
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#FF000000");
+    EXPECT_THAT(colorCheckValue, Eq("#FF000000"));
 }
 
 /*
@@ -1022,25 +1023,25 @@ HWTEST_F(TabsModifierTest, setBarBackgroundEffectTestDefaultValues, TestSize.Lev
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     ASSERT_NE(jsonValue, nullptr);
-    auto effect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_EFFECT);
+    auto effect = GetAttrObject(jsonValue, ATTRIBUTE_BAR_BACKGROUND_EFFECT);
     ASSERT_NE(effect, nullptr);
     auto radius = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_RADIUS);
-    ASSERT_DOUBLE_EQ(radius, DEFAULT_BAR_BACKGROUND_EFFECT_RADIUS);
+    EXPECT_THAT(radius, Optional(DoubleEq(DEFAULT_BAR_BACKGROUND_EFFECT_RADIUS)));
     auto saturation = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_SATURATION);
-    ASSERT_DOUBLE_EQ(saturation, DEFAULT_BAR_BACKGROUND_EFFECT_SATURATION);
+    EXPECT_THAT(saturation, Optional(DoubleEq(DEFAULT_BAR_BACKGROUND_EFFECT_SATURATION)));
     auto brightness = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_BRIGHTNESS);
-    ASSERT_DOUBLE_EQ(brightness, DEFAULT_BAR_BACKGROUND_EFFECT_BRIGHTNESS);
+    EXPECT_THAT(brightness, Optional(DoubleEq(DEFAULT_BAR_BACKGROUND_EFFECT_BRIGHTNESS)));
     auto color = GetAttrValue<std::string>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_COLOR);
-    EXPECT_EQ(color, DEFAULT_BAR_BACKGROUND_EFFECT_COLOR);
+    EXPECT_THAT(color, Eq(DEFAULT_BAR_BACKGROUND_EFFECT_COLOR));
     auto adaptiveColor = GetAttrValue<std::string>(effect, ATTRIBUTE_ADAPTIVE_COLOR);
-    EXPECT_EQ(adaptiveColor, DEFAULT_ADAPTIVE_COLOR);
+    EXPECT_THAT(adaptiveColor, Eq(DEFAULT_ADAPTIVE_COLOR));
     auto policy = GetAttrValue<std::string>(effect, ATTRIBUTE_POLICY);
-    EXPECT_EQ(policy, DEFAULT_POLICY);
+    EXPECT_THAT(policy, Eq(DEFAULT_POLICY));
     auto type = GetAttrValue<std::string>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_TYPE);
-    EXPECT_EQ(type, DEFAULT_BAR_BACKGROUND_EFFECT_TYPE);
+    EXPECT_THAT(type, Eq(DEFAULT_BAR_BACKGROUND_EFFECT_TYPE));
     auto inactiveColor = GetAttrValue<std::string>(effect, ATTRIBUTE_INACTIVE_COLOR);
-    EXPECT_EQ(inactiveColor, DEFAULT_INACTIVE_COLOR);
-    auto blurOption = GetAttrValue<std::unique_ptr<JsonValue>>(effect, ATTRIBUTE_BLUR_OPTION);
+    EXPECT_THAT(inactiveColor, Eq(DEFAULT_INACTIVE_COLOR));
+    auto blurOption = GetAttrObject(effect, ATTRIBUTE_BLUR_OPTION);
     ASSERT_NE(blurOption, nullptr);
     ASSERT_EQ(blurOption->GetArraySize(), ATTRIBUTE_BLUR_OPTION_COUNT);
     auto gray1 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS0);
@@ -1075,25 +1076,25 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundEffectTestValidValues, TestS
     modifier_->setBarBackgroundEffect(node_, &inputValue);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     ASSERT_NE(jsonValue, nullptr);
-    auto effect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_EFFECT);
+    auto effect = GetAttrObject(jsonValue, ATTRIBUTE_BAR_BACKGROUND_EFFECT);
     ASSERT_NE(effect, nullptr);
     auto radius = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_RADIUS);
-    ASSERT_NEAR(radius, EFFECT_RADIUS, COMPARING_DELTA);
+    EXPECT_THAT(radius, Optional(DoubleEq(EFFECT_RADIUS)));
     auto saturation = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_SATURATION);
-    ASSERT_NEAR(saturation, EFFECT_SATURATION, COMPARING_DELTA);
+    EXPECT_THAT(saturation, Optional(DoubleEq(EFFECT_SATURATION)));
     auto brightness = GetAttrValue<double>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_BRIGHTNESS);
-    ASSERT_NEAR(brightness, EFFECT_BRIGHTNESS, COMPARING_DELTA);
+    EXPECT_THAT(brightness, Optional(DoubleEq(EFFECT_BRIGHTNESS)));
     auto color = GetAttrValue<std::string>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_COLOR);
-    EXPECT_EQ(color, EFFECT_COLOR);
+    EXPECT_THAT(color, Eq(EFFECT_COLOR));
     auto adaptiveColor = GetAttrValue<std::string>(effect, ATTRIBUTE_ADAPTIVE_COLOR);
-    EXPECT_EQ(adaptiveColor, ADAPTIVE_COLOR_AVERAGE);
+    EXPECT_THAT(adaptiveColor, Eq(ADAPTIVE_COLOR_AVERAGE));
     auto policy = GetAttrValue<std::string>(effect, ATTRIBUTE_POLICY);
-    EXPECT_EQ(policy, POLICY);
+    EXPECT_THAT(policy, Eq(POLICY));
     auto type = GetAttrValue<std::string>(effect, ATTRIBUTE_BAR_BACKGROUND_EFFECT_TYPE);
-    EXPECT_EQ(type, DEFAULT_BAR_BACKGROUND_EFFECT_TYPE);
+    EXPECT_THAT(type, Eq(DEFAULT_BAR_BACKGROUND_EFFECT_TYPE));
     auto inactiveColor = GetAttrValue<std::string>(effect, ATTRIBUTE_INACTIVE_COLOR);
-    EXPECT_EQ(inactiveColor, COLOR_GREEN);
-    auto blurOption = GetAttrValue<std::unique_ptr<JsonValue>>(effect, ATTRIBUTE_BLUR_OPTION);
+    EXPECT_THAT(inactiveColor, Eq(COLOR_GREEN));
+    auto blurOption = GetAttrObject(effect, ATTRIBUTE_BLUR_OPTION);
     ASSERT_NE(blurOption, nullptr);
     ASSERT_EQ(blurOption->GetArraySize(), ATTRIBUTE_BLUR_OPTION_COUNT);
     auto gray1 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS0);
@@ -1124,15 +1125,15 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundBlurStyle1TestDefaultValues,
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     ASSERT_NE(jsonValue, nullptr);
-    auto option = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_BLUR_STYLE_OPTIONS);
+    auto option = GetAttrObject(jsonValue, ATTRIBUTE_BAR_BACKGROUND_BLUR_STYLE_OPTIONS);
     ASSERT_NE(option, nullptr);
     auto colorMode = GetAttrValue<std::string>(option, ATTRIBUTE_COLOR_MODE);
-    EXPECT_EQ(colorMode, DEFAULT_COLOR_MODE);
+    EXPECT_THAT(colorMode, Eq(DEFAULT_COLOR_MODE));
     auto adaptiveColor = GetAttrValue<std::string>(option, ATTRIBUTE_ADAPTIVE_COLOR);
-    EXPECT_EQ(adaptiveColor, DEFAULT_ADAPTIVE_COLOR);
+    EXPECT_THAT(adaptiveColor, Eq(DEFAULT_ADAPTIVE_COLOR));
     auto scale = GetAttrValue<double>(option, ATTRIBUTE_SCALE);
-    ASSERT_NEAR(scale, DEFAULT_SCALE, COMPARING_DELTA);
-    auto blurOption = GetAttrValue<std::unique_ptr<JsonValue>>(option, ATTRIBUTE_BLUR_OPTION);
+    EXPECT_THAT(scale, Optional(DoubleEq(DEFAULT_SCALE)));
+    auto blurOption = GetAttrObject(option, ATTRIBUTE_BLUR_OPTION);
     ASSERT_NE(blurOption, nullptr);
     ASSERT_EQ(blurOption->GetArraySize(), ATTRIBUTE_BLUR_OPTION_COUNT);
     auto gray1 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS0);
@@ -1142,9 +1143,9 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundBlurStyle1TestDefaultValues,
     ASSERT_NE(gray2, nullptr);
     ASSERT_NEAR(gray2->GetDouble(), DEFAULT_BLUR_OPTION, COMPARING_DELTA);
     auto policy = GetAttrValue<std::string>(option, ATTRIBUTE_POLICY);
-    EXPECT_EQ(policy, DEFAULT_POLICY);
+    EXPECT_THAT(policy, Eq(DEFAULT_POLICY));
     auto inactiveColor = GetAttrValue<std::string>(option, ATTRIBUTE_INACTIVE_COLOR);
-    EXPECT_EQ(inactiveColor, DEFAULT_INACTIVE_COLOR);
+    EXPECT_THAT(inactiveColor, Eq(DEFAULT_INACTIVE_COLOR));
 }
 
 /*
@@ -1174,15 +1175,15 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundBlurStyle1TestValidValues, T
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     ASSERT_NE(jsonValue, nullptr);
-    auto option = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_BLUR_STYLE_OPTIONS);
+    auto option = GetAttrObject(jsonValue, ATTRIBUTE_BAR_BACKGROUND_BLUR_STYLE_OPTIONS);
     ASSERT_NE(option, nullptr);
     auto colorMode = GetAttrValue<std::string>(option, ATTRIBUTE_COLOR_MODE);
-    EXPECT_EQ(colorMode, COLOR_MODE_DARK);
+    EXPECT_THAT(colorMode, Eq(COLOR_MODE_DARK));
     auto adaptiveColor = GetAttrValue<std::string>(option, ATTRIBUTE_ADAPTIVE_COLOR);
-    EXPECT_EQ(adaptiveColor, ADAPTIVE_COLOR_AVERAGE);
+    EXPECT_THAT(adaptiveColor, Eq(ADAPTIVE_COLOR_AVERAGE));
     auto scale = GetAttrValue<double>(option, ATTRIBUTE_SCALE);
-    ASSERT_NEAR(scale, SCALE, COMPARING_DELTA);
-    auto blurOption = GetAttrValue<std::unique_ptr<JsonValue>>(option, ATTRIBUTE_BLUR_OPTION);
+    EXPECT_THAT(scale, Optional(DoubleEq(SCALE)));
+    auto blurOption = GetAttrObject(option, ATTRIBUTE_BLUR_OPTION);
     ASSERT_NE(blurOption, nullptr);
     ASSERT_EQ(blurOption->GetArraySize(), ATTRIBUTE_BLUR_OPTION_COUNT);
     auto gray1 = blurOption->GetArrayItem(ATTRIBUTE_BLUR_OPTION_POS0);
@@ -1192,9 +1193,9 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundBlurStyle1TestValidValues, T
     ASSERT_NE(gray2, nullptr);
     ASSERT_NEAR(gray2->GetDouble(), GRAY_SCALE1, COMPARING_DELTA);
     auto policy = GetAttrValue<std::string>(option, ATTRIBUTE_POLICY);
-    EXPECT_EQ(policy, POLICY);
+    EXPECT_THAT(policy, Eq(POLICY));
     auto inactiveColor = GetAttrValue<std::string>(option, ATTRIBUTE_INACTIVE_COLOR);
-    EXPECT_EQ(inactiveColor, COLOR_GREEN);
+    EXPECT_THAT(inactiveColor, Eq(COLOR_GREEN));
 }
 
 /*
@@ -1216,10 +1217,10 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundBlurStyle1TestInvalidValues,
 HWTEST_F(TabsModifierTest, setBarBackgroundColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_BACKGROUND_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BAR_BACKGROUND_COLOR_DEFAULT_VALUE));
 }
 
 // Color values for attribute 'barBackgroundColor' of method 'barBackgroundColor'
@@ -1244,7 +1245,7 @@ static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> barB
 HWTEST_F(TabsModifierTest, setBarBackgroundColorTest, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     for (auto&& value: barBackgroundColorValues) {
@@ -1253,7 +1254,7 @@ HWTEST_F(TabsModifierTest, setBarBackgroundColorTest, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_BACKGROUND_COLOR_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1266,23 +1267,23 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultBarGridAlign =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
-    std::string resultStr;
+        GetAttrObject(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_SM_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_GRID_ALIGN_SM_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BAR_GRID_ALIGN_SM_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_MD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_GRID_ALIGN_MD_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BAR_GRID_ALIGN_MD_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_LG_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_GRID_ALIGN_LG_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BAR_GRID_ALIGN_LG_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'sm' of method 'barGridAlign'
@@ -1345,7 +1346,7 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues1, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultBarGridAlign;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_BarGridColumnOptions inputValueBarGridAlign;
     Ark_BarGridColumnOptions initValueBarGridAlign;
@@ -1364,10 +1365,10 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues1, TestSize.Level1)
         auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
-        resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
+        resultBarGridAlign = GetAttrObject(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_SM_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'md'  values
@@ -1377,10 +1378,10 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues1, TestSize.Level1)
         auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
-        resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
+        resultBarGridAlign = GetAttrObject(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_MD_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'lg'  values
@@ -1390,10 +1391,10 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues1, TestSize.Level1)
         auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
-        resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
+        resultBarGridAlign = GetAttrObject(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_LG_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1406,7 +1407,7 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues2, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultBarGridAlign;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_BarGridColumnOptions inputValueBarGridAlign;
     Ark_BarGridColumnOptions initValueBarGridAlign;
@@ -1425,10 +1426,10 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues2, TestSize.Level1)
         auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
-        resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
+        resultBarGridAlign = GetAttrObject(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'gutter'  values
@@ -1438,10 +1439,10 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestValidValues2, TestSize.Level1)
         auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
-        resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
+        resultBarGridAlign = GetAttrObject(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1492,7 +1493,7 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestInvalidValues1, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultBarGridAlign;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Ark_BarGridColumnOptions inputValueBarGridAlign;
     Ark_BarGridColumnOptions initValueBarGridAlign;
 
@@ -1505,44 +1506,44 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestInvalidValues1, TestSize.Level1)
 
     // Verifying attribute's 'sm' values
     for (auto&& value: barGridAlignSmInvalidValues) {
-        inputValueBarGridAlign = initValueBarGridAlign;
-        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(initValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         inputValueBarGridAlign.sm = std::get<1>(value);
         inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
-        resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
+        resultBarGridAlign = GetAttrObject(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_SM_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BAR_GRID_ALIGN_SM_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BAR_GRID_ALIGN_SM_DEFAULT_VALUE)) << "Passed value is: " <<
+            std::get<0>(value);
     }
 
     // Verifying attribute's 'md' values
     for (auto&& value: barGridAlignMdInvalidValues) {
-        inputValueBarGridAlign = initValueBarGridAlign;
-        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(initValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         inputValueBarGridAlign.md = std::get<1>(value);
         inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
-        resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
+        resultBarGridAlign = GetAttrObject(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_MD_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BAR_GRID_ALIGN_MD_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BAR_GRID_ALIGN_MD_DEFAULT_VALUE)) << "Passed value is: "
+            << std::get<0>(value);
     }
 
     // Verifying attribute's 'lg' values
     for (auto&& value: barGridAlignLgInvalidValues) {
-        inputValueBarGridAlign = initValueBarGridAlign;
-        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
+        auto inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(initValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         inputValueBarGridAlign.lg = std::get<1>(value);
         inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
-        resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
+        resultBarGridAlign = GetAttrObject(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_LG_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BAR_GRID_ALIGN_LG_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BAR_GRID_ALIGN_LG_DEFAULT_VALUE)) << "Passed value is: " <<
+            std::get<0>(value);
     }
 }
 
@@ -1555,7 +1556,7 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestInvalidValues2, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultBarGridAlign;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_BarGridColumnOptions inputValueBarGridAlign;
     Ark_BarGridColumnOptions initValueBarGridAlign;
@@ -1576,10 +1577,10 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestInvalidValues2, TestSize.Level1)
         inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
-        resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
+        resultBarGridAlign = GetAttrObject(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_NAME);
         expectedStr = ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'gutter' values
@@ -1591,10 +1592,10 @@ HWTEST_F(TabsModifierTest, setBarGridAlignTestInvalidValues2, TestSize.Level1)
         inputValue = Converter::ArkValue<Opt_BarGridColumnOptions>(inputValueBarGridAlign);
         modifier_->setBarGridAlign(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
-        resultBarGridAlign = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
+        resultBarGridAlign = GetAttrObject(jsonValue, ATTRIBUTE_BAR_GRID_ALIGN_NAME);
         resultStr = GetAttrValue<std::string>(resultBarGridAlign, ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_NAME);
         expectedStr = ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1787,8 +1788,7 @@ HWTEST_F(TabsModifierTest, setCachedMaxCountTestValues, TestSize.Level1)
 
     // default value
     auto json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    EXPECT_EQ("", GetAttrValue<std::string>(json, "cachedMaxCount"));
+    EXPECT_THAT(GetAttrValue<std::string>(json, "cachedMaxCount"), Eq(std::nullopt));
 
     // new values
     std::vector<std::tuple<std::string, Ark_TabsCacheMode, int32_t>> testMap = {
@@ -1801,17 +1801,14 @@ HWTEST_F(TabsModifierTest, setCachedMaxCountTestValues, TestSize.Level1)
         auto arkMode = Converter::ArkValue<Opt_TabsCacheMode>(modeValue);
         modifier_->setCachedMaxCount(frameNode, &arkCount, &arkMode);
         auto json = GetJsonValue(node_);
-        ASSERT_TRUE(json);
-        auto cachedMaxCount = GetAttrValue<std::unique_ptr<JsonValue>>(json, "cachedMaxCount");
-        ASSERT_TRUE(cachedMaxCount);
-        EXPECT_EQ(expectedModeValue, GetAttrValue<std::string>(cachedMaxCount, "mode"));
-        EXPECT_EQ(countValue, GetAttrValue<int32_t>(cachedMaxCount, "count"));
+        auto cachedMaxCount = GetAttrObject(json, "cachedMaxCount");
+        EXPECT_THAT(GetAttrValue<std::string>(cachedMaxCount, "mode"), Eq(expectedModeValue));
+        EXPECT_THAT(GetAttrValue<int32_t>(cachedMaxCount, "count"), Eq(countValue));
     }
 
     auto arkMode = Converter::ArkValue<Opt_TabsCacheMode>(ARK_TABS_CACHE_MODE_CACHE_BOTH_SIDE);
     modifier_->setCachedMaxCount(frameNode, nullptr, &arkMode);
     json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    EXPECT_EQ("", GetAttrValue<std::string>(json, "cachedMaxCount"));
+    EXPECT_THAT(GetAttrValue<std::string>(json, "cachedMaxCount"), Eq(std::nullopt));
 }
 }

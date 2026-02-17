@@ -140,7 +140,7 @@ public:
     {
         std::unique_ptr<JsonValue> jsonValue;
         std::unique_ptr<JsonValue> cbJson;
-        std::string resultStr;
+        std::optional<std::string> resultStr;
         Ark_ButtonStyle inputValue;
         for (auto [passed, checkVal, expected]: styleArray) {
             if (attribute == ATTRIBUTE_CONTROL_BUTTON_LEFT_NAME) {
@@ -158,9 +158,9 @@ public:
             auto valueOpt = Converter::ArkValue<Opt_ButtonStyle>(inputValue);
             modifier_->setControlButton(node_, &valueOpt);
             jsonValue = GetJsonValue(node_);
-            cbJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONTROL_BUTTON_NAME);
+            cbJson = GetAttrObject(jsonValue, ATTRIBUTE_CONTROL_BUTTON_NAME);
             resultStr = GetAttrValue<std::string>(cbJson, attribute);
-            EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed << " Attribute: " << attribute;
+            EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed << " Attribute: " << attribute;
         }
     }
 
@@ -169,7 +169,7 @@ public:
     {
         std::unique_ptr<JsonValue> jsonValue;
         std::unique_ptr<JsonValue> divJson;
-        std::string resultStr;
+        std::optional<std::string> resultStr;
         Ark_DividerStyle inputValue{};
         for (auto [passed, checkVal, expected]: styleArray) {
             if (attribute == ATTRIBUTE_DIVIDER_STROKE_WIDTH) {
@@ -184,9 +184,9 @@ public:
             auto divider = Converter::ArkValue<Opt_DividerStyle>(inputValue);
             modifier_->setDivider(node_, &divider);
             jsonValue = GetJsonValue(node_);
-            divJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
+            divJson = GetAttrObject(jsonValue, ATTRIBUTE_DIVIDER_NAME);
             resultStr = GetAttrValue<std::string>(divJson, attribute);
-            EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed << ", attribute: " << attribute;
+            EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed << ", attribute: " << attribute;
         }
     }
 };
@@ -211,14 +211,14 @@ static std::vector<std::tuple<Ark_SideBarContainerType, Opt_SideBarContainerType
 HWTEST_F(SideBarContainerModifierTest, setSideBarContainerOptionsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_SideBarContainerType inputValue;
     for (auto [passed, checkVal, expected]: sbTypeValidValues) {
         inputValue = checkVal;
         modifier_->setSideBarContainerOptions(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTAINER_TYPE);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -230,10 +230,10 @@ HWTEST_F(SideBarContainerModifierTest, setSideBarContainerOptionsTestValidValues
 HWTEST_F(SideBarContainerModifierTest, setShowSideBarTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_SIDE_BAR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_SIDE_BAR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SHOW_SIDE_BAR_DEFAULT_VALUE));
 }
 
 static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> showSideBarValidValues = {
@@ -249,14 +249,14 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> showSideBa
 HWTEST_F(SideBarContainerModifierTest, setShowSideBarTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     for (auto [passed, checkVal, expected]: showSideBarValidValues) {
         auto inputValueShowSideBar = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(checkVal);
         modifier_->setShowSideBar(node_, &inputValueShowSideBar);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_SIDE_BAR_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -269,23 +269,23 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setControlButtonTestDefaultValue
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultControlButton =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONTROL_BUTTON_NAME);
-    std::string resultStr;
+        GetAttrObject(jsonValue, ATTRIBUTE_CONTROL_BUTTON_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultControlButton, ATTRIBUTE_CONTROL_BUTTON_LEFT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_BUTTON_LEFT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONTROL_BUTTON_LEFT_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultControlButton, ATTRIBUTE_CONTROL_BUTTON_TOP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_BUTTON_TOP_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONTROL_BUTTON_TOP_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultControlButton, ATTRIBUTE_CONTROL_BUTTON_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_BUTTON_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONTROL_BUTTON_WIDTH_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultControlButton, ATTRIBUTE_CONTROL_BUTTON_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_BUTTON_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONTROL_BUTTON_HEIGHT_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultControlButton, ATTRIBUTE_CONTROL_BUTTON_ICONS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_BUTTON_ICONS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONTROL_BUTTON_ICONS_DEFAULT_VALUE));
 }
 
 /*
@@ -362,17 +362,17 @@ HWTEST_F(SideBarContainerModifierTest, setControlButtonTestIconsStringValidValue
         auto style = Converter::ArkValue<Opt_ButtonStyle>(inputStyle);
         modifier_->setControlButton(node_, &style);
         auto jsonValue = GetJsonValue(node_);
-        auto resultControlButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONTROL_BUTTON_NAME);
+        auto resultControlButton = GetAttrObject(jsonValue, ATTRIBUTE_CONTROL_BUTTON_NAME);
         auto resultIcons =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultControlButton, ATTRIBUTE_CONTROL_BUTTON_ICONS_NAME);
+            GetAttrObject(resultControlButton, ATTRIBUTE_CONTROL_BUTTON_ICONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultIcons, ATTRIBUTE_CONTROL_BUTTON_ICONS_SHOWN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setControlButton, attribute: controlButton.icons.shown";
         resultStr = GetAttrValue<std::string>(resultIcons, ATTRIBUTE_CONTROL_BUTTON_ICONS_HIDDEN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setControlButton, attribute: controlButton.icons.shown";
         resultStr = GetAttrValue<std::string>(resultIcons, ATTRIBUTE_CONTROL_BUTTON_ICONS_SWITCH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setControlButton, attribute: controlButton.icons.shown";
     };
 
@@ -434,10 +434,10 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setControlButtonTestIconsPixelMa
 HWTEST_F(SideBarContainerModifierTest, setShowControlButtonTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_CONTROL_BUTTON_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_CONTROL_BUTTON_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SHOW_CONTROL_BUTTON_DEFAULT_VALUE));
 }
 
 static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> showControlButtonValidValues = {
@@ -453,14 +453,14 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> showContro
 HWTEST_F(SideBarContainerModifierTest, setShowControlButtonTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_Boolean inputValue;
     for (auto [passed, checkVal, expected]: showControlButtonValidValues) {
         inputValue = checkVal;
         modifier_->setShowControlButton(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_CONTROL_BUTTON_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -505,10 +505,10 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setOnChangeTest, TestSize.Level1
 HWTEST_F(SideBarContainerModifierTest, setSideBarWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_BAR_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SIDE_BAR_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SIDE_BAR_WIDTH_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'sideBarWidth' of method 'sideBarWidth'
@@ -526,13 +526,13 @@ static std::vector<std::tuple<std::string, float, std::string>> mSideBarWidthVal
 HWTEST_F(SideBarContainerModifierTest, setSideBarWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: mSideBarWidthValidValues1) {
         auto width = Converter::ArkUnion<Opt_Union_Length_Bindable, Ark_Length>(checkVal);
         modifier_->setSideBarWidth(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_BAR_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -544,10 +544,10 @@ HWTEST_F(SideBarContainerModifierTest, setSideBarWidthTestValidValues, TestSize.
 HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_SIDE_BAR_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_SIDE_BAR_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MIN_SIDE_BAR_WIDTH_DEFAULT_VALUE));
 }
 
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> mMinSideBarWidthValidValues1 = {
@@ -564,13 +564,13 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> mMinSideBar
 HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     for (auto [passed, width, expected]: mMinSideBarWidthValidValues1) {
         modifier_->setMinSideBarWidth(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_SIDE_BAR_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -582,10 +582,10 @@ HWTEST_F(SideBarContainerModifierTest, setMinSideBarWidthTestValidValues, TestSi
 HWTEST_F(SideBarContainerModifierTest, setMaxSideBarWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_SIDE_BAR_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_SIDE_BAR_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MAX_SIDE_BAR_WIDTH_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'maxSideBarWidth' of method 'maxSideBarWidth'
@@ -603,12 +603,12 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> maxSideBarW
 HWTEST_F(SideBarContainerModifierTest, setMaxSideBarWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, width, expected]: maxSideBarWidthValidValues1) {
         modifier_->setMaxSideBarWidth(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_SIDE_BAR_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -627,10 +627,10 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> sideBarWidt
 HWTEST_F(SideBarContainerModifierTest, setAutoHideTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_HIDE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTO_HIDE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_AUTO_HIDE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'autoHide' of method 'autoHide'
@@ -647,14 +647,14 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> autoHideVa
 HWTEST_F(SideBarContainerModifierTest, setAutoHideTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_Boolean inputValueAutoHide;
     for (auto [passed, checkVal, expected]: autoHideValidValues) {
         inputValueAutoHide = checkVal;
         modifier_->setAutoHide(node_, &inputValueAutoHide);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_HIDE_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -666,10 +666,10 @@ HWTEST_F(SideBarContainerModifierTest, setAutoHideTestValidValues, TestSize.Leve
 HWTEST_F(SideBarContainerModifierTest, setSideBarPositionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_BAR_POSITION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SIDE_BAR_POSITION_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SIDE_BAR_POSITION_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'sideBarPosition' of method 'sideBarPosition'
@@ -688,13 +688,13 @@ static std::vector<std::tuple<std::string, Ark_SideBarPosition, std::string>> sb
 HWTEST_F(SideBarContainerModifierTest, setSideBarPositionTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: sbPositionValidValues) {
         auto position = Converter::ArkValue<Opt_SideBarPosition>(checkVal);
         modifier_->setSideBarPosition(node_, &position);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_BAR_POSITION_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -706,10 +706,10 @@ HWTEST_F(SideBarContainerModifierTest, setSideBarPositionTestValidValues, TestSi
 HWTEST_F(SideBarContainerModifierTest, setMinContentWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_CONTENT_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_CONTENT_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MIN_CONTENT_WIDTH_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'minContentWidth' of method 'minContentWidth'
@@ -727,14 +727,14 @@ static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> minConte
 HWTEST_F(SideBarContainerModifierTest, setMinContentWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_Dimension inputValue;
     for (auto [passed, checkVal, expected]: minContentWidthValidValues) {
         inputValue = checkVal;
         modifier_->setMinContentWidth(node_, &inputValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_CONTENT_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -747,16 +747,16 @@ HWTEST_F(SideBarContainerModifierTest, setDividerTestDefaultValues, TestSize.Lev
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> divJson;
-    std::string resultStr;
-    divJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
+    std::optional<std::string> resultStr;
+    divJson = GetAttrObject(jsonValue, ATTRIBUTE_DIVIDER_NAME);
     resultStr = GetAttrValue<std::string>(divJson, ATTRIBUTE_DIVIDER_STROKE_WIDTH);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE));
     resultStr = GetAttrValue<std::string>(divJson, ATTRIBUTE_DIVIDER_START_MARGIN);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIVIDER_START_MARGIN_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DIVIDER_START_MARGIN_DEFAULT_VALUE));
     resultStr = GetAttrValue<std::string>(divJson, ATTRIBUTE_DIVIDER_END_MARGIN);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE));
     resultStr = GetAttrValue<std::string>(divJson, ATTRIBUTE_DIVIDER_COLOR);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIVIDER_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DIVIDER_COLOR_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'strokeWidth' of method 'setDivider'
@@ -815,9 +815,9 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setDividerTestColorValidValues, 
         auto divider = Converter::ArkValue<Opt_DividerStyle>(inputValue);
         modifier_->setDivider(node_, &divider);
         auto jsonValue = GetJsonValue(node_);
-        auto divJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
+        auto divJson = GetAttrObject(jsonValue, ATTRIBUTE_DIVIDER_NAME);
         auto resultStr = GetAttrValue<std::string>(divJson, ATTRIBUTE_DIVIDER_COLOR);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 

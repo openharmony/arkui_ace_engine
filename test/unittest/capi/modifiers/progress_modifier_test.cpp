@@ -126,16 +126,16 @@ public:
  */
 HWTEST_F(ProgressModifierTest, setProgressOptionsTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_VALUE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_VALUE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_VALUE_DEFAULT_VALUE));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_TOTAL_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_TOTAL_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_TOTAL_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_TOTAL_DEFAULT_VALUE));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_TYPE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
 }
 
 /*
@@ -151,16 +151,16 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestValidValues, TestSize.Level
     options.type = Converter::ArkValue<Opt_ProgressType>(ARK_PROGRESS_TYPE_RING);
     modifier_->setProgressOptions(node_, &options);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(strResult, "5.000000");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_VALUE_NAME);
+    EXPECT_THAT(strResult, Eq("5.000000"));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_TOTAL_NAME);
-    EXPECT_EQ(strResult, "20.000000");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_TOTAL_NAME);
+    EXPECT_THAT(strResult, Eq("20.000000"));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(strResult, "ProgressStyle.Ring");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_TYPE_NAME);
+    EXPECT_THAT(strResult, Eq("ProgressStyle.Ring"));
 }
 
 /*
@@ -176,16 +176,16 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestInvalidValues, TestSize.Lev
     options.type = Converter::ArkValue<Opt_ProgressType>(Ark_Empty());
     modifier_->setProgressOptions(node_, &options);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(strResult, "20.000000");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_VALUE_NAME);
+    EXPECT_THAT(strResult, Eq("20.000000"));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_TOTAL_NAME);
-    EXPECT_EQ(strResult, "20.000000");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_TOTAL_NAME);
+    EXPECT_THAT(strResult, Eq("20.000000"));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_TYPE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
 }
 
 /*
@@ -195,10 +195,10 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestInvalidValues, TestSize.Lev
  */
 HWTEST_F(ProgressModifierTest, setValueTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_VALUE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_VALUE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_VALUE_DEFAULT_VALUE));
 }
 
 /*
@@ -211,10 +211,10 @@ HWTEST_F(ProgressModifierTest, setValueTestValidValues, TestSize.Level1)
     auto value = Converter::ArkValue<Opt_Float64>(8.);
     modifier_->setValue(node_, &value);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(strResult, "8.000000");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_VALUE_NAME);
+    EXPECT_THAT(strResult, Eq("8.000000"));
 }
 
 /*
@@ -227,10 +227,10 @@ HWTEST_F(ProgressModifierTest, setValueTestInvalidValues, TestSize.Level1)
     auto value = Converter::ArkValue<Opt_Float64>(254.);
     modifier_->setValue(node_, &value);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_TOTAL_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_VALUE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_TOTAL_DEFAULT_VALUE));
 }
 
 /*
@@ -240,13 +240,13 @@ HWTEST_F(ProgressModifierTest, setValueTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(ProgressModifierTest, setColorTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLOR_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_COLOR_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLOR_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_GRADIENT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_GRADIENT_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_GRADIENT_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_GRADIENT_DEFAULT_VALUE));
 }
 
 /*
@@ -261,14 +261,14 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestValidValues, TestSize.Level1
         Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(color);
     modifier_->setColor(node_, &options);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLOR_NAME);
-    EXPECT_EQ(strResult, "#11223344");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLOR_NAME);
+    EXPECT_THAT(strResult, Eq("#11223344"));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_GRADIENT_NAME);
-    EXPECT_EQ(strResult,
-        "[{\"color\":\"#11223344\",\"offset\":\"0.000000\"},{\"color\":\"#11223344\",\"offset\":\"1.000000\"}]");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_GRADIENT_NAME);
+    EXPECT_THAT(strResult, Eq(
+        "[{\"color\":\"#11223344\",\"offset\":\"0.000000\"},{\"color\":\"#11223344\",\"offset\":\"1.000000\"}]"));
 
     Ark_LinearGradient gradient{};
 #ifdef WRONG_TYPE
@@ -287,9 +287,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestValidValues, TestSize.Level1
 
     options = Converter::ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
     modifier_->setColor(node_, &options);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_GRADIENT_NAME);
-    EXPECT_EQ(strResult,
-        "[{\"color\":\"#44223311\",\"offset\":\"0.500000\"},{\"color\":\"#33112244\",\"offset\":\"0.900000\"}]");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_GRADIENT_NAME);
+    EXPECT_THAT(strResult, Eq(
+        "[{\"color\":\"#44223311\",\"offset\":\"0.500000\"},{\"color\":\"#33112244\",\"offset\":\"0.900000\"}]"));
 }
 
 /*
@@ -299,15 +299,14 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestValidValues, TestSize.Level1
  */
 HWTEST_F(ProgressModifierTest, setStyleLinearTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
-
-    strResult = GetStringAttribute(node_, ATTRIBUTE_LINEAR_STYLE_NAME);
-    std::string result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STROKE_WIDTH_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STROKE_RADIUS_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_STROKE_RADIUS_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_ENABLE_SCAN_EFFECT_DEFAULT_VALUE);
+    auto jsonValue = GetJsonValue(node_);
+    auto jsonLinearStyle = GetAttrObject(jsonValue, ATTRIBUTE_LINEAR_STYLE_NAME);
+    auto result = GetAttrValue<std::string>(jsonLinearStyle, ATTRIBUTE_STROKE_WIDTH_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(jsonLinearStyle, ATTRIBUTE_STROKE_RADIUS_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_STROKE_RADIUS_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(jsonLinearStyle, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_ENABLE_SCAN_EFFECT_DEFAULT_VALUE));
 }
 
 /*
@@ -326,13 +325,12 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestLinearValidValues, TestSize.
             Ark_LinearStyleOptions>(linearStyle);
     modifier_->setStyle(node_, &options);
 
-    std::string strResult;
-
-    strResult = GetStringAttribute(node_, ATTRIBUTE_LINEAR_STYLE_NAME);
-    std::string result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STROKE_WIDTH_NAME);
-    EXPECT_EQ(result, "3.00px");
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
-    EXPECT_EQ(result, "true");
+    auto jsonValue = GetJsonValue(node_);
+    auto linearStyleJson = GetAttrObject(jsonValue, ATTRIBUTE_LINEAR_STYLE_NAME);
+    auto result = GetAttrValue<std::string>(linearStyleJson, ATTRIBUTE_STROKE_WIDTH_NAME);
+    EXPECT_THAT(result, Eq("3.00px"));
+    result = GetAttrValue<std::string>(linearStyleJson, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
+    EXPECT_THAT(result, Eq("true"));
 }
 
 /*
@@ -352,9 +350,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestLinearStrokeRadiusValidValue
         [this](const Opt_Union_LinearStyleOptions_RingStyleOptions_CapsuleStyleOptions_ProgressStyleOptions& input,
             const std::string& expectedStr) {
             modifier_->setStyle(node_, &input);
-            auto strResult = GetStringAttribute(node_, ATTRIBUTE_LINEAR_STYLE_NAME);
-            auto result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STROKE_RADIUS_NAME);
-            EXPECT_EQ(result, expectedStr);
+            auto jsonValue = GetJsonValue(node_);
+            auto linearStyle = GetAttrObject(jsonValue, ATTRIBUTE_LINEAR_STYLE_NAME);
+            auto result = GetAttrValue<std::string>(linearStyle, ATTRIBUTE_STROKE_RADIUS_NAME);
+            EXPECT_THAT(result, Eq(expectedStr));
         };
     auto value = Converter::ArkUnion<Opt_Union_String_F64_Resource, Ark_Float64>(12.34);
     TypeHelper::WriteToUnion<Ark_LinearStyleOptions>(options.value).strokeRadius = value;
@@ -382,17 +381,16 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestLinearStrokeRadiusValidValue
  */
 HWTEST_F(ProgressModifierTest, setStyleRingTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
-
-    strResult = GetStringAttribute(node_, ATTRIBUTE_RING_STYLE_NAME);
-    std::string result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STROKE_WIDTH_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_SHADOW_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_SHADOW_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_ENABLE_SCAN_EFFECT_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STATUS_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_STATUS_DEFAULT_VALUE);
+    auto jsonValue = GetJsonValue(node_);
+    auto ringStyle = GetAttrObject(jsonValue, ATTRIBUTE_RING_STYLE_NAME);
+    auto result = GetAttrValue<std::string>(ringStyle, ATTRIBUTE_STROKE_WIDTH_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(ringStyle, ATTRIBUTE_SHADOW_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_SHADOW_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(ringStyle, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_ENABLE_SCAN_EFFECT_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(ringStyle, ATTRIBUTE_STATUS_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_STATUS_DEFAULT_VALUE));
 }
 
 /*
@@ -412,17 +410,16 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestRingValidValues, TestSize.Le
             Ark_RingStyleOptions>(ringStyle);
     modifier_->setStyle(node_, &options);
 
-    std::string strResult;
-
-    strResult = GetStringAttribute(node_, ATTRIBUTE_RING_STYLE_NAME);
-    std::string result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STROKE_WIDTH_NAME);
-    EXPECT_EQ(result, "5.00px");
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
-    EXPECT_EQ(result, "true");
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_SHADOW_NAME);
-    EXPECT_EQ(result, "true");
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STATUS_NAME);
-    EXPECT_EQ(result, "ProgressStatus.LOADING");
+    auto jsonValue = GetJsonValue(node_);
+    auto ringStyleJson = GetAttrObject(jsonValue, ATTRIBUTE_RING_STYLE_NAME);
+    auto result = GetAttrValue<std::string>(ringStyleJson, ATTRIBUTE_STROKE_WIDTH_NAME);
+    EXPECT_THAT(result, Eq("5.00px"));
+    result = GetAttrValue<std::string>(ringStyleJson, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
+    EXPECT_THAT(result, Eq("true"));
+    result = GetAttrValue<std::string>(ringStyleJson, ATTRIBUTE_SHADOW_NAME);
+    EXPECT_THAT(result, Eq("true"));
+    result = GetAttrValue<std::string>(ringStyleJson, ATTRIBUTE_STATUS_NAME);
+    EXPECT_THAT(result, Eq("ProgressStatus.LOADING"));
 }
 
 /*
@@ -432,30 +429,29 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestRingValidValues, TestSize.Le
  */
 HWTEST_F(ProgressModifierTest, setStyleCapsuleTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
-
-    strResult = GetStringAttribute(node_, ATTRIBUTE_CAPSULE_STYLE_NAME);
-    std::string result = GetAttrValue<std::string>(strResult, ATTRIBUTE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_BORDER_WIDTH_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_BORDER_COLOR_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_BORDER_COLOR_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_ENABLE_SCAN_EFFECT_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_FONT_COLOR_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_CONTENT_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_CONTENT_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_SHOW_DEFAULT_PERCENTAGE_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_SHOW_DEFAULT_PERCENTAGE_DEFAULT_VALUE);
-    std::string fontResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_FONT_NAME);
-    result = GetAttrValue<std::string>(fontResult, ATTRIBUTE_FONT_SIZE_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(fontResult, ATTRIBUTE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(fontResult, ATTRIBUTE_FONT_STYLE_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(fontResult, ATTRIBUTE_FONT_FAMILY_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE);
+    auto jsonValue = GetJsonValue(node_);
+    auto capsuleStyle = GetAttrObject(jsonValue, ATTRIBUTE_CAPSULE_STYLE_NAME);
+    auto result = GetAttrValue<std::string>(capsuleStyle, ATTRIBUTE_BORDER_WIDTH_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_BORDER_WIDTH_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(capsuleStyle, ATTRIBUTE_BORDER_COLOR_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_BORDER_COLOR_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(capsuleStyle, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_ENABLE_SCAN_EFFECT_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(capsuleStyle, ATTRIBUTE_FONT_COLOR_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(capsuleStyle, ATTRIBUTE_CONTENT_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_CONTENT_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(capsuleStyle, ATTRIBUTE_SHOW_DEFAULT_PERCENTAGE_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_SHOW_DEFAULT_PERCENTAGE_DEFAULT_VALUE));
+    auto font = GetAttrObject(capsuleStyle, ATTRIBUTE_FONT_NAME);
+    result = GetAttrValue<std::string>(font, ATTRIBUTE_FONT_SIZE_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(font, ATTRIBUTE_FONT_WEIGHT_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(font, ATTRIBUTE_FONT_STYLE_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(font, ATTRIBUTE_FONT_FAMILY_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE));
 }
 
 /*
@@ -482,21 +478,20 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestCapsuleValidValues, TestSize
             Ark_CapsuleStyleOptions>(capsuleStyle);
     modifier_->setStyle(node_, &options);
 
-    std::string strResult;
-
-    strResult = GetStringAttribute(node_, ATTRIBUTE_CAPSULE_STYLE_NAME);
-    std::string result = GetAttrValue<std::string>(strResult, ATTRIBUTE_BORDER_COLOR_NAME);
-    EXPECT_EQ(result, "#12131415");
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(result, "7.00px");
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
-    EXPECT_EQ(result, "true");
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_CONTENT_NAME);
-    EXPECT_EQ(result, "content");
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_FONT_COLOR_NAME);
-    EXPECT_EQ(result, "#23456134");
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_SHOW_DEFAULT_PERCENTAGE_NAME);
-    EXPECT_EQ(result, "true");
+    auto jsonValue = GetJsonValue(node_);
+    auto capsuleJson = GetAttrObject(jsonValue, ATTRIBUTE_CAPSULE_STYLE_NAME);
+    auto result = GetAttrValue<std::string>(capsuleJson, ATTRIBUTE_BORDER_COLOR_NAME);
+    EXPECT_THAT(result, Eq("#12131415"));
+    result = GetAttrValue<std::string>(capsuleJson, ATTRIBUTE_BORDER_WIDTH_NAME);
+    EXPECT_THAT(result, Eq("7.00px"));
+    result = GetAttrValue<std::string>(capsuleJson, ATTRIBUTE_ENABLE_SCAN_EFFECT_NAME);
+    EXPECT_THAT(result, Eq("true"));
+    result = GetAttrValue<std::string>(capsuleJson, ATTRIBUTE_CONTENT_NAME);
+    EXPECT_THAT(result, Eq("content"));
+    result = GetAttrValue<std::string>(capsuleJson, ATTRIBUTE_FONT_COLOR_NAME);
+    EXPECT_THAT(result, Eq("#23456134"));
+    result = GetAttrValue<std::string>(capsuleJson, ATTRIBUTE_SHOW_DEFAULT_PERCENTAGE_NAME);
+    EXPECT_THAT(result, Eq("true"));
 }
 
 /*
@@ -516,9 +511,10 @@ HWTEST_F(ProgressModifierTest, setStyleTestCapsuleValidContentValues, TestSize.L
             Ark_CapsuleStyleOptions>(capsuleStyle);
     modifier_->setStyle(node_, &options);
 
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_CAPSULE_STYLE_NAME);
-    std::string result = GetAttrValue<std::string>(strResult, ATTRIBUTE_CONTENT_NAME);
-    EXPECT_EQ(result, "content");
+    auto jsonValue = GetJsonValue(node_);
+    auto capsuleJson = GetAttrObject(jsonValue, ATTRIBUTE_CAPSULE_STYLE_NAME);
+    auto result = GetAttrValue<std::string>(capsuleJson, ATTRIBUTE_CONTENT_NAME);
+    EXPECT_THAT(result, Eq("content"));
 }
 
 /*
@@ -548,18 +544,17 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestCapsuleValidFontValues, Test
             Ark_CapsuleStyleOptions>(capsuleStyle);
     modifier_->setStyle(node_, &options);
 
-    std::string strResult;
-
-    strResult = GetStringAttribute(node_, ATTRIBUTE_CAPSULE_STYLE_NAME);
-    std::string fontResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_FONT_NAME);
-    strResult = GetAttrValue<std::string>(fontResult, ATTRIBUTE_FONT_SIZE_NAME);
-    EXPECT_EQ(strResult, "9.00px");
-    strResult = GetAttrValue<std::string>(fontResult, ATTRIBUTE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(strResult, "FontWeight.Bold");
-    strResult = GetAttrValue<std::string>(fontResult, ATTRIBUTE_FONT_STYLE_NAME);
-    EXPECT_EQ(strResult, "FontStyle.Italic");
-    strResult = GetAttrValue<std::string>(fontResult, ATTRIBUTE_FONT_FAMILY_NAME);
-    EXPECT_EQ(strResult, "Family");
+    auto jsonValue = GetJsonValue(node_);
+    auto capsuleJson = GetAttrObject(jsonValue, ATTRIBUTE_CAPSULE_STYLE_NAME);
+    auto fontJson = GetAttrObject(capsuleJson, ATTRIBUTE_FONT_NAME);
+    auto result = GetAttrValue<std::string>(fontJson, ATTRIBUTE_FONT_SIZE_NAME);
+    EXPECT_THAT(result, Eq("9.00px"));
+    result = GetAttrValue<std::string>(fontJson, ATTRIBUTE_FONT_WEIGHT_NAME);
+    EXPECT_THAT(result, Eq("FontWeight.Bold"));
+    result = GetAttrValue<std::string>(fontJson, ATTRIBUTE_FONT_STYLE_NAME);
+    EXPECT_THAT(result, Eq("FontStyle.Italic"));
+    result = GetAttrValue<std::string>(fontJson, ATTRIBUTE_FONT_FAMILY_NAME);
+    EXPECT_THAT(result, Eq("Family"));
 }
 
 /*
@@ -569,17 +564,16 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestCapsuleValidFontValues, Test
  */
 HWTEST_F(ProgressModifierTest, setStyleProgressTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
-
-    strResult = GetStringAttribute(node_, ATTRIBUTE_STYLE_NAME);
-    std::string result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STROKE_WIDTH_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCALE_COUNT_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_SCALE_COUNT_DEFAULT_VALUE);
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCALE_WIDTH_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_SCALE_WIDTH_DEFAULT_VALUE);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ENABLE_SMOOTH_EFFECT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ENABLE_SMOOTH_EFFECT_DEFAULT_VALUE);
+    auto jsonValue = GetJsonValue(node_);
+    auto progressStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
+    auto result = GetAttrValue<std::string>(progressStyle, ATTRIBUTE_STROKE_WIDTH_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(progressStyle, ATTRIBUTE_SCALE_COUNT_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_SCALE_COUNT_DEFAULT_VALUE));
+    result = GetAttrValue<std::string>(progressStyle, ATTRIBUTE_SCALE_WIDTH_NAME);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_SCALE_WIDTH_DEFAULT_VALUE));
+    auto enableSmoothEffect = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_SMOOTH_EFFECT_NAME);
+    EXPECT_THAT(enableSmoothEffect, Eq(ATTRIBUTE_ENABLE_SMOOTH_EFFECT_DEFAULT_VALUE));
 }
 
 /*
@@ -599,17 +593,16 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestProgressValidValues, TestSiz
             Ark_ProgressStyleOptions>(progressStyle);
     modifier_->setStyle(node_, &options);
 
-    std::string strResult;
-
-    strResult = GetStringAttribute(node_, ATTRIBUTE_STYLE_NAME);
-    std::string result = GetAttrValue<std::string>(strResult, ATTRIBUTE_STROKE_WIDTH_NAME);
-    EXPECT_EQ(result, "25.00px");
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCALE_COUNT_NAME);
-    EXPECT_EQ(result, "5");
-    result = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCALE_WIDTH_NAME);
-    EXPECT_EQ(result, "15.00px");
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ENABLE_SMOOTH_EFFECT_NAME);
-    EXPECT_EQ(strResult, "false");
+    auto jsonValue = GetJsonValue(node_);
+    auto styleJson = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
+    auto result = GetAttrValue<std::string>(styleJson, ATTRIBUTE_STROKE_WIDTH_NAME);
+    EXPECT_THAT(result, Eq("25.00px"));
+    result = GetAttrValue<std::string>(styleJson, ATTRIBUTE_SCALE_COUNT_NAME);
+    EXPECT_THAT(result, Eq("5"));
+    result = GetAttrValue<std::string>(styleJson, ATTRIBUTE_SCALE_WIDTH_NAME);
+    EXPECT_THAT(result, Eq("15.00px"));
+    auto enableSmoothEffect = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_SMOOTH_EFFECT_NAME);
+    EXPECT_THAT(enableSmoothEffect, Eq("false"));
 }
 
 /*

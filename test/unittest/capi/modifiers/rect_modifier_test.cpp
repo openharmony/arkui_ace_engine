@@ -79,13 +79,13 @@ Opt_Union_RectOptions_RoundedRectOptions BuildRectOptions(double width, double h
         Ark_RectOptions>(radiusOpt);
 }
 
-std::string GetStringAttribute(const RefPtr<PaintProperty>& property, const std::string& name)
+template<typename T>
+std::optional<T> GetAttrValue(const RefPtr<PaintProperty>& property, const std::string& name)
 {
     static const InspectorFilter inspector;
     auto jsonVal = JsonUtil::Create(true);
     property->ToJsonValue(jsonVal, inspector);
-    auto val = jsonVal->GetValue(name);
-    return val->ToString();
+    return GetAttrValue<T>(jsonVal, name);
 }
 
 /**
@@ -99,17 +99,17 @@ HWTEST_F(RectModifierTest, DISABLED_setRectOptionsTestRectModifierSetRectOptions
     auto options = BuildRectOptions(WIDTH, HEIGHT, RADIUS_X);
     modifier_->setRectOptions(frameNode, &options);
 
-    std::string strResult;
-    strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-    EXPECT_EQ(strResult, WIDTH_STR);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-    EXPECT_EQ(strResult, HEIGHT_STR);
+    std::optional<std::string> strResult;
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+    EXPECT_THAT(strResult, Eq(WIDTH_STR));
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+    EXPECT_THAT(strResult, Eq(HEIGHT_STR));
 
     auto paintProperty = frameNode->GetPaintProperty<RectPaintProperty>();
-    strResult = GetStringAttribute(paintProperty, ATTRIBUTE_RADIUS_WIDTH_NAME);
-    EXPECT_EQ(strResult, RADIUS_X_STR);
-    strResult = GetStringAttribute(paintProperty, ATTRIBUTE_RADIUS_HEIGHT_NAME);
-    EXPECT_EQ(strResult, RADIUS_X_STR);
+    strResult = GetAttrValue<std::string>(paintProperty, ATTRIBUTE_RADIUS_WIDTH_NAME);
+    EXPECT_THAT(strResult, Eq(RADIUS_X_STR));
+    strResult = GetAttrValue<std::string>(paintProperty, ATTRIBUTE_RADIUS_HEIGHT_NAME);
+    EXPECT_THAT(strResult, Eq(RADIUS_X_STR));
 }
 
 /**
@@ -126,14 +126,14 @@ HWTEST_F(RectModifierTest, setRadiusWidthTestRectModifierSetRadiusWidth, TestSiz
     modifier_->setRadiusWidth(frameNode, &options);
 
     auto checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_WIDTH_NAME);
-    EXPECT_EQ(checkVal1, RADIUS_X);
+    EXPECT_THAT(checkVal1, Eq(RADIUS_X));
     auto checkVal2 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_HEIGHT_NAME);
-    EXPECT_EQ(checkVal2, DEFAULT_VALUE);
+    EXPECT_THAT(checkVal2, Eq(DEFAULT_VALUE));
 
     options = Converter::ArkValue<Opt_Length>(SIZE_STR);
     modifier_->setRadiusWidth(frameNode, &options);
     checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_WIDTH_NAME);
-    EXPECT_EQ(checkVal1, SIZE);
+    EXPECT_THAT(checkVal1, Eq(SIZE));
 }
 
 /**
@@ -150,14 +150,14 @@ HWTEST_F(RectModifierTest, setRadiusHeightTestRectModifierSetRadiusHeight, TestS
     modifier_->setRadiusHeight(frameNode, &options);
 
     auto checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_WIDTH_NAME);
-    EXPECT_EQ(checkVal1, DEFAULT_VALUE);
+    EXPECT_THAT(checkVal1, Eq(DEFAULT_VALUE));
     auto checkVal2 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_HEIGHT_NAME);
-    EXPECT_EQ(checkVal2, RADIUS_Y);
+    EXPECT_THAT(checkVal2, Eq(RADIUS_Y));
 
     options = Converter::ArkValue<Opt_Length>(SIZE_STR);
     modifier_->setRadiusHeight(frameNode, &options);
     checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_HEIGHT_NAME);
-    EXPECT_EQ(checkVal1, SIZE);
+    EXPECT_THAT(checkVal1, Eq(SIZE));
 }
 
 /**
@@ -171,24 +171,24 @@ HWTEST_F(RectModifierTest, setRadiusTestRectModifierSetRadius, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     auto checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_WIDTH_NAME);
-    EXPECT_EQ(checkVal1, 0);
+    EXPECT_THAT(checkVal1, Eq(std::nullopt));
     auto checkVal2 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_HEIGHT_NAME);
-    EXPECT_EQ(checkVal2, 0);
+    EXPECT_THAT(checkVal2, Eq(std::nullopt));
 
     auto optRadius = Converter::ArkUnion<Opt_Union_Length_Array_RadiusItem, Ark_Length>(WIDTH_STR);
     modifier_->setRadius(frameNode, &optRadius);
 
     checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_WIDTH_NAME);
-    EXPECT_EQ(checkVal1, WIDTH);
+    EXPECT_THAT(checkVal1, Eq(WIDTH));
     checkVal2 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_HEIGHT_NAME);
-    EXPECT_EQ(checkVal2, WIDTH);
+    EXPECT_THAT(checkVal2, Eq(WIDTH));
 
     optRadius = Converter::ArkUnion<Opt_Union_Length_Array_RadiusItem, Ark_Length>(SIZE_STR);
     modifier_->setRadius(frameNode, &optRadius);
 
     checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_WIDTH_NAME);
-    EXPECT_EQ(checkVal1, SIZE);
+    EXPECT_THAT(checkVal1, Eq(SIZE));
     checkVal2 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_HEIGHT_NAME);
-    EXPECT_EQ(checkVal2, SIZE);
+    EXPECT_THAT(checkVal2, Eq(SIZE));
 }
 } // namespace OHOS::Ace::NG

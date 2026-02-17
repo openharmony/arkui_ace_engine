@@ -70,10 +70,10 @@ public:
 HWTEST_F(PanelModifierTest, setModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MODE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MODE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'mode' of method 'mode'
@@ -91,14 +91,14 @@ static std::vector<std::tuple<std::string, Opt_PanelMode, std::string>> modeVali
 HWTEST_F(PanelModifierTest, setModeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     // Verifying attribute's  values
     for (auto& [print, input, expected]: modeValidValues) {
         modifier_->setMode(node_, &input);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << print;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << print;
     }
 }
 
@@ -115,7 +115,7 @@ static std::vector<std::tuple<std::string, Opt_PanelMode>> modeInvalidValues = {
 HWTEST_F(PanelModifierTest, setModeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_PanelMode inputValueMode;
     Opt_PanelMode initValueMode;
@@ -132,7 +132,7 @@ HWTEST_F(PanelModifierTest, setModeTestInvalidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_NAME);
         expectedStr = ATTRIBUTE_MODE_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << print;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << print;
     }
 }
 
@@ -144,10 +144,10 @@ HWTEST_F(PanelModifierTest, setModeTestInvalidValues, TestSize.Level1)
 HWTEST_F(PanelModifierTest, setTypeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'type' of method 'type'
@@ -167,7 +167,7 @@ HWTEST_F(PanelModifierTest, DISABLED_setTypeTestValidValues, TestSize.Level1)
 {
     // reason of disable: need fix array PANEL_TYPE in SlidingPanelPattern::ToJsonValue
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_PanelType inputValueType;
     Opt_PanelType initValueType;
@@ -183,7 +183,7 @@ HWTEST_F(PanelModifierTest, DISABLED_setTypeTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -200,7 +200,7 @@ static std::vector<std::tuple<std::string, Opt_PanelType>> typeInvalidValues = {
 HWTEST_F(PanelModifierTest, setTypeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_PanelType inputValueType;
     Opt_PanelType initValueType;
@@ -217,7 +217,7 @@ HWTEST_F(PanelModifierTest, setTypeTestInvalidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         expectedStr = ATTRIBUTE_TYPE_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -229,10 +229,10 @@ HWTEST_F(PanelModifierTest, setTypeTestInvalidValues, TestSize.Level1)
 HWTEST_F(PanelModifierTest, setDragBarTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DRAG_BAR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DRAG_BAR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DRAG_BAR_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'dragBar' of method 'dragBar'
@@ -249,14 +249,14 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> dragBarVal
 HWTEST_F(PanelModifierTest, setDragBarTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     // Verifying attribute's  values
     for (auto& [print, input, expected]: dragBarValidValues) {
         modifier_->setDragBar(node_, &input);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DRAG_BAR_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << print;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << print;
     }
 }
 
@@ -268,10 +268,10 @@ HWTEST_F(PanelModifierTest, setDragBarTestValidValues, TestSize.Level1)
 HWTEST_F(PanelModifierTest, setShowTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SHOW_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'show' of method 'show'
@@ -288,12 +288,12 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> showValidV
 HWTEST_F(PanelModifierTest, setShowTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto& [print, input, expected]: showValidValues) {
         modifier_->setShow(node_, &input);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << print;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << print;
     }
 }
 
@@ -305,10 +305,10 @@ HWTEST_F(PanelModifierTest, setShowTestValidValues, TestSize.Level1)
 HWTEST_F(PanelModifierTest, DISABLED_setBackgroundMaskTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_MASK_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BACKGROUND_MASK_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BACKGROUND_MASK_COLOR_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'backgroundMaskColor' of method 'backgroundMask'
@@ -330,7 +330,7 @@ HWTEST_F(PanelModifierTest, DISABLED_setBackgroundMaskTestValidValues, TestSize.
 {
     // reason of disable: need fix set value in SlidingPanelPattern::ToJsonValue
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_ResourceColor inputValueBackgroundMaskColor;
     Opt_ResourceColor initValueBackgroundMaskColor;
@@ -346,7 +346,7 @@ HWTEST_F(PanelModifierTest, DISABLED_setBackgroundMaskTestValidValues, TestSize.
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_MASK_COLOR_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -367,7 +367,7 @@ HWTEST_F(PanelModifierTest, DISABLED_setBackgroundMaskTestInvalidValues, TestSiz
 {
     // reason of disable: need fix set value in SlidingPanelPattern::ToJsonValue
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_ResourceColor inputValueBackgroundMaskColor;
     Opt_ResourceColor initValueBackgroundMaskColor;
@@ -383,7 +383,7 @@ HWTEST_F(PanelModifierTest, DISABLED_setBackgroundMaskTestInvalidValues, TestSiz
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_MASK_COLOR_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -395,10 +395,10 @@ HWTEST_F(PanelModifierTest, DISABLED_setBackgroundMaskTestInvalidValues, TestSiz
 HWTEST_F(PanelModifierTest, setShowCloseIconTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_CLOSE_ICON_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_CLOSE_ICON_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SHOW_CLOSE_ICON_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'showCloseIcon' of method 'showCloseIcon'
@@ -415,12 +415,12 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> showCloseI
 HWTEST_F(PanelModifierTest, setShowCloseIconTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto& [print, input, expected]: showCloseIconValidValues) {
         modifier_->setShowCloseIcon(node_, &input);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_CLOSE_ICON_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << print;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << print;
     }
 }
 
@@ -436,10 +436,10 @@ HWTEST_F(PanelModifierTest, DISABLED_setMiniHeightTestDefaultValues, TestSize.Le
     modifier_->setMode(node_, &mode);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MINI_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MINI_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MINI_HEIGHT_DEFAULT_VALUE));
 }
 
 typedef std::pair<Opt_Union_Number_String, std::string> OneTestStep;
@@ -478,8 +478,8 @@ HWTEST_F(PanelModifierTest, setMiniHeightTestValidValues, TestSize.Level1)
 
     for (const auto &[arkHeight, expected]: heightValidValues) {
         modifier_->setMiniHeight(node_, &arkHeight);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_MINI_HEIGHT_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_MINI_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 }
 
@@ -496,9 +496,9 @@ HWTEST_F(PanelModifierTest, DISABLED_setMiniHeightTestInvalidValues, TestSize.Le
 
     for (const auto &[arkHeight, expected]: heightInvalidValues) {
         modifier_->setMiniHeight(node_, &arkHeight);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_MINI_HEIGHT_NAME);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_MINI_HEIGHT_NAME);
         auto expectedStr = ATTRIBUTE_MINI_HEIGHT_DEFAULT_VALUE;
-        EXPECT_EQ(strResult, expectedStr);
+        EXPECT_THAT(strResult, Eq(expectedStr));
     }
 }
 
@@ -511,13 +511,13 @@ HWTEST_F(PanelModifierTest, DISABLED_setMiniHeightTestInvalidValues, TestSize.Le
 HWTEST_F(PanelModifierTest, setHalfHeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     const auto mode = Converter::ArkValue<Opt_PanelMode>(ARK_PANEL_MODE_HALF);
     modifier_->setMode(node_, &mode);
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HALF_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_HALF_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_HALF_HEIGHT_DEFAULT_VALUE));
 }
 
 /*
@@ -532,8 +532,8 @@ HWTEST_F(PanelModifierTest, setHalfHeightTestValidValues, TestSize.Level1)
 
     for (const auto &[arkHeight, expected]: heightValidValues) {
         modifier_->setHalfHeight(node_, &arkHeight);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_HALF_HEIGHT_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HALF_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 }
 
@@ -549,8 +549,8 @@ HWTEST_F(PanelModifierTest, setHalfHeightTestInvalidValues, TestSize.Level1)
 
     for (const auto &[arkHeight, expected]: heightInvalidValues) {
         modifier_->setHalfHeight(node_, &arkHeight);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_HALF_HEIGHT_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HALF_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 }
 
@@ -562,13 +562,13 @@ HWTEST_F(PanelModifierTest, setHalfHeightTestInvalidValues, TestSize.Level1)
 HWTEST_F(PanelModifierTest, setFullHeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     const auto mode = Converter::ArkValue<Opt_PanelMode>(ARK_PANEL_MODE_FULL);
     modifier_->setMode(node_, &mode);
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FULL_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FULL_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FULL_HEIGHT_DEFAULT_VALUE));
 }
 
 /*
@@ -583,8 +583,8 @@ HWTEST_F(PanelModifierTest, setFullHeightTestValidValues, TestSize.Level1)
 
     for (const auto &[arkHeight, expected]: heightValidValues) {
         modifier_->setFullHeight(node_, &arkHeight);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_FULL_HEIGHT_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_FULL_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 }
 
@@ -600,8 +600,8 @@ HWTEST_F(PanelModifierTest, setFullHeightTestInvalidValues, TestSize.Level1)
 
     for (const auto &[arkHeight, expected]: heightInvalidValues) {
         modifier_->setFullHeight(node_, &arkHeight);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_FULL_HEIGHT_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_FULL_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 }
 
@@ -613,13 +613,13 @@ HWTEST_F(PanelModifierTest, setFullHeightTestInvalidValues, TestSize.Level1)
 HWTEST_F(PanelModifierTest, setCustomHeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     const auto type = Converter::ArkValue<Opt_PanelType>(ARK_PANEL_TYPE_CUSTOM);
     modifier_->setType(node_, &type);
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CUSTOM_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CUSTOM_HEIGHT_DEFAULT_VALUE));
 }
 
 /*
@@ -647,15 +647,15 @@ HWTEST_F(PanelModifierTest, setCustomHeightTestValidValues, TestSize.Level1)
     for (const auto &[lengthValue, expected]: testPlan) {
         auto value = Converter::ArkUnion<Opt_Union_Dimension_PanelHeight, Ark_Length>(lengthValue);
         modifier_->setCustomHeight(node_, &value);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_CUSTOM_HEIGHT_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_CUSTOM_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 
     auto value = Converter::ArkUnion<Opt_Union_Dimension_PanelHeight, Ark_PanelHeight>(
         Ark_PanelHeight::ARK_PANEL_HEIGHT_WRAP_CONTENT);
     modifier_->setCustomHeight(node_, &value);
-    auto strResult = GetStringAttribute(node_, ATTRIBUTE_CUSTOM_HEIGHT_NAME);
-    EXPECT_EQ(strResult, "wrapContentcalc");
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_CUSTOM_HEIGHT_NAME);
+    EXPECT_THAT(strResult, Eq("wrapContentcalc"));
 }
 
 /*
@@ -678,8 +678,8 @@ HWTEST_F(PanelModifierTest, setCustomHeightTestInvalidValues, TestSize.Level1)
     for (const auto &[lengthValue, expected]: testPlan) {
         auto value = Converter::ArkUnion<Opt_Union_Dimension_PanelHeight, Ark_Length>(lengthValue);
         modifier_->setCustomHeight(node_, &value);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_CUSTOM_HEIGHT_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_CUSTOM_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 }
 

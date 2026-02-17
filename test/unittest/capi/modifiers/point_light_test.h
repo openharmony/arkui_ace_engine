@@ -40,7 +40,7 @@ namespace OHOS::Ace::NG::PointLight {
 
     const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
     const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME = "lightSource";
-    const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME = "LightPosition";
     const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_DEFAULT_VALUE = "{}";
     const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_NAME = "x";
@@ -50,9 +50,9 @@ namespace OHOS::Ace::NG::PointLight {
     const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE = 0.f;
     const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_NAME = "color";
     const auto ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME = "illuminated";
-    const auto ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME = "bloom";
-    const auto ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE = 0.f;
+    const auto ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE = std::nullopt;
 
     // Fixture 'LengthNonNegNonPct' for type 'Ark_Dimension'
     const std::vector<std::tuple<std::string, Ark_Dimension, std::string>> testFixtureLengthLightPosition = {

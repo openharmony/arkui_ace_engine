@@ -31,11 +31,11 @@ using namespace TypeHelper;
 namespace {
 const auto ATTRIBUTE_TEMPLATE_NAME = "template";
 const auto ATTRIBUTE_TEMPLATE_I_SOURCE_NAME = "source";
-const auto ATTRIBUTE_TEMPLATE_I_SOURCE_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_TEMPLATE_I_SOURCE_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_TEMPLATE_I_BUNDLE_NAME_NAME = "bundleName";
-const auto ATTRIBUTE_TEMPLATE_I_BUNDLE_NAME_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_TEMPLATE_I_BUNDLE_NAME_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_TEMPLATE_I_DATA_NAME = "data";
-const auto ATTRIBUTE_TEMPLATE_I_DATA_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_TEMPLATE_I_DATA_DEFAULT_VALUE = std::nullopt;
 
 enum ResID {
     STRING_RES_0_ID,
@@ -85,19 +85,19 @@ HWTEST_F(PluginComponentModifierTest, setPluginComponentOptionsTestDefaultValues
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultTemplate =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEMPLATE_NAME);
-    std::string resultStr;
+        GetAttrObject(jsonValue, ATTRIBUTE_TEMPLATE_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultTemplate, ATTRIBUTE_TEMPLATE_I_SOURCE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEMPLATE_I_SOURCE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TEMPLATE_I_SOURCE_DEFAULT_VALUE)) <<
         "Default value for attribute 'options.template.source'";
 
     resultStr = GetAttrValue<std::string>(resultTemplate, ATTRIBUTE_TEMPLATE_I_BUNDLE_NAME_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEMPLATE_I_BUNDLE_NAME_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TEMPLATE_I_BUNDLE_NAME_DEFAULT_VALUE)) <<
         "Default value for attribute 'options.template.bundleName'";
 
     resultStr = GetAttrValue<std::string>(resultTemplate, ATTRIBUTE_TEMPLATE_I_DATA_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEMPLATE_I_DATA_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TEMPLATE_I_DATA_DEFAULT_VALUE)) <<
         "Default value for attribute 'options.data'";
 }
 
@@ -125,10 +125,10 @@ HWTEST_F(PluginComponentModifierTest, DISABLED_setPluginComponentOptionsTestOpti
         inputValueOptions.template_.source = Converter::ArkValue<Opt_String>(value);
         modifier_->setPluginComponentOptions(node, &inputValueOptions);
         auto jsonValue = GetJsonValue(node);
-        auto resultTemplate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEMPLATE_NAME);
+        auto resultTemplate = GetAttrObject(jsonValue, ATTRIBUTE_TEMPLATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTemplate, ATTRIBUTE_TEMPLATE_I_SOURCE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setPluginComponentOptions, attribute: options.template.source";
     };
 
@@ -163,10 +163,10 @@ HWTEST_F(
         inputValueOptions.template_.bundleName = Converter::ArkValue<Opt_String>(value);
         modifier_->setPluginComponentOptions(node, &inputValueOptions);
         auto jsonValue = GetJsonValue(node);
-        auto resultTemplate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEMPLATE_NAME);
+        auto resultTemplate = GetAttrObject(jsonValue, ATTRIBUTE_TEMPLATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTemplate, ATTRIBUTE_TEMPLATE_I_BUNDLE_NAME_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input <<
             ", method: setPluginComponentOptions, attribute: options.template.bundleName";
     };

@@ -88,13 +88,13 @@ HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsTestDefaultValues, T
     const auto jsonLayout = GetJsonValue(node_);
 
     auto resultStr = GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_DIRECTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIRECTION_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DIRECTION_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_STATE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STATE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_STATE_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_VISIBILITY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VISIBILITY_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_VISIBILITY_DEFAULT_VALUE));
 }
 
 /*
@@ -139,7 +139,7 @@ HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsTestDirectionValidVa
         modifier_->setScrollBarOptions(node_, &options.value);
         auto jsonValue = GetJsonValue(node_);
         auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
-        EXPECT_EQ(result, expected) <<
+        EXPECT_THAT(result, Eq(expected)) <<
             "Input value is: " << input << ", method: setScrollBarOptions, attribute: " << ATTRIBUTE_DIRECTION_NAME;
     }
 }
@@ -164,11 +164,11 @@ HWTEST_F(ScrollBarModifierTest, DISABLED_setScrollBarOptionsTestDirectionInvalid
         modifier_->setScrollBarOptions(node_, &optionsValid.value);
         auto jsonValue = GetJsonValue(node_);
         auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
-        EXPECT_EQ(result, optionsValidStr);
+        EXPECT_THAT(result, Eq(optionsValidStr));
         modifier_->setScrollBarOptions(node_, &options.value);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
-        EXPECT_EQ(result, expected) <<
+        EXPECT_THAT(result, Eq(expected)) <<
             "Input value is: " << input << ", method: setScrollBarOptions, attribute: " << ATTRIBUTE_DIRECTION_NAME;
     }
 }
@@ -193,11 +193,11 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsTestStateValidValues, TestSiz
         modifier_->setScrollBarOptions(node_, &options.value);
         auto jsonValue = GetJsonValue(node_);
         auto state = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_NAME);
-        EXPECT_EQ(state, expected) <<
+        EXPECT_THAT(state, Eq(expected)) <<
             "Input value is: " << input << ", method: setScrollBarOptions, attribute: " << ATTRIBUTE_STATE_NAME;
         auto visibility = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VISIBILITY_NAME);
         auto expectedVisibility = input == "ARK_BAR_STATE_OFF" ? "Visibility.Hidden" : "Visibility.Visible";
-        EXPECT_EQ(visibility, expectedVisibility) <<
+        EXPECT_THAT(visibility, Eq(expectedVisibility)) <<
             " Method: setScrollBarOptions, attribute: " << ATTRIBUTE_STATE_NAME;
     }
 }
@@ -221,15 +221,15 @@ HWTEST_F(ScrollBarModifierTest, setScrollBarOptionsTestStateInvalidValues, TestS
         modifier_->setScrollBarOptions(node_, &optionsValid.value);
         auto jsonValue = GetJsonValue(node_);
         auto state = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_NAME);
-        EXPECT_EQ(state, optionsValidStr);
+        EXPECT_THAT(state, Eq(optionsValidStr));
         modifier_->setScrollBarOptions(node_, &options.value);
         jsonValue = GetJsonValue(node_);
         state = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_NAME);
-        EXPECT_EQ(state, expected) <<
+        EXPECT_THAT(state, Eq(expected)) <<
             "Input value is: " << input << ", method: setScrollBarOptions, attribute: " << ATTRIBUTE_STATE_NAME;
         auto visibility = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VISIBILITY_NAME);
         auto expectedVisibility = input == "ARK_BAR_STATE_OFF" ? "Visibility.Hidden" : "Visibility.Visible";
-        EXPECT_EQ(visibility, expectedVisibility) <<
+        EXPECT_THAT(visibility, Eq(expectedVisibility)) <<
             " Method: setScrollBarOptions, attribute: " << ATTRIBUTE_STATE_NAME;
     }
 }
@@ -245,7 +245,7 @@ HWTEST_F(ScrollBarModifierTest, setEnableNestedScrollTestDefaultValues, TestSize
     modifier_->setScrollBarOptions(node_, &options.value);
     auto jsonValue = GetJsonValue(node_);
     auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_NESTED_SCROLL_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_ENABLE_NESTED_SCROLL_DEFAULT_VALUE) <<
+    EXPECT_THAT(result, Eq(ATTRIBUTE_ENABLE_NESTED_SCROLL_DEFAULT_VALUE)) <<
         "Default value for attribute " << ATTRIBUTE_ENABLE_NESTED_SCROLL_NAME;
 }
 
@@ -275,7 +275,7 @@ HWTEST_F(ScrollBarModifierTest, setEnableNestedScrollTestValidValues, TestSize.L
         modifier_->setEnableNestedScroll(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_NESTED_SCROLL_NAME);
-        EXPECT_EQ(result, expected) <<
+        EXPECT_THAT(result, Eq(expected)) <<
             "Input value is: " << input << ", method: setEnableNestedScroll, attribute: "
             << ATTRIBUTE_ENABLE_NESTED_SCROLL_NAME;
     }
@@ -306,10 +306,10 @@ HWTEST_F(ScrollBarModifierTest, setEnableNestedScrollTestInvalidValues, TestSize
         auto jsonValue = GetJsonValue(node_);
         auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_NESTED_SCROLL_NAME);
         modifier_->setEnableNestedScroll(node_, &value);
-        EXPECT_EQ(result, validStr);
+        EXPECT_THAT(result, Eq(validStr));
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_NESTED_SCROLL_NAME);
-        EXPECT_EQ(result, expected) <<
+        EXPECT_THAT(result, Eq(expected)) <<
             "Input value is: " << input << ", method: setEnableNestedScroll, attribute: "
             << ATTRIBUTE_ENABLE_NESTED_SCROLL_NAME;
     }

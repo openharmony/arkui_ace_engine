@@ -27,11 +27,11 @@ namespace {
     const auto ATTRIBUTE_TRANSFORM_NAME = "transform";
     const auto ATTRIBUTE_TRANSFORM_DEFAULT_VALUE = "{}";
     const auto ATTRIBUTE_CLICK_EFFECT_NAME = "clickEffect";
-    const auto ATTRIBUTE_CLICK_EFFECT_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_CLICK_EFFECT_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
-    const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_MOTION_PATH_NAME = "motionPath";
-    const auto ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_KEY_NAME = "id";
     const auto ATTRIBUTE_KEY_DEFAULT_VALUE = "";
 
@@ -295,8 +295,8 @@ public:
  */
 HWTEST_F(CommonMethodModifierTest6, setTransformTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_TRANSFORM_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_TRANSFORM_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_TRANSFORM_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_TRANSFORM_DEFAULT_VALUE));
 }
 
 /*
@@ -329,8 +329,8 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues, Test
  */
 HWTEST_F(CommonMethodModifierTest6, setClickEffectTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_CLICK_EFFECT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_CLICK_EFFECT_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_CLICK_EFFECT_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_CLICK_EFFECT_DEFAULT_VALUE));
 }
 
 /*
@@ -354,7 +354,7 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setClickEffectTestValidValues, Test
         modifier_->setClickEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_CLICK_EFFECT_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -379,13 +379,13 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setClickEffectTestInvalidValues, Te
         modifier_->setClickEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_CLICK_EFFECT_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
     modifier_->setClickEffect(node_, nullptr);
     auto fullJson = GetJsonValue(node_);
     auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_CLICK_EFFECT_NAME);
     auto expectedValue = "";
-    EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
 }
 
 //////////// AllowDrop
@@ -457,8 +457,8 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setAllowDropTestInvalidValues, Test
  */
 HWTEST_F(CommonMethodModifierTest6, setDraggableTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_DRAGGABLE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_DRAGGABLE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE));
 }
 
 /*
@@ -478,7 +478,7 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setDraggableTestValidValues, TestSi
         modifier_->setDraggable(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_DRAGGABLE_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -490,8 +490,8 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setDraggableTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest6, setMotionPathTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_MOTION_PATH_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_MOTION_PATH_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE));
 }
 
 /*
@@ -506,14 +506,14 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setMotionPathTestValidValues, TestS
     MotionPathOptionTest defaultValue;
     MotionPathOptionTest validValue = {.path = "path", .from = 1.0f, .to = 2.0f, .rotatable = true};
     const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_MotionPathOptions>(defaultValue), ATTRIBUTE_MOTION_PATH_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_MotionPathOptions>(defaultValue), ""},
         {Converter::ArkValue<Opt_MotionPathOptions>(validValue), ""},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setMotionPath(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MOTION_PATH_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -536,7 +536,7 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setMotionPathTestInvalidValues, Tes
         modifier_->setMotionPath(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MOTION_PATH_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -548,8 +548,8 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setMotionPathTestInvalidValues, Tes
  */
 HWTEST_F(CommonMethodModifierTest6, setKeyTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_KEY_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_KEY_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_KEY_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_KEY_DEFAULT_VALUE));
 }
 
 /*
@@ -569,7 +569,7 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setKeyTestValidValues, TestSize.Lev
         modifier_->setKey(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_KEY_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -590,7 +590,7 @@ HWTEST_F(CommonMethodModifierTest6, setKeyTestInvalidValues, TestSize.Level1)
         auto fullJson = GetJsonValue(node_);
         ASSERT_NE(fullJson, nullptr);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_KEY_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 // GENERATED_ArkUICommonMethodModifier

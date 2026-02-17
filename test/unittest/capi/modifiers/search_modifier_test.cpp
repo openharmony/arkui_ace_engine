@@ -372,9 +372,9 @@ HWTEST_F(SearchModifierTest, setSearchOptionsTestDefault, TestSize.Level1)
     auto value = GetAttrValue<std::string>(jsonValue, SEARCH_VALUE_OPTION);
     auto placeholder = GetAttrValue<std::string>(jsonValue, SEARCH_PLACEHOLDER_OPTION);
     auto icon = GetAttrValue<std::string>(jsonValue, SEARCH_ICON_OPTION);
-    EXPECT_EQ(value, EMPTY_TEXT);
-    EXPECT_EQ(placeholder, EMPTY_TEXT);
-    EXPECT_EQ(icon, ICON_DEFAULT_TEXT);
+    EXPECT_THAT(value, Eq(EMPTY_TEXT));
+    EXPECT_THAT(placeholder, Eq(EMPTY_TEXT));
+    EXPECT_THAT(icon, Eq(ICON_DEFAULT_TEXT));
 }
 
 /**
@@ -396,9 +396,9 @@ HWTEST_F(SearchModifierTest, setSearchOptionsTestValidValues, TestSize.Level1)
     auto value = GetAttrValue<std::string>(jsonValue, SEARCH_VALUE_OPTION);
     auto placeholder = GetAttrValue<std::string>(jsonValue, SEARCH_PLACEHOLDER_OPTION);
     auto icon = GetAttrValue<std::string>(jsonValue, SEARCH_ICON_OPTION);
-    EXPECT_EQ(value, TEST_STRING);
-    EXPECT_EQ(placeholder, TEST_STRING);
-    EXPECT_EQ(icon, TEST_STRING);
+    EXPECT_THAT(value, Eq(TEST_STRING));
+    EXPECT_THAT(placeholder, Eq(TEST_STRING));
+    EXPECT_THAT(icon, Eq(TEST_STRING));
 }
 
 /**
@@ -412,9 +412,9 @@ HWTEST_F(SearchModifierTest, DISABLED_setCancelButtonTestDefault, TestSize.Level
     ASSERT_NE(modifier_->setCancelButton, nullptr);
     // default
     auto fullJsonDefault = GetJsonValue(node_);
-    auto defaultCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJsonDefault, CANCEL_BUTTON_ATTR);
+    auto defaultCancelButtonAttrs = GetAttrObject(fullJsonDefault, CANCEL_BUTTON_ATTR);
     auto defaultButtonIconStyleAttr = GetAttrValue<std::string>(defaultCancelButtonAttrs, CANCEL_BUTTON_STYLE_ATTR);
-    auto defaultCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(defaultCancelButtonAttrs,
+    auto defaultCancelButtonIconAttrs = GetAttrObject(defaultCancelButtonAttrs,
         CANCEL_BUTTON_ICON_ATTR);
     auto defaultCancelButtonIconSrc = GetAttrValue<std::string>(defaultCancelButtonIconAttrs,
         CANCEL_BUTTON_ICON_SRC_ATTR);
@@ -422,10 +422,10 @@ HWTEST_F(SearchModifierTest, DISABLED_setCancelButtonTestDefault, TestSize.Level
         CANCEL_BUTTON_ICON_COLOR_ATTR);
     auto defaultCancelButtonIconSize = GetAttrValue<std::string>(defaultCancelButtonIconAttrs,
         CANCEL_BUTTON_ICON_SIZE_ATTR);
-    EXPECT_EQ(defaultButtonIconStyleAttr, BUTTON_STYLE_INPUT);
-    EXPECT_EQ(defaultCancelButtonIconSrc, EMPTY_TEXT);
-    EXPECT_EQ(defaultCancelButtonIconColor, CHECK_DEFAULT_BLACK_COLOR_ARRAY);
-    EXPECT_EQ(defaultCancelButtonIconSize, CHECK_DEFAULT_PX);
+    EXPECT_THAT(defaultButtonIconStyleAttr, Eq(BUTTON_STYLE_INPUT));
+    EXPECT_THAT(defaultCancelButtonIconSrc, Eq(EMPTY_TEXT));
+    EXPECT_THAT(defaultCancelButtonIconColor, Eq(CHECK_DEFAULT_BLACK_COLOR_ARRAY));
+    EXPECT_THAT(defaultCancelButtonIconSize, Eq(CHECK_DEFAULT_PX));
 }
 
 /*
@@ -436,7 +436,7 @@ HWTEST_F(SearchModifierTest, DISABLED_setCancelButtonTestDefault, TestSize.Level
 HWTEST_F(SearchModifierTest, setCancelButtonTestValidColorValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -460,11 +460,11 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidColorValues, TestSize.Level
         value = ArkValue<Opt_ResourceColor>(color);
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
-        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+        auto customCancelButtonAttrs = GetAttrObject(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrObject(customCancelButtonAttrs,
             CANCEL_BUTTON_ICON_ATTR);
         auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
     }
 }
 
@@ -476,7 +476,7 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidColorValues, TestSize.Level
 HWTEST_F(SearchModifierTest, setCancelButtonTestValidNumberValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -501,11 +501,11 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidNumberValues, TestSize.Leve
         value = ArkValue<Opt_ResourceColor>(color);
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
-        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+        auto customCancelButtonAttrs = GetAttrObject(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrObject(customCancelButtonAttrs,
             CANCEL_BUTTON_ICON_ATTR);
         auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
     }
 }
 
@@ -517,7 +517,7 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidNumberValues, TestSize.Leve
 HWTEST_F(SearchModifierTest, setCancelButtonTestValidStringValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -542,11 +542,11 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidStringValues, TestSize.Leve
         value = ArkValue<Opt_ResourceColor>(color);
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
-        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+        auto customCancelButtonAttrs = GetAttrObject(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrObject(customCancelButtonAttrs,
             CANCEL_BUTTON_ICON_ATTR);
         auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
     }
 }
 
@@ -558,7 +558,7 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestValidStringValues, TestSize.Leve
 HWTEST_F(SearchModifierTest, setCancelButtonTestInvalidStringValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -572,11 +572,11 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestInvalidStringValues, TestSize.Le
         value = ArkValue<Opt_ResourceColor>(color);
         modifier_->setCancelButton(node_, &attrs);
         jsonValue = GetJsonValue(node_);
-        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+        auto customCancelButtonAttrs = GetAttrObject(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrObject(customCancelButtonAttrs,
             CANCEL_BUTTON_ICON_ATTR);
         auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_COLOR_ATTR);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
     }
 }
 
@@ -594,12 +594,12 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestIconSize, TestSize.Level1)
         value = testSize.first;
         modifier_->setCancelButton(node_, &attrs);
         auto fullJson = GetJsonValue(node_);
-        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+        auto customCancelButtonAttrs = GetAttrObject(fullJson, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrObject(customCancelButtonAttrs,
             CANCEL_BUTTON_ICON_ATTR);
         auto customCancelButtonIconSize = GetAttrValue<std::string>(customCancelButtonIconAttrs,
             CANCEL_BUTTON_ICON_SIZE_ATTR);
-        EXPECT_EQ(customCancelButtonIconSize, testSize.second);
+        EXPECT_THAT(customCancelButtonIconSize, Eq(testSize.second));
     }
 }
 
@@ -611,18 +611,18 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestIconSize, TestSize.Level1)
 HWTEST_F(SearchModifierTest, setCancelButtonTestIconSrc, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
     auto& value = WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(attrs)).icon).src;
     for (const auto &[src, expected] : RESOURCE_TEST_PLAN) {
         value = ArkValue<Opt_ResourceStr>(src);
         modifier_->setCancelButton(node_, &attrs);
         auto jsonValue = GetJsonValue(node_);
-        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
-        auto customCancelButtonIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(customCancelButtonAttrs,
+        auto customCancelButtonAttrs = GetAttrObject(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = GetAttrObject(customCancelButtonAttrs,
             CANCEL_BUTTON_ICON_ATTR);
         auto resultStr = GetAttrValue<std::string>(customCancelButtonIconAttrs, CANCEL_BUTTON_ICON_SRC_ATTR);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
     }
 }
 
@@ -640,9 +640,9 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestStyle, TestSize.Level1)
         value = ArkValue<Opt_CancelButtonStyle>(testStyleButton.first);
         modifier_->setCancelButton(node_, &attrs);
         auto fullJson = GetJsonValue(node_);
-        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonAttrs = GetAttrObject(fullJson, CANCEL_BUTTON_ATTR);
         auto customButtonIconStyleAttr = GetAttrValue<std::string>(customCancelButtonAttrs, CANCEL_BUTTON_STYLE_ATTR);
-        EXPECT_EQ(customButtonIconStyleAttr, testStyleButton.second);
+        EXPECT_THAT(customButtonIconStyleAttr, Eq(testStyleButton.second));
     }
 }
 
@@ -666,12 +666,12 @@ HWTEST_F(SearchModifierTest, setCopyOptionTest, TestSize.Level1)
         { ArkValue<Opt_CopyOptions>(), defaultValue },
     };
 
-    auto checkVal = GetStringAttribute(node_, COPY_OPTION_ATTR);
-    EXPECT_EQ(checkVal, defaultValue);
+    auto checkVal = GetAttrValue<std::string>(node_, COPY_OPTION_ATTR);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
     for (const auto& [value, expectVal] : COPY_OPTION_TEST_PLAN) {
         modifier_->setCopyOption(node_, &value);
-        checkVal = GetStringAttribute(node_, COPY_OPTION_ATTR);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, COPY_OPTION_ATTR);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -679,13 +679,13 @@ HWTEST_F(SearchModifierTest, setCopyOptionTest, TestSize.Level1)
 HWTEST_F(SearchModifierTest, DISABLED_setSearchIconTestDefaultValues, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
-    auto defaultSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, SEARCH_ICON_ATTR);
+    auto defaultSearchIconAttrs = GetAttrObject(fullJson, SEARCH_ICON_ATTR);
     auto defaultSearchIconSrc = GetAttrValue<std::string>(defaultSearchIconAttrs, SEARCH_ICON_SRC_ATTR);
     auto defaultSearchIconColor = GetAttrValue<std::string>(defaultSearchIconAttrs, SEARCH_ICON_COLOR_ATTR);
     auto defaultSearchIconSize = GetAttrValue<std::string>(defaultSearchIconAttrs, SEARCH_ICON_SIZE_ATTR);
-    EXPECT_EQ(defaultSearchIconSrc, ICON_DEFAULT_SRC);
-    EXPECT_EQ(defaultSearchIconColor, CHECK_DEFAULT_BLACK_COLOR_ARRAY);
-    EXPECT_EQ(defaultSearchIconSize, CHECK_DEFAULT_PX);
+    EXPECT_THAT(defaultSearchIconSrc, Eq(ICON_DEFAULT_SRC));
+    EXPECT_THAT(defaultSearchIconColor, Eq(CHECK_DEFAULT_BLACK_COLOR_ARRAY));
+    EXPECT_THAT(defaultSearchIconSize, Eq(CHECK_DEFAULT_PX));
 }
 
 /**
@@ -707,9 +707,9 @@ HWTEST_F(SearchModifierTest, setSearchIconTest, TestSize.Level1)
             });
         modifier_->setSearchIcon(node_, &attrs);
         auto jsonValue = GetJsonValue(node_);
-        auto customSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, SEARCH_ICON_ATTR);
+        auto customSearchIconAttrs = GetAttrObject(jsonValue, SEARCH_ICON_ATTR);
         auto customSearchIconSize = GetAttrValue<std::string>(customSearchIconAttrs, SEARCH_ICON_SIZE_ATTR);
-        EXPECT_EQ(customSearchIconSize, expectLength);
+        EXPECT_THAT(customSearchIconSize, Eq(expectLength));
     }
     for (const auto &[testColor, expectColor] : COLOR_TEST_PLAN) {
         auto attrs = ArkUnion<Opt_Union_IconOptions_SymbolGlyphModifier, Ark_IconOptions>(
@@ -720,9 +720,9 @@ HWTEST_F(SearchModifierTest, setSearchIconTest, TestSize.Level1)
             });
         modifier_->setSearchIcon(node_, &attrs);
         auto jsonValue = GetJsonValue(node_);
-        auto customSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, SEARCH_ICON_ATTR);
+        auto customSearchIconAttrs = GetAttrObject(jsonValue, SEARCH_ICON_ATTR);
         auto customSearchIconColor = GetAttrValue<std::string>(customSearchIconAttrs, SEARCH_ICON_COLOR_ATTR);
-        EXPECT_EQ(customSearchIconColor, expectColor);
+        EXPECT_THAT(customSearchIconColor, Eq(expectColor));
     }
     for (const auto &[testSrc, expectSrc] : RESOURCE_TEST_PLAN) {
         auto attrs = ArkUnion<Opt_Union_IconOptions_SymbolGlyphModifier, Ark_IconOptions>(
@@ -733,9 +733,9 @@ HWTEST_F(SearchModifierTest, setSearchIconTest, TestSize.Level1)
             });
         modifier_->setSearchIcon(node_, &attrs);
         auto jsonValue = GetJsonValue(node_);
-        auto customSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, SEARCH_ICON_ATTR);
+        auto customSearchIconAttrs = GetAttrObject(jsonValue, SEARCH_ICON_ATTR);
         auto customSearchIconSrc = GetAttrValue<std::string>(customSearchIconAttrs, SEARCH_ICON_SRC_ATTR);
-        EXPECT_EQ(customSearchIconSrc, expectSrc);
+        EXPECT_THAT(customSearchIconSrc, Eq(expectSrc));
     }
 }
 
@@ -748,20 +748,20 @@ HWTEST_F(SearchModifierTest, setFontColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFontColor, nullptr);
     // default
-    auto fontColor = GetStringAttribute(node_, FONT_COLOR_ATTR);
-    EXPECT_EQ(fontColor, CHECK_DEFAULT_BLACK_COLOR);
+    auto fontColor = GetAttrValue<std::string>(node_, FONT_COLOR_ATTR);
+    EXPECT_THAT(fontColor, Eq(CHECK_DEFAULT_BLACK_COLOR));
     // //color
     modifier_->setFontColor(node_, &OPT_COLOR_COLOR);
-    auto fontColorColor = GetStringAttribute(node_, FONT_COLOR_ATTR);
-    EXPECT_EQ(fontColorColor, CHECK_COLOR_COLOR);
+    auto fontColorColor = GetAttrValue<std::string>(node_, FONT_COLOR_ATTR);
+    EXPECT_THAT(fontColorColor, Eq(CHECK_COLOR_COLOR));
     //int
     modifier_->setFontColor(node_, &OPT_COLOR_INT);
-    auto fontColorInt = GetStringAttribute(node_, FONT_COLOR_ATTR);
-    EXPECT_EQ(fontColorInt, CUSTOM_COLOR_STRING);
+    auto fontColorInt = GetAttrValue<std::string>(node_, FONT_COLOR_ATTR);
+    EXPECT_THAT(fontColorInt, Eq(CUSTOM_COLOR_STRING));
     // string
     modifier_->setFontColor(node_, &OPT_COLOR_STRING);
-    auto fontColorColorString = GetStringAttribute(node_, FONT_COLOR_ATTR);
-    EXPECT_EQ(fontColorColorString, CUSTOM_COLOR_STRING);
+    auto fontColorColorString = GetAttrValue<std::string>(node_, FONT_COLOR_ATTR);
+    EXPECT_THAT(fontColorColorString, Eq(CUSTOM_COLOR_STRING));
 }
 
 /**
@@ -774,11 +774,11 @@ HWTEST_F(SearchModifierTest, DISABLED_setSearchButtonTest, TestSize.Level1)
     ASSERT_NE(modifier_->setSearchButton, nullptr);
     // default
     auto fullJson = GetJsonValue(node_);
-    auto defaultCaretStyle = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUTTON_OPTIONS_ATTR);
+    auto defaultCaretStyle = GetAttrObject(fullJson, BUTTON_OPTIONS_ATTR);
     auto defaultCaretColor = GetAttrValue<std::string>(defaultCaretStyle, BUTTON_OPTIONS_COLOR_ATTR);
     auto defaultCaretWidth = GetAttrValue<std::string>(defaultCaretStyle, BUTTON_OPTIONS_SIZE_ATTR);
-    EXPECT_EQ(defaultCaretColor, CHECK_DEFAULT_BLACK_COLOR);
-    EXPECT_EQ(defaultCaretWidth, CHECK_DEFAULT_VP);
+    EXPECT_THAT(defaultCaretColor, Eq(CHECK_DEFAULT_BLACK_COLOR));
+    EXPECT_THAT(defaultCaretWidth, Eq(CHECK_DEFAULT_VP));
     // custom
     std::vector<TestSearchButtonOption> testSearchButton;
     for (auto testLength : OPT_LENGTH_TEST_PLAN) {
@@ -794,11 +794,11 @@ HWTEST_F(SearchModifierTest, DISABLED_setSearchButtonTest, TestSize.Level1)
     for (auto buttonOptions : testSearchButton) {
         modifier_->setSearchButton(node_, &checkText, &buttonOptions.first);
         auto fullJson = GetJsonValue(node_);
-        auto customButtonOptions = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUTTON_OPTIONS_ATTR);
+        auto customButtonOptions = GetAttrObject(fullJson, BUTTON_OPTIONS_ATTR);
         auto searchButtonColor = GetAttrValue<std::string>(customButtonOptions, BUTTON_OPTIONS_COLOR_ATTR);
         auto searchButtonSize = GetAttrValue<std::string>(customButtonOptions, BUTTON_OPTIONS_SIZE_ATTR);
-        EXPECT_EQ(searchButtonColor, buttonOptions.second.first);
-        EXPECT_EQ(searchButtonSize, buttonOptions.second.second);
+        EXPECT_THAT(searchButtonColor, Eq(buttonOptions.second.first));
+        EXPECT_THAT(searchButtonSize, Eq(buttonOptions.second.second));
     }
 }
 
@@ -811,8 +811,8 @@ HWTEST_F(SearchModifierTest, setTextIndentTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextIndent, nullptr);
     // default
-    auto indentValueDefault = GetStringAttribute(node_, TEXT_INDENT_ATTR);
-    EXPECT_EQ(indentValueDefault, CHECK_DEFAULT_VP);
+    auto indentValueDefault = GetAttrValue<std::string>(node_, TEXT_INDENT_ATTR);
+    EXPECT_THAT(indentValueDefault, Eq(CHECK_DEFAULT_VP));
 
     const std::vector<std::pair<Opt_Dimension, std::string>> INDENT_LENGTH_TEST_PLAN = {
         { ArkValue<Opt_Dimension>("0vp"), "0.00vp" },
@@ -824,8 +824,8 @@ HWTEST_F(SearchModifierTest, setTextIndentTest, TestSize.Level1)
     // custom
     for (auto length : INDENT_LENGTH_TEST_PLAN) {
         modifier_->setTextIndent(node_, &length.first);
-        auto indentValue = GetStringAttribute(node_, TEXT_INDENT_ATTR);
-        EXPECT_EQ(indentValue, length.second);
+        auto indentValue = GetAttrValue<std::string>(node_, TEXT_INDENT_ATTR);
+        EXPECT_THAT(indentValue, Eq(length.second));
     }
 }
 
@@ -840,14 +840,14 @@ HWTEST_F(SearchModifierTest, DISABLED_setEnableKeyboardOnFocusTest, TestSize.Lev
 
     auto fullJson = GetJsonValue(node_);
     auto checkVal = GetAttrValue<bool>(fullJson, ENABLE_KEYBOARD_ON_FOCUS);
-    EXPECT_EQ(checkVal, true);
+    EXPECT_THAT(checkVal, Eq(true));
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         auto inputValue = ArkValue<Opt_Boolean>(value);
         modifier_->setEnableKeyboardOnFocus(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         checkVal = GetAttrValue<bool>(fullJson, ENABLE_KEYBOARD_ON_FOCUS);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -860,20 +860,20 @@ HWTEST_F(SearchModifierTest, setPlaceholderColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderColor, nullptr);
     // default
-    auto placeholderColor = GetStringAttribute(node_, PLACEHOLDER_COLOR_ATTR);
-    EXPECT_EQ(placeholderColor, CHECK_DEFAULT_BLACK_COLOR);
+    auto placeholderColor = GetAttrValue<std::string>(node_, PLACEHOLDER_COLOR_ATTR);
+    EXPECT_THAT(placeholderColor, Eq(CHECK_DEFAULT_BLACK_COLOR));
     // color
     modifier_->setPlaceholderColor(node_, &OPT_COLOR_COLOR);
-    auto placeholderColorColor = GetStringAttribute(node_, PLACEHOLDER_COLOR_ATTR);
-    EXPECT_EQ(placeholderColorColor, CHECK_COLOR_COLOR);
+    auto placeholderColorColor = GetAttrValue<std::string>(node_, PLACEHOLDER_COLOR_ATTR);
+    EXPECT_THAT(placeholderColorColor, Eq(CHECK_COLOR_COLOR));
     //int
     modifier_->setPlaceholderColor(node_, &OPT_COLOR_INT);
-    auto placeholderColorInt = GetStringAttribute(node_, PLACEHOLDER_COLOR_ATTR);
-    EXPECT_EQ(placeholderColorInt, CUSTOM_COLOR_STRING);
+    auto placeholderColorInt = GetAttrValue<std::string>(node_, PLACEHOLDER_COLOR_ATTR);
+    EXPECT_THAT(placeholderColorInt, Eq(CUSTOM_COLOR_STRING));
     // string
     modifier_->setPlaceholderColor(node_, &OPT_COLOR_STRING);
-    auto placeholderColorString = GetStringAttribute(node_, PLACEHOLDER_COLOR_ATTR);
-    EXPECT_EQ(placeholderColorString, CUSTOM_COLOR_STRING);
+    auto placeholderColorString = GetAttrValue<std::string>(node_, PLACEHOLDER_COLOR_ATTR);
+    EXPECT_THAT(placeholderColorString, Eq(CUSTOM_COLOR_STRING));
 }
 
 /**
@@ -885,11 +885,11 @@ HWTEST_F(SearchModifierTest, setCaretStyleTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCaretStyle, nullptr);
     auto fullJsonDefault = GetJsonValue(node_);
-    auto defaultCaretStyle = GetAttrValue<std::unique_ptr<JsonValue>>(fullJsonDefault, CARET_STYLE_ATTR);
+    auto defaultCaretStyle = GetAttrObject(fullJsonDefault, CARET_STYLE_ATTR);
     auto defaultCaretColor = GetAttrValue<std::string>(defaultCaretStyle, CARET_STYLE_COLOR_ATTR);
     auto defaultCaretWidth = GetAttrValue<std::string>(defaultCaretStyle, CARET_STYLE_WIDTH_ATTR);
-    EXPECT_EQ(defaultCaretColor, CHECK_DEFAULT_BLACK_COLOR);
-    EXPECT_EQ(defaultCaretWidth, CHECK_DEFAULT_PX);
+    EXPECT_THAT(defaultCaretColor, Eq(CHECK_DEFAULT_BLACK_COLOR));
+    EXPECT_THAT(defaultCaretWidth, Eq(CHECK_DEFAULT_PX));
 
     using TestCaretStyle = std::pair<Opt_CaretStyle, CheckCaretValue>;
     std::vector<TestCaretStyle> testPlanCaretStyle;
@@ -904,13 +904,13 @@ HWTEST_F(SearchModifierTest, setCaretStyleTest, TestSize.Level1)
 
     for (auto caretStyle : testPlanCaretStyle) {
         modifier_->setCaretStyle(node_, &caretStyle.first);
-        auto value = GetStringAttribute(node_, CARET_STYLE_ATTR);
+        auto value = GetAttrValue<std::string>(node_, CARET_STYLE_ATTR);
         auto fullJson = GetJsonValue(node_);
-        auto customCaretStyle = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, CARET_STYLE_ATTR);
+        auto customCaretStyle = GetAttrObject(fullJson, CARET_STYLE_ATTR);
         auto caretColor = GetAttrValue<std::string>(customCaretStyle, CARET_STYLE_COLOR_ATTR);
         auto caretWidth = GetAttrValue<std::string>(customCaretStyle, CARET_STYLE_WIDTH_ATTR);
-        EXPECT_EQ(caretColor, caretStyle.second.first);
-        EXPECT_EQ(caretWidth, caretStyle.second.second);
+        EXPECT_THAT(caretColor, Eq(caretStyle.second.first));
+        EXPECT_THAT(caretWidth, Eq(caretStyle.second.second));
     }
 }
 
@@ -923,20 +923,20 @@ HWTEST_F(SearchModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBack
 {
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
     // default
-    auto selectedBackgroundColor = GetStringAttribute(node_, SELECTED_BACKGROUND_COLOR_ATTR);
-    EXPECT_EQ(selectedBackgroundColor, CHECK_DEFAULT_BLACK_COLOR);
+    auto selectedBackgroundColor = GetAttrValue<std::string>(node_, SELECTED_BACKGROUND_COLOR_ATTR);
+    EXPECT_THAT(selectedBackgroundColor, Eq(CHECK_DEFAULT_BLACK_COLOR));
     // color
     modifier_->setSelectedBackgroundColor(node_, &OPT_COLOR_COLOR);
-    auto selectedBackgroundColorColor = GetStringAttribute(node_, SELECTED_BACKGROUND_COLOR_ATTR);
-    EXPECT_EQ(selectedBackgroundColorColor, CHECK_COLOR_COLOR);
+    auto selectedBackgroundColorColor = GetAttrValue<std::string>(node_, SELECTED_BACKGROUND_COLOR_ATTR);
+    EXPECT_THAT(selectedBackgroundColorColor, Eq(CHECK_COLOR_COLOR));
     //int
     modifier_->setSelectedBackgroundColor(node_, &OPT_COLOR_INT);
-    auto selectedBackgroundColorInt = GetStringAttribute(node_, SELECTED_BACKGROUND_COLOR_ATTR);
-    EXPECT_EQ(selectedBackgroundColorInt, CUSTOM_COLOR_STRING);
+    auto selectedBackgroundColorInt = GetAttrValue<std::string>(node_, SELECTED_BACKGROUND_COLOR_ATTR);
+    EXPECT_THAT(selectedBackgroundColorInt, Eq(CUSTOM_COLOR_STRING));
     // string
     modifier_->setSelectedBackgroundColor(node_, &OPT_COLOR_STRING);
-    auto selectedBackgroundColorString = GetStringAttribute(node_, SELECTED_BACKGROUND_COLOR_ATTR);
-    EXPECT_EQ(selectedBackgroundColorString, CUSTOM_COLOR_STRING);
+    auto selectedBackgroundColorString = GetAttrValue<std::string>(node_, SELECTED_BACKGROUND_COLOR_ATTR);
+    EXPECT_THAT(selectedBackgroundColorString, Eq(CUSTOM_COLOR_STRING));
 }
 
 /**
@@ -948,12 +948,12 @@ HWTEST_F(SearchModifierTest, DISABLED_setSelectionMenuHiddenTest, TestSize.Level
 {
     auto fullJsonDefault = GetJsonValue(node_);
     auto checkVal = GetAttrValue<bool>(fullJsonDefault, SELECTION_MENU_HIDDEN_ATTR);
-    EXPECT_EQ(checkVal, false);
+    EXPECT_THAT(checkVal, Eq(false));
     auto inputValue = ArkValue<Opt_Boolean>(true);
     modifier_->setSelectionMenuHidden(node_, &inputValue);
     auto fullJson = GetJsonValue(node_);
     checkVal = GetAttrValue<bool>(fullJson, SELECTION_MENU_HIDDEN_ATTR);
-    EXPECT_EQ(checkVal, true);
+    EXPECT_THAT(checkVal, Eq(true));
 }
 
 /**
@@ -965,8 +965,8 @@ HWTEST_F(SearchModifierTest, setMaxLengthTest, TestSize.Level1)
 {
     const auto defaultValue = "INF";
     ASSERT_NE(modifier_->setMaxLength, nullptr);
-    auto checkVal = GetStringAttribute(node_, MAX_LENGTH_ATTR);
-    EXPECT_EQ(checkVal, defaultValue);
+    auto checkVal = GetAttrValue<std::string>(node_, MAX_LENGTH_ATTR);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
     const std::vector<std::pair<Opt_Int32, std::string>> testPlan = {
         { ArkValue<Opt_Int32>(20), "20"},
         { ArkValue<Opt_Int32>(0), "0"},
@@ -974,8 +974,8 @@ HWTEST_F(SearchModifierTest, setMaxLengthTest, TestSize.Level1)
     };
     for (const auto &[value, expectVal]: testPlan) {
         modifier_->setMaxLength(node_, &value);
-        checkVal = GetStringAttribute(node_, MAX_LENGTH_ATTR);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, MAX_LENGTH_ATTR);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -987,13 +987,13 @@ HWTEST_F(SearchModifierTest, setMaxLengthTest, TestSize.Level1)
 HWTEST_F(SearchModifierTest, DISABLED_setMinFontSizeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setMinFontSize, nullptr);
-    auto checkVal = GetStringAttribute(node_, MIN_FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal, "0.00px");
+    auto checkVal = GetAttrValue<std::string>(node_, MIN_FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal, Eq("0.00px"));
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN) {
         modifier_->setMinFontSize(node_, &value);
-        checkVal = GetStringAttribute(node_, MIN_FONT_SIZE_ATTR);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, MIN_FONT_SIZE_ATTR);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1006,13 +1006,13 @@ HWTEST_F(SearchModifierTest, DISABLED_setMaxFontSizeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setMaxFontSize, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, MAX_FONT_SIZE_ATTR);
-    EXPECT_EQ(checkVal, "0.00px");
+    auto checkVal = GetAttrValue<std::string>(node_, MAX_FONT_SIZE_ATTR);
+    EXPECT_THAT(checkVal, Eq("0.00px"));
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN) {
         modifier_->setMaxFontSize(node_, &value);
-        checkVal = GetStringAttribute(node_, MAX_FONT_SIZE_ATTR);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, MAX_FONT_SIZE_ATTR);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1025,13 +1025,13 @@ HWTEST_F(SearchModifierTest, DISABLED_setLetterSpacingTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLetterSpacing, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, LETTER_SPACING_ATTR);
-    EXPECT_EQ(checkVal, "0.00px");
+    auto checkVal = GetAttrValue<std::string>(node_, LETTER_SPACING_ATTR);
+    EXPECT_THAT(checkVal, Eq("0.00px"));
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN) {
         modifier_->setLetterSpacing(node_, &value);
-        checkVal = GetStringAttribute(node_, LETTER_SPACING_ATTR);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, LETTER_SPACING_ATTR);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1045,14 +1045,14 @@ HWTEST_F(SearchModifierTest, setEnablePreviewTextTest, TestSize.Level1)
     ASSERT_NE(modifier_->setEnablePreviewText, nullptr);
     auto fullJsonDefault = GetJsonValue(node_);
     auto checkVal = GetAttrValue<bool>(fullJsonDefault, ENABLE_PREVIEW_TEXT);
-    EXPECT_EQ(checkVal, true);
+    EXPECT_THAT(checkVal, Eq(true));
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         auto inputValue = ArkValue<Opt_Boolean>(value);
         modifier_->setEnablePreviewText(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         checkVal = GetAttrValue<bool>(fullJson, ENABLE_PREVIEW_TEXT);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1080,19 +1080,19 @@ HWTEST_F(SearchModifierTest, setPlaceholderFontTestStyle, TestSize.Level1)
         font.style = style.first;
         fontOpt = ArkValue<Opt_Font>(font);
         modifier_->setPlaceholderFont(node_, &fontOpt);
-        auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
-        auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrObject(jsonValue, PLACEHOLDER_FONT_ATTRS);
         auto checkSize = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_SIZE);
         auto checkFamily = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_FAMILY);
         auto checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT);
-        if (checkWeight.empty()) {
+        if (!checkWeight || checkWeight->empty()) {
             checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT_ENUM);
         }
         auto checkStyle = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_STYLE);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, style.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(style.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -1120,19 +1120,19 @@ HWTEST_F(SearchModifierTest, setPlaceholderFontTestWeight, TestSize.Level1)
         font.weight = weight.first;
         fontOpt = ArkValue<Opt_Font>(font);
         modifier_->setPlaceholderFont(node_, &fontOpt);
-        auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
-        auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrObject(jsonValue, PLACEHOLDER_FONT_ATTRS);
         auto checkSize = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_SIZE);
         auto checkFamily = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_FAMILY);
         auto checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT);
-        if (checkWeight.empty()) {
+        if (!checkWeight || checkWeight->empty()) {
             checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT_ENUM);
         }
         auto checkStyle = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_STYLE);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -1160,19 +1160,19 @@ HWTEST_F(SearchModifierTest, setPlaceholderFontTestFamily, TestSize.Level1)
         font.family = family.first;
         fontOpt = ArkValue<Opt_Font>(font);
         modifier_->setPlaceholderFont(node_, &fontOpt);
-        auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
-        auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrObject(jsonValue, PLACEHOLDER_FONT_ATTRS);
         auto checkSize = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_SIZE);
         auto checkFamily = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_FAMILY);
         auto checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT);
-        if (checkWeight.empty()) {
+        if (!checkWeight || checkWeight->empty()) {
             checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT_ENUM);
         }
         auto checkStyle = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_STYLE);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(family.second));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -1200,19 +1200,19 @@ HWTEST_F(SearchModifierTest, DISABLED_setPlaceholderFontTestSize, TestSize.Level
         font.size = size.first;
         fontOpt = ArkValue<Opt_Font>(font);
         modifier_->setPlaceholderFont(node_, &fontOpt);
-        auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
-        auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrObject(jsonValue, PLACEHOLDER_FONT_ATTRS);
         auto checkSize = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_SIZE);
         auto checkFamily = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_FAMILY);
         auto checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT);
-        if (checkWeight.empty()) {
+        if (!checkWeight || checkWeight->empty()) {
             checkWeight = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_WEIGHT_ENUM);
         }
         auto checkStyle = GetAttrValue<std::string>(placeholderFont, PLACEHOLDER_FONT_STYLE);
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -1240,16 +1240,16 @@ HWTEST_F(SearchModifierTest, setTextFontTestStyle, TestSize.Level1)
         font.style = style.first;
         fontOpt = ArkValue<Opt_Font>(font);
         modifier_->setTextFont(node_, &fontOpt);
-        auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
-        auto textFont = JsonUtil::ParseJsonString(textFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto textFont = GetAttrObject(jsonValue, TEXT_FONT_ATTRS);
         auto checkSize = GetAttrValue<std::string>(textFont, TEXT_FONT_SIZE_ATTR);
         auto checkFamily = GetAttrValue<std::string>(textFont, TEXT_FONT_FAMILY_ATTR);
         auto checkWeight = GetAttrValue<std::string>(textFont, TEXT_FONT_WEIGHT_ATTR);
         auto checkStyle = GetAttrValue<std::string>(textFont, TEXT_FONT_STYLE_ATTR);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, style.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(style.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -1277,16 +1277,16 @@ HWTEST_F(SearchModifierTest, setTextFontTestFontWeight, TestSize.Level1)
         font.weight = weight.first;
         fontOpt = ArkValue<Opt_Font>(font);
         modifier_->setTextFont(node_, &fontOpt);
-        auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
-        auto textFont = JsonUtil::ParseJsonString(textFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto textFont = GetAttrObject(jsonValue, TEXT_FONT_ATTRS);
         auto checkSize = GetAttrValue<std::string>(textFont, TEXT_FONT_SIZE_ATTR);
         auto checkFamily = GetAttrValue<std::string>(textFont, TEXT_FONT_FAMILY_ATTR);
         auto checkWeight = GetAttrValue<std::string>(textFont, TEXT_FONT_WEIGHT_ATTR);
         auto checkStyle = GetAttrValue<std::string>(textFont, TEXT_FONT_STYLE_ATTR);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -1314,16 +1314,16 @@ HWTEST_F(SearchModifierTest, setTextFontTestFontFamily, TestSize.Level1)
         font.family = family.first;
         fontOpt = ArkValue<Opt_Font>(font);
         modifier_->setTextFont(node_, &fontOpt);
-        auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
-        auto textFont = JsonUtil::ParseJsonString(textFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto textFont = GetAttrObject(jsonValue, TEXT_FONT_ATTRS);
         auto checkSize = GetAttrValue<std::string>(textFont, TEXT_FONT_SIZE_ATTR);
         auto checkFamily = GetAttrValue<std::string>(textFont, TEXT_FONT_FAMILY_ATTR);
         auto checkWeight = GetAttrValue<std::string>(textFont, TEXT_FONT_WEIGHT_ATTR);
         auto checkStyle = GetAttrValue<std::string>(textFont, TEXT_FONT_STYLE_ATTR);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(family.second));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -1351,16 +1351,16 @@ HWTEST_F(SearchModifierTest, DISABLED_setTextFontTestFontSize, TestSize.Level1)
         font.size = size.first;
         fontOpt = ArkValue<Opt_Font>(font);
         modifier_->setTextFont(node_, &fontOpt);
-        auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
-        auto textFont = JsonUtil::ParseJsonString(textFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto textFont = GetAttrObject(jsonValue, TEXT_FONT_ATTRS);
         auto checkSize = GetAttrValue<std::string>(textFont, TEXT_FONT_SIZE_ATTR);
         auto checkFamily = GetAttrValue<std::string>(textFont, TEXT_FONT_FAMILY_ATTR);
         auto checkWeight = GetAttrValue<std::string>(textFont, TEXT_FONT_WEIGHT_ATTR);
         auto checkStyle = GetAttrValue<std::string>(textFont, TEXT_FONT_STYLE_ATTR);
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 /**
@@ -1372,13 +1372,13 @@ HWTEST_F(SearchModifierTest, DISABLED_setLineHeightTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLineHeight, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, LINE_HEIGHT_ATTR);
-    EXPECT_EQ(checkVal, "0.00vp");
+    auto checkVal = GetAttrValue<std::string>(node_, LINE_HEIGHT_ATTR);
+    EXPECT_THAT(checkVal, Eq("0.00vp"));
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN_WITH_PERCENT) {
         modifier_->setLineHeight(node_, &value);
-        checkVal = GetStringAttribute(node_, LINE_HEIGHT_ATTR);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, LINE_HEIGHT_ATTR);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1391,8 +1391,8 @@ HWTEST_F(SearchModifierTest, DISABLED_setEnterKeyTypeTest, TestSize.Level1)
 {
     const auto defaultValue = "EnterKeyType.Search";
     ASSERT_NE(modifier_->setEnterKeyType, nullptr);
-    auto checkVal = GetStringAttribute(node_, ENTER_KEY_TYPE_ATTR);
-    EXPECT_EQ(checkVal, defaultValue);
+    auto checkVal = GetAttrValue<std::string>(node_, ENTER_KEY_TYPE_ATTR);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
 
     const std::vector<std::pair<Opt_EnterKeyType, std::string>> ENTER_KEY_TYPE_TEST_PLAN = {
         { ArkValue<Opt_EnterKeyType>(ARK_ENTER_KEY_TYPE_NEXT), "EnterKeyType.Next" },
@@ -1407,8 +1407,8 @@ HWTEST_F(SearchModifierTest, DISABLED_setEnterKeyTypeTest, TestSize.Level1)
 
     for (const auto &[value, expectVal]: ENTER_KEY_TYPE_TEST_PLAN) {
         modifier_->setEnterKeyType(node_, &value);
-        checkVal = GetStringAttribute(node_, ENTER_KEY_TYPE_ATTR);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, ENTER_KEY_TYPE_ATTR);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1422,8 +1422,8 @@ HWTEST_F(SearchModifierTest, setTextAlignTest, TestSize.Level1)
     const auto defaultValue = "TextAlign.Start";
     ASSERT_NE(modifier_->setTextAlign, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, TEXT_ALIGN_ATTR);
-    EXPECT_EQ(checkVal, defaultValue);
+    auto checkVal = GetAttrValue<std::string>(node_, TEXT_ALIGN_ATTR);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
 
     const std::vector<std::pair<Opt_TextAlign, std::string>> TEXT_ALIGN_TEST_PLAN = {
         { ArkValue<Opt_TextAlign>(ARK_TEXT_ALIGN_CENTER), "TextAlign.Center" },
@@ -1435,8 +1435,8 @@ HWTEST_F(SearchModifierTest, setTextAlignTest, TestSize.Level1)
 
     for (const auto &[value, expectVal]: TEXT_ALIGN_TEST_PLAN) {
         modifier_->setTextAlign(node_, &value);
-        checkVal = GetStringAttribute(node_, TEXT_ALIGN_ATTR);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, TEXT_ALIGN_ATTR);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1449,8 +1449,8 @@ HWTEST_F(SearchModifierTest, DISABLED_setTypeTest, TestSize.Level1)
 {
     const auto defaultValue = "SearchType.NORMAL";
     ASSERT_NE(modifier_->setType, nullptr);
-    auto checkVal = GetStringAttribute(node_, TYPE_ATTR);
-    EXPECT_EQ(checkVal, defaultValue);
+    auto checkVal = GetAttrValue<std::string>(node_, TYPE_ATTR);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
 
     const std::vector<std::pair<Opt_SearchType, std::string>> SEARCH_TYPE_TEST_PLAN = {
         { ArkValue<Opt_SearchType>(ARK_SEARCH_TYPE_NORMAL), "SearchType.NORMAL" },
@@ -1465,8 +1465,8 @@ HWTEST_F(SearchModifierTest, DISABLED_setTypeTest, TestSize.Level1)
 
     for (const auto &[value, expectVal]: SEARCH_TYPE_TEST_PLAN) {
         modifier_->setType(node_, &value);
-        checkVal = GetStringAttribute(node_, TYPE_ATTR);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, TYPE_ATTR);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1478,14 +1478,14 @@ HWTEST_F(SearchModifierTest, DISABLED_setTypeTest, TestSize.Level1)
 HWTEST_F(SearchModifierTest, setDecorationTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDecoration, nullptr);
-    auto defaultDecorationJSON = GetStringAttribute(node_, DECORATION_ATTRS);
-    auto defaultDecoration = JsonUtil::ParseJsonString(defaultDecorationJSON);
+    auto jsonValue = GetJsonValue(node_);
+    auto defaultDecoration = GetAttrObject(jsonValue, DECORATION_ATTRS);
     auto defaultType = GetAttrValue<std::string>(defaultDecoration, DECORATION_TYPE_ATTR);
     auto defaultStyle = GetAttrValue<std::string>(defaultDecoration, DECORATION_STYLE_ATTR);
     auto defaultColor = GetAttrValue<std::string>(defaultDecoration, DECORATION_COLOR_ATTR);
-    EXPECT_EQ(defaultType, "TextDecorationType.None");
-    EXPECT_EQ(defaultStyle, "TextDecorationStyle.SOLID");
-    EXPECT_EQ(defaultColor, CHECK_DEFAULT_BLACK_COLOR);
+    EXPECT_THAT(defaultType, Eq("TextDecorationType.None"));
+    EXPECT_THAT(defaultStyle, Eq("TextDecorationStyle.SOLID"));
+    EXPECT_THAT(defaultColor, Eq(CHECK_DEFAULT_BLACK_COLOR));
 
     for (const auto &[decorationType, expectDecorationType]: TEXT_DECORATION_TYPE_TEST_PLAN) {
         for (const auto &[decorationStyle, expectDecorationStyle]: TEXT_DECORATION_STYLE_TEST_PLAN) {
@@ -1497,14 +1497,14 @@ HWTEST_F(SearchModifierTest, setDecorationTest, TestSize.Level1)
                 };
                 auto inputValue = ArkValue<Opt_TextDecorationOptions>(options);
                 modifier_->setDecoration(node_, &inputValue);
-                auto decorationJSON = GetStringAttribute(node_, DECORATION_ATTRS);
-                auto decoration = JsonUtil::ParseJsonString(decorationJSON);
+                auto jsonValue = GetJsonValue(node_);
+                auto decoration = GetAttrObject(jsonValue, DECORATION_ATTRS);
                 auto type = GetAttrValue<std::string>(decoration, DECORATION_TYPE_ATTR);
                 auto style = GetAttrValue<std::string>(decoration, DECORATION_STYLE_ATTR);
                 auto color = GetAttrValue<std::string>(decoration, DECORATION_COLOR_ATTR);
-                EXPECT_EQ(type, expectDecorationType);
-                EXPECT_EQ(style, expectDecorationStyle);
-                EXPECT_EQ(color, expectColor);
+                EXPECT_THAT(type, Eq(expectDecorationType));
+                EXPECT_THAT(style, Eq(expectDecorationStyle));
+                EXPECT_THAT(color, Eq(expectColor));
             }
         }
     }
@@ -1519,8 +1519,8 @@ HWTEST_F(SearchModifierTest, DISABLED_setFontFeatureTest, TestSize.Level1)
 {
     const auto defaultValue = "";
     ASSERT_NE(modifier_->setFontFeature, nullptr);
-    auto checkVal = GetStringAttribute(node_, FONT_FEATURE_ATTR);
-    EXPECT_EQ(checkVal, defaultValue);
+    auto checkVal = GetAttrValue<std::string>(node_, FONT_FEATURE_ATTR);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
 
     const std::vector<std::pair<Opt_String, std::string>> FONT_FEATURE_TEST_PLAN = {
         {ArkValue<Opt_String>("\"ss01\" on"), "\"ss01\" 1"},
@@ -1540,8 +1540,8 @@ HWTEST_F(SearchModifierTest, DISABLED_setFontFeatureTest, TestSize.Level1)
 
     for (const auto &[value, expectVal]: FONT_FEATURE_TEST_PLAN) {
         modifier_->setFontFeature(node_, &value);
-        checkVal = GetStringAttribute(node_, FONT_FEATURE_ATTR);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, FONT_FEATURE_ATTR);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1556,14 +1556,14 @@ HWTEST_F(SearchModifierTest, DISABLED_setEnableHapticFeedbackTest, TestSize.Leve
 
     auto fullJson = GetJsonValue(node_);
     auto checkVal = GetAttrValue<bool>(fullJson, ENABLE_HAPTIC_FEEDBACK_ATTR);
-    EXPECT_EQ(checkVal, true);
+    EXPECT_THAT(checkVal, Eq(true));
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         auto inputValue = ArkValue<Opt_Boolean>(value);
         modifier_->setEnableHapticFeedback(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         checkVal = GetAttrValue<bool>(fullJson, ENABLE_HAPTIC_FEEDBACK_ATTR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1620,10 +1620,10 @@ HWTEST_F(SearchModifierTest, set_onChangeEvent_valueTestValidCallback, TestSize.
 HWTEST_F(SearchModifierTest, setMinFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, MIN_FONT_SCALE_ATTR);
-    EXPECT_EQ(resultStr, MIN_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'minFontScale'";
+    EXPECT_THAT(resultStr, Eq(MIN_FONT_SCALE_DEFAULT_VALUE)) << "Default value for attribute 'minFontScale'";
 }
 
 /*
@@ -1645,7 +1645,7 @@ HWTEST_F(SearchModifierTest, setMinFontScaleTestValidValues, TestSize.Level1)
         modifier_->setMinFontScale(node_, &inputValueMinFontScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, MIN_FONT_SCALE_ATTR);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMinFontScaleNumValidValues) {
@@ -1654,8 +1654,8 @@ HWTEST_F(SearchModifierTest, setMinFontScaleTestValidValues, TestSize.Level1)
 
     const auto scaleRes = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(FLOAT_RES_0);
     modifier_->setMinFontScale(node_, &scaleRes);
-    auto checkVal2 = GetStringAttribute(node_, MIN_FONT_SCALE_ATTR);
-    EXPECT_EQ(checkVal2, "0.705000");
+    auto checkVal2 = GetAttrValue<std::string>(node_, MIN_FONT_SCALE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("0.705000"));
 }
 
 /*
@@ -1674,7 +1674,7 @@ HWTEST_F(SearchModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
         modifier_->setMinFontScale(node_, &inputValueMinFontScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, MIN_FONT_SCALE_ATTR);
-        EXPECT_EQ(resultStr, MIN_FONT_SCALE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(MIN_FONT_SCALE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
 
@@ -1692,10 +1692,10 @@ HWTEST_F(SearchModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
 HWTEST_F(SearchModifierTest, setMaxFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, MAX_FONT_SCALE_ATTR);
-    EXPECT_EQ(resultStr, MAX_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'maxFontScale'";
+    EXPECT_THAT(resultStr, Eq(MAX_FONT_SCALE_DEFAULT_VALUE)) << "Default value for attribute 'maxFontScale'";
 }
 
 /*
@@ -1716,7 +1716,7 @@ HWTEST_F(SearchModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
         modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, MAX_FONT_SCALE_ATTR);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMaxFontScaleNumValidValues) {
@@ -1725,8 +1725,8 @@ HWTEST_F(SearchModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
 
     const auto scaleRes = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(FLOAT_RES_1);
     modifier_->setMaxFontScale(node_, &scaleRes);
-    auto checkVal2 = GetStringAttribute(node_, MAX_FONT_SCALE_ATTR);
-    EXPECT_EQ(checkVal2, "1.200000");
+    auto checkVal2 = GetAttrValue<std::string>(node_, MAX_FONT_SCALE_ATTR);
+    EXPECT_THAT(checkVal2, Eq("1.200000"));
 }
 
 /*
@@ -1745,7 +1745,7 @@ HWTEST_F(SearchModifierTest, DISABLED_setMaxFontScaleTestInvalidValues, TestSize
         modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, MAX_FONT_SCALE_ATTR);
-        EXPECT_EQ(resultStr, MAX_FONT_SCALE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(MAX_FONT_SCALE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
 
@@ -1763,10 +1763,10 @@ HWTEST_F(SearchModifierTest, DISABLED_setMaxFontScaleTestInvalidValues, TestSize
 HWTEST_F(SearchModifierTest, setHalfLeadingTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, HALF_LEADING_ATTR);
-    EXPECT_EQ(resultStr, HALF_LEADING_DEFAULT_VALUE) << "Default value for attribute 'halfLeading'";
+    EXPECT_THAT(resultStr, Eq(HALF_LEADING_DEFAULT_VALUE)) << "Default value for attribute 'halfLeading'";
 }
 
 /*
@@ -1788,7 +1788,7 @@ HWTEST_F(SearchModifierTest, setHalfLeadingTestValidValues, TestSize.Level1)
         modifier_->setHalfLeading(node_, &inputValueHalfLeading);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, HALF_LEADING_ATTR);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setHalfLeading, attribute: halfLeading";
     };
 
@@ -1817,7 +1817,7 @@ HWTEST_F(SearchModifierTest, setHalfLeadingTestInvalidValues, TestSize.Level1)
         modifier_->setHalfLeading(node_, &inputValueHalfLeading);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, HALF_LEADING_ATTR);
-        EXPECT_EQ(resultStr, HALF_LEADING_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(HALF_LEADING_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setHalfLeading, attribute: halfLeading";
     };
     // Check empty optional
@@ -1832,10 +1832,10 @@ HWTEST_F(SearchModifierTest, setHalfLeadingTestInvalidValues, TestSize.Level1)
 HWTEST_F(SearchModifierTest, setStopBackPressTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, STOP_BACK_PRESS_ATTR);
-    EXPECT_EQ(resultStr, STOP_BACK_PRESS_DEFAULT_VALUE) << "Default value for attribute 'stopBackPress'";
+    EXPECT_THAT(resultStr, Eq(STOP_BACK_PRESS_DEFAULT_VALUE)) << "Default value for attribute 'stopBackPress'";
 }
 
 /*
@@ -1857,7 +1857,7 @@ HWTEST_F(SearchModifierTest, setStopBackPressTestValidValues, TestSize.Level1)
         modifier_->setStopBackPress(node_, &inputValueHalfLeading);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, STOP_BACK_PRESS_ATTR);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
     };
 
@@ -1886,7 +1886,7 @@ HWTEST_F(SearchModifierTest, setStopBackPressTestInvalidValues, TestSize.Level1)
         modifier_->setStopBackPress(node_, &inputValueHalfLeading);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, STOP_BACK_PRESS_ATTR);
-        EXPECT_EQ(resultStr, STOP_BACK_PRESS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(STOP_BACK_PRESS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
     };
     // Check empty optional

@@ -26,73 +26,60 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
-
 // Json functions
-
-std::string GetStringAttribute(Ark_NodeHandle node, const std::string &name);
 std::unique_ptr<JsonValue> GetJsonValue(Ark_NodeHandle node);
 std::unique_ptr<JsonValue> GetLayoutJsonValue(Ark_NodeHandle node); // Workaround for duplicated key in json
 std::unique_ptr<JsonValue> GetPatternJsonValue(Ark_NodeHandle node); // Workaround for duplicated key in json
 
+
+// GetAttrValue templates
 template <typename T>
-T GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey) = delete;
+std::optional<T> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey) = delete;
 
 template<>
-inline int GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+std::optional<std::string> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey);
+template<>
+std::optional<int> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey);
+template<>
+std::optional<double> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey);
+template<>
+std::optional<bool> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey);
+template<>
+inline std::optional<float> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
 {
-    return jsonVal ? jsonVal->GetInt(attrKey) : int();
+    auto result = GetAttrValue<double>(jsonVal, attrKey);
+    return result ? std::optional<float>(*result) : std::nullopt;
 }
 
 template<>
-std::string GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey);
-
-template<>
-inline std::unique_ptr<JsonValue> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+inline std::optional<std::u16string> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
 {
-    if (jsonVal) {
-        auto result = jsonVal->GetValue(attrKey);
-        if (result->IsObject() || result->IsArray()) {
-            return result;
-        }
-        if (result->IsString()) {
-            return JsonUtil::ParseJsonData(result->GetString().c_str());
-        }
-    }
-    return nullptr;
+    auto result = GetAttrValue<std::string>(jsonVal, attrKey);
+    return result ? std::make_optional(StringUtils::Str8ToStr16(*result)) : std::nullopt;
 }
 
-template<>
-inline bool GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
-{
-    return jsonVal ? jsonVal->GetBool(attrKey) : bool();
-}
-
-template<>
-inline double GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
-{
-    return jsonVal ? jsonVal->GetDouble(attrKey) : double();
-}
-
-template<>
-inline std::optional<bool> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
-{
-    if (!jsonVal) {
-        return std::nullopt;
-    }
-    auto val = jsonVal->GetValue(attrKey);
-    return val && val->IsBool() ? std::optional<bool>(val->GetBool()) : std::nullopt;
-}
-
+// GetAttrValue overloads
 template <typename T>
-inline T GetAttrValue(Ark_NodeHandle node, const std::string &attrKey)
+inline std::optional<T> GetAttrValue(Ark_NodeHandle node, const std::string &attrKey)
 {
     return GetAttrValue<T>(GetJsonValue(node), attrKey);
 }
 
 template <typename T>
-inline T GetAttrValue(const std::string &jsonObjAsStr, const std::string &attrKey)
+inline std::optional<T> GetAttrValue(const std::string &jsonObjAsStr, const std::string &attrKey)
 {
     return GetAttrValue<T>(JsonUtil::ParseJsonData(jsonObjAsStr.c_str()), attrKey);
+}
+
+// GetAttrObject overloads
+std::unique_ptr<JsonValue> GetAttrObject(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey);
+
+inline std::unique_ptr<JsonValue> GetAttrObject(const std::unique_ptr<JsonValue> &jsonVal, int32_t index)
+{
+    if (!jsonVal || !jsonVal->IsArray() || jsonVal->GetArraySize() >= index) {
+        return nullptr;
+    }
+    return jsonVal->GetArrayItem(index);
 }
 
 // Resource functions

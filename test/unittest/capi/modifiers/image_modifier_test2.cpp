@@ -72,7 +72,7 @@ HWTEST_F(ImageModifierTest2, setAltTestDefaultValues, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALT_DEFAULT_VALUE));
 }
 
 /*
@@ -91,7 +91,7 @@ HWTEST_F(ImageModifierTest2, setAltTestArkStringUnion, TestSize.Level1)
     modifier_->setAlt(frameNode, &inputStr);
     auto fullJson = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(fullJson, ATTRIBUTE_ALT_NAME);
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
@@ -112,7 +112,7 @@ HWTEST_F(ImageModifierTest2, setAltTestArkResourceUnion, TestSize.Level1)
     modifier_->setAlt(frameNode, &inputArkResource);
     auto fullJson = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(fullJson, ATTRIBUTE_ALT_NAME);
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*

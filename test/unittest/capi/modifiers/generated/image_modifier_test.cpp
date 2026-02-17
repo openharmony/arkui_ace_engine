@@ -105,10 +105,10 @@ public:
 HWTEST_F(ImageModifierTest, setImageOptions0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) << "Default value for attribute 'src'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SRC_DEFAULT_VALUE)) << "Default value for attribute 'src'";
 }
 
 /*
@@ -135,7 +135,7 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestSrcValidValues, TestSize.Level1)
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setImageOptions0, attribute: src";
     };
 
@@ -179,7 +179,7 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestSrcInvalidValues, TestSize.Level
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SRC_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setImageOptions0, attribute: src";
     };
 
@@ -199,15 +199,14 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestSrcInvalidValues, TestSize.Level
 HWTEST_F(ImageModifierTest, setImageOptions1TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultImageAIOptions =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_IMAGE_AIOPTIONS_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultImageAIOptions = GetAttrObject(jsonValue, ATTRIBUTE_IMAGE_AIOPTIONS_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) << "Default value for attribute 'src'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SRC_DEFAULT_VALUE)) << "Default value for attribute 'src'";
 
     resultStr = GetAttrValue<std::string>(resultImageAIOptions, ATTRIBUTE_IMAGE_AIOPTIONS_I_TYPES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_IMAGE_AIOPTIONS_I_TYPES_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_IMAGE_AIOPTIONS_I_TYPES_DEFAULT_VALUE)) <<
         "Default value for attribute 'imageAIOptions.types'";
 }
 
@@ -229,10 +228,10 @@ HWTEST_F(ImageModifierTest, DISABLED_setImageOptions1TestValidValues, TestSize.L
 HWTEST_F(ImageModifierTest, setAltTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALT_DEFAULT_VALUE) << "Default value for attribute 'alt'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALT_DEFAULT_VALUE)) << "Default value for attribute 'alt'";
 }
 
 /*
@@ -256,7 +255,8 @@ HWTEST_F(ImageModifierTest, setAltTestAltValidValues, TestSize.Level1)
         modifier_->setAlt(node_, &inputValueAlt);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setAlt, attribute: alt";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setAlt, attribute: alt";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
@@ -288,7 +288,7 @@ HWTEST_F(ImageModifierTest, setAltTestAltInvalidValues, TestSize.Level1)
         modifier_->setAlt(node_, &inputValueAlt);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ALT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAlt, attribute: alt";
     };
 
@@ -306,10 +306,10 @@ HWTEST_F(ImageModifierTest, setAltTestAltInvalidValues, TestSize.Level1)
 HWTEST_F(ImageModifierTest, setMatchTextDirectionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MATCH_TEXT_DIRECTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MATCH_TEXT_DIRECTION_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MATCH_TEXT_DIRECTION_DEFAULT_VALUE)) <<
         "Default value for attribute 'matchTextDirection'";
 }
 
@@ -333,7 +333,7 @@ HWTEST_F(ImageModifierTest, setMatchTextDirectionTestMatchTextDirectionValidValu
         modifier_->setMatchTextDirection(node_, &inputValueMatchTextDirection);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MATCH_TEXT_DIRECTION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMatchTextDirection, attribute: matchTextDirection";
     };
 
@@ -362,7 +362,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setMatchTextDirectionTestMatchTextDirection
         modifier_->setMatchTextDirection(node_, &inputValueMatchTextDirection);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MATCH_TEXT_DIRECTION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MATCH_TEXT_DIRECTION_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MATCH_TEXT_DIRECTION_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMatchTextDirection, attribute: matchTextDirection";
     };
 
@@ -378,10 +378,11 @@ HWTEST_F(ImageModifierTest, DISABLED_setMatchTextDirectionTestMatchTextDirection
 HWTEST_F(ImageModifierTest, setFitOriginalSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FIT_ORIGINAL_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FIT_ORIGINAL_SIZE_DEFAULT_VALUE) << "Default value for attribute 'fitOriginalSize'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FIT_ORIGINAL_SIZE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'fitOriginalSize'";
 }
 
 /*
@@ -404,7 +405,7 @@ HWTEST_F(ImageModifierTest, setFitOriginalSizeTestFitOriginalSizeValidValues, Te
         modifier_->setFitOriginalSize(node_, &inputValueFitOriginalSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FIT_ORIGINAL_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFitOriginalSize, attribute: fitOriginalSize";
     };
 
@@ -433,7 +434,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setFitOriginalSizeTestFitOriginalSizeInvali
         modifier_->setFitOriginalSize(node_, &inputValueFitOriginalSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FIT_ORIGINAL_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FIT_ORIGINAL_SIZE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FIT_ORIGINAL_SIZE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFitOriginalSize, attribute: fitOriginalSize";
     };
 
@@ -449,10 +450,10 @@ HWTEST_F(ImageModifierTest, DISABLED_setFitOriginalSizeTestFitOriginalSizeInvali
 HWTEST_F(ImageModifierTest, setFillColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE) << "Default value for attribute 'fillColor'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE)) << "Default value for attribute 'fillColor'";
 }
 
 /*
@@ -476,7 +477,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorValidValues, TestSize.Level
         modifier_->setFillColor(node_, &inputValueFillColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFillColor, attribute: fillColor";
     };
 
@@ -524,7 +525,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorInvalidValues, TestSize.Lev
         modifier_->setFillColor(node_, &inputValueFillColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFillColor, attribute: fillColor";
     };
 
@@ -552,10 +553,10 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorInvalidValues, TestSize.Lev
 HWTEST_F(ImageModifierTest, setObjectFitTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE) << "Default value for attribute 'objectFit'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE)) << "Default value for attribute 'objectFit'";
 }
 
 /*
@@ -578,7 +579,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setObjectFitTestObjectFitValidValues, TestS
         modifier_->setObjectFit(node_, &inputValueObjectFit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setObjectFit, attribute: objectFit";
     };
 
@@ -607,7 +608,7 @@ HWTEST_F(ImageModifierTest, setObjectFitTestObjectFitInvalidValues, TestSize.Lev
         modifier_->setObjectFit(node_, &inputValueObjectFit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setObjectFit, attribute: objectFit";
     };
 
@@ -624,10 +625,11 @@ HWTEST_F(ImageModifierTest, setObjectFitTestObjectFitInvalidValues, TestSize.Lev
 HWTEST_F(ImageModifierTest, setObjectRepeatTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_REPEAT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_OBJECT_REPEAT_DEFAULT_VALUE) << "Default value for attribute 'objectRepeat'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_OBJECT_REPEAT_DEFAULT_VALUE)) <<
+        "Default value for attribute 'objectRepeat'";
 }
 
 /*
@@ -650,7 +652,7 @@ HWTEST_F(ImageModifierTest, setObjectRepeatTestObjectRepeatValidValues, TestSize
         modifier_->setObjectRepeat(node_, &inputValueObjectRepeat);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_REPEAT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setObjectRepeat, attribute: objectRepeat";
     };
 
@@ -679,7 +681,7 @@ HWTEST_F(ImageModifierTest, setObjectRepeatTestObjectRepeatInvalidValues, TestSi
         modifier_->setObjectRepeat(node_, &inputValueObjectRepeat);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_REPEAT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_OBJECT_REPEAT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_OBJECT_REPEAT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setObjectRepeat, attribute: objectRepeat";
     };
 
@@ -696,10 +698,10 @@ HWTEST_F(ImageModifierTest, setObjectRepeatTestObjectRepeatInvalidValues, TestSi
 HWTEST_F(ImageModifierTest, setAutoResizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_RESIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE) << "Default value for attribute 'autoResize'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE)) << "Default value for attribute 'autoResize'";
 }
 
 /*
@@ -722,7 +724,7 @@ HWTEST_F(ImageModifierTest, setAutoResizeTestAutoResizeValidValues, TestSize.Lev
         modifier_->setAutoResize(node_, &inputValueAutoResize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_RESIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAutoResize, attribute: autoResize";
     };
 
@@ -751,7 +753,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setAutoResizeTestAutoResizeInvalidValues, T
         modifier_->setAutoResize(node_, &inputValueAutoResize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_RESIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAutoResize, attribute: autoResize";
     };
 
@@ -767,10 +769,10 @@ HWTEST_F(ImageModifierTest, DISABLED_setAutoResizeTestAutoResizeInvalidValues, T
 HWTEST_F(ImageModifierTest, setRenderModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RENDER_MODE_DEFAULT_VALUE) << "Default value for attribute 'renderMode'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RENDER_MODE_DEFAULT_VALUE)) << "Default value for attribute 'renderMode'";
 }
 
 /*
@@ -794,7 +796,7 @@ HWTEST_F(ImageModifierTest, setRenderModeTestRenderModeValidValues, TestSize.Lev
         modifier_->setRenderMode(node_, &inputValueRenderMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setRenderMode, attribute: renderMode";
     };
 
@@ -824,7 +826,7 @@ HWTEST_F(ImageModifierTest, setRenderModeTestRenderModeInvalidValues, TestSize.L
         modifier_->setRenderMode(node_, &inputValueRenderMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_RENDER_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RENDER_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRenderMode, attribute: renderMode";
     };
 
@@ -841,10 +843,10 @@ HWTEST_F(ImageModifierTest, setRenderModeTestRenderModeInvalidValues, TestSize.L
 HWTEST_F(ImageModifierTest, DISABLED_setDynamicRangeModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DYNAMIC_RANGE_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DYNAMIC_RANGE_MODE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DYNAMIC_RANGE_MODE_DEFAULT_VALUE)) <<
         "Default value for attribute 'dynamicRangeMode'";
 }
 
@@ -869,7 +871,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setDynamicRangeModeTestDynamicRangeModeVali
         modifier_->setDynamicRangeMode(node_, &inputValueDynamicRangeMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DYNAMIC_RANGE_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDynamicRangeMode, attribute: dynamicRangeMode";
     };
 
@@ -899,7 +901,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setDynamicRangeModeTestDynamicRangeModeInva
         modifier_->setDynamicRangeMode(node_, &inputValueDynamicRangeMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DYNAMIC_RANGE_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DYNAMIC_RANGE_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DYNAMIC_RANGE_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setDynamicRangeMode, attribute: dynamicRangeMode";
     };
 
@@ -916,10 +918,11 @@ HWTEST_F(ImageModifierTest, DISABLED_setDynamicRangeModeTestDynamicRangeModeInva
 HWTEST_F(ImageModifierTest, setInterpolationTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_INTERPOLATION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_INTERPOLATION_DEFAULT_VALUE) << "Default value for attribute 'interpolation'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_INTERPOLATION_DEFAULT_VALUE)) <<
+        "Default value for attribute 'interpolation'";
 }
 
 /*
@@ -943,7 +946,7 @@ HWTEST_F(ImageModifierTest, setInterpolationTestInterpolationValidValues, TestSi
         modifier_->setInterpolation(node_, &inputValueInterpolation);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_INTERPOLATION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setInterpolation, attribute: interpolation";
     };
 
@@ -973,7 +976,7 @@ HWTEST_F(ImageModifierTest, setInterpolationTestInterpolationInvalidValues, Test
         modifier_->setInterpolation(node_, &inputValueInterpolation);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_INTERPOLATION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_INTERPOLATION_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_INTERPOLATION_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setInterpolation, attribute: interpolation";
     };
 
@@ -1000,10 +1003,10 @@ HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestPlaceholder, TestSize.Leve
 HWTEST_F(ImageModifierTest, setSyncLoadTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SYNC_LOAD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SYNC_LOAD_DEFAULT_VALUE) << "Default value for attribute 'syncLoad'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SYNC_LOAD_DEFAULT_VALUE)) << "Default value for attribute 'syncLoad'";
 }
 
 /*
@@ -1026,7 +1029,7 @@ HWTEST_F(ImageModifierTest, setSyncLoadTestSyncLoadValidValues, TestSize.Level1)
         modifier_->setSyncLoad(node_, &inputValueSyncLoad);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SYNC_LOAD_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSyncLoad, attribute: syncLoad";
     };
 
@@ -1055,7 +1058,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setSyncLoadTestSyncLoadInvalidValues, TestS
         modifier_->setSyncLoad(node_, &inputValueSyncLoad);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SYNC_LOAD_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SYNC_LOAD_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SYNC_LOAD_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSyncLoad, attribute: syncLoad";
     };
 
@@ -1081,10 +1084,10 @@ HWTEST_F(ImageModifierTest, DISABLED_setColorFilterTestPlaceholder, TestSize.Lev
 HWTEST_F(ImageModifierTest, setCopyOptionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE) << "Default value for attribute 'copyOption'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE)) << "Default value for attribute 'copyOption'";
 }
 
 /*
@@ -1107,7 +1110,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setCopyOptionTestCopyOptionValidValues, Tes
         modifier_->setCopyOption(node_, &inputValueCopyOption);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setCopyOption, attribute: copyOption";
     };
 
@@ -1136,7 +1139,7 @@ HWTEST_F(ImageModifierTest, setCopyOptionTestCopyOptionInvalidValues, TestSize.L
         modifier_->setCopyOption(node_, &inputValueCopyOption);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setCopyOption, attribute: copyOption";
     };
 
@@ -1153,10 +1156,10 @@ HWTEST_F(ImageModifierTest, setCopyOptionTestCopyOptionInvalidValues, TestSize.L
 HWTEST_F(ImageModifierTest, setDraggableTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DRAGGABLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE) << "Default value for attribute 'draggable'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE)) << "Default value for attribute 'draggable'";
 }
 
 /*
@@ -1179,7 +1182,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setDraggableTestDraggableValidValues, TestS
         modifier_->setDraggable(node_, &inputValueDraggable);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DRAGGABLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDraggable, attribute: draggable";
     };
 
@@ -1208,7 +1211,7 @@ HWTEST_F(ImageModifierTest, setDraggableTestDraggableInvalidValues, TestSize.Lev
         modifier_->setDraggable(node_, &inputValueDraggable);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DRAGGABLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setDraggable, attribute: draggable";
     };
 
@@ -1224,38 +1227,37 @@ HWTEST_F(ImageModifierTest, setDraggableTestDraggableInvalidValues, TestSize.Lev
 HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultPointLight =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    std::unique_ptr<JsonValue> resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
     std::unique_ptr<JsonValue> resultLightSource =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
-    std::string resultStr;
+        GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_DEFAULT_VALUE)) <<
         "Default value for attribute 'pointLight.lightSource.positionX'";
 
     resultStr = GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_DEFAULT_VALUE)) <<
         "Default value for attribute 'pointLight.lightSource.positionY'";
 
     resultStr = GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_DEFAULT_VALUE)) <<
         "Default value for attribute 'pointLight.lightSource.positionZ'";
 
     resultStr = GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE)) <<
         "Default value for attribute 'pointLight.lightSource.intensity'";
 
     resultStr = GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'pointLight.lightSource.color'";
 
     resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE)) <<
         "Default value for attribute 'pointLight.illuminated'";
 
     resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE)) <<
         "Default value for attribute 'pointLight.bloom'";
 }
 
@@ -1291,9 +1293,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
         WriteTo(WriteTo(inputValuePointLight).lightSource).positionX = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource = GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1343,9 +1344,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
         WriteTo(WriteTo(inputValuePointLight).lightSource).positionX = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource = GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_DEFAULT_VALUE) <<
@@ -1397,9 +1397,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
         WriteTo(WriteTo(inputValuePointLight).lightSource).positionY = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource = GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1449,9 +1448,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
         WriteTo(WriteTo(inputValuePointLight).lightSource).positionY = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource = GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_DEFAULT_VALUE) <<
@@ -1503,9 +1501,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
         WriteTo(WriteTo(inputValuePointLight).lightSource).positionZ = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource = GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1555,9 +1552,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
         WriteTo(WriteTo(inputValuePointLight).lightSource).positionZ = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource = GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_DEFAULT_VALUE) <<
@@ -1609,9 +1605,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceInten
         WriteTo(WriteTo(inputValuePointLight).lightSource).intensity = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource = GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1655,9 +1650,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceColor
         WriteTo(WriteTo(inputValuePointLight).lightSource).color = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource = GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1710,9 +1704,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceColor
         WriteTo(WriteTo(inputValuePointLight).lightSource).color = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultLightSource = GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_DEFAULT_VALUE) <<
@@ -1763,9 +1756,9 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedValidValues, T
         WriteTo(inputValuePointLight).illuminated = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.illuminated";
     };
 
@@ -1806,9 +1799,9 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedInvalidValues,
         WriteTo(inputValuePointLight).illuminated = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.illuminated";
     };
 
@@ -1849,9 +1842,9 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightBloomValidValues
         WriteTo(inputValuePointLight).bloom = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.bloom";
     };
 
@@ -1892,9 +1885,9 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightBloomInvalidValu
         WriteTo(inputValuePointLight).bloom = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.bloom";
     };
 
@@ -1920,10 +1913,11 @@ HWTEST_F(ImageModifierTest, DISABLED_setEdgeAntialiasingTestPlaceholder, TestSiz
 HWTEST_F(ImageModifierTest, setEnableAnalyzerTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_ANALYZER_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE) << "Default value for attribute 'enableAnalyzer'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE)) <<
+        "Default value for attribute 'enableAnalyzer'";
 }
 
 /*
@@ -1946,7 +1940,7 @@ HWTEST_F(ImageModifierTest, setEnableAnalyzerTestEnableAnalyzerValidValues, Test
         modifier_->setEnableAnalyzer(node_, &inputValueEnableAnalyzer);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_ANALYZER_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnableAnalyzer, attribute: enableAnalyzer";
     };
 
@@ -1975,7 +1969,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setEnableAnalyzerTestEnableAnalyzerInvalidV
         modifier_->setEnableAnalyzer(node_, &inputValueEnableAnalyzer);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_ANALYZER_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEnableAnalyzer, attribute: enableAnalyzer";
     };
 
@@ -2011,10 +2005,11 @@ HWTEST_F(ImageModifierTest, DISABLED_setResizableTestPlaceholder, TestSize.Level
 HWTEST_F(ImageModifierTest, setPrivacySensitiveTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE) << "Default value for attribute 'privacySensitive'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'privacySensitive'";
 }
 
 /*
@@ -2037,7 +2032,7 @@ HWTEST_F(ImageModifierTest, setPrivacySensitiveTestPrivacySensitiveValidValues, 
         modifier_->setPrivacySensitive(node_, &inputValuePrivacySensitive);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
     };
 
@@ -2066,7 +2061,7 @@ HWTEST_F(ImageModifierTest, setPrivacySensitiveTestPrivacySensitiveInvalidValues
         modifier_->setPrivacySensitive(node_, &inputValuePrivacySensitive);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
     };
 
@@ -2092,10 +2087,11 @@ HWTEST_F(ImageModifierTest, DISABLED_setEnhancedImageQualityTestPlaceholder, Tes
 HWTEST_F(ImageModifierTest, setOrientationTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ORIENTATION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ORIENTATION_DEFAULT_VALUE) << "Default value for attribute 'orientation'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ORIENTATION_DEFAULT_VALUE)) <<
+        "Default value for attribute 'orientation'";
 }
 
 /*
@@ -2119,7 +2115,7 @@ HWTEST_F(ImageModifierTest, setOrientationTestOrientationValidValues, TestSize.L
         modifier_->setOrientation(node_, &inputValueOrientation);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ORIENTATION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setOrientation, attribute: orientation";
     };
 
@@ -2149,7 +2145,7 @@ HWTEST_F(ImageModifierTest, setOrientationTestOrientationInvalidValues, TestSize
         modifier_->setOrientation(node_, &inputValueOrientation);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ORIENTATION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ORIENTATION_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ORIENTATION_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setOrientation, attribute: orientation";
     };
 

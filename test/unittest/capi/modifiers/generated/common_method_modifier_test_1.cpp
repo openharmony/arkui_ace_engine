@@ -117,16 +117,15 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setLayoutWeightTestPlaceholder, Test
 HWTEST_P(CommonMethodModifierTest, setChainWeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultChainWeight =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CHAIN_WEIGHT_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultChainWeight = GetAttrObject(jsonValue, ATTRIBUTE_CHAIN_WEIGHT_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultChainWeight, ATTRIBUTE_CHAIN_WEIGHT_I_HORIZONTAL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CHAIN_WEIGHT_I_HORIZONTAL_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CHAIN_WEIGHT_I_HORIZONTAL_DEFAULT_VALUE)) <<
         "Default value for attribute 'chainWeight.horizontal'";
 
     resultStr = GetAttrValue<std::string>(resultChainWeight, ATTRIBUTE_CHAIN_WEIGHT_I_VERTICAL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CHAIN_WEIGHT_I_VERTICAL_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CHAIN_WEIGHT_I_VERTICAL_DEFAULT_VALUE)) <<
         "Default value for attribute 'chainWeight.vertical'";
 }
 
@@ -152,9 +151,9 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setChainWeightTestChainWeightHorizon
         WriteTo(inputValueChainWeight).horizontal = value;
         modifier_->setChainWeight(node_, &inputValueChainWeight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultChainWeight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CHAIN_WEIGHT_NAME);
+        auto resultChainWeight = GetAttrObject(jsonValue, ATTRIBUTE_CHAIN_WEIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultChainWeight, ATTRIBUTE_CHAIN_WEIGHT_I_HORIZONTAL_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setChainWeight, attribute: chainWeight.horizontal";
     };
 
@@ -185,9 +184,9 @@ HWTEST_P(CommonMethodModifierTest, setChainWeightTestChainWeightHorizontalInvali
         WriteTo(inputValueChainWeight).horizontal = value;
         modifier_->setChainWeight(node_, &inputValueChainWeight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultChainWeight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CHAIN_WEIGHT_NAME);
+        auto resultChainWeight = GetAttrObject(jsonValue, ATTRIBUTE_CHAIN_WEIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultChainWeight, ATTRIBUTE_CHAIN_WEIGHT_I_HORIZONTAL_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CHAIN_WEIGHT_I_HORIZONTAL_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CHAIN_WEIGHT_I_HORIZONTAL_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setChainWeight, attribute: chainWeight.horizontal";
     };
 
@@ -217,9 +216,9 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setChainWeightTestChainWeightVertica
         WriteTo(inputValueChainWeight).vertical = value;
         modifier_->setChainWeight(node_, &inputValueChainWeight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultChainWeight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CHAIN_WEIGHT_NAME);
+        auto resultChainWeight = GetAttrObject(jsonValue, ATTRIBUTE_CHAIN_WEIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultChainWeight, ATTRIBUTE_CHAIN_WEIGHT_I_VERTICAL_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setChainWeight, attribute: chainWeight.vertical";
     };
 
@@ -250,9 +249,9 @@ HWTEST_P(CommonMethodModifierTest, setChainWeightTestChainWeightVerticalInvalidV
         WriteTo(inputValueChainWeight).vertical = value;
         modifier_->setChainWeight(node_, &inputValueChainWeight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultChainWeight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CHAIN_WEIGHT_NAME);
+        auto resultChainWeight = GetAttrObject(jsonValue, ATTRIBUTE_CHAIN_WEIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultChainWeight, ATTRIBUTE_CHAIN_WEIGHT_I_VERTICAL_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CHAIN_WEIGHT_I_VERTICAL_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CHAIN_WEIGHT_I_VERTICAL_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setChainWeight, attribute: chainWeight.vertical";
     };
 
@@ -568,10 +567,10 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setTabStopTestPlaceholder, TestSize.
 HWTEST_P(CommonMethodModifierTest, setTabIndexTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TAB_INDEX_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TAB_INDEX_DEFAULT_VALUE) << "Default value for attribute 'tabIndex'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TAB_INDEX_DEFAULT_VALUE)) << "Default value for attribute 'tabIndex'";
 }
 
 /*
@@ -594,7 +593,7 @@ HWTEST_P(CommonMethodModifierTest, setTabIndexTestTabIndexValidValues, TestSize.
         modifier_->setTabIndex(node_, &inputValueTabIndex);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TAB_INDEX_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setTabIndex, attribute: tabIndex";
     };
 
@@ -623,7 +622,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setTabIndexTestTabIndexInvalidValues
         modifier_->setTabIndex(node_, &inputValueTabIndex);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TAB_INDEX_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TAB_INDEX_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TAB_INDEX_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setTabIndex, attribute: tabIndex";
     };
 
@@ -639,10 +638,11 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setTabIndexTestTabIndexInvalidValues
 HWTEST_P(CommonMethodModifierTest, setDefaultFocusTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_FOCUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DEFAULT_FOCUS_DEFAULT_VALUE) << "Default value for attribute 'defaultFocus'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DEFAULT_FOCUS_DEFAULT_VALUE)) <<
+        "Default value for attribute 'defaultFocus'";
 }
 
 /*
@@ -665,7 +665,7 @@ HWTEST_P(CommonMethodModifierTest, setDefaultFocusTestDefaultFocusValidValues, T
         modifier_->setDefaultFocus(node_, &inputValueDefaultFocus);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_FOCUS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDefaultFocus, attribute: defaultFocus";
     };
 
@@ -694,7 +694,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setDefaultFocusTestDefaultFocusInval
         modifier_->setDefaultFocus(node_, &inputValueDefaultFocus);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_FOCUS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DEFAULT_FOCUS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DEFAULT_FOCUS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setDefaultFocus, attribute: defaultFocus";
     };
 
@@ -710,10 +710,10 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setDefaultFocusTestDefaultFocusInval
 HWTEST_P(CommonMethodModifierTest, setGroupDefaultFocusTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GROUP_DEFAULT_FOCUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_GROUP_DEFAULT_FOCUS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_GROUP_DEFAULT_FOCUS_DEFAULT_VALUE)) <<
         "Default value for attribute 'groupDefaultFocus'";
 }
 
@@ -737,7 +737,7 @@ HWTEST_P(CommonMethodModifierTest, setGroupDefaultFocusTestGroupDefaultFocusVali
         modifier_->setGroupDefaultFocus(node_, &inputValueGroupDefaultFocus);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GROUP_DEFAULT_FOCUS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setGroupDefaultFocus, attribute: groupDefaultFocus";
     };
 
@@ -766,7 +766,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setGroupDefaultFocusTestGroupDefault
         modifier_->setGroupDefaultFocus(node_, &inputValueGroupDefaultFocus);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GROUP_DEFAULT_FOCUS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_GROUP_DEFAULT_FOCUS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_GROUP_DEFAULT_FOCUS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setGroupDefaultFocus, attribute: groupDefaultFocus";
     };
 
@@ -782,10 +782,11 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setGroupDefaultFocusTestGroupDefault
 HWTEST_P(CommonMethodModifierTest, setFocusOnTouchTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_ON_TOUCH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_ON_TOUCH_DEFAULT_VALUE) << "Default value for attribute 'focusOnTouch'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FOCUS_ON_TOUCH_DEFAULT_VALUE)) <<
+        "Default value for attribute 'focusOnTouch'";
 }
 
 /*
@@ -808,7 +809,7 @@ HWTEST_P(CommonMethodModifierTest, setFocusOnTouchTestFocusOnTouchValidValues, T
         modifier_->setFocusOnTouch(node_, &inputValueFocusOnTouch);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_ON_TOUCH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFocusOnTouch, attribute: focusOnTouch";
     };
 
@@ -837,7 +838,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setFocusOnTouchTestFocusOnTouchInval
         modifier_->setFocusOnTouch(node_, &inputValueFocusOnTouch);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_ON_TOUCH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_ON_TOUCH_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FOCUS_ON_TOUCH_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFocusOnTouch, attribute: focusOnTouch";
     };
 
@@ -1033,34 +1034,37 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setScaleTestPlaceholder, TestSize.Le
 HWTEST_P(CommonMethodModifierTest, setRotateTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultRotate =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_X_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_X_DEFAULT_VALUE) << "Default value for attribute 'rotate.x'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_X_DEFAULT_VALUE)) << "Default value for attribute 'rotate.x'";
 
     resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_Y_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_Y_DEFAULT_VALUE) << "Default value for attribute 'rotate.y'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_Y_DEFAULT_VALUE)) << "Default value for attribute 'rotate.y'";
 
     resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_Z_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_Z_DEFAULT_VALUE) << "Default value for attribute 'rotate.z'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_Z_DEFAULT_VALUE)) << "Default value for attribute 'rotate.z'";
 
     resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_X_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_CENTER_X_DEFAULT_VALUE) << "Default value for attribute 'rotate.centerX'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_CENTER_X_DEFAULT_VALUE)) <<
+        "Default value for attribute 'rotate.centerX'";
 
     resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Y_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_CENTER_Y_DEFAULT_VALUE) << "Default value for attribute 'rotate.centerY'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_CENTER_Y_DEFAULT_VALUE)) <<
+        "Default value for attribute 'rotate.centerY'";
 
     resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_CENTER_Z_DEFAULT_VALUE) << "Default value for attribute 'rotate.centerZ'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_CENTER_Z_DEFAULT_VALUE)) <<
+        "Default value for attribute 'rotate.centerZ'";
 
     resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_PERSPECTIVE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_PERSPECTIVE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_PERSPECTIVE_DEFAULT_VALUE)) <<
         "Default value for attribute 'rotate.perspective'";
 
     resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_ANGLE_DEFAULT_VALUE) << "Default value for attribute 'rotate.angle'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_ANGLE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'rotate.angle'";
 }
 
 /*
@@ -1097,9 +1101,10 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateXValidValues, TestSize.Lev
         WriteTo(inputValueRotate).x = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_X_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setRotate, attribute: rotate.x";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setRotate, attribute: rotate.x";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatAnythingValidValues) {
@@ -1141,9 +1146,9 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateXInvalidValues, TestSize.L
         WriteTo(inputValueRotate).x = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_X_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_X_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_X_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.x";
     };
 
@@ -1185,9 +1190,10 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateYValidValues, TestSize.Lev
         WriteTo(inputValueRotate).y = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_Y_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setRotate, attribute: rotate.y";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setRotate, attribute: rotate.y";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatAnythingValidValues) {
@@ -1229,9 +1235,9 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateYInvalidValues, TestSize.L
         WriteTo(inputValueRotate).y = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_Y_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_Y_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_Y_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.y";
     };
 
@@ -1273,9 +1279,10 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateZValidValues, TestSize.Lev
         WriteTo(inputValueRotate).z = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_Z_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setRotate, attribute: rotate.z";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setRotate, attribute: rotate.z";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatAnythingValidValues) {
@@ -1317,9 +1324,9 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateZInvalidValues, TestSize.L
         WriteTo(inputValueRotate).z = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_Z_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_Z_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_Z_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.z";
     };
 
@@ -1361,9 +1368,9 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateCenterXValidValues, TestSi
         WriteTo(inputValueRotate).centerX = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_X_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.centerX";
     };
 
@@ -1409,9 +1416,9 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setRotateTestRotateCenterXInvalidVal
         WriteTo(inputValueRotate).centerX = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_X_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_CENTER_X_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_CENTER_X_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.centerX";
     };
 
@@ -1455,9 +1462,9 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateCenterYValidValues, TestSi
         WriteTo(inputValueRotate).centerY = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Y_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.centerY";
     };
 
@@ -1503,9 +1510,9 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setRotateTestRotateCenterYInvalidVal
         WriteTo(inputValueRotate).centerY = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Y_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_CENTER_Y_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_CENTER_Y_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.centerY";
     };
 
@@ -1549,9 +1556,9 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setRotateTestRotateCenterZValidValue
         WriteTo(inputValueRotate).centerZ = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.centerZ";
     };
 
@@ -1594,9 +1601,9 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setRotateTestRotateCenterZInvalidVal
         WriteTo(inputValueRotate).centerZ = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Z_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_CENTER_Z_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_CENTER_Z_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.centerZ";
     };
 
@@ -1638,9 +1645,9 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotatePerspectiveValidValues, Te
         WriteTo(inputValueRotate).perspective = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_PERSPECTIVE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.perspective";
     };
 
@@ -1683,9 +1690,9 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotatePerspectiveInvalidValues, 
         WriteTo(inputValueRotate).perspective = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_PERSPECTIVE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_PERSPECTIVE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_PERSPECTIVE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.perspective";
     };
 
@@ -1727,9 +1734,9 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateAngleValidValues, TestSize
         WriteTo(inputValueRotate).angle = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.angle";
     };
 
@@ -1775,9 +1782,9 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateAngleInvalidValues, TestSi
         WriteTo(inputValueRotate).angle = value;
         modifier_->setRotate(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
+        auto resultRotate = GetAttrObject(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_ANGLE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROTATE_I_ANGLE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRotate, attribute: rotate.angle";
     };
 
@@ -1816,10 +1823,10 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setVisibilityTestPlaceholder, TestSi
 HWTEST_P(CommonMethodModifierTest, setFlexGrowTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLEX_GROW_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FLEX_GROW_DEFAULT_VALUE) << "Default value for attribute 'flexGrow'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FLEX_GROW_DEFAULT_VALUE)) << "Default value for attribute 'flexGrow'";
 }
 
 /*
@@ -1842,7 +1849,7 @@ HWTEST_P(CommonMethodModifierTest, setFlexGrowTestFlexGrowValidValues, TestSize.
         modifier_->setFlexGrow(node_, &inputValueFlexGrow);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLEX_GROW_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFlexGrow, attribute: flexGrow";
     };
 
@@ -1871,7 +1878,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setFlexGrowTestFlexGrowInvalidValues
         modifier_->setFlexGrow(node_, &inputValueFlexGrow);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLEX_GROW_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FLEX_GROW_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FLEX_GROW_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFlexGrow, attribute: flexGrow";
     };
 
@@ -1887,10 +1894,10 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setFlexGrowTestFlexGrowInvalidValues
 HWTEST_P(CommonMethodModifierTest, setFlexShrinkTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLEX_SHRINK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FLEX_SHRINK_DEFAULT_VALUE) << "Default value for attribute 'flexShrink'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FLEX_SHRINK_DEFAULT_VALUE)) << "Default value for attribute 'flexShrink'";
 }
 
 /*
@@ -1913,7 +1920,7 @@ HWTEST_P(CommonMethodModifierTest, setFlexShrinkTestFlexShrinkValidValues, TestS
         modifier_->setFlexShrink(node_, &inputValueFlexShrink);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLEX_SHRINK_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFlexShrink, attribute: flexShrink";
     };
 
@@ -1942,7 +1949,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setFlexShrinkTestFlexShrinkInvalidVa
         modifier_->setFlexShrink(node_, &inputValueFlexShrink);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLEX_SHRINK_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FLEX_SHRINK_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FLEX_SHRINK_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFlexShrink, attribute: flexShrink";
     };
 
@@ -1958,10 +1965,10 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setFlexShrinkTestFlexShrinkInvalidVa
 HWTEST_P(CommonMethodModifierTest, setFlexBasisTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLEX_BASIS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FLEX_BASIS_DEFAULT_VALUE) << "Default value for attribute 'flexBasis'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FLEX_BASIS_DEFAULT_VALUE)) << "Default value for attribute 'flexBasis'";
 }
 
 /*
@@ -1985,7 +1992,7 @@ HWTEST_P(CommonMethodModifierTest, setFlexBasisTestFlexBasisValidValues, TestSiz
         modifier_->setFlexBasis(node_, &inputValueFlexBasis);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLEX_BASIS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFlexBasis, attribute: flexBasis";
     };
 
@@ -2018,7 +2025,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setFlexBasisTestFlexBasisInvalidValu
         modifier_->setFlexBasis(node_, &inputValueFlexBasis);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLEX_BASIS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FLEX_BASIS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FLEX_BASIS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFlexBasis, attribute: flexBasis";
     };
 
@@ -2102,16 +2109,15 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setPositionTestPlaceholder, TestSize
 HWTEST_P(CommonMethodModifierTest, setMarkAnchorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultMarkAnchor =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultMarkAnchor = GetAttrObject(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_I_X_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MARK_ANCHOR_I_X_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MARK_ANCHOR_I_X_DEFAULT_VALUE)) <<
         "Default value for attribute 'markAnchor.Position.x'";
 
     resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_I_Y_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MARK_ANCHOR_I_Y_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MARK_ANCHOR_I_Y_DEFAULT_VALUE)) <<
         "Default value for attribute 'markAnchor.Position.y'";
 }
 
@@ -2137,9 +2143,9 @@ HWTEST_P(CommonMethodModifierTest, setMarkAnchorTestMarkAnchorPositionXValidValu
         WriteToUnion<Ark_Position>(WriteTo(inputValueMarkAnchor)).x = value;
         modifier_->setMarkAnchor(node_, &inputValueMarkAnchor);
         auto jsonValue = GetJsonValue(node_);
-        auto resultMarkAnchor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
+        auto resultMarkAnchor = GetAttrObject(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_I_X_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMarkAnchor, attribute: markAnchor.Position.x";
     };
 
@@ -2176,9 +2182,9 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setMarkAnchorTestMarkAnchorPositionX
         WriteToUnion<Ark_Position>(WriteTo(inputValueMarkAnchor)).x = value;
         modifier_->setMarkAnchor(node_, &inputValueMarkAnchor);
         auto jsonValue = GetJsonValue(node_);
-        auto resultMarkAnchor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
+        auto resultMarkAnchor = GetAttrObject(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_I_X_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MARK_ANCHOR_I_X_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MARK_ANCHOR_I_X_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMarkAnchor, attribute: markAnchor.Position.x";
     };
 
@@ -2210,9 +2216,9 @@ HWTEST_P(CommonMethodModifierTest, setMarkAnchorTestMarkAnchorPositionYValidValu
         WriteToUnion<Ark_Position>(WriteTo(inputValueMarkAnchor)).y = value;
         modifier_->setMarkAnchor(node_, &inputValueMarkAnchor);
         auto jsonValue = GetJsonValue(node_);
-        auto resultMarkAnchor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
+        auto resultMarkAnchor = GetAttrObject(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_I_Y_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMarkAnchor, attribute: markAnchor.Position.y";
     };
 

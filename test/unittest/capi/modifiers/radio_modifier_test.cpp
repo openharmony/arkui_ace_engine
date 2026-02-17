@@ -108,48 +108,48 @@ public:
  */
 HWTEST_F(RadioModifierTest, setRadioOptionsTestVariant001, TestSize.Level1)
 {
-    auto groupDefault = GetStringAttribute(node_, RADIO_GROUP_ATTR);
-    auto valueDefault = GetStringAttribute(node_, RADIO_VALUE_ATTR);
-    EXPECT_EQ(groupDefault, "");
-    EXPECT_EQ(groupDefault, "");
+    auto groupDefault = GetAttrValue<std::string>(node_, RADIO_GROUP_ATTR);
+    auto valueDefault = GetAttrValue<std::string>(node_, RADIO_VALUE_ATTR);
+    EXPECT_THAT(groupDefault, Eq(""));
+    EXPECT_THAT(groupDefault, Eq(""));
     Ark_RadioOptions radioOptions = {
         .group = Converter::ArkValue<Ark_String>(RADIO_GROUP_VALUE),
         .value = Converter::ArkValue<Ark_String>(RADIO_VALUE_VALUE)
     };
     modifier_->setRadioOptions(node_, &radioOptions);
-    auto group = GetStringAttribute(node_, RADIO_GROUP_ATTR);
-    auto value = GetStringAttribute(node_, RADIO_VALUE_ATTR);
-    EXPECT_EQ(group, RADIO_GROUP_VALUE);
-    EXPECT_EQ(value, RADIO_VALUE_VALUE);
+    auto group = GetAttrValue<std::string>(node_, RADIO_GROUP_ATTR);
+    auto value = GetAttrValue<std::string>(node_, RADIO_VALUE_ATTR);
+    EXPECT_THAT(group, Eq(RADIO_GROUP_VALUE));
+    EXPECT_THAT(value, Eq(RADIO_VALUE_VALUE));
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         Ark_RadioOptions radioOptionsTick = {
             .indicatorType = Converter::ArkValue<Opt_RadioIndicatorType>(ARK_RADIO_INDICATOR_TYPE_TICK),
         };
         modifier_->setRadioOptions(node_, &radioOptionsTick);
-        auto groupEmpty = GetStringAttribute(node_, RADIO_GROUP_ATTR);
-        auto valueEmpty = GetStringAttribute(node_, RADIO_VALUE_ATTR);
-        auto indicatorTypeTick = GetStringAttribute(node_, INDICATOR_TYPE_ATTR);
-        EXPECT_EQ(groupEmpty, RADIO_GROUP_VALUE);
-        EXPECT_EQ(valueEmpty, RADIO_VALUE_VALUE);
-        EXPECT_EQ(indicatorTypeTick, INDICATOR_TYPE_TICK);
+        auto groupEmpty = GetAttrValue<std::string>(node_, RADIO_GROUP_ATTR);
+        auto valueEmpty = GetAttrValue<std::string>(node_, RADIO_VALUE_ATTR);
+        auto indicatorTypeTick = GetAttrValue<std::string>(node_, INDICATOR_TYPE_ATTR);
+        EXPECT_THAT(groupEmpty, Eq(RADIO_GROUP_VALUE));
+        EXPECT_THAT(valueEmpty, Eq(RADIO_VALUE_VALUE));
+        EXPECT_THAT(indicatorTypeTick, Eq(INDICATOR_TYPE_TICK));
         Ark_RadioOptions radioOptionsDot = {
             .indicatorType = Converter::ArkValue<Opt_RadioIndicatorType>(ARK_RADIO_INDICATOR_TYPE_DOT),
         };
         modifier_->setRadioOptions(node_, &radioOptionsDot);
-        auto indicatorTypeDot = GetStringAttribute(node_, INDICATOR_TYPE_ATTR);
-        EXPECT_EQ(indicatorTypeDot, INDICATOR_TYPE_DOT);
+        auto indicatorTypeDot = GetAttrValue<std::string>(node_, INDICATOR_TYPE_ATTR);
+        EXPECT_THAT(indicatorTypeDot, Eq(INDICATOR_TYPE_DOT));
         Ark_RadioOptions radioOptionsCustom = {
             .indicatorType = Converter::ArkValue<Opt_RadioIndicatorType>(ARK_RADIO_INDICATOR_TYPE_CUSTOM),
         };
         modifier_->setRadioOptions(node_, &radioOptionsCustom);
-        auto indicatorTypeCustom = GetStringAttribute(node_, INDICATOR_TYPE_ATTR);
-        EXPECT_EQ(indicatorTypeCustom, INDICATOR_TYPE_CUSTOM);
+        auto indicatorTypeCustom = GetAttrValue<std::string>(node_, INDICATOR_TYPE_ATTR);
+        EXPECT_THAT(indicatorTypeCustom, Eq(INDICATOR_TYPE_CUSTOM));
         Ark_RadioOptions radioOptionsInvalid = {
             .indicatorType = Converter::ArkValue<Opt_RadioIndicatorType>(static_cast<Ark_RadioIndicatorType>(INT_MAX)),
         };
         modifier_->setRadioOptions(node_, &radioOptionsInvalid);
-        auto indicatorTypeInvalid = GetStringAttribute(node_, INDICATOR_TYPE_ATTR);
-        EXPECT_EQ(indicatorTypeInvalid, INDICATOR_TYPE_TICK);
+        auto indicatorTypeInvalid = GetAttrValue<std::string>(node_, INDICATOR_TYPE_ATTR);
+        EXPECT_THAT(indicatorTypeInvalid, Eq(INDICATOR_TYPE_TICK));
     }
 }
 
@@ -189,12 +189,12 @@ HWTEST_F(RadioModifierTest, setRadioOptionsTestCustomBuilder, TestSize.Level1)
  */
 HWTEST_F(RadioModifierTest, setCheckedTestVariant001, TestSize.Level1)
 {
-    auto checked = GetStringAttribute(node_, CHECKED_ATTR);
-    EXPECT_EQ(checked, "false");
+    auto checked = GetAttrValue<std::string>(node_, CHECKED_ATTR);
+    EXPECT_THAT(checked, Eq("false"));
     auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     modifier_->setChecked(node_, &optValue);
-    auto checkedChanged = GetStringAttribute(node_, CHECKED_ATTR);
-    EXPECT_EQ(checkedChanged, "true");
+    auto checkedChanged = GetAttrValue<std::string>(node_, CHECKED_ATTR);
+    EXPECT_THAT(checkedChanged, Eq("true"));
 }
 
 /**
@@ -205,7 +205,7 @@ HWTEST_F(RadioModifierTest, setCheckedTestVariant001, TestSize.Level1)
 HWTEST_F(RadioModifierTest, radioModifierTestDefaultColor, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
-    auto radioStyle = GetAttrValue< std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+    auto radioStyle = GetAttrObject(jsonValue, RADIO_STYLE_ATTR);
     auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
     EXPECT_EQ(checkedBackgroundColor, CHECKED_COLOR_DEFAULT);
     auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
@@ -222,7 +222,7 @@ HWTEST_F(RadioModifierTest, radioModifierTestDefaultColor, TestSize.Level1)
 HWTEST_F(RadioModifierTest, setRadioStyleTestValidEnumColorValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::unique_ptr<JsonValue> radioStyle;
 
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
@@ -251,7 +251,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestValidEnumColorValues, TestSize.Leve
 
         modifier_->setRadioStyle(node_, &radioStyleColors);
         jsonValue = GetJsonValue(node_);
-        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        radioStyle = GetAttrObject(jsonValue, RADIO_STYLE_ATTR);
         auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
         EXPECT_EQ(checkedBackgroundColor, expected);
         auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
@@ -269,7 +269,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestValidEnumColorValues, TestSize.Leve
 HWTEST_F(RadioModifierTest, DISABLED_setRadioStyleTestValidNumberValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::unique_ptr<JsonValue> radioStyle;
 
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
@@ -297,7 +297,7 @@ HWTEST_F(RadioModifierTest, DISABLED_setRadioStyleTestValidNumberValues, TestSiz
 
         modifier_->setRadioStyle(node_, &radioStyleColors);
         jsonValue = GetJsonValue(node_);
-        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        radioStyle = GetAttrObject(jsonValue, RADIO_STYLE_ATTR);
         auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
         EXPECT_EQ(checkedBackgroundColor, expected);
         auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
@@ -315,7 +315,7 @@ HWTEST_F(RadioModifierTest, DISABLED_setRadioStyleTestValidNumberValues, TestSiz
 HWTEST_F(RadioModifierTest, setRadioStyleTestValidStringValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::unique_ptr<JsonValue> radioStyle;
 
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
@@ -343,7 +343,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestValidStringValues, TestSize.Level1)
 
         modifier_->setRadioStyle(node_, &radioStyleColors);
         jsonValue = GetJsonValue(node_);
-        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        radioStyle = GetAttrObject(jsonValue, RADIO_STYLE_ATTR);
         auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
         EXPECT_EQ(checkedBackgroundColor, expected);
         auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
@@ -361,7 +361,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestValidStringValues, TestSize.Level1)
 HWTEST_F(RadioModifierTest, DISABLED_setRadioStyleTestInvalidNumberValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::unique_ptr<JsonValue> radioStyle;
 
     using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
@@ -380,7 +380,7 @@ HWTEST_F(RadioModifierTest, DISABLED_setRadioStyleTestInvalidNumberValues, TestS
 
         modifier_->setRadioStyle(node_, &radioStyleColors);
         jsonValue = GetJsonValue(node_);
-        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        radioStyle = GetAttrObject(jsonValue, RADIO_STYLE_ATTR);
         auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
         EXPECT_EQ(checkedBackgroundColor, expected);
         auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
@@ -399,7 +399,7 @@ HWTEST_F(RadioModifierTest, DISABLED_setRadioStyleTestInvalidNumberValues, TestS
 HWTEST_F(RadioModifierTest, setRadioStyleTestInvalidStringValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::unique_ptr<JsonValue> radioStyle;
 
     const std::vector<Opt_ResourceColor> testPlan = {
@@ -417,7 +417,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestInvalidStringValues, TestSize.Level
 
         modifier_->setRadioStyle(node_, &radioStyleColors);
         jsonValue = GetJsonValue(node_);
-        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        radioStyle = GetAttrObject(jsonValue, RADIO_STYLE_ATTR);
         auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
         EXPECT_EQ(checkedBackgroundColor, CHECKED_COLOR_DEFAULT);
         auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
@@ -435,7 +435,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestInvalidStringValues, TestSize.Level
 HWTEST_F(RadioModifierTest, setRadioStyleTestResourceColorValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::unique_ptr<JsonValue> radioStyle;
 
     typedef std::pair<Opt_ResourceColor, std::string> OneTestStep;
@@ -458,7 +458,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestResourceColorValues, TestSize.Level
 
         modifier_->setRadioStyle(node_, &radioStyleColors);
         jsonValue = GetJsonValue(node_);
-        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        radioStyle = GetAttrObject(jsonValue, RADIO_STYLE_ATTR);
         auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
         EXPECT_EQ(checkedBackgroundColor, expected);
         auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);

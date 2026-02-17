@@ -150,8 +150,8 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestDefaultValues, TestSize.L
     EXPECT_TRUE(checkInvokeStop);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TIME_ZONE_OFFSET_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE) <<
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TIME_ZONE_OFFSET_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE)) <<
         "Default value for attribute 'options.timeZoneOffset'";
 }
 
@@ -186,7 +186,7 @@ static std::vector<std::tuple<std::string, Opt_TextClockOptions, std::string>> s
 HWTEST_F(TextClockModifierTest, setTextClockOptionsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_TextClockOptions inputValueOptions = Converter::ArkValue<Opt_TextClockOptions>();
 
     // Verifying attribute's  values
@@ -195,7 +195,7 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestValidValues, TestSize.Lev
         modifier_->setTextClockOptions(node_, &inputValueOptions);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TIME_ZONE_OFFSET_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << print;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << print;
     }
 }
 
@@ -216,7 +216,7 @@ static std::vector<std::tuple<std::string, Opt_TextClockOptions>> setTextClockOp
 HWTEST_F(TextClockModifierTest, setTextClockOptionsTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_TextClockOptions realInputValue = Converter::ArkValue<Opt_TextClockOptions>();
     Ark_TextClockOptions& inputValueOptions = realInputValue.value;
@@ -231,7 +231,7 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestInvalidValues, TestSize.L
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TIME_ZONE_OFFSET_NAME);
         expectedStr = ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 

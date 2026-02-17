@@ -91,8 +91,8 @@ HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsTestString, 
 {
     auto headerValue = GetAttrValue<std::string>(node_, "header");
     auto footerValue = GetAttrValue<std::string>(node_, "footer");
-    EXPECT_EQ(headerValue, "");
-    EXPECT_EQ(footerValue, "");
+    EXPECT_THAT(headerValue, Eq(""));
+    EXPECT_THAT(footerValue, Eq(""));
 
     auto headerStr = Converter::ArkValue<Ark_String>("Header");
     auto headerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(headerStr);
@@ -105,8 +105,8 @@ HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsTestString, 
     modifier_->setMenuItemGroupOptions(node_, &optionsOpt);
     headerValue = GetAttrValue<std::string>(node_, "header");
     footerValue = GetAttrValue<std::string>(node_, "footer");
-    EXPECT_EQ(headerValue, "Header");
-    EXPECT_EQ(footerValue, "Footer");
+    EXPECT_THAT(headerValue, Eq("Header"));
+    EXPECT_THAT(footerValue, Eq("Footer"));
 }
 
 /*
@@ -118,8 +118,8 @@ HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsTestResource
 {
     auto headerValue = GetAttrValue<std::string>(node_, "header");
     auto footerValue = GetAttrValue<std::string>(node_, "footer");
-    EXPECT_EQ(headerValue, "");
-    EXPECT_EQ(footerValue, "");
+    EXPECT_THAT(headerValue, Eq(""));
+    EXPECT_THAT(footerValue, Eq(""));
 
     const auto RES_NAME_HEADER = NamedResourceId{"header", ResourceType::STRING};
     Ark_ResourceStr headerResStr = CreateResourceUnion<Ark_ResourceStr>(RES_NAME_HEADER);
@@ -134,8 +134,8 @@ HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsTestResource
     modifier_->setMenuItemGroupOptions(node_, &optionsOpt);
     headerValue = GetAttrValue<std::string>(node_, "header");
     footerValue = GetAttrValue<std::string>(node_, "footer");
-    EXPECT_EQ(headerValue, "Header");
-    EXPECT_EQ(footerValue, "Footer");
+    EXPECT_THAT(headerValue, Eq("Header"));
+    EXPECT_THAT(footerValue, Eq("Footer"));
 }
 
 /*

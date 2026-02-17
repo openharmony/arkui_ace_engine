@@ -59,10 +59,10 @@ public:
  */
 HWTEST_F(CounterModifierTest, setEnableDecTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ENABLE_DEC_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ENABLE_DEC_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_DEC_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ENABLE_DEC_DEFAULT_VALUE));
 }
 
 /*
@@ -72,17 +72,17 @@ HWTEST_F(CounterModifierTest, setEnableDecTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(CounterModifierTest, DISABLED_setEnableDecTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
     auto inputValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setEnableDec(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ENABLE_DEC_NAME);
-    EXPECT_EQ(strResult, "false");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_DEC_NAME);
+    EXPECT_THAT(strResult, Eq("false"));
 
     inputValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setEnableDec(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ENABLE_DEC_NAME);
-    EXPECT_EQ(strResult, "true");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_DEC_NAME);
+    EXPECT_THAT(strResult, Eq("true"));
 }
 
 /*
@@ -92,10 +92,10 @@ HWTEST_F(CounterModifierTest, DISABLED_setEnableDecTestValidValues, TestSize.Lev
  */
 HWTEST_F(CounterModifierTest, setEnableIncTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ENABLE_INC_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ENABLE_INC_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_INC_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ENABLE_INC_DEFAULT_VALUE));
 }
 
 /*
@@ -105,17 +105,17 @@ HWTEST_F(CounterModifierTest, setEnableIncTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(CounterModifierTest, DISABLED_setEnableIncTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
     auto inputValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setEnableInc(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ENABLE_INC_NAME);
-    EXPECT_EQ(strResult, "false");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_INC_NAME);
+    EXPECT_THAT(strResult, Eq("false"));
 
     inputValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setEnableInc(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ENABLE_INC_NAME);
-    EXPECT_EQ(strResult, "true");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_INC_NAME);
+    EXPECT_THAT(strResult, Eq("true"));
 }
 
 /*
@@ -221,13 +221,13 @@ HWTEST_F(CounterModifierTest, DISABLED_setBackgroundColorTest, TestSize.Level1)
     ASSERT_NE(commonModifier_->setBackgroundColor, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, propName);
-    EXPECT_EQ(checkInitial, Color::TRANSPARENT.ToString());
+    EXPECT_THAT(checkInitial, Eq(Color::TRANSPARENT.ToString()));
 
     for (const auto &[arkResColor, expected]: testPlan) {
         auto inputValue = ArkUnion<Opt_Union_ResourceColor_ColorMetrics, Ark_ResourceColor>(arkResColor);
         commonModifier_->setBackgroundColor(node_, &inputValue);
         auto checkColor = GetAttrValue<std::string>(node_, propName);
-        EXPECT_EQ(checkColor, expected);
+        EXPECT_THAT(checkColor, Eq(expected));
     }
 }
 
@@ -238,8 +238,8 @@ HWTEST_F(CounterModifierTest, DISABLED_setBackgroundColorTest, TestSize.Level1)
  */
 HWTEST_F(CounterModifierTest, setWidthTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
 }
 
 /*
@@ -265,8 +265,8 @@ HWTEST_F(CounterModifierTest, DISABLED_setWidthTestValidValues, TestSize.Level1)
     for (const auto &[arkLength, expected]: testPlan) {
         auto inputValue = Converter::ArkUnion<Opt_Union_Length_LayoutPolicy, Ark_Length>(arkLength);
         commonModifier_->setWidth(node_, &inputValue);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 }
 
@@ -290,13 +290,13 @@ HWTEST_F(CounterModifierTest, DISABLED_setWidthTestInvalidValues, TestSize.Level
     for (const auto &arkLength : testPlan) {
         auto inputValue = Converter::ArkUnion<Opt_Union_Length_LayoutPolicy, Ark_Length>(arkLength);
         commonModifier_->setWidth(node_, &inputValue);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
     }
 
     commonModifier_->setWidth(node_, nullptr);
-    auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
 }
 
 /*
@@ -306,8 +306,8 @@ HWTEST_F(CounterModifierTest, DISABLED_setWidthTestInvalidValues, TestSize.Level
  */
 HWTEST_F(CounterModifierTest, setHeightTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
 }
 
 /*
@@ -333,8 +333,8 @@ HWTEST_F(CounterModifierTest, DISABLED_setHeightTestValidValues, TestSize.Level1
     for (const auto &[arkLength, expected]: testPlan) {
         auto inputValue = Converter::ArkUnion<Opt_Union_Length_LayoutPolicy, Ark_Length>(arkLength);
         commonModifier_->setHeight(node_, &inputValue);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 }
 
@@ -358,13 +358,13 @@ HWTEST_F(CounterModifierTest, DISABLED_setHeightTestInvalidValues, TestSize.Leve
     for (const auto &arkLength : testPlan) {
         auto inputValue = Converter::ArkUnion<Opt_Union_Length_LayoutPolicy, Ark_Length>(arkLength);
         commonModifier_->setHeight(node_, &inputValue);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
     }
 
     commonModifier_->setHeight(node_, nullptr);
-    auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
 }
 
 /*
@@ -393,10 +393,10 @@ HWTEST_F(CounterModifierTest, DISABLED_setSizeTestValidHeightValues, TestSize.Le
         inputValue.width = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto optValue = Converter::ArkValue<Opt_SizeOptions>(inputValue);
         commonModifier_->setSize(node_, &optValue);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(strResult, expected);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
+        strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
     }
 }
 
@@ -426,10 +426,10 @@ HWTEST_F(CounterModifierTest, DISABLED_setSizeTestValidWidthValues, TestSize.Lev
         inputValue.height = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto optValue = Converter::ArkValue<Opt_SizeOptions>(inputValue);
         commonModifier_->setSize(node_, &optValue);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(strResult, expected);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
+        strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
     }
 }
 
@@ -457,10 +457,10 @@ HWTEST_F(CounterModifierTest, DISABLED_setSizeTestInvalidValues, TestSize.Level1
         inputValue.height = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto optValue = Converter::ArkValue<Opt_SizeOptions>(inputValue);
         commonModifier_->setSize(node_, &optValue);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
+        strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
     }
 
     for (const auto &arkLength : testPlan) {
@@ -468,16 +468,16 @@ HWTEST_F(CounterModifierTest, DISABLED_setSizeTestInvalidValues, TestSize.Level1
         inputValue.width = Converter::ArkValue<Opt_Length>(Ark_Empty());
         auto optValue = Converter::ArkValue<Opt_SizeOptions>(inputValue);
         commonModifier_->setSize(node_, &optValue);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
+        strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
     }
 
     commonModifier_->setSize(node_, nullptr);
-    auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
 }
 } // namespace OHOS::Ace::NG
