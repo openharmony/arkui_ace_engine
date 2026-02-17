@@ -19,7 +19,6 @@ import { StateContext } from 'arkui.incremental.runtime.state'
 import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
 import { PeerNode } from '../PeerNode'
-import { InternalListener } from './DataChangeListener'
 import { setNeedCreate } from '../ArkComponentRoot'
 import { IDataSource } from '../component/lazyForEach'
 import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
@@ -61,20 +60,6 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     if (pool.total !== dataSource.totalCount()) {
         console.log(`dataSource totalCount changed from ${pool.total} to ${dataSource.totalCount()}`)
         pool.total = dataSource.totalCount()
-    }
-    let listener = remember(() => {
-        let changeCounter = STATE_MGMT_FACTORY.makeStaticLocal<int32>('__backing_value_change_counter', 0)
-        let res = new InternalListener(changeCounter)
-        dataSource.registerDataChangeListener(res)
-        return res
-    })
-    listener.version.get() // subscribe
-    // first item index that's affected by DataChange
-    const changeIndex = listener.flush(node.getPeerPtr(), pool.activeStart)
-    if (changeIndex < Number.POSITIVE_INFINITY) {
-        scheduleCallback(() => {
-            pool.pruneBy((index: int32) => index >= changeIndex)
-        })
     }
 
     const currentRenderingComponent = ObserveSingleton.instance.renderingComponent
