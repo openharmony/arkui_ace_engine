@@ -34,7 +34,7 @@ import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics
 import { ColorMetricsExt, ColorMetricsExt_serializer, CustomNodeBuilderT } from './idlize'
 import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
 import { ResizableOptions_serializer, ResizableOptions } from './image'
-import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_BrightnessBlender_serializer, uiEffect_HdrBrightnessBlender_serializer } from './../framework/ohos.graphics.uiEffect'
+import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_HdrBrightnessBlender_serializer, uiEffect_BrightnessBlender_serializer } from './../framework/ohos.graphics.uiEffect'
 import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from './focus'
 import { matrix4_Matrix4Transit_serializer } from './../framework/ohos.matrix4'
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from './../framework/ohos.arkui.shape'
@@ -5558,14 +5558,14 @@ export class ArkCommonMethodPeer extends PeerNode {
             } else if (effectTmpValue instanceof Blender) {
                 thisSerializer.writeInt8((1).toByte())
                 const effectTmpValueForIdx1 = effectTmpValue as Blender
-                if (effectTmpValueForIdx1 instanceof uiEffect.BrightnessBlender) {
-                    thisSerializer.writeInt8((0).toByte())
-                    const effectTmpValueForIdx1ForIdx0 = effectTmpValueForIdx1 as uiEffect.BrightnessBlender
-                    uiEffect_BrightnessBlender_serializer.write(thisSerializer, effectTmpValueForIdx1ForIdx0)
-                } else if (effectTmpValueForIdx1 instanceof uiEffect.HdrBrightnessBlender) {
+                if (effectTmpValueForIdx1 instanceof uiEffect.HdrBrightnessBlender) {
                     thisSerializer.writeInt8((1).toByte())
                     const effectTmpValueForIdx1ForIdx1 = effectTmpValueForIdx1 as uiEffect.HdrBrightnessBlender
                     uiEffect_HdrBrightnessBlender_serializer.write(thisSerializer, effectTmpValueForIdx1ForIdx1)
+                } else if (effectTmpValueForIdx1 instanceof uiEffect.BrightnessBlender) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const effectTmpValueForIdx1ForIdx0 = effectTmpValueForIdx1 as uiEffect.BrightnessBlender
+                    uiEffect_BrightnessBlender_serializer.write(thisSerializer, effectTmpValueForIdx1ForIdx0)
                 }
             }
         } else {

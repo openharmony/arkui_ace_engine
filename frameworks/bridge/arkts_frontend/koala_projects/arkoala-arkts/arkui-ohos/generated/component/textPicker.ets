@@ -100,14 +100,14 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            if (valueTmpValue instanceof PickerTextStyle) {
-                thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0 = valueTmpValue as PickerTextStyle
-                PickerTextStyle_serializer.write(thisSerializer, valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof TextPickerTextStyle) {
+            if (valueTmpValue instanceof TextPickerTextStyle) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as TextPickerTextStyle
                 TextPickerTextStyle_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof PickerTextStyle) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as PickerTextStyle
+                PickerTextStyle_serializer.write(thisSerializer, valueTmpValueForIdx0)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -120,14 +120,14 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            if (valueTmpValue instanceof PickerTextStyle) {
-                thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0 = valueTmpValue as PickerTextStyle
-                PickerTextStyle_serializer.write(thisSerializer, valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof TextPickerTextStyle) {
+            if (valueTmpValue instanceof TextPickerTextStyle) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as TextPickerTextStyle
                 TextPickerTextStyle_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof PickerTextStyle) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as PickerTextStyle
+                PickerTextStyle_serializer.write(thisSerializer, valueTmpValueForIdx0)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -140,14 +140,14 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            if (valueTmpValue instanceof PickerTextStyle) {
-                thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0 = valueTmpValue as PickerTextStyle
-                PickerTextStyle_serializer.write(thisSerializer, valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof TextPickerTextStyle) {
+            if (valueTmpValue instanceof TextPickerTextStyle) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as TextPickerTextStyle
                 TextPickerTextStyle_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof PickerTextStyle) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as PickerTextStyle
+                PickerTextStyle_serializer.write(thisSerializer, valueTmpValueForIdx0)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
