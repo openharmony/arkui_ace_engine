@@ -159,7 +159,7 @@ void SetOnDestoryEventImpl(Ark_NativePointer self,
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnWillUnbind(nodeId);
         eventHub->FireOnUnbind(nodeId);
-        callback.InvokeSync(Converter::ArkValue<Ark_Float64>(nodeId));
+        callback.Invoke(Converter::ArkValue<Ark_Float64>(nodeId));
     };
     nodeContainer->SetOnNodeDestroyCallback(onNodeDestroyCallback);
 }

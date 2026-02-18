@@ -90,6 +90,7 @@ ace_unittest("capi_all_accessors_test") {
     "mutable_styled_string_accessor_test.cpp",
     "nav_destination_context_accessor_test.cpp",
     "navigation_transition_proxy_accessor_test.cpp",
+    "node_container_ops_accessor_test.cpp",
     #"pan_gesture_event_accessor_test.cpp",
     #"pan_gesture_options_accessor_test.cpp",
     "pan_recognizer_accessor_test.cpp",
