@@ -4237,7 +4237,7 @@ export function deserializeAndCallWorkerEventListener(thisDeserializer: Deserial
 }
 export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): void {
     const kind: int32 = thisDeserializer.readInt32()
-    switch ((kind as CallbackKind)) {
+    switch (CallbackKind.fromValue(kind)) {
         case CallbackKind.KIND_ACCESSIBILITYACTIONINTERCEPTCALLBACK: return deserializeAndCallAccessibilityActionInterceptCallback(thisDeserializer);
         case CallbackKind.KIND_ACCESSIBILITYCALLBACK: return deserializeAndCallAccessibilityCallback(thisDeserializer);
         case CallbackKind.KIND_ACCESSIBILITYFOCUSCALLBACK: return deserializeAndCallAccessibilityFocusCallback(thisDeserializer);
