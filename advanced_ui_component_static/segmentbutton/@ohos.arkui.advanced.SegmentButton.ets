@@ -756,8 +756,8 @@ struct MultiSelectItemArray {
   @Consume buttonItemsSize: SizeOptions[];
   @Consume zoomScaleArray: number[];
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[];
-  @State multiColor: ResourceColor[] =
-    new Array<ResourceColor>(MAX_ITEM_COUNT).fill(Color.Transparent as ResourceColor);
+  @State multiColor: ResourceColor[] = 
+    Array.create<ResourceColor>(MAX_ITEM_COUNT, Color.Transparent as ResourceColor);
 
   onOptionsChange(a: string) {
     for (let i: number = 0.0; i < this.selectedIndexes.length; i++) {
@@ -1053,10 +1053,10 @@ struct SegmentButtonItemArrayComponent {
   @Link hoverArray: boolean[];
   @Link hoverColorArray: HoverColorProperty[];
   @State @Require maxFontScale: number | Resource = 0.0;
-  @State buttonWidth: number[] = new Array<number>(MAX_ITEM_COUNT).fill(0);
-  @State buttonHeight: number[] = new Array<number>(MAX_ITEM_COUNT).fill(0);
+  @State buttonWidth: number[] = Array.create<number>(MAX_ITEM_COUNT, 0);
+  @State buttonHeight: number[] = Array.create<number>(MAX_ITEM_COUNT, 0);
   @State isMarqueeAndFadeout: boolean = false;
-  @State buttonItemsRealHeight: number[] = new Array<number>(MAX_ITEM_COUNT).fill(0);
+  @State buttonItemsRealHeight: number[] = Array.create<number>(MAX_ITEM_COUNT, 0);
   private groupId: string = util.generateRandomUUID(true);
   public onItemClicked?: Callback<int>;
   @State isSegmentFocusStyleCustomized: boolean = false;
@@ -1204,15 +1204,12 @@ struct SegmentButtonItemArrayComponent {
   }
 
   private calculateBorderRadius() {
-    let borderRadiusArray: LocalizedBorderRadiuses[] = new Array<LocalizedBorderRadiuses>(MAX_ITEM_COUNT)
-    for (let i = 0; i < MAX_ITEM_COUNT; i++) {
-      borderRadiusArray[i] = {
+    let borderRadiusArray: LocalizedBorderRadiuses[] = Array.create<LocalizedBorderRadiuses>(MAX_ITEM_COUNT, {
         topStart: LengthMetrics.vp(0),
         topEnd: LengthMetrics.vp(0),
         bottomStart: LengthMetrics.vp(0),
         bottomEnd: LengthMetrics.vp(0)
-      }
-    }
+      })
 
     const setAllCorners = (array: LocalizedBorderRadiuses[], index: int, lengthMetrics: LengthMetrics) => {
       if (!array || index < 0 || index >= array.length) {
@@ -1508,15 +1505,12 @@ export struct SegmentButton {
   @State maxFontScale: number | Resource = DEFAULT_MAX_FONT_SCALE
   @Provide componentSize: SizeOptions = { width: 0.0, height: 0.0 } as SizeOptions
   @Provide buttonBorderRadius: LocalizedBorderRadiuses[] = (() => {
-    let array = new Array<LocalizedBorderRadiuses>(MAX_ITEM_COUNT)
-    for (let i = 0; i < MAX_ITEM_COUNT; i++) {
-      array[i] = {
+    let array = Array.create<LocalizedBorderRadiuses>(MAX_ITEM_COUNT, {
         topStart: LengthMetrics.vp(0),
         topEnd: LengthMetrics.vp(0),
         bottomStart: LengthMetrics.vp(0),
         bottomEnd: LengthMetrics.vp(0)
-      };
-    }
+      })
     return array;
   })()
   @Provide buttonItemsSize: SizeOptions[] = (() => {
@@ -1527,25 +1521,19 @@ export struct SegmentButton {
     return arr;
   })()
   @Provide @Watch('onItemsPositionChange') buttonItemsPosition: LocalizedEdges[] = (() => {
-    let array = new Array<LocalizedEdges>(MAX_ITEM_COUNT)
-    for (let i = 0; i < MAX_ITEM_COUNT; i++) {
-      array[i] = {};
-    }
+    let array = Array.create<LocalizedEdges>(MAX_ITEM_COUNT, {})
     return array;
   })()
-  @Provide buttonItemsSelected: boolean[] = new Array<boolean>(MAX_ITEM_COUNT).fill(false);
+  @Provide buttonItemsSelected: boolean[] = Array.create<boolean>(MAX_ITEM_COUNT, false);
   @Provide buttonItemProperty: ItemProperty[] = (() => {
-    let array = new Array<ItemProperty>(MAX_ITEM_COUNT)
-    for (let i = 0; i < MAX_ITEM_COUNT; i++) {
-      array[i] = new ItemProperty();
-    }
+    let array = Array.create<ItemProperty>(MAX_ITEM_COUNT, new ItemProperty())
     return array;
   })()
   @Provide focusIndex: int = -1;
   @Provide selectedItemPosition: LocalizedEdges = {} as LocalizedEdges;
-  @Provide zoomScaleArray: number[] = Array<number>(MAX_ITEM_COUNT).fill(1.0);
-  @State pressArray: boolean[] = new Array<boolean>(MAX_ITEM_COUNT).fill(false);
-  @State hoverArray: boolean[] = new Array<boolean>(MAX_ITEM_COUNT).fill(false);
+  @Provide zoomScaleArray: number[] = Array.create<number>(MAX_ITEM_COUNT, 1.0);
+  @State pressArray: boolean[] = Array.create<boolean>(MAX_ITEM_COUNT, false);
+  @State hoverArray: boolean[] = Array.create<boolean>(MAX_ITEM_COUNT, false);
   @State hoverColorArray: HoverColorProperty[] = (() => {
     let arr: HoverColorProperty[] = [];
     for (let i = 0; i < MAX_ITEM_COUNT; i++) {

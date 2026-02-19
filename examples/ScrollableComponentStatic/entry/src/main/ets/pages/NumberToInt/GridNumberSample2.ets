@@ -22,7 +22,7 @@ import hilog from '@ohos.hilog'
 @Entry
 @Component
 struct GridExample {
-  numbers: Array<number> = new Array<number>(30).fill(0);
+  numbers: Array<number> = Array.create<number>(30, 0);
 
 
 
