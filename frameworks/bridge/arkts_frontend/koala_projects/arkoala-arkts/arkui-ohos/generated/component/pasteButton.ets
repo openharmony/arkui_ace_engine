@@ -130,20 +130,6 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
         super.applyOptionsFinish(traceName)
     }
 }
-
-@memo
-export function PasteButtonImpl(
-    @memo @memo_skip
-    style: ((attributes: PasteButtonAttribute) => void) | undefined,
-): void {
-    const receiver = remember<ArkPasteButtonComponent>((): ArkPasteButtonComponent => {
-        return new ArkPasteButtonComponent()
-    })
-    NodeAttach<ArkPasteButtonPeer>((): ArkPasteButtonPeer => ArkPasteButtonPeer.create(receiver), (_: ArkPasteButtonPeer): void => {
-        style?.(receiver)
-    })
-}
-
 export class PasteButtonOptions_serializer {
     public static write(buffer: SerializerBase, value: PasteButtonOptions): void {
         let valueSerializer: SerializerBase = buffer
