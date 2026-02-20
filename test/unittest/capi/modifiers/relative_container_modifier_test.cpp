@@ -89,7 +89,7 @@ void checkGuideLineData(Ark_NodeHandle node, std::vector<string> vecId,
     std::vector<string> vecStart, std::vector<string> vecEnd)
 {
     auto jsonValue = GetJsonValue(node);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_GUIDE_LINE_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_GUIDE_LINE_NAME);
     ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), vecId.size());
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -100,7 +100,7 @@ void checkGuideLineData(Ark_NodeHandle node, std::vector<string> vecId,
         } else {
             EXPECT_EQ(itemJson->GetString(ATTR_GUIDE_LINE_DIRECTION), "Axis.Vertical");
         }
-        auto posJson = GetAttrValue<std::unique_ptr<JsonValue>>(itemJson, ATTR_GUIDE_LINE_POSITION);
+        auto posJson = GetAttrObject(itemJson, ATTR_GUIDE_LINE_POSITION);
         EXPECT_EQ(posJson->GetString(ATTR_GUIDE_LINE_START), vecStart[i]);
         EXPECT_EQ(posJson->GetString(ATTR_GUIDE_LINE_END), vecEnd[i]);
     }
@@ -120,7 +120,7 @@ void checkBarrierData(Ark_NodeHandle node, std::vector<string> vecId,
     std::vector<string> vecRedId)
 {
     auto jsonValue = GetJsonValue(node);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BARRIER_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_BARRIER_NAME);
     ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), vecId.size());
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -128,7 +128,7 @@ void checkBarrierData(Ark_NodeHandle node, std::vector<string> vecId,
         EXPECT_EQ(itemJson->GetString(ATTR_BARRIER_ID), vecId[i]);
         auto expectedDir =  ExpectedBarrierDirValue(vecBarrierDir[i]);
         EXPECT_EQ(itemJson->GetString(ATTR_BARRIER_DIRECTION), expectedDir);
-        auto refIdJson = GetAttrValue<std::unique_ptr<JsonValue>>(itemJson, ATTR_BARRIER_REF_ID);
+        auto refIdJson = GetAttrObject(itemJson, ATTR_BARRIER_REF_ID);
         for (int j = 0; j < refIdJson->GetArraySize(); j++) {
             auto refIdItem = refIdJson->GetArrayItem(j);
             EXPECT_EQ(refIdItem->GetString(), vecRedId[j]);
@@ -151,10 +151,10 @@ class RelativeContainerModifierTest : public ModifierTestBase<
 HWTEST_F(RelativeContainerModifierTest, DISABLED_setTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_GUIDE_LINE_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_GUIDE_LINE_NAME);
     ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
-    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BARRIER_NAME);
+    jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_BARRIER_NAME);
     EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
 }
 

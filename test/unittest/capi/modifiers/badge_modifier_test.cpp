@@ -138,9 +138,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptionsTestDefaultValues, TestSize.Level1)
     auto jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
 
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : DEFAULT_0_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected);
@@ -186,9 +186,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptionsTestNumberEmptyValues, TestSize.Level
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : EMPTY_0_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected);
@@ -250,9 +250,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptionsTestNumberValidValues, TestSize.Level
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : VALID_0_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected) << "Attribute style." << key;
@@ -316,9 +316,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptionsTestNumberInvalidValues, TestSize.Lev
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : INVALID_0_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected) << "Attribute style." << key;
@@ -363,9 +363,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptionsTestStringEmptyValues, TestSize.Level
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : EMPTY_1_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected) << "Attribute style." << key;
@@ -424,9 +424,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptionsTestStringValidValues, TestSize.Level
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : VALID_1_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected) << "Attribute style." << key;
@@ -487,9 +487,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptionsTestStringInvalidValues, TestSize.Lev
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : INVALID_1_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected) << "Attribute style." << key;

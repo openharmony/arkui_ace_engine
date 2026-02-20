@@ -46,13 +46,13 @@ class NavigatorModifierTest : public ModifierTestBase<GENERATED_ArkUINavigatorMo
 HWTEST_F(NavigatorModifierTest, DISABLED_setNavigatorOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TARGET_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TARGET_DEFAULT_VALUE));
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
 }
 
 /*
@@ -63,7 +63,7 @@ HWTEST_F(NavigatorModifierTest, DISABLED_setNavigatorOptionsTestDefaultValues, T
 HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     ASSERT_NE(modifier_->setNavigatorOptions0, nullptr);
 
@@ -81,9 +81,9 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestValidValues, TestSize.Le
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
-    EXPECT_EQ(resultStr, testValue);
+    EXPECT_THAT(resultStr, Eq(testValue));
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, "NavigationType.Replace");
+    EXPECT_THAT(resultStr, Eq("NavigationType.Replace"));
 }
 
 /*
@@ -94,7 +94,7 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestValidValues, TestSize.Le
 HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     ASSERT_NE(modifier_->setNavigatorOptions0, nullptr);
 
@@ -111,9 +111,9 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestInvalidValues, TestSize.
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TARGET_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TARGET_DEFAULT_VALUE));
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
 }
 
 /*
@@ -124,7 +124,7 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestInvalidValues, TestSize.
 HWTEST_F(NavigatorModifierTest, DISABLED_setNavigatorOptions1Test, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     ASSERT_NE(modifier_->setNavigatorOptions1, nullptr);
 
@@ -134,9 +134,9 @@ HWTEST_F(NavigatorModifierTest, DISABLED_setNavigatorOptions1Test, TestSize.Leve
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TARGET_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TARGET_DEFAULT_VALUE));
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
 }
 
 /*
@@ -147,7 +147,7 @@ HWTEST_F(NavigatorModifierTest, DISABLED_setNavigatorOptions1Test, TestSize.Leve
 HWTEST_F(NavigatorModifierTest, DISABLED_setActiveTestDefaultValues, TestSize.Level1)
 {
     auto resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_ACTIVE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ACTIVE_DEFAULT_VALUE));
 }
 
 /*
@@ -157,7 +157,7 @@ HWTEST_F(NavigatorModifierTest, DISABLED_setActiveTestDefaultValues, TestSize.Le
  */
 HWTEST_F(NavigatorModifierTest, setActiveTestValidValues, TestSize.Level1)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     ASSERT_NE(modifier_->setActive, nullptr);
 
@@ -167,13 +167,13 @@ HWTEST_F(NavigatorModifierTest, setActiveTestValidValues, TestSize.Level1)
 
     // Initial verification
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_ACTIVE_NAME);
-    EXPECT_EQ(resultStr, "true");
+    EXPECT_THAT(resultStr, Eq("true"));
 
     // Verifying attribute's other values
     optInputValueActive = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setActive(node_, &optInputValueActive);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_ACTIVE_NAME);
-    EXPECT_EQ(resultStr, "false");
+    EXPECT_THAT(resultStr, Eq("false"));
 }
 
 /*
@@ -184,7 +184,7 @@ HWTEST_F(NavigatorModifierTest, setActiveTestValidValues, TestSize.Level1)
 HWTEST_F(NavigatorModifierTest, DISABLED_setTypeTestDefaultValues, TestSize.Level1)
 {
     auto resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
 }
 
 /*
@@ -195,7 +195,7 @@ HWTEST_F(NavigatorModifierTest, DISABLED_setTypeTestDefaultValues, TestSize.Leve
 HWTEST_F(NavigatorModifierTest, setTypeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     ASSERT_NE(modifier_->setType, nullptr);
 
@@ -206,20 +206,20 @@ HWTEST_F(NavigatorModifierTest, setTypeTestValidValues, TestSize.Level1)
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, "NavigationType.Push");
+    EXPECT_THAT(resultStr, Eq("NavigationType.Push"));
 
     // Verifying attribute's other values
     optInputValueType = Converter::ArkValue<Opt_NavigationType>(ARK_NAVIGATION_TYPE_BACK);
     modifier_->setType(node_, &optInputValueType);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, "NavigationType.Back");
+    EXPECT_THAT(resultStr, Eq("NavigationType.Back"));
 
     optInputValueType = Converter::ArkValue<Opt_NavigationType>(ARK_NAVIGATION_TYPE_REPLACE);
     modifier_->setType(node_, &optInputValueType);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, "NavigationType.Replace");
+    EXPECT_THAT(resultStr, Eq("NavigationType.Replace"));
 }
 
 /*
@@ -230,7 +230,7 @@ HWTEST_F(NavigatorModifierTest, setTypeTestValidValues, TestSize.Level1)
 HWTEST_F(NavigatorModifierTest, DISABLED_setTypeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     ASSERT_NE(modifier_->setType, nullptr);
 
@@ -241,7 +241,7 @@ HWTEST_F(NavigatorModifierTest, DISABLED_setTypeTestInvalidValues, TestSize.Leve
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
 }
 
 /*
@@ -252,10 +252,10 @@ HWTEST_F(NavigatorModifierTest, DISABLED_setTypeTestInvalidValues, TestSize.Leve
 HWTEST_F(NavigatorModifierTest, setTargetTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TARGET_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TARGET_DEFAULT_VALUE));
 }
 
 /*
@@ -266,7 +266,7 @@ HWTEST_F(NavigatorModifierTest, setTargetTestDefaultValues, TestSize.Level1)
 HWTEST_F(NavigatorModifierTest, setTargetTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     ASSERT_NE(modifier_->setTarget, nullptr);
 
@@ -277,14 +277,14 @@ HWTEST_F(NavigatorModifierTest, setTargetTestValidValues, TestSize.Level1)
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
-    EXPECT_EQ(resultStr, "");
+    EXPECT_THAT(resultStr, Eq(""));
 
     // Verifying attribute's other values
     optInputValueType = Converter::ArkValue<Opt_String>("abc");
     modifier_->setTarget(node_, &optInputValueType);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
-    EXPECT_EQ(resultStr, "abc");
+    EXPECT_THAT(resultStr, Eq("abc"));
 }
 
 /*

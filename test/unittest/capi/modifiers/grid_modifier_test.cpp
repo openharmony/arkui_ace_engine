@@ -145,16 +145,16 @@ public:
  */
 HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestDefaultLayoutOptionaValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_DEFAULT_VALUE));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SET_REGULAR_SIZE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SET_REGULAR_SIZE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_REGULAR_SIZE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SET_REGULAR_SIZE_DEFAULT_VALUE));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SET_IRREGULAR_INDEXES_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SET_IRREGULAR_INDEXES_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_IRREGULAR_INDEXES_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SET_IRREGULAR_INDEXES_DEFAULT_VALUE));
 }
 
 /*
@@ -164,7 +164,7 @@ HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestDefaultLayoutOptionaValues
  */
 HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestValidLayoutOptionsValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Opt_Scroller inputValue0;
     Ark_GridLayoutOptions layoutOptions;
     Opt_GridLayoutOptions inputValue1;
@@ -177,21 +177,21 @@ HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestValidLayoutOptionsValues, 
     layoutOptions.irregularIndexes = Converter::ArkValue<Opt_Array_Int32>(indexesArrayResult);
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
-    EXPECT_EQ(strResult, "true");
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SET_REGULAR_SIZE_NAME);
-    EXPECT_EQ(strResult, "[1,1]");
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SET_IRREGULAR_INDEXES_NAME);
-    EXPECT_EQ(strResult, "[1,2,3,4,5]");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
+    EXPECT_THAT(strResult, Eq("true"));
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_REGULAR_SIZE_NAME);
+    EXPECT_THAT(strResult, Eq("[1,1]"));
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_IRREGULAR_INDEXES_NAME);
+    EXPECT_THAT(strResult, Eq("[1,2,3,4,5]"));
 
     layoutOptions.regularSize.value0 = Converter::ArkValue<Ark_Int32>(2);
     layoutOptions.regularSize.value1 = Converter::ArkValue<Ark_Int32>(2);
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
-    EXPECT_EQ(strResult, "true");
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SET_REGULAR_SIZE_NAME);
-    EXPECT_EQ(strResult, "[1,1]");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
+    EXPECT_THAT(strResult, Eq("true"));
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_REGULAR_SIZE_NAME);
+    EXPECT_THAT(strResult, Eq("[1,1]"));
 }
 
 /*
@@ -201,19 +201,19 @@ HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestValidLayoutOptionsValues, 
  */
 HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestInvalidLayoutOptionsValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Opt_Scroller inputValue0;
     Ark_GridLayoutOptions layoutOptions;
     Opt_GridLayoutOptions inputValue1;
 
     inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(layoutOptions);
     modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
-    EXPECT_EQ(strResult, "true");
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SET_REGULAR_SIZE_NAME);
-    EXPECT_EQ(strResult, "[1,1]");
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SET_IRREGULAR_INDEXES_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SET_IRREGULAR_INDEXES_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_GRID_OPTIONS_LAYOUT_OPTIONS_NAME);
+    EXPECT_THAT(strResult, Eq("true"));
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_REGULAR_SIZE_NAME);
+    EXPECT_THAT(strResult, Eq("[1,1]"));
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SET_IRREGULAR_INDEXES_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SET_IRREGULAR_INDEXES_DEFAULT_VALUE));
 }
 
 /*
@@ -390,10 +390,10 @@ HWTEST_F(GridModifierTest, setGridOptionsTestGetRectByIndex, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setColumnsTemplateTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE));
 }
 
 /*
@@ -403,19 +403,19 @@ HWTEST_F(GridModifierTest, setColumnsTemplateTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setColumnsTemplateTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
     // check '1fr 1fr 1fr' template
     auto optInputValue = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("1fr 1fr 1fr");
     modifier_->setColumnsTemplate(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, "1fr 1fr 1fr");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
+    EXPECT_THAT(strResult, Eq("1fr 1fr 1fr"));
 
     // check '2fr' template
     optInputValue = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("2fr");
     modifier_->setColumnsTemplate(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, "2fr");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
+    EXPECT_THAT(strResult, Eq("2fr"));
 }
 
 /*
@@ -425,21 +425,21 @@ HWTEST_F(GridModifierTest, setColumnsTemplateTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setColumnsTemplateTestInvalidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     auto initValue = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("1fr");
 
     // check empty template
     auto inputValue = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("");
     modifier_->setColumnsTemplate(node_, &initValue);
     modifier_->setColumnsTemplate(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE));
 
     inputValue = Converter::ArkValue<Opt_Union_String_ItemFillPolicy>();
     modifier_->setColumnsTemplate(node_, &initValue);
     modifier_->setColumnsTemplate(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE));
 }
 
 /*
@@ -449,10 +449,10 @@ HWTEST_F(GridModifierTest, setColumnsTemplateTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setRowsTemplateTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE));
 }
 
 /*
@@ -462,22 +462,22 @@ HWTEST_F(GridModifierTest, setRowsTemplateTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setRowsTemplateTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_String inputValue;
 
     // check '1fr 1fr 1fr' template
     inputValue = Converter::ArkValue<Ark_String>("1fr 1fr 1fr");
     auto optInputValue = Converter::ArkValue<Opt_String>(inputValue);
     modifier_->setRowsTemplate(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, "1fr 1fr 1fr");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
+    EXPECT_THAT(strResult, Eq("1fr 1fr 1fr"));
 
     // check '2fr' template
     inputValue = Converter::ArkValue<Ark_String>("2fr");
     optInputValue = Converter::ArkValue<Opt_String>(inputValue);
     modifier_->setRowsTemplate(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, "2fr");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
+    EXPECT_THAT(strResult, Eq("2fr"));
 }
 
 /*
@@ -487,7 +487,7 @@ HWTEST_F(GridModifierTest, setRowsTemplateTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setRowsTemplateTestInvalidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Opt_String inputValue;
     auto initValue = Converter::ArkValue<Opt_String>("1fr");
 
@@ -495,14 +495,14 @@ HWTEST_F(GridModifierTest, setRowsTemplateTestInvalidValues, TestSize.Level1)
     inputValue = Converter::ArkValue<Opt_String>("");
     modifier_->setRowsTemplate(node_, &initValue);
     modifier_->setRowsTemplate(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE));
 
     inputValue = Converter::ArkValue<Opt_String>();
     modifier_->setRowsTemplate(node_, &initValue);
     modifier_->setRowsTemplate(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROWS_TEMPLATE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE));
 }
 
 /*
@@ -512,10 +512,10 @@ HWTEST_F(GridModifierTest, setRowsTemplateTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setColumnsGapTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_COLUMNS_GAP_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_COLUMNS_GAP_DEFAULT_VALUE));
 }
 
 /*
@@ -525,29 +525,29 @@ HWTEST_F(GridModifierTest, setColumnsGapTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setColumnsGapTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_Length inputValue;
 
     // set 2vp
     inputValue = Converter::ArkValue<Ark_Length>(2.f);
     auto optInputValue = Converter::ArkValue<Opt_Length>(inputValue);
     modifier_->setColumnsGap(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_EQ(strResult, "2.00vp");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
+    EXPECT_THAT(strResult, Eq("2.00vp"));
 
     // set 50.35vp
     inputValue = Converter::ArkValue<Ark_Length>(50.35f);
     optInputValue = Converter::ArkValue<Opt_Length>(inputValue);
     modifier_->setColumnsGap(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_EQ(strResult, "50.35vp");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
+    EXPECT_THAT(strResult, Eq("50.35vp"));
 
     // set 0vp
     inputValue = Converter::ArkValue<Ark_Length>(0.f);
     optInputValue = Converter::ArkValue<Opt_Length>(inputValue);
     modifier_->setColumnsGap(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_EQ(strResult, "0.00vp");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
+    EXPECT_THAT(strResult, Eq("0.00vp"));
 }
 
 /*
@@ -560,8 +560,8 @@ HWTEST_F(GridModifierTest, setColumnsGapTestValidResourceValues, TestSize.Level1
     Ark_Length inputValue = RES_ARK_LENGTH;
     auto optInputValue = Converter::ArkValue<Opt_Length>(inputValue);
     modifier_->setColumnsGap(node_, &optInputValue);
-    auto strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_EQ(strResult, "10.00px");
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
+    EXPECT_THAT(strResult, Eq("10.00px"));
 }
 
 /*
@@ -571,16 +571,16 @@ HWTEST_F(GridModifierTest, setColumnsGapTestValidResourceValues, TestSize.Level1
  */
 HWTEST_F(GridModifierTest, DISABLED_setColumnsGapTestInvalidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_Length inputValue;
 
     // set -1vp
     inputValue = Converter::ArkValue<Ark_Length>(-1.f);
     auto optInputValue = Converter::ArkValue<Opt_Length>(inputValue);
     modifier_->setColumnsGap(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_NE(strResult, "-1.00vp");
-    EXPECT_EQ(strResult, ATTRIBUTE_COLUMNS_GAP_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
+    EXPECT_THAT(strResult, Ne("-1.00vp"));
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_COLUMNS_GAP_DEFAULT_VALUE));
 }
 
 /*
@@ -590,10 +590,10 @@ HWTEST_F(GridModifierTest, DISABLED_setColumnsGapTestInvalidValues, TestSize.Lev
  */
 HWTEST_F(GridModifierTest, setRowsGapTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ROWS_GAP_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROWS_GAP_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ROWS_GAP_DEFAULT_VALUE));
 }
 
 /*
@@ -603,29 +603,29 @@ HWTEST_F(GridModifierTest, setRowsGapTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setRowsGapTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_Length inputValue;
 
     // set 2vp
     inputValue = Converter::ArkValue<Ark_Length>(2.f);
     auto optInputValue = Converter::ArkValue<Opt_Length>(inputValue);
     modifier_->setRowsGap(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_EQ(strResult, "2.00vp");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROWS_GAP_NAME);
+    EXPECT_THAT(strResult, Eq("2.00vp"));
 
     // set 50.35vp
     inputValue = Converter::ArkValue<Ark_Length>(50.35f);
     optInputValue = Converter::ArkValue<Opt_Length>(inputValue);
     modifier_->setRowsGap(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_EQ(strResult, "50.35vp");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROWS_GAP_NAME);
+    EXPECT_THAT(strResult, Eq("50.35vp"));
 
     // set 0vp
     inputValue = Converter::ArkValue<Ark_Length>(0.f);
     optInputValue = Converter::ArkValue<Opt_Length>(inputValue);
     modifier_->setRowsGap(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_EQ(strResult, "0.00vp");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROWS_GAP_NAME);
+    EXPECT_THAT(strResult, Eq("0.00vp"));
 }
 
 /*
@@ -638,8 +638,8 @@ HWTEST_F(GridModifierTest, setRowsGapTestValidResourceValues, TestSize.Level1)
     Ark_Length inputValue = RES_ARK_LENGTH;
     auto optInputValue = Converter::ArkValue<Opt_Length>(inputValue);
     modifier_->setRowsGap(node_, &optInputValue);
-    auto strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_EQ(strResult, "10.00px");
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROWS_GAP_NAME);
+    EXPECT_THAT(strResult, Eq("10.00px"));
 }
 
 /*
@@ -649,16 +649,16 @@ HWTEST_F(GridModifierTest, setRowsGapTestValidResourceValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, DISABLED_setRowsGapTestInvalidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_Length inputValue;
 
     // set -1vp
     inputValue = Converter::ArkValue<Ark_Length>(-1.f);
     auto optInputValue = Converter::ArkValue<Opt_Length>(inputValue);
     modifier_->setRowsGap(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_NE(strResult, "-1.00vp");
-    EXPECT_EQ(strResult, ATTRIBUTE_ROWS_GAP_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ROWS_GAP_NAME);
+    EXPECT_THAT(strResult, Ne("-1.00vp"));
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ROWS_GAP_DEFAULT_VALUE));
 }
 
 /*
@@ -668,10 +668,10 @@ HWTEST_F(GridModifierTest, DISABLED_setRowsGapTestInvalidValues, TestSize.Level1
  */
 HWTEST_F(GridModifierTest, setScrollBarWidthTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_WIDTH_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SCROLL_BAR_WIDTH_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SCROLL_BAR_WIDTH_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SCROLL_BAR_WIDTH_DEFAULT_VALUE));
 }
 
 /*
@@ -681,10 +681,10 @@ HWTEST_F(GridModifierTest, setScrollBarWidthTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setScrollBarColorTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SCROLL_BAR_COLOR_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SCROLL_BAR_COLOR_DEFAULT_VALUE));
 }
 
 /*
@@ -694,10 +694,10 @@ HWTEST_F(GridModifierTest, setScrollBarColorTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setScrollBarTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SCROLL_BAR_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SCROLL_BAR_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SCROLL_BAR_DEFAULT_VALUE));
 }
 
 /*
@@ -707,10 +707,10 @@ HWTEST_F(GridModifierTest, setScrollBarTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setCachedCount0TestDefaultValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
 
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE));
 }
 
 /*
@@ -720,7 +720,7 @@ HWTEST_F(GridModifierTest, setCachedCount0TestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setCachedCount0TestValidValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
     Ark_Int32 inputValue;
 
     // check 0 value
@@ -728,21 +728,21 @@ HWTEST_F(GridModifierTest, setCachedCount0TestValidValues, TestSize.Level1)
     auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
-    EXPECT_EQ(intResult, 0);
+    EXPECT_THAT(intResult, Eq(0));
 
     // check 5 value
     inputValue = Converter::ArkValue<Ark_Int32>(5);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
-    EXPECT_EQ(intResult, 5);
+    EXPECT_THAT(intResult, Eq(5));
 
     // check maximum value
     inputValue = Converter::ArkValue<Ark_Int32>(INT_MAX);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
-    EXPECT_EQ(intResult, INT_MAX);
+    EXPECT_THAT(intResult, Eq(INT_MAX));
 }
 
 /*
@@ -752,33 +752,33 @@ HWTEST_F(GridModifierTest, setCachedCount0TestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, DISABLED_setCachedCount0TestInvalidValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
     Ark_Int32 inputValue;
 
     modifier_->setCachedCount0(node_, nullptr);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE));
 
     // check minimum value
     inputValue = Converter::ArkValue<Ark_Int32>(INT_MIN);
     auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE));
 
     // check negative value
     inputValue = Converter::ArkValue<Ark_Int32>(-1);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE));
 
     // check float value
     inputValue = Converter::ArkValue<Ark_Int32>(2.2f);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setCachedCount0(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CACHED_COUNT_NAME);
-    EXPECT_EQ(intResult, 2);
+    EXPECT_THAT(intResult, Eq(2));
 }
 
 /*
@@ -788,10 +788,10 @@ HWTEST_F(GridModifierTest, DISABLED_setCachedCount0TestInvalidValues, TestSize.L
  */
 HWTEST_F(GridModifierTest, setEditModeTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDIT_MODE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_EDIT_MODE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_EDIT_MODE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_EDIT_MODE_DEFAULT_VALUE));
 }
 
 /*
@@ -801,22 +801,22 @@ HWTEST_F(GridModifierTest, setEditModeTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setEditModeTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_Boolean inputValue;
 
     // check true value
     inputValue = Converter::ArkValue<Ark_Boolean>(true);
     auto optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
     modifier_->setEditMode(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDIT_MODE_NAME);
-    EXPECT_EQ(strResult, "true");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_EDIT_MODE_NAME);
+    EXPECT_THAT(strResult, Eq("true"));
 
     // check false value
     inputValue = Converter::ArkValue<Ark_Boolean>(false);
     optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
     modifier_->setEditMode(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDIT_MODE_NAME);
-    EXPECT_EQ(strResult, "false");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_EDIT_MODE_NAME);
+    EXPECT_THAT(strResult, Eq("false"));
 }
 
 /*
@@ -826,10 +826,10 @@ HWTEST_F(GridModifierTest, setEditModeTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setMultiSelectableTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_MULTI_SELECTABLE_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_MULTI_SELECTABLE_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_MULTI_SELECTABLE_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_MULTI_SELECTABLE_DEFAULT_VALUE));
 }
 
 /*
@@ -839,22 +839,22 @@ HWTEST_F(GridModifierTest, setMultiSelectableTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setMultiSelectableTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_Boolean inputValue;
 
     // check true value
     inputValue = Converter::ArkValue<Ark_Boolean>(true);
     auto optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
     modifier_->setMultiSelectable(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_MULTI_SELECTABLE_NAME);
-    EXPECT_EQ(strResult, "true");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_MULTI_SELECTABLE_NAME);
+    EXPECT_THAT(strResult, Eq("true"));
 
     // check false value
     inputValue = Converter::ArkValue<Ark_Boolean>(false);
     optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
     modifier_->setMultiSelectable(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_MULTI_SELECTABLE_NAME);
-    EXPECT_EQ(strResult, "false");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_MULTI_SELECTABLE_NAME);
+    EXPECT_THAT(strResult, Eq("false"));
 }
 
 /*
@@ -864,10 +864,10 @@ HWTEST_F(GridModifierTest, setMultiSelectableTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setMaxCountTestDefaultValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
 
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE));
 }
 
 /*
@@ -877,7 +877,7 @@ HWTEST_F(GridModifierTest, setMaxCountTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setMaxCountTestValidValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
     Ark_Int32 inputValue;
 
     // check 5 value
@@ -885,14 +885,14 @@ HWTEST_F(GridModifierTest, setMaxCountTestValidValues, TestSize.Level1)
     auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(intResult, 5);
+    EXPECT_THAT(intResult, Eq(5));
 
     // check maximum value
     inputValue = Converter::ArkValue<Ark_Int32>(INT_MAX);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(intResult, INT_MAX);
+    EXPECT_THAT(intResult, Eq(INT_MAX));
 }
 
 /*
@@ -902,40 +902,40 @@ HWTEST_F(GridModifierTest, setMaxCountTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, DISABLED_setMaxCountTestInvalidValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
     Ark_Int32 inputValue;
 
     modifier_->setMaxCount(node_, nullptr);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE));
 
     // check 0 value
     inputValue = Converter::ArkValue<Ark_Int32>(0);
     auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE));
 
     // check minimum value
     inputValue = Converter::ArkValue<Ark_Int32>(INT_MIN);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE));
 
     // check negative value
     inputValue = Converter::ArkValue<Ark_Int32>(-2);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE));
 
     // check float value
     inputValue = Converter::ArkValue<Ark_Int32>(5.3f);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMaxCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(intResult, 5);
+    EXPECT_THAT(intResult, Eq(5));
 }
 
 /*
@@ -945,10 +945,10 @@ HWTEST_F(GridModifierTest, DISABLED_setMaxCountTestInvalidValues, TestSize.Level
  */
 HWTEST_F(GridModifierTest, setMinCountTestDefaultValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
 
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE));
 }
 
 /*
@@ -958,7 +958,7 @@ HWTEST_F(GridModifierTest, setMinCountTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setMinCountTestValidValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
     Ark_Int32 inputValue;
 
     // check 5 value
@@ -966,14 +966,14 @@ HWTEST_F(GridModifierTest, setMinCountTestValidValues, TestSize.Level1)
     auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
-    EXPECT_EQ(intResult, 5);
+    EXPECT_THAT(intResult, Eq(5));
 
     // check maximum value
     inputValue = Converter::ArkValue<Ark_Int32>(INT_MAX);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
-    EXPECT_EQ(intResult, INT_MAX);
+    EXPECT_THAT(intResult, Eq(INT_MAX));
 }
 
 /*
@@ -983,40 +983,40 @@ HWTEST_F(GridModifierTest, setMinCountTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, DISABLED_setMinCountTestInvalidValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
     Ark_Int32 inputValue;
 
     modifier_->setMinCount(node_, nullptr);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE));
 
     // check 0 value
     inputValue = Converter::ArkValue<Ark_Int32>(0);
     auto optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE));
 
     // check minimum value
     inputValue = Converter::ArkValue<Ark_Int32>(INT_MIN);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE));
 
     // check negative value
     inputValue = Converter::ArkValue<Ark_Int32>(-4);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_MIN_COUNT_DEFAULT_VALUE));
 
     // check float value
     inputValue = Converter::ArkValue<Ark_Int32>(6.4f);
     optInputValue = Converter::ArkValue<Opt_Int32>(inputValue);
     modifier_->setMinCount(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_MIN_COUNT_NAME);
-    EXPECT_EQ(intResult, 6);
+    EXPECT_THAT(intResult, Eq(6));
 }
 
 /*
@@ -1026,10 +1026,10 @@ HWTEST_F(GridModifierTest, DISABLED_setMinCountTestInvalidValues, TestSize.Level
  */
 HWTEST_F(GridModifierTest, setCellLengthTestDefaultValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
 
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CELL_LENGTH_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_CELL_LENGTH_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_CELL_LENGTH_DEFAULT_VALUE));
 }
 
 /*
@@ -1039,7 +1039,7 @@ HWTEST_F(GridModifierTest, setCellLengthTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setCellLengthTestValidValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
     Ark_Float64 inputValue;
 
     // check 1 value
@@ -1047,28 +1047,28 @@ HWTEST_F(GridModifierTest, setCellLengthTestValidValues, TestSize.Level1)
     auto optInputValue = Converter::ArkValue<Opt_Float64>(inputValue);
     modifier_->setCellLength(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CELL_LENGTH_NAME);
-    EXPECT_EQ(intResult, 1);
+    EXPECT_THAT(intResult, Eq(1));
 
     // check 5 value
     inputValue = Converter::ArkValue<Ark_Float64>(5);
     optInputValue = Converter::ArkValue<Opt_Float64>(inputValue);
     modifier_->setCellLength(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CELL_LENGTH_NAME);
-    EXPECT_EQ(intResult, 5);
+    EXPECT_THAT(intResult, Eq(5));
 
     // check maximum value
     inputValue = Converter::ArkValue<Ark_Float64>(INT_MAX);
     optInputValue = Converter::ArkValue<Opt_Float64>(inputValue);
     modifier_->setCellLength(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CELL_LENGTH_NAME);
-    EXPECT_EQ(intResult, INT_MAX);
+    EXPECT_THAT(intResult, Eq(INT_MAX));
 
     // check minimum value
     inputValue = Converter::ArkValue<Ark_Float64>(INT_MIN);
     optInputValue = Converter::ArkValue<Opt_Float64>(inputValue);
     modifier_->setCellLength(node_, &optInputValue);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CELL_LENGTH_NAME);
-    EXPECT_EQ(intResult, INT_MIN);
+    EXPECT_THAT(intResult, Eq(INT_MIN));
 }
 
 /*
@@ -1078,10 +1078,10 @@ HWTEST_F(GridModifierTest, setCellLengthTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, DISABLED_setCellLengthTestInvalidValues, TestSize.Level1)
 {
-    int intResult;
+    std::optional<int> intResult;
     modifier_->setCellLength(node_, nullptr);
     intResult = GetAttrValue<int>(node_, ATTRIBUTE_CELL_LENGTH_NAME);
-    EXPECT_EQ(intResult, ATTRIBUTE_CELL_LENGTH_DEFAULT_VALUE);
+    EXPECT_THAT(intResult, Eq(ATTRIBUTE_CELL_LENGTH_DEFAULT_VALUE));
 }
 
 /*
@@ -1091,10 +1091,10 @@ HWTEST_F(GridModifierTest, DISABLED_setCellLengthTestInvalidValues, TestSize.Lev
  */
 HWTEST_F(GridModifierTest, setLayoutDirectionTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_LAYOUT_DIRECTION_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_LAYOUT_DIRECTION_DEFAULT_VALUE));
 }
 
 /*
@@ -1104,36 +1104,36 @@ HWTEST_F(GridModifierTest, setLayoutDirectionTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setLayoutDirectionTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_GridDirection inputValue;
 
     // check Column direction
     inputValue = ARK_GRID_DIRECTION_COLUMN;
     auto optInputValue = Converter::ArkValue<Opt_GridDirection>(inputValue);
     modifier_->setLayoutDirection(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-    EXPECT_EQ(strResult, "GridDirection.Column");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
+    EXPECT_THAT(strResult, Eq("GridDirection.Column"));
 
     // check Row direction
     inputValue = ARK_GRID_DIRECTION_ROW;
     optInputValue = Converter::ArkValue<Opt_GridDirection>(inputValue);
     modifier_->setLayoutDirection(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-    EXPECT_EQ(strResult, "GridDirection.Row");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
+    EXPECT_THAT(strResult, Eq("GridDirection.Row"));
 
     // check Column Reverse direction
     inputValue = ARK_GRID_DIRECTION_COLUMN_REVERSE;
     optInputValue = Converter::ArkValue<Opt_GridDirection>(inputValue);
     modifier_->setLayoutDirection(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-    EXPECT_EQ(strResult, "GridDirection.ColumnReverse");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
+    EXPECT_THAT(strResult, Eq("GridDirection.ColumnReverse"));
 
     // check Row Reverse direction
     inputValue = ARK_GRID_DIRECTION_ROW_REVERSE;
     optInputValue = Converter::ArkValue<Opt_GridDirection>(inputValue);
     modifier_->setLayoutDirection(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-    EXPECT_EQ(strResult, "GridDirection.RowReverse");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
+    EXPECT_THAT(strResult, Eq("GridDirection.RowReverse"));
 }
 
 /*
@@ -1143,22 +1143,22 @@ HWTEST_F(GridModifierTest, setLayoutDirectionTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setLayoutDirectionTestInvalidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_GridDirection inputValue;
 
     // check value less then possible range
     inputValue = static_cast<Ark_GridDirection>(-1);
     auto optInputValue = Converter::ArkValue<Opt_GridDirection>(inputValue);
     modifier_->setLayoutDirection(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-    EXPECT_EQ(strResult, "GridDirection.Row");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
+    EXPECT_THAT(strResult, Eq("GridDirection.Row"));
 
     // check value more then possible range
     inputValue = static_cast<Ark_GridDirection>(4);
     optInputValue = Converter::ArkValue<Opt_GridDirection>(inputValue);
     modifier_->setLayoutDirection(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-    EXPECT_EQ(strResult, "GridDirection.Row");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
+    EXPECT_THAT(strResult, Eq("GridDirection.Row"));
 }
 
 /*
@@ -1168,10 +1168,10 @@ HWTEST_F(GridModifierTest, setLayoutDirectionTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setSupportAnimationTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SUPPORT_ANIMATION_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_SUPPORT_ANIMATION_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SUPPORT_ANIMATION_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_SUPPORT_ANIMATION_DEFAULT_VALUE));
 }
 
 /*
@@ -1181,22 +1181,22 @@ HWTEST_F(GridModifierTest, setSupportAnimationTestDefaultValues, TestSize.Level1
  */
 HWTEST_F(GridModifierTest, setSupportAnimationTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_Boolean inputValue;
 
     // check true value
     inputValue = Converter::ArkValue<Ark_Boolean>(true);
     auto optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
     modifier_->setSupportAnimation(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SUPPORT_ANIMATION_NAME);
-    EXPECT_EQ(strResult, "true");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SUPPORT_ANIMATION_NAME);
+    EXPECT_THAT(strResult, Eq("true"));
 
     // check false value
     inputValue = Converter::ArkValue<Ark_Boolean>(false);
     optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
     modifier_->setSupportAnimation(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_SUPPORT_ANIMATION_NAME);
-    EXPECT_EQ(strResult, "false");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SUPPORT_ANIMATION_NAME);
+    EXPECT_THAT(strResult, Eq("false"));
 }
 
 /*
@@ -1206,15 +1206,15 @@ HWTEST_F(GridModifierTest, setSupportAnimationTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setEdgeEffectTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
-    bool boolResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_EDGE_EFFECT_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_EDGE_EFFECT_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_EDGE_EFFECT_DEFAULT_VALUE));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_EDGE_EFFECT_OPTIONS_NAME);
-    boolResult = GetAttrValue<bool>(strResult, ATTRIBUTE_ALWAYS_ENABLED_NAME);
-    EXPECT_EQ(boolResult, ATTRIBUTE_ALWAYS_ENABLED_DEFAULT_VALUE);
+    auto jsonValue = GetJsonValue(node_);
+    auto jsonEdgeEffectOptions = GetAttrObject(jsonValue, ATTRIBUTE_EDGE_EFFECT_OPTIONS_NAME);
+    auto boolResult = GetAttrValue<bool>(jsonEdgeEffectOptions, ATTRIBUTE_ALWAYS_ENABLED_NAME);
+    EXPECT_THAT(boolResult, Eq(ATTRIBUTE_ALWAYS_ENABLED_DEFAULT_VALUE));
 }
 
 /*
@@ -1224,13 +1224,14 @@ HWTEST_F(GridModifierTest, setEdgeEffectTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setNestedScrollTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_NESTED_SCROLL_NAME);
-    std::string strScrollForward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_FORWARD_NAME);
-    std::string strScrollBackward = GetAttrValue<std::string>(strResult, ATTRIBUTE_SCROLL_BACKWARD_NAME);
-    EXPECT_EQ(strScrollForward, ATTRIBUTE_SCROLL_FORWARD_DEFAULT_VALUE);
-    EXPECT_EQ(strScrollBackward, ATTRIBUTE_SCROLL_BACKWARD_DEFAULT_VALUE);
+    auto jsonValue = GetJsonValue(node_);
+    auto jsonNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+    auto strScrollForward = GetAttrValue<std::string>(jsonNestedScroll, ATTRIBUTE_SCROLL_FORWARD_NAME);
+    auto strScrollBackward = GetAttrValue<std::string>(jsonNestedScroll, ATTRIBUTE_SCROLL_BACKWARD_NAME);
+    EXPECT_THAT(strScrollForward, Eq(ATTRIBUTE_SCROLL_FORWARD_DEFAULT_VALUE));
+    EXPECT_THAT(strScrollBackward, Eq(ATTRIBUTE_SCROLL_BACKWARD_DEFAULT_VALUE));
 }
 
 /*
@@ -1240,10 +1241,8 @@ HWTEST_F(GridModifierTest, setNestedScrollTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setEnableScrollInteractionTestDefaultValues, TestSize.Level1)
 {
-    bool boolResult;
-
-    boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
-    EXPECT_EQ(boolResult, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE);
+    auto boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
+    EXPECT_THAT(boolResult, Eq(ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE));
 }
 
 /*
@@ -1253,14 +1252,12 @@ HWTEST_F(GridModifierTest, setEnableScrollInteractionTestDefaultValues, TestSize
  */
 HWTEST_F(GridModifierTest, setFrictionTestDefaultValues, TestSize.Level1)
 {
-    double doubleResult;
-
     auto optColumnsStr = Converter::ArkUnion<Opt_Union_String_ItemFillPolicy, Ark_String>("1fr 1fr 2fr");
     modifier_->setColumnsTemplate(node_, &optColumnsStr);
     OnModifyDone();
 
-    doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_DOUBLE_EQ(doubleResult, ATTRIBUTE_FRICTION_DEFAULT_VALUE);
+    auto doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
+    EXPECT_THAT(doubleResult, Optional(DoubleEq(ATTRIBUTE_FRICTION_DEFAULT_VALUE)));
 }
 
 /*
@@ -1270,10 +1267,10 @@ HWTEST_F(GridModifierTest, setFrictionTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setAlignItemsTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_DEFAULT_VALUE));
 }
 
 /*
@@ -1283,20 +1280,20 @@ HWTEST_F(GridModifierTest, setAlignItemsTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Opt_GridItemAlignment inputValue;
 
     // check Stretch
     inputValue = Converter::ArkValue<Opt_GridItemAlignment>(ARK_GRID_ITEM_ALIGNMENT_STRETCH);
     modifier_->setAlignItems(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
-    EXPECT_EQ(strResult, "GridItemAlignment.Stretch");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
+    EXPECT_THAT(strResult, Eq("GridItemAlignment.Stretch"));
 
     // check Default
     inputValue = Converter::ArkValue<Opt_GridItemAlignment>(ARK_GRID_ITEM_ALIGNMENT_DEFAULT);
     modifier_->setAlignItems(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
-    EXPECT_EQ(strResult, "GridItemAlignment.Default");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
+    EXPECT_THAT(strResult, Eq("GridItemAlignment.Default"));
 }
 
 /*
@@ -1306,13 +1303,13 @@ HWTEST_F(GridModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
  */
 HWTEST_F(GridModifierTest, setAlignItemsTestInvalidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Opt_GridItemAlignment inputValue;
 
     // check undefined
     inputValue = Converter::ArkValue<Opt_GridItemAlignment>(Ark_Empty());
     modifier_->setAlignItems(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
-    EXPECT_EQ(strResult, "GridItemAlignment.Default");
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME);
+    EXPECT_THAT(strResult, Eq("GridItemAlignment.Default"));
 }
 } // namespace OHOS::Ace::NG

@@ -62,38 +62,38 @@ HWTEST_F(LoadingProgressModifierTest, DISABLED_setColorTest, TestSize.Level1)
     constexpr auto propName = "color";
     ASSERT_NE(modifier_->setColor, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, THEME_LOADING_COLOR.ToString());
+    auto checkVal1 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal1, Eq(THEME_LOADING_COLOR.ToString()));
 
     Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
     modifier_->setColor(node_, &optColor);
-    auto checkVal2 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal2, "#FFFFFFFF");
+    auto checkVal2 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal2, Eq("#FFFFFFFF"));
 
     Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123401);
     auto optNumberInt = Converter::ArkValue<Opt_ResourceColor>(numberInt);
     modifier_->setColor(node_, &optNumberInt);
-    auto checkVal3 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal3, "#FF123401");
+    auto checkVal3 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal3, Eq("#FF123401"));
 
     Ark_ResourceColor numberFlt = ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f);
     auto optNumberFlt = Converter::ArkValue<Opt_ResourceColor>(numberFlt);
     modifier_->setColor(node_, &optNumberFlt);
-    auto checkVal4 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal4, "#00000000");
+    auto checkVal4 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal4, Eq("#00000000"));
 
     Ark_ResourceColor strColor = ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
     auto optStrColor = Converter::ArkValue<Opt_ResourceColor>(strColor);
     modifier_->setColor(node_, &optStrColor);
-    auto checkVal5 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal5, "#11223344");
+    auto checkVal5 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal5, Eq("#11223344"));
 
     Ark_ResourceColor strNumber = ArkUnion<Ark_ResourceColor, Ark_String>("65535");
     auto optStrNumber = Converter::ArkValue<Opt_ResourceColor>(strNumber);
     modifier_->setColor(node_, &optStrNumber);
-    auto checkVal6 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal6, "#FF00FFFF");
+    auto checkVal6 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal6, Eq("#FF00FFFF"));
 }
 
 /**
@@ -109,7 +109,7 @@ HWTEST_F(LoadingProgressModifierTest, setColorTestResource, TestSize.Level1)
         modifier_->setColor(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << input;
     };
 
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsResValidValues) {
@@ -127,18 +127,18 @@ HWTEST_F(LoadingProgressModifierTest, setEnableLoadingTest, TestSize.Level1)
     constexpr auto propName = "enableLoading";
     ASSERT_NE(modifier_->setEnableLoading, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, "true");
+    auto checkVal1 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal1, Eq("true"));
 
     auto optValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setEnableLoading(node_, &optValue);
-    auto checkVal2 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal2, "false");
+    auto checkVal2 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal2, Eq("false"));
 
     optValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setEnableLoading(node_, &optValue);
-    auto checkVal3 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal3, "true");
+    auto checkVal3 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal3, Eq("true"));
 }
 
 } // namespace OHOS::Ace::NG

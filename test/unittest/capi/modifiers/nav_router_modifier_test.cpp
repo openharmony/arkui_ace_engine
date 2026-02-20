@@ -55,15 +55,15 @@ class NavRouterModifierTest : public ModifierTestBase<GENERATED_ArkUINavRouterMo
 HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions0Test, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     modifier_->setNavRouterOptions0(node_);
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NAME_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NAME_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_NAME_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PARAM_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PARAM_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PARAM_DEFAULT_VALUE));
 }
 
 /*
@@ -75,13 +75,13 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions0Test, TestSize.Leve
 HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NAME_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NAME_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_NAME_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PARAM_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PARAM_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PARAM_DEFAULT_VALUE));
 }
 
 /*
@@ -93,7 +93,7 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestDefaultValues, 
 HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Ark_RouteInfo inputValueOptions;
 
     // Initial setup
@@ -106,16 +106,16 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestValidValues, Te
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NAME_NAME);
-    EXPECT_EQ(resultStr, "");
+    EXPECT_THAT(resultStr, Eq(""));
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PARAM_NAME);
-    EXPECT_EQ(resultStr, "");
+    EXPECT_THAT(resultStr, Eq(""));
 
     // Verifying attribute's 'name' other values
     inputValueOptions.name = Converter::ArkValue<Ark_String>("abc");
     modifier_->setNavRouterOptions1(node_, &inputValueOptions);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NAME_NAME);
-    EXPECT_EQ(resultStr, "abc");
+    EXPECT_THAT(resultStr, Eq("abc"));
 }
 
 /*
@@ -149,10 +149,10 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setOnStateChangeTest, TestSize.Level1)
 HWTEST_F(NavRouterModifierTest, setModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MODE_MODE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MODE_MODE_DEFAULT_VALUE));
 }
 
 /*
@@ -163,7 +163,7 @@ HWTEST_F(NavRouterModifierTest, setModeTestDefaultValues, TestSize.Level1)
 HWTEST_F(NavRouterModifierTest, setModeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     auto inputValueModeMode = ARK_NAV_ROUTE_MODE_PUSH_WITH_RECREATE;
 
     // Test
@@ -173,7 +173,7 @@ HWTEST_F(NavRouterModifierTest, setModeTestValidValues, TestSize.Level1)
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
-    EXPECT_EQ(resultStr, "NavRouteMode.PUSH_WITH_RECREATE");
+    EXPECT_THAT(resultStr, Eq("NavRouteMode.PUSH_WITH_RECREATE"));
 
     // Verifying attribute's other values
     inputValueModeMode = ARK_NAV_ROUTE_MODE_PUSH;
@@ -181,14 +181,14 @@ HWTEST_F(NavRouterModifierTest, setModeTestValidValues, TestSize.Level1)
     modifier_->setMode(node_, &optInputValueModeMode);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
-    EXPECT_EQ(resultStr, "NavRouteMode.PUSH");
+    EXPECT_THAT(resultStr, Eq("NavRouteMode.PUSH"));
 
     inputValueModeMode = ARK_NAV_ROUTE_MODE_REPLACE;
     optInputValueModeMode = Converter::ArkValue<Opt_NavRouteMode>(inputValueModeMode);
     modifier_->setMode(node_, &optInputValueModeMode);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
-    EXPECT_EQ(resultStr, "NavRouteMode.REPLACE");
+    EXPECT_THAT(resultStr, Eq("NavRouteMode.REPLACE"));
 }
 
 /*
@@ -199,7 +199,7 @@ HWTEST_F(NavRouterModifierTest, setModeTestValidValues, TestSize.Level1)
 HWTEST_F(NavRouterModifierTest, setModeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     // Initial setup
     auto inputValueModeMode = static_cast<Ark_NavRouteMode>(3);
 
@@ -210,6 +210,6 @@ HWTEST_F(NavRouterModifierTest, setModeTestInvalidValues, TestSize.Level1)
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
-    EXPECT_EQ(resultStr, "NavRouteMode.PUSH_WITH_RECREATE");
+    EXPECT_THAT(resultStr, Eq("NavRouteMode.PUSH_WITH_RECREATE"));
 }
 } // namespace OHOS::Ace::NG

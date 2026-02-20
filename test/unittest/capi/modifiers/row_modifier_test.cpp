@@ -61,10 +61,10 @@ public:
 HWTEST_F(RowModifierTest, setAlignItemsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE));
 }
 
 /*
@@ -75,7 +75,7 @@ HWTEST_F(RowModifierTest, setAlignItemsTestDefaultValues, TestSize.Level1)
 HWTEST_F(RowModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_VerticalAlign inputValueAlignItems;
 
@@ -85,7 +85,7 @@ HWTEST_F(RowModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
     expectedStr = "VerticalAlign.Bottom";
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
@@ -96,10 +96,10 @@ HWTEST_F(RowModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
 HWTEST_F(RowModifierTest, setJustifyContentTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JUSTIFY_CONTENT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JUSTIFY_CONTENT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_JUSTIFY_CONTENT_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'justifyContent' of method 'justifyContent'
@@ -127,7 +127,7 @@ static std::vector<std::tuple<std::string, Opt_FlexAlign, std::string>>
 HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_FlexAlign inputValueJustifyContent;
 
@@ -139,7 +139,7 @@ HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JUSTIFY_CONTENT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -152,11 +152,9 @@ HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
 HWTEST_F(RowModifierTest, DISABLED_setPointLightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-    std::string resultStr2;
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-    resultStr2 = GetAttrValue<std::string>(resultStr, ATTRIBUTE_LIGHT_INTENSITY_NAME);
-    EXPECT_EQ(resultStr2, ATTRIBUTE_LIGHT_INTENSITY_DEFAULT_VALUE);
+    auto pointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    auto lightIntensity = GetAttrValue<std::string>(pointLight, ATTRIBUTE_LIGHT_INTENSITY_NAME);
+    EXPECT_THAT(lightIntensity, Eq(ATTRIBUTE_LIGHT_INTENSITY_DEFAULT_VALUE));
 }
 
 /*
@@ -167,9 +165,9 @@ HWTEST_F(RowModifierTest, DISABLED_setPointLightTestDefaultValues, TestSize.Leve
 HWTEST_F(RowModifierTest, DISABLED_setIsReverseTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_REVERSE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_IS_REVERSE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IS_REVERSE_DEFAULT_VALUE));
 }
 // Valid values for attribute 'isReverse'
 static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> isReverseValidValues = {
@@ -185,7 +183,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> isReverseV
 HWTEST_F(RowModifierTest, DISABLED_setReverseTestDefaultValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Boolean inputValueSelect;
     Opt_Boolean initValueSelect;
@@ -201,7 +199,7 @@ HWTEST_F(RowModifierTest, DISABLED_setReverseTestDefaultValidValues, TestSize.Le
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IS_REVERSE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -215,29 +213,25 @@ HWTEST_F(RowModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto resultPointLight =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-    std::string resultStr;
-    double resultDouble;
-
-    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME);
-    resultDouble = StringUtils::StringToDouble(resultStr);
-    EXPECT_NEAR(resultDouble, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE, FLT_EPSILON) <<
+        GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    auto intensityResult = GetAttrValue<double>(resultPointLight,
+        ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME);
+    EXPECT_THAT(intensityResult, Optional(DoubleEq(ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE))) <<
         "Default value for attribute 'pointLight.lightSource.intensity'";
 
-    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_DEFAULT_VALUE) <<
+    auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_DEFAULT_VALUE)) <<
         "Default value for attribute 'pointLight.lightSource'";
 
     resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE)) <<
         "Default value for attribute 'pointLight.illuminated'";
 
-    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
-    resultDouble = StringUtils::StringToDouble(resultStr);
-    EXPECT_NEAR(resultDouble, ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE, FLT_EPSILON) <<
+    auto bloomResult = GetAttrValue<double>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
+    EXPECT_THAT(bloomResult, Eq(ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE)) <<
         "Default value for attribute 'pointLight.bloom'";
     auto resultPointLightPosition =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
+        GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
     EXPECT_EQ(resultPointLightPosition->ToString(), ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_DEFAULT_VALUE) <<
         "Default value for attribute 'pointLight.lightSource.position'";
     EXPECT_TRUE(resultPointLightPosition->IsObject()) <<
@@ -280,7 +274,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionXValidVa
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -326,7 +320,7 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourcePositionYValidVa
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -371,7 +365,7 @@ HWTEST_F(RowModifierTest, DISABLED_setPointLightTestPointLightLightSourcePositio
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -418,11 +412,9 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceIntensity, TestS
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME);
-        auto result = StringUtils::StringToDouble(resultStr);
-        EXPECT_NEAR(result, expected, FLT_EPSILON) <<
+            GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto result = GetAttrValue<double>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME);
+        EXPECT_THAT(result, Optional(DoubleEq(expected))) <<
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.lightSource.intensity";
     };
 
@@ -469,9 +461,9 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorValidValues
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+            GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -526,9 +518,9 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightLightSourceColorInvalidValu
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_DEFAULT_VALUE)) <<
             "Default value for attribute 'pointLight.lightSource'";
     };
 
@@ -577,9 +569,9 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedValidValues, Tes
         WriteTo(inputValuePointLight).illuminated = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.illuminated";
     };
 
@@ -619,9 +611,9 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightIlluminatedInvalidValues, T
         WriteTo(inputValuePointLight).illuminated = value;
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        auto resultPointLight = GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.illuminated";
     };
 
@@ -664,13 +656,11 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomValidValues, TestSize.
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
-        auto result = StringUtils::StringToDouble(resultStr);
-        EXPECT_NEAR(result, ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE, FLT_EPSILON) <<
+            GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto result = GetAttrValue<double>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
+        EXPECT_THAT(result, Eq(ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.bloom";
     };
 
@@ -713,13 +703,11 @@ HWTEST_F(RowModifierTest, setPointLightTestPointLightBloomInvalidValues, TestSiz
         modifier_->setPointLight(node_, &inputValuePointLight);
         auto jsonValue = GetJsonValue(node_);
         auto resultPointLight =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+            GetAttrObject(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
         auto resultLightSource =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
-        auto resultStr =
-            GetAttrValue<std::string>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
-        auto result = StringUtils::StringToDouble(resultStr);
-        EXPECT_NEAR(result, ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE, FLT_EPSILON) <<
+            GetAttrObject(resultPointLight, ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME);
+        auto result = GetAttrValue<double>(resultLightSource, ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME);
+        EXPECT_THAT(result, Eq(ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPointLight, attribute: pointLight.bloom";
     };
 

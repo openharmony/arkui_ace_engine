@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_GEN140_COMPAT_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_GEN140_COMPAT_H
 
+#include "arkoala_api_generated.h"
+
 // WRONG_GEN_140: Compatibility aliases for types from generation 140
 // These types were renamed in the newer CAPI generation
 // This header provides backward compatibility mapping: OLD_GEN_140_NAME -> NEW_NAME

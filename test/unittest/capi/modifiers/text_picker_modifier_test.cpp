@@ -375,18 +375,18 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestDefaultValues, TestSize
 
     EXPECT_EQ(false, jsonValue->Contains(ATTRIBUTE_RANGE_NAME));
 
-    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_VALUE_DEFAULT_VALUE));
 
-    auto resultJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUES_NAME);
+    auto resultJson = GetAttrObject(jsonValue, ATTRIBUTE_VALUES_NAME);
     ASSERT_NE(resultJson.get(), nullptr);
     EXPECT_EQ(true, resultJson.get()->IsArray());
     EXPECT_EQ(ATTRIBUTE_VALUES_DEFAULT_COUNT, resultJson.get()->GetArraySize());
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_DEFAULT_VALUE));
 
-    resultJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
+    resultJson = GetAttrObject(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
     ASSERT_NE(resultJson.get(), nullptr);
     EXPECT_EQ(true, resultJson.get()->IsArray());
     EXPECT_EQ(ATTRIBUTE_SELECTEDS_DEFAULT_COUNT, resultJson.get()->GetArraySize());
@@ -427,7 +427,7 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsStringArray, TestSize
     auto valueCheck = [&jsonValue](const std::string& attrName,
         const TextPickerOptionsTestTuple& value, const std::string& expectedStr) {
         auto resultStr = GetAttrValue<std::string>(jsonValue, attrName);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
     };
 
     for (auto&& value: textPickerOptionsAsStringArray) {
@@ -464,14 +464,14 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsStringArray, TestSize
         valueCheck(ATTRIBUTE_SELECTED_NAME, value, std::get<SELECTEDS_RES_ID>(value));
 
         //check "values"
-        auto resultJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUES_NAME);
+        auto resultJson = GetAttrObject(jsonValue, ATTRIBUTE_VALUES_NAME);
         ASSERT_NE(resultJson.get(), nullptr);
         EXPECT_EQ(true, resultJson.get()->IsArray()) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
         EXPECT_EQ(ATTRIBUTE_VALUES_DEFAULT_COUNT, resultJson.get()->GetArraySize()) <<
             "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
 
         //check "selecteds"
-        resultJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
+        resultJson = GetAttrObject(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
         ASSERT_NE(resultJson.get(), nullptr);
         EXPECT_EQ(true, resultJson.get()->IsArray()) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
         EXPECT_EQ(ATTRIBUTE_SELECTEDS_DEFAULT_COUNT, resultJson.get()->GetArraySize()) <<
@@ -544,12 +544,12 @@ static std::vector<TextPickerOptionsAsRangeArrayTestTuple> textPickerOptionsAsRa
 HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsRangeArray, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     auto valueCheck = [&resultStr, &jsonValue](const std::string& attrName,
         const TextPickerOptionsAsRangeArrayTestTuple& value, const std::string& expectedStr) {
         resultStr = GetAttrValue<std::string>(jsonValue, attrName);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
     };
 
     for (auto&& value: textPickerOptionsAsRangeArray) {
@@ -587,14 +587,14 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsRangeArray, TestSize.
         valueCheck(ATTRIBUTE_SELECTED_NAME, value, std::get<SELECTEDS_RES_ID>(value));
 
         //check "values"
-        auto resultJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUES_NAME);
+        auto resultJson = GetAttrObject(jsonValue, ATTRIBUTE_VALUES_NAME);
         ASSERT_NE(resultJson.get(), nullptr);
         EXPECT_EQ(true, resultJson.get()->IsArray()) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
         EXPECT_EQ(ATTRIBUTE_VALUES_DEFAULT_COUNT, resultJson.get()->GetArraySize()) <<
             "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
 
         //check "selecteds"
-        resultJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
+        resultJson = GetAttrObject(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
         ASSERT_NE(resultJson.get(), nullptr);
         EXPECT_EQ(true, resultJson.get()->IsArray()) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
         EXPECT_EQ(ATTRIBUTE_SELECTEDS_DEFAULT_COUNT, resultJson.get()->GetArraySize()) <<
@@ -648,21 +648,21 @@ static std::vector<MultiArrayTestData> textPickerOptionsAsStringMultiArray = {
 
 void MultiArrayPickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, MultiArrayTestData value)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     //check "range"
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RANGE_NAME);
     expectedStr = value.rangeRes;
-    EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << value.input;
+    EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << value.input;
 
     //check "value"
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
     expectedStr = ATTRIBUTE_VALUE_DEFAULT_VALUE;
-    EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << value.input;
+    EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << value.input;
 
     //check "values"
-    auto attrValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUES_NAME);
+    auto attrValue = GetAttrObject(jsonValue, ATTRIBUTE_VALUES_NAME);
     auto resultJson = attrValue.get();
     ASSERT_NE(resultJson, nullptr);
     EXPECT_EQ(true, resultJson->IsArray()) << "Passed value is: " << value.input;
@@ -674,19 +674,19 @@ void MultiArrayPickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, Multi
     for (int i = 0; i < requiredValuesCount; i++) {
         resultStr = resultJson->GetArrayItem(i)->ToString();
         expectedStr = value.valuesRes[i];
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << value.input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << value.input;
     }
 
     //check "selected"
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_NAME);
     expectedStr = ATTRIBUTE_SELECTED_DEFAULT_VALUE;
-    EXPECT_EQ(resultStr, expectedStr)  << "Passed value is: " << value.input;
+    EXPECT_THAT(resultStr, Eq(expectedStr))  << "Passed value is: " << value.input;
 
     if (!value.hasSelecteds) {
         return;
     }
     //check "selecteds"
-    attrValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
+    attrValue = GetAttrObject(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
     resultJson = attrValue.get();
     ASSERT_NE(resultJson, nullptr);
     EXPECT_EQ(true, resultJson->IsArray()) << "Passed value is: " << value.input;
@@ -698,7 +698,7 @@ void MultiArrayPickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, Multi
     for (int i = 0; i < requiredSelectedsCount; i++) {
         resultStr = resultJson->GetArrayItem(i)->ToString();
         expectedStr = value.selectedsRes[i];
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << value.input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << value.input;
     }
 }
 } // namespace
@@ -712,7 +712,7 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsStringMultiArray, Tes
 {
     ASSERT_NE(modifier_->setTextPickerOptions, nullptr);
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     for (auto&& value: textPickerOptionsAsStringMultiArray) {
@@ -813,19 +813,19 @@ void CreateOptions(Array_TextCascadePickerRangeContent& arrayRoot,
 
 void CascadePickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, cascade_test_data value)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     //check "range"
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RANGE_NAME);
     expectedStr = std::get<RANGE_RES_ID>(value);
-    EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+    EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
     //check "value"
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
     expectedStr = ATTRIBUTE_VALUE_DEFAULT_VALUE;
-    EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+    EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
     //check "values"
-    auto attrValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUES_NAME);
+    auto attrValue = GetAttrObject(jsonValue, ATTRIBUTE_VALUES_NAME);
     auto resultJson = attrValue.get();
     ASSERT_NE(resultJson, nullptr);
     EXPECT_EQ(true, resultJson->IsArray()) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
@@ -834,14 +834,14 @@ void CascadePickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, cascade_
     for (int i = 0; i < resultJson->GetArraySize(); i++) {
         resultStr = resultJson->GetArrayItem(i)->ToString();
         expectedStr = std::get<VALUES_RES_ID>(value)[i];
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
     }
     //check "select"
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_NAME);
     expectedStr = ATTRIBUTE_SELECTED_DEFAULT_VALUE;
-    EXPECT_EQ(resultStr, expectedStr)  << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+    EXPECT_THAT(resultStr, Eq(expectedStr))  << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
     //check "selecteds"
-    attrValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
+    attrValue = GetAttrObject(jsonValue, ATTRIBUTE_SELECTEDS_NAME);
     resultJson = attrValue.get();
     ASSERT_NE(resultJson, nullptr);
     EXPECT_EQ(true, resultJson->IsArray()) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
@@ -850,7 +850,7 @@ void CascadePickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, cascade_
     for (int i = 0; i < resultJson->GetArraySize(); i++) {
         resultStr = resultJson->GetArrayItem(i)->ToString();
         expectedStr = std::get<SELECTEDS_RES_ID>(value)[i];
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<TEST_COMMENT_ID>(value);
     }
 }
 /*
@@ -901,7 +901,7 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsCascadeArray, TestSiz
     Array_TextCascadePickerRangeContent arrayRoot = holderRootVector.ArkValue();
 
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     for (auto&& value: textPickerOptionsAsCascadeArray) {
         Ark_TextPickerOptions arkTextPickerOptions;
@@ -983,12 +983,12 @@ HWTEST_F(TextPickerModifierTest, setDefaultPickerItemHeightTest, TestSize.Level1
 {
     ASSERT_NE(modifier_->setDefaultPickerItemHeight, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DEFAULT_PICKER_ITEM_HEIGHT_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_DEFAULT_PICKER_ITEM_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_DEFAULT_PICKER_ITEM_HEIGHT_DEFAULT_VALUE));
 
     for (const auto &[height, expected] : PICKER_ITEM_HEIGHT_TEST_PLAN) {
         modifier_->setDefaultPickerItemHeight(node_, &height);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DEFAULT_PICKER_ITEM_HEIGHT_NAME);
-        EXPECT_EQ(checkVal, expected);
+        EXPECT_THAT(checkVal, Eq(expected));
     }
 }
 
@@ -1002,15 +1002,15 @@ HWTEST_F(TextPickerModifierTest, setCanLoopTest, TestSize.Level1)
     ASSERT_NE(modifier_->setCanLoop, nullptr);
 
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_CAN_LOOP_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_CAN_LOOP_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_CAN_LOOP_DEFAULT_VALUE));
 
     modifier_->setCanLoop(node_, &OPT_TRUE);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_CAN_LOOP_NAME);
-    EXPECT_EQ(checkVal, EXPECTED_TRUE);
+    EXPECT_THAT(checkVal, Eq(EXPECTED_TRUE));
 
     modifier_->setCanLoop(node_, &OPT_FALSE);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_CAN_LOOP_NAME);
-    EXPECT_EQ(checkVal, EXPECTED_FALSE);
+    EXPECT_THAT(checkVal, Eq(EXPECTED_FALSE));
 }
 
 /**
@@ -1039,16 +1039,16 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextStyleTest, TestSize.Le
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, style.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(style.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -1078,10 +1078,10 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextStyleTestWeight, TestSize.Level
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
@@ -1091,10 +1091,10 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextStyleTestWeight, TestSize.Level
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -1124,16 +1124,16 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextStyleTestFamily, TestS
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(family.second));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -1163,10 +1163,10 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextStyleTestSize, TestSize.Level1)
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(checkSize, size.second);
+        EXPECT_THAT(checkSize, Eq(size.second));
     }
 }
 
@@ -1179,9 +1179,9 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextStyleTestColor, TestSi
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
-    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+    auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
     auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE));
     Ark_PickerTextStyle pickerStyle;
 
     for (const auto& [value, expectVal] : COLOR_BLACK_TEST_PLAN) {
@@ -1190,9 +1190,9 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextStyleTestColor, TestSi
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1222,10 +1222,10 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setTextStyleTest, TestSize.Level1)
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
-        EXPECT_EQ(checkStyle, style.second);
+        EXPECT_THAT(checkStyle, Eq(style.second));
     }
 }
 
@@ -1255,10 +1255,10 @@ HWTEST_F(TextPickerModifierTest, setTextStyleTestWeight, TestSize.Level1)
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
@@ -1268,10 +1268,10 @@ HWTEST_F(TextPickerModifierTest, setTextStyleTestWeight, TestSize.Level1)
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -1301,10 +1301,10 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setTextStyleTestFamily, TestSize.Level
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
-        EXPECT_EQ(checkFamily, family.second);
+        EXPECT_THAT(checkFamily, Eq(family.second));
     }
 }
 
@@ -1334,10 +1334,10 @@ HWTEST_F(TextPickerModifierTest, setTextStyleTestSize, TestSize.Level1)
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(checkSize, size.second);
+        EXPECT_THAT(checkSize, Eq(size.second));
     }
 }
 
@@ -1350,9 +1350,9 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setTextStyleTestColor, TestSize.Level1
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
-    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+    auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
     auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE));
     Ark_PickerTextStyle pickerStyle;
 
     for (const auto& [value, expectVal] : COLOR_BLACK_TEST_PLAN) {
@@ -1361,9 +1361,9 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setTextStyleTestColor, TestSize.Level1
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1393,10 +1393,10 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextStyleTest, TestSize.Lev
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
-        EXPECT_EQ(checkStyle, style.second);
+        EXPECT_THAT(checkStyle, Eq(style.second));
     }
 }
 
@@ -1426,10 +1426,10 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextStyleTestWeight, TestSize.Level1
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
@@ -1439,10 +1439,10 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextStyleTestWeight, TestSize.Level1
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -1472,10 +1472,10 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextStyleTestFamily, TestSi
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkFamily = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_FAMILY_NAME);
-        EXPECT_EQ(checkFamily, family.second);
+        EXPECT_THAT(checkFamily, Eq(family.second));
     }
 }
 
@@ -1505,10 +1505,10 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextStyleTestSize, TestSize.Level1)
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(checkSize, size.second);
+        EXPECT_THAT(checkSize, Eq(size.second));
     }
 }
 
@@ -1521,9 +1521,9 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextStyleTestColor, TestSiz
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
-    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+    auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
     auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE));
     Ark_PickerTextStyle pickerStyle;
 
     for (const auto& [value, expectVal] : COLOR_BLACK_TEST_PLAN) {
@@ -1532,9 +1532,9 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextStyleTestColor, TestSiz
             Ark_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1547,7 +1547,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedIndex, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_SELECTED_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_SELECTED_DEFAULT_VALUE));
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1563,7 +1563,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexTest, TestSize.Level1)
     for (const auto &[index, expected] : SELECTED_INDEX_TEST_PLAN) {
         modifier_->setSelectedIndex(node_, &index);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME);
-        EXPECT_EQ(checkVal, expected);
+        EXPECT_THAT(checkVal, Eq(expected));
     }
 }
 
@@ -1576,9 +1576,9 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexTestMulti, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedIndex, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTEDS_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_SELECTEDS_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_SELECTEDS_DEFAULT_VALUE));
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME_INDEX);
-    EXPECT_EQ(checkVal, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE));
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1594,9 +1594,9 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexTestMulti, TestSize.Level1)
     for (const auto &[indexes, expected] : SELECTEDS_INDEX_TEST_PLAN) {
         modifier_->setSelectedIndex(node_, &indexes);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTEDS_NAME);
-        EXPECT_EQ(checkVal, expected);
+        EXPECT_THAT(checkVal, Eq(expected));
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME_INDEX);
-        EXPECT_EQ(checkVal, expected);
+        EXPECT_THAT(checkVal, Eq(expected));
     }
 }
 
@@ -1609,9 +1609,9 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexTestMultiCascade, TestSize.Leve
 {
     ASSERT_NE(modifier_->setSelectedIndex, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTEDS_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_SELECTEDS_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_SELECTEDS_DEFAULT_VALUE));
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME_INDEX);
-    EXPECT_EQ(checkVal, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE));
 
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1635,9 +1635,9 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexTestMultiCascade, TestSize.Leve
     for (const auto &[indexes, expected] : SELECTEDS_INDEX_CASCADE_TEST_PLAN) {
         modifier_->setSelectedIndex(node_, &indexes);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTEDS_NAME);
-        EXPECT_EQ(checkVal, expected);
+        EXPECT_THAT(checkVal, Eq(expected));
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME_INDEX);
-        EXPECT_EQ(checkVal, expected);
+        EXPECT_THAT(checkVal, Eq(expected));
     }
 }
 
@@ -1656,15 +1656,15 @@ HWTEST_F(TextPickerModifierTest, setDividerTestStrokeWidth, TestSize.Level1)
         auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
         modifier_->setDivider(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
-        auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
+        auto dividerObject = GetAttrObject(fullJson, ATTRIBUTE_DIVIDER_NAME);
         auto checkStrokeWidth = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_STROKE_WIDTH_NAME);
         auto checkColor = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_COLOR_NAME);
         auto checkStartMargin =  GetAttrValue<std::string>(dividerObject, ATTRIBUTE_START_MARGIN_NAME);
         auto checkEndMargin = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_END_MARGIN_NAME);
-        EXPECT_EQ(checkStrokeWidth, expected);
-        EXPECT_EQ(checkColor, ATTRIBUTE_DIVIDER_COLOR_INITIAL_VALUE);
-        EXPECT_EQ(checkStartMargin, ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE);
-        EXPECT_EQ(checkEndMargin, ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE);
+        EXPECT_THAT(checkStrokeWidth, Eq(expected));
+        EXPECT_THAT(checkColor, Eq(ATTRIBUTE_DIVIDER_COLOR_INITIAL_VALUE));
+        EXPECT_THAT(checkStartMargin, Eq(ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE));
+        EXPECT_THAT(checkEndMargin, Eq(ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE));
     }
 }
 
@@ -1685,15 +1685,15 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDividerTestColor, TestSize.Level1)
         auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
         modifier_->setDivider(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
-        auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
+        auto dividerObject = GetAttrObject(fullJson, ATTRIBUTE_DIVIDER_NAME);
         auto checkStrokeWidth = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_STROKE_WIDTH_NAME);
         auto checkColor = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_COLOR_NAME);
         auto checkStartMargin =  GetAttrValue<std::string>(dividerObject, ATTRIBUTE_START_MARGIN_NAME);
         auto checkEndMargin = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_END_MARGIN_NAME);
-        EXPECT_EQ(checkStrokeWidth, ATTRIBUTE_DIVIDER_STROKE_WIDTH_INITIAL_VALUE);
-        EXPECT_EQ(checkColor, expected);
-        EXPECT_EQ(checkStartMargin, ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE);
-        EXPECT_EQ(checkEndMargin, ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE);
+        EXPECT_THAT(checkStrokeWidth, Eq(ATTRIBUTE_DIVIDER_STROKE_WIDTH_INITIAL_VALUE));
+        EXPECT_THAT(checkColor, Eq(expected));
+        EXPECT_THAT(checkStartMargin, Eq(ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE));
+        EXPECT_THAT(checkEndMargin, Eq(ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE));
     }
 }
 
@@ -1712,15 +1712,15 @@ HWTEST_F(TextPickerModifierTest, setDividerTestStartMargin, TestSize.Level1)
         auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
         modifier_->setDivider(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
-        auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
+        auto dividerObject = GetAttrObject(fullJson, ATTRIBUTE_DIVIDER_NAME);
         auto checkStrokeWidth = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_STROKE_WIDTH_NAME);
         auto checkColor = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_COLOR_NAME);
         auto checkStartMargin =  GetAttrValue<std::string>(dividerObject, ATTRIBUTE_START_MARGIN_NAME);
         auto checkEndMargin = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_END_MARGIN_NAME);
-        EXPECT_EQ(checkStrokeWidth, ATTRIBUTE_DIVIDER_STROKE_WIDTH_INITIAL_VALUE);
-        EXPECT_EQ(checkColor, ATTRIBUTE_DIVIDER_COLOR_INITIAL_VALUE);
-        EXPECT_EQ(checkStartMargin, expected);
-        EXPECT_EQ(checkEndMargin, ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE);
+        EXPECT_THAT(checkStrokeWidth, Eq(ATTRIBUTE_DIVIDER_STROKE_WIDTH_INITIAL_VALUE));
+        EXPECT_THAT(checkColor, Eq(ATTRIBUTE_DIVIDER_COLOR_INITIAL_VALUE));
+        EXPECT_THAT(checkStartMargin, Eq(expected));
+        EXPECT_THAT(checkEndMargin, Eq(ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE));
     }
 }
 
@@ -1739,15 +1739,15 @@ HWTEST_F(TextPickerModifierTest, setDividerTestEndMargin, TestSize.Level1)
         auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
         modifier_->setDivider(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
-        auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
+        auto dividerObject = GetAttrObject(fullJson, ATTRIBUTE_DIVIDER_NAME);
         auto checkStrokeWidth = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_STROKE_WIDTH_NAME);
         auto checkColor = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_COLOR_NAME);
         auto checkStartMargin =  GetAttrValue<std::string>(dividerObject, ATTRIBUTE_START_MARGIN_NAME);
         auto checkEndMargin = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_END_MARGIN_NAME);
-        EXPECT_EQ(checkStrokeWidth, ATTRIBUTE_DIVIDER_STROKE_WIDTH_INITIAL_VALUE);
-        EXPECT_EQ(checkColor, ATTRIBUTE_DIVIDER_COLOR_INITIAL_VALUE);
-        EXPECT_EQ(checkStartMargin, ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE);
-        EXPECT_EQ(checkEndMargin, expected);
+        EXPECT_THAT(checkStrokeWidth, Eq(ATTRIBUTE_DIVIDER_STROKE_WIDTH_INITIAL_VALUE));
+        EXPECT_THAT(checkColor, Eq(ATTRIBUTE_DIVIDER_COLOR_INITIAL_VALUE));
+        EXPECT_THAT(checkStartMargin, Eq(ATTRIBUTE_DIVIDER_MARGIN_INITIAL_VALUE));
+        EXPECT_THAT(checkEndMargin, Eq(expected));
     }
 }
 
@@ -1762,15 +1762,15 @@ HWTEST_F(TextPickerModifierTest, setDividerTestUndefined, TestSize.Level1)
     auto unionOptions = Converter::ArkValue<Opt_DividerOptions>();
     modifier_->setDivider(node_, &unionOptions);
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
+    auto dividerObject = GetAttrObject(fullJson, ATTRIBUTE_DIVIDER_NAME);
     auto checkStrokeWidth = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_STROKE_WIDTH_NAME);
     auto checkColor = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_COLOR_NAME);
     auto checkStartMargin = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_START_MARGIN_NAME);
     auto checkEndMargin = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_END_MARGIN_NAME);
-    EXPECT_EQ(checkStrokeWidth, ATTRIBUTE_DIVIDER_STROKE_WIDTH_INITIAL_VALUE);
-    EXPECT_EQ(checkColor, ATTRIBUTE_DIVIDER_COLOR_DEFAULT_VALUE);
-    EXPECT_EQ(checkStartMargin, ATTRIBUTE_DIVIDER_MARGIN_DEFAULT_VALUE);
-    EXPECT_EQ(checkEndMargin, ATTRIBUTE_DIVIDER_MARGIN_DEFAULT_VALUE);
+    EXPECT_THAT(checkStrokeWidth, Eq(ATTRIBUTE_DIVIDER_STROKE_WIDTH_INITIAL_VALUE));
+    EXPECT_THAT(checkColor, Eq(ATTRIBUTE_DIVIDER_COLOR_DEFAULT_VALUE));
+    EXPECT_THAT(checkStartMargin, Eq(ATTRIBUTE_DIVIDER_MARGIN_DEFAULT_VALUE));
+    EXPECT_THAT(checkEndMargin, Eq(ATTRIBUTE_DIVIDER_MARGIN_DEFAULT_VALUE));
 }
 
 /**
@@ -1782,12 +1782,12 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setGradientHeightTest, TestSize.Level1
 {
     ASSERT_NE(modifier_->setGradientHeight, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_GRADIENT_HEIGHT_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_GRADIENT_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_GRADIENT_HEIGHT_DEFAULT_VALUE));
 
     for (const auto &[height, expected] : GRADIENT_HEIGHT_TEST_PLAN) {
         modifier_->setGradientHeight(node_, &height);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_GRADIENT_HEIGHT_NAME);
-        EXPECT_EQ(checkVal, expected);
+        EXPECT_THAT(checkVal, Eq(expected));
     }
 }
 
@@ -2023,13 +2023,13 @@ HWTEST_F(TextPickerModifierTest, setEnableHapticFeedbackTest, TestSize.Level1)
     ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
 
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE));
     modifier_->setEnableHapticFeedback(node_, &OPT_FALSE);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(checkVal, EXPECTED_FALSE);
+    EXPECT_THAT(checkVal, Eq(EXPECTED_FALSE));
     modifier_->setEnableHapticFeedback(node_, &OPT_TRUE);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(checkVal, EXPECTED_TRUE);
+    EXPECT_THAT(checkVal, Eq(EXPECTED_TRUE));
 }
 
 /**
@@ -2042,13 +2042,13 @@ HWTEST_F(TextPickerModifierTest, setDisableTextStyleAnimationTestDisableTextStyl
     ASSERT_NE(modifier_->setDisableTextStyleAnimation, nullptr);
 
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_DEFAULT_VALUE));
     modifier_->setDisableTextStyleAnimation(node_, &OPT_FALSE);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME);
-    EXPECT_EQ(checkVal, EXPECTED_FALSE);
+    EXPECT_THAT(checkVal, Eq(EXPECTED_FALSE));
     modifier_->setDisableTextStyleAnimation(node_, &OPT_TRUE);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME);
-    EXPECT_EQ(checkVal, EXPECTED_TRUE);
+    EXPECT_THAT(checkVal, Eq(EXPECTED_TRUE));
 }
 
 /**
@@ -2076,10 +2076,10 @@ HWTEST_F(TextPickerModifierTest, setDefaultTextStyleTestDefaultTextWeight, TestS
         auto style = Converter::ArkValue<Opt_TextPickerTextStyle>(pickerStyle);
         modifier_->setDefaultTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
@@ -2088,10 +2088,10 @@ HWTEST_F(TextPickerModifierTest, setDefaultTextStyleTestDefaultTextWeight, TestS
         auto style = Converter::ArkValue<Opt_TextPickerTextStyle>(pickerStyle);
         modifier_->setDefaultTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -2120,10 +2120,10 @@ HWTEST_F(TextPickerModifierTest, setDefaultTextStyleTestDefaultTextSize, TestSiz
         auto style = Converter::ArkValue<Opt_TextPickerTextStyle>(pickerStyle);
         modifier_->setDefaultTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(checkSize, size.second);
+        EXPECT_THAT(checkSize, Eq(size.second));
     }
 }
 
@@ -2136,9 +2136,9 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDefaultTextStyleTestDefaultTextColo
 {
     ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
-    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+    auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
     auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE));
     Ark_TextPickerTextStyle pickerStyle;
 
     for (const auto& [value, expectVal] : COLOR_BLACK_TEST_PLAN) {
@@ -2146,9 +2146,9 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDefaultTextStyleTestDefaultTextColo
         auto style = Converter::ArkValue<Opt_TextPickerTextStyle>(pickerStyle);
         modifier_->setDefaultTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -2168,11 +2168,11 @@ HWTEST_F(TextPickerModifierTest, setDefaultTextStyleTestMinMaxFontSize, TestSize
         auto style = Converter::ArkValue<Opt_TextPickerTextStyle>(pickerStyle);
         modifier_->setDefaultTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
         auto minSize = GetAttrValue<std::string>(styleObject, ATTRIBUTE_DEFAULT_TEXT_STYLE_MIN_FONT_SIZE_NAME);
         auto maxSize = GetAttrValue<std::string>(styleObject, ATTRIBUTE_DEFAULT_TEXT_STYLE_MAX_FONT_SIZE_NAME);
-        EXPECT_EQ(minSize, size.second);
-        EXPECT_EQ(maxSize, size.second);
+        EXPECT_THAT(minSize, Eq(size.second));
+        EXPECT_THAT(maxSize, Eq(size.second));
     }
 }
 
@@ -2191,9 +2191,9 @@ HWTEST_F(TextPickerModifierTest, setDefaultTextStyleTestTextOverflow, TestSize.L
         auto style = Converter::ArkValue<Opt_TextPickerTextStyle>(pickerStyle);
         modifier_->setDefaultTextStyle(node_, &style);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
         auto strRes = GetAttrValue<std::string>(styleObject, ATTRIBUTE_DEFAULT_TEXT_STYLE_TEXT_OVERFLOW_NAME);
-        EXPECT_EQ(strRes, overflow.second);
+        EXPECT_THAT(strRes, Eq(overflow.second));
     }
 }
 

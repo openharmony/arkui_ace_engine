@@ -109,12 +109,12 @@ std::vector<std::tuple<std::string, Ark_Float64>> testFixtureFloat64NonNegInvali
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
-    strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-    auto xResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_X_NAME);
-    EXPECT_EQ(xResult, ATTRIBUTE_OFFSET_X_DEFAULT_VALUE);
-    auto yResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_Y_NAME);
-    EXPECT_EQ(yResult, ATTRIBUTE_OFFSET_Y_DEFAULT_VALUE);
+    auto jsonValue = GetJsonValue(node_);
+    auto offset = GetAttrObject(jsonValue, ATTRIBUTE_OFFSET_NAME);
+    auto xResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_X_NAME);
+    EXPECT_THAT(xResult, Eq(ATTRIBUTE_OFFSET_X_DEFAULT_VALUE));
+    auto yResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_Y_NAME);
+    EXPECT_THAT(yResult, Eq(ATTRIBUTE_OFFSET_Y_DEFAULT_VALUE));
 }
 
 /*
@@ -125,17 +125,17 @@ HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestDefaultValues, TestSi
 HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidPositionXValues, TestSize.Level1)
 {
     Ark_Position position;
-    std::string strResult;
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
         position.x = Converter::ArkValue<Opt_Length>(arkLength, &ctx);
         position.y = Converter::ArkUnion<Opt_Length, Ark_Empty>(nullptr);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Position>(position, &ctx);
         modifier_->setOffset(node_, &value);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-        auto xResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_X_NAME);
-        EXPECT_EQ(xResult, expected);
-        auto yResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_Y_NAME);
-        EXPECT_EQ(yResult, "0.00px");
+        auto jsonValue = GetJsonValue(node_);
+        auto offset = GetAttrObject(jsonValue, ATTRIBUTE_OFFSET_NAME);
+        auto xResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_X_NAME);
+        EXPECT_THAT(xResult, Eq(expected));
+        auto yResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_Y_NAME);
+        EXPECT_THAT(yResult, Eq("0.00px"));
     }
 }
 
@@ -147,17 +147,17 @@ HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidPositionXValues,
 HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidPositionYValues, TestSize.Level1)
 {
     Ark_Position position;
-    std::string strResult;
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
         position.x = Converter::ArkUnion<Opt_Length, Ark_Empty>(nullptr);
         position.y = Converter::ArkValue<Opt_Length>(arkLength, &ctx);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Position>(position, &ctx);
         modifier_->setOffset(node_, &value);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-        auto xResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_X_NAME);
-        EXPECT_EQ(xResult, "0.00px");
-        auto yResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_Y_NAME);
-        EXPECT_EQ(yResult, expected);
+        auto jsonValue = GetJsonValue(node_);
+        auto offset = GetAttrObject(jsonValue, ATTRIBUTE_OFFSET_NAME);
+        auto xResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_X_NAME);
+        EXPECT_THAT(xResult, Eq("0.00px"));
+        auto yResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_Y_NAME);
+        EXPECT_THAT(yResult, Eq(expected));
     }
 }
 
@@ -169,7 +169,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, setOffsetTestValidPositionYValues,
 HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesLeftValues, TestSize.Level1)
 {
     Ark_Edges edges;
-    std::string strResult;
     for (const auto &[arkValue, expected]: DIMENSION_TEST_PLAN) {
         edges.left = Converter::ArkValue<Opt_Dimension>(arkValue, &ctx);
         edges.top = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
@@ -177,15 +176,16 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesLe
         edges.bottom = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges, &ctx);
         modifier_->setOffset(node_, &value);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-        auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
-        EXPECT_EQ(leftResult, expected);
-        auto topResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_TOP_NAME);
-        EXPECT_EQ(topResult, "");
-        auto rightResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_RIGHT_NAME);
-        EXPECT_EQ(rightResult, "");
-        auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_BOTTOM_NAME);
-        EXPECT_EQ(bottomResult, "");
+        auto jsonValue = GetJsonValue(node_);
+        auto offset = GetAttrObject(jsonValue, ATTRIBUTE_OFFSET_NAME);
+        auto leftResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_LEFT_NAME);
+        EXPECT_THAT(leftResult, Eq(expected));
+        auto topResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_TOP_NAME);
+        EXPECT_THAT(topResult, Eq(""));
+        auto rightResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_RIGHT_NAME);
+        EXPECT_THAT(rightResult, Eq(""));
+        auto bottomResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_BOTTOM_NAME);
+        EXPECT_THAT(bottomResult, Eq(""));
     }
 }
 
@@ -197,7 +197,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesLe
 HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesTopValues, TestSize.Level1)
 {
     Ark_Edges edges;
-    std::string strResult;
     for (const auto &[arkValue, expected]: DIMENSION_TEST_PLAN) {
         edges.left = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
         edges.top = Converter::ArkValue<Opt_Dimension>(arkValue, &ctx);
@@ -205,15 +204,16 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesTo
         edges.bottom = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges, &ctx);
         modifier_->setOffset(node_, &value);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-        auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
-        EXPECT_EQ(leftResult, "");
-        auto topResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_TOP_NAME);
-        EXPECT_EQ(topResult, expected);
-        auto rightResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_RIGHT_NAME);
-        EXPECT_EQ(rightResult, "");
-        auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_BOTTOM_NAME);
-        EXPECT_EQ(bottomResult, "");
+        auto jsonValue = GetJsonValue(node_);
+        auto offset = GetAttrObject(jsonValue, ATTRIBUTE_OFFSET_NAME);
+        auto leftResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_LEFT_NAME);
+        EXPECT_THAT(leftResult, Eq(""));
+        auto topResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_TOP_NAME);
+        EXPECT_THAT(topResult, Eq(expected));
+        auto rightResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_RIGHT_NAME);
+        EXPECT_THAT(rightResult, Eq(""));
+        auto bottomResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_BOTTOM_NAME);
+        EXPECT_THAT(bottomResult, Eq(""));
     }
 }
 
@@ -225,7 +225,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesTo
 HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesRightValues, TestSize.Level1)
 {
     Ark_Edges edges;
-    std::string strResult;
     for (const auto &[arkValue, expected]: DIMENSION_TEST_PLAN) {
         edges.left = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
         edges.top = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
@@ -233,15 +232,16 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesRi
         edges.bottom = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges, &ctx);
         modifier_->setOffset(node_, &value);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-        auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
-        EXPECT_EQ(leftResult, "");
-        auto topResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_TOP_NAME);
-        EXPECT_EQ(topResult, "");
-        auto rightResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_RIGHT_NAME);
-        EXPECT_EQ(rightResult, expected);
-        auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_BOTTOM_NAME);
-        EXPECT_EQ(bottomResult, "");
+        auto jsonValue = GetJsonValue(node_);
+        auto offset = GetAttrObject(jsonValue, ATTRIBUTE_OFFSET_NAME);
+        auto leftResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_LEFT_NAME);
+        EXPECT_THAT(leftResult, Eq(""));
+        auto topResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_TOP_NAME);
+        EXPECT_THAT(topResult, Eq(""));
+        auto rightResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_RIGHT_NAME);
+        EXPECT_THAT(rightResult, Eq(expected));
+        auto bottomResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_BOTTOM_NAME);
+        EXPECT_THAT(bottomResult, Eq(""));
     }
 }
 
@@ -253,7 +253,6 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesRi
 HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesBottomValues, TestSize.Level1)
 {
     Ark_Edges edges;
-    std::string strResult;
     for (const auto &[arkValue, expected]: DIMENSION_TEST_PLAN) {
         edges.left = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
         edges.top = Converter::ArkUnion<Opt_Dimension, Ark_Empty>(nullptr);
@@ -261,15 +260,16 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidEdgesBo
         edges.bottom = Converter::ArkValue<Opt_Dimension>(arkValue, &ctx);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges, &ctx);
         modifier_->setOffset(node_, &value);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-        auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
-        EXPECT_EQ(leftResult, "");
-        auto topResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_TOP_NAME);
-        EXPECT_EQ(topResult, "");
-        auto rightResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_RIGHT_NAME);
-        EXPECT_EQ(rightResult, "");
-        auto bottomResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_BOTTOM_NAME);
-        EXPECT_EQ(bottomResult, expected);
+        auto jsonValue = GetJsonValue(node_);
+        auto offset = GetAttrObject(jsonValue, ATTRIBUTE_OFFSET_NAME);
+        auto leftResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_LEFT_NAME);
+        EXPECT_THAT(leftResult, Eq(""));
+        auto topResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_TOP_NAME);
+        EXPECT_THAT(topResult, Eq(""));
+        auto rightResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_RIGHT_NAME);
+        EXPECT_THAT(rightResult, Eq(""));
+        auto bottomResult = GetAttrValue<std::string>(offset, ATTRIBUTE_OFFSET_BOTTOM_NAME);
+        EXPECT_THAT(bottomResult, Eq(expected));
     }
 }
 
@@ -290,11 +290,12 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidLocaliz
         inputValue.start = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
         modifier_->setOffset(node_, &value);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), expected);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), defaultValue);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), defaultValue);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), defaultValue);
+        auto jsonValue = GetJsonValue(node_);
+        auto offset = GetAttrObject(jsonValue, ATTRIBUTE_OFFSET_NAME);
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_LEFT_NAME), Eq(expected));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_TOP_NAME), Eq(defaultValue));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_RIGHT_NAME), Eq(defaultValue));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_BOTTOM_NAME), Eq(defaultValue));
     }
 }
 
@@ -315,11 +316,12 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidLocaliz
         inputValue.end = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
         modifier_->setOffset(node_, &value);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), defaultValue);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), defaultValue);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), expected);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), defaultValue);
+        auto jsonValue = GetJsonValue(node_);
+        auto offset = GetAttrObject(jsonValue, ATTRIBUTE_OFFSET_NAME);
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_LEFT_NAME), Eq(defaultValue));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_TOP_NAME), Eq(defaultValue));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_RIGHT_NAME), Eq(expected));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_BOTTOM_NAME), Eq(defaultValue));
     }
 }
 
@@ -340,11 +342,12 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidLocaliz
         inputValue.top = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
         modifier_->setOffset(node_, &value);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), defaultValue);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), expected);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), defaultValue);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), defaultValue);
+        auto jsonValue = GetJsonValue(node_);
+        auto offset = GetAttrObject(jsonValue, ATTRIBUTE_OFFSET_NAME);
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_LEFT_NAME), Eq(defaultValue));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_TOP_NAME), Eq(expected));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_RIGHT_NAME), Eq(defaultValue));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_BOTTOM_NAME), Eq(defaultValue));
     }
 }
 
@@ -365,11 +368,12 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setOffsetTestValidLocaliz
         inputValue.bottom = Converter::ArkValue<Opt_LengthMetrics>(lenMetrics);
         auto value = Converter::ArkUnion<Opt_Union_Position_Edges_LocalizedEdges, Ark_LocalizedEdges>(inputValue);
         modifier_->setOffset(node_, &value);
-        auto strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME), defaultValue);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_TOP_NAME), defaultValue);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_RIGHT_NAME), defaultValue);
-        EXPECT_EQ(GetAttrValue<std::string>(strResult, ATTRIBUTE_BOTTOM_NAME), expected);
+        auto jsonValue = GetJsonValue(node_);
+        auto offset = GetAttrObject(jsonValue, ATTRIBUTE_OFFSET_NAME);
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_LEFT_NAME), Eq(defaultValue));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_TOP_NAME), Eq(defaultValue));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_RIGHT_NAME), Eq(defaultValue));
+        EXPECT_THAT(GetAttrValue<std::string>(offset, ATTRIBUTE_BOTTOM_NAME), Eq(expected));
     }
 }
 

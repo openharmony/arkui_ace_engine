@@ -46,8 +46,8 @@ class StepperModifierTest : public ModifierTestBase<GENERATED_ArkUIStepperModifi
 HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEPPER_INDEX_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEPPER_INDEX_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE));
 }
 
 static std::vector<std::tuple<std::string, Opt_Union_I32_Bindable, std::string>> optionsIndexValidValues = {
@@ -65,7 +65,7 @@ static std::vector<std::tuple<std::string, Opt_Union_I32_Bindable, std::string>>
 HWTEST_F(StepperModifierTest, DISABLED_setStepperOptionsTestIndexValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     auto realInputValue = Converter::ArkValue<Opt_StepperOptions>(Ark_StepperOptions{});
     auto& inputValueStatus = realInputValue.value.index;
@@ -76,7 +76,7 @@ HWTEST_F(StepperModifierTest, DISABLED_setStepperOptionsTestIndexValidValues, Te
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEPPER_INDEX_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -93,7 +93,7 @@ static std::vector<std::tuple<std::string, Opt_Union_I32_Bindable>> optionsIndex
 HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     auto realInputValue = Converter::ArkValue<Opt_StepperOptions>(Ark_StepperOptions{});
     auto& inputValueStatus = realInputValue.value.index;
@@ -103,14 +103,14 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexInvalidValues, TestSize.
         modifier_->setStepperOptions(node_, &realInputValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEPPER_INDEX_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE)) << "Passed value is: " << std::get<0>(value);
     }
 
     realInputValue = Converter::ArkValue<Opt_StepperOptions>();
     modifier_-> setStepperOptions(node_, &realInputValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEPPER_INDEX_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE) << "Passed value is: optional";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE)) << "Passed value is: optional";
 }
 
 /*

@@ -98,9 +98,9 @@ public:
 HWTEST_F(TextModifierTest2, bindSelectionMenuTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BIND_SELECTION_MENU_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BIND_SELECTION_MENU_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BIND_SELECTION_MENU_DEFAULT_VALUE)) <<
         "Default value for attribute 'BindSelectionMenu'";
 }
 
@@ -148,7 +148,7 @@ HWTEST_F(TextModifierTest2, DISABLED_setBindSelectionMenuTestValidValues, TestSi
     const auto builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
 
     std::unique_ptr<JsonValue> fullJson;
-    std::string resultValue;
+    std::optional<std::string> resultValue;
     SelectionMenuOptions selectionMenuOptions1 = {.onAppear = std::nullopt, .onDisappear = std::nullopt,
         .menuType = Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU};
     auto options1 = Converter::ArkValue<Opt_SelectionMenuOptions>(selectionMenuOptions1);
@@ -190,7 +190,7 @@ HWTEST_F(TextModifierTest2, DISABLED_setBindSelectionMenuTestValidValues, TestSi
         "{\"spanType\":2,\"responseType\":0,\"menuType\":0},"
         "{\"spanType\":2,\"responseType\":1,\"menuType\":0},"
         "{\"spanType\":2,\"responseType\":2,\"menuType\":0}]";
-    EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
 }
 
 /*
@@ -213,7 +213,7 @@ HWTEST_F(TextModifierTest2, DISABLED_setBindSelectionMenuTestMenuTypeValidValues
     CustomNodeBuilderTestHelper<TextModifierTest2> builderHelper(this, frameNode);
     const auto builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
     std::unique_ptr<JsonValue> fullJson;
-    std::string resultValue;
+    std::optional<std::string> resultValue;
     auto spanType = Converter::ArkValue<Opt_TextSpanType>(ARK_TEXT_SPAN_TYPE_TEXT);
     auto responseType = Converter::ArkValue<Opt_TextResponseType>(ARK_TEXT_RESPONSE_TYPE_SELECT);
     SelectionMenuOptions selectionMenuOptions = {};
@@ -230,7 +230,7 @@ HWTEST_F(TextModifierTest2, DISABLED_setBindSelectionMenuTestMenuTypeValidValues
     std::string expectedValue =
         "[{\"spanType\":0,\"responseType\":2,\"menuType\":0},"
         "{\"spanType\":0,\"responseType\":2,\"menuType\":1}]";
-    EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
 }
 
 /**

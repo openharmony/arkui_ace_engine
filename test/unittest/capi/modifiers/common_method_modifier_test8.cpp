@@ -31,9 +31,9 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
     const auto ATTRIBUTE_GEOMETRY_TRANSITION_NAME = "geometryTransition";
-    const auto ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_RESTORE_ID_NAME = "restoreId";
-    const auto ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_MONOPOLIZE_EVENTS_NAME = "monopolizeEvents";
     const auto ATTRIBUTE_MONOPOLIZE_EVENTS_DEFAULT_VALUE = "false";
     const auto ACTUAL_TRUE = true;
@@ -189,8 +189,8 @@ public:
  */
 HWTEST_F(CommonMethodModifierTest8, setGeometryTransitionTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_GEOMETRY_TRANSITION_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_GEOMETRY_TRANSITION_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE));
 }
 
 /*
@@ -210,7 +210,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransitionTestValidValue
         modifier_->setGeometryTransition(node_, &inputValue, &optOptions);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GEOMETRY_TRANSITION_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -222,8 +222,8 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransitionTestValidValue
  */
 HWTEST_F(CommonMethodModifierTest8, setRestoreIdTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_RESTORE_ID_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_RESTORE_ID_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE));
 }
 
 /*
@@ -244,7 +244,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setRestoreIdTestValidValues, TestSi
         modifier_->setRestoreId(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_RESTORE_ID_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -261,19 +261,19 @@ HWTEST_F(CommonMethodModifierTest8, setMonopolizeEventsTest, TestSize.Level1)
 
     auto fullJson = GetJsonValue(node_);
     auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MONOPOLIZE_EVENTS_NAME);
-    EXPECT_EQ(resultValue, ATTRIBUTE_MONOPOLIZE_EVENTS_DEFAULT_VALUE);
+    EXPECT_THAT(resultValue, Eq(ATTRIBUTE_MONOPOLIZE_EVENTS_DEFAULT_VALUE));
 
     auto arkTrueValue = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
     modifier_->setMonopolizeEvents(node_, &arkTrueValue);
     fullJson = GetJsonValue(node_);
     resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MONOPOLIZE_EVENTS_NAME);
-    EXPECT_EQ(resultValue, EXPECTED_TRUE);
+    EXPECT_THAT(resultValue, Eq(EXPECTED_TRUE));
 
     auto arkFalseValue = Converter::ArkValue<Opt_Boolean>(ACTUAL_FALSE);
     modifier_->setMonopolizeEvents(node_, &arkFalseValue);
     fullJson = GetJsonValue(node_);
     resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MONOPOLIZE_EVENTS_NAME);
-    EXPECT_EQ(resultValue, EXPECTED_FALSE);
+    EXPECT_THAT(resultValue, Eq(EXPECTED_FALSE));
 }
 
 /*

@@ -112,7 +112,7 @@ HWTEST_F(SymbolSpanModifierTest, DISABLED_setSymbolSpanOptionsTestValidValues, T
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNICODE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setSpanOptions, attribute: content";
     };
 
@@ -129,9 +129,9 @@ HWTEST_F(SymbolSpanModifierTest, DISABLED_setSymbolSpanOptionsTestValidValues, T
 HWTEST_F(SymbolSpanModifierTest, DISABLED_setSymbolSpanOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNICODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_UNICODE_NAME_DEFAULT_VALUE) << "Default value for attribute 'value.id'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_UNICODE_NAME_DEFAULT_VALUE)) << "Default value for attribute 'value.id'";
 }
 
 static const std::vector<std::pair<Ark_ResourceColor, std::string>> COLOR_TEST_PLAN = {
@@ -149,7 +149,7 @@ static const std::vector<std::pair<Ark_ResourceColor, std::string>> COLOR_TEST_P
 HWTEST_F(SymbolSpanModifierTest, DISABLED_setFontColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::vector<Ark_ResourceColor> fontColorVector;
     std::vector<std::string> expectedVector;
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
@@ -164,7 +164,7 @@ HWTEST_F(SymbolSpanModifierTest, DISABLED_setFontColorTestValidValues, TestSize.
 
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SYMBOL_COLOR_NAME);
-    EXPECT_EQ(resultStr, symbolColorStr) << "Passed value is: " << symbolColorStr;
+    EXPECT_THAT(resultStr, Eq(symbolColorStr)) << "Passed value is: " << symbolColorStr;
 }
 
 } // namespace OHOS::Ace::NG

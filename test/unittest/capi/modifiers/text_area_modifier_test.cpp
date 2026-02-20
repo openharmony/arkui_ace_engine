@@ -325,14 +325,14 @@ HWTEST_F(TextAreaModifierTest, setAutoCapitalizationModeTest, TestSize.Level1)
     ASSERT_TRUE(modifier_->setAutoCapitalizationMode);
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE) << "Default value is: " << resultStr
-                                        << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE))
+                                        << "Method: setAutoCapitalizationMode, attribute: keyboardAppearance";
     auto checkValue = [this](const std::string& input, const std::string& expectedStr,
                           const Opt_AutoCapitalizationMode& value) {
         modifier_->setAutoCapitalizationMode(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Input value is: " << input
                                         << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
     };
     for (auto& [input, value, expected] : testFixtureEnumAutoCapitalizationModeTestPlan) {
@@ -350,14 +350,14 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderColorTest, TestSize.Level1
     static const std::string propName("placeholderColor");
     ASSERT_NE(modifier_->setPlaceholderColor, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, COLOR_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq(COLOR_BLACK));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setPlaceholderColor(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -371,13 +371,13 @@ HWTEST_F(TextAreaModifierTest, setCaretColorTest, TestSize.Level1)
     static const std::string propName("caretColor");
     ASSERT_NE(modifier_->setCaretColor, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, COLOR_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq(COLOR_BLACK));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setCaretColor(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
+        checkVal = GetAttrValue<std::string>(node_, propName);
     }
 }
 
@@ -391,14 +391,14 @@ HWTEST_F(TextAreaModifierTest, setFontColorTest, TestSize.Level1)
     static const std::string propName("fontColor");
     ASSERT_NE(modifier_->setFontColor, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, COLOR_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq(COLOR_BLACK));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setFontColor(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -412,14 +412,14 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setSelectedBackgroundColorTest, TestSize
     static const std::string propName("selectedBackgroundColor");
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, COLOR_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq(COLOR_BLACK));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setSelectedBackgroundColor(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -434,13 +434,13 @@ HWTEST_F(TextAreaModifierTest, setEnablePreviewTextTest, TestSize.Level1)
     ASSERT_NE(modifier_->setEnablePreviewText, nullptr);
 
     auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, true);
+    EXPECT_THAT(checkVal, Eq(true));
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
         modifier_->setEnablePreviewText(node_, &inputValue);
         checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -455,13 +455,13 @@ HWTEST_F(TextAreaModifierTest, setEnableAutoFillTest, TestSize.Level1)
     ASSERT_NE(modifier_->setEnableAutoFill, nullptr);
 
     auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, true);
+    EXPECT_THAT(checkVal, Eq(true));
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
         modifier_->setEnableAutoFill(node_, &inputValue);
         checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -476,13 +476,13 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setSelectionMenuHiddenTest, TestSize.Lev
     ASSERT_NE(modifier_->setSelectionMenuHidden, nullptr);
 
     auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, false);
+    EXPECT_THAT(checkVal, Eq(false));
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
         modifier_->setSelectionMenuHidden(node_, &inputValue);
         checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -497,13 +497,13 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnableKeyboardOnFocusTest, TestSize.L
     ASSERT_NE(modifier_->setEnableKeyboardOnFocus, nullptr);
 
     auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, true);
+    EXPECT_THAT(checkVal, Eq(true));
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_Boolean>(value);
         modifier_->setEnableKeyboardOnFocus(node_, &inputValue);
         checkVal = GetAttrValue<bool>(GetJsonValue(node_), propName);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -518,8 +518,8 @@ HWTEST_F(TextAreaModifierTest, setTextIndentTest, TestSize.Level1)
     static const std::string propName("textIndent");
     ASSERT_NE(modifier_->setTextIndent, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, defaultTextIndent);
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq(defaultTextIndent));
 
     const std::vector<std::tuple<Opt_Dimension, std::string>> ARK_LENGTH_TEST_PLAN = {
         { Converter::ArkValue<Opt_Dimension>(1.11f), "1.11fp" },
@@ -538,8 +538,8 @@ HWTEST_F(TextAreaModifierTest, setTextIndentTest, TestSize.Level1)
     for (const auto& [value, expectVal] : ARK_LENGTH_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_Dimension>(value);
         modifier_->setTextIndent(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -557,8 +557,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setCaretStyleTest, TestSize.Level1)
     const std::string propWidth("width");
     ASSERT_NE(modifier_->setCaretStyle, nullptr);
 
-    auto value = GetStringAttribute(node_, propName);
-    auto caretStyleObj = JsonUtil::ParseJsonString(value);
+    auto jsonValue = GetJsonValue(node_);
+    auto caretStyleObj = GetAttrObject(jsonValue, propName);
     auto caretColor = caretStyleObj->GetString(propColor);
     auto caretWidth = caretStyleObj->GetString(propWidth);
     EXPECT_EQ(caretColor, defaultCaretColor);
@@ -582,8 +582,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setCaretStyleTest, TestSize.Level1)
 
     for (auto caretStyle : testPlanCaretStyle) {
         modifier_->setCaretStyle(node_, &caretStyle.first);
-        value = GetStringAttribute(node_, propName);
-        caretStyleObj = JsonUtil::ParseJsonString(value);
+        jsonValue = GetJsonValue(node_);
+        caretStyleObj = GetAttrObject(jsonValue, propName);
         auto caretColor = caretStyleObj->GetString(propColor);
         auto caretWidth = caretStyleObj->GetString(propWidth);
         EXPECT_EQ(caretColor, caretStyle.second.first);
@@ -704,8 +704,8 @@ HWTEST_F(TextAreaModifierTest, setMaxLengthTest, TestSize.Level1)
     const auto propName = "maxLength";
     const auto defaultValue = "INF";
     ASSERT_NE(modifier_->setMaxLength, nullptr);
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, defaultValue);
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq(defaultValue));
 
     static const std::vector<std::pair<Opt_Int32, std::string>> arkNumberTestPlan = {
         { Converter::ArkValue<Opt_Int32>(20), "20" },
@@ -717,8 +717,8 @@ HWTEST_F(TextAreaModifierTest, setMaxLengthTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : arkNumberTestPlan) {
         modifier_->setMaxLength(node_, &value);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -732,13 +732,13 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setMinFontSizeTest, TestSize.Level1)
     static const std::string propName("minFontSize");
     ASSERT_NE(modifier_->setMinFontSize, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "0.00px");
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("0.00px"));
 
     for (const auto& [value, expectVal] : UNION_NUM_STR_RES_TEST_PLAN) {
         modifier_->setMinFontSize(node_, &value);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -752,13 +752,13 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setMaxFontSizeTest, TestSize.Level1)
     static const std::string propName("maxFontSize");
     ASSERT_NE(modifier_->setMaxFontSize, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "0.00px");
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("0.00px"));
 
     for (const auto& [value, expectVal] : UNION_NUM_STR_RES_TEST_PLAN) {
         modifier_->setMaxFontSize(node_, &value);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -772,8 +772,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setLineHeightTest, TestSize.Level1)
     static const std::string propName("lineHeight");
     ASSERT_NE(modifier_->setLineHeight, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "0.00vp");
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("0.00vp"));
 
     const std::vector<std::pair<Opt_Union_F64_String_Resource, std::string>> testPlan = {
         { Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(123.), "123.00fp" },
@@ -797,8 +797,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setLineHeightTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : testPlan) {
         modifier_->setLineHeight(node_, &value);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -812,8 +812,8 @@ HWTEST_F(TextAreaModifierTest, setTextAlignTest, TestSize.Level1)
     static const std::string propName("textAlign");
     ASSERT_NE(modifier_->setTextAlign, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "TextAlign.Start");
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("TextAlign.Start"));
 
     typedef std::pair<Ark_TextAlign, std::string> TextAlignTestStep;
     const std::vector<TextAlignTestStep> testPlan = {
@@ -829,8 +829,8 @@ HWTEST_F(TextAreaModifierTest, setTextAlignTest, TestSize.Level1)
     for (const auto& [value, expectVal] : testPlan) {
         auto inputValue = Converter::ArkValue<Opt_TextAlign>(value);
         modifier_->setTextAlign(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -844,8 +844,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTest, TestSize.Level1)
     static const std::string propName("enterKeyType");
     ASSERT_NE(modifier_->setEnterKeyType, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "EnterKeyType.NEW_LINE");
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("EnterKeyType.NEW_LINE"));
 
     typedef std::pair<Ark_EnterKeyType, std::string> EnterKeyTypeTestStep;
     const std::vector<EnterKeyTypeTestStep> testPlan = {
@@ -862,8 +862,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTest, TestSize.Level1)
     for (const auto& [value, expectVal] : testPlan) {
         auto inputValue = Converter::ArkValue<Opt_EnterKeyType>(value);
         modifier_->setEnterKeyType(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -881,18 +881,18 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTestVariant2, TestSize.Le
     modifier_->setMaxLines(node_, &maxLines, nullptr);
     ///
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "EnterKeyType.NEW_LINE");
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("EnterKeyType.NEW_LINE"));
 
     // Additional conditions
 #ifdef WRONG_API
     TextFieldModelNG::SetMaxLines(reinterpret_cast<FrameNode*>(node_), 1);
 #endif
-    checkVal = GetStringAttribute(node_, "maxLines");
-    EXPECT_EQ(checkVal, "1");
+    checkVal = GetAttrValue<std::string>(node_, "maxLines");
+    EXPECT_THAT(checkVal, Eq("1"));
 
-    checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "EnterKeyType.Done");
+    checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("EnterKeyType.Done"));
 
     typedef std::pair<Ark_EnterKeyType, std::string> EnterKeyTypeTestStep;
     const std::vector<EnterKeyTypeTestStep> testPlan = {
@@ -909,8 +909,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTestVariant2, TestSize.Le
     for (const auto& [value, expectVal] : testPlan) {
         auto inputValue = Converter::ArkValue<Opt_EnterKeyType>(value);
         modifier_->setEnterKeyType(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -925,13 +925,13 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTest, TestSize.Level1)
     static const std::string defaultMaxViewLines("3");
     ASSERT_NE(modifier_->setMaxLines, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "INF");
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("INF"));
 
     auto style = Converter::ArkValue<Opt_TextContentStyle>(ARK_TEXT_CONTENT_STYLE_INLINE);
     modifier_->setStyle(node_, &style);
-    checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, defaultMaxViewLines);
+    checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq(defaultMaxViewLines));
 
     static const std::vector<std::tuple<std::string, Opt_Int32, std::string>> testPlan = {
         { "20", Converter::ArkValue<Opt_Int32>(20), "20" },
@@ -944,8 +944,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTest, TestSize.Level1)
 
     for (const auto& [input, value, expectVal] : testPlan) {
         modifier_->setMaxLines(node_, &value, nullptr);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal) << "Input value is: " << input;
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal)) << "Input value is: " << input;
     }
 }
 
@@ -958,8 +958,8 @@ HWTEST_F(TextAreaModifierTest, setTypeTest, TestSize.Level1)
 {
     static const std::string propName("type");
     ASSERT_NE(modifier_->setType, nullptr);
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "TextAreaType.NORMAL");
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("TextAreaType.NORMAL"));
     typedef std::pair<Ark_TextAreaType, std::string> typeTestStep;
     const std::vector<typeTestStep> testPlan = {
         { ARK_TEXT_AREA_TYPE_EMAIL, "TextAreaType.EMAIL" },
@@ -973,8 +973,8 @@ HWTEST_F(TextAreaModifierTest, setTypeTest, TestSize.Level1)
     for (const auto& [value, expectVal] : testPlan) {
         auto inputValue = Converter::ArkValue<Opt_TextAreaType>(value);
         modifier_->setType(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -987,12 +987,11 @@ HWTEST_F(TextAreaModifierTest, setFontFeatureTest, TestSize.Level1)
 {
     static const std::string propName("fontFeature");
     ASSERT_NE(modifier_->setFontFeature, nullptr);
-    std::string checkVal = "";
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> array = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, propName);
+    std::unique_ptr<JsonValue> array = GetAttrObject(jsonValue, propName);
     auto jsonArray = array.get();
     ASSERT_NE(jsonArray, nullptr);
-    checkVal = jsonArray->ToString();
+    auto checkVal = jsonArray->ToString();
     EXPECT_EQ(checkVal, "");
     typedef std::pair<Ark_String, std::string> FontFeatureTestStep;
     const std::vector<FontFeatureTestStep> testPlan = {
@@ -1014,8 +1013,8 @@ HWTEST_F(TextAreaModifierTest, setFontFeatureTest, TestSize.Level1)
     for (const auto& [value, expectVal] : testPlan) {
         auto inputValue = Converter::ArkValue<Opt_String>(value);
         modifier_->setFontFeature(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        auto checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1297,13 +1296,13 @@ HWTEST_F(TextAreaModifierTest, setCopyOptionTest, TestSize.Level1)
         { static_cast<Ark_CopyOptions>(-1), "CopyOptions.Local" },
     };
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "CopyOptions.Local");
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("CopyOptions.Local"));
     for (const auto& [value, expectVal] : copyOptionTestPlan) {
         auto inputValue = Converter::ArkValue<Opt_CopyOptions>(value);
         modifier_->setCopyOption(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1341,8 +1340,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setInputFilterTestValidValues, TestSize.
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->error, ERROR_TEXT);
-    auto attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
-    EXPECT_EQ(attrValue, STR_TEST_TEXT);
+    auto attrValue = GetAttrValue<std::string>(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_THAT(attrValue, Eq(STR_TEST_TEXT));
 
     checkEvent.reset();
     modifier_->setInputFilter(node_, &sendResource2, &optCallbackValue);
@@ -1351,8 +1350,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setInputFilterTestValidValues, TestSize.
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->error, ERROR_TEXT2);
-    attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
-    EXPECT_EQ(attrValue, STR_TEST_TEXT2);
+    attrValue = GetAttrValue<std::string>(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_THAT(attrValue, Eq(STR_TEST_TEXT2));
 }
 
 /**
@@ -1372,13 +1371,13 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTestInvalidValues, TestSize.Level1)
 
     modifier_->setInputFilter(node_, &sendResource, &optCallbackValue);
     eventHub->FireOnInputFilterError(ERROR_TEXT);
-    auto attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
-    EXPECT_EQ(attrValue, STR_TEST_TEXT);
+    auto attrValue = GetAttrValue<std::string>(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_THAT(attrValue, Eq(STR_TEST_TEXT));
 
     modifier_->setInputFilter(node_, &sendResource2, nullptr);
     eventHub->FireOnInputFilterError(ERROR_TEXT);
-    attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
-    EXPECT_EQ(attrValue, STR_TEST_TEXT2);
+    attrValue = GetAttrValue<std::string>(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_THAT(attrValue, Eq(STR_TEST_TEXT2));
 }
 
 /**
@@ -1404,8 +1403,8 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestVariant1, TestSize.Level1)
         font.style = style.first;
         auto inputValue = Converter::ArkValue<Opt_Font>(font);
         modifier_->setPlaceholderFont(node_, &inputValue);
-        auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
-        auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrObject(jsonValue, "placeholderFont");
         auto checkSize = placeholderFont->GetString("size");
         auto checkFamily = placeholderFont->GetString("fontFamily");
         auto checkWeight = placeholderFont->GetString("fontWeight");
@@ -1440,8 +1439,8 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestVariant2, TestSize.Level1)
         font.weight = weight.first;
         auto inputValue = Converter::ArkValue<Opt_Font>(font);
         modifier_->setPlaceholderFont(node_, &inputValue);
-        auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
-        auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrObject(jsonValue, "placeholderFont");
         auto checkSize = placeholderFont->GetString("size");
         auto checkFamily = placeholderFont->GetString("fontFamily");
         auto checkWeight = placeholderFont->GetString("fontWeight");
@@ -1476,8 +1475,8 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestVariant3, TestSize.Level1)
         font.weight = weight.first;
         auto inputValue = Converter::ArkValue<Opt_Font>(font);
         modifier_->setPlaceholderFont(node_, &inputValue);
-        auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
-        auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrObject(jsonValue, "placeholderFont");
         auto checkSize = placeholderFont->GetString("size");
         auto checkFamily = placeholderFont->GetString("fontFamily");
         auto checkWeight = placeholderFont->GetString("weight");
@@ -1512,8 +1511,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestVariant4, TestSize
         font.size = size.first;
         auto inputValue = Converter::ArkValue<Opt_Font>(font);
         modifier_->setPlaceholderFont(node_, &inputValue);
-        auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
-        auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
+        auto jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrObject(jsonValue, "placeholderFont");
         auto checkSize = placeholderFont->GetString("size");
         auto checkFamily = placeholderFont->GetString("fontFamily");
         auto checkWeight = placeholderFont->GetString("fontWeight");
@@ -1537,8 +1536,8 @@ HWTEST_F(TextAreaModifierTest, setDecorationTest, TestSize.Level1)
     const auto decorationTypeAttr("type");
     const auto decorationStyleAttr("style");
     const auto decorationColorAttr("color");
-    auto defaultDecorationJSON = GetStringAttribute(node_, decorationsAttrs);
-    auto defaultDecoration = JsonUtil::ParseJsonString(defaultDecorationJSON);
+    auto jsonValue = GetJsonValue(node_);
+    auto defaultDecoration = GetAttrObject(jsonValue, decorationsAttrs);
     auto defaultType = defaultDecoration->GetString(decorationTypeAttr);
     auto defaultStyle = defaultDecoration->GetString(decorationStyleAttr);
     auto defaultColor = defaultDecoration->GetString(decorationColorAttr);
@@ -1556,8 +1555,8 @@ HWTEST_F(TextAreaModifierTest, setDecorationTest, TestSize.Level1)
                 };
                 auto inputValue = Converter::ArkValue<Opt_TextDecorationOptions>(options);
                 modifier_->setDecoration(node_, &inputValue);
-                auto decorationJSON = GetStringAttribute(node_, decorationsAttrs);
-                auto decoration = JsonUtil::ParseJsonString(decorationJSON);
+                auto jsonValue = GetJsonValue(node_);
+                auto decoration = GetAttrObject(jsonValue, decorationsAttrs);
                 auto type = decoration->GetString(decorationTypeAttr);
                 auto style = decoration->GetString(decorationStyleAttr);
                 auto color = decoration->GetString(decorationColorAttr);
@@ -1579,13 +1578,13 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setLetterSpacingTest, TestSize.Level1)
     ASSERT_NE(modifier_->setLetterSpacing, nullptr);
     const auto letterSpacingAttr("letterSpacing");
 
-    auto checkVal = GetStringAttribute(node_, letterSpacingAttr);
-    EXPECT_EQ(checkVal, "0.00px");
+    auto checkVal = GetAttrValue<std::string>(node_, letterSpacingAttr);
+    EXPECT_THAT(checkVal, Eq("0.00px"));
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN) {
         modifier_->setLetterSpacing(node_, &value);
-        checkVal = GetStringAttribute(node_, letterSpacingAttr);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, letterSpacingAttr);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1598,8 +1597,8 @@ HWTEST_F(TextAreaModifierTest, setContentTypeTest, TestSize.Level1)
 {
     const std::string propName("contentType");
     ASSERT_NE(modifier_->setContentType, nullptr);
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "TextContentType.UNSPECIFIED");
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("TextContentType.UNSPECIFIED"));
     typedef std::pair<Ark_ContentType, std::string> TypeTestStep;
     const std::vector<TypeTestStep> testPlan = {
         { ARK_CONTENT_TYPE_USER_NAME, "TextContentType.USER_NAME" },
@@ -1639,8 +1638,8 @@ HWTEST_F(TextAreaModifierTest, setContentTypeTest, TestSize.Level1)
     for (const auto& [value, expectVal] : testPlan) {
         auto inputValue = Converter::ArkValue<Opt_ContentType>(value);
         modifier_->setContentType(node_, &inputValue);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1697,10 +1696,10 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
     EXPECT_TRUE(checkInvoke);
 
     // check the expected "placeholder" and "text" attribute values
-    auto checkVal = GetStringAttribute(node_, ATTRIBUTE_PLACEHOLDER_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_PLACEHOLDER_VALUE);
-    checkVal = GetStringAttribute(node_, ATTRIBUTE_TEXT_NAME);
-    EXPECT_EQ(checkVal, ATTRIBUTE_TEXT_VALUE);
+    auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_PLACEHOLDER_NAME);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_PLACEHOLDER_VALUE));
+    checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_TEXT_NAME);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_TEXT_VALUE));
 }
 
 /**
@@ -1724,11 +1723,11 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTestVariant2, TestSize.Level1)
         auto jsonValue = GetJsonValue(node_);
         ASSERT_NE(jsonValue, nullptr);
         auto checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        EXPECT_EQ(checkVal, expectedStr)
+        EXPECT_THAT(checkVal, Eq(expectedStr))
             << "Input value is: " << input << ", method: setTextAreaOptions, attribute: "
             << ATTRIBUTE_PLACEHOLDER_NAME;
         checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_NAME);
-        EXPECT_EQ(checkVal, expectedStr)
+        EXPECT_THAT(checkVal, Eq(expectedStr))
             << "Input value is: " << input << ", method: setTextAreaOptions, attribute: "
             << ATTRIBUTE_TEXT_NAME;
     };
@@ -1826,14 +1825,14 @@ HWTEST_F(TextAreaModifierTest, setTextOverflowTest, TestSize.Level1)
     const auto defaultValue = "TextOverflow.Clip";
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_OVERFLOW_NAME);
-    EXPECT_EQ(resultStr, defaultValue);
+    EXPECT_THAT(resultStr, Eq(defaultValue));
 
     auto checkValue = [this](
                           const std::string& input, const std::string& expectedStr, const Opt_TextOverflow& value) {
         modifier_->setTextOverflow(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_OVERFLOW_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setTextOverflow, attribute: textOverflow";
     };
 

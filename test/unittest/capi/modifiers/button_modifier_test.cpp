@@ -198,22 +198,22 @@ public:
 HWTEST_F(ButtonModifierTest, setButtonOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROLE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ROLE_DEFAULT_VALUE));
 }
 
 /**
@@ -234,11 +234,11 @@ HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions0Test, TestSize.Level1)
     auto buttonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
     auto role = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
 
-    EXPECT_EQ(type, ATTRIBUTE_TYPE_DEFAULT_VALUE);
-    EXPECT_EQ(stateEffect, ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE);
-    EXPECT_EQ(controlSize, ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE);
-    EXPECT_EQ(buttonStyle, ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE);
-    EXPECT_EQ(role, ATTRIBUTE_ROLE_DEFAULT_VALUE);
+    EXPECT_THAT(type, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
+    EXPECT_THAT(stateEffect, Eq(ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE));
+    EXPECT_THAT(controlSize, Eq(ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE));
+    EXPECT_THAT(buttonStyle, Eq(ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE));
+    EXPECT_THAT(role, Eq(ATTRIBUTE_ROLE_DEFAULT_VALUE));
 #endif
 }
 /*
@@ -266,17 +266,17 @@ HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions1TestStateEffect, TestSize
     auto checkButtonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
     auto checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
     auto checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-    EXPECT_EQ(checkType, "ButtonType.Capsule");
-    EXPECT_EQ(checkStateEffect, "true");
-    EXPECT_EQ(checkButtonStyle, "ButtonStyleMode.NORMAL");
-    EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
-    EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
+    EXPECT_THAT(checkType, Eq("ButtonType.Capsule"));
+    EXPECT_THAT(checkStateEffect, Eq("true"));
+    EXPECT_THAT(checkButtonStyle, Eq("ButtonStyleMode.NORMAL"));
+    EXPECT_THAT(checkControlSize, Eq("ControlSize.SMALL"));
+    EXPECT_THAT(checkRole, Eq("ButtonRole.NORMAL"));
     for (auto stateEffect : BOOL_TEST_PLAN) {
         inputValueOptions.stateEffect = Converter::ArkValue<Opt_Boolean>(stateEffect.first);
         modifier_->setButtonOptions1(node_, &inputValueOptions);
         jsonValue = GetJsonValue(node_);
         checkStateEffect = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
-        EXPECT_EQ(checkStateEffect, stateEffect.second);
+        EXPECT_THAT(checkStateEffect, Eq(stateEffect.second));
     }
 #endif
 }
@@ -305,17 +305,17 @@ HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions1TestButtonStyleMode, Test
     auto checkButtonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
     auto checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
     auto checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-    EXPECT_EQ(checkType, "ButtonType.Capsule");
-    EXPECT_EQ(checkStateEffect, "true");
-    EXPECT_EQ(checkButtonStyle, "ButtonStyleMode.NORMAL");
-    EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
-    EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
+    EXPECT_THAT(checkType, Eq("ButtonType.Capsule"));
+    EXPECT_THAT(checkStateEffect, Eq("true"));
+    EXPECT_THAT(checkButtonStyle, Eq("ButtonStyleMode.NORMAL"));
+    EXPECT_THAT(checkControlSize, Eq("ControlSize.SMALL"));
+    EXPECT_THAT(checkRole, Eq("ButtonRole.NORMAL"));
     for (auto styleMode : BUTTON_STYLE_MODE_TEST_PLAN) {
         inputValueOptions.buttonStyle = Converter::ArkValue<Opt_ButtonStyleMode>(styleMode.first);
         modifier_->setButtonOptions1(node_, &inputValueOptions);
         jsonValue = GetJsonValue(node_);
         checkButtonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
-        EXPECT_EQ(checkButtonStyle, styleMode.second);
+        EXPECT_THAT(checkButtonStyle, Eq(styleMode.second));
     }
 #endif
 }
@@ -344,17 +344,17 @@ HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions1TestControlSize, TestSize
     auto checkButtonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
     auto checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
     auto checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-    EXPECT_EQ(checkType, "ButtonType.Capsule");
-    EXPECT_EQ(checkStateEffect, "true");
-    EXPECT_EQ(checkButtonStyle, "ButtonStyleMode.NORMAL");
-    EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
-    EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
+    EXPECT_THAT(checkType, Eq("ButtonType.Capsule"));
+    EXPECT_THAT(checkStateEffect, Eq("true"));
+    EXPECT_THAT(checkButtonStyle, Eq("ButtonStyleMode.NORMAL"));
+    EXPECT_THAT(checkControlSize, Eq("ControlSize.SMALL"));
+    EXPECT_THAT(checkRole, Eq("ButtonRole.NORMAL"));
     for (auto controlSize : BUTTON_CONTROL_SIZE_TEST_PLAN) {
         inputValueOptions.controlSize = Converter::ArkValue<Opt_ControlSize>(controlSize.first);
         modifier_->setButtonOptions1(node_, &inputValueOptions);
         jsonValue = GetJsonValue(node_);
         checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
-        EXPECT_EQ(checkControlSize, controlSize.second);
+        EXPECT_THAT(checkControlSize, Eq(controlSize.second));
     }
 #endif
 }
@@ -383,17 +383,17 @@ HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions1TestButtonRole, TestSize.
     auto checkButtonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
     auto checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
     auto checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-    EXPECT_EQ(checkType, "ButtonType.Capsule");
-    EXPECT_EQ(checkStateEffect, "true");
-    EXPECT_EQ(checkButtonStyle, "ButtonStyleMode.NORMAL");
-    EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
-    EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
+    EXPECT_THAT(checkType, Eq("ButtonType.Capsule"));
+    EXPECT_THAT(checkStateEffect, Eq("true"));
+    EXPECT_THAT(checkButtonStyle, Eq("ButtonStyleMode.NORMAL"));
+    EXPECT_THAT(checkControlSize, Eq("ControlSize.SMALL"));
+    EXPECT_THAT(checkRole, Eq("ButtonRole.NORMAL"));
     for (auto role : BUTTON_ROLE_TEST_PLAN) {
         inputValueOptions.role = Converter::ArkValue<Opt_ButtonRole>(role.first);
         modifier_->setButtonOptions1(node_, &inputValueOptions);
         jsonValue = GetJsonValue(node_);
         checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-        EXPECT_EQ(checkRole, role.second);
+        EXPECT_THAT(checkRole, Eq(role.second));
     }
 #endif
 }
@@ -427,18 +427,18 @@ HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions2TestStateEffect, TestSize
     auto checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
     auto checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
     auto checkLabel = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_NAME);
-    EXPECT_EQ(checkType, "ButtonType.Capsule");
-    EXPECT_EQ(checkStateEffect, "true");
-    EXPECT_EQ(checkButtonStyle, "ButtonStyleMode.NORMAL");
-    EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
-    EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
+    EXPECT_THAT(checkType, Eq("ButtonType.Capsule"));
+    EXPECT_THAT(checkStateEffect, Eq("true"));
+    EXPECT_THAT(checkButtonStyle, Eq("ButtonStyleMode.NORMAL"));
+    EXPECT_THAT(checkControlSize, Eq("ControlSize.SMALL"));
+    EXPECT_THAT(checkRole, Eq("ButtonRole.NORMAL"));
     for (auto stateEffect : BOOL_TEST_PLAN) {
         inputValueOptions.stateEffect = Converter::ArkValue<Opt_Boolean>(stateEffect.first);
         optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
         modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
         jsonValue = GetJsonValue(node_);
         checkStateEffect = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
-        EXPECT_EQ(checkStateEffect, stateEffect.second);
+        EXPECT_THAT(checkStateEffect, Eq(stateEffect.second));
     }
 #endif
 }
@@ -470,18 +470,18 @@ HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions2TestButtonStyleMode, Test
     auto checkButtonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
     auto checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
     auto checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-    EXPECT_EQ(checkType, "ButtonType.Capsule");
-    EXPECT_EQ(checkStateEffect, "true");
-    EXPECT_EQ(checkButtonStyle, "ButtonStyleMode.NORMAL");
-    EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
-    EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
+    EXPECT_THAT(checkType, Eq("ButtonType.Capsule"));
+    EXPECT_THAT(checkStateEffect, Eq("true"));
+    EXPECT_THAT(checkButtonStyle, Eq("ButtonStyleMode.NORMAL"));
+    EXPECT_THAT(checkControlSize, Eq("ControlSize.SMALL"));
+    EXPECT_THAT(checkRole, Eq("ButtonRole.NORMAL"));
     for (auto styleMode : BUTTON_STYLE_MODE_TEST_PLAN) {
         inputValueOptions.buttonStyle = Converter::ArkValue<Opt_ButtonStyleMode>(styleMode.first);
         optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
         modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
         jsonValue = GetJsonValue(node_);
         checkButtonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
-        EXPECT_EQ(checkButtonStyle, styleMode.second);
+        EXPECT_THAT(checkButtonStyle, Eq(styleMode.second));
     }
 #endif
 }
@@ -513,18 +513,18 @@ HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions2TestControlSize, TestSize
     auto checkButtonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
     auto checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
     auto checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-    EXPECT_EQ(checkType, "ButtonType.Capsule");
-    EXPECT_EQ(checkStateEffect, "true");
-    EXPECT_EQ(checkButtonStyle, "ButtonStyleMode.NORMAL");
-    EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
-    EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
+    EXPECT_THAT(checkType, Eq("ButtonType.Capsule"));
+    EXPECT_THAT(checkStateEffect, Eq("true"));
+    EXPECT_THAT(checkButtonStyle, Eq("ButtonStyleMode.NORMAL"));
+    EXPECT_THAT(checkControlSize, Eq("ControlSize.SMALL"));
+    EXPECT_THAT(checkRole, Eq("ButtonRole.NORMAL"));
     for (auto controlSize : BUTTON_CONTROL_SIZE_TEST_PLAN) {
         inputValueOptions.controlSize = Converter::ArkValue<Opt_ControlSize>(controlSize.first);
         optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
         modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
         jsonValue = GetJsonValue(node_);
         checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
-        EXPECT_EQ(checkControlSize, controlSize.second);
+        EXPECT_THAT(checkControlSize, Eq(controlSize.second));
     }
 #endif
 }
@@ -556,18 +556,18 @@ HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions2TestButtonRole, TestSize.
     auto checkButtonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
     auto checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
     auto checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-    EXPECT_EQ(checkType, "ButtonType.Capsule");
-    EXPECT_EQ(checkStateEffect, "true");
-    EXPECT_EQ(checkButtonStyle, "ButtonStyleMode.NORMAL");
-    EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
-    EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
+    EXPECT_THAT(checkType, Eq("ButtonType.Capsule"));
+    EXPECT_THAT(checkStateEffect, Eq("true"));
+    EXPECT_THAT(checkButtonStyle, Eq("ButtonStyleMode.NORMAL"));
+    EXPECT_THAT(checkControlSize, Eq("ControlSize.SMALL"));
+    EXPECT_THAT(checkRole, Eq("ButtonRole.NORMAL"));
     for (auto role : BUTTON_ROLE_TEST_PLAN) {
         inputValueOptions.role = Converter::ArkValue<Opt_ButtonRole>(role.first);
         optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
         modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
         jsonValue = GetJsonValue(node_);
         checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-        EXPECT_EQ(checkRole, role.second);
+        EXPECT_THAT(checkRole, Eq(role.second));
     }
 #endif
 }
@@ -580,10 +580,10 @@ HWTEST_F(ButtonModifierTest, DISABLED_setButtonOptions2TestButtonRole, TestSize.
 HWTEST_F(ButtonModifierTest, setTypeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
 }
 
 /*
@@ -594,7 +594,7 @@ HWTEST_F(ButtonModifierTest, setTypeTestDefaultValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setTypeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     const std::vector<std::pair<Ark_ButtonType, std::string>> testPlan = {
         { ARK_BUTTON_TYPE_NORMAL, "ButtonType.Normal" },
         { ARK_BUTTON_TYPE_CAPSULE, "ButtonType.Capsule" },
@@ -606,7 +606,7 @@ HWTEST_F(ButtonModifierTest, setTypeTestValidValues, TestSize.Level1)
         modifier_->setType(node_, &optType);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-        EXPECT_EQ(resultStr, expectValue);
+        EXPECT_THAT(resultStr, Eq(expectValue));
     }
 }
 
@@ -618,7 +618,7 @@ HWTEST_F(ButtonModifierTest, setTypeTestValidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setTypeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     const std::vector<std::pair<Ark_ButtonType, std::string>> testPlan = {
         { static_cast<Ark_ButtonType>(-100), ATTRIBUTE_TYPE_DEFAULT_VALUE },
         { static_cast<Ark_ButtonType>(100), ATTRIBUTE_TYPE_DEFAULT_VALUE }
@@ -628,7 +628,7 @@ HWTEST_F(ButtonModifierTest, setTypeTestInvalidValues, TestSize.Level1)
         modifier_->setType(node_, &optType);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-        EXPECT_EQ(resultStr, expectValue);
+        EXPECT_THAT(resultStr, Eq(expectValue));
     }
 }
 
@@ -640,10 +640,10 @@ HWTEST_F(ButtonModifierTest, setTypeTestInvalidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setStateEffectTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE));
 }
 
 /*
@@ -654,14 +654,14 @@ HWTEST_F(ButtonModifierTest, setStateEffectTestDefaultValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setStateEffectTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     for (const auto &[stateEffect, expectValue] : BOOL_TEST_PLAN) {
         auto optStateEffect = Converter::ArkValue<Opt_Boolean>(stateEffect);
         modifier_->setStateEffect(node_, &optStateEffect);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
-        EXPECT_EQ(resultStr, expectValue);
+        EXPECT_THAT(resultStr, Eq(expectValue));
     }
 }
 
@@ -673,10 +673,10 @@ HWTEST_F(ButtonModifierTest, setStateEffectTestValidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setButtonStyleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE));
 }
 
 /*
@@ -687,7 +687,7 @@ HWTEST_F(ButtonModifierTest, setButtonStyleTestDefaultValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setButtonStyleTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     const std::vector<std::pair<Ark_ButtonStyleMode, std::string>> BUTTON_STYLE_MODE_TEST_PLAN = {
         { ARK_BUTTON_STYLE_MODE_NORMAL, "ButtonStyleMode.NORMAL" },
@@ -700,7 +700,7 @@ HWTEST_F(ButtonModifierTest, setButtonStyleTestValidValues, TestSize.Level1)
         modifier_->setButtonStyle(node_, &optStyleMode);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectValue);
+        EXPECT_THAT(resultStr, Eq(expectValue));
     }
 }
 
@@ -712,7 +712,7 @@ HWTEST_F(ButtonModifierTest, setButtonStyleTestValidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setButtonStyleTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     const std::vector<std::pair<Ark_ButtonStyleMode, std::string>> BUTTON_STYLE_MODE_TEST_PLAN = {
         { static_cast<Ark_ButtonStyleMode>(-100), ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE },
@@ -724,7 +724,7 @@ HWTEST_F(ButtonModifierTest, setButtonStyleTestInvalidValues, TestSize.Level1)
         modifier_->setButtonStyle(node_, &optStyleMode);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectValue);
+        EXPECT_THAT(resultStr, Eq(expectValue));
     }
 }
 
@@ -736,10 +736,10 @@ HWTEST_F(ButtonModifierTest, setButtonStyleTestInvalidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setControlSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE));
 }
 
 /*
@@ -750,7 +750,7 @@ HWTEST_F(ButtonModifierTest, setControlSizeTestDefaultValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setControlSizeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     const std::vector<std::pair<Ark_ControlSize, std::string>> testPlan = {
         { ARK_CONTROL_SIZE_NORMAL, "ControlSize.NORMAL" },
@@ -761,7 +761,7 @@ HWTEST_F(ButtonModifierTest, setControlSizeTestValidValues, TestSize.Level1)
         modifier_->setControlSize(node_, &optControlSize);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectValue);
+        EXPECT_THAT(resultStr, Eq(expectValue));
     }
 }
 
@@ -773,7 +773,7 @@ HWTEST_F(ButtonModifierTest, setControlSizeTestValidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setControlSizeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     const std::vector<std::pair<Ark_ControlSize, std::string>> testPlan = {
         { static_cast<Ark_ControlSize>(-100), ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE },
@@ -784,7 +784,7 @@ HWTEST_F(ButtonModifierTest, setControlSizeTestInvalidValues, TestSize.Level1)
         modifier_->setControlSize(node_, &optControlSize);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectValue);
+        EXPECT_THAT(resultStr, Eq(expectValue));
     }
 }
 
@@ -796,10 +796,10 @@ HWTEST_F(ButtonModifierTest, setControlSizeTestInvalidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setRoleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROLE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ROLE_DEFAULT_VALUE));
 }
 
 /*
@@ -810,7 +810,7 @@ HWTEST_F(ButtonModifierTest, setRoleTestDefaultValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setRoleTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     const std::vector<std::pair<Ark_ButtonRole, std::string>> testPlan = {
         { ARK_BUTTON_ROLE_NORMAL, "ButtonRole.NORMAL" },
@@ -822,7 +822,7 @@ HWTEST_F(ButtonModifierTest, setRoleTestValidValues, TestSize.Level1)
         modifier_->setRole(node_, &optRole);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-        EXPECT_EQ(resultStr, expectValue);
+        EXPECT_THAT(resultStr, Eq(expectValue));
     }
 }
 
@@ -834,7 +834,7 @@ HWTEST_F(ButtonModifierTest, setRoleTestValidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setRoleTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     const std::vector<std::pair<Ark_ButtonRole, std::string>> testPlan = {
         { static_cast<Ark_ButtonRole>(-100), ATTRIBUTE_ROLE_DEFAULT_VALUE },
@@ -846,7 +846,7 @@ HWTEST_F(ButtonModifierTest, setRoleTestInvalidValues, TestSize.Level1)
         modifier_->setRole(node_, &optRole);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-        EXPECT_EQ(resultStr, expectValue);
+        EXPECT_THAT(resultStr, Eq(expectValue));
     }
 }
 
@@ -858,11 +858,11 @@ HWTEST_F(ButtonModifierTest, setRoleTestInvalidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE));
 }
 
 /*
@@ -873,7 +873,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setFontColorTestValidColorValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -896,7 +896,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestValidColorValues, TestSize.Level1)
         modifier_->setFontColor(node_, &optResColor);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
     }
 }
 
@@ -908,7 +908,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestValidColorValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setFontColorTestValidNumberValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -932,7 +932,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestValidNumberValues, TestSize.Level1)
         modifier_->setFontColor(node_, &optResColor);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
     }
 }
 
@@ -944,7 +944,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestValidNumberValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setFontColorTestValidStringValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -966,7 +966,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestValidStringValues, TestSize.Level1)
         modifier_->setFontColor(node_, &optResColor);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
     }
 }
 
@@ -978,7 +978,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestValidStringValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setFontColorTestInvalidStringValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
@@ -991,7 +991,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestInvalidStringValues, TestSize.Level
         modifier_->setFontColor(node_, &optResColor);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
     }
 }
 
@@ -1004,7 +1004,7 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestDefaultValue, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE));
 }
 
 /*
@@ -1014,9 +1014,6 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestDefaultValue, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setFontSizeTestValidValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string result;
-
     typedef std::pair<Opt_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
         { ArkValue<Opt_Length>(1.0f),  "1.00fp" },
@@ -1031,9 +1028,9 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestValidValues, TestSize.Level1)
 
     for (const auto &[optLength, expected]: testPlan) {
         modifier_->setFontSize(node_, &optLength);
-        jsonValue = GetJsonValue(node_);
-        result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(result, expected);
+        auto jsonValue = GetJsonValue(node_);
+        auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
+        EXPECT_THAT(result, Eq(expected));
     }
 }
 
@@ -1044,9 +1041,6 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setFontSizeTestInvalidValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string result;
-
     typedef std::pair<Opt_Length, std::string> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
         { ArkValue<Opt_Length>("23.00%"), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
@@ -1056,9 +1050,9 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestInvalidValues, TestSize.Level1)
 
     for (const auto &[optLength, expected]: testPlan) {
         modifier_->setFontSize(node_, &optLength);
-        jsonValue = GetJsonValue(node_);
-        result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(result, expected);
+        auto jsonValue = GetJsonValue(node_);
+        auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
+        EXPECT_THAT(result, Eq(expected));
     }
 }
 
@@ -1071,7 +1065,7 @@ HWTEST_F(ButtonModifierTest, setFontWeightTestDefaultValue, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE));
 }
 
 /**
@@ -1082,14 +1076,12 @@ HWTEST_F(ButtonModifierTest, setFontWeightTestDefaultValue, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setFontWeightTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFontWeight, nullptr);
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string result;
     for (const auto &[weight, expectValue] : FONT_WEIGHT_TEST_PLAN) {
         auto optWeight = Converter::ArkValue<Opt_Union_I32_FontWeight_String>(weight);
         modifier_->setFontWeight(node_, &optWeight);
-        jsonValue = GetJsonValue(node_);
-        result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(result, expectValue);
+        auto jsonValue = GetJsonValue(node_);
+        auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
+        EXPECT_THAT(result, Eq(expectValue));
     }
 }
 
@@ -1101,8 +1093,6 @@ HWTEST_F(ButtonModifierTest, setFontWeightTestValidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, DISABLED_setFontWeightTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFontWeight, nullptr);
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string result;
 
     const std::vector<std::pair<Ark_Union_I32_FontWeight_String, std::string>> testPlan = {
         { ArkUnion<Ark_Union_I32_FontWeight_String, Ark_Int32>(1000), ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE },
@@ -1111,9 +1101,9 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontWeightTestInvalidValues, TestSize.L
     for (const auto &[weight, expectValue] : testPlan) {
         auto optWeight = Converter::ArkValue<Opt_Union_I32_FontWeight_String>(weight);
         modifier_->setFontWeight(node_, &optWeight);
-        jsonValue = GetJsonValue(node_);
-        result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(result, expectValue);
+        auto jsonValue = GetJsonValue(node_);
+        auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
+        EXPECT_THAT(result, Eq(expectValue));
     }
 }
 
@@ -1125,10 +1115,10 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontWeightTestInvalidValues, TestSize.L
 HWTEST_F(ButtonModifierTest, setFontStyleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE));
 }
 
 /*
@@ -1139,7 +1129,7 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestDefaultValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setFontStyleTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     using ArkFontStyleTest = std::pair<Ark_FontStyle, std::string>;
     const std::vector<ArkFontStyleTest> testPlan = {
@@ -1153,7 +1143,7 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestValidValues, TestSize.Level1)
         modifier_->setFontStyle(node_, &optStyle);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectValue);
+        EXPECT_THAT(resultStr, Eq(expectValue));
     }
 }
 
@@ -1165,7 +1155,7 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestValidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setFontStyleTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     using ArkFontStyleTest = std::pair<Ark_FontStyle, std::string>;
     const std::vector<ArkFontStyleTest> testPlan = {
@@ -1177,7 +1167,7 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestInvalidValues, TestSize.Level1)
         modifier_->setFontStyle(node_, &optStyle);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectValue);
+        EXPECT_THAT(resultStr, Eq(expectValue));
     }
 }
 
@@ -1189,7 +1179,7 @@ HWTEST_F(ButtonModifierTest, setFontStyleTestInvalidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     auto inputStringValue = "testFamily";
     auto inputArkStringValue = ArkValue<Ark_String>(inputStringValue);
     auto inputValue = ArkUnion<Ark_Union_String_Resource, Ark_String>(inputArkStringValue);
@@ -1198,7 +1188,7 @@ HWTEST_F(ButtonModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
     modifier_->setFontFamily(node_, &optInputValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
-    EXPECT_EQ(resultStr, inputStringValue);
+    EXPECT_THAT(resultStr, Eq(inputStringValue));
 
     inputStringValue = "testFamily1,testFamily2";
     inputArkStringValue = ArkValue<Ark_String>(inputStringValue);
@@ -1208,7 +1198,7 @@ HWTEST_F(ButtonModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
     modifier_->setFontFamily(node_, &optInputValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
-    EXPECT_EQ(resultStr, inputStringValue);
+    EXPECT_THAT(resultStr, Eq(inputStringValue));
 
     inputStringValue = "testFamily1, testFamily2";
     inputArkStringValue = ArkValue<Ark_String>(inputStringValue);
@@ -1218,7 +1208,7 @@ HWTEST_F(ButtonModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
     modifier_->setFontFamily(node_, &optInputValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
-    EXPECT_EQ(resultStr, inputStringValue);
+    EXPECT_THAT(resultStr, Eq(inputStringValue));
 }
 
 /*
@@ -1230,45 +1220,45 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultLabelStyle =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
     std::unique_ptr<JsonValue> resultFont =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
-    std::string resultStr;
+        GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_OVERFLOW_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_OVERFLOW_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_OVERFLOW_DEFAULT_VALUE)) <<
         "Default value for attribute 'labelStyle.overflow'";
 
     resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_MAX_LINES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_MAX_LINES_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_MAX_LINES_DEFAULT_VALUE)) <<
         "Default value for attribute 'labelStyle.maxLines'";
 
     resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_MIN_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_MIN_FONT_SIZE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_MIN_FONT_SIZE_DEFAULT_VALUE)) <<
         "Default value for attribute 'labelStyle.minFontSize'";
 
     resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_MAX_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_MAX_FONT_SIZE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_MAX_FONT_SIZE_DEFAULT_VALUE)) <<
         "Default value for attribute 'labelStyle.maxFontSize'";
 
     resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_HEIGHT_ADAPTIVE_POLICY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE)) <<
         "Default value for attribute 'labelStyle.heightAdaptivePolicy'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_FONT_SIZE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_FONT_SIZE_DEFAULT_VALUE)) <<
         "Default value for attribute 'labelStyle.font.size'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_FONT_WEIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_FONT_WEIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'labelStyle.font.weight'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_DEFAULT_VALUE)) <<
         "Default value for attribute 'labelStyle.font.family'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_FONT_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_FONT_STYLE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_FONT_STYLE_DEFAULT_VALUE)) <<
         "Default value for attribute 'labelStyle.font.style'";
 }
 
@@ -1281,7 +1271,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestOverflow, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
 
@@ -1307,10 +1297,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestOverflow, TestSize.Level1)
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
-        resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_OVERFLOW_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1323,7 +1313,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMaxLines, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
 
@@ -1340,10 +1330,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMaxLines, TestSize.Level1)
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
-        resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_MAX_LINES_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1356,7 +1346,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMinFontSize, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
 
@@ -1377,10 +1367,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMinFontSize, TestSize.Level1)
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
-        resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_MIN_FONT_SIZE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 /*
@@ -1392,7 +1382,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMaxFontSize, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
     static std::vector<std::tuple<std::string, Opt_Union_F64_ResourceStr, std::string>> labelStyleMaxFontSize = {
@@ -1410,10 +1400,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestMaxFontSize, TestSize.Level1)
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
-        resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_MAX_FONT_SIZE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 /*
@@ -1425,7 +1415,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestHeightAdaptivePolicy, TestSize.Lev
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
 
@@ -1446,10 +1436,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestHeightAdaptivePolicy, TestSize.Lev
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
-        resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
         resultStr = GetAttrValue<std::string>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_HEIGHT_ADAPTIVE_POLICY_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 /*
@@ -1461,7 +1451,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontWeightValidValues, TestSize.Le
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
@@ -1471,10 +1461,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontWeightValidValues, TestSize.Le
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
-        resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
+        resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto font = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
         auto weight = GetAttrValue<std::string>(font, ATTRIBUTE_LABEL_STYLE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(weight, expectValue);
+        EXPECT_THAT(weight, Eq(expectValue));
     }
 }
 
@@ -1488,7 +1478,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestFontWeightInvalidValues, 
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
@@ -1502,10 +1492,10 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestFontWeightInvalidValues, 
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
-        resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
+        resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto font = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
         auto weight = GetAttrValue<std::string>(font, ATTRIBUTE_LABEL_STYLE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(weight, expectValue);
+        EXPECT_THAT(weight, Eq(expectValue));
     }
 }
 
@@ -1518,7 +1508,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontStyleValidValues, TestSize.Lev
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
@@ -1528,10 +1518,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontStyleValidValues, TestSize.Lev
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
-        resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
+        resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto font = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
         auto style = GetAttrValue<std::string>(font, ATTRIBUTE_LABEL_STYLE_FONT_STYLE_NAME);
-        EXPECT_EQ(style, expectValue);
+        EXPECT_THAT(style, Eq(expectValue));
     }
 }
 
@@ -1544,7 +1534,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontStyleInvalidValues, TestSize.L
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
@@ -1559,10 +1549,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontStyleInvalidValues, TestSize.L
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
-        resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
+        resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto font = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
         auto style = GetAttrValue<std::string>(font, ATTRIBUTE_LABEL_STYLE_FONT_STYLE_NAME);
-        EXPECT_EQ(style, expectValue);
+        EXPECT_THAT(style, Eq(expectValue));
     }
 }
 
@@ -1575,7 +1565,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeValidValues, TestSize.Leve
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
@@ -1597,10 +1587,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontSizeValidValues, TestSize.Leve
         auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
-        resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
+        resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto font = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
         auto style = GetAttrValue<std::string>(font, ATTRIBUTE_LABEL_STYLE_FONT_SIZE_NAME);
-        EXPECT_EQ(style, expectValue);
+        EXPECT_THAT(style, Eq(expectValue));
     }
 }
 /*
@@ -1612,7 +1602,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestFontSizeInvalidValues, Te
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ButtonLabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
@@ -1632,10 +1622,10 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestFontSizeInvalidValues, Te
         modifier_->setLabelStyle(node_, &initialValue);
         modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
         jsonValue = GetJsonValue(node_);
-        resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
+        resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto font = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
         auto style = GetAttrValue<std::string>(font, ATTRIBUTE_LABEL_STYLE_FONT_SIZE_NAME);
-        EXPECT_EQ(style, expectValue);
+        EXPECT_THAT(style, Eq(expectValue));
     }
 }
 /*
@@ -1659,10 +1649,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
     auto optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
     modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
     jsonValue = GetJsonValue(node_);
-    resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-    auto font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
+    resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+    auto font = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
     auto family = GetAttrValue<std::string>(font, ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_NAME);
-    EXPECT_EQ(family, inputStringValue);
+    EXPECT_THAT(family, Eq(inputStringValue));
 
     inputStringValue = "testFamily1,testFamily2";
     inputArkStringValue = ArkValue<Ark_String>(inputStringValue);
@@ -1673,10 +1663,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
     optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
     modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
     jsonValue = GetJsonValue(node_);
-    resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-    font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
+    resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+    font = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
     family = GetAttrValue<std::string>(font, ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_NAME);
-    EXPECT_EQ(family, inputStringValue);
+    EXPECT_THAT(family, Eq(inputStringValue));
 
     inputStringValue = "testFamily1, testFamily2";
     inputArkStringValue = ArkValue<Ark_String>(inputStringValue);
@@ -1687,10 +1677,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
     optInputValueLabelStyle = Converter::ArkValue<Opt_ButtonLabelStyle>(inputValueLabelStyle);
     modifier_->setLabelStyle(node_, &optInputValueLabelStyle);
     jsonValue = GetJsonValue(node_);
-    resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-    font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
+    resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+    font = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
     family = GetAttrValue<std::string>(font, ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_NAME);
-    EXPECT_EQ(family, inputStringValue);
+    EXPECT_THAT(family, Eq(inputStringValue));
 }
 
 /*
@@ -1701,9 +1691,9 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setMinFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MIN_FONT_SCALE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_MIN_FONT_SCALE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_MIN_FONT_SCALE_DEFAULT_VALUE)) <<
         "Default value for attribute 'minFontScale'";
 }
 
@@ -1725,7 +1715,7 @@ HWTEST_F(ButtonModifierTest, setMinFontScaleTestValidValues, TestSize.Level1)
         modifier_->setMinFontScale(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MIN_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMinFontScaleNumValidValues) {
@@ -1753,7 +1743,7 @@ HWTEST_F(ButtonModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
         modifier_->setMinFontScale(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MIN_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_MIN_FONT_SCALE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_MIN_FONT_SCALE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
     for (auto& [input, value] : testFixtureMinFontScaleNumInvalidValues) {
@@ -1769,9 +1759,9 @@ HWTEST_F(ButtonModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
 HWTEST_F(ButtonModifierTest, setMaxFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MAX_FONT_SCALE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_MAX_FONT_SCALE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_MAX_FONT_SCALE_DEFAULT_VALUE)) <<
         "Default value for attribute 'maxFontScale'";
 }
 
@@ -1797,7 +1787,7 @@ HWTEST_F(ButtonModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
         modifier_->setMaxFontScale(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MAX_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
     for (auto& [input, value, expected] : testFixtureMaxFontScaleNumValidValues) {
@@ -1825,7 +1815,7 @@ HWTEST_F(ButtonModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Level1)
         modifier_->setMaxFontScale(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MAX_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_MAX_FONT_SCALE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LABEL_STYLE_MAX_FONT_SCALE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
     for (auto& [input, value] : testFixtureMaxFontScaleNumInvalidValues) {

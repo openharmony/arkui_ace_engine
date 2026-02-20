@@ -29,9 +29,9 @@ const auto ATTRIBUTE_RESIZEABLE_NAME = "resizeable";
 const auto ATTRIBUTE_RESIZEABLE_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_DIVIDER_NAME = "divider";
 const auto ATTRIBUTE_DIVIDER_START_MARGIN = "startMargin";
-const auto ATTRIBUTE_DIVIDER_START_MARGIN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_DIVIDER_START_MARGIN_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_DIVIDER_END_MARGIN = "endMargin";
-const auto ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE = std::nullopt;
 
 const auto OPT_LEN_NUM_NEG = Converter::ArkValue<Opt_Dimension>("-1234.00px");
 const auto OPT_LEN_NUM_ZERO = Converter::ArkValue<Opt_Dimension>("0.00px");
@@ -52,7 +52,7 @@ class ColumnSplitModifierTest : public ModifierTestBase<GENERATED_ArkUIColumnSpl
     {
         std::unique_ptr<JsonValue> jsonValue;
         std::unique_ptr<JsonValue> divJson;
-        std::string resultStr;
+        std::optional<std::string> resultStr;
         Ark_ColumnSplitDividerStyle inputValue;
 
         for (auto [passed, checkVal, expected]: styleArray) {
@@ -65,9 +65,9 @@ class ColumnSplitModifierTest : public ModifierTestBase<GENERATED_ArkUIColumnSpl
             auto divider = Converter::ArkValue<Opt_ColumnSplitDividerStyle>(inputValue);
             modifier_->setDivider(node_, &divider);
             jsonValue = GetJsonValue(node_);
-            divJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
+            divJson = GetAttrObject(jsonValue, ATTRIBUTE_DIVIDER_NAME);
             resultStr = GetAttrValue<std::string>(divJson, attribute);
-            EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+            EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
         }
     }
 };
@@ -81,10 +81,10 @@ class ColumnSplitModifierTest : public ModifierTestBase<GENERATED_ArkUIColumnSpl
 HWTEST_F(ColumnSplitModifierTest, setResizeableTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RESIZEABLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RESIZEABLE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_RESIZEABLE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'resizeable' of method 'resizeable'
@@ -101,13 +101,13 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> resizeable
 HWTEST_F(ColumnSplitModifierTest, setResizeableTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: resizeableValidValues) {
         auto checkValue = Converter::ArkValue<Opt_Boolean>(checkVal);
         modifier_->setResizeable(node_, &checkValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RESIZEABLE_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -120,12 +120,12 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> divJson;
-    std::string resultStr;
-    divJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
+    std::optional<std::string> resultStr;
+    divJson = GetAttrObject(jsonValue, ATTRIBUTE_DIVIDER_NAME);
     resultStr = GetAttrValue<std::string>(divJson, ATTRIBUTE_DIVIDER_START_MARGIN);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIVIDER_START_MARGIN_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DIVIDER_START_MARGIN_DEFAULT_VALUE));
     resultStr = GetAttrValue<std::string>(divJson, ATTRIBUTE_DIVIDER_END_MARGIN);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE));
 }
 
 static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> dividerStartMarginValidValues = {

@@ -222,7 +222,7 @@ HWTEST_F(CalendarModifierTest, setCalendarOptionsTestValidValues1, TestSize.Leve
     modifier_->setCalendarOptions(node_, &calendarOptions);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
 
-    EXPECT_EQ(GetAttrValue<std::string>(jsonValue, OPTIONS_NAME), OPTIONS_VALUE);
+    EXPECT_THAT(GetAttrValue<std::string>(jsonValue, OPTIONS_NAME), Eq(OPTIONS_VALUE));
 }
 
 /*
@@ -250,10 +250,10 @@ HWTEST_F(CalendarModifierTest, setCalendarOptionsTestController, TestSize.Level1
 HWTEST_F(CalendarModifierTest, setNeedSlideTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NEED_SLIDE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NEED_SLIDE_DEFAULT_VALUE) << "Default value for attribute 'needSlide'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_NEED_SLIDE_DEFAULT_VALUE)) << "Default value for attribute 'needSlide'";
 }
 
 /*
@@ -274,7 +274,7 @@ HWTEST_F(CalendarModifierTest, setNeedSlideTestNeedSlideValidValues, TestSize.Le
         modifier_->setNeedSlide(node_, &inputValueNeedSlide);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NEED_SLIDE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setNeedSlide, attribute: needSlide";
     };
 
@@ -304,7 +304,7 @@ HWTEST_F(CalendarModifierTest, showLunarTestDefaultValues, TestSize.Level1)
         auto jsonVal = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonVal, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_LUNAR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_LUNAR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SHOW_LUNAR_DEFAULT_VALUE)) <<
             "Default value for attribute 'showLunar'";
     }
 }
@@ -338,7 +338,7 @@ HWTEST_F(CalendarModifierTest, setShowLunarTestNeedSlideValidValues, TestSize.Le
             auto jsonVal = JsonUtil::Create(true);
             calendarPaintProperty->ToJsonValue(jsonVal, inspector);
             auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_LUNAR_NAME);
-            EXPECT_EQ(resultStr, expectedStr) <<
+            EXPECT_THAT(resultStr, Eq(expectedStr)) <<
                  "Input value is: " << input << ", method: setShowLunar, attribute: showLunar";
         }
     };
@@ -368,7 +368,7 @@ HWTEST_F(CalendarModifierTest, showHolidayTestDefaultValues, TestSize.Level1)
         auto jsonVal = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonVal, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_HOLIDAY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_HOLIDAY_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SHOW_HOLIDAY_DEFAULT_VALUE)) <<
             "Default value for attribute 'showHoliday'";
     }
 }
@@ -400,7 +400,7 @@ HWTEST_F(CalendarModifierTest, setShowHolidayTestNeedSlideValidValues, TestSize.
             auto jsonVal = JsonUtil::Create(true);
             calendarPaintProperty->ToJsonValue(jsonVal, inspector);
             auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_HOLIDAY_NAME);
-            EXPECT_EQ(resultStr, expectedStr) <<
+            EXPECT_THAT(resultStr, Eq(expectedStr)) <<
                  "Input value is: " << input << ", method: setShowHoliday, attribute: showHoliday";
         }
     };
@@ -430,7 +430,7 @@ HWTEST_F(CalendarModifierTest, startOfWeekTestDefaultValues, TestSize.Level1)
         auto jsonVal = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonVal, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_START_OF_WEEK_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_START_OF_WEEK_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_START_OF_WEEK_DEFAULT_VALUE)) <<
             "Default value for attribute 'startOfWeek'";
     }
 }
@@ -462,7 +462,7 @@ HWTEST_F(CalendarModifierTest, setStartOfWeekTestValidValues, TestSize.Level1)
             auto jsonVal = JsonUtil::Create(true);
             calendarPaintProperty->ToJsonValue(jsonVal, inspector);
             auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_START_OF_WEEK_NAME);
-            EXPECT_EQ(resultStr, expectedStr) <<
+            EXPECT_THAT(resultStr, Eq(expectedStr)) <<
                  "Input value is: " << input << ", method: setStartOfWeek, attribute: startOfWeek";
         }
     };
@@ -492,7 +492,7 @@ HWTEST_F(CalendarModifierTest, offDaysTestDefaultValues, TestSize.Level1)
         auto jsonVal = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonVal, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_OFF_DAYS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_OF_DAYS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_OF_DAYS_DEFAULT_VALUE)) <<
             "Default value for attribute 'offDays'";
     }
 }
@@ -524,7 +524,7 @@ HWTEST_F(CalendarModifierTest, setOffDaysTestValidValues, TestSize.Level1)
             auto jsonVal = JsonUtil::Create(true);
             calendarPaintProperty->ToJsonValue(jsonVal, inspector);
             auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_OFF_DAYS_NAME);
-            EXPECT_EQ(resultStr, expectedStr) <<
+            EXPECT_THAT(resultStr, Eq(expectedStr)) <<
                  "Input value is: " << input << ", method: setOffDays, attribute: offDays";
         }
     };
@@ -541,10 +541,10 @@ HWTEST_F(CalendarModifierTest, setOffDaysTestValidValues, TestSize.Level1)
 HWTEST_F(CalendarModifierTest, setDirectionTestDefaultValues, TestSize.Level1)
 {
     auto jsonValue = GetPatternJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIRECTION_DEFAULT_VALUE) << "Default value for attribute 'direction'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DIRECTION_DEFAULT_VALUE)) << "Default value for attribute 'direction'";
 }
 
 /*
@@ -565,7 +565,7 @@ HWTEST_F(CalendarModifierTest, setDirectionTestDirectionValidValues, TestSize.Le
         modifier_->setDirection(node_, &inputValueDirection);
         auto jsonValue = GetPatternJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setDirection, attribute: direction";
     };
 
@@ -591,7 +591,7 @@ HWTEST_F(CalendarModifierTest, setDirectionTestDirectionInvalidValues, TestSize.
         modifier_->setDirection(node_, &inputValueDirection);
         auto jsonValue = GetPatternJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DIRECTION_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DIRECTION_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setDirection, attribute: direction";
     };
 
@@ -634,25 +634,25 @@ HWTEST_F(CalendarModifierTest, setCurrentDayStyleTestCurrentDayStyle, TestSize.L
         auto jsonValue = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonValue, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAY_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_WHITE);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_WHITE));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LUNAR_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_BLACK);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_BLACK));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OFF_MARK_LUNAR_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_BLUE);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_BLUE));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAY_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, "0.00vp");
+        EXPECT_THAT(resultStr, Eq("0.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LUNAR_DAY_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, "1.00vp");
+        EXPECT_THAT(resultStr, Eq("1.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAY_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, "2.00vp");
+        EXPECT_THAT(resultStr, Eq("2.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAY_WIDTH_NAME);
-        EXPECT_EQ(resultStr, "3.00vp");
+        EXPECT_THAT(resultStr, Eq("3.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GREGORIAN_CALENDAR_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, "4.00vp");
+        EXPECT_THAT(resultStr, Eq("4.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAY_Y_AXIS_OFFSET_NAME);
-        EXPECT_EQ(resultStr, "5.00vp");
+        EXPECT_THAT(resultStr, Eq("5.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LUNAR_DAY_Y_AXIS_OFFSET_NAME);
-        EXPECT_EQ(resultStr, "6.00vp");
+        EXPECT_THAT(resultStr, Eq("6.00vp"));
     }
 }
 
@@ -686,17 +686,17 @@ HWTEST_F(CalendarModifierTest, setCurrentDayStyleTestVariant2, TestSize.Level1)
         auto jsonValue = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonValue, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_X_AXIS_OFFSET_NAME);
-        EXPECT_EQ(resultStr, "7.00vp");
+        EXPECT_THAT(resultStr, Eq("7.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_Y_AXIS_OFFSET_NAME);
-        EXPECT_EQ(resultStr, "8.00vp");
+        EXPECT_THAT(resultStr, Eq("8.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCHEDULE_MARKER_X_AXIS_OFFSET_NAME);
-        EXPECT_EQ(resultStr, "9.00vp");
+        EXPECT_THAT(resultStr, Eq("9.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCHEDULE_MARKER_Y_AXIS_OFFSET_NAME);
-        EXPECT_EQ(resultStr, "10.00vp");
+        EXPECT_THAT(resultStr, Eq("10.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COL_SPACE_NAME);
-        EXPECT_EQ(resultStr, "11.00vp");
+        EXPECT_THAT(resultStr, Eq("11.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAILY_FIVE_ROW_SPACE_NAME);
-        EXPECT_EQ(resultStr, "12.00vp");
+        EXPECT_THAT(resultStr, Eq("12.00vp"));
     }
 }
 
@@ -731,19 +731,19 @@ HWTEST_F(CalendarModifierTest, setCurrentDayStyleTestVariant3, TestSize.Level1)
         auto jsonValue = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonValue, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAILY_SIX_ROW_SPACE_NAME);
-        EXPECT_EQ(resultStr, "13.00vp");
+        EXPECT_THAT(resultStr, Eq("13.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LUNAR_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, "14.00vp");
+        EXPECT_THAT(resultStr, Eq("14.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, "15.00vp");
+        EXPECT_THAT(resultStr, Eq("15.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_LENGTH_NAME);
-        EXPECT_EQ(resultStr, "16.00vp");
+        EXPECT_THAT(resultStr, Eq("16.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCHEDULE_MARKER_RADIUS_NAME);
-        EXPECT_EQ(resultStr, "17.00vp");
+        EXPECT_THAT(resultStr, Eq("17.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BOUNDARY_ROW_OFFSET_NAME);
-        EXPECT_EQ(resultStr, "18.00vp");
+        EXPECT_THAT(resultStr, Eq("18.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BOUNDARY_COL_OFFSET_NAME);
-        EXPECT_EQ(resultStr, "19.00vp");
+        EXPECT_THAT(resultStr, Eq("19.00vp"));
     }
 }
 
@@ -775,13 +775,13 @@ HWTEST_F(CalendarModifierTest, setNonCurrentDayStyleTestNonCurrentDayStyle, Test
         auto jsonValue = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonValue, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NON_CURRENT_MONTH_DAY_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_WHITE);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_WHITE));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NON_CURRENT_MONTH_LUNAR_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_BLACK);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_BLACK));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NON_CURRENT_MONTH_WORK_DAY_MARK_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_BLUE);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_BLUE));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NON_CURRENT_MONTH_OFF_DAY_MARK_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_BROWN);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_BROWN));
     }
 }
 
@@ -814,13 +814,13 @@ HWTEST_F(CalendarModifierTest, setTodayStyleTestTodayStyle, TestSize.Level1)
         auto jsonValue = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonValue, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUSED_DAY_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_WHITE);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_WHITE));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUSED_LUNAR_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_BLACK);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_BLACK));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUSED_AREA_BACKGROUND_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_BLUE);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_BLUE));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUSED_AREA_RADIUS_COLOR_NAME);
-        EXPECT_EQ(resultStr, "0.00vp");
+        EXPECT_THAT(resultStr, Eq("0.00vp"));
     }
 }
 
@@ -856,19 +856,19 @@ HWTEST_F(CalendarModifierTest, setWeekStyleTestWeekStyle, TestSize.Level1)
         auto jsonValue = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonValue, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEK_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_WHITE);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_WHITE));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEKEND_DAY_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_BLACK);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_BLACK));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEKEND_LUNAR_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_BLUE);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_BLUE));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEK_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, "0.00vp");
+        EXPECT_THAT(resultStr, Eq("0.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEK_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, "1.00vp");
+        EXPECT_THAT(resultStr, Eq("1.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEK_WIDTH_NAME);
-        EXPECT_EQ(resultStr, "2.00vp");
+        EXPECT_THAT(resultStr, Eq("2.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEK_AND_DAY_ROW_SPACE_NAME);
-        EXPECT_EQ(resultStr, "3.00vp");
+        EXPECT_THAT(resultStr, Eq("3.00vp"));
     }
 }
 
@@ -904,19 +904,19 @@ HWTEST_F(CalendarModifierTest, setWorkStateStyleTestWorkStateStyle, TestSize.Lev
         auto jsonValue = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonValue, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORK_DAY_MARK_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_WHITE);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_WHITE));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OFF_DAY_MARK_COLOR_NAME);
-        EXPECT_EQ(resultStr, RESULT_COLOR_BLACK);
+        EXPECT_THAT(resultStr, Eq(RESULT_COLOR_BLACK));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORK_DAY_MARK_SIZE_NAME);
-        EXPECT_EQ(resultStr, "0.00vp");
+        EXPECT_THAT(resultStr, Eq("0.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OFF_DAY_MARK_SIZE_NAME);
-        EXPECT_EQ(resultStr, "1.00vp");
+        EXPECT_THAT(resultStr, Eq("1.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORK_STATE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, "2.00vp");
+        EXPECT_THAT(resultStr, Eq("2.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORK_STATE_HORIZONTAL_MOVING_DISTANCE_NAME);
-        EXPECT_EQ(resultStr, "3.00vp");
+        EXPECT_THAT(resultStr, Eq("3.00vp"));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORK_STATE_VERTICAL_MOVING_DISTANCE_NAME);
-        EXPECT_EQ(resultStr, "4.00vp");
+        EXPECT_THAT(resultStr, Eq("4.00vp"));
     }
 }
 

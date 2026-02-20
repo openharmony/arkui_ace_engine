@@ -31,11 +31,11 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace  {
     const auto ATTRIBUTE_SRC_NAME = "src";
-    const auto ATTRIBUTE_SRC_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_SRC_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_BUNDLE_NAME = "bundleName";
-    const auto ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_MODULE_NAME = "moduleName";
-    const auto ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_CURRENT_PROGRESS_RATE_NAME = "currentProgressRate";
     const auto ATTRIBUTE_CURRENT_PROGRESS_RATE_DEFAULT_VALUE = 1.0;
     const auto ATTRIBUTE_PREVIEW_URI_NAME = "previewUri";
@@ -77,15 +77,13 @@ class VideoModifierTest : public ModifierTestBase<GENERATED_ArkUIVideoModifier,
 HWTEST_F(VideoModifierTest, setOptionsSrcTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    std::string src = GetAttrValue<std::string>(resultStr, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(src, ATTRIBUTE_SRC_DEFAULT_VALUE);
-    std::string bundleName = GetAttrValue<std::string>(resultStr, ATTRIBUTE_BUNDLE_NAME);
-    EXPECT_EQ(bundleName, ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE);
-    std::string moduleName = GetAttrValue<std::string>(resultStr, ATTRIBUTE_MODULE_NAME);
-    EXPECT_EQ(moduleName, ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE);
+    auto srcData = GetAttrObject(jsonValue, ATTRIBUTE_SRC_NAME);
+    auto src = GetAttrValue<std::string>(srcData, ATTRIBUTE_SRC_NAME);
+    EXPECT_THAT(src, Eq(ATTRIBUTE_SRC_DEFAULT_VALUE));
+    auto bundleName = GetAttrValue<std::string>(srcData, ATTRIBUTE_BUNDLE_NAME);
+    EXPECT_THAT(bundleName, Eq(ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE));
+    auto moduleName = GetAttrValue<std::string>(srcData, ATTRIBUTE_MODULE_NAME);
+    EXPECT_THAT(moduleName, Eq(ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE));
 }
 
 /*
@@ -105,15 +103,13 @@ HWTEST_F(VideoModifierTest, DISABLED_setVideoOptionsTestOptionsSrcValidValues, T
     modifier_->setVideoOptions(node_, &options);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    std::string src = GetAttrValue<std::string>(resultStr, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(src, "source_str");
-    std::string bundleName = GetAttrValue<std::string>(resultStr, ATTRIBUTE_BUNDLE_NAME);
-    EXPECT_EQ(bundleName, ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE);
-    std::string moduleName = GetAttrValue<std::string>(resultStr, ATTRIBUTE_MODULE_NAME);
-    EXPECT_EQ(moduleName, ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE);
+    auto srcData = GetAttrObject(jsonValue, ATTRIBUTE_SRC_NAME);
+    auto src = GetAttrValue<std::string>(srcData, ATTRIBUTE_SRC_NAME);
+    EXPECT_THAT(src, Eq("source_str"));
+    auto bundleName = GetAttrValue<std::string>(srcData, ATTRIBUTE_BUNDLE_NAME);
+    EXPECT_THAT(bundleName, Eq(ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE));
+    auto moduleName = GetAttrValue<std::string>(srcData, ATTRIBUTE_MODULE_NAME);
+    EXPECT_THAT(moduleName, Eq(ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE));
 }
 
 /*
@@ -126,7 +122,7 @@ HWTEST_F(VideoModifierTest, setOptionsProgressRateTestDefaultValues, TestSize.Le
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
 
     auto result = GetAttrValue<double>(jsonValue, ATTRIBUTE_CURRENT_PROGRESS_RATE_NAME);
-    EXPECT_NEAR(result, ATTRIBUTE_CURRENT_PROGRESS_RATE_DEFAULT_VALUE, FLT_EPSILON);
+    EXPECT_THAT(result, Optional(DoubleEq(ATTRIBUTE_CURRENT_PROGRESS_RATE_DEFAULT_VALUE)));
 }
 
 // Valid values for attribute 'objectFit' of method 'objectFit'
@@ -206,7 +202,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setVideoOptionsTestOptionsProgressRateValid
         jsonValue = GetJsonValue(node_);
         auto result = GetAttrValue<double>(jsonValue, ATTRIBUTE_CURRENT_PROGRESS_RATE_NAME);
         auto expected = std::get<2>(value);
-        EXPECT_NEAR(result, expected, FLT_EPSILON) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(result, Optional(DoubleEq(expected))) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -218,15 +214,13 @@ HWTEST_F(VideoModifierTest, DISABLED_setVideoOptionsTestOptionsProgressRateValid
 HWTEST_F(VideoModifierTest, setOptionsPreviewUriTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PREVIEW_URI_NAME);
-    std::string src = GetAttrValue<std::string>(resultStr, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(src, ATTRIBUTE_SRC_DEFAULT_VALUE);
-    std::string bundleName = GetAttrValue<std::string>(resultStr, ATTRIBUTE_BUNDLE_NAME);
-    EXPECT_EQ(bundleName, ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE);
-    std::string moduleName = GetAttrValue<std::string>(resultStr, ATTRIBUTE_MODULE_NAME);
-    EXPECT_EQ(moduleName, ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE);
+    auto previewUri = GetAttrObject(jsonValue, ATTRIBUTE_PREVIEW_URI_NAME);
+    auto src = GetAttrValue<std::string>(previewUri, ATTRIBUTE_SRC_NAME);
+    EXPECT_THAT(src, Eq(ATTRIBUTE_SRC_DEFAULT_VALUE));
+    auto bundleName = GetAttrValue<std::string>(previewUri, ATTRIBUTE_BUNDLE_NAME);
+    EXPECT_THAT(bundleName, Eq(ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE));
+    auto moduleName = GetAttrValue<std::string>(previewUri, ATTRIBUTE_MODULE_NAME);
+    EXPECT_THAT(moduleName, Eq(ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE));
 }
 
 /*
@@ -246,15 +240,13 @@ HWTEST_F(VideoModifierTest, DISABLED_setVideoOptionsTestOptionsPreviewUriValidVa
     modifier_->setVideoOptions(node_, &options);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PREVIEW_URI_NAME);
-    std::string src = GetAttrValue<std::string>(resultStr, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(src, "preview_uri_source");
-    std::string bundleName = GetAttrValue<std::string>(resultStr, ATTRIBUTE_BUNDLE_NAME);
-    EXPECT_EQ(bundleName, ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE);
-    std::string moduleName = GetAttrValue<std::string>(resultStr, ATTRIBUTE_MODULE_NAME);
-    EXPECT_EQ(moduleName, ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE);
+    auto previewUri = GetAttrObject(jsonValue, ATTRIBUTE_PREVIEW_URI_NAME);
+    auto src = GetAttrValue<std::string>(previewUri, ATTRIBUTE_SRC_NAME);
+    EXPECT_THAT(src, Eq("preview_uri_source"));
+    auto bundleName = GetAttrValue<std::string>(previewUri, ATTRIBUTE_BUNDLE_NAME);
+    EXPECT_THAT(bundleName, Eq(ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE));
+    auto moduleName = GetAttrValue<std::string>(previewUri, ATTRIBUTE_MODULE_NAME);
+    EXPECT_THAT(moduleName, Eq(ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE));
 }
 
 /*
@@ -345,10 +337,10 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> mutedMuted
 HWTEST_F(VideoModifierTest, DISABLED_setMutedTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MUTED_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MUTED_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MUTED_DEFAULT_VALUE));
 }
 
 /*
@@ -359,7 +351,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setMutedTestDefaultValues, TestSize.Level1)
 HWTEST_F(VideoModifierTest, DISABLED_setMutedTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Boolean inputValueMuted;
     Opt_Boolean initValueMuted;
@@ -375,7 +367,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setMutedTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MUTED_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -387,10 +379,10 @@ HWTEST_F(VideoModifierTest, DISABLED_setMutedTestValidValues, TestSize.Level1)
 HWTEST_F(VideoModifierTest, DISABLED_setAutoPlayTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_PLAY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTO_PLAY_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_AUTO_PLAY_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'autoPlay' of method 'autoPlay'
@@ -407,7 +399,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> autoPlayAu
 HWTEST_F(VideoModifierTest, DISABLED_setAutoPlayTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Boolean inputValueAutoPlay;
     Opt_Boolean initValueAutoPlay;
@@ -423,7 +415,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setAutoPlayTestValidValues, TestSize.Level1
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_PLAY_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -435,10 +427,10 @@ HWTEST_F(VideoModifierTest, DISABLED_setAutoPlayTestValidValues, TestSize.Level1
 HWTEST_F(VideoModifierTest, DISABLED_setControlsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROLS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTROLS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONTROLS_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'controls' of method 'controls'
@@ -455,7 +447,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> controlsCo
 HWTEST_F(VideoModifierTest, DISABLED_setControlsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Boolean inputValueControls;
     Opt_Boolean initValueControls;
@@ -471,7 +463,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setControlsTestValidValues, TestSize.Level1
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROLS_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -483,10 +475,10 @@ HWTEST_F(VideoModifierTest, DISABLED_setControlsTestValidValues, TestSize.Level1
 HWTEST_F(VideoModifierTest, DISABLED_setLoopTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LOOP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LOOP_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LOOP_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'loop' of method 'loop'
@@ -503,7 +495,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> loopLoopVa
 HWTEST_F(VideoModifierTest, DISABLED_setLoopTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Boolean inputValueLoop;
     Opt_Boolean initValueLoop;
@@ -519,7 +511,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setLoopTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LOOP_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -531,10 +523,10 @@ HWTEST_F(VideoModifierTest, DISABLED_setLoopTestValidValues, TestSize.Level1)
 HWTEST_F(VideoModifierTest, DISABLED_setObjectFitTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'objectFit' of method 'objectFit'
@@ -565,7 +557,7 @@ static std::vector<std::tuple<std::string, Opt_ImageFit, std::string>> objectFit
 HWTEST_F(VideoModifierTest, DISABLED_setObjectFitTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_ImageFit inputValueObjectFit;
     Opt_ImageFit initValueObjectFit;
@@ -581,7 +573,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setObjectFitTestValidValues, TestSize.Level
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -598,7 +590,7 @@ static std::vector<std::tuple<std::string, Opt_ImageFit>> objectFitObjectFitInva
 HWTEST_F(VideoModifierTest, DISABLED_setObjectFitTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_ImageFit inputValueObjectFit;
     Opt_ImageFit initValueObjectFit;
@@ -615,7 +607,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setObjectFitTestInvalidValues, TestSize.Lev
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
         expectedStr = ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -992,10 +984,10 @@ HWTEST_F(VideoModifierTest, setOnStopTest, TestSize.Level1)
 HWTEST_F(VideoModifierTest, setEnableAnalyzerTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_ANALYZER_ENABLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_ANALYZER_ENABLE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ENABLE_ANALYZER_ENABLE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'enableAnalyzerEnable' of method 'enableAnalyzer'
@@ -1012,7 +1004,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> enableAnal
 HWTEST_F(VideoModifierTest, DISABLED_setEnableAnalyzerTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Boolean inputValueEnableAnalyzerEnable;
     Opt_Boolean initValueEnableAnalyzerEnable;
@@ -1028,7 +1020,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setEnableAnalyzerTestValidValues, TestSize.
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_ANALYZER_ENABLE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1078,8 +1070,8 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> enableShor
 HWTEST_F(VideoModifierTest, setEnableShortcutKeyTest, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SHORTCUT_KEY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_SHORTCUT_KEY_DEFAULT_VALUE);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SHORTCUT_KEY_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ENABLE_SHORTCUT_KEY_DEFAULT_VALUE));
 
     std::string expectedStr;
     Opt_Boolean inputValueEnableShortcutKey;
@@ -1090,7 +1082,7 @@ HWTEST_F(VideoModifierTest, setEnableShortcutKeyTest, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SHORTCUT_KEY_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1109,8 +1101,8 @@ HWTEST_F(VideoModifierTest, DISABLED_setSurfaceBackgroundColorTest, TestSize.Lev
 {
 #ifdef WRONG_SDK
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SURFACE_BACKGROUND_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SURFACE_BACKGROUND_COLOR_DEFAULT_VALUE);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SURFACE_BACKGROUND_COLOR_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SURFACE_BACKGROUND_COLOR_DEFAULT_VALUE));
     std::string expectedStr;
 
     for (auto&& value: setSurfaceBackgroundColorPlan) {
@@ -1121,7 +1113,7 @@ HWTEST_F(VideoModifierTest, DISABLED_setSurfaceBackgroundColorTest, TestSize.Lev
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SURFACE_BACKGROUND_COLOR_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 #endif
 }

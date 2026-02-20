@@ -248,10 +248,10 @@ public:
     static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
         bool followWithoutTransition, bool doRegisterSharedTransition);
 
-    static void SetFrontBlur(FrameNode* frameNode, const std::optional<float>& radius,
+    static void SetFrontBlur(FrameNode* frameNode, const std::optional<double>& radius,
         const std::optional<BlurOption>& blurOption, const std::optional<SysOptions>& sysOptions)
     {
-        Dimension radiusPX(radius.value_or(0.0f), DimensionUnit::PX);
+        Dimension radiusPX(radius.value_or(0.0), DimensionUnit::PX);
         ViewAbstract::SetFrontBlur(frameNode, radiusPX, blurOption.value_or(BlurOption()),
             sysOptions.value_or(DEFAULT_SYS_OPTIONS));
     }

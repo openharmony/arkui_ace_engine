@@ -71,13 +71,13 @@ public:
 HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ADDRESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ADDRESS_DEFAULT_VALUE) << "Default value for attribute 'address'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ADDRESS_DEFAULT_VALUE)) << "Default value for attribute 'address'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_DEFAULT_VALUE) << "Default value for attribute 'content'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONTENT_DEFAULT_VALUE)) << "Default value for attribute 'content'";
 }
 
 /*
@@ -105,7 +105,7 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestAddressValidValues, TestS
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ADDRESS_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
+        EXPECT_THAT(resultStr, Eq(expectedStr))
             << "Input value is: " << input << ", method: setHyperlinkOptions, attribute: address";
     };
 
@@ -142,7 +142,7 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestAddressInvalidValues, Tes
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ADDRESS_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ADDRESS_DEFAULT_VALUE)
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ADDRESS_DEFAULT_VALUE))
             << "Input value is: " << input << ", method: setHyperlinkOptions, attribute: address";
     };
 
@@ -176,7 +176,7 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestContentValidValues, TestS
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr)
+        EXPECT_THAT(resultStr, Eq(expectedStr))
             << "Input value is: " << input << ", method: setHyperlinkOptions, attribute: content";
     };
 
@@ -216,7 +216,7 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestContentInvalidValues, Tes
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, std::get<2>(Fixtures::testFixtureStringNoEmptyValidValues[0]))
+        EXPECT_THAT(resultStr, Eq(std::get<2>(Fixtures::testFixtureStringNoEmptyValidValues[0])))
             << "Input value is: " << input << ", method: setHyperlinkOptions, attribute: content";
     };
 
@@ -234,10 +234,10 @@ HWTEST_F(HyperlinkModifierTest, setHyperlinkOptionsTestContentInvalidValues, Tes
 HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) << "Default value for attribute 'color'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE)) << "Default value for attribute 'color'";
 }
 
 /*
@@ -262,7 +262,8 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorValidValues, TestSize.
         modifier_->setColor(node_, &optInputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setColor, attribute: color";
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Input value is: " << input <<
+            ", method: setColor, attribute: color";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
@@ -305,7 +306,7 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorInvalidValues, TestSiz
         modifier_->setColor(node_, &optInputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE)
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE))
             << "Input value is: " << input << ", method: setColor, attribute: color";
     };
 

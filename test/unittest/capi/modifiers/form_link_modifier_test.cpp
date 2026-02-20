@@ -68,22 +68,22 @@ class FormLinkModifierTest : public ModifierTestBase<GENERATED_ArkUIFormLinkModi
  */
 HWTEST_F(FormLinkModifierTest, DISABLED_setFormLinkOptionsTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
 
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ACTION_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ACTION_DEFAULT_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ACTION_DEFAULT_VALUE));
 
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_MODULE_NAME_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE));
 
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_BUNDLE_NAME_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE));
 
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ABILITY_NAME_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ABILITY_NAME_DEFAULT_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ABILITY_NAME_DEFAULT_VALUE));
 
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_URI_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_URI_DEFAULT_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_URI_DEFAULT_VALUE));
 }
 
 /*
@@ -93,7 +93,7 @@ HWTEST_F(FormLinkModifierTest, DISABLED_setFormLinkOptionsTestDefaultValues, Tes
  */
 HWTEST_F(FormLinkModifierTest, DISABLED_setFormLinkOptionsTestValidValues, TestSize.Level1)
 {
-    std::string strResult;
+    std::optional<std::string> strResult;
     Ark_FormLinkOptions inputValue = FormLinkOpt(ACTION_1_NAME);
 
     // Test
@@ -105,15 +105,15 @@ HWTEST_F(FormLinkModifierTest, DISABLED_setFormLinkOptionsTestValidValues, TestS
     strResult = jsonInfo->GetString(ATTRIBUTE_ACTION_NAME);
     EXPECT_EQ(strResult, ACTION_1_NAME);
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_MODULE_NAME_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_MODULE_NAME_DEFAULT_VALUE));
 
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_BUNDLE_NAME_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_BUNDLE_NAME_DEFAULT_VALUE));
 
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_ABILITY_NAME_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_ABILITY_NAME_DEFAULT_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_ABILITY_NAME_DEFAULT_VALUE));
 
     strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_URI_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_URI_DEFAULT_VALUE);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_URI_DEFAULT_VALUE));
 }
 } // namespace OHOS::Ace::NG

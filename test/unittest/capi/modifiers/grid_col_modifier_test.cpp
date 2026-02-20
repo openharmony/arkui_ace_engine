@@ -100,12 +100,12 @@ HWTEST_F(GridColModifierTest, setGridColOptionsTestDefaultValues, TestSize.Level
     modifier_->setGridColOptions(node_, &initValue);
     std::unique_ptr<JsonValue> jsonLayout = GetLayoutJsonValue(node_);
     CHECK_NULL_VOID(jsonLayout);
-    int32_t span = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_SPAN_NAME));
-    int32_t offset = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME));
-    int32_t order = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_ORDER_NAME));
-    EXPECT_EQ(span, ATTRIBUTE_SPAN_DEFAULT_VALUE);
-    EXPECT_EQ(offset, ATTRIBUTE_GRID_COL_OFFSET_DEFAULT_VALUE);
-    EXPECT_EQ(order, ATTRIBUTE_ORDER_DEFAULT_VALUE);
+    auto span = GetAttrValue<int>(jsonLayout, ATTRIBUTE_SPAN_NAME);
+    auto offset = GetAttrValue<int>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME);
+    auto order = GetAttrValue<int>(jsonLayout, ATTRIBUTE_ORDER_NAME);
+    EXPECT_THAT(span, Eq(ATTRIBUTE_SPAN_DEFAULT_VALUE));
+    EXPECT_THAT(offset, Eq(ATTRIBUTE_GRID_COL_OFFSET_DEFAULT_VALUE));
+    EXPECT_THAT(order, Eq(ATTRIBUTE_ORDER_DEFAULT_VALUE));
 }
 
 static VectorOptionsTest setGridColOptionsValidValues = {
@@ -132,12 +132,12 @@ HWTEST_F(GridColModifierTest, setGridColOptionsTestValidValues, TestSize.Level1)
         modifier_->setGridColOptions(node_, &optInputValue);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
-        int32_t resultSpan = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_SPAN_NAME));
-        EXPECT_EQ(resultSpan, expectedValue.span);
-        int32_t resultOffset = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME));
-        EXPECT_EQ(resultOffset, expectedValue.offset);
-        int32_t resultOrder = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_ORDER_NAME));
-        EXPECT_EQ(resultOrder, expectedValue.order);
+        auto resultSpan = GetAttrValue<int>(jsonLayout, ATTRIBUTE_SPAN_NAME);
+        EXPECT_THAT(resultSpan, Eq(expectedValue.span));
+        auto resultOffset = GetAttrValue<int>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME);
+        EXPECT_THAT(resultOffset, Eq(expectedValue.offset));
+        auto resultOrder = GetAttrValue<int>(jsonLayout, ATTRIBUTE_ORDER_NAME);
+        EXPECT_THAT(resultOrder, Eq(expectedValue.order));
     }
 }
 
@@ -168,12 +168,12 @@ HWTEST_F(GridColModifierTest, setGridColOptionsTestInvalidValues, TestSize.Level
         modifier_->setGridColOptions(node_, &optInputValue);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
-        int32_t resultSpan = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_SPAN_NAME));
-        EXPECT_EQ(resultSpan, expectedValue.span);
-        int32_t resultOffset = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME));
-        EXPECT_EQ(resultOffset, expectedValue.offset);
-        int32_t resultOrder = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_ORDER_NAME));
-        EXPECT_EQ(resultOrder, expectedValue.order);
+        auto resultSpan = GetAttrValue<int>(jsonLayout, ATTRIBUTE_SPAN_NAME);
+        EXPECT_THAT(resultSpan, Eq(expectedValue.span));
+        auto resultOffset = GetAttrValue<int>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME);
+        EXPECT_THAT(resultOffset, Eq(expectedValue.offset));
+        auto resultOrder = GetAttrValue<int>(jsonLayout, ATTRIBUTE_ORDER_NAME);
+        EXPECT_THAT(resultOrder, Eq(expectedValue.order));
     }
 }
 
@@ -191,8 +191,8 @@ HWTEST_F(GridColModifierTest, DISABLED_setSpanTestDefaultValues, TestSize.Level1
     modifier_->setSpan(node_, &optInitValue);
     std::unique_ptr<JsonValue> jsonLayout = GetLayoutJsonValue(node_);
     CHECK_NULL_VOID(jsonLayout);
-    int32_t span = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_SPAN_NAME));
-    EXPECT_EQ(span, ATTRIBUTE_SPAN_DEFAULT_VALUE);
+    auto span = GetAttrValue<int>(jsonLayout, ATTRIBUTE_SPAN_NAME);
+    EXPECT_THAT(span, Eq(ATTRIBUTE_SPAN_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'Span' of method 'Span'
@@ -211,7 +211,7 @@ HWTEST_F(GridColModifierTest, DISABLED_setSpanTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonLayout;
     int32_t expectedValue {0};
-    int32_t resultValue {0};
+    std::optional<int> resultValue;
     Ark_Union_I32_GridColColumnOption inputValueSpan;
     // Initial setup
     Ark_Union_I32_GridColColumnOption initValueSpan = std::get<1>(spanValidValues[0]);
@@ -223,9 +223,9 @@ HWTEST_F(GridColModifierTest, DISABLED_setSpanTestValidValues, TestSize.Level1)
         modifier_->setSpan(node_, &optInputValueSpan);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
-        resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_SPAN_NAME));
+        resultValue = GetAttrValue<int>(jsonLayout, ATTRIBUTE_SPAN_NAME);
         expectedValue = std::get<2>(value);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -244,7 +244,7 @@ HWTEST_F(GridColModifierTest, DISABLED_setSpanTestInvalidValues, TestSize.Level1
 {
     std::unique_ptr<JsonValue> jsonLayout;
     int32_t expectedValue {0};
-    int32_t resultValue {0};
+    std::optional<int> resultValue;
     Ark_Union_I32_GridColColumnOption inputValueSpan;
     // Initial setup
     Ark_Union_I32_GridColColumnOption initValueSpan = std::get<1>(spanValidValues[0]);
@@ -256,9 +256,9 @@ HWTEST_F(GridColModifierTest, DISABLED_setSpanTestInvalidValues, TestSize.Level1
         modifier_->setSpan(node_, &optInputValueSpan);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
-        resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_SPAN_NAME));
+        resultValue = GetAttrValue<int>(jsonLayout, ATTRIBUTE_SPAN_NAME);
         expectedValue = std::get<2>(value);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -276,8 +276,8 @@ HWTEST_F(GridColModifierTest, DISABLED_setOffsetTestDefaultValues, TestSize.Leve
     modifier_->setGridColOffset(node_, &optInitValue);
     std::unique_ptr<JsonValue> jsonLayout = GetLayoutJsonValue(node_);
     CHECK_NULL_VOID(jsonLayout);
-    int32_t offset = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME));
-    EXPECT_EQ(offset, ATTRIBUTE_GRID_COL_OFFSET_DEFAULT_VALUE);
+    auto offset = GetAttrValue<int>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME);
+    EXPECT_THAT(offset, Eq(ATTRIBUTE_GRID_COL_OFFSET_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'Offset' of method 'Offset'
@@ -296,7 +296,7 @@ HWTEST_F(GridColModifierTest, DISABLED_setGridColOffsetTestValidValues, TestSize
 {
     std::unique_ptr<JsonValue> jsonLayout;
     int32_t expectedValue {0};
-    int32_t resultValue {0};
+    std::optional<int> resultValue;
     Ark_Union_I32_GridColColumnOption inputValueOffset;
     // Initial setup
     Ark_Union_I32_GridColColumnOption initValueOffset = std::get<1>(offsetValidValues[0]);
@@ -308,9 +308,9 @@ HWTEST_F(GridColModifierTest, DISABLED_setGridColOffsetTestValidValues, TestSize
         modifier_->setGridColOffset(node_, &optInputValueOffset);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
-        resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME));
+        resultValue = GetAttrValue<int>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME);
         expectedValue = std::get<2>(value);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -329,7 +329,7 @@ HWTEST_F(GridColModifierTest, DISABLED_setGridColOffsetTestInvalidValues, TestSi
 {
     std::unique_ptr<JsonValue> jsonLayout;
     int32_t expectedValue {0};
-    int32_t resultValue {0};
+    std::optional<int> resultValue;
     Ark_Union_I32_GridColColumnOption inputValueOffset;
     // Initial setup
     Ark_Union_I32_GridColColumnOption initValueOffset = std::get<1>(offsetValidValues[0]);
@@ -341,9 +341,9 @@ HWTEST_F(GridColModifierTest, DISABLED_setGridColOffsetTestInvalidValues, TestSi
         modifier_->setGridColOffset(node_, &optInputValueOffset);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
-        resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME));
+        resultValue = GetAttrValue<int>(jsonLayout, ATTRIBUTE_GRID_COL_OFFSET_NAME);
         expectedValue = std::get<2>(value);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -361,8 +361,8 @@ HWTEST_F(GridColModifierTest, DISABLED_setOrderTestDefaultValues, TestSize.Level
     modifier_->setOrder(node_, &optInitValue);
     std::unique_ptr<JsonValue> jsonLayout = GetLayoutJsonValue(node_);
     CHECK_NULL_VOID(jsonLayout);
-    int32_t order = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_ORDER_NAME));
-    EXPECT_EQ(order, ATTRIBUTE_ORDER_DEFAULT_VALUE);
+    auto order = GetAttrValue<int>(jsonLayout, ATTRIBUTE_ORDER_NAME);
+    EXPECT_THAT(order, Eq(ATTRIBUTE_ORDER_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'Order' of method 'Order'
@@ -381,7 +381,7 @@ HWTEST_F(GridColModifierTest, DISABLED_setOrderTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonLayout;
     int32_t expectedValue {0};
-    int32_t resultValue {0};
+    std::optional<int> resultValue;
     Ark_Union_I32_GridColColumnOption inputValueOrder;
     // Initial setup
     Ark_Union_I32_GridColColumnOption initValueOrder = std::get<1>(orderValidValues[0]);
@@ -393,9 +393,9 @@ HWTEST_F(GridColModifierTest, DISABLED_setOrderTestValidValues, TestSize.Level1)
         modifier_->setOrder(node_, &optInputValueOrder);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
-        resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_ORDER_NAME));
+        resultValue = GetAttrValue<int>(jsonLayout, ATTRIBUTE_ORDER_NAME);
         expectedValue = std::get<2>(value);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -414,7 +414,7 @@ HWTEST_F(GridColModifierTest, DISABLED_setOrderTestInvalidValues, TestSize.Level
 {
     std::unique_ptr<JsonValue> jsonLayout;
     int32_t expectedValue {0};
-    int32_t resultValue {0};
+    std::optional<int> resultValue;
     Ark_Union_I32_GridColColumnOption inputValueOrder;
     // Initial setup
     Ark_Union_I32_GridColColumnOption initValueOrder = std::get<1>(orderValidValues[0]);
@@ -426,9 +426,9 @@ HWTEST_F(GridColModifierTest, DISABLED_setOrderTestInvalidValues, TestSize.Level
         modifier_->setOrder(node_, &optInputValueOrder);
         jsonLayout = GetLayoutJsonValue(node_);
         CHECK_NULL_VOID(jsonLayout);
-        resultValue = std::stoi(GetAttrValue<std::string>(jsonLayout, ATTRIBUTE_ORDER_NAME));
+        resultValue = GetAttrValue<int>(jsonLayout, ATTRIBUTE_ORDER_NAME);
         expectedValue = std::get<2>(value);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << std::get<0>(value);
     }
 }
 } // namespace OHOS::Ace::NG

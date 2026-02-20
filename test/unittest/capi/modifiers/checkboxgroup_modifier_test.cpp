@@ -66,13 +66,13 @@ public:
  */
 HWTEST_F(CheckboxGroupModifierTest, setSelectedColorTestVariant001, TestSize.Level1)
 {
-    auto checkVal1 = GetStringAttribute(node_, "selectedColor");
-    EXPECT_EQ(checkVal1, "#FF007DFF");
+    auto checkVal1 = GetAttrValue<std::string>(node_, "selectedColor");
+    EXPECT_THAT(checkVal1, Eq("#FF007DFF"));
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF123456);
     auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
     modifier_->setSelectedColor(node_, &optColor);
-    auto checkVal2 = GetStringAttribute(node_, "selectedColor");
-    EXPECT_EQ(checkVal2, "#FF123456");
+    auto checkVal2 = GetAttrValue<std::string>(node_, "selectedColor");
+    EXPECT_THAT(checkVal2, Eq("#FF123456"));
 }
 
 /**
@@ -82,13 +82,13 @@ HWTEST_F(CheckboxGroupModifierTest, setSelectedColorTestVariant001, TestSize.Lev
  */
 HWTEST_F(CheckboxGroupModifierTest, setUnselectedColorTestVariant002, TestSize.Level1)
 {
-    auto checkVal1 = GetStringAttribute(node_, "unselectedColor");
-    EXPECT_EQ(checkVal1, "#FF000000");
+    auto checkVal1 = GetAttrValue<std::string>(node_, "unselectedColor");
+    EXPECT_THAT(checkVal1, Eq("#FF000000"));
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF123456);
     auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
     modifier_->setUnselectedColor(node_, &optColor);
-    auto checkVal2 = GetStringAttribute(node_, "unselectedColor");
-    EXPECT_EQ(checkVal2, "#FF123456");
+    auto checkVal2 = GetAttrValue<std::string>(node_, "unselectedColor");
+    EXPECT_THAT(checkVal2, Eq("#FF123456"));
 }
 
 /**
@@ -98,12 +98,12 @@ HWTEST_F(CheckboxGroupModifierTest, setUnselectedColorTestVariant002, TestSize.L
  */
 HWTEST_F(CheckboxGroupModifierTest, setSelectAllTestVariant003, TestSize.Level1)
 {
-    auto checkVal1 = GetStringAttribute(node_, "selectAll");
-    EXPECT_EQ(checkVal1, "false");
+    auto checkVal1 = GetAttrValue<std::string>(node_, "selectAll");
+    EXPECT_THAT(checkVal1, Eq("false"));
     auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     modifier_->setSelectAll(node_, &optValue);
-    auto checkVal2 = GetStringAttribute(node_, "selectAll");
-    EXPECT_EQ(checkVal2, "true");
+    auto checkVal2 = GetAttrValue<std::string>(node_, "selectAll");
+    EXPECT_THAT(checkVal2, Eq("true"));
 }
 
 /**
@@ -122,16 +122,16 @@ HWTEST_F(CheckboxGroupModifierTest, setMarkTestVariant004, TestSize.Level1)
     modifier_->setMark(node_, &optStyle);
 
     auto jsonValue = GetJsonValue(node_);
-    auto mark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, "mark");
+    auto mark = GetAttrObject(jsonValue, "mark");
 
     auto checkVal1 = GetAttrValue<std::string>(mark, "strokeColor");
-    EXPECT_EQ(checkVal1, "#FF123456");
+    EXPECT_THAT(checkVal1, Eq("#FF123456"));
 
     auto checkVal2 = GetAttrValue<std::string>(mark, "size");
-    EXPECT_EQ(checkVal2, "111.00px");
+    EXPECT_THAT(checkVal2, Eq("111.00px"));
 
     auto checkVal3 = GetAttrValue<std::string>(mark, "strokeWidth");
-    EXPECT_EQ(checkVal3, "222.00px");
+    EXPECT_THAT(checkVal3, Eq("222.00px"));
 }
 
 /**
@@ -144,16 +144,16 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_setCheckboxShapeTestVariant005, Tes
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
-    auto checkVal1 = GetStringAttribute(node_, "checkboxShape");
-    EXPECT_EQ(checkVal1, "CIRCLE");
+    auto checkVal1 = GetAttrValue<std::string>(node_, "checkboxShape");
+    EXPECT_THAT(checkVal1, Eq("CIRCLE"));
     auto optValue = Converter::ArkValue<Opt_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE);
     modifier_->setCheckboxShape(node_, &optValue);
-    auto checkVal2 = GetStringAttribute(node_, "checkboxShape");
-    EXPECT_EQ(checkVal2, "ROUNDED_SQUARE");
+    auto checkVal2 = GetAttrValue<std::string>(node_, "checkboxShape");
+    EXPECT_THAT(checkVal2, Eq("ROUNDED_SQUARE"));
     optValue = Converter::ArkValue<Opt_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_CIRCLE);
     modifier_->setCheckboxShape(node_, &optValue);
-    auto checkVal3 = GetStringAttribute(node_, "checkboxShape");
-    EXPECT_EQ(checkVal3, "CIRCLE");
+    auto checkVal3 = GetAttrValue<std::string>(node_, "checkboxShape");
+    EXPECT_THAT(checkVal3, Eq("CIRCLE"));
 }
 
 /**

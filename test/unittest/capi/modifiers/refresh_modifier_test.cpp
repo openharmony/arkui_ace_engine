@@ -128,10 +128,10 @@ HWTEST_F(RefreshModifierTest, setOnRefreshingTest, TestSize.Level1)
 HWTEST_F(RefreshModifierTest, setRefreshOffsetTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REFRESH_OFFSET_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_REFRESH_OFFSET_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_REFRESH_OFFSET_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'refreshOffset' of method 'refreshOffset'
@@ -151,7 +151,7 @@ static std::vector<std::tuple<std::string, Ark_Float64, std::string>> refreshOff
 HWTEST_F(RefreshModifierTest, setRefreshOffsetTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Float64 inputValueRefreshOffset;
     Ark_Float64 initValueRefreshOffset;
@@ -168,7 +168,7 @@ HWTEST_F(RefreshModifierTest, setRefreshOffsetTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REFRESH_OFFSET_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -180,10 +180,10 @@ HWTEST_F(RefreshModifierTest, setRefreshOffsetTestValidValues, TestSize.Level1)
 HWTEST_F(RefreshModifierTest, setPullToRefreshTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PULL_TO_REFRESH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PULL_TO_REFRESH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PULL_TO_REFRESH_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'pullToRefresh' of method 'pullToRefresh'
@@ -200,7 +200,7 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> pullToRefr
 HWTEST_F(RefreshModifierTest, setPullToRefreshTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Boolean inputValuePullToRefresh;
     Ark_Boolean initValuePullToRefresh;
@@ -217,7 +217,7 @@ HWTEST_F(RefreshModifierTest, setPullToRefreshTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PULL_TO_REFRESH_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -261,18 +261,18 @@ HWTEST_F(RefreshModifierTest, setOnOffsetChangeTest, TestSize.Level1)
 HWTEST_F(RefreshModifierTest, setPullDownRatioTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_DEFAULT_VALUE);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PULL_DOWN_RATIO_RATIO_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'pullDownRatioRatio' of method 'pullDownRatio'
 static std::vector<std::tuple<std::string, Opt_Float64, double>> pullDownRatioPullDownRatioRatioValidValues = {
-    { "0", Converter::ArkValue<Opt_Float64>(0.), 0 },
+    { "0", Converter::ArkValue<Opt_Float64>(0.), 0. },
     { "0.5", Converter::ArkValue<Opt_Float64>(0.5), 0.5 },
-    { "1", Converter::ArkValue<Opt_Float64>(1.), 1 },
-    { "-20", Converter::ArkValue<Opt_Float64>(-20.), 0 },
-    { "12.4", Converter::ArkValue<Opt_Float64>(12.4), 1 },
-    { "22.5", Converter::ArkValue<Opt_Float64>(22.5), 1 },
+    { "1", Converter::ArkValue<Opt_Float64>(1.), 1. },
+    { "-20", Converter::ArkValue<Opt_Float64>(-20.), 0. },
+    { "12.4", Converter::ArkValue<Opt_Float64>(12.4), 1. },
+    { "22.5", Converter::ArkValue<Opt_Float64>(22.5), 1. },
 };
 
 /*
@@ -282,26 +282,22 @@ static std::vector<std::tuple<std::string, Opt_Float64, double>> pullDownRatioPu
  */
 HWTEST_F(RefreshModifierTest, setPullDownRatioTestValidValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue;
-    double result;
-    double expected;
-
     // Verifying attribute's  values
     for (auto&& value: pullDownRatioPullDownRatioRatioValidValues) {
         auto inputValuePullDownRatioRatio = std::get<1>(value);
         modifier_->setPullDownRatio(node_, &inputValuePullDownRatioRatio);
-        jsonValue = GetJsonValue(node_);
-        result = GetAttrValue<double>(jsonValue, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_NAME);
-        expected = std::get<2>(value);
-        EXPECT_FLOAT_EQ(result, expected);
+        auto jsonValue = GetJsonValue(node_);
+        auto result = GetAttrValue<double>(jsonValue, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_NAME);
+        auto expected = std::get<2>(value);
+        EXPECT_THAT(result, Optional(DoubleEq(expected)));
     }
 
     // Verifying Ark_Empty value
     auto inputValuePullDownRatioRatio = Converter::ArkValue<Opt_Float64>(Ark_Empty());
     modifier_->setPullDownRatio(node_, &inputValuePullDownRatioRatio);
-    jsonValue = GetJsonValue(node_);
-    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_DEFAULT_VALUE);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PULL_DOWN_RATIO_RATIO_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PULL_DOWN_RATIO_RATIO_DEFAULT_VALUE));
 }
 
 #ifdef WRONG_OLD_GEN

@@ -49,10 +49,10 @@ class StepperItemModifierTest : public ModifierTestBase<GENERATED_ArkUIStepperIt
 HWTEST_F(StepperItemModifierTest, DISABLED_setPrevLabelTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PREV_LABEL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PREV_LABEL_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PREV_LABEL_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'prevLabel' of method 'prevLabel'
@@ -69,7 +69,7 @@ static std::vector<std::tuple<std::string, Opt_String, std::string>> prevLabelPr
 HWTEST_F(StepperItemModifierTest, setPrevLabelTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_String inputValuePrevLabel;
     Opt_String initValuePrevLabel;
@@ -85,7 +85,7 @@ HWTEST_F(StepperItemModifierTest, setPrevLabelTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PREV_LABEL_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -97,10 +97,10 @@ HWTEST_F(StepperItemModifierTest, setPrevLabelTestValidValues, TestSize.Level1)
 HWTEST_F(StepperItemModifierTest, DISABLED_setNextLabelTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NEXT_LABEL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NEXT_LABEL_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_NEXT_LABEL_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'nextLabel' of method 'nextLabel'
@@ -117,7 +117,7 @@ static std::vector<std::tuple<std::string, Opt_String, std::string>> nextLabelNe
 HWTEST_F(StepperItemModifierTest, setNextLabelTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_String inputValueNextLabel;
     Opt_String initValueNextLabel;
@@ -133,7 +133,7 @@ HWTEST_F(StepperItemModifierTest, setNextLabelTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NEXT_LABEL_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -145,10 +145,10 @@ HWTEST_F(StepperItemModifierTest, setNextLabelTestValidValues, TestSize.Level1)
 HWTEST_F(StepperItemModifierTest, setStatusTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STATUS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_STATUS_DEFAULT_VALUE));
 }
 
 static std::vector<std::tuple<std::string, Ark_ItemState, std::string>> statusStatusValidValues = {
@@ -166,7 +166,7 @@ static std::vector<std::tuple<std::string, Ark_ItemState, std::string>> statusSt
 HWTEST_F(StepperItemModifierTest, setStatusTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_ItemState realInputValue = Converter::ArkValue<Opt_ItemState>(Ark_ItemState{});
     Ark_ItemState& inputValueStatus = realInputValue.value;
@@ -183,7 +183,7 @@ HWTEST_F(StepperItemModifierTest, setStatusTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATUS_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -200,7 +200,7 @@ static std::vector<std::tuple<std::string, Ark_ItemState>> statusStatusInvalidVa
 HWTEST_F(StepperItemModifierTest, setStatusTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_ItemState realInputValue = Converter::ArkValue<Opt_ItemState>(Ark_ItemState{});
     Ark_ItemState& inputValueStatus = realInputValue.value;
@@ -218,7 +218,7 @@ HWTEST_F(StepperItemModifierTest, setStatusTestInvalidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATUS_NAME);
         expectedStr = ATTRIBUTE_STATUS_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 } // namespace OHOS::Ace::NG

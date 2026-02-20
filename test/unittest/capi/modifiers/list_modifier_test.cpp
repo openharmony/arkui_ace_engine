@@ -75,11 +75,11 @@ public:
 HWTEST_F(ListModifierTest, setMultiSelectableTest, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<bool>(node_, "multiSelectable");
-    EXPECT_FALSE(checkValue);
+    EXPECT_THAT(checkValue, Eq(false));
     auto optValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setMultiSelectable(node_, &optValue);
     checkValue = GetAttrValue<bool>(node_, "multiSelectable");
-    EXPECT_TRUE(checkValue);
+    EXPECT_THAT(checkValue, Eq(true));
 }
 
 /**
@@ -90,11 +90,11 @@ HWTEST_F(ListModifierTest, setMultiSelectableTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setChainAnimationTest, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<bool>(node_, "chainAnimation");
-    EXPECT_FALSE(checkValue);
+    EXPECT_THAT(checkValue, Eq(false));
     auto optValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setChainAnimation(node_, &optValue);
     checkValue = GetAttrValue<bool>(node_, "chainAnimation");
-    EXPECT_TRUE(checkValue);
+    EXPECT_THAT(checkValue, Eq(true));
 }
 
 /**
@@ -105,19 +105,19 @@ HWTEST_F(ListModifierTest, setChainAnimationTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, DISABLED_setCachedCount0Test, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<std::string>(node_, "cachedCount");
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
 
     auto arg = Converter::ArkValue<Ark_Int32>(10);
     auto optArg = Converter::ArkValue<Opt_Int32>(arg);
     modifier_->setCachedCount0(node_, &optArg);
     checkValue = GetAttrValue<std::string>(node_, "cachedCount");
-    EXPECT_EQ(checkValue, "10");
+    EXPECT_THAT(checkValue, Eq("10"));
 
     arg = Converter::ArkValue<Ark_Int32>(-10);
     optArg = Converter::ArkValue<Opt_Int32>(arg);
     modifier_->setCachedCount0(node_, &optArg);
     checkValue = GetAttrValue<std::string>(node_, "cachedCount");
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
 }
 
 /**
@@ -128,30 +128,30 @@ HWTEST_F(ListModifierTest, DISABLED_setCachedCount0Test, TestSize.Level1)
 HWTEST_F(ListModifierTest, setStickyTest, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<std::string>(node_, "sticky");
-    EXPECT_EQ(checkValue, "StickyStyle.None");
+    EXPECT_THAT(checkValue, Eq("StickyStyle.None"));
     auto value = Converter::ArkValue<Ark_StickyStyle>(V2::StickyStyle::HEADER);
     auto optValue = Converter::ArkValue<Opt_StickyStyle>(value);
     modifier_->setSticky(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "sticky");
-    EXPECT_EQ(checkValue, "StickyStyle.Header");
+    EXPECT_THAT(checkValue, Eq("StickyStyle.Header"));
 
     value = Converter::ArkValue<Ark_StickyStyle>(V2::StickyStyle::NONE);
     optValue = Converter::ArkValue<Opt_StickyStyle>(value);
     modifier_->setSticky(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "sticky");
-    EXPECT_EQ(checkValue, "StickyStyle.None");
+    EXPECT_THAT(checkValue, Eq("StickyStyle.None"));
 
     value = Converter::ArkValue<Ark_StickyStyle>(V2::StickyStyle::FOOTER);
     optValue = Converter::ArkValue<Opt_StickyStyle>(value);
     modifier_->setSticky(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "sticky");
-    EXPECT_EQ(checkValue, "StickyStyle.Footer");
+    EXPECT_THAT(checkValue, Eq("StickyStyle.Footer"));
 
     value = Converter::ArkValue<Ark_StickyStyle>(static_cast<V2::StickyStyle>(-10));
     optValue = Converter::ArkValue<Opt_StickyStyle>(value);
     modifier_->setSticky(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "sticky");
-    EXPECT_EQ(checkValue, "StickyStyle.None");
+    EXPECT_THAT(checkValue, Eq("StickyStyle.None"));
 }
 
 /**
@@ -162,31 +162,31 @@ HWTEST_F(ListModifierTest, setStickyTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setAlignListItemTest, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<std::string>(node_, "alignListItem");
-    EXPECT_EQ(checkValue, "ListItemAlign.Start");
+    EXPECT_THAT(checkValue, Eq("ListItemAlign.Start"));
 
     auto value = Converter::ArkValue<Ark_ListItemAlign>(V2::ListItemAlign::CENTER);
     auto optValue = Converter::ArkValue<Opt_ListItemAlign>(value);
     modifier_->setAlignListItem(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "alignListItem");
-    EXPECT_EQ(checkValue, "ListItemAlign.Center");
+    EXPECT_THAT(checkValue, Eq("ListItemAlign.Center"));
 
     value = Converter::ArkValue<Ark_ListItemAlign>(V2::ListItemAlign::END);
     optValue = Converter::ArkValue<Opt_ListItemAlign>(value);
     modifier_->setAlignListItem(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "alignListItem");
-    EXPECT_EQ(checkValue, "ListItemAlign.End");
+    EXPECT_THAT(checkValue, Eq("ListItemAlign.End"));
 
     value = Converter::ArkValue<Ark_ListItemAlign>(V2::ListItemAlign::START);
     optValue = Converter::ArkValue<Opt_ListItemAlign>(value);
     modifier_->setAlignListItem(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "alignListItem");
-    EXPECT_EQ(checkValue, "ListItemAlign.Start");
+    EXPECT_THAT(checkValue, Eq("ListItemAlign.Start"));
 
     value = Converter::ArkValue<Ark_ListItemAlign>(static_cast<V2::ListItemAlign>(-10));
     optValue = Converter::ArkValue<Opt_ListItemAlign>(value);
     modifier_->setAlignListItem(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "alignListItem");
-    EXPECT_EQ(checkValue, "ListItemAlign.Start");
+    EXPECT_THAT(checkValue, Eq("ListItemAlign.Start"));
 }
 
 /**
@@ -197,37 +197,37 @@ HWTEST_F(ListModifierTest, setAlignListItemTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setScrollSnapAlignTest, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<std::string>(node_, "scrollSnapAlign");
-    EXPECT_EQ(checkValue, "ScrollSnapAlign.NONE");
+    EXPECT_THAT(checkValue, Eq("ScrollSnapAlign.NONE"));
 
     auto value = Converter::ArkValue<Ark_ScrollSnapAlign>(V2::ScrollSnapAlign::START);
     auto optValue = Converter::ArkValue<Opt_ScrollSnapAlign>(value);
     modifier_->setScrollSnapAlign(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "scrollSnapAlign");
-    EXPECT_EQ(checkValue, "ScrollSnapAlign.START");
+    EXPECT_THAT(checkValue, Eq("ScrollSnapAlign.START"));
 
     value = Converter::ArkValue<Ark_ScrollSnapAlign>(V2::ScrollSnapAlign::NONE);
     optValue = Converter::ArkValue<Opt_ScrollSnapAlign>(value);
     modifier_->setScrollSnapAlign(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "scrollSnapAlign");
-    EXPECT_EQ(checkValue, "ScrollSnapAlign.NONE");
+    EXPECT_THAT(checkValue, Eq("ScrollSnapAlign.NONE"));
 
     value = Converter::ArkValue<Ark_ScrollSnapAlign>(V2::ScrollSnapAlign::CENTER);
     optValue = Converter::ArkValue<Opt_ScrollSnapAlign>(value);
     modifier_->setScrollSnapAlign(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "scrollSnapAlign");
-    EXPECT_EQ(checkValue, "ScrollSnapAlign.CENTER");
+    EXPECT_THAT(checkValue, Eq("ScrollSnapAlign.CENTER"));
 
     value = Converter::ArkValue<Ark_ScrollSnapAlign>(V2::ScrollSnapAlign::END);
     optValue = Converter::ArkValue<Opt_ScrollSnapAlign>(value);
     modifier_->setScrollSnapAlign(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "scrollSnapAlign");
-    EXPECT_EQ(checkValue, "ScrollSnapAlign.END");
+    EXPECT_THAT(checkValue, Eq("ScrollSnapAlign.END"));
 
     value = Converter::ArkValue<Ark_ScrollSnapAlign>(static_cast<V2::ScrollSnapAlign>(-10));
     optValue = Converter::ArkValue<Opt_ScrollSnapAlign>(value);
     modifier_->setScrollSnapAlign(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "scrollSnapAlign");
-    EXPECT_EQ(checkValue, "ScrollSnapAlign.NONE");
+    EXPECT_THAT(checkValue, Eq("ScrollSnapAlign.NONE"));
 }
 
 /**
@@ -238,22 +238,22 @@ HWTEST_F(ListModifierTest, setScrollSnapAlignTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setContentStartOffsetTest, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<std::string>(node_, "contentStartOffset");
-    EXPECT_EQ(checkValue, "0.000000");
+    EXPECT_THAT(checkValue, Eq("0.000000"));
 
     auto inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(11.);
     modifier_->setContentStartOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentStartOffset");
-    EXPECT_EQ(checkValue, "11.000000");
+    EXPECT_THAT(checkValue, Eq("11.000000"));
 
     inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(22.2);
     modifier_->setContentStartOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentStartOffset");
-    EXPECT_EQ(checkValue, "22.200001");
+    EXPECT_THAT(checkValue, Eq("22.200001"));
 
     inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-33.);
     modifier_->setContentStartOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentStartOffset");
-    EXPECT_EQ(checkValue, "-33.000000");
+    EXPECT_THAT(checkValue, Eq("-33.000000"));
 }
 
 /**
@@ -264,22 +264,22 @@ HWTEST_F(ListModifierTest, setContentStartOffsetTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setContentEndOffsetTest, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<std::string>(node_, "contentEndOffset");
-    EXPECT_EQ(checkValue, "0.000000");
+    EXPECT_THAT(checkValue, Eq("0.000000"));
 
     auto inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(11.);
     modifier_->setContentEndOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentEndOffset");
-    EXPECT_EQ(checkValue, "11.000000");
+    EXPECT_THAT(checkValue, Eq("11.000000"));
 
     inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(22.2);
     modifier_->setContentEndOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentEndOffset");
-    EXPECT_EQ(checkValue, "22.200001");
+    EXPECT_THAT(checkValue, Eq("22.200001"));
 
     inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-55.);
     modifier_->setContentEndOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentEndOffset");
-    EXPECT_EQ(checkValue, "-55.000000");
+    EXPECT_THAT(checkValue, Eq("-55.000000"));
 }
 
 /**
@@ -290,25 +290,25 @@ HWTEST_F(ListModifierTest, setContentEndOffsetTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setListDirectionTest, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<std::string>(node_, "listDirection");
-    EXPECT_EQ(checkValue, "Axis.Vertical");
+    EXPECT_THAT(checkValue, Eq("Axis.Vertical"));
 
     auto value = Converter::ArkValue<Ark_Axis>(Converter::ArkValue<Ark_Axis>(Axis::HORIZONTAL));
     auto optValue = Converter::ArkValue<Opt_Axis>(value);
     modifier_->setListDirection(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "listDirection");
-    EXPECT_EQ(checkValue, "Axis.Horizontal");
+    EXPECT_THAT(checkValue, Eq("Axis.Horizontal"));
 
     value = Converter::ArkValue<Ark_Axis>(Converter::ArkValue<Ark_Axis>(Axis::VERTICAL));
     optValue = Converter::ArkValue<Opt_Axis>(value);
     modifier_->setListDirection(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "listDirection");
-    EXPECT_EQ(checkValue, "Axis.Vertical");
+    EXPECT_THAT(checkValue, Eq("Axis.Vertical"));
 
     value = Converter::ArkValue<Ark_Axis>(Converter::ArkValue<Ark_Axis>(static_cast<Axis>(-10)));
     optValue = Converter::ArkValue<Opt_Axis>(value);
     modifier_->setListDirection(node_, &optValue);
     checkValue = GetAttrValue<std::string>(node_, "listDirection");
-    EXPECT_EQ(checkValue, "Axis.Vertical");
+    EXPECT_THAT(checkValue, Eq("Axis.Vertical"));
 }
 
 /**
@@ -319,9 +319,9 @@ HWTEST_F(ListModifierTest, setListDirectionTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
 {
     auto indexCheckValue = GetAttrValue<std::string>(node_, "initialIndex");
-    EXPECT_EQ(indexCheckValue, "0");
+    EXPECT_THAT(indexCheckValue, Eq("0"));
     auto spaceCheckValue = GetAttrValue<std::string>(node_, "space");
-    EXPECT_EQ(spaceCheckValue, "0.00vp");
+    EXPECT_THAT(spaceCheckValue, Eq("0.00vp"));
 
     Ark_ListOptions listOptions = {
         .initialIndex = Converter::ArkValue<Opt_Int32>(1),
@@ -332,17 +332,17 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     Opt_ListOptions options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
     indexCheckValue = GetAttrValue<std::string>(node_, "initialIndex");
-    EXPECT_EQ(indexCheckValue, "1");
+    EXPECT_THAT(indexCheckValue, Eq("1"));
     spaceCheckValue = GetAttrValue<std::string>(node_, "space");
-    EXPECT_EQ(spaceCheckValue, "55.70vp");
+    EXPECT_THAT(spaceCheckValue, Eq("55.70vp"));
 
     // options are undefined
     options = Converter::ArkValue<Opt_ListOptions>(Ark_Empty());
     modifier_->setListOptions(node_, &options);
     indexCheckValue = GetAttrValue<std::string>(node_, "initialIndex");
-    EXPECT_EQ(indexCheckValue, "1");
+    EXPECT_THAT(indexCheckValue, Eq("1"));
     spaceCheckValue = GetAttrValue<std::string>(node_, "space");
-    EXPECT_EQ(spaceCheckValue, "55.70vp");
+    EXPECT_THAT(spaceCheckValue, Eq("55.70vp"));
 
     // index, space are undefined
     listOptions = {
@@ -353,9 +353,9 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
     indexCheckValue = GetAttrValue<std::string>(node_, "initialIndex");
-    EXPECT_EQ(indexCheckValue, "0");
+    EXPECT_THAT(indexCheckValue, Eq("0"));
     spaceCheckValue = GetAttrValue<std::string>(node_, "space");
-    EXPECT_EQ(spaceCheckValue, "0.00vp");
+    EXPECT_THAT(spaceCheckValue, Eq("0.00vp"));
 
     // space as string
     listOptions = {
@@ -366,9 +366,9 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
     indexCheckValue = GetAttrValue<std::string>(node_, "initialIndex");
-    EXPECT_EQ(indexCheckValue, "3");
+    EXPECT_THAT(indexCheckValue, Eq("3"));
     spaceCheckValue = GetAttrValue<std::string>(node_, "space");
-    EXPECT_EQ(spaceCheckValue, "88.90px");
+    EXPECT_THAT(spaceCheckValue, Eq("88.90px"));
 }
 
 /**
@@ -387,9 +387,9 @@ HWTEST_F(ListModifierTest, setListOptionsTestNegative, TestSize.Level1)
     Opt_ListOptions options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
     auto indexCheckValue = GetAttrValue<std::string>(node_, "initialIndex");
-    EXPECT_EQ(indexCheckValue, "0");
+    EXPECT_THAT(indexCheckValue, Eq("0"));
     auto spaceCheckValue = GetAttrValue<std::string>(node_, "space");
-    EXPECT_EQ(spaceCheckValue, "-9.00vp");
+    EXPECT_THAT(spaceCheckValue, Eq("-9.00vp"));
 }
 
 /**
@@ -401,32 +401,32 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
 {
     // default values
     auto lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
-    EXPECT_EQ(lanesCheckValue, "0");
+    EXPECT_THAT(lanesCheckValue, Eq("0"));
     auto laneMinLengthCheckValue = GetAttrValue<std::string>(node_, "laneMinLength");
-    EXPECT_EQ(laneMinLengthCheckValue, "0.00vp");
+    EXPECT_THAT(laneMinLengthCheckValue, Eq("0.00vp"));
     auto laneMaxLengthCheckValue = GetAttrValue<std::string>(node_, "laneMaxLength");
-    EXPECT_EQ(laneMaxLengthCheckValue, "0.00vp");
+    EXPECT_THAT(laneMaxLengthCheckValue, Eq("0.00vp"));
     auto gutterCheckValue = GetAttrValue<std::string>(node_, "laneGutter");
-    EXPECT_EQ(gutterCheckValue, "0.00vp");
+    EXPECT_THAT(gutterCheckValue, Eq("0.00vp"));
 
     // lanes, gutter are valid
     auto optValue = Converter::ArkUnion<Opt_Union_I32_LengthConstrain_ItemFillPolicy, Ark_Int32>(2);
     auto gutterOpt = Converter::ArkValue<Opt_Dimension>(55.5f);
     modifier_->setLanes(node_, &optValue, &gutterOpt);
     lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
-    EXPECT_EQ(lanesCheckValue, "2");
+    EXPECT_THAT(lanesCheckValue, Eq("2"));
     laneMinLengthCheckValue = GetAttrValue<std::string>(node_, "laneMinLength");
-    EXPECT_EQ(laneMinLengthCheckValue, "0.00vp");
+    EXPECT_THAT(laneMinLengthCheckValue, Eq("0.00vp"));
     laneMaxLengthCheckValue = GetAttrValue<std::string>(node_, "laneMaxLength");
-    EXPECT_EQ(laneMaxLengthCheckValue, "0.00vp");
+    EXPECT_THAT(laneMaxLengthCheckValue, Eq("0.00vp"));
     gutterCheckValue = GetAttrValue<std::string>(node_, "laneGutter");
-    EXPECT_EQ(gutterCheckValue, "55.50vp");
+    EXPECT_THAT(gutterCheckValue, Eq("55.50vp"));
 
     // gutter as optional
     gutterOpt = Converter::ArkValue<Opt_Dimension>(Ark_Empty());
     modifier_->setLanes(node_, &optValue, &gutterOpt);
     gutterCheckValue = GetAttrValue<std::string>(node_, "laneGutter");
-    EXPECT_EQ(gutterCheckValue, "0.00vp");
+    EXPECT_THAT(gutterCheckValue, Eq("0.00vp"));
 
     // lanes as constraints
     Ark_LengthConstrain constraint = {
@@ -436,11 +436,11 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
     optValue = Converter::ArkUnion<Opt_Union_I32_LengthConstrain_ItemFillPolicy, Ark_LengthConstrain>(constraint);
     modifier_->setLanes(node_, &optValue, &gutterOpt);
     lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
-    EXPECT_EQ(lanesCheckValue, "1");
+    EXPECT_THAT(lanesCheckValue, Eq("1"));
     laneMinLengthCheckValue = GetAttrValue<std::string>(node_, "laneMinLength");
-    EXPECT_EQ(laneMinLengthCheckValue, "11.00fp");
+    EXPECT_THAT(laneMinLengthCheckValue, Eq("11.00fp"));
     laneMaxLengthCheckValue = GetAttrValue<std::string>(node_, "laneMaxLength");
-    EXPECT_EQ(laneMaxLengthCheckValue, "77.70px");
+    EXPECT_THAT(laneMaxLengthCheckValue, Eq("77.70px"));
 }
 
 /**
@@ -455,13 +455,13 @@ HWTEST_F(ListModifierTest, setLanesTestNegative, TestSize.Level1)
     auto gutterOpt = Converter::ArkValue<Opt_Dimension>("-88px");
     modifier_->setLanes(node_, &optValue, &gutterOpt);
     auto lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
-    EXPECT_EQ(lanesCheckValue, "-2");
+    EXPECT_THAT(lanesCheckValue, Eq("-2"));
     auto laneMinLengthCheckValue = GetAttrValue<std::string>(node_, "laneMinLength");
-    EXPECT_EQ(laneMinLengthCheckValue, "0.00vp");
+    EXPECT_THAT(laneMinLengthCheckValue, Eq("0.00vp"));
     auto laneMaxLengthCheckValue = GetAttrValue<std::string>(node_, "laneMaxLength");
-    EXPECT_EQ(laneMaxLengthCheckValue, "0.00vp");
+    EXPECT_THAT(laneMaxLengthCheckValue, Eq("0.00vp"));
     auto gutterCheckValue = GetAttrValue<std::string>(node_, "laneGutter");
-    EXPECT_EQ(gutterCheckValue, "-88.00px");
+    EXPECT_THAT(gutterCheckValue, Eq("-88.00px"));
 }
 
 /**
@@ -473,7 +473,7 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerObject = GetAttrObject(fullJson, "divider");
     auto dividerCheckValue = dividerObject->ToString();
     EXPECT_EQ(dividerCheckValue, "{}");
 
@@ -487,15 +487,15 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    dividerObject = GetAttrObject(fullJson, "divider");
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "11.00px");
+    EXPECT_THAT(strokeWidthCheckValue, Eq("11.00px"));
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "55.50vp");
+    EXPECT_THAT(startMarginCheckValue, Eq("55.50vp"));
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "77.00px");
+    EXPECT_THAT(endMarginCheckValue, Eq("77.00px"));
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#FFFFFFFF");
+    EXPECT_THAT(colorCheckValue, Eq("#FFFFFFFF"));
 
     // set color as Ark_Number
     dividerOptions = {
@@ -507,9 +507,9 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
     divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    dividerObject = GetAttrObject(fullJson, "divider");
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#FF123456");
+    EXPECT_THAT(colorCheckValue, Eq("#FF123456"));
 }
 
 /**
@@ -521,7 +521,7 @@ HWTEST_F(ListModifierTest, setDividerTestColorResource, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerObject = GetAttrObject(fullJson, "divider");
     auto dividerCheckValue = dividerObject->ToString();
     EXPECT_EQ(dividerCheckValue, "{}");
 
@@ -535,9 +535,9 @@ HWTEST_F(ListModifierTest, setDividerTestColorResource, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    dividerObject = GetAttrObject(fullJson, "divider");
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, DIVIDER_COLOR);
+    EXPECT_THAT(colorCheckValue, Eq(DIVIDER_COLOR));
 }
 
 /**
@@ -557,15 +557,15 @@ HWTEST_F(ListModifierTest, setDividerTestUndefined, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerObject = GetAttrObject(fullJson, "divider");
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "11.00px");
+    EXPECT_THAT(strokeWidthCheckValue, Eq("11.00px"));
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "0.00vp");
+    EXPECT_THAT(startMarginCheckValue, Eq("0.00vp"));
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "0.00vp");
+    EXPECT_THAT(endMarginCheckValue, Eq("0.00vp"));
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#00000000");
+    EXPECT_THAT(colorCheckValue, Eq("#00000000"));
 }
 
 /**
@@ -585,9 +585,9 @@ HWTEST_F(ListModifierTest, setDividerTestColorString, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerObject = GetAttrObject(fullJson, "divider");
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#11223344");
+    EXPECT_THAT(colorCheckValue, Eq("#11223344"));
 }
 
 /**
@@ -600,15 +600,15 @@ HWTEST_F(ListModifierTest, setDividerTestEmpty, TestSize.Level1)
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>();
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
-    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerObject = GetAttrObject(fullJson, "divider");
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "");
+    EXPECT_THAT(strokeWidthCheckValue, Eq(std::nullopt));
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "");
+    EXPECT_THAT(startMarginCheckValue, Eq(std::nullopt));
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "");
+    EXPECT_THAT(endMarginCheckValue, Eq(std::nullopt));
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "");
+    EXPECT_THAT(colorCheckValue, Eq(std::nullopt));
 }
 
 /**
@@ -630,11 +630,11 @@ HWTEST_F(ListModifierTest, DISABLED_setChainAnimationOptionsTest, TestSize.Level
 HWTEST_F(ListModifierTest, setMaintainVisibleContentPositionTestSetListMaintainVisibleContentPosition, TestSize.Level1)
 {
     auto checkValue = GetAttrValue<bool>(node_, "maintainVisibleContentPosition");
-    EXPECT_FALSE(checkValue);
+    EXPECT_THAT(checkValue, Eq(false));
     auto optValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setMaintainVisibleContentPosition(node_, &optValue);
     checkValue = GetAttrValue<bool>(node_, "maintainVisibleContentPosition");
-    EXPECT_TRUE(checkValue);
+    EXPECT_THAT(checkValue, Eq(true));
 }
 
 /*

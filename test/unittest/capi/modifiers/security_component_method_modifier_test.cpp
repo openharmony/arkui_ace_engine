@@ -104,10 +104,10 @@ static std::vector<std::tuple<std::string,
 HWTEST_F(SecurityComponentMethodModifierTest, setIconSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ICON_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ICON_SIZE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ICON_SIZE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'iconSize' of method 'iconSize'
@@ -124,7 +124,7 @@ static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> iconSize
 HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setIconSizeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Dimension inputValueIconSize;
     Opt_Dimension initValueIconSize;
@@ -142,7 +142,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setIconSizeTestValidValue
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ICON_SIZE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -159,7 +159,7 @@ static std::vector<std::tuple<std::string, Opt_Dimension>> iconSizeInvalidValues
 HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setIconSizeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Dimension inputValueIconSize;
     Opt_Dimension initValueIconSize;
@@ -182,7 +182,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setIconSizeTestInvalidVal
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ICON_SIZE_NAME);
         expectedStr = initValueStr; // expect that invalid value should be ignored
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -294,14 +294,14 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPositionTestDefaultVal
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultPosition =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POSITION_NAME);
-    std::string resultStr;
+        GetAttrObject(jsonValue, ATTRIBUTE_POSITION_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultPosition, ATTRIBUTE_POSITION_X_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POSITION_X_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_POSITION_X_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultPosition, ATTRIBUTE_POSITION_Y_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POSITION_Y_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_POSITION_Y_DEFAULT_VALUE));
 }
 
 /*
@@ -313,7 +313,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPositionTestValidValue
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultPosition;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Position inputValuePosition;
     Ark_Position initValuePosition;
@@ -330,10 +330,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPositionTestValidValue
         modifier_->setPosition(node_, &position);
         OnModifyDone();
         jsonValue = GetJsonValue(node_);
-        resultPosition = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POSITION_NAME);
+        resultPosition = GetAttrObject(jsonValue, ATTRIBUTE_POSITION_NAME);
         resultStr = GetAttrValue<std::string>(resultPosition, ATTRIBUTE_POSITION_X_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'y'  values
@@ -344,10 +344,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPositionTestValidValue
         modifier_->setPosition(node_, &position);
         OnModifyDone();
         jsonValue = GetJsonValue(node_);
-        resultPosition = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POSITION_NAME);
+        resultPosition = GetAttrObject(jsonValue, ATTRIBUTE_POSITION_NAME);
         resultStr = GetAttrValue<std::string>(resultPosition, ATTRIBUTE_POSITION_Y_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -360,7 +360,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPositionTestInvalidVal
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultPosition;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Position inputValuePosition;
     Ark_Position initValuePosition;
@@ -380,10 +380,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPositionTestInvalidVal
         modifier_->setPosition(node_, &position);
         OnModifyDone();
         jsonValue = GetJsonValue(node_);
-        resultPosition = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POSITION_NAME);
+        resultPosition = GetAttrObject(jsonValue, ATTRIBUTE_POSITION_NAME);
         resultStr = GetAttrValue<std::string>(resultPosition, ATTRIBUTE_POSITION_X_NAME);
         expectedStr = ATTRIBUTE_POSITION_X_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'y'  values
@@ -397,10 +397,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPositionTestInvalidVal
         modifier_->setPosition(node_, &position);
         OnModifyDone();
         jsonValue = GetJsonValue(node_);
-        resultPosition = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POSITION_NAME);
+        resultPosition = GetAttrObject(jsonValue, ATTRIBUTE_POSITION_NAME);
         resultStr = GetAttrValue<std::string>(resultPosition, ATTRIBUTE_POSITION_Y_NAME);
         expectedStr = ATTRIBUTE_POSITION_Y_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -413,14 +413,14 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setMarkAnchorTestDefaultV
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultMarkAnchor =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
-    std::string resultStr;
+        GetAttrObject(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_X_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MARK_ANCHOR_X_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MARK_ANCHOR_X_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_Y_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MARK_ANCHOR_Y_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MARK_ANCHOR_Y_DEFAULT_VALUE));
 }
 
 /*
@@ -432,7 +432,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setMarkAnchorTestValidVal
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultMarkAnchor;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Position inputValueMarkAnchor;
     Ark_Position initValueMarkAnchor;
@@ -448,10 +448,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setMarkAnchorTestValidVal
         auto markAnchor = ArkValue<Opt_Position>(inputValueMarkAnchor);
         modifier_->setMarkAnchor(node_, &markAnchor);
         jsonValue = GetJsonValue(node_);
-        resultMarkAnchor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
+        resultMarkAnchor = GetAttrObject(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
         resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_X_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'y'  values
@@ -461,10 +461,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setMarkAnchorTestValidVal
         auto markAnchor = ArkValue<Opt_Position>(inputValueMarkAnchor);
         modifier_->setMarkAnchor(node_, &markAnchor);
         jsonValue = GetJsonValue(node_);
-        resultMarkAnchor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
+        resultMarkAnchor = GetAttrObject(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
         resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_Y_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -477,7 +477,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setMarkAnchorTestInvalidV
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultMarkAnchor;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Position inputValueMarkAnchor;
     Ark_Position initValueMarkAnchor;
@@ -495,10 +495,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setMarkAnchorTestInvalidV
         markAnchor = ArkValue<Opt_Position>(inputValueMarkAnchor);
         modifier_->setMarkAnchor(node_, &markAnchor);
         jsonValue = GetJsonValue(node_);
-        resultMarkAnchor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
+        resultMarkAnchor = GetAttrObject(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
         resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_X_NAME);
         expectedStr = ATTRIBUTE_MARK_ANCHOR_X_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'y'  values
@@ -510,10 +510,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setMarkAnchorTestInvalidV
         markAnchor = ArkValue<Opt_Position>(inputValueMarkAnchor);
         modifier_->setMarkAnchor(node_, &markAnchor);
         jsonValue = GetJsonValue(node_);
-        resultMarkAnchor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
+        resultMarkAnchor = GetAttrObject(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
         resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_Y_NAME);
         expectedStr = ATTRIBUTE_MARK_ANCHOR_Y_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -525,10 +525,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setMarkAnchorTestInvalidV
 HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'fontSize' of method 'fontSize'
@@ -545,7 +545,7 @@ static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> fontSize
 HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Dimension inputValueFontSize;
 
@@ -558,7 +558,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestValidValues, TestSi
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -575,7 +575,7 @@ static std::vector<std::tuple<std::string, Opt_Dimension>> fontSizeInvalidValues
 HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Dimension inputValueFontSize;
     Opt_Dimension initValueFontSize;
@@ -598,7 +598,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestInvalidValues, Test
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
         expectedStr = initValueStr; // expect that invalid value should be ignored
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -610,10 +610,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontSizeTestInvalidValues, Test
 HWTEST_F(SecurityComponentMethodModifierTest, setFontStyleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    int result;
-
-    result = GetAttrValue<int>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
-    EXPECT_EQ(result, static_cast<int>(ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE));
+    auto result = GetAttrValue<int>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
+    EXPECT_THAT(result, Eq(static_cast<int>(ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE)));
 }
 
 // Valid values for attribute 'fontStyle' of method 'fontStyle'
@@ -630,26 +628,20 @@ static std::vector<std::tuple<std::string, Ark_FontStyle, Ace::FontStyle>> fontS
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setFontStyleTestValidValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue;
-    int result;
-    int expected;
-    Ark_FontStyle inputValueFontStyle;
-    Ark_FontStyle initValueFontStyle;
-
     // Initial setup
-    initValueFontStyle = std::get<1>(fontStyleFontStyleValidValues[0]);
+    auto initValueFontStyle = std::get<1>(fontStyleFontStyleValidValues[0]);
 
     // Verifying attribute's  values
-    inputValueFontStyle = initValueFontStyle;
+    auto inputValueFontStyle = initValueFontStyle;
     for (auto&& value: fontStyleFontStyleValidValues) {
         inputValueFontStyle = std::get<1>(value);
         auto convValue = ArkValue<Opt_FontStyle>(inputValueFontStyle);
         modifier_->setFontStyle(node_, &convValue);
         OnModifyDone();
-        jsonValue = GetJsonValue(node_);
-        result = GetAttrValue<int>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
-        expected = static_cast<int>(std::get<2>(value));
-        EXPECT_EQ(result, expected) << "Passed value is: " << std::get<0>(value);
+        auto jsonValue = GetJsonValue(node_);
+        auto result = GetAttrValue<int>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
+        auto expected = static_cast<int>(std::get<2>(value));
+        EXPECT_THAT(result, Eq(expected)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -665,18 +657,12 @@ static std::vector<std::tuple<std::string, Ark_FontStyle>> fontStyleFontStyleInv
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setFontStyleTestInvalidValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue;
-    int result;
-    int expected;
-    Ark_FontStyle inputValueFontStyle;
-    Ark_FontStyle initValueFontStyle;
-
     // Initial setup
-    initValueFontStyle = std::get<1>(fontStyleFontStyleValidValues[0]);
+    auto initValueFontStyle = std::get<1>(fontStyleFontStyleValidValues[0]);
 
     // Verifying attribute's  values
     for (auto&& value: fontStyleFontStyleInvalidValues) {
-        inputValueFontStyle = initValueFontStyle;
+        auto inputValueFontStyle = initValueFontStyle;
         auto convValue = ArkValue<Opt_FontStyle>(inputValueFontStyle);
         modifier_->setFontStyle(node_, &convValue);
         OnModifyDone();
@@ -684,10 +670,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontStyleTestInvalidValues, Tes
         convValue = ArkValue<Opt_FontStyle>(inputValueFontStyle);
         modifier_->setFontStyle(node_, &convValue);
         OnModifyDone();
-        jsonValue = GetJsonValue(node_);
-        result = GetAttrValue<int>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
-        expected = static_cast<int>(ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
-        EXPECT_EQ(result, expected) << "Passed value is: " << std::get<0>(value);
+        auto jsonValue = GetJsonValue(node_);
+        auto result = GetAttrValue<int>(jsonValue, ATTRIBUTE_FONT_STYLE_NAME);
+        auto expected = static_cast<int>(ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE);
+        EXPECT_THAT(result, Eq(expected)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -699,10 +685,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontStyleTestInvalidValues, Tes
 HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE));
 }
 
 using FontWeightT = Opt_Union_I32_FontWeight_String_Resource;
@@ -722,7 +708,7 @@ static std::vector<std::tuple<std::string, FontWeightT, std::string>> fontWeight
 HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     FontWeightT inputValueFontWeight;
     FontWeightT initValueFontWeight;
@@ -739,7 +725,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestValidValues, Test
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -757,7 +743,7 @@ static std::vector<std::tuple<std::string, FontWeightT>> fontWeightInvalidValues
 HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     FontWeightT inputValueFontWeight;
     FontWeightT initValueFontWeight;
@@ -776,7 +762,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestInvalidValues, Te
         OnModifyDone();
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -788,10 +774,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontWeightTestInvalidValues, Te
 HWTEST_F(SecurityComponentMethodModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE));
 }
 
 /*
@@ -812,7 +798,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setFontColorTestValidValu
         OnModifyDone();
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << input;
     };
 
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsStrValidValues) {
@@ -857,7 +843,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontColorTestInvalidValues, Tes
         OnModifyDone();
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << input;
     };
 
     for (const auto &[input, value]: Fixtures::testFixtureColorsStrInvalidValues) {
@@ -879,10 +865,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setFontColorTestInvalidValues, Tes
 HWTEST_F(SecurityComponentMethodModifierTest, setIconColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ICON_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ICON_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ICON_COLOR_DEFAULT_VALUE));
 }
 
 /*
@@ -903,7 +889,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setIconColorTestValidValu
         OnModifyDone();
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ICON_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << input;
     };
 
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsStrValidValues) {
@@ -948,7 +934,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setIconColorTestInvalidValues, Tes
         OnModifyDone();
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ICON_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << input;
     };
 
     for (const auto &[input, value]: Fixtures::testFixtureColorsStrInvalidValues) {
@@ -970,10 +956,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setIconColorTestInvalidValues, Tes
 HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE));
 }
 
 // Fixture 'ColorsStr' for type 'Ark_String'
@@ -1029,7 +1015,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestValidValues,
         OnModifyDone();
         auto jsonValue = GetPatternJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << input;
     };
 
     for (const auto &[input, value, expectedStr]: backgroundColorStrValidValues) {
@@ -1074,7 +1060,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestInvalidValue
         OnModifyDone();
         auto jsonValue = GetPatternJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << input;
     };
 
     for (const auto &[input, value]: Fixtures::testFixtureColorsStrInvalidValues) {
@@ -1096,29 +1082,15 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBackgroundColorTestInvalidValue
 HWTEST_F(SecurityComponentMethodModifierTest, setBorderStyleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
-    int result;
-
-    result = GetAttrValue<int>(jsonValue, ATTRIBUTE_BORDER_STYLE_NAME);
-    EXPECT_EQ(result, static_cast<int>(ATTRIBUTE_BORDER_STYLE_DEFAULT_VALUE));
+    auto result = GetAttrValue<int>(jsonValue, ATTRIBUTE_BORDER_STYLE_NAME);
+    EXPECT_THAT(result, Eq(static_cast<int>(ATTRIBUTE_BORDER_STYLE_DEFAULT_VALUE)));
 }
 
 // Valid values for attribute 'borderStyle' of method 'borderStyle'
 static std::vector<std::tuple<std::string, Ark_BorderStyle, BorderStyle>> borderStyleBorderStyleValidValues = {
-    {
-        "ARK_BORDER_STYLE_DOTTED",
-        ARK_BORDER_STYLE_DOTTED,
-        BorderStyle::DOTTED
-    },
-    {
-        "ARK_BORDER_STYLE_DASHED",
-        ARK_BORDER_STYLE_DASHED,
-        BorderStyle::DASHED
-    },
-    {
-        "ARK_BORDER_STYLE_SOLID",
-        ARK_BORDER_STYLE_SOLID,
-        BorderStyle::SOLID
-    },
+    {"ARK_BORDER_STYLE_DOTTED", ARK_BORDER_STYLE_DOTTED, BorderStyle::DOTTED},
+    {"ARK_BORDER_STYLE_DASHED", ARK_BORDER_STYLE_DASHED, BorderStyle::DASHED},
+    {"ARK_BORDER_STYLE_SOLID", ARK_BORDER_STYLE_SOLID, BorderStyle::SOLID},
 };
 
 /*
@@ -1128,35 +1100,27 @@ static std::vector<std::tuple<std::string, Ark_BorderStyle, BorderStyle>> border
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setBorderStyleTestValidValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue;
-    int result;
-    int expected;
-    Ark_BorderStyle inputValueBorderStyle;
-    Ark_BorderStyle initValueBorderStyle;
-
     // Initial setup
-    initValueBorderStyle = std::get<1>(borderStyleBorderStyleValidValues[0]);
+    auto initValueBorderStyle = std::get<1>(borderStyleBorderStyleValidValues[0]);
 
     // Verifying attribute's  values
-    inputValueBorderStyle = initValueBorderStyle;
+    auto inputValueBorderStyle = initValueBorderStyle;
     for (auto&& value: borderStyleBorderStyleValidValues) {
         inputValueBorderStyle = std::get<1>(value);
         auto convValue = ArkValue<Opt_BorderStyle>(inputValueBorderStyle);
         modifier_->setBorderStyle(node_, &convValue);
         OnModifyDone();
-        jsonValue = GetPatternJsonValue(node_);
-        result = GetAttrValue<int>(jsonValue, ATTRIBUTE_BORDER_STYLE_NAME);
-        expected = static_cast<int>(std::get<2>(value));
-        EXPECT_EQ(result, expected) << "Passed value is: " << std::get<0>(value);
+        auto jsonValue = GetPatternJsonValue(node_);
+        auto result = GetAttrValue<int>(jsonValue, ATTRIBUTE_BORDER_STYLE_NAME);
+        auto expected = static_cast<int>(std::get<2>(value));
+        EXPECT_THAT(result, Eq(expected)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
 // Invalid values for attribute 'borderStyle' of method 'borderStyle'
-static std::vector<std::tuple<std::string, Ark_BorderStyle>> borderStyleBorderStyleInvalidValues = {
-    {
-        "static_cast<Ark_BorderStyle>(-1)",
-        Converter::ArkValue<Ark_BorderStyle>(static_cast<Ark_BorderStyle>(-1))
-    },
+static std::vector<std::tuple<std::string, Opt_BorderStyle>> borderStyleBorderStyleInvalidValues = {
+    {"-1", Converter::ArkValue<Opt_BorderStyle>(static_cast<Ark_BorderStyle>(-1))},
+    {"undefined", Converter::ArkValue<Opt_BorderStyle>()},
 };
 
 /*
@@ -1166,29 +1130,21 @@ static std::vector<std::tuple<std::string, Ark_BorderStyle>> borderStyleBorderSt
  */
 HWTEST_F(SecurityComponentMethodModifierTest, setBorderStyleTestInvalidValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue;
-    int result;
-    int expected;
-    Ark_BorderStyle inputValueBorderStyle;
-    Ark_BorderStyle initValueBorderStyle;
-
     // Initial setup
-    initValueBorderStyle = std::get<1>(borderStyleBorderStyleValidValues[0]);
+    auto initValueBorderStyle = std::get<1>(borderStyleBorderStyleValidValues[0]);
 
     // Verifying attribute's  values
     for (auto&& value: borderStyleBorderStyleInvalidValues) {
-        inputValueBorderStyle = initValueBorderStyle;
-        auto convValue = ArkValue<Opt_BorderStyle>(inputValueBorderStyle);
-        modifier_->setBorderStyle(node_, &convValue);
+        auto inputValueBorderStyle = ArkValue<Opt_BorderStyle>(initValueBorderStyle);
+        modifier_->setBorderStyle(node_, &inputValueBorderStyle);
         OnModifyDone();
         inputValueBorderStyle = std::get<1>(value);
-        convValue = ArkValue<Opt_BorderStyle>(inputValueBorderStyle);
-        modifier_->setBorderStyle(node_, &convValue);
+        modifier_->setBorderStyle(node_, &inputValueBorderStyle);
         OnModifyDone();
-        jsonValue = GetPatternJsonValue(node_);
-        result = GetAttrValue<int>(jsonValue, ATTRIBUTE_BORDER_STYLE_NAME);
-        expected = static_cast<int>(ATTRIBUTE_BORDER_STYLE_DEFAULT_VALUE);
-        EXPECT_EQ(result, expected) << "Passed value is: " << std::get<0>(value);
+        auto jsonValue = GetPatternJsonValue(node_);
+        auto result = GetAttrValue<int>(jsonValue, ATTRIBUTE_BORDER_STYLE_NAME);
+        auto expected = static_cast<int>(ATTRIBUTE_BORDER_STYLE_DEFAULT_VALUE);
+        EXPECT_THAT(result, Eq(expected)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1200,10 +1156,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderStyleTestInvalidValues, T
 HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BORDER_WIDTH_DEFAULT_VALUE);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_WIDTH_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BORDER_WIDTH_DEFAULT_VALUE));
 }
 
 /*
@@ -1214,7 +1168,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestDefaultValues, T
 HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Dimension inputValueBorderWidth;
     Opt_Dimension initValueBorderWidth;
@@ -1231,7 +1185,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestValidValues, Tes
         jsonValue = GetPatternJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_WIDTH_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1243,7 +1197,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestValidValues, Tes
 HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Dimension inputValueBorderWidth;
     Opt_Dimension initValueBorderWidth;
@@ -1262,7 +1216,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestInvalidValues, T
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1274,10 +1228,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderWidthTestInvalidValues, T
 HWTEST_F(SecurityComponentMethodModifierTest, setBorderColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BORDER_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BORDER_COLOR_DEFAULT_VALUE));
 }
 
 /*
@@ -1298,7 +1252,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setBorderColorTestValidVa
         OnModifyDone();
         auto jsonValue = GetPatternJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << input;
     };
 
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsStrValidValues) {
@@ -1343,7 +1297,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderColorTestInvalidValues, T
         OnModifyDone();
         auto jsonValue = GetPatternJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << input;
     };
 
     for (const auto &[input, value]: Fixtures::testFixtureColorsStrInvalidValues) {
@@ -1365,10 +1319,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderColorTestInvalidValues, T
 HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_RADIUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BORDER_RADIUS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BORDER_RADIUS_DEFAULT_VALUE));
 }
 
 /*
@@ -1379,7 +1333,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestDefaultValues, 
 HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Union_Dimension_BorderRadiuses inputValueBorderRadius;
     Opt_Union_Dimension_BorderRadiuses initValueBorderRadius;
@@ -1396,7 +1350,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestValidValues, Te
         jsonValue = GetPatternJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BORDER_RADIUS_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1408,7 +1362,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestValidValues, Te
 HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Union_Dimension_BorderRadiuses inputValueBorderRadius;
     Opt_Union_Dimension_BorderRadiuses initValueBorderRadius;
@@ -1451,10 +1405,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setBorderRadiusTestInvalidValues, 
 HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setTextIconSpaceTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_ICON_SPACE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_ICON_SPACE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TEXT_ICON_SPACE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'textIconSpace' of method 'textIconSpace'
@@ -1471,7 +1425,7 @@ static std::vector<std::tuple<std::string, Opt_Dimension, std::string>> textIcon
 HWTEST_F(SecurityComponentMethodModifierTest, setTextIconSpaceTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Dimension inputValueTextIconSpace;
     Opt_Dimension initValueTextIconSpace;
@@ -1488,7 +1442,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setTextIconSpaceTestValidValues, T
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_ICON_SPACE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1505,7 +1459,7 @@ static std::vector<std::tuple<std::string, Opt_Dimension>> textIconSpaceInvalidV
 HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setTextIconSpaceTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Dimension inputValueTextIconSpace;
     Opt_Dimension initValueTextIconSpace;
@@ -1526,7 +1480,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setTextIconSpaceTestInval
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_ICON_SPACE_NAME);
         expectedStr = ATTRIBUTE_TEXT_ICON_SPACE_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1538,10 +1492,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setTextIconSpaceTestInval
 HWTEST_F(SecurityComponentMethodModifierTest, setKeyTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_KEY_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_KEY_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'key' of method 'key'
@@ -1558,7 +1512,7 @@ static std::vector<std::tuple<std::string, Ark_String, std::string>> keyKeyValid
 HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setKeyTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_String inputValueKey;
     Ark_String initValueKey;
@@ -1575,7 +1529,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setKeyTestValidValues, Te
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEY_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1587,10 +1541,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setKeyTestValidValues, Te
 HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
 }
 
 /*
@@ -1601,7 +1555,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestDefaultValues, TestSiz
 HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Length inputValueWidth;
     Opt_Length initValueWidth;
@@ -1617,7 +1571,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestValidValues, TestSize.
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDTH_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1629,7 +1583,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestValidValues, TestSize.
 HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setWidthTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Length inputValueWidth;
     Opt_Length initValueWidth;
@@ -1646,7 +1600,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setWidthTestInvalidValues
         jsonValue = GetJsonValue(node_);
         expectedStr = ATTRIBUTE_WIDTH_DEFAULT_VALUE;
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1658,10 +1612,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setWidthTestInvalidValues
 HWTEST_F(SecurityComponentMethodModifierTest, setHeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'height' of method 'height'
@@ -1682,7 +1636,7 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> heightHeigh
 HWTEST_F(SecurityComponentMethodModifierTest, setHeightTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Length inputValueHeight;
     Ark_Length initValueHeight;
@@ -1699,7 +1653,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setHeightTestValidValues, TestSize
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1715,7 +1669,7 @@ static std::vector<std::tuple<std::string, Ark_Length>> heightHeightInvalidValue
 HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setHeightTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Length inputValueHeight;
     Ark_Length initValueHeight;
@@ -1734,7 +1688,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setHeightTestInvalidValue
         jsonValue = GetJsonValue(node_);
         expectedStr = ATTRIBUTE_HEIGHT_DEFAULT_VALUE;
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }/*
  * @tc.name: setSizeTestDefaultValues
@@ -1744,14 +1698,14 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setHeightTestInvalidValue
 HWTEST_F(SecurityComponentMethodModifierTest, setSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SIZE_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultSize = GetAttrObject(jsonValue, ATTRIBUTE_SIZE_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SIZE_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SIZE_WIDTH_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SIZE_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SIZE_HEIGHT_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'width' of method 'size'
@@ -1783,7 +1737,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setSizeTestValidValues, TestSize.L
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultSize;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_SizeOptions inputValueSize;
     Ark_SizeOptions initValueSize;
@@ -1799,10 +1753,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setSizeTestValidValues, TestSize.L
         auto convValue = ArkValue<Opt_SizeOptions>(inputValueSize);
         modifier_->setSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SIZE_NAME);
+        resultSize = GetAttrObject(jsonValue, ATTRIBUTE_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_WIDTH_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'height'  values
@@ -1812,10 +1766,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setSizeTestValidValues, TestSize.L
         auto convValue = ArkValue<Opt_SizeOptions>(inputValueSize);
         modifier_->setSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SIZE_NAME);
+        resultSize = GetAttrObject(jsonValue, ATTRIBUTE_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_HEIGHT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1838,7 +1792,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setSizeTestInvalidValues,
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultSize;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStrWidth;
     std::string expectedStrHeight;
     Ark_SizeOptions inputValueSize;
@@ -1859,9 +1813,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setSizeTestInvalidValues,
         convValue = ArkValue<Opt_SizeOptions>(inputValueSize);
         modifier_->setSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SIZE_NAME);
+        resultSize = GetAttrObject(jsonValue, ATTRIBUTE_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStrWidth) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStrWidth)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'height'  values
@@ -1873,9 +1827,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setSizeTestInvalidValues,
         convValue = ArkValue<Opt_SizeOptions>(inputValueSize);
         modifier_->setSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SIZE_NAME);
+        resultSize = GetAttrObject(jsonValue, ATTRIBUTE_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStrHeight) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStrHeight)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1898,7 +1852,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setSizeTestInvalidValuesR
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultSize;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStrWidth;
     std::string expectedStrHeight;
     Ark_SizeOptions inputValueSize;
@@ -1919,9 +1873,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setSizeTestInvalidValuesR
         convValue = ArkValue<Opt_SizeOptions>(inputValueSize);
         modifier_->setSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SIZE_NAME);
+        resultSize = GetAttrObject(jsonValue, ATTRIBUTE_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStrWidth) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStrWidth)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'height'  values
@@ -1933,9 +1887,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setSizeTestInvalidValuesR
         convValue = ArkValue<Opt_SizeOptions>(inputValueSize);
         modifier_->setSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SIZE_NAME);
+        resultSize = GetAttrObject(jsonValue, ATTRIBUTE_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStrHeight) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStrHeight)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1948,20 +1902,20 @@ HWTEST_F(SecurityComponentMethodModifierTest, setConstraintSizeTestDefaultValues
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultConstraintSize =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
-    std::string resultStr;
+        GetAttrObject(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MIN_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONSTRAINT_SIZE_MIN_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONSTRAINT_SIZE_MIN_WIDTH_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MAX_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONSTRAINT_SIZE_MAX_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONSTRAINT_SIZE_MAX_WIDTH_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MIN_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONSTRAINT_SIZE_MIN_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONSTRAINT_SIZE_MIN_HEIGHT_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MAX_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONSTRAINT_SIZE_MAX_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CONSTRAINT_SIZE_MAX_HEIGHT_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'minWidth' of method 'constraintSize'
@@ -2015,7 +1969,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setConstraintSizeTestValidWidthVal
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultConstraintSize;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ConstraintSizeOptions inputValueConstraintSize;
     Ark_ConstraintSizeOptions initValueConstraintSize;
@@ -2033,10 +1987,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setConstraintSizeTestValidWidthVal
         auto convValue = ArkValue<Opt_ConstraintSizeOptions>(inputValueConstraintSize);
         modifier_->setConstraintSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultConstraintSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
+        resultConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MIN_WIDTH_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'maxWidth'  values
@@ -2046,10 +2000,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setConstraintSizeTestValidWidthVal
         auto convValue = ArkValue<Opt_ConstraintSizeOptions>(inputValueConstraintSize);
         modifier_->setConstraintSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultConstraintSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
+        resultConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MAX_WIDTH_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -2062,7 +2016,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setConstraintSizeTestValidHeightVa
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultConstraintSize;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ConstraintSizeOptions inputValueConstraintSize;
     Ark_ConstraintSizeOptions initValueConstraintSize;
@@ -2080,10 +2034,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setConstraintSizeTestValidHeightVa
         auto convValue = ArkValue<Opt_ConstraintSizeOptions>(inputValueConstraintSize);
         modifier_->setConstraintSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultConstraintSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
+        resultConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MIN_HEIGHT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'maxHeight'  values
@@ -2093,10 +2047,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setConstraintSizeTestValidHeightVa
         auto convValue = ArkValue<Opt_ConstraintSizeOptions>(inputValueConstraintSize);
         modifier_->setConstraintSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultConstraintSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
+        resultConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MAX_HEIGHT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -2129,7 +2083,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setConstraintSizeTestInva
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultConstraintSize;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStrMinWidth;
     std::string expectedStrMaxWidth;
     std::string expectedStrMinHeight;
@@ -2154,9 +2108,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setConstraintSizeTestInva
         convValue = ArkValue<Opt_ConstraintSizeOptions>(inputValueConstraintSize);
         modifier_->setConstraintSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultConstraintSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
+        resultConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MIN_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStrMinWidth) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStrMinWidth)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'maxWidth'  values
@@ -2168,9 +2122,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setConstraintSizeTestInva
         convValue = ArkValue<Opt_ConstraintSizeOptions>(inputValueConstraintSize);
         modifier_->setConstraintSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultConstraintSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
+        resultConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MAX_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStrMaxWidth) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStrMaxWidth)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -2183,7 +2137,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setConstraintSizeTestInva
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultConstraintSize;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStrMinWidth;
     std::string expectedStrMaxWidth;
     std::string expectedStrMinHeight;
@@ -2208,9 +2162,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setConstraintSizeTestInva
         convValue = ArkValue<Opt_ConstraintSizeOptions>(inputValueConstraintSize);
         modifier_->setConstraintSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultConstraintSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
+        resultConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MIN_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStrMinHeight) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStrMinHeight)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'maxHeight'  values
@@ -2222,9 +2176,9 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setConstraintSizeTestInva
         convValue = ArkValue<Opt_ConstraintSizeOptions>(inputValueConstraintSize);
         modifier_->setConstraintSize(node_, &convValue);
         jsonValue = GetJsonValue(node_);
-        resultConstraintSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
+        resultConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_CONSTRAINT_SIZE_NAME);
         resultStr = GetAttrValue<std::string>(resultConstraintSize, ATTRIBUTE_CONSTRAINT_SIZE_MAX_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStrMaxHeight) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStrMaxHeight)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -2237,20 +2191,20 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestDefaultValu
 {
     std::unique_ptr<JsonValue> jsonValue = GetPatternJsonValue(node_);
     std::unique_ptr<JsonValue> resultPadding =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
-    std::string resultStr;
+        GetAttrObject(jsonValue, ATTRIBUTE_PADDING_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_LEFT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PADDING_LEFT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PADDING_LEFT_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_RIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PADDING_RIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PADDING_RIGHT_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_TOP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PADDING_TOP_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PADDING_TOP_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_BOTTOM_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PADDING_BOTTOM_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PADDING_BOTTOM_DEFAULT_VALUE));
 }
 
 std::vector<std::tuple<std::string, Ark_Dimension, std::string>> paddingValidValues = {
@@ -2272,10 +2226,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestValidValues, TestSiz
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultPadding;
-    std::string resultStrLeft;
-    std::string resultStrRight;
-    std::string resultStrTop;
-    std::string resultStrBottom;
+    std::optional<std::string> resultStrLeft;
+    std::optional<std::string> resultStrRight;
+    std::optional<std::string> resultStrTop;
+    std::optional<std::string> resultStrBottom;
     std::string expectedStr;
     Ark_Dimension inputValuePadding;
 
@@ -2285,16 +2239,16 @@ HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestValidValues, TestSiz
         modifier_->setPadding(node_, &unionValue);
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
-        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultPadding = GetAttrObject(jsonValue, ATTRIBUTE_PADDING_NAME);
         resultStrLeft = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_LEFT_NAME);
         resultStrRight = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_RIGHT_NAME);
         resultStrTop = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_TOP_NAME);
         resultStrBottom = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_BOTTOM_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStrLeft, expectedStr) << "Passed value is: " << std::get<0>(value);
-        EXPECT_EQ(resultStrRight, expectedStr) << "Passed value is: " << std::get<0>(value);
-        EXPECT_EQ(resultStrTop, expectedStr) << "Passed value is: " << std::get<0>(value);
-        EXPECT_EQ(resultStrBottom, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStrLeft, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStrRight, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStrTop, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStrBottom, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -2317,7 +2271,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestLeftRightValidValues
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultPadding;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Padding inputValuePadding;
     Ark_Padding initValuePadding;
@@ -2335,10 +2289,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestLeftRightValidValues
         modifier_->setPadding(node_, &unionValue);
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
-        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultPadding = GetAttrObject(jsonValue, ATTRIBUTE_PADDING_NAME);
         resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_LEFT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     inputValuePadding = initValuePadding;
@@ -2348,10 +2302,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestLeftRightValidValues
         modifier_->setPadding(node_, &unionValue);
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
-        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultPadding = GetAttrObject(jsonValue, ATTRIBUTE_PADDING_NAME);
         resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_RIGHT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -2364,7 +2318,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestTopBottomValidValues
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultPadding;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Padding inputValuePadding;
     Ark_Padding initValuePadding;
@@ -2382,10 +2336,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestTopBottomValidValues
         modifier_->setPadding(node_, &unionValue);
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
-        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultPadding = GetAttrObject(jsonValue, ATTRIBUTE_PADDING_NAME);
         resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_TOP_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     inputValuePadding = initValuePadding;
@@ -2395,10 +2349,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, setPaddingTestTopBottomValidValues
         modifier_->setPadding(node_, &unionValue);
         OnModifyDone();
         jsonValue = GetPatternJsonValue(node_);
-        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultPadding = GetAttrObject(jsonValue, ATTRIBUTE_PADDING_NAME);
         resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_BOTTOM_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -2411,10 +2365,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestInvalidValu
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultPadding;
-    std::string resultStrLeft;
-    std::string resultStrRight;
-    std::string resultStrTop;
-    std::string resultStrBottom;
+    std::optional<std::string> resultStrLeft;
+    std::optional<std::string> resultStrRight;
+    std::optional<std::string> resultStrTop;
+    std::optional<std::string> resultStrBottom;
     std::string expectedStrLeft;
     std::string expectedStrRight;
     std::string expectedStrTop;
@@ -2436,7 +2390,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestInvalidValu
     OnModifyDone();
 
     jsonValue = GetPatternJsonValue(node_);
-    resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+    resultPadding = GetAttrObject(jsonValue, ATTRIBUTE_PADDING_NAME);
     resultStrLeft = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_LEFT_NAME);
     resultStrRight = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_RIGHT_NAME);
     resultStrTop = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_TOP_NAME);
@@ -2446,10 +2400,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestInvalidValu
     expectedStrTop = ATTRIBUTE_PADDING_TOP_DEFAULT_VALUE;
     expectedStrBottom = ATTRIBUTE_PADDING_BOTTOM_DEFAULT_VALUE;
     std::string message = "Passed value is: invalid union";
-    EXPECT_EQ(resultStrLeft, expectedStrLeft) << message;
-    EXPECT_EQ(resultStrRight, expectedStrRight) << message;
-    EXPECT_EQ(resultStrTop, expectedStrTop) << message;
-    EXPECT_EQ(resultStrBottom, expectedStrBottom) << message;
+    EXPECT_THAT(resultStrLeft, Eq(expectedStrLeft)) << message;
+    EXPECT_THAT(resultStrRight, Eq(expectedStrRight)) << message;
+    EXPECT_THAT(resultStrTop, Eq(expectedStrTop)) << message;
+    EXPECT_THAT(resultStrBottom, Eq(expectedStrBottom)) << message;
 }
 
 std::vector<std::tuple<std::string, Opt_Length>> optPaddingInvalidValues = {
@@ -2465,7 +2419,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestLeftRightIn
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultPadding;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Padding inputValuePadding;
     Ark_Padding initValuePadding;
@@ -2490,10 +2444,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestLeftRightIn
         OnModifyDone();
 
         jsonValue = GetPatternJsonValue(node_);
-        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultPadding = GetAttrObject(jsonValue, ATTRIBUTE_PADDING_NAME);
         resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_LEFT_NAME);
         expectedStr = ATTRIBUTE_PADDING_LEFT_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     inputValuePadding = initValuePadding;
@@ -2509,10 +2463,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestLeftRightIn
         OnModifyDone();
 
         jsonValue = GetPatternJsonValue(node_);
-        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultPadding = GetAttrObject(jsonValue, ATTRIBUTE_PADDING_NAME);
         resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_RIGHT_NAME);
         expectedStr = ATTRIBUTE_PADDING_RIGHT_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -2525,7 +2479,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestTopBottomIn
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultPadding;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Padding inputValuePadding;
     Ark_Padding initValuePadding;
@@ -2550,10 +2504,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestTopBottomIn
         OnModifyDone();
 
         jsonValue = GetPatternJsonValue(node_);
-        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultPadding = GetAttrObject(jsonValue, ATTRIBUTE_PADDING_NAME);
         resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_TOP_NAME);
         expectedStr = ATTRIBUTE_PADDING_TOP_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     inputValuePadding = initValuePadding;
@@ -2569,10 +2523,10 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestTopBottomIn
         OnModifyDone();
 
         jsonValue = GetPatternJsonValue(node_);
-        resultPadding = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PADDING_NAME);
+        resultPadding = GetAttrObject(jsonValue, ATTRIBUTE_PADDING_NAME);
         resultStr = GetAttrValue<std::string>(resultPadding, ATTRIBUTE_PADDING_BOTTOM_NAME);
         expectedStr = ATTRIBUTE_PADDING_BOTTOM_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 

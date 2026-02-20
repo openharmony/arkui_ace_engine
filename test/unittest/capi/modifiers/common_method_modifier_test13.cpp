@@ -128,9 +128,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsArrowW
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
+    auto bubbleObject = GetAttrObject(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_WIDTH);
-    EXPECT_EQ(checkValue, "16.00vp");
+    EXPECT_THAT(checkValue, Eq("16.00vp"));
 
     // valid value
     arkOptions = {
@@ -144,9 +144,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsArrowW
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
+    bubbleObject = GetAttrObject(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_WIDTH);
-    EXPECT_EQ(checkValue, "1.00px");
+    EXPECT_THAT(checkValue, Eq("1.00px"));
 
     // negative value
     arkOptions = {
@@ -160,9 +160,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsArrowW
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
+    bubbleObject = GetAttrObject(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_WIDTH);
-    EXPECT_EQ(checkValue, "1.00px");
+    EXPECT_THAT(checkValue, Eq("1.00px"));
 }
 
 /*
@@ -191,9 +191,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsArrowH
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
+    auto bubbleObject = GetAttrObject(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_HEIGHT);
-    EXPECT_EQ(checkValue, "8.00vp");
+    EXPECT_THAT(checkValue, Eq("8.00vp"));
 
     // valid value
     arkOptions = {
@@ -207,9 +207,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsArrowH
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
+    bubbleObject = GetAttrObject(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_HEIGHT);
-    EXPECT_EQ(checkValue, "1.00px");
+    EXPECT_THAT(checkValue, Eq("1.00px"));
 
     // negative value
     arkOptions = {
@@ -223,9 +223,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsArrowH
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
+    bubbleObject = GetAttrObject(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_ARROW_HEIGHT);
-    EXPECT_EQ(checkValue, "1.00px");
+    EXPECT_THAT(checkValue, Eq("1.00px"));
 }
 
 /*
@@ -254,9 +254,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsRadius
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
+    auto bubbleObject = GetAttrObject(fullJson, BUBBLE_LAYOUT_PROP);
     auto checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_RADIUS);
-    EXPECT_EQ(checkValue, "20.00vp");
+    EXPECT_THAT(checkValue, Eq("20.00vp"));
 
     // valid value
     arkOptions = {
@@ -270,9 +270,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsRadius
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
+    bubbleObject = GetAttrObject(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_RADIUS);
-    EXPECT_EQ(checkValue, "1.00px");
+    EXPECT_THAT(checkValue, Eq("1.00px"));
 
     // negative value
     arkOptions = {
@@ -286,9 +286,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsRadius
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_LAYOUT_PROP);
+    bubbleObject = GetAttrObject(fullJson, BUBBLE_LAYOUT_PROP);
     checkValue = GetAttrValue<std::string>(bubbleObject, BUBBLE_LAYOUT_PROP_RADIUS);
-    EXPECT_EQ(checkValue, "1.00px");
+    EXPECT_THAT(checkValue, Eq("1.00px"));
 }
 
 /*
@@ -318,9 +318,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsBlurSt
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP_BLUR_STYLE);
+    auto childObject = GetAttrObject(fullJson, BUBBLE_RENDER_PROP_BLUR_STYLE);
     auto checkValue = GetAttrValue<std::string>(childObject, BUBBLE_RENDER_PROP_BLUR_STYLE_VALUE);
-    EXPECT_EQ(checkValue, "BlurStyle.COMPONENT_ULTRA_THICK");
+    EXPECT_THAT(checkValue, Eq("BlurStyle.COMPONENT_ULTRA_THICK"));
 
     // valid value
     arkOptions = { .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
@@ -336,9 +336,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsBlurSt
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP_BLUR_STYLE);
+    childObject = GetAttrObject(fullJson, BUBBLE_RENDER_PROP_BLUR_STYLE);
     checkValue = GetAttrValue<std::string>(childObject, BUBBLE_RENDER_PROP_BLUR_STYLE_VALUE);
-    EXPECT_EQ(checkValue, "BlurStyle.Regular");
+    EXPECT_THAT(checkValue, Eq("BlurStyle.Regular"));
 
     // invalid value
     arkOptions = { .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
@@ -354,9 +354,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsBlurSt
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP_BLUR_STYLE);
+    childObject = GetAttrObject(fullJson, BUBBLE_RENDER_PROP_BLUR_STYLE);
     checkValue = GetAttrValue<std::string>(childObject, BUBBLE_RENDER_PROP_BLUR_STYLE_VALUE);
-    EXPECT_EQ(checkValue, "BlurStyle.COMPONENT_ULTRA_THICK");
+    EXPECT_THAT(checkValue, Eq("BlurStyle.COMPONENT_ULTRA_THICK"));
 }
 
 /*
@@ -386,19 +386,19 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "radius");
-    EXPECT_EQ(checkValue, "0.000000");
+    EXPECT_THAT(checkValue, Eq("0.000000"));
     checkValue = GetAttrValue<std::string>(childObject, "color");
-    EXPECT_EQ(checkValue, "#FF000000");
+    EXPECT_THAT(checkValue, Eq("#FF000000"));
     checkValue = GetAttrValue<std::string>(childObject, "offsetX");
-    EXPECT_EQ(checkValue, "0.000000");
+    EXPECT_THAT(checkValue, Eq("0.000000"));
     checkValue = GetAttrValue<std::string>(childObject, "offsetY");
-    EXPECT_EQ(checkValue, "0.000000");
+    EXPECT_THAT(checkValue, Eq("0.000000"));
     checkValue = GetAttrValue<std::string>(childObject, "type");
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
     checkValue = GetAttrValue<std::string>(childObject, "fill");
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
 }
 
 /*
@@ -434,7 +434,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "shadow");
-    EXPECT_EQ(checkValue, "ShadowStyle.OuterFloatingMD");
+    EXPECT_THAT(checkValue, Eq("ShadowStyle.OuterFloatingMD"));
 
     // invalid value
     arkShadowStyle = Converter::ArkValue<Ark_ShadowStyle>(static_cast<Ark_ShadowStyle>(-1));
@@ -454,7 +454,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     checkValue = GetAttrValue<std::string>(fullJson, "shadow");
-    EXPECT_EQ(checkValue, "ShadowStyle.OuterFloatingMD");
+    EXPECT_THAT(checkValue, Eq("ShadowStyle.OuterFloatingMD"));
 }
 
 /*
@@ -492,9 +492,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "radius");
-    EXPECT_EQ(checkValue, "1.000000");
+    EXPECT_THAT(checkValue, Eq("1.000000"));
 
     // negative value
     arkShadowOptions = {
@@ -516,9 +516,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    childObject = GetAttrObject(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "radius");
-    EXPECT_EQ(checkValue, "0.000000");
+    EXPECT_THAT(checkValue, Eq("0.000000"));
 }
 
 /*
@@ -558,9 +558,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "radius");
-    EXPECT_EQ(checkValue, "1.000000");
+    EXPECT_THAT(checkValue, Eq("1.000000"));
 }
 
 /*
@@ -600,9 +600,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "offsetX");
-    EXPECT_EQ(checkValue, "1.000000");
+    EXPECT_THAT(checkValue, Eq("1.000000"));
 
     // negative value
     arkOffsetX = Converter::ArkValue<Ark_Float64>(-1.0f);
@@ -626,9 +626,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    childObject = GetAttrObject(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "offsetX");
-    EXPECT_EQ(checkValue, "-1.000000");
+    EXPECT_THAT(checkValue, Eq("-1.000000"));
 }
 
 /*
@@ -666,9 +666,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "offsetX");
-    EXPECT_EQ(checkValue, "1.000000");
+    EXPECT_THAT(checkValue, Eq("1.000000"));
 }
 
 /*
@@ -705,9 +705,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "offsetY");
-    EXPECT_EQ(checkValue, "1.000000");
+    EXPECT_THAT(checkValue, Eq("1.000000"));
 
     // negative value
     arkShadowOptions = {
@@ -728,9 +728,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    childObject = GetAttrObject(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "offsetY");
-    EXPECT_EQ(checkValue, "-1.000000");
+    EXPECT_THAT(checkValue, Eq("-1.000000"));
 }
 
 /*
@@ -769,9 +769,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "offsetY");
-    EXPECT_EQ(checkValue, "1.000000");
+    EXPECT_THAT(checkValue, Eq("1.000000"));
 }
 
 /*
@@ -808,9 +808,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "fill");
-    EXPECT_EQ(checkValue, "1");
+    EXPECT_THAT(checkValue, Eq("1"));
 
     // false value
     arkShadowOptions = {
@@ -832,9 +832,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    childObject = GetAttrObject(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "fill");
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
 }
 
 /*
@@ -872,9 +872,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "type");
-    EXPECT_EQ(checkValue, "1");
+    EXPECT_THAT(checkValue, Eq("1"));
 
     // invalid value
     arkShadowOptions = {
@@ -897,9 +897,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    childObject = GetAttrObject(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "type");
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
 }
 
 /*
@@ -939,9 +939,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "color");
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
@@ -980,9 +980,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "color");
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
@@ -1021,9 +1021,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "color");
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
@@ -1059,9 +1059,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    auto childObject = GetAttrObject(fullJson, "shadow");
     auto checkValue = GetAttrValue<std::string>(childObject, "color");
-    EXPECT_EQ(checkValue, "ColoringStrategy.PRIMARY");
+    EXPECT_THAT(checkValue, Eq("ColoringStrategy.PRIMARY"));
 
     // invalid value
     arkShadowOptions = {
@@ -1081,9 +1081,9 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsShadow
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "shadow");
+    childObject = GetAttrObject(fullJson, "shadow");
     checkValue = GetAttrValue<std::string>(childObject, "color");
-    EXPECT_EQ(checkValue, "#FF000000");
+    EXPECT_THAT(checkValue, Eq("#FF000000"));
 }
 
 /*
@@ -1122,13 +1122,13 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsMessag
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontSize");
-    EXPECT_EQ(checkValue, "14.00fp");
+    EXPECT_THAT(checkValue, Eq("14.00fp"));
     checkValue = GetAttrValue<std::string>(fullJson, "fontColor");
-    EXPECT_EQ(checkValue, "#FFFFFFFF");
+    EXPECT_THAT(checkValue, Eq("#FFFFFFFF"));
     checkValue = GetAttrValue<std::string>(fullJson, "fontStyle");
-    EXPECT_EQ(checkValue, "FontStyle.Normal");
+    EXPECT_THAT(checkValue, Eq("FontStyle.Normal"));
     checkValue = GetAttrValue<std::string>(fullJson, "fontWeight");
-    EXPECT_EQ(checkValue, "FontWeight.Normal");
+    EXPECT_THAT(checkValue, Eq("FontWeight.Normal"));
 }
 
 /*
@@ -1174,7 +1174,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsMessag
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontColor");
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
@@ -1221,7 +1221,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsMessag
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontColor");
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
@@ -1268,7 +1268,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsMessag
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontColor");
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
@@ -1314,7 +1314,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsMessag
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontColor");
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
@@ -1361,7 +1361,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsMessag
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontSize");
-    EXPECT_EQ(checkValue, "11.00px");
+    EXPECT_THAT(checkValue, Eq("11.00px"));
 }
 
 /*
@@ -1410,7 +1410,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsMessag
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontWeight");
-    EXPECT_EQ(checkValue, "FontWeight.Bolder");
+    EXPECT_THAT(checkValue, Eq("FontWeight.Bolder"));
 }
 
 /*
@@ -1459,7 +1459,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsMessag
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontWeight");
-    EXPECT_EQ(checkValue, "400");
+    EXPECT_THAT(checkValue, Eq("400"));
 }
 
 /*
@@ -1508,7 +1508,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsMessag
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontWeight");
-    EXPECT_EQ(checkValue, "FontWeight.Medium");
+    EXPECT_THAT(checkValue, Eq("FontWeight.Medium"));
 }
 
 /*
@@ -1554,7 +1554,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsMessag
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontStyle");
-    EXPECT_EQ(checkValue, "FontStyle.Italic");
+    EXPECT_THAT(checkValue, Eq("FontStyle.Italic"));
 }
 
 /*
@@ -1601,7 +1601,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsMessag
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, "fontStyle");
-    EXPECT_EQ(checkValue, "FontStyle.Normal");
+    EXPECT_THAT(checkValue, Eq("FontStyle.Normal"));
 }
 
 /*
@@ -1803,7 +1803,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsPrimar
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
+    auto bubbleObject = GetAttrObject(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_RENDER_PROP_PRIMARY_BUTTON_SHOW);
     EXPECT_FALSE(checkValue);
 }
@@ -1841,7 +1841,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsPrimar
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
+    auto bubbleObject = GetAttrObject(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_RENDER_PROP_PRIMARY_BUTTON_SHOW);
     EXPECT_TRUE(checkValue);
 
@@ -1858,7 +1858,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsPrimar
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValueString = GetAttrValue<std::string>(fullJson, TEXT_LAYOUT_PROP_CONTENT);
-    EXPECT_EQ(checkValueString, PRIMARY_BUTTON_TEXT);
+    EXPECT_THAT(checkValueString, Eq(PRIMARY_BUTTON_TEXT));
 
     auto frameNode = AceType::DynamicCast<FrameNode>(firstButtonNode);
     ASSERT_NE(frameNode, nullptr);
@@ -1905,7 +1905,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsSecond
     ASSERT_NE(popupInfo.popupNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(popupInfo.popupNode)));
-    auto bubbleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUBBLE_RENDER_PROP);
+    auto bubbleObject = GetAttrObject(fullJson, BUBBLE_RENDER_PROP);
     auto checkValue = GetAttrValue<bool>(bubbleObject, BUBBLE_RENDER_PROP_SECONDARY_BUTTON_SHOW);
     EXPECT_TRUE(checkValue);
 
@@ -1922,7 +1922,7 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_setBindPopupTestPopupOptionsSecond
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(textNode)));
     auto checkValueString = GetAttrValue<std::string>(fullJson, TEXT_LAYOUT_PROP_CONTENT);
-    EXPECT_EQ(checkValueString, SECONDARY_BUTTON_TEXT);
+    EXPECT_THAT(checkValueString, Eq(SECONDARY_BUTTON_TEXT));
 
     auto frameNode = AceType::DynamicCast<FrameNode>(secondButtonNode);
     ASSERT_NE(frameNode, nullptr);

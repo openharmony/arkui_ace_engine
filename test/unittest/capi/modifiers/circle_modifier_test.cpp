@@ -44,13 +44,11 @@ class CircleModifierTest : public ModifierTestBase<GENERATED_ArkUICircleModifier
  */
 HWTEST_F(CircleModifierTest, setCircleOptionsTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult;
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
 
-    strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
-
-    strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+    strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
 }
 
 /*
@@ -60,7 +58,6 @@ HWTEST_F(CircleModifierTest, setCircleOptionsTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(CircleModifierTest, setCircleOptionsTestValidWidthValues, TestSize.Level1)
 {
-    std::string strResult;
     Ark_CircleOptions circleOptions;
     Opt_CircleOptions circleOptionsOpt;
 
@@ -88,10 +85,10 @@ HWTEST_F(CircleModifierTest, setCircleOptionsTestValidWidthValues, TestSize.Leve
         circleOptionsOpt = Converter::ArkValue<Opt_CircleOptions>(circleOptions);
         modifier_->setCircleOptions(node_, &circleOptionsOpt);
 
-        strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(strResult, expected);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
+        strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
     }
 }
 
@@ -102,7 +99,6 @@ HWTEST_F(CircleModifierTest, setCircleOptionsTestValidWidthValues, TestSize.Leve
  */
 HWTEST_F(CircleModifierTest, setCircleOptionsTestValidHeightValues, TestSize.Level1)
 {
-    std::string strResult;
     Ark_CircleOptions circleOptions;
     Opt_CircleOptions circleOptionsOpt;
 
@@ -130,10 +126,10 @@ HWTEST_F(CircleModifierTest, setCircleOptionsTestValidHeightValues, TestSize.Lev
         circleOptionsOpt = Converter::ArkValue<Opt_CircleOptions>(circleOptions);
         modifier_->setCircleOptions(node_, &circleOptionsOpt);
 
-        strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
+        strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 }
 
@@ -144,7 +140,6 @@ HWTEST_F(CircleModifierTest, setCircleOptionsTestValidHeightValues, TestSize.Lev
  */
 HWTEST_F(CircleModifierTest, setCircleOptionsTestInvalidWidthValues, TestSize.Level1)
 {
-    std::string strResult;
     Ark_CircleOptions circleOptions;
     Opt_CircleOptions circleOptionsOpt;
 
@@ -171,10 +166,10 @@ HWTEST_F(CircleModifierTest, setCircleOptionsTestInvalidWidthValues, TestSize.Le
         circleOptionsOpt = Converter::ArkValue<Opt_CircleOptions>(circleOptions);
         modifier_->setCircleOptions(node_, &circleOptionsOpt);
 
-        strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(strResult, expected);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
+        strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
     }
 }
 
@@ -185,7 +180,6 @@ HWTEST_F(CircleModifierTest, setCircleOptionsTestInvalidWidthValues, TestSize.Le
  */
 HWTEST_F(CircleModifierTest, setCircleOptionsTestInvalidHeightValues, TestSize.Level1)
 {
-    std::string strResult;
     Ark_CircleOptions circleOptions;
     Opt_CircleOptions circleOptionsOpt;
 
@@ -212,10 +206,10 @@ HWTEST_F(CircleModifierTest, setCircleOptionsTestInvalidHeightValues, TestSize.L
         circleOptionsOpt = Converter::ArkValue<Opt_CircleOptions>(circleOptions);
         modifier_->setCircleOptions(node_, &circleOptionsOpt);
 
-        strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
-        strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(strResult, expected);
+        auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_THAT(strResult, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
+        strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_THAT(strResult, Eq(expected));
     }
 }
 } // namespace OHOS::Ace::NG

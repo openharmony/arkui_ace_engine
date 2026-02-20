@@ -181,7 +181,7 @@ HWTEST_F(SearchModifierCallbackTest, DISABLED_setInputFilterTest, TestSize.Level
     auto filterValue = GetAttrValue<std::string>(jsonValue, INPUT_FILTER_ATTR);
     EXPECT_EQ(checkEvent->nodeId, textFieldChild->GetId());
     EXPECT_EQ(checkEvent->textBreakpoints, UtfUtils::Str16ToStr8(ERROR_TEXT));
-    EXPECT_EQ(filterValue, UtfUtils::Str16ToStr8(ERROR_TEXT));
+    EXPECT_THAT(filterValue, Eq(UtfUtils::Str16ToStr8(ERROR_TEXT)));
     // reset callback
     optCallback = ArkValue<Opt_Callback_String_Void>();
     checkEvent.reset();
@@ -412,10 +412,10 @@ HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnEditChangeTest, TestSize.Leve
     ASSERT_NE(textFieldEventHub, nullptr);
     checkEvent.reset();
     textFieldEventHub->FireOnEditChanged(false);
-    EXPECT_THAT(checkEvent, Optional(Eq(false)));
+    EXPECT_THAT(checkEvent, Eq(false));
     checkEvent.reset();
     textFieldEventHub->FireOnEditChanged(true);
-    EXPECT_THAT(checkEvent, Optional(Eq(true)));
+    EXPECT_THAT(checkEvent, Eq(true));
 }
 
 /**

@@ -70,10 +70,10 @@ RefPtr<PixelMap> MediaCachedImageModifierTest::CreatePixelMap(std::string& src)
 HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) << "Default value for attribute 'src'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SRC_DEFAULT_VALUE)) << "Default value for attribute 'src'";
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_TRUE(frameNode);
@@ -129,7 +129,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestResource, T
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
         "Input value is: " << input << ", method: setMediaCachedImageOptions, attribute: src";
     };
 
@@ -177,10 +177,10 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestASTCResourc
     modifier_->setMediaCachedImageOptions(node_, &arkValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) << "Default value for attribute 'src'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SRC_DEFAULT_VALUE)) << "Default value for attribute 'src'";
 
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_TRUE(layoutProperty);
@@ -213,7 +213,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestSrcInvalidV
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SRC_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMediaCachedImageOptions, attribute: src";
     };
 

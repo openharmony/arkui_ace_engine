@@ -76,14 +76,14 @@ HWTEST_F(SearchModifierTest2, setAutoCapitalizationModeTest, TestSize.Level1)
     ASSERT_TRUE(modifier_->setAutoCapitalizationMode);
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE) << "Default value is: " << resultStr
-                                        << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE))
+                                        << "Method: setAutoCapitalizationMode, attribute: keyboardAppearance";
     auto checkValue = [this](const std::string& input, const std::string& expectedStr,
                           const Opt_AutoCapitalizationMode& value) {
         modifier_->setAutoCapitalizationMode(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Input value is: " << input
                                         << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
     };
     for (auto& [input, value, expected] : testFixtureEnumAutoCapitalizationModeTestPlan) {
@@ -156,7 +156,7 @@ HWTEST_F(SearchModifierTest2, setKeyboardAppearanceTestDefaultValues, TestSize.L
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
-    EXPECT_EQ(resultStr,  ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE)
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE))
         << "Default value for attribute 'keyboardAppearance'";
 }
 
@@ -187,7 +187,7 @@ HWTEST_F(SearchModifierTest2, setKeyboardAppearanceTestValues, TestSize.Level1)
         modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Input value is: " << input
                                         << ", method: setKeyboardAppearance, attribute: keyboardAppearance";
     };
     for (auto& [input, value, expected] : testFixtureEnumKeyboardAppearanceTestPlan) {

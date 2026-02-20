@@ -210,15 +210,15 @@ HWTEST_F(TimePickerModifierTest, setUseMilitaryTimeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setUseMilitaryTime, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME_USE_MILITARY_TIME);
-    EXPECT_EQ(checkInitial, ATTRIBUTE_USE_MILITARY_TIME_DEFAULT_VALUE);
+    EXPECT_THAT(checkInitial, Eq(ATTRIBUTE_USE_MILITARY_TIME_DEFAULT_VALUE));
 
     modifier_->setUseMilitaryTime(node_, &OPT_TRUE);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME_USE_MILITARY_TIME);
-    EXPECT_EQ(checkVal2, EXPECTED_TRUE);
+    EXPECT_THAT(checkVal2, Eq(EXPECTED_TRUE));
 
     modifier_->setUseMilitaryTime(node_, &OPT_FALSE);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME_USE_MILITARY_TIME);
-    EXPECT_EQ(checkVal3, EXPECTED_FALSE);
+    EXPECT_THAT(checkVal3, Eq(EXPECTED_FALSE));
 }
 
 /**
@@ -231,15 +231,15 @@ HWTEST_F(TimePickerModifierTest, setLoopTest, TestSize.Level1)
     ASSERT_NE(modifier_->setLoop, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME_LOOP);
-    EXPECT_EQ(checkInitial, ATTRIBUTE_LOOP_DEFAULT_VALUE);
+    EXPECT_THAT(checkInitial, Eq(ATTRIBUTE_LOOP_DEFAULT_VALUE));
 
     modifier_->setLoop(node_, &OPT_TRUE);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME_LOOP);
-    EXPECT_EQ(checkVal2, EXPECTED_TRUE);
+    EXPECT_THAT(checkVal2, Eq(EXPECTED_TRUE));
 
     modifier_->setLoop(node_, &OPT_FALSE);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME_LOOP);
-    EXPECT_EQ(checkVal3, EXPECTED_FALSE);
+    EXPECT_THAT(checkVal3, Eq(EXPECTED_FALSE));
 }
 
 /**
@@ -270,16 +270,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTest, TestSize.Le
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, style.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(style.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -311,16 +311,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTestWeight, TestS
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
@@ -329,16 +329,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTestWeight, TestS
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -370,16 +370,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTestFamily, TestS
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(family.second));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -411,16 +411,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTestSize, TestSiz
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -433,9 +433,9 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTestColor, TestSi
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
-    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
+    auto styleObject = GetAttrObject(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
     auto checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE));
     Ark_PickerTextStyle pickerStyle;
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
@@ -443,9 +443,9 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyleTestColor, TestSi
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setDisappearTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_DISAPPEAR_TEXT_STYLE);
         checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -477,16 +477,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTest, TestSize.Level1)
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, style.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(style.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -518,16 +518,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTestWeight, TestSize.Level
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
@@ -536,16 +536,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTestWeight, TestSize.Level
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -577,16 +577,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTestFamily, TestSize.Level
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(family.second));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -618,16 +618,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTestSize, TestSize.Level1)
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -640,9 +640,9 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTestColor, TestSize.Level1
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
-    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
+    auto styleObject = GetAttrObject(fullJson, PROP_NAME_TEXT_STYLE);
     auto checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE));
     Ark_PickerTextStyle pickerStyle;
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
@@ -650,9 +650,9 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyleTestColor, TestSize.Level1
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_TEXT_STYLE);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_TEXT_STYLE);
         checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -684,16 +684,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTest, TestSize.Lev
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, style.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(style.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -725,16 +725,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTestWeight, TestSi
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
@@ -743,16 +743,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTestWeight, TestSi
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -784,16 +784,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTestFamily, TestSi
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(family.second));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -825,16 +825,16 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTestSize, TestSize
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
-        auto fontObject = GetAttrValue<std::string>(styleObject, PROP_NAME_FONT);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
+        auto fontObject = GetAttrObject(styleObject, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle =  GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -847,9 +847,9 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTestColor, TestSiz
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
     auto fullJson = GetJsonValue(node_);
-    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
+    auto styleObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
     auto checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE));
     Ark_PickerTextStyle pickerStyle;
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
@@ -857,9 +857,9 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyleTestColor, TestSiz
         auto optStyle =  Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setSelectedTextStyle(node_, &optStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
+        auto styleObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_TEXT_STYLE);
         checkVal = GetAttrValue<std::string>(styleObject, PROP_NAME_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -872,20 +872,20 @@ HWTEST_F(TimePickerModifierTest, setDateTimeOptionsTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDateTimeOptions, nullptr);
     auto fullJson = GetJsonValue(node_);
-    auto optionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DATETIMEOPTIONS);
+    auto optionsObject = GetAttrObject(fullJson, PROP_NAME_DATETIMEOPTIONS);
     auto hourStr = GetAttrValue<std::string>(optionsObject, PROP_NAME_HOUR);
-    EXPECT_EQ(hourStr, ATTRIBUTE_DATETIMEOPTIONS_HOUR_DEFAULT_VALUE);
+    EXPECT_THAT(hourStr, Eq(ATTRIBUTE_DATETIMEOPTIONS_HOUR_DEFAULT_VALUE));
     auto minuteStr = GetAttrValue<std::string>(optionsObject, PROP_NAME_MINUTE);
-    EXPECT_EQ(minuteStr, ATTRIBUTE_DATETIMEOPTIONS_MINUTE_DEFAULT_VALUE);
+    EXPECT_THAT(minuteStr, Eq(ATTRIBUTE_DATETIMEOPTIONS_MINUTE_DEFAULT_VALUE));
 
     for (const auto& [val, expectVal] : DATETIMEOPTIONS_HOUR_TEST_PLAN) {
         Ark_intl_DateTimeOptions dateTimeOptions {.hour = val };
         auto optOptions = Converter::ArkValue<Opt_intl_DateTimeOptions>(dateTimeOptions);
         modifier_->setDateTimeOptions(node_, &optOptions);
         auto fullJson = GetJsonValue(node_);
-        optionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DATETIMEOPTIONS);
+        optionsObject = GetAttrObject(fullJson, PROP_NAME_DATETIMEOPTIONS);
         hourStr = GetAttrValue<std::string>(optionsObject, PROP_NAME_HOUR);
-        EXPECT_EQ(hourStr, expectVal);
+        EXPECT_THAT(hourStr, Eq(expectVal));
     }
 
     for (const auto& [val, expectVal] : DATETIMEOPTIONS_MINUTE_TEST_PLAN) {
@@ -893,9 +893,9 @@ HWTEST_F(TimePickerModifierTest, setDateTimeOptionsTest, TestSize.Level1)
         auto optOptions = Converter::ArkValue<Opt_intl_DateTimeOptions>(dateTimeOptions);
         modifier_->setDateTimeOptions(node_, &optOptions);
         auto fullJson = GetJsonValue(node_);
-        optionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_DATETIMEOPTIONS);
+        optionsObject = GetAttrObject(fullJson, PROP_NAME_DATETIMEOPTIONS);
         minuteStr = GetAttrValue<std::string>(optionsObject, PROP_NAME_MINUTE);
-        EXPECT_EQ(minuteStr, expectVal);
+        EXPECT_THAT(minuteStr, Eq(expectVal));
     }
 }
 
@@ -1034,15 +1034,15 @@ HWTEST_F(TimePickerModifierTest, setEnableCascadeTestEnableCascade, TestSize.Lev
     ASSERT_NE(modifier_->setEnableCascade, nullptr);
 
     auto checkValue = GetAttrValue<std::string>(node_, PROP_NAME_ENABLE_CASCADE);
-    EXPECT_EQ(checkValue, ATTRIBUTE_ENABLE_CASCADE_DEFAULT_VALUE);
+    EXPECT_THAT(checkValue, Eq(ATTRIBUTE_ENABLE_CASCADE_DEFAULT_VALUE));
     auto value = Converter::ArkValue<Ark_Boolean>(true);
     modifier_->setEnableCascade(node_, &OPT_TRUE);
     checkValue = GetAttrValue<std::string>(node_, PROP_NAME_ENABLE_CASCADE);
-    EXPECT_EQ(checkValue, EXPECTED_TRUE);
+    EXPECT_THAT(checkValue, Eq(EXPECTED_TRUE));
     value = Converter::ArkValue<Ark_Boolean>(false);
     modifier_->setEnableCascade(node_, &OPT_FALSE);
     checkValue = GetAttrValue<std::string>(node_, PROP_NAME_ENABLE_CASCADE);
-    EXPECT_EQ(checkValue, EXPECTED_FALSE);
+    EXPECT_THAT(checkValue, Eq(EXPECTED_FALSE));
 }
 /**
  * @tc.name: setDigitalCrownSensitivityTestDigitalCrownSensitivity
@@ -1053,11 +1053,11 @@ HWTEST_F(TimePickerModifierTest, setDigitalCrownSensitivityTestDigitalCrownSensi
 {
     ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
     auto checkValue = GetAttrValue<std::string>(node_, PROP_NAME_DIGITAL_CROWN_SENSITIVITY);
-    EXPECT_EQ(checkValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE);
+    EXPECT_THAT(checkValue, Eq(ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE));
         for (const auto& [value, expectVal] : SENSITIVITY_TEST_PLAN) {
         modifier_->setDigitalCrownSensitivity(node_, &value);
         auto checkValue = GetAttrValue<std::string>(node_, PROP_NAME_DIGITAL_CROWN_SENSITIVITY);
-        EXPECT_EQ(checkValue, expectVal);
+        EXPECT_THAT(checkValue, Eq(expectVal));
     }
 }
 

@@ -242,13 +242,13 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestCustomBuilder, TestSize.Lev
 HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestStartIconString, TestSize.Level1)
 {
     auto startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
-    EXPECT_EQ(startIcon, "");
+    EXPECT_THAT(startIcon, Eq(std::nullopt));
     Ark_MenuItemOptions options = { .startIcon =
         Converter::ArkUnion<Opt_ResourceStr, Ark_String>(START_ICON_PATH, Converter::FC)};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
-    EXPECT_EQ(startIcon, START_ICON_PATH);
+    EXPECT_THAT(startIcon, Eq(START_ICON_PATH));
 }
 
 /*
@@ -259,13 +259,13 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestStartIconString, TestSize.L
 HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestStartIconResource, TestSize.Level1)
 {
     auto startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
-    EXPECT_EQ(startIcon, "");
+    EXPECT_THAT(startIcon, Eq(std::nullopt));
     Ark_MenuItemOptions options = { .startIcon =
         Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(START_ICON_RES, ResourceType::STRING))};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
-    EXPECT_EQ(startIcon, START_ICON_PATH);
+    EXPECT_THAT(startIcon, Eq(START_ICON_PATH));
 }
 
 /*
@@ -276,13 +276,13 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestStartIconResource, TestSize
 HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestEndIconString, TestSize.Level1)
 {
     auto endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
-    EXPECT_EQ(endIcon, "");
+    EXPECT_THAT(endIcon, Eq(std::nullopt));
     Ark_MenuItemOptions options = { .endIcon =
         Converter::ArkUnion<Opt_ResourceStr, Ark_String>(END_ICON_PATH, Converter::FC)};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
-    EXPECT_EQ(endIcon, END_ICON_PATH);
+    EXPECT_THAT(endIcon, Eq(END_ICON_PATH));
 }
 
 /*
@@ -293,13 +293,13 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestEndIconString, TestSize.Lev
 HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestEndIconResource, TestSize.Level1)
 {
     auto endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
-    EXPECT_EQ(endIcon, "");
+    EXPECT_THAT(endIcon, Eq(std::nullopt));
     Ark_MenuItemOptions options = { .endIcon =
         Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(END_ICON_RES, ResourceType::STRING))};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
-    EXPECT_EQ(endIcon, END_ICON_PATH);
+    EXPECT_THAT(endIcon, Eq(END_ICON_PATH));
 }
 
 /*
@@ -310,13 +310,13 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestEndIconResource, TestSize.L
 HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestContentString, TestSize.Level1)
 {
     auto content = GetAttrValue<std::string>(node_, CONTENT_PROP);
-    EXPECT_EQ(content, "");
+    EXPECT_THAT(content, Eq(""));
     Ark_MenuItemOptions options = { .content =
         Converter::ArkUnion<Opt_ResourceStr, Ark_String>(CONTENT, Converter::FC)};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     content = GetAttrValue<std::string>(node_, CONTENT_PROP);
-    EXPECT_EQ(content, CONTENT);
+    EXPECT_THAT(content, Eq(CONTENT));
 }
 
 /*
@@ -327,13 +327,13 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestContentString, TestSize.Lev
 HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestContentResource, TestSize.Level1)
 {
     auto content = GetAttrValue<std::string>(node_, CONTENT_PROP);
-    EXPECT_EQ(content, "");
+    EXPECT_THAT(content, Eq(""));
     Ark_MenuItemOptions options = { .content =
         Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(CONTENT_RES, ResourceType::STRING))};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     content = GetAttrValue<std::string>(node_, CONTENT_PROP);
-    EXPECT_EQ(content, CONTENT);
+    EXPECT_THAT(content, Eq(CONTENT));
 }
 
 /*
@@ -344,13 +344,13 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestContentResource, TestSize.L
 HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestLabelInfoString, TestSize.Level1)
 {
     auto labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
-    EXPECT_EQ(labelInfo, "");
+    EXPECT_THAT(labelInfo, Eq(""));
     Ark_MenuItemOptions options = { .labelInfo =
         Converter::ArkUnion<Opt_ResourceStr, Ark_String>(LABEL_INFO, Converter::FC)};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
-    EXPECT_EQ(labelInfo, LABEL_INFO);
+    EXPECT_THAT(labelInfo, Eq(LABEL_INFO));
 }
 
 /*
@@ -361,13 +361,13 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestLabelInfoString, TestSize.L
 HWTEST_F(MenuItemModifierTest, setMenuItemOptionsTestLabelInfoResource, TestSize.Level1)
 {
     auto labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
-    EXPECT_EQ(labelInfo, "");
+    EXPECT_THAT(labelInfo, Eq(""));
     Ark_MenuItemOptions options = { .labelInfo =
         Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(LABEL_INFO_RES, ResourceType::STRING))};
     auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
-    EXPECT_EQ(labelInfo, LABEL_INFO);
+    EXPECT_THAT(labelInfo, Eq(LABEL_INFO));
 }
 
 /*
@@ -469,17 +469,17 @@ HWTEST_F(MenuItemModifierTest, setSelectIconTestSymbol, TestSize.Level1)
  */
 HWTEST_F(MenuItemModifierTest, DISABLED_setSelectedTest, TestSize.Level1)
 {
-    bool selected = GetAttrValue<bool>(node_, SELECTED_STR);
-    EXPECT_FALSE(selected);
+    auto selected = GetAttrValue<bool>(node_, SELECTED_STR);
+    EXPECT_THAT(selected, Eq(false));
     auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     modifier_->setSelected(node_, &optValue);
     selected = GetAttrValue<bool>(node_, SELECTED_STR);
-    EXPECT_TRUE(selected);
+    EXPECT_THAT(selected, Eq(true));
 
     optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(false);
     modifier_->setSelected(node_, &optValue);
     selected = GetAttrValue<bool>(node_, SELECTED_STR);
-    EXPECT_FALSE(selected);
+    EXPECT_THAT(selected, Eq(false));
 }
 
 /*
@@ -490,12 +490,12 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setSelectedTest, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setSelectIconTestBool, TestSize.Level1)
 {
     auto selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
-    EXPECT_EQ(selectIcon, "false");
+    EXPECT_THAT(selectIcon, Eq("false"));
 
     auto optIcon = Converter::ArkUnion<Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_Boolean>(true);
     modifier_->setSelectIcon(node_, &optIcon);
     selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
-    EXPECT_EQ(selectIcon, "true");
+    EXPECT_THAT(selectIcon, Eq("true"));
 }
 
 /*
@@ -506,7 +506,7 @@ HWTEST_F(MenuItemModifierTest, setSelectIconTestBool, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setSelectIconTestString, TestSize.Level1)
 {
     auto selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
-    EXPECT_EQ(selectIcon, "false");
+    EXPECT_THAT(selectIcon, Eq("false"));
 
     auto str = Converter::ArkValue<Ark_String>("path_to_select_icon");
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str);
@@ -514,7 +514,7 @@ HWTEST_F(MenuItemModifierTest, setSelectIconTestString, TestSize.Level1)
     auto optIcon = Converter::ArkUnion<Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
     modifier_->setSelectIcon(node_, &optIcon);
     selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
-    EXPECT_EQ(selectIcon, "path_to_select_icon");
+    EXPECT_THAT(selectIcon, Eq("path_to_select_icon"));
 }
 
 /*
@@ -525,13 +525,13 @@ HWTEST_F(MenuItemModifierTest, setSelectIconTestString, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setSelectIconTestResource, TestSize.Level1)
 {
     auto selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
-    EXPECT_EQ(selectIcon, "false");
+    EXPECT_THAT(selectIcon, Eq("false"));
     Ark_Resource iconRes = CreateResource(ICON_OK_STR.c_str(), ResourceType::STRING);
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(iconRes);
     auto optIcon = Converter::ArkUnion<Opt_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
     modifier_->setSelectIcon(node_, &optIcon);
     selectIcon = GetAttrValue<std::string>(node_, SELECT_ICON_STR);
-    EXPECT_EQ(selectIcon, "path_to_select_icon");
+    EXPECT_THAT(selectIcon, Eq("path_to_select_icon"));
 }
 
 /**
@@ -543,13 +543,13 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontColorTest, TestSize.Level1
 {
     ASSERT_NE(modifier_->setContentFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, CONTENT_FONT_COLOR_STR);
-    EXPECT_EQ(checkVal, COLOR_THEME_FONT);
+    EXPECT_THAT(checkVal, Eq(COLOR_THEME_FONT));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setContentFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, CONTENT_FONT_COLOR_STR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -562,13 +562,13 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontColorTestRes, TestSize.Lev
 {
     ASSERT_NE(modifier_->setContentFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, CONTENT_FONT_COLOR_STR);
-    EXPECT_EQ(checkVal, COLOR_THEME_FONT);
+    EXPECT_THAT(checkVal, Eq(COLOR_THEME_FONT));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setContentFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, CONTENT_FONT_COLOR_STR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -581,13 +581,13 @@ HWTEST_F(MenuItemModifierTest, setContentFontColorTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, CONTENT_FONT_COLOR_STR);
-    EXPECT_EQ(checkVal, COLOR_THEME_FONT);
+    EXPECT_THAT(checkVal, Eq(COLOR_THEME_FONT));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_INVALID) {
         auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setContentFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, CONTENT_FONT_COLOR_STR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -600,13 +600,13 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
-    EXPECT_EQ(checkVal, COLOR_THEME_FONT_ALPHA_06);
+    EXPECT_THAT(checkVal, Eq(COLOR_THEME_FONT_ALPHA_06));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN1) {
         auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setLabelFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -619,13 +619,13 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontColorTestRes, TestSize.Level
 {
     ASSERT_NE(modifier_->setLabelFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
-    EXPECT_EQ(checkVal, COLOR_THEME_FONT_ALPHA_06);
+    EXPECT_THAT(checkVal, Eq(COLOR_THEME_FONT_ALPHA_06));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setLabelFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -638,13 +638,13 @@ HWTEST_F(MenuItemModifierTest, setLabelFontColorTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFontColor, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
-    EXPECT_EQ(checkVal, COLOR_THEME_FONT_ALPHA_06);
+    EXPECT_THAT(checkVal, Eq(COLOR_THEME_FONT_ALPHA_06));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN1_INVALID) {
         auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setLabelFontColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -671,15 +671,15 @@ HWTEST_F(MenuItemModifierTest, setContentFontTestVariant1, TestSize.Level1)
         auto optFont = Converter::ArkValue<Opt_Font>(font);
         modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
+        auto fontObject = GetAttrObject(fullJson, "contentFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
         auto checkWeight = GetAttrValue<std::string>(fontObject, "weight");
         auto checkStyle = GetAttrValue<std::string>(fontObject, "style");
         auto checkFamily = GetAttrValue<std::string>(fontObject, "family");
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, style.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(style.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -706,15 +706,15 @@ HWTEST_F(MenuItemModifierTest, setContentFontTestVariant2, TestSize.Level1)
         auto optFont = Converter::ArkValue<Opt_Font>(font);
         modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
+        auto fontObject = GetAttrObject(fullJson, "contentFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
         auto checkWeight = GetAttrValue<std::string>(fontObject, "weight");
         auto checkStyle = GetAttrValue<std::string>(fontObject, "style");
         auto checkFamily = GetAttrValue<std::string>(fontObject, "family");
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -741,15 +741,15 @@ HWTEST_F(MenuItemModifierTest, setContentFontTestVariant3, TestSize.Level1)
         auto optFont = Converter::ArkValue<Opt_Font>(font);
         modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
+        auto fontObject = GetAttrObject(fullJson, "contentFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
         auto checkWeight = GetAttrValue<std::string>(fontObject, "weight");
         auto checkStyle = GetAttrValue<std::string>(fontObject, "style");
         auto checkFamily = GetAttrValue<std::string>(fontObject, "family");
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -776,15 +776,15 @@ HWTEST_F(MenuItemModifierTest, setContentFontTestVariant4, TestSize.Level1)
         auto optFont = Converter::ArkValue<Opt_Font>(font);
         modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
+        auto fontObject = GetAttrObject(fullJson, "contentFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
         auto checkWeight = GetAttrValue<std::string>(fontObject, "weight");
         auto checkStyle = GetAttrValue<std::string>(fontObject, "style");
         auto checkFamily = GetAttrValue<std::string>(fontObject, "family");
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily,  family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(family.second));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -811,15 +811,15 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontTestVariant5, TestSize.Lev
         auto optFont = Converter::ArkValue<Opt_Font>(font);
         modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
+        auto fontObject = GetAttrObject(fullJson, "contentFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
         auto checkWeight = GetAttrValue<std::string>(fontObject, "weight");
         auto checkStyle = GetAttrValue<std::string>(fontObject, "style");
         auto checkFamily = GetAttrValue<std::string>(fontObject, "family");
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkFamily,  familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -846,15 +846,15 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTestVariant1, TestSize.Level1)
         auto optFont = Converter::ArkValue<Opt_Font>(font);
         modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
+        auto fontObject = GetAttrObject(fullJson, "labelFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
         auto checkWeight = GetAttrValue<std::string>(fontObject, "weight");
         auto checkStyle = GetAttrValue<std::string>(fontObject, "style");
         auto checkFamily = GetAttrValue<std::string>(fontObject, "family");
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, style.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(style.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -881,15 +881,15 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTestVariant2, TestSize.Level1)
         auto optFont = Converter::ArkValue<Opt_Font>(font);
         modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
+        auto fontObject = GetAttrObject(fullJson, "labelFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
         auto checkWeight = GetAttrValue<std::string>(fontObject, "weight");
         auto checkStyle = GetAttrValue<std::string>(fontObject, "style");
         auto checkFamily = GetAttrValue<std::string>(fontObject, "family");
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -916,15 +916,15 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTestVariant3, TestSize.Level1)
         auto optFont = Converter::ArkValue<Opt_Font>(font);
         modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
+        auto fontObject = GetAttrObject(fullJson, "labelFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
         auto checkWeight = GetAttrValue<std::string>(fontObject, "weight");
         auto checkStyle = GetAttrValue<std::string>(fontObject, "style");
         auto checkFamily = GetAttrValue<std::string>(fontObject, "family");
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -951,15 +951,15 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTestVariant4, TestSize.Level1)
         auto optFont = Converter::ArkValue<Opt_Font>(font);
         modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
+        auto fontObject = GetAttrObject(fullJson, "labelFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
         auto checkWeight = GetAttrValue<std::string>(fontObject, "weight");
         auto checkStyle = GetAttrValue<std::string>(fontObject, "style");
         auto checkFamily = GetAttrValue<std::string>(fontObject, "family");
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily,  family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(family.second));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -986,15 +986,15 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontTestVariant5, TestSize.Level
         auto optFont = Converter::ArkValue<Opt_Font>(font);
         modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
+        auto fontObject = GetAttrObject(fullJson, "labelFont");
         auto checkSize = GetAttrValue<std::string>(fontObject, "size");
         auto checkWeight = GetAttrValue<std::string>(fontObject, "weight");
         auto checkStyle = GetAttrValue<std::string>(fontObject, "style");
         auto checkFamily = GetAttrValue<std::string>(fontObject, "family");
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkFamily,  familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 

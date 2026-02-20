@@ -65,13 +65,13 @@ RefPtr<PixelMap> ImageSpanModifierTest::CreatePixelMap(std::string& src)
 HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) << "Default value for attribute 'src'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SRC_DEFAULT_VALUE)) << "Default value for attribute 'src'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RAWSRC_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RAWSRC_DEFAULT_VALUE) << "Default value for attribute 'rawSrc'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_RAWSRC_DEFAULT_VALUE)) << "Default value for attribute 'rawSrc'";
 }
 
 /*
@@ -81,17 +81,17 @@ HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestDefaultValues, TestSize.L
  */
 HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidStrValues, TestSize.Level1)
 {
-    std::string strResult;
-    std::string resultStr;
+    std::optional<std::string> strResult;
+    std::optional<std::string> resultStr;
     std::string expectedStr = TEST_VALUE;
     auto subvalue = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(TEST_VALUE));
     auto options = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(subvalue);
     modifier_->setImageSpanOptions(node_, &options);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RAWSRC_NAME);
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
@@ -101,7 +101,7 @@ HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidStrValues, TestSize.
  */
 HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidResValues, TestSize.Level1)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr = TEST_VALUE;
     auto subvalue = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(
         CreateResource(IMAGES_OK_STR.c_str(), ResourceType::STRING));
@@ -109,9 +109,9 @@ HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidResValues, TestSize.
     modifier_->setImageSpanOptions(node_, &options);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RAWSRC_NAME);
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
@@ -121,7 +121,7 @@ HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidResValues, TestSize.
  */
 HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidPixMapValues, TestSize.Level1)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string imagesSrc = TEST_VALUE;
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
     image_PixelMapPeer pixelMapPeer;
@@ -145,7 +145,7 @@ HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidPixMapValues, TestSi
  */
 HWTEST_F(ImageSpanModifierTest, setAltTestValidValues, TestSize.Level1)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string imagesSrc = TEST_VALUE;
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
     image_PixelMapPeer pixelMapPeer;
@@ -183,7 +183,7 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setColorFilterTest, TestSize.Level1)
     ASSERT_TRUE(accessor);
     auto jsonValue = GetJsonValue(node_);
     auto result = GetAttrValue<std::string>(jsonValue, ColorFilter::ATTRIBUTE_COLOR_FILTER_NAME);
-    EXPECT_EQ(result, ColorFilter::ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE);
+    EXPECT_THAT(result, Eq(ColorFilter::ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE));
     for (auto& [name, value, expected] : ColorFilter::floatMatrixTest) {
         std::stringstream expectedStream;
         expectedStream << std::fixed << std::setprecision(PRECISION);
@@ -197,7 +197,7 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setColorFilterTest, TestSize.Level1)
             expectedStream << std::fixed << elem << " ";
         }
         result = GetAttrValue<std::string>(jsonValue, ColorFilter::ATTRIBUTE_COLOR_FILTER_NAME);
-        EXPECT_EQ(result, expectedStream.str());
+        EXPECT_THAT(result, Eq(expectedStream.str()));
     }
 #endif
 }

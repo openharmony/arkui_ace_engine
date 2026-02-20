@@ -98,9 +98,9 @@ class PatternLockModifierTest : public ModifierTestBase<GENERATED_ArkUIPatternLo
 HWTEST_F(PatternLockModifierTest, setSideLengthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_LENGTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SIDE_LENGTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SIDE_LENGTH_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'sideLength' of method 'sideLength'
@@ -119,13 +119,13 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> sideLengthV
 HWTEST_F(PatternLockModifierTest, DISABLED_setSideLengthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: sideLengthValidValues) {
         auto optVal = Converter::ArkValue<Opt_Length>(checkVal);
         modifier_->setSideLength(node_, &optVal);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_LENGTH_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -137,9 +137,9 @@ HWTEST_F(PatternLockModifierTest, DISABLED_setSideLengthTestValidValues, TestSiz
 HWTEST_F(PatternLockModifierTest, setCircleRadiusTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CIRCLE_RADIUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CIRCLE_RADIUS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CIRCLE_RADIUS_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'circleRadius' of method 'circleRadius'
@@ -158,13 +158,13 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> circleRadiu
 HWTEST_F(PatternLockModifierTest, setCircleRadiusTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: circleRadiusValidValues) {
         auto optVal = Converter::ArkValue<Opt_Length>(checkVal);
         modifier_->setCircleRadius(node_, &optVal);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CIRCLE_RADIUS_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -176,10 +176,10 @@ HWTEST_F(PatternLockModifierTest, setCircleRadiusTestValidValues, TestSize.Level
 HWTEST_F(PatternLockModifierTest, setBackgroundColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_BACKGROUND_COLOR_DEFAULT_VALUE));
 }
 
 static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> backgroundColorValidValues = {
@@ -199,13 +199,13 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> back
 HWTEST_F(PatternLockModifierTest, setBackgroundColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: backgroundColorValidValues) {
         auto optVal = Converter::ArkValue<Opt_ResourceColor>(checkVal);
         modifier_->setBackgroundColor(node_, &optVal);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACKGROUND_COLOR_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -217,10 +217,10 @@ HWTEST_F(PatternLockModifierTest, setBackgroundColorTestValidValues, TestSize.Le
 HWTEST_F(PatternLockModifierTest, setRegularColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REGULAR_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_REGULAR_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_REGULAR_COLOR_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'regularColor' of method 'regularColor'
@@ -240,13 +240,13 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> regu
 HWTEST_F(PatternLockModifierTest, setRegularColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: regularColorValidValues) {
         auto optVal = Converter::ArkValue<Opt_ResourceColor>(checkVal);
         modifier_->setRegularColor(node_, &optVal);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REGULAR_COLOR_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -258,10 +258,10 @@ HWTEST_F(PatternLockModifierTest, setRegularColorTestValidValues, TestSize.Level
 HWTEST_F(PatternLockModifierTest, setSelectedColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'selectedColor' of method 'selectedColor'
@@ -282,13 +282,13 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> sele
 HWTEST_F(PatternLockModifierTest, setSelectedColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: selectedColorValidValues) {
         auto optVal = Converter::ArkValue<Opt_ResourceColor>(checkVal);
         modifier_->setSelectedColor(node_, &optVal);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -300,10 +300,10 @@ HWTEST_F(PatternLockModifierTest, setSelectedColorTestValidValues, TestSize.Leve
 HWTEST_F(PatternLockModifierTest, setActiveColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ACTIVE_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVE_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ACTIVE_COLOR_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'activeColor' of method 'activeColor'
@@ -323,13 +323,13 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> acti
 HWTEST_F(PatternLockModifierTest, setActiveColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: activeColorValidValues) {
         auto optVal = Converter::ArkValue<Opt_ResourceColor>(checkVal);
         modifier_->setActiveColor(node_, &optVal);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ACTIVE_COLOR_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -341,10 +341,10 @@ HWTEST_F(PatternLockModifierTest, setActiveColorTestValidValues, TestSize.Level1
 HWTEST_F(PatternLockModifierTest, setPathColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PATH_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PATH_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PATH_COLOR_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'pathColor' of method 'pathColor'
@@ -364,13 +364,13 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> path
 HWTEST_F(PatternLockModifierTest, setPathColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: pathColorValidValues) {
         auto optVal = Converter::ArkValue<Opt_ResourceColor>(checkVal);
         modifier_->setPathColor(node_, &optVal);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PATH_COLOR_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -382,10 +382,10 @@ HWTEST_F(PatternLockModifierTest, setPathColorTestValidValues, TestSize.Level1)
 HWTEST_F(PatternLockModifierTest, setAutoResetTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_RESET_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTO_RESET_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_AUTO_RESET_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'autoReset' of method 'autoReset'
@@ -402,13 +402,13 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> autoResetV
 HWTEST_F(PatternLockModifierTest, setAutoResetTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: autoResetValidValues) {
         auto optVal = Converter::ArkValue<Opt_Boolean>(checkVal);
         modifier_->setAutoReset(node_, &optVal);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_RESET_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -420,10 +420,10 @@ HWTEST_F(PatternLockModifierTest, setAutoResetTestValidValues, TestSize.Level1)
 HWTEST_F(PatternLockModifierTest, setSkipUnselectedPointTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SKIP_UNSELECTED_POINT);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SKIP_UNSELECTED_POINT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SKIP_UNSELECTED_POINT_DEFAULT_VALUE));
 }
 
 /*
@@ -434,13 +434,13 @@ HWTEST_F(PatternLockModifierTest, setSkipUnselectedPointTestDefaultValues, TestS
 HWTEST_F(PatternLockModifierTest, setSkipUnselectedPointTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: autoResetValidValues) {
         auto optVal = Converter::ArkValue<Opt_Boolean>(checkVal);
         modifier_->setSkipUnselectedPoint(node_, &optVal);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SKIP_UNSELECTED_POINT);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 
@@ -550,20 +550,20 @@ HWTEST_F(PatternLockModifierTest, setOnDotConnectTest, TestSize.Level1)
  */
 HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestDefaultValues, TestSize.Level1)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue,
         ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_DEFAULT_VALUE));
     resultStr = GetAttrValue<std::string>(jsonValue,
         ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_FOREGROUND_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_FOREGROUND_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_FOREGROUND_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'color' of method 'activateCircleStyle'
@@ -598,7 +598,7 @@ HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestValidValues, TestSiz
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultJsonOptions;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_CircleStyleOptions realInputValue = Converter::ArkValue<Opt_CircleStyleOptions>(Ark_CircleStyleOptions{});
 
     for (auto [passed, checkVal, expected]: styleColorValidValues) {
@@ -606,7 +606,7 @@ HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestValidValues, TestSiz
         modifier_->setActivateCircleStyle(node_, &realInputValue);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_COLOR_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 
     for (auto [passed, checkVal, expected]: styleEnableWaveEffectValidValues) {
@@ -616,10 +616,10 @@ HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestValidValues, TestSiz
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue,
             ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
         resultStr = GetAttrValue<std::string>(jsonValue,
             ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_FOREGROUND_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 
     for (const auto &[lenMetrics, expected]: LENGTH_METRICS_ANY_TEST_PLAN) {
@@ -628,7 +628,7 @@ HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestValidValues, TestSiz
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue,
             ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_RADIUS_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << expected;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << expected;
     }
 }
 } // namespace OHOS::Ace::NG

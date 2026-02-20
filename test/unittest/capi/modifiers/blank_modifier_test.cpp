@@ -37,43 +37,43 @@ HWTEST_F(BlankModifierTest, DISABLED_setColorTestVariant001, TestSize.Level1)
     constexpr auto propName = "color";
     ASSERT_NE(modifier_->setColor, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, "#00000000");
+    auto checkVal1 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal1, Eq("#00000000"));
     Opt_ResourceColor optColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setColor(node_, &optColor);
-    auto checkVal2 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal2, "#FFFFFFFF");
+    auto checkVal2 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal2, Eq("#FFFFFFFF"));
 
     Opt_ResourceColor optNumberInt = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456);
     modifier_->setColor(node_, &optNumberInt);
-    auto checkVal3 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal3, "#FF123456");
+    auto checkVal3 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal3, Eq("#FF123456"));
 
     Opt_ResourceColor optNumberFlt = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f);
     modifier_->setColor(node_, &optNumberFlt);
-    auto checkVal4 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal4, "#00000000");
+    auto checkVal4 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal4, Eq("#00000000"));
 
     Opt_ResourceColor optStrColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344");
     modifier_->setColor(node_, &optStrColor);
-    auto checkVal5 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal5, "#11223344");
+    auto checkVal5 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal5, Eq("#11223344"));
 
     Opt_ResourceColor optStrNumber = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535");
     modifier_->setColor(node_, &optStrNumber);
-    auto checkVal6 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal6, "#FF00FFFF");
+    auto checkVal6 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal6, Eq("#FF00FFFF"));
 
     auto optResNameColor = CreateResourceUnion<Opt_ResourceColor>(
         NamedResourceId{"aa.bb.cc", ResourceType::COLOR});
     modifier_->setColor(node_, &optResNameColor);
-    auto checkVal7 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
+    auto checkVal7 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal7, Eq("#FFFF0000")); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
     auto optResIdColor = CreateResourceUnion<Opt_ResourceColor>(IntResourceId{1234, ResourceType::COLOR});
     modifier_->setColor(node_, &optResIdColor);
-    auto checkVal8 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
+    auto checkVal8 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal8, Eq("#FFFF0000")); // Color::RED is result of mocked ThemeConstants::GetColor(int)
 }
 
 /**
@@ -86,52 +86,52 @@ HWTEST_F(BlankModifierTest, DISABLED_setBlankOptionsTestVariant002, TestSize.Lev
     constexpr auto propName = "min";
     ASSERT_NE(modifier_->setBlankOptions, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, "0.00px");
+    auto checkVal1 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal1, Eq("0.00px"));
 
     auto intNegVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-123.);
     modifier_->setBlankOptions(node_, &intNegVal);
-    auto checkVal7 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal7, "0.00px");
+    auto checkVal7 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal7, Eq("0.00px"));
 
     auto floatNegVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-1.23f);
     modifier_->setBlankOptions(node_, &floatNegVal);
-    auto checkVal8 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal8, "0.00px");
+    auto checkVal8 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal8, Eq("0.00px"));
 
     auto pxNegVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-4.5px");
     modifier_->setBlankOptions(node_, &pxNegVal);
-    auto checkVal9 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal9, "0.00px");
+    auto checkVal9 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal9, Eq("0.00px"));
 
     auto vpNegVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-56vp");
     modifier_->setBlankOptions(node_, &vpNegVal);
-    auto checkVal10 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal10, "0.00px");
+    auto checkVal10 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal10, Eq("0.00px"));
 
     auto undefVal = Converter::ArkValue<Opt_Union_F64_String>();
     modifier_->setBlankOptions(node_, &undefVal);
-    auto checkVal2 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal2, "0.00px");
+    auto checkVal2 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal2, Eq("0.00px"));
 
     auto intVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(123.);
     modifier_->setBlankOptions(node_, &intVal);
-    auto checkVal3 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal3, "123.00vp");
+    auto checkVal3 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal3, Eq("123.00vp"));
 
     auto floatVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.23);
     modifier_->setBlankOptions(node_, &floatVal);
-    auto checkVal4 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal4, "1.23vp");
+    auto checkVal4 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal4, Eq("1.23vp"));
 
     auto pxVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("45px");
     modifier_->setBlankOptions(node_, &pxVal);
-    auto checkVal5 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal5, "45.00px");
+    auto checkVal5 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal5, Eq("45.00px"));
 
     auto vpVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("5.6vp");
     modifier_->setBlankOptions(node_, &vpVal);
-    auto checkVal6 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal6, "5.60vp");
+    auto checkVal6 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal6, Eq("5.60vp"));
 }
 } // namespace OHOS::Ace::NG

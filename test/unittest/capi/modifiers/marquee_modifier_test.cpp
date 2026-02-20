@@ -77,10 +77,10 @@ public:
 HWTEST_F(MarqueeModifierTest, setAllowScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALLOW_SCALE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALLOW_SCALE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALLOW_SCALE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'select' of method 'select'
@@ -97,7 +97,7 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> allowScale
 HWTEST_F(MarqueeModifierTest, setAllowScaleTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Boolean inputValueAllowScale;
     Ark_Boolean initValueAllowScale;
@@ -114,7 +114,7 @@ HWTEST_F(MarqueeModifierTest, setAllowScaleTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALLOW_SCALE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -126,10 +126,10 @@ HWTEST_F(MarqueeModifierTest, setAllowScaleTestValidValues, TestSize.Level1)
 HWTEST_F(MarqueeModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'fontColor' of method 'fontColor'
@@ -146,7 +146,7 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> font
 HWTEST_F(MarqueeModifierTest, setFontColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ResourceColor inputValueFontColor;
     Ark_ResourceColor initValueFontColor;
@@ -163,7 +163,7 @@ HWTEST_F(MarqueeModifierTest, setFontColorTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -175,7 +175,7 @@ HWTEST_F(MarqueeModifierTest, setFontColorTestValidValues, TestSize.Level1)
 HWTEST_F(MarqueeModifierTest, DISABLED_setFontColorTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ResourceColor inputValueFontColor;
 
@@ -186,7 +186,7 @@ HWTEST_F(MarqueeModifierTest, DISABLED_setFontColorTestInvalidValues, TestSize.L
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
     expectedStr = ATTRIBUTE_FONT_COLOR_INVALID_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
@@ -197,7 +197,7 @@ HWTEST_F(MarqueeModifierTest, DISABLED_setFontColorTestInvalidValues, TestSize.L
 HWTEST_F(MarqueeModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     auto inputStringValue = "testFamily";
     auto inputArkStringValue = Converter::ArkValue<Ark_String>(inputStringValue);
     auto inputValue = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(inputArkStringValue);
@@ -206,7 +206,7 @@ HWTEST_F(MarqueeModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
     modifier_->setFontFamily(node_, &optInputValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
-    EXPECT_EQ(resultStr, inputStringValue);
+    EXPECT_THAT(resultStr, Eq(inputStringValue));
 
     inputStringValue = "testFamily1, testFamily2";
     inputArkStringValue = Converter::ArkValue<Ark_String>(inputStringValue);
@@ -216,7 +216,7 @@ HWTEST_F(MarqueeModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
     modifier_->setFontFamily(node_, &optInputValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
-    EXPECT_EQ(resultStr, inputStringValue);
+    EXPECT_THAT(resultStr, Eq(inputStringValue));
 
     inputStringValue = "testFamily1, testFamily2";
     inputArkStringValue = Converter::ArkValue<Ark_String>(inputStringValue);
@@ -226,7 +226,7 @@ HWTEST_F(MarqueeModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
     modifier_->setFontFamily(node_, &optInputValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
-    EXPECT_EQ(resultStr, inputStringValue);
+    EXPECT_THAT(resultStr, Eq(inputStringValue));
 }
 
 /*
@@ -238,7 +238,7 @@ HWTEST_F(MarqueeModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto size = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-    EXPECT_EQ(size, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE);
+    EXPECT_THAT(size, Eq(ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE));
 }
 
 /*
@@ -249,7 +249,7 @@ HWTEST_F(MarqueeModifierTest, setFontSizeTestDefaultValues, TestSize.Level1)
 HWTEST_F(MarqueeModifierTest, DISABLED_setFontSizeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     typedef std::pair<Opt_Length, std::string> OneTestStep;
     const std::vector<OneTestStep> testFontSizeValid = {
@@ -266,7 +266,7 @@ HWTEST_F(MarqueeModifierTest, DISABLED_setFontSizeTestValidValues, TestSize.Leve
         modifier_->setFontSize(node_, &value);
         jsonValue = GetJsonValue(node_);
         auto size = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(size, expectValue);
+        EXPECT_THAT(size, Eq(expectValue));
     }
 }
 /*
@@ -277,7 +277,7 @@ HWTEST_F(MarqueeModifierTest, DISABLED_setFontSizeTestValidValues, TestSize.Leve
 HWTEST_F(MarqueeModifierTest, DISABLED_setFontSizeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     typedef std::pair<Opt_Length, std::string> OneTestStep;
     const std::vector<OneTestStep> testFontSizeInvalid = {
@@ -288,7 +288,7 @@ HWTEST_F(MarqueeModifierTest, DISABLED_setFontSizeTestInvalidValues, TestSize.Le
         modifier_->setFontSize(node_, &value);
         jsonValue = GetJsonValue(node_);
         auto size = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
-        EXPECT_EQ(size, expectValue);
+        EXPECT_THAT(size, Eq(expectValue));
     }
 }
 
@@ -337,7 +337,7 @@ HWTEST_F(MarqueeModifierTest, setFontWeightTestDefaultValue, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE));
 }
 
 /**
@@ -349,13 +349,13 @@ HWTEST_F(MarqueeModifierTest, setFontWeightTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFontWeight, nullptr);
     std::unique_ptr<JsonValue> jsonValue;
-    std::string result;
+    std::optional<std::string> result;
     for (const auto &[weight, expectValue] : Converter::FONT_WEIGHT_TEST_PLAN) {
         auto optWeight = Converter::ArkValue<Opt_Union_I32_FontWeight_ResourceStr>(weight);
         modifier_->setFontWeight(node_, &optWeight);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(result, expectValue);
+        EXPECT_THAT(result, Eq(expectValue));
     }
 }
 
@@ -368,7 +368,7 @@ HWTEST_F(MarqueeModifierTest, setFontWeightTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFontWeight, nullptr);
     std::unique_ptr<JsonValue> jsonValue;
-    std::string result;
+    std::optional<std::string> result;
 
     const std::vector<ArkFontWeightTest> testPlan = {
         { Converter::ArkUnion<Ark_Union_I32_FontWeight_ResourceStr, Ark_Int32>(1000), "FontWeight.Normal" },
@@ -379,7 +379,7 @@ HWTEST_F(MarqueeModifierTest, setFontWeightTestInvalidValues, TestSize.Level1)
         modifier_->setFontWeight(node_, &optWeight);
         jsonValue = GetJsonValue(node_);
         result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(result, expectValue);
+        EXPECT_THAT(result, Eq(expectValue));
     }
 }
 
@@ -391,9 +391,9 @@ HWTEST_F(MarqueeModifierTest, setFontWeightTestInvalidValues, TestSize.Level1)
 HWTEST_F(MarqueeModifierTest, setUpdateStrategyTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UPDATE_STRATEGY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_UPDATE_STRATEGY_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_UPDATE_STRATEGY_DEFAULT_VALUE));
 }
 
 /*
@@ -404,7 +404,7 @@ HWTEST_F(MarqueeModifierTest, setUpdateStrategyTestDefaultValues, TestSize.Level
 HWTEST_F(MarqueeModifierTest, setMarqueeUpdateStrategyTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_MarqueeUpdateStrategy inputUpdateStrategyItems;
 
@@ -416,7 +416,7 @@ HWTEST_F(MarqueeModifierTest, setMarqueeUpdateStrategyTestValidValues, TestSize.
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UPDATE_STRATEGY_NAME);
     expectedStr = ATTRIBUTE_UPDATE_STRATEGY_TEST_VALUE;
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
@@ -427,22 +427,22 @@ HWTEST_F(MarqueeModifierTest, setMarqueeUpdateStrategyTestValidValues, TestSize.
 HWTEST_F(MarqueeModifierTest, setMarqueeOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STEP_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_STEP_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LOOP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LOOP_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_LOOP_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SRC_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PLAYER_STATUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PLAYER_STATUS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PLAYER_STATUS_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIRECTION_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DIRECTION_DEFAULT_VALUE));
 }
 
 /**
@@ -469,11 +469,11 @@ HWTEST_F(MarqueeModifierTest, DISABLED_setMarqueeOptionsTestValid, TestSize.Leve
     auto checkSrc = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
     auto checkPlayerStatus = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PLAYER_STATUS_NAME);
     auto checkDirection = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
-    EXPECT_EQ(checkStep, "8.000000");
-    EXPECT_EQ(checkLoop, "3");
-    EXPECT_EQ(checkSrc, "teststring");
-    EXPECT_EQ(checkPlayerStatus, "false");
-    EXPECT_EQ(checkDirection, "true");
+    EXPECT_THAT(checkStep, Eq("8.000000"));
+    EXPECT_THAT(checkLoop, Eq("3"));
+    EXPECT_THAT(checkSrc, Eq("teststring"));
+    EXPECT_THAT(checkPlayerStatus, Eq("false"));
+    EXPECT_THAT(checkDirection, Eq("true"));
 }
 /*
  * @tc.name: setOnStartTest

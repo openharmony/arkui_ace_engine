@@ -303,8 +303,8 @@ public:
 HWTEST_F(IndexerModifierTest, setAlphabetIndexerOptionsTestArrayValue, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlphabetIndexerOptions, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_ARRAY_VALUE);
-    EXPECT_EQ(checkVal, ATTRIBUTE_ARRAY_VALUE_DEFAULT_VALUE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ARRAY_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_ARRAY_VALUE_DEFAULT_VALUE));
 
     Ark_AlphabetIndexerOptions options;
     for (const auto& [value, expectVal] : ARRAY_VALUE_TEST_PLAN) {
@@ -312,8 +312,8 @@ HWTEST_F(IndexerModifierTest, setAlphabetIndexerOptionsTestArrayValue, TestSize.
         auto stringArrayResult = vecHolder.ArkValue();
         options.arrayValue = stringArrayResult;
         modifier_->setAlphabetIndexerOptions(node_, &options);
-        checkVal = GetStringAttribute(node_, PROP_NAME_ARRAY_VALUE);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ARRAY_VALUE);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -325,15 +325,15 @@ HWTEST_F(IndexerModifierTest, setAlphabetIndexerOptionsTestArrayValue, TestSize.
 HWTEST_F(IndexerModifierTest, DISABLED_setAlphabetIndexerOptionsTestSelected, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlphabetIndexerOptions, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED);
-    EXPECT_EQ(checkVal, ATTRIBUTE_SELECTED_DEFAULT_VALUE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_SELECTED_DEFAULT_VALUE));
 
     Ark_AlphabetIndexerOptions options;
     for (const auto& [value, expectVal, _] : SELECTED_TEST_PLAN) {
         options.selected = Converter::ArkUnion<Ark_Union_I32_Bindable, Ark_Int32>(value);
         modifier_->setAlphabetIndexerOptions(node_, &options);
-        checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -345,13 +345,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setAlphabetIndexerOptionsTestSelected, Te
 HWTEST_F(IndexerModifierTest, DISABLED_setColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_WHITE) {
         modifier_->setColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -363,13 +363,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setColorTest, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -381,13 +381,13 @@ HWTEST_F(IndexerModifierTest, setColorTestRes, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, DISABLED_setSelectedColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_WHITE) {
         modifier_->setSelectedColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -399,13 +399,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setSelectedColorTest, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setSelectedColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setSelectedColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -417,13 +417,13 @@ HWTEST_F(IndexerModifierTest, setSelectedColorTestRes, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, DISABLED_setPopupColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_WHITE) {
         modifier_->setPopupColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 /**
@@ -434,13 +434,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupColorTest, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setPopupColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -452,13 +452,13 @@ HWTEST_F(IndexerModifierTest, setPopupColorTestRes, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, DISABLED_setSelectedBackgroundColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_WHITE) {
         modifier_->setSelectedBackgroundColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -470,13 +470,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setSelectedBackgroundColorTest, TestSize.
 HWTEST_F(IndexerModifierTest, DISABLED_setSelectedBackgroundColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setSelectedBackgroundColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -488,13 +488,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setSelectedBackgroundColorTestRes, TestSi
 HWTEST_F(IndexerModifierTest, DISABLED_setPopupBackgroundTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupBackground, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_BACKGROUND);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BACKGROUND);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_WHITE) {
         modifier_->setPopupBackground(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BACKGROUND);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -506,13 +506,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupBackgroundTest, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, DISABLED_setPopupBackgroundTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupBackground, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_BACKGROUND);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BACKGROUND);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupBackground(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BACKGROUND);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -524,13 +524,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupBackgroundTestRes, TestSize.Level
 HWTEST_F(IndexerModifierTest, DISABLED_setPopupSelectedColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupSelectedColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_SELECTED_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_SELECTED_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_BLACK) {
         modifier_->setPopupSelectedColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_SELECTED_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -542,13 +542,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupSelectedColorTest, TestSize.Level
 HWTEST_F(IndexerModifierTest, setPopupSelectedColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupSelectedColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_SELECTED_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_SELECTED_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupSelectedColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_SELECTED_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -560,13 +560,13 @@ HWTEST_F(IndexerModifierTest, setPopupSelectedColorTestRes, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, DISABLED_setPopupUnselectedColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupUnselectedColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_UNSELECTED_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_UNSELECTED_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_BLACK) {
         modifier_->setPopupUnselectedColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_UNSELECTED_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -578,13 +578,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupUnselectedColorTest, TestSize.Lev
 HWTEST_F(IndexerModifierTest, setPopupUnselectedColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupUnselectedColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_UNSELECTED_COLOR);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_UNSELECTED_COLOR);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupUnselectedColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_UNSELECTED_COLOR);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -596,13 +596,13 @@ HWTEST_F(IndexerModifierTest, setPopupUnselectedColorTestRes, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, DISABLED_setPopupItemBackgroundColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupItemBackgroundColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_BACKGROUND);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BACKGROUND);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_BLACK) {
         modifier_->setPopupItemBackgroundColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BACKGROUND);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -614,13 +614,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupItemBackgroundColorTest, TestSize
 HWTEST_F(IndexerModifierTest, setPopupItemBackgroundColorTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupItemBackgroundColor, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_BACKGROUND);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BACKGROUND);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupItemBackgroundColor(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BACKGROUND);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -634,17 +634,17 @@ HWTEST_F(IndexerModifierTest, setUsingPopupTest, TestSize.Level1)
     ASSERT_NE(modifier_->setUsingPopup, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME_USING_POPUP);
-    EXPECT_EQ(checkInitial, ATTRIBUTE_USING_POPUP_DEFAULT_VALUE);
+    EXPECT_THAT(checkInitial, Eq(ATTRIBUTE_USING_POPUP_DEFAULT_VALUE));
 
     auto optValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setUsingPopup(node_, &optValue);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME_USING_POPUP);
-    EXPECT_EQ(checkVal2, EXPECTED_TRUE);
+    EXPECT_THAT(checkVal2, Eq(EXPECTED_TRUE));
 
     optValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setUsingPopup(node_, &optValue);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME_USING_POPUP);
-    EXPECT_EQ(checkVal3, EXPECTED_FALSE);
+    EXPECT_THAT(checkVal3, Eq(EXPECTED_FALSE));
 }
 
 /**
@@ -670,15 +670,15 @@ HWTEST_F(IndexerModifierTest, setSelectedFontTestVariant1, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setSelectedFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, style.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(style.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -705,15 +705,15 @@ HWTEST_F(IndexerModifierTest, setSelectedFontTestVariant2, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setSelectedFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
@@ -721,15 +721,15 @@ HWTEST_F(IndexerModifierTest, setSelectedFontTestVariant2, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setSelectedFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -756,15 +756,15 @@ HWTEST_F(IndexerModifierTest, setSelectedFontTestVariant3, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setSelectedFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(family.second));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -791,15 +791,15 @@ HWTEST_F(IndexerModifierTest, setSelectedFontTestVariant4, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setSelectedFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SELECTED_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_SELECTED_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -826,15 +826,15 @@ HWTEST_F(IndexerModifierTest, setPopupFontTestVariant1, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_POPUP_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, style.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(style.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -861,15 +861,15 @@ HWTEST_F(IndexerModifierTest, setPopupFontTestVariant2, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_POPUP_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
@@ -877,15 +877,15 @@ HWTEST_F(IndexerModifierTest, setPopupFontTestVariant2, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_POPUP_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);;
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -912,15 +912,15 @@ HWTEST_F(IndexerModifierTest, setPopupFontTestVariant3, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_POPUP_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(family.second));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -947,15 +947,15 @@ HWTEST_F(IndexerModifierTest, setPopupFontTestVariant4, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_POPUP_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -978,20 +978,20 @@ HWTEST_F(IndexerModifierTest, setPopupItemFontTestVariant1, TestSize.Level1)
         font.weight = weight.first;
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupItemFont(node_, &optFont);
-        auto checkSize = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_SIZE);
-        auto checkWeight = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_WEIGHT);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        auto checkSize = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_FONT_SIZE);
+        auto checkWeight = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_FONT_WEIGHT);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupItemFont(node_, &optFont);
-        auto checkSize = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_SIZE);
-        auto checkWeight = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_WEIGHT);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        auto checkSize = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_FONT_SIZE);
+        auto checkWeight = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_FONT_WEIGHT);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -1013,10 +1013,10 @@ HWTEST_F(IndexerModifierTest, setPopupItemFontTestVariant2, TestSize.Level1)
         font.size = size.first;
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setPopupItemFont(node_, &optFont);
-        auto checkSize = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_SIZE);
-        auto checkWeight = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_FONT_WEIGHT);
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        auto checkSize = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_FONT_SIZE);
+        auto checkWeight = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_FONT_WEIGHT);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -1029,12 +1029,12 @@ HWTEST_F(IndexerModifierTest, setItemSizeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setItemSize, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_SIZE);
-    EXPECT_EQ(checkVal, ATTRIBUTE_ITEM_SIZE_INITIAL_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_ITEM_SIZE_INITIAL_VALUE));
 
     for (const auto& [size, expectVal] : ITEM_SIZE_TEST_PLAN) {
         modifier_->setItemSize(node_, &size);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_SIZE);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1061,15 +1061,15 @@ HWTEST_F(IndexerModifierTest, setFontTestVariant1, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, style.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(style.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -1096,15 +1096,15 @@ HWTEST_F(IndexerModifierTest, setFontTestVariant2, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
@@ -1112,15 +1112,15 @@ HWTEST_F(IndexerModifierTest, setFontTestVariant2, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
@@ -1147,15 +1147,15 @@ HWTEST_F(IndexerModifierTest, setFontTestVariant3, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily, family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkFamily, Eq(family.second));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -1182,15 +1182,15 @@ HWTEST_F(IndexerModifierTest, setFontTestVariant4, TestSize.Level1)
         auto optFont = ArkValue<Opt_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
-        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_FONT);
+        auto fontObject = GetAttrObject(fullJson, PROP_NAME_FONT);
         auto checkSize = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_SIZE);
         auto checkWeight = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_WEIGHT);
         auto checkStyle = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_STYLE);
         auto checkFamily = GetAttrValue<std::string>(fontObject, PROP_NAME_FONT_FAMILY);
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkFamily, familyStr);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkFamily, Eq(familyStr));
+        EXPECT_THAT(checkStyle, Eq(styleStr));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
@@ -1203,14 +1203,14 @@ HWTEST_F(IndexerModifierTest, setAlignStyleTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlignStyle, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ALIGN_STYLE);
-    EXPECT_EQ(checkVal, ATTRIBUTE_ALIGN_STYLE_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_ALIGN_STYLE_DEFAULT_VALUE));
 
     const auto& arkOffset = Converter::ArkValue<Opt_Length>(Ark_Empty());
     for (const auto& [value, expectVal] : ALIGN_TEST_PLAN) {
         auto optValue = ArkValue<Opt_IndexerAlign>(value);
         modifier_->setAlignStyle(node_, &optValue, &arkOffset);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ALIGN_STYLE);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1223,13 +1223,13 @@ HWTEST_F(IndexerModifierTest, setAlignStyleTestOffset, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlignStyle, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_HORIZONTAL_SPACE);
-    EXPECT_EQ(checkVal, ATTRIBUTE_POPUP_HORIZONTAL_SPACE_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_POPUP_HORIZONTAL_SPACE_DEFAULT_VALUE));
 
     for (const auto& [value, expectVal] : POPUP_HORIZONTAL_OFFSET_TEST_PLAN) {
         auto optValue = ArkValue<Opt_IndexerAlign>(ARK_INDEXER_ALIGN_START);
         modifier_->setAlignStyle(node_, &optValue, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_HORIZONTAL_SPACE);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1339,13 +1339,13 @@ HWTEST_F(IndexerModifierTest, setSelectedTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelected, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED);
-    EXPECT_EQ(checkVal, ATTRIBUTE_SELECTED_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_SELECTED_DEFAULT_VALUE));
 
     for (const auto& [value, expectVal, _] : SELECTED_TEST_PLAN) {
         auto optValue = Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(value);
         modifier_->setSelected(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1358,9 +1358,9 @@ HWTEST_F(IndexerModifierTest, setPopupPositionTestX, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupPosition, nullptr);
     auto fullJson = GetJsonValue(node_);
-    auto posObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_POSITION);
+    auto posObject = GetAttrObject(fullJson, PROP_NAME_POPUP_POSITION);
     auto checkValX = GetAttrValue<std::string>(posObject, PROP_NAME_POPUP_POSITION_X);
-    EXPECT_EQ(checkValX, ATTRIBUTE_POPUP_POSITION_DEFAULT_VALUE);
+    EXPECT_THAT(checkValX, Eq(ATTRIBUTE_POPUP_POSITION_DEFAULT_VALUE));
 
     for (const auto &[value, expectVal] : POPUP_POSITION_TEST_PLAN) {
         const Ark_Position& position = {
@@ -1371,9 +1371,9 @@ HWTEST_F(IndexerModifierTest, setPopupPositionTestX, TestSize.Level1)
         modifier_->setPopupPosition(node_, &optPosition);
 
         fullJson = GetJsonValue(node_);
-        posObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_POSITION);
+        posObject = GetAttrObject(fullJson, PROP_NAME_POPUP_POSITION);
         checkValX = GetAttrValue<std::string>(posObject, PROP_NAME_POPUP_POSITION_X);
-        EXPECT_EQ(checkValX, expectVal);
+        EXPECT_THAT(checkValX, Eq(expectVal));
     }
 }
 
@@ -1386,9 +1386,9 @@ HWTEST_F(IndexerModifierTest, setPopupPositionTestY, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupPosition, nullptr);
     auto fullJson = GetJsonValue(node_);
-    auto posObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_POSITION);
+    auto posObject = GetAttrObject(fullJson, PROP_NAME_POPUP_POSITION);
     auto checkValY = GetAttrValue<std::string>(posObject, PROP_NAME_POPUP_POSITION_Y);
-    EXPECT_EQ(checkValY, ATTRIBUTE_POPUP_POSITION_DEFAULT_VALUE);
+    EXPECT_THAT(checkValY, Eq(ATTRIBUTE_POPUP_POSITION_DEFAULT_VALUE));
 
     for (const auto &[value, expectVal] : POPUP_POSITION_TEST_PLAN) {
         const Ark_Position& position = {
@@ -1399,9 +1399,9 @@ HWTEST_F(IndexerModifierTest, setPopupPositionTestY, TestSize.Level1)
         modifier_->setPopupPosition(node_, &optPosition);
 
         fullJson = GetJsonValue(node_);
-        posObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_POSITION);
+        posObject = GetAttrObject(fullJson, PROP_NAME_POPUP_POSITION);
         checkValY = GetAttrValue<std::string>(posObject, PROP_NAME_POPUP_POSITION_Y);
-        EXPECT_EQ(checkValY, expectVal);
+        EXPECT_THAT(checkValY, Eq(expectVal));
     }
 }
 
@@ -1415,17 +1415,17 @@ HWTEST_F(IndexerModifierTest, setAutoCollapseTest, TestSize.Level1)
     ASSERT_NE(modifier_->setAutoCollapse, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME_AUTO_COLLAPSE);
-    EXPECT_EQ(checkInitial, ATTRIBUTE_AUTOCOLLAPSE_DEFAULT_VALUE);
+    EXPECT_THAT(checkInitial, Eq(ATTRIBUTE_AUTOCOLLAPSE_DEFAULT_VALUE));
 
     auto optValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setAutoCollapse(node_, &optValue);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME_AUTO_COLLAPSE);
-    EXPECT_EQ(checkVal2, EXPECTED_TRUE);
+    EXPECT_THAT(checkVal2, Eq(EXPECTED_TRUE));
 
     optValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setAutoCollapse(node_, &optValue);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME_AUTO_COLLAPSE);
-    EXPECT_EQ(checkVal3, EXPECTED_FALSE);
+    EXPECT_THAT(checkVal3, Eq(EXPECTED_FALSE));
 }
 
 /**
@@ -1437,15 +1437,15 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupItemBorderRadiusTest, TestSize.Le
 {
     ASSERT_NE(modifier_->setPopupItemBorderRadius, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BORDER_RADIUS);
-    EXPECT_EQ(checkVal, ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_POPUP_ITEM_BORDER_RADIUS_DEFAULT_VALUE));
 
     for (const auto& [value, expectItemVal, expectVal] : BORDER_RADIUS_TEST_PLAN) {
         auto optValue = Converter::ArkValue<Opt_Float64>(value);
         modifier_->setPopupItemBorderRadius(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BORDER_RADIUS);
-        EXPECT_EQ(checkVal, expectItemVal);
+        EXPECT_THAT(checkVal, Eq(expectItemVal));
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BORDER_RADIUS);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1458,7 +1458,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setItemBorderRadiusTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setItemBorderRadius, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_BORDER_RADIUS);
-    EXPECT_EQ(checkVal, ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_ITEM_BORDER_RADIUS_DEFAULT_VALUE));
 
     using TestStep = std::tuple<double, std::string, std::string>;
     static const std::vector<TestStep> testPlan = {
@@ -1474,9 +1474,9 @@ HWTEST_F(IndexerModifierTest, DISABLED_setItemBorderRadiusTest, TestSize.Level1)
         auto optValue = Converter::ArkValue<Opt_Float64>(value);
         modifier_->setItemBorderRadius(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_BORDER_RADIUS);
-        EXPECT_EQ(checkVal, expectItemVal) << "Input value: " << value;
+        EXPECT_THAT(checkVal, Eq(expectItemVal)) << "Input value: " << value;
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_INDEXER_BORDER_RADIUS);
-        EXPECT_EQ(checkVal, expectVal) << "Input value: " << value;;
+        EXPECT_THAT(checkVal, Eq(expectVal)) << "Input value: " << value;;
     }
 }
 
@@ -1488,14 +1488,14 @@ HWTEST_F(IndexerModifierTest, DISABLED_setItemBorderRadiusTest, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, setPopupBackgroundBlurStyleTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupBackgroundBlurStyle, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_BACKGROUND_BLUR_STYLE);
-    EXPECT_EQ(checkVal, ATTRIBUTE_POPUP_BACKGROUND_BLUR_STYLE_DEFAULT_VALUE);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BACKGROUND_BLUR_STYLE);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_POPUP_BACKGROUND_BLUR_STYLE_DEFAULT_VALUE));
 
     for (const auto& [value, expectVal] : BLUR_STYLE_TEST_PLAN) {
         auto optValue = Converter::ArkValue<Opt_BlurStyle>(value);
         modifier_->setPopupBackgroundBlurStyle(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BACKGROUND_BLUR_STYLE);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1507,13 +1507,13 @@ HWTEST_F(IndexerModifierTest, setPopupBackgroundBlurStyleTest, TestSize.Level1)
 HWTEST_F(IndexerModifierTest, DISABLED_setPopupTitleBackgroundTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupTitleBackground, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_TITLE_BACKGROUND);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_TITLE_BACKGROUND);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_BLACK) {
         modifier_->setPopupTitleBackground(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_TITLE_BACKGROUND);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1525,13 +1525,13 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupTitleBackgroundTest, TestSize.Lev
 HWTEST_F(IndexerModifierTest, setPopupTitleBackgroundTestRes, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPopupTitleBackground, nullptr);
-    auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_TITLE_BACKGROUND);
-    EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
+    auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_TITLE_BACKGROUND);
+    EXPECT_THAT(checkVal, Eq(ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK));
 
     for (const auto& [optValue, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupTitleBackground(node_, &optValue);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_TITLE_BACKGROUND);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 
@@ -1545,18 +1545,18 @@ HWTEST_F(IndexerModifierTest, setEnableHapticFeedbackTest, TestSize.Level1)
     ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME_HAPTIC_FEEDBACK);
-    EXPECT_EQ(checkInitial, ATTRIBUTE_HAPTIC_FEEDBACK_DEFAULT_VALUE);
+    EXPECT_THAT(checkInitial, Eq(ATTRIBUTE_HAPTIC_FEEDBACK_DEFAULT_VALUE));
 
     auto optValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setEnableHapticFeedback(node_, &optValue);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME_HAPTIC_FEEDBACK);
-    EXPECT_EQ(checkVal2, EXPECTED_FALSE);
+    EXPECT_THAT(checkVal2, Eq(EXPECTED_FALSE));
 
     optValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setEnableHapticFeedback(node_, &optValue);
 
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME_HAPTIC_FEEDBACK);
-    EXPECT_EQ(checkVal3, EXPECTED_TRUE);
+    EXPECT_THAT(checkVal3, Eq(EXPECTED_TRUE));
 }
 
 #ifdef WRONG_OLD_GEN

@@ -20,8 +20,8 @@
 #include <tuple>
 #include <vector>
 
-#include "arkoala_api_generated.h"
 #include "../../capi_gen140_compat.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Fixtures {
 extern std::vector<std::tuple<std::string, Ark_AnimationStatus, std::string>> testFixtureEnumAnimationStatusValidValues;

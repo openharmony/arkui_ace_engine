@@ -95,19 +95,19 @@ HWTEST_F(CanvasModifierTest, DISABLED_setOnReadyTest, TestSize.Level1)
 HWTEST_F(CanvasModifierTest, DISABLED_setEnableAnalyzerTestValidValues, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
-    auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
+    auto canvasObject = GetAttrObject(fullJson, ATTRIBUTE_CANVAS_NAME);
     auto initialValue = GetAttrValue<bool>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
 
-    EXPECT_EQ(initialValue, ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE);
+    EXPECT_THAT(initialValue, Eq(ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE));
 
     for (auto testValue : BOOL_TEST_PLAN) {
         auto inputValue = Converter::ArkValue<Opt_Boolean>(testValue.first);
         modifier_->setEnableAnalyzer(node_, &inputValue);
 
         auto fullJson = GetJsonValue(node_);
-        auto canvasObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_CANVAS_NAME);
+        auto canvasObject = GetAttrObject(fullJson, ATTRIBUTE_CANVAS_NAME);
         auto checkValue = GetAttrValue<bool>(canvasObject, ATTRIBUTE_ENABLE_ANALYZER_NAME);
-        EXPECT_EQ(checkValue, testValue.second);
+        EXPECT_THAT(checkValue, Eq(testValue.second));
     }
 }
 

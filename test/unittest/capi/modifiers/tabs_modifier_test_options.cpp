@@ -72,7 +72,7 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestBarPos, TestSize.Level1)
     constexpr auto propName = "barPosition";
     constexpr auto expectedDefaultValue = "BarPosition.Start";
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, expectedDefaultValue);
+    EXPECT_THAT(checkVal, Eq(expectedDefaultValue));
 
     using OneTestStep = std::pair<Opt_BarPosition, std::string> ;
     const std::vector<OneTestStep> testPlan = {
@@ -88,7 +88,7 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestBarPos, TestSize.Level1)
         optionsOpt.value.barPosition = Converter::ArkValue<Opt_BarPosition>(value);
         modifier_->setTabsOptions(node_, &optionsOpt);
         checkVal = GetAttrValue<std::string>(node_, propName);
-        EXPECT_EQ(checkVal, expected);
+        EXPECT_THAT(checkVal, Eq(expected));
     }
 }
 
@@ -150,7 +150,7 @@ HWTEST_F(TabsModifierTestOptions, DISABLED_setTabsOptionsTestIndex, TestSize.Lev
     constexpr auto propName = "index";
     constexpr auto expectedDefaultValue = "0";
     auto checkVal = GetAttrValue<std::string>(GetJsonValue(node_), propName);
-    EXPECT_EQ(checkVal, expectedDefaultValue);
+    EXPECT_THAT(checkVal, Eq(expectedDefaultValue));
 
     const std::vector<std::pair<Ark_Int32, std::string>> testPlan = {
         { Converter::ArkValue<Ark_Int32>(0), "0" },
@@ -163,7 +163,7 @@ HWTEST_F(TabsModifierTestOptions, DISABLED_setTabsOptionsTestIndex, TestSize.Lev
         auto optionsOpt = Converter::ArkValue<Opt_TabsOptions>(options);
         modifier_->setTabsOptions(node_, &optionsOpt);
         checkVal = GetAttrValue<std::string>(node_, propName);
-        EXPECT_EQ(checkVal, expected);
+        EXPECT_THAT(checkVal, Eq(expected));
     }
 }
 } // namespace OHOS::Ace::NG

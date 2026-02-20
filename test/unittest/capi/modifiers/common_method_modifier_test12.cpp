@@ -31,7 +31,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const auto ATTRIBUTE_DRAG_PREVIEW_NAME = "dragPreview";
-const auto ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE = std::nullopt;
 const auto ATTRIBUTE_OVERLAY_NAME = "overlay";
 const auto ATTRIBUTE_OVERLAY_TITLE_NAME = "title";
 const auto ATTRIBUTE_OVERLAY_TITLE_DEFAULT_VALUE = "";
@@ -70,8 +70,8 @@ public:
  */
 HWTEST_F(CommonMethodModifierTest12, setDragPreviewTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_DRAG_PREVIEW_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_DRAG_PREVIEW_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_DRAG_PREVIEW_DEFAULT_VALUE));
 }
 
 /*
@@ -186,18 +186,18 @@ HWTEST_F(CommonMethodModifierTest12, setAccessibilityVirtualNodeTestAccessibilit
 HWTEST_F(CommonMethodModifierTest12, setOverlayTestDefaultValues, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
-    auto overlay = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_OVERLAY_NAME);
-    auto options = GetAttrValue<std::unique_ptr<JsonValue>>(overlay, ATTRIBUTE_OVERLAY_OPTIONS_NAME);
-    auto offset = GetAttrValue<std::unique_ptr<JsonValue>>(options, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_NAME);
+    auto overlay = GetAttrObject(fullJson, ATTRIBUTE_OVERLAY_NAME);
+    auto options = GetAttrObject(overlay, ATTRIBUTE_OVERLAY_OPTIONS_NAME);
+    auto offset = GetAttrObject(options, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_NAME);
 
     auto title = GetAttrValue<std::string>(overlay, ATTRIBUTE_OVERLAY_TITLE_NAME);
-    EXPECT_EQ(title, ATTRIBUTE_OVERLAY_TITLE_DEFAULT_VALUE);
+    EXPECT_THAT(title, Eq(ATTRIBUTE_OVERLAY_TITLE_DEFAULT_VALUE));
     auto align = GetAttrValue<std::string>(options, ATTRIBUTE_OVERLAY_OPTIONS_ALIGN_NAME);
-    EXPECT_EQ(align, ATTRIBUTE_OVERLAY_OPTIONS_ALIGN_DEFAULT_VALUE);
+    EXPECT_THAT(align, Eq(ATTRIBUTE_OVERLAY_OPTIONS_ALIGN_DEFAULT_VALUE));
     auto x = GetAttrValue<std::string>(offset, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_X_NAME);
-    EXPECT_EQ(x, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_X_DEFAULT_VALUE);
+    EXPECT_THAT(x, Eq(ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_X_DEFAULT_VALUE));
     auto y = GetAttrValue<std::string>(offset, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_Y_NAME);
-    EXPECT_EQ(y, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_Y_DEFAULT_VALUE);
+    EXPECT_THAT(y, Eq(ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_Y_DEFAULT_VALUE));
 }
 
 /*
@@ -238,23 +238,23 @@ HWTEST_F(CommonMethodModifierTest12, setOverlayTestValidValues, TestSize.Level1)
         auto optOverlayOptions = Converter::ArkValue<Opt_OverlayOptions>(arkOverlayOptions);
         modifier_->setOverlay(node_, &unionStringValue, &optOverlayOptions);
         auto fullJson = GetJsonValue(node_);
-        auto overlay = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_OVERLAY_NAME);
-        auto options = GetAttrValue<std::unique_ptr<JsonValue>>(overlay, ATTRIBUTE_OVERLAY_OPTIONS_NAME);
+        auto overlay = GetAttrObject(fullJson, ATTRIBUTE_OVERLAY_NAME);
+        auto options = GetAttrObject(overlay, ATTRIBUTE_OVERLAY_OPTIONS_NAME);
         auto resultValue = GetAttrValue<std::string>(options, ATTRIBUTE_OVERLAY_OPTIONS_ALIGN_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 
     auto fullJson = GetJsonValue(node_);
-    auto overlay = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_OVERLAY_NAME);
-    auto options = GetAttrValue<std::unique_ptr<JsonValue>>(overlay, ATTRIBUTE_OVERLAY_OPTIONS_NAME);
-    auto offset = GetAttrValue<std::unique_ptr<JsonValue>>(options, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_NAME);
+    auto overlay = GetAttrObject(fullJson, ATTRIBUTE_OVERLAY_NAME);
+    auto options = GetAttrObject(overlay, ATTRIBUTE_OVERLAY_OPTIONS_NAME);
+    auto offset = GetAttrObject(options, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_NAME);
 
     auto title = GetAttrValue<std::string>(overlay, ATTRIBUTE_OVERLAY_TITLE_NAME);
-    EXPECT_EQ(title, expectedStr);
+    EXPECT_THAT(title, Eq(expectedStr));
     auto x = GetAttrValue<std::string>(offset, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_X_NAME);
-    EXPECT_EQ(x, "5.00vp");
+    EXPECT_THAT(x, Eq("5.00vp"));
     auto y = GetAttrValue<std::string>(offset, ATTRIBUTE_OVERLAY_OPTIONS_OFFSET_Y_NAME);
-    EXPECT_EQ(y, "6.00vp");
+    EXPECT_THAT(y, Eq("6.00vp"));
 
     // test CustomNodeBuilder
     CustomNodeBuilderTestHelper<CommonMethodModifierTest12> builderHelper(this, frameNode);
