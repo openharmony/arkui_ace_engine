@@ -1361,21 +1361,20 @@ export class ScrollSnapOptions_serializer {
                 snapPaginationTmpBufOpt = (snapPaginationTmpBufOptBufU as string | number | global_resource_Resource)
             } else if (snapPaginationTmpBufOptUnionSelector == (1).toByte()) {
                 const snapPaginationTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
-                let snapPaginationTmpBufOptBufU: Array<Dimension> = new Array<Dimension>(snapPaginationTmpBufOptBufULength)
-                for (let snapPaginationTmpBufOptBufUBufCounterI = 0; snapPaginationTmpBufOptBufUBufCounterI < snapPaginationTmpBufOptBufULength; snapPaginationTmpBufOptBufUBufCounterI++) {
-                    const snapPaginationTmpBufOptBufUTempBufUnionSelector: int32 = valueDeserializer.readInt8()
-                    let snapPaginationTmpBufOptBufUTempBuf: string | number | global_resource_Resource | undefined
-                    if (snapPaginationTmpBufOptBufUTempBufUnionSelector == (0).toByte()) {
-                        snapPaginationTmpBufOptBufUTempBuf = (valueDeserializer.readString() as string)
-                    } else if (snapPaginationTmpBufOptBufUTempBufUnionSelector == (1).toByte()) {
-                        snapPaginationTmpBufOptBufUTempBuf = (valueDeserializer.readNumber() as number)
-                    } else if (snapPaginationTmpBufOptBufUTempBufUnionSelector == (2).toByte()) {
-                        snapPaginationTmpBufOptBufUTempBuf = global_resource_Resource_serializer.read(valueDeserializer)
-                    } else {
-                        throw new Error('One of the branches for snapPaginationTmpBufOptBufUTempBuf has to be chosen through deserialisation.')
-                    }
-                    snapPaginationTmpBufOptBufU[snapPaginationTmpBufOptBufUBufCounterI] = (snapPaginationTmpBufOptBufUTempBuf as string | number | global_resource_Resource)
-                }
+                const snapPaginationTmpBufOptBufU: Array<Dimension> = new Array<Dimension>(snapPaginationTmpBufOptBufULength, (arg0: int32):Dimension => {
+            const snapPaginationTmpBufOptBufUTempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let snapPaginationTmpBufOptBufUTempBuf: string | number | global_resource_Resource | undefined;
+            if (snapPaginationTmpBufOptBufUTempBufUnionSelector == (0).toByte()) {
+                snapPaginationTmpBufOptBufUTempBuf = (valueDeserializer.readString() as string);
+            } else if (snapPaginationTmpBufOptBufUTempBufUnionSelector == (1).toByte()) {
+                snapPaginationTmpBufOptBufUTempBuf = (valueDeserializer.readNumber() as number);
+            } else if (snapPaginationTmpBufOptBufUTempBufUnionSelector == (2).toByte()) {
+                snapPaginationTmpBufOptBufUTempBuf = global_resource_Resource_serializer.read(valueDeserializer);
+            } else {
+                throw new Error('One of the branches for snapPaginationTmpBufOptBufUTempBuf has to be chosen through deserialisation.');
+            }
+            return (snapPaginationTmpBufOptBufUTempBuf as string | number | global_resource_Resource);
+        })
                 snapPaginationTmpBufOpt = snapPaginationTmpBufOptBufU
             } else {
                 throw new Error('One of the branches for snapPaginationTmpBufOpt has to be chosen through deserialisation.')

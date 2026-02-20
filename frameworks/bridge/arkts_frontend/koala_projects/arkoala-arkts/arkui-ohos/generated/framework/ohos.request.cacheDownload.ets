@@ -41,10 +41,9 @@ export class cacheDownload_NetworkInfo_serializer {
     public static read(buffer: DeserializerBase): cacheDownload.NetworkInfo {
         let valueDeserializer: DeserializerBase = buffer
         const dnsServersTmpBufLength: int32 = valueDeserializer.readInt32()
-        let dnsServersTmpBuf: Array<string> = new Array<string>(dnsServersTmpBufLength)
-        for (let dnsServersTmpBufBufCounterI = 0; dnsServersTmpBufBufCounterI < dnsServersTmpBufLength; dnsServersTmpBufBufCounterI++) {
-            dnsServersTmpBuf[dnsServersTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const dnsServersTmpBuf: Array<string> = new Array<string>(dnsServersTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const dnsServersTmpResult: Array<string> = dnsServersTmpBuf
         const ipTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let ipTmpBuf: string | undefined = undefined

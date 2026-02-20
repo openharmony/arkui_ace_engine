@@ -119,22 +119,19 @@ export class font_UIFontConfig_serializer {
     public static read(buffer: DeserializerBase): font.UIFontConfig {
         let valueDeserializer: DeserializerBase = buffer
         const fontDirTmpBufLength: int32 = valueDeserializer.readInt32()
-        let fontDirTmpBuf: Array<string> = new Array<string>(fontDirTmpBufLength)
-        for (let fontDirTmpBufBufCounterI = 0; fontDirTmpBufBufCounterI < fontDirTmpBufLength; fontDirTmpBufBufCounterI++) {
-            fontDirTmpBuf[fontDirTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const fontDirTmpBuf: Array<string> = new Array<string>(fontDirTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const fontDirTmpResult: Array<string> = fontDirTmpBuf
         const genericTmpBufLength: int32 = valueDeserializer.readInt32()
-        let genericTmpBuf: Array<font.UIFontGenericInfo> = new Array<font.UIFontGenericInfo>(genericTmpBufLength)
-        for (let genericTmpBufBufCounterI = 0; genericTmpBufBufCounterI < genericTmpBufLength; genericTmpBufBufCounterI++) {
-            genericTmpBuf[genericTmpBufBufCounterI] = font_UIFontGenericInfo_serializer.read(valueDeserializer)
-        }
+        const genericTmpBuf: Array<font.UIFontGenericInfo> = new Array<font.UIFontGenericInfo>(genericTmpBufLength, (arg0: int32):font.UIFontGenericInfo => {
+            return font_UIFontGenericInfo_serializer.read(valueDeserializer);
+        })
         const genericTmpResult: Array<font.UIFontGenericInfo> = genericTmpBuf
         const fallbackGroupsTmpBufLength: int32 = valueDeserializer.readInt32()
-        let fallbackGroupsTmpBuf: Array<font.UIFontFallbackGroupInfo> = new Array<font.UIFontFallbackGroupInfo>(fallbackGroupsTmpBufLength)
-        for (let fallbackGroupsTmpBufBufCounterI = 0; fallbackGroupsTmpBufBufCounterI < fallbackGroupsTmpBufLength; fallbackGroupsTmpBufBufCounterI++) {
-            fallbackGroupsTmpBuf[fallbackGroupsTmpBufBufCounterI] = font_UIFontFallbackGroupInfo_serializer.read(valueDeserializer)
-        }
+        const fallbackGroupsTmpBuf: Array<font.UIFontFallbackGroupInfo> = new Array<font.UIFontFallbackGroupInfo>(fallbackGroupsTmpBufLength, (arg0: int32):font.UIFontFallbackGroupInfo => {
+            return font_UIFontFallbackGroupInfo_serializer.read(valueDeserializer);
+        })
         const fallbackGroupsTmpResult: Array<font.UIFontFallbackGroupInfo> = fallbackGroupsTmpBuf
         let value: font.UIFontConfig = ({fontDir: fontDirTmpResult, generic: genericTmpResult, fallbackGroups: fallbackGroupsTmpResult} as font.UIFontConfig)
         return value
@@ -156,10 +153,9 @@ export class font_UIFontFallbackGroupInfo_serializer {
         let valueDeserializer: DeserializerBase = buffer
         const fontSetNameTmpResult: string = (valueDeserializer.readString() as string)
         const fallbackTmpBufLength: int32 = valueDeserializer.readInt32()
-        let fallbackTmpBuf: Array<font.UIFontFallbackInfo> = new Array<font.UIFontFallbackInfo>(fallbackTmpBufLength)
-        for (let fallbackTmpBufBufCounterI = 0; fallbackTmpBufBufCounterI < fallbackTmpBufLength; fallbackTmpBufBufCounterI++) {
-            fallbackTmpBuf[fallbackTmpBufBufCounterI] = font_UIFontFallbackInfo_serializer.read(valueDeserializer)
-        }
+        const fallbackTmpBuf: Array<font.UIFontFallbackInfo> = new Array<font.UIFontFallbackInfo>(fallbackTmpBufLength, (arg0: int32):font.UIFontFallbackInfo => {
+            return font_UIFontFallbackInfo_serializer.read(valueDeserializer);
+        })
         const fallbackTmpResult: Array<font.UIFontFallbackInfo> = fallbackTmpBuf
         let value: font.UIFontFallbackGroupInfo = ({fontSetName: fontSetNameTmpResult, fallback: fallbackTmpResult} as font.UIFontFallbackGroupInfo)
         return value
@@ -203,16 +199,14 @@ export class font_UIFontGenericInfo_serializer {
         let valueDeserializer: DeserializerBase = buffer
         const familyTmpResult: string = (valueDeserializer.readString() as string)
         const aliasTmpBufLength: int32 = valueDeserializer.readInt32()
-        let aliasTmpBuf: Array<font.UIFontAliasInfo> = new Array<font.UIFontAliasInfo>(aliasTmpBufLength)
-        for (let aliasTmpBufBufCounterI = 0; aliasTmpBufBufCounterI < aliasTmpBufLength; aliasTmpBufBufCounterI++) {
-            aliasTmpBuf[aliasTmpBufBufCounterI] = font_UIFontAliasInfo_serializer.read(valueDeserializer)
-        }
+        const aliasTmpBuf: Array<font.UIFontAliasInfo> = new Array<font.UIFontAliasInfo>(aliasTmpBufLength, (arg0: int32):font.UIFontAliasInfo => {
+            return font_UIFontAliasInfo_serializer.read(valueDeserializer);
+        })
         const aliasTmpResult: Array<font.UIFontAliasInfo> = aliasTmpBuf
         const adjustTmpBufLength: int32 = valueDeserializer.readInt32()
-        let adjustTmpBuf: Array<font.UIFontAdjustInfo> = new Array<font.UIFontAdjustInfo>(adjustTmpBufLength)
-        for (let adjustTmpBufBufCounterI = 0; adjustTmpBufBufCounterI < adjustTmpBufLength; adjustTmpBufBufCounterI++) {
-            adjustTmpBuf[adjustTmpBufBufCounterI] = font_UIFontAdjustInfo_serializer.read(valueDeserializer)
-        }
+        const adjustTmpBuf: Array<font.UIFontAdjustInfo> = new Array<font.UIFontAdjustInfo>(adjustTmpBufLength, (arg0: int32):font.UIFontAdjustInfo => {
+            return font_UIFontAdjustInfo_serializer.read(valueDeserializer);
+        })
         const adjustTmpResult: Array<font.UIFontAdjustInfo> = adjustTmpBuf
         let value: font.UIFontGenericInfo = ({family: familyTmpResult, alias: aliasTmpResult, adjust: adjustTmpResult} as font.UIFontGenericInfo)
         return value

@@ -79,25 +79,24 @@ export class global_resource_Resource_serializer {
         let paramsTmpBuf: Array<string | int32 | int64 | double | global_resource_Resource> | undefined = undefined
         if ((paramsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const paramsTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let paramsTmpBufOpt: Array<string | int32 | int64 | double | global_resource_Resource> = new Array<string | int32 | int64 | double | global_resource_Resource>(paramsTmpBufOptLength)
-            for (let paramsTmpBufOptBufCounterI = 0; paramsTmpBufOptBufCounterI < paramsTmpBufOptLength; paramsTmpBufOptBufCounterI++) {
-                const paramsTmpBufOptTempBufUnionSelector: int32 = valueDeserializer.readInt8()
-                let paramsTmpBufOptTempBuf: string | int32 | int64 | double | global_resource_Resource | undefined
-                if (paramsTmpBufOptTempBufUnionSelector == (0).toByte()) {
-                    paramsTmpBufOptTempBuf = (valueDeserializer.readString() as string)
-                } else if (paramsTmpBufOptTempBufUnionSelector == (1).toByte()) {
-                    paramsTmpBufOptTempBuf = valueDeserializer.readInt32()
-                } else if (paramsTmpBufOptTempBufUnionSelector == (2).toByte()) {
-                    paramsTmpBufOptTempBuf = valueDeserializer.readInt64()
-                } else if (paramsTmpBufOptTempBufUnionSelector == (3).toByte()) {
-                    paramsTmpBufOptTempBuf = valueDeserializer.readFloat64()
-                } else if (paramsTmpBufOptTempBufUnionSelector == (4).toByte()) {
-                    paramsTmpBufOptTempBuf = global_resource_Resource_serializer.read(valueDeserializer)
-                } else {
-                    throw new Error('One of the branches for paramsTmpBufOptTempBuf has to be chosen through deserialisation.')
-                }
-                paramsTmpBufOpt[paramsTmpBufOptBufCounterI] = (paramsTmpBufOptTempBuf as string | int32 | int64 | double | global_resource_Resource)
+            const paramsTmpBufOpt: Array<string | int32 | int64 | double | global_resource_Resource> = new Array<string | int32 | int64 | double | global_resource_Resource>(paramsTmpBufOptLength, (arg0: int32):string | int32 | int64 | double | global_resource_Resource => {
+            const paramsTmpBufOptTempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let paramsTmpBufOptTempBuf: string | int32 | int64 | double | global_resource_Resource | undefined;
+            if (paramsTmpBufOptTempBufUnionSelector == (0).toByte()) {
+                paramsTmpBufOptTempBuf = (valueDeserializer.readString() as string);
+            } else if (paramsTmpBufOptTempBufUnionSelector == (1).toByte()) {
+                paramsTmpBufOptTempBuf = valueDeserializer.readInt32();
+            } else if (paramsTmpBufOptTempBufUnionSelector == (2).toByte()) {
+                paramsTmpBufOptTempBuf = valueDeserializer.readInt64();
+            } else if (paramsTmpBufOptTempBufUnionSelector == (3).toByte()) {
+                paramsTmpBufOptTempBuf = valueDeserializer.readFloat64();
+            } else if (paramsTmpBufOptTempBufUnionSelector == (4).toByte()) {
+                paramsTmpBufOptTempBuf = global_resource_Resource_serializer.read(valueDeserializer);
+            } else {
+                throw new Error('One of the branches for paramsTmpBufOptTempBuf has to be chosen through deserialisation.');
             }
+            return (paramsTmpBufOptTempBuf as string | int32 | int64 | double | global_resource_Resource);
+        })
             paramsTmpBuf = paramsTmpBufOpt
         }
         const paramsTmpResult: Array<string | int32 | int64 | double | global_resource_Resource> | undefined = paramsTmpBuf

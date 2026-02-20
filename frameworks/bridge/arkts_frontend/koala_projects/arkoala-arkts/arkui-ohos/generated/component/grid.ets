@@ -1026,10 +1026,9 @@ export class GridLayoutOptions_serializer {
         let irregularIndexesTmpBuf: Array<int32> | undefined = undefined
         if ((irregularIndexesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const irregularIndexesTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let irregularIndexesTmpBufOpt: Array<int32> = new Array<int32>(irregularIndexesTmpBufOptLength)
-            for (let irregularIndexesTmpBufOptBufCounterI = 0; irregularIndexesTmpBufOptBufCounterI < irregularIndexesTmpBufOptLength; irregularIndexesTmpBufOptBufCounterI++) {
-                irregularIndexesTmpBufOpt[irregularIndexesTmpBufOptBufCounterI] = valueDeserializer.readInt32()
-            }
+            const irregularIndexesTmpBufOpt: Array<int32> = new Array<int32>(irregularIndexesTmpBufOptLength, (arg0: int32):int32 => {
+            return valueDeserializer.readInt32();
+        })
             irregularIndexesTmpBuf = irregularIndexesTmpBufOpt
         }
         const irregularIndexesTmpResult: Array<int32> | undefined = irregularIndexesTmpBuf

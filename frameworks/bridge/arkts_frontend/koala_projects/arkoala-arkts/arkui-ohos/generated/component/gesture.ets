@@ -978,10 +978,9 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         const retval = ArkUIGeneratedNativeModule._BaseGestureEvent_getFingerList(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<FingerInfo> = new Array<FingerInfo>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = FingerInfo_serializer.read(retvalDeserializer)
-        }
+        const buffer: Array<FingerInfo> = new Array<FingerInfo>(bufferLength, (arg0: int32):FingerInfo => {
+            return FingerInfo_serializer.read(retvalDeserializer);
+        })
         const returnResult: Array<FingerInfo> = buffer
         return returnResult
     }
@@ -1002,10 +1001,9 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         let buffer: Array<FingerInfo> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            let bufferOpt: Array<FingerInfo> = new Array<FingerInfo>(bufferOptLength)
-            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
-                bufferOpt[bufferOptBufCounterI] = FingerInfo_serializer.read(retvalDeserializer)
-            }
+            const bufferOpt: Array<FingerInfo> = new Array<FingerInfo>(bufferOptLength, (arg0: int32):FingerInfo => {
+            return FingerInfo_serializer.read(retvalDeserializer);
+        })
             buffer = bufferOpt
         }
         const returnResult: Array<FingerInfo> | undefined = buffer
@@ -1226,10 +1224,9 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
         const retval = ArkUIGeneratedNativeModule._GestureEvent_getFingerList(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<FingerInfo> = new Array<FingerInfo>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = FingerInfo_serializer.read(retvalDeserializer)
-        }
+        const buffer: Array<FingerInfo> = new Array<FingerInfo>(bufferLength, (arg0: int32):FingerInfo => {
+            return FingerInfo_serializer.read(retvalDeserializer);
+        })
         const returnResult: Array<FingerInfo> = buffer
         return returnResult
     }
@@ -1250,10 +1247,9 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
         let buffer: Array<FingerInfo> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            let bufferOpt: Array<FingerInfo> = new Array<FingerInfo>(bufferOptLength)
-            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
-                bufferOpt[bufferOptBufCounterI] = FingerInfo_serializer.read(retvalDeserializer)
-            }
+            const bufferOpt: Array<FingerInfo> = new Array<FingerInfo>(bufferOptLength, (arg0: int32):FingerInfo => {
+            return FingerInfo_serializer.read(retvalDeserializer);
+        })
             buffer = bufferOpt
         }
         const returnResult: Array<FingerInfo> | undefined = buffer

@@ -637,10 +637,9 @@ export class TextCascadePickerRangeContent_serializer {
         let childrenTmpBuf: Array<TextCascadePickerRangeContent> | undefined = undefined
         if ((childrenTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const childrenTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let childrenTmpBufOpt: Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(childrenTmpBufOptLength)
-            for (let childrenTmpBufOptBufCounterI = 0; childrenTmpBufOptBufCounterI < childrenTmpBufOptLength; childrenTmpBufOptBufCounterI++) {
-                childrenTmpBufOpt[childrenTmpBufOptBufCounterI] = TextCascadePickerRangeContent_serializer.read(valueDeserializer)
-            }
+            const childrenTmpBufOpt: Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(childrenTmpBufOptLength, (arg0: int32):TextCascadePickerRangeContent => {
+            return TextCascadePickerRangeContent_serializer.read(valueDeserializer);
+        })
             childrenTmpBuf = childrenTmpBufOpt
         }
         const childrenTmpResult: Array<TextCascadePickerRangeContent> | undefined = childrenTmpBuf
@@ -765,10 +764,9 @@ export class TextPickerResult_serializer {
             valueTmpBuf = (valueDeserializer.readString() as string)
         } else if (valueTmpBufUnionSelector == (1).toByte()) {
             const valueTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let valueTmpBufBufU: Array<string> = new Array<string>(valueTmpBufBufULength)
-            for (let valueTmpBufBufUBufCounterI = 0; valueTmpBufBufUBufCounterI < valueTmpBufBufULength; valueTmpBufBufUBufCounterI++) {
-                valueTmpBufBufU[valueTmpBufBufUBufCounterI] = (valueDeserializer.readString() as string)
-            }
+            const valueTmpBufBufU: Array<string> = new Array<string>(valueTmpBufBufULength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
             valueTmpBuf = valueTmpBufBufU
         } else {
             throw new Error('One of the branches for valueTmpBuf has to be chosen through deserialisation.')
@@ -780,10 +778,9 @@ export class TextPickerResult_serializer {
             indexTmpBuf = valueDeserializer.readInt32()
         } else if (indexTmpBufUnionSelector == (1).toByte()) {
             const indexTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let indexTmpBufBufU: Array<int32> = new Array<int32>(indexTmpBufBufULength)
-            for (let indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-                indexTmpBufBufU[indexTmpBufBufUBufCounterI] = valueDeserializer.readInt32()
-            }
+            const indexTmpBufBufU: Array<int32> = new Array<int32>(indexTmpBufBufULength, (arg0: int32):int32 => {
+            return valueDeserializer.readInt32();
+        })
             indexTmpBuf = indexTmpBufBufU
         } else {
             throw new Error('One of the branches for indexTmpBuf has to be chosen through deserialisation.')
@@ -1149,38 +1146,33 @@ export class TextPickerOptions_serializer {
         let rangeTmpBuf: Array<string> | Array<Array<string>> | arkui_component_units_Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent> | undefined
         if (rangeTmpBufUnionSelector == (0).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<string> = new Array<string>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = (valueDeserializer.readString() as string)
-            }
+            const rangeTmpBufBufU: Array<string> = new Array<string>(rangeTmpBufBufULength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else if (rangeTmpBufUnionSelector == (1).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<Array<string>> = new Array<Array<string>>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                const rangeTmpBufBufUTempBufLength: int32 = valueDeserializer.readInt32()
-                let rangeTmpBufBufUTempBuf: Array<string> = new Array<string>(rangeTmpBufBufUTempBufLength)
-                for (let rangeTmpBufBufUTempBufBufCounterI = 0; rangeTmpBufBufUTempBufBufCounterI < rangeTmpBufBufUTempBufLength; rangeTmpBufBufUTempBufBufCounterI++) {
-                    rangeTmpBufBufUTempBuf[rangeTmpBufBufUTempBufBufCounterI] = (valueDeserializer.readString() as string)
-                }
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = rangeTmpBufBufUTempBuf
-            }
+            const rangeTmpBufBufU: Array<Array<string>> = new Array<Array<string>>(rangeTmpBufBufULength, (arg0: int32):Array<string> => {
+            const rangeTmpBufBufUTempBufLength: int32 = valueDeserializer.readInt32();
+            const rangeTmpBufBufUTempBuf: Array<string> = new Array<string>(rangeTmpBufBufUTempBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        });
+            return rangeTmpBufBufUTempBuf;
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else if (rangeTmpBufUnionSelector == (2).toByte()) {
             rangeTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
         } else if (rangeTmpBufUnionSelector == (3).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<TextPickerRangeContent> = new Array<TextPickerRangeContent>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = TextPickerRangeContent_serializer.read(valueDeserializer)
-            }
+            const rangeTmpBufBufU: Array<TextPickerRangeContent> = new Array<TextPickerRangeContent>(rangeTmpBufBufULength, (arg0: int32):TextPickerRangeContent => {
+            return TextPickerRangeContent_serializer.read(valueDeserializer);
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else if (rangeTmpBufUnionSelector == (4).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = TextCascadePickerRangeContent_serializer.read(valueDeserializer)
-            }
+            const rangeTmpBufBufU: Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(rangeTmpBufBufULength, (arg0: int32):TextCascadePickerRangeContent => {
+            return TextCascadePickerRangeContent_serializer.read(valueDeserializer);
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else {
             throw new Error('One of the branches for rangeTmpBuf has to be chosen through deserialisation.')
@@ -1220,19 +1212,18 @@ export class TextPickerOptions_serializer {
                 let valueTmpBufOptBufU: Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<global_resource_Resource>> | Bindable<Array<string>> | undefined
                 if (valueTmpBufOptBufUUnionSelector == (0).toByte()) {
                     const valueTmpBufOptBufUBufULength: int32 = valueDeserializer.readInt32()
-                    let valueTmpBufOptBufUBufU: Array<ResourceStr> = new Array<ResourceStr>(valueTmpBufOptBufUBufULength)
-                    for (let valueTmpBufOptBufUBufUBufCounterI = 0; valueTmpBufOptBufUBufUBufCounterI < valueTmpBufOptBufUBufULength; valueTmpBufOptBufUBufUBufCounterI++) {
-                        const valueTmpBufOptBufUBufUTempBufUnionSelector: int32 = valueDeserializer.readInt8()
-                        let valueTmpBufOptBufUBufUTempBuf: string | arkui_component_units_Resource | undefined
-                        if (valueTmpBufOptBufUBufUTempBufUnionSelector == (0).toByte()) {
-                            valueTmpBufOptBufUBufUTempBuf = (valueDeserializer.readString() as string)
-                        } else if (valueTmpBufOptBufUBufUTempBufUnionSelector == (1).toByte()) {
-                            valueTmpBufOptBufUBufUTempBuf = global_resource_Resource_serializer.read(valueDeserializer)
-                        } else {
-                            throw new Error('One of the branches for valueTmpBufOptBufUBufUTempBuf has to be chosen through deserialisation.')
-                        }
-                        valueTmpBufOptBufUBufU[valueTmpBufOptBufUBufUBufCounterI] = (valueTmpBufOptBufUBufUTempBuf as string | arkui_component_units_Resource)
-                    }
+                    const valueTmpBufOptBufUBufU: Array<ResourceStr> = new Array<ResourceStr>(valueTmpBufOptBufUBufULength, (arg0: int32):ResourceStr => {
+            const valueTmpBufOptBufUBufUTempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let valueTmpBufOptBufUBufUTempBuf: string | arkui_component_units_Resource | undefined;
+            if (valueTmpBufOptBufUBufUTempBufUnionSelector == (0).toByte()) {
+                valueTmpBufOptBufUBufUTempBuf = (valueDeserializer.readString() as string);
+            } else if (valueTmpBufOptBufUBufUTempBufUnionSelector == (1).toByte()) {
+                valueTmpBufOptBufUBufUTempBuf = global_resource_Resource_serializer.read(valueDeserializer);
+            } else {
+                throw new Error('One of the branches for valueTmpBufOptBufUBufUTempBuf has to be chosen through deserialisation.');
+            }
+            return (valueTmpBufOptBufUBufUTempBuf as string | arkui_component_units_Resource);
+        })
                     valueTmpBufOptBufU = valueTmpBufOptBufUBufU
                 } else if (valueTmpBufOptBufUUnionSelector == (1).toByte()) {
                     valueTmpBufOptBufU = Bindable_Array_ResourceStr_serializer.read(valueDeserializer)
@@ -1259,10 +1250,9 @@ export class TextPickerOptions_serializer {
                 selectedTmpBufOpt = valueDeserializer.readInt32()
             } else if (selectedTmpBufOptUnionSelector == (1).toByte()) {
                 const selectedTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
-                let selectedTmpBufOptBufU: Array<int32> = new Array<int32>(selectedTmpBufOptBufULength)
-                for (let selectedTmpBufOptBufUBufCounterI = 0; selectedTmpBufOptBufUBufCounterI < selectedTmpBufOptBufULength; selectedTmpBufOptBufUBufCounterI++) {
-                    selectedTmpBufOptBufU[selectedTmpBufOptBufUBufCounterI] = valueDeserializer.readInt32()
-                }
+                const selectedTmpBufOptBufU: Array<int32> = new Array<int32>(selectedTmpBufOptBufULength, (arg0: int32):int32 => {
+            return valueDeserializer.readInt32();
+        })
                 selectedTmpBufOpt = selectedTmpBufOptBufU
             } else if (selectedTmpBufOptUnionSelector == (2).toByte()) {
                 selectedTmpBufOpt = Bindable_I32_serializer.read(valueDeserializer)
@@ -1278,10 +1268,9 @@ export class TextPickerOptions_serializer {
         let columnWidthsTmpBuf: Array<arkui_Graphics_LengthMetrics> | undefined = undefined
         if ((columnWidthsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const columnWidthsTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let columnWidthsTmpBufOpt: Array<arkui_Graphics_LengthMetrics> = new Array<arkui_Graphics_LengthMetrics>(columnWidthsTmpBufOptLength)
-            for (let columnWidthsTmpBufOptBufCounterI = 0; columnWidthsTmpBufOptBufCounterI < columnWidthsTmpBufOptLength; columnWidthsTmpBufOptBufCounterI++) {
-                columnWidthsTmpBufOpt[columnWidthsTmpBufOptBufCounterI] = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
-            }
+            const columnWidthsTmpBufOpt: Array<arkui_Graphics_LengthMetrics> = new Array<arkui_Graphics_LengthMetrics>(columnWidthsTmpBufOptLength, (arg0: int32):arkui_Graphics_LengthMetrics => {
+            return arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer);
+        })
             columnWidthsTmpBuf = columnWidthsTmpBufOpt
         }
         const columnWidthsTmpResult: Array<arkui_Graphics_LengthMetrics> | undefined = columnWidthsTmpBuf
@@ -1990,38 +1979,33 @@ export class TextPickerDialogOptions_serializer {
         let rangeTmpBuf: Array<string> | Array<Array<string>> | arkui_component_units_Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent> | undefined
         if (rangeTmpBufUnionSelector == (0).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<string> = new Array<string>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = (valueDeserializer.readString() as string)
-            }
+            const rangeTmpBufBufU: Array<string> = new Array<string>(rangeTmpBufBufULength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else if (rangeTmpBufUnionSelector == (1).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<Array<string>> = new Array<Array<string>>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                const rangeTmpBufBufUTempBufLength: int32 = valueDeserializer.readInt32()
-                let rangeTmpBufBufUTempBuf: Array<string> = new Array<string>(rangeTmpBufBufUTempBufLength)
-                for (let rangeTmpBufBufUTempBufBufCounterI = 0; rangeTmpBufBufUTempBufBufCounterI < rangeTmpBufBufUTempBufLength; rangeTmpBufBufUTempBufBufCounterI++) {
-                    rangeTmpBufBufUTempBuf[rangeTmpBufBufUTempBufBufCounterI] = (valueDeserializer.readString() as string)
-                }
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = rangeTmpBufBufUTempBuf
-            }
+            const rangeTmpBufBufU: Array<Array<string>> = new Array<Array<string>>(rangeTmpBufBufULength, (arg0: int32):Array<string> => {
+            const rangeTmpBufBufUTempBufLength: int32 = valueDeserializer.readInt32();
+            const rangeTmpBufBufUTempBuf: Array<string> = new Array<string>(rangeTmpBufBufUTempBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        });
+            return rangeTmpBufBufUTempBuf;
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else if (rangeTmpBufUnionSelector == (2).toByte()) {
             rangeTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
         } else if (rangeTmpBufUnionSelector == (3).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<TextPickerRangeContent> = new Array<TextPickerRangeContent>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = TextPickerRangeContent_serializer.read(valueDeserializer)
-            }
+            const rangeTmpBufBufU: Array<TextPickerRangeContent> = new Array<TextPickerRangeContent>(rangeTmpBufBufULength, (arg0: int32):TextPickerRangeContent => {
+            return TextPickerRangeContent_serializer.read(valueDeserializer);
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else if (rangeTmpBufUnionSelector == (4).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = TextCascadePickerRangeContent_serializer.read(valueDeserializer)
-            }
+            const rangeTmpBufBufU: Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(rangeTmpBufBufULength, (arg0: int32):TextCascadePickerRangeContent => {
+            return TextCascadePickerRangeContent_serializer.read(valueDeserializer);
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else {
             throw new Error('One of the branches for rangeTmpBuf has to be chosen through deserialisation.')
@@ -2061,19 +2045,18 @@ export class TextPickerDialogOptions_serializer {
                 let valueTmpBufOptBufU: Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<global_resource_Resource>> | Bindable<Array<string>> | undefined
                 if (valueTmpBufOptBufUUnionSelector == (0).toByte()) {
                     const valueTmpBufOptBufUBufULength: int32 = valueDeserializer.readInt32()
-                    let valueTmpBufOptBufUBufU: Array<ResourceStr> = new Array<ResourceStr>(valueTmpBufOptBufUBufULength)
-                    for (let valueTmpBufOptBufUBufUBufCounterI = 0; valueTmpBufOptBufUBufUBufCounterI < valueTmpBufOptBufUBufULength; valueTmpBufOptBufUBufUBufCounterI++) {
-                        const valueTmpBufOptBufUBufUTempBufUnionSelector: int32 = valueDeserializer.readInt8()
-                        let valueTmpBufOptBufUBufUTempBuf: string | arkui_component_units_Resource | undefined
-                        if (valueTmpBufOptBufUBufUTempBufUnionSelector == (0).toByte()) {
-                            valueTmpBufOptBufUBufUTempBuf = (valueDeserializer.readString() as string)
-                        } else if (valueTmpBufOptBufUBufUTempBufUnionSelector == (1).toByte()) {
-                            valueTmpBufOptBufUBufUTempBuf = global_resource_Resource_serializer.read(valueDeserializer)
-                        } else {
-                            throw new Error('One of the branches for valueTmpBufOptBufUBufUTempBuf has to be chosen through deserialisation.')
-                        }
-                        valueTmpBufOptBufUBufU[valueTmpBufOptBufUBufUBufCounterI] = (valueTmpBufOptBufUBufUTempBuf as string | arkui_component_units_Resource)
-                    }
+                    const valueTmpBufOptBufUBufU: Array<ResourceStr> = new Array<ResourceStr>(valueTmpBufOptBufUBufULength, (arg0: int32):ResourceStr => {
+            const valueTmpBufOptBufUBufUTempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let valueTmpBufOptBufUBufUTempBuf: string | arkui_component_units_Resource | undefined;
+            if (valueTmpBufOptBufUBufUTempBufUnionSelector == (0).toByte()) {
+                valueTmpBufOptBufUBufUTempBuf = (valueDeserializer.readString() as string);
+            } else if (valueTmpBufOptBufUBufUTempBufUnionSelector == (1).toByte()) {
+                valueTmpBufOptBufUBufUTempBuf = global_resource_Resource_serializer.read(valueDeserializer);
+            } else {
+                throw new Error('One of the branches for valueTmpBufOptBufUBufUTempBuf has to be chosen through deserialisation.');
+            }
+            return (valueTmpBufOptBufUBufUTempBuf as string | arkui_component_units_Resource);
+        })
                     valueTmpBufOptBufU = valueTmpBufOptBufUBufU
                 } else if (valueTmpBufOptBufUUnionSelector == (1).toByte()) {
                     valueTmpBufOptBufU = Bindable_Array_ResourceStr_serializer.read(valueDeserializer)
@@ -2100,10 +2083,9 @@ export class TextPickerDialogOptions_serializer {
                 selectedTmpBufOpt = valueDeserializer.readInt32()
             } else if (selectedTmpBufOptUnionSelector == (1).toByte()) {
                 const selectedTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
-                let selectedTmpBufOptBufU: Array<int32> = new Array<int32>(selectedTmpBufOptBufULength)
-                for (let selectedTmpBufOptBufUBufCounterI = 0; selectedTmpBufOptBufUBufCounterI < selectedTmpBufOptBufULength; selectedTmpBufOptBufUBufCounterI++) {
-                    selectedTmpBufOptBufU[selectedTmpBufOptBufUBufCounterI] = valueDeserializer.readInt32()
-                }
+                const selectedTmpBufOptBufU: Array<int32> = new Array<int32>(selectedTmpBufOptBufULength, (arg0: int32):int32 => {
+            return valueDeserializer.readInt32();
+        })
                 selectedTmpBufOpt = selectedTmpBufOptBufU
             } else if (selectedTmpBufOptUnionSelector == (2).toByte()) {
                 selectedTmpBufOpt = Bindable_I32_serializer.read(valueDeserializer)
@@ -2119,10 +2101,9 @@ export class TextPickerDialogOptions_serializer {
         let columnWidthsTmpBuf: Array<arkui_Graphics_LengthMetrics> | undefined = undefined
         if ((columnWidthsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const columnWidthsTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let columnWidthsTmpBufOpt: Array<arkui_Graphics_LengthMetrics> = new Array<arkui_Graphics_LengthMetrics>(columnWidthsTmpBufOptLength)
-            for (let columnWidthsTmpBufOptBufCounterI = 0; columnWidthsTmpBufOptBufCounterI < columnWidthsTmpBufOptLength; columnWidthsTmpBufOptBufCounterI++) {
-                columnWidthsTmpBufOpt[columnWidthsTmpBufOptBufCounterI] = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
-            }
+            const columnWidthsTmpBufOpt: Array<arkui_Graphics_LengthMetrics> = new Array<arkui_Graphics_LengthMetrics>(columnWidthsTmpBufOptLength, (arg0: int32):arkui_Graphics_LengthMetrics => {
+            return arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer);
+        })
             columnWidthsTmpBuf = columnWidthsTmpBufOpt
         }
         const columnWidthsTmpResult: Array<arkui_Graphics_LengthMetrics> | undefined = columnWidthsTmpBuf
@@ -2920,38 +2901,33 @@ export class TextPickerDialogOptionsExt_serializer {
         let rangeTmpBuf: Array<string> | Array<Array<string>> | arkui_component_units_Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent> | undefined
         if (rangeTmpBufUnionSelector == (0).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<string> = new Array<string>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = (valueDeserializer.readString() as string)
-            }
+            const rangeTmpBufBufU: Array<string> = new Array<string>(rangeTmpBufBufULength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else if (rangeTmpBufUnionSelector == (1).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<Array<string>> = new Array<Array<string>>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                const rangeTmpBufBufUTempBufLength: int32 = valueDeserializer.readInt32()
-                let rangeTmpBufBufUTempBuf: Array<string> = new Array<string>(rangeTmpBufBufUTempBufLength)
-                for (let rangeTmpBufBufUTempBufBufCounterI = 0; rangeTmpBufBufUTempBufBufCounterI < rangeTmpBufBufUTempBufLength; rangeTmpBufBufUTempBufBufCounterI++) {
-                    rangeTmpBufBufUTempBuf[rangeTmpBufBufUTempBufBufCounterI] = (valueDeserializer.readString() as string)
-                }
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = rangeTmpBufBufUTempBuf
-            }
+            const rangeTmpBufBufU: Array<Array<string>> = new Array<Array<string>>(rangeTmpBufBufULength, (arg0: int32):Array<string> => {
+            const rangeTmpBufBufUTempBufLength: int32 = valueDeserializer.readInt32();
+            const rangeTmpBufBufUTempBuf: Array<string> = new Array<string>(rangeTmpBufBufUTempBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        });
+            return rangeTmpBufBufUTempBuf;
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else if (rangeTmpBufUnionSelector == (2).toByte()) {
             rangeTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
         } else if (rangeTmpBufUnionSelector == (3).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<TextPickerRangeContent> = new Array<TextPickerRangeContent>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = TextPickerRangeContent_serializer.read(valueDeserializer)
-            }
+            const rangeTmpBufBufU: Array<TextPickerRangeContent> = new Array<TextPickerRangeContent>(rangeTmpBufBufULength, (arg0: int32):TextPickerRangeContent => {
+            return TextPickerRangeContent_serializer.read(valueDeserializer);
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else if (rangeTmpBufUnionSelector == (4).toByte()) {
             const rangeTmpBufBufULength: int32 = valueDeserializer.readInt32()
-            let rangeTmpBufBufU: Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(rangeTmpBufBufULength)
-            for (let rangeTmpBufBufUBufCounterI = 0; rangeTmpBufBufUBufCounterI < rangeTmpBufBufULength; rangeTmpBufBufUBufCounterI++) {
-                rangeTmpBufBufU[rangeTmpBufBufUBufCounterI] = TextCascadePickerRangeContent_serializer.read(valueDeserializer)
-            }
+            const rangeTmpBufBufU: Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(rangeTmpBufBufULength, (arg0: int32):TextCascadePickerRangeContent => {
+            return TextCascadePickerRangeContent_serializer.read(valueDeserializer);
+        })
             rangeTmpBuf = rangeTmpBufBufU
         } else {
             throw new Error('One of the branches for rangeTmpBuf has to be chosen through deserialisation.')
@@ -2991,19 +2967,18 @@ export class TextPickerDialogOptionsExt_serializer {
                 let valueTmpBufOptBufU: Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<global_resource_Resource>> | Bindable<Array<string>> | undefined
                 if (valueTmpBufOptBufUUnionSelector == (0).toByte()) {
                     const valueTmpBufOptBufUBufULength: int32 = valueDeserializer.readInt32()
-                    let valueTmpBufOptBufUBufU: Array<ResourceStr> = new Array<ResourceStr>(valueTmpBufOptBufUBufULength)
-                    for (let valueTmpBufOptBufUBufUBufCounterI = 0; valueTmpBufOptBufUBufUBufCounterI < valueTmpBufOptBufUBufULength; valueTmpBufOptBufUBufUBufCounterI++) {
-                        const valueTmpBufOptBufUBufUTempBufUnionSelector: int32 = valueDeserializer.readInt8()
-                        let valueTmpBufOptBufUBufUTempBuf: string | arkui_component_units_Resource | undefined
-                        if (valueTmpBufOptBufUBufUTempBufUnionSelector == (0).toByte()) {
-                            valueTmpBufOptBufUBufUTempBuf = (valueDeserializer.readString() as string)
-                        } else if (valueTmpBufOptBufUBufUTempBufUnionSelector == (1).toByte()) {
-                            valueTmpBufOptBufUBufUTempBuf = global_resource_Resource_serializer.read(valueDeserializer)
-                        } else {
-                            throw new Error('One of the branches for valueTmpBufOptBufUBufUTempBuf has to be chosen through deserialisation.')
-                        }
-                        valueTmpBufOptBufUBufU[valueTmpBufOptBufUBufUBufCounterI] = (valueTmpBufOptBufUBufUTempBuf as string | arkui_component_units_Resource)
-                    }
+                    const valueTmpBufOptBufUBufU: Array<ResourceStr> = new Array<ResourceStr>(valueTmpBufOptBufUBufULength, (arg0: int32):ResourceStr => {
+            const valueTmpBufOptBufUBufUTempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let valueTmpBufOptBufUBufUTempBuf: string | arkui_component_units_Resource | undefined;
+            if (valueTmpBufOptBufUBufUTempBufUnionSelector == (0).toByte()) {
+                valueTmpBufOptBufUBufUTempBuf = (valueDeserializer.readString() as string);
+            } else if (valueTmpBufOptBufUBufUTempBufUnionSelector == (1).toByte()) {
+                valueTmpBufOptBufUBufUTempBuf = global_resource_Resource_serializer.read(valueDeserializer);
+            } else {
+                throw new Error('One of the branches for valueTmpBufOptBufUBufUTempBuf has to be chosen through deserialisation.');
+            }
+            return (valueTmpBufOptBufUBufUTempBuf as string | arkui_component_units_Resource);
+        })
                     valueTmpBufOptBufU = valueTmpBufOptBufUBufU
                 } else if (valueTmpBufOptBufUUnionSelector == (1).toByte()) {
                     valueTmpBufOptBufU = Bindable_Array_ResourceStr_serializer.read(valueDeserializer)
@@ -3030,10 +3005,9 @@ export class TextPickerDialogOptionsExt_serializer {
                 selectedTmpBufOpt = valueDeserializer.readInt32()
             } else if (selectedTmpBufOptUnionSelector == (1).toByte()) {
                 const selectedTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
-                let selectedTmpBufOptBufU: Array<int32> = new Array<int32>(selectedTmpBufOptBufULength)
-                for (let selectedTmpBufOptBufUBufCounterI = 0; selectedTmpBufOptBufUBufCounterI < selectedTmpBufOptBufULength; selectedTmpBufOptBufUBufCounterI++) {
-                    selectedTmpBufOptBufU[selectedTmpBufOptBufUBufCounterI] = valueDeserializer.readInt32()
-                }
+                const selectedTmpBufOptBufU: Array<int32> = new Array<int32>(selectedTmpBufOptBufULength, (arg0: int32):int32 => {
+            return valueDeserializer.readInt32();
+        })
                 selectedTmpBufOpt = selectedTmpBufOptBufU
             } else if (selectedTmpBufOptUnionSelector == (2).toByte()) {
                 selectedTmpBufOpt = Bindable_I32_serializer.read(valueDeserializer)
@@ -3049,10 +3023,9 @@ export class TextPickerDialogOptionsExt_serializer {
         let columnWidthsTmpBuf: Array<arkui_Graphics_LengthMetrics> | undefined = undefined
         if ((columnWidthsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const columnWidthsTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let columnWidthsTmpBufOpt: Array<arkui_Graphics_LengthMetrics> = new Array<arkui_Graphics_LengthMetrics>(columnWidthsTmpBufOptLength)
-            for (let columnWidthsTmpBufOptBufCounterI = 0; columnWidthsTmpBufOptBufCounterI < columnWidthsTmpBufOptLength; columnWidthsTmpBufOptBufCounterI++) {
-                columnWidthsTmpBufOpt[columnWidthsTmpBufOptBufCounterI] = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
-            }
+            const columnWidthsTmpBufOpt: Array<arkui_Graphics_LengthMetrics> = new Array<arkui_Graphics_LengthMetrics>(columnWidthsTmpBufOptLength, (arg0: int32):arkui_Graphics_LengthMetrics => {
+            return arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer);
+        })
             columnWidthsTmpBuf = columnWidthsTmpBufOpt
         }
         const columnWidthsTmpResult: Array<arkui_Graphics_LengthMetrics> | undefined = columnWidthsTmpBuf

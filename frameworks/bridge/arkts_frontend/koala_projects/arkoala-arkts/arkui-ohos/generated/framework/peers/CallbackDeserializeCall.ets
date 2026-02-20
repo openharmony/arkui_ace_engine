@@ -202,10 +202,9 @@ export function deserializeAndCallCallback_Array_I32_Void(thisDeserializer: Dese
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<Array<int32>, void>)
     const dataTmpBufLength: int32 = thisDeserializer.readInt32()
-    let dataTmpBuf: Array<int32> = new Array<int32>(dataTmpBufLength)
-    for (let dataTmpBufBufCounterI = 0; dataTmpBufBufCounterI < dataTmpBufLength; dataTmpBufBufCounterI++) {
-        dataTmpBuf[dataTmpBufBufCounterI] = thisDeserializer.readInt32()
-    }
+    const dataTmpBuf: Array<int32> = new Array<int32>(dataTmpBufLength, (arg0: int32):int32 => {
+        return thisDeserializer.readInt32();
+    })
     let data: Array<int32> = dataTmpBuf
     call(data)
 }
@@ -213,10 +212,9 @@ export function deserializeAndCallCallback_Array_Resource_Void(thisDeserializer:
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<Array<global_resource_Resource>, void>)
     const dataTmpBufLength: int32 = thisDeserializer.readInt32()
-    let dataTmpBuf: Array<global_resource_Resource> = new Array<global_resource_Resource>(dataTmpBufLength)
-    for (let dataTmpBufBufCounterI = 0; dataTmpBufBufCounterI < dataTmpBufLength; dataTmpBufBufCounterI++) {
-        dataTmpBuf[dataTmpBufBufCounterI] = global_resource_Resource_serializer.read(thisDeserializer)
-    }
+    const dataTmpBuf: Array<global_resource_Resource> = new Array<global_resource_Resource>(dataTmpBufLength, (arg0: int32):global_resource_Resource => {
+        return global_resource_Resource_serializer.read(thisDeserializer);
+    })
     let data: Array<global_resource_Resource> = dataTmpBuf
     call(data)
 }
@@ -224,19 +222,18 @@ export function deserializeAndCallCallback_Array_ResourceStr_Void(thisDeserializ
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<Array<ResourceStr>, void>)
     const dataTmpBufLength: int32 = thisDeserializer.readInt32()
-    let dataTmpBuf: Array<ResourceStr> = new Array<ResourceStr>(dataTmpBufLength)
-    for (let dataTmpBufBufCounterI = 0; dataTmpBufBufCounterI < dataTmpBufLength; dataTmpBufBufCounterI++) {
-        const dataTmpBufTempBufUnionSelector: int32 = thisDeserializer.readInt8()
-        let dataTmpBufTempBuf: string | arkui_component_units_Resource | undefined
+    const dataTmpBuf: Array<ResourceStr> = new Array<ResourceStr>(dataTmpBufLength, (arg0: int32):ResourceStr => {
+        const dataTmpBufTempBufUnionSelector: int32 = thisDeserializer.readInt8();
+        let dataTmpBufTempBuf: string | arkui_component_units_Resource | undefined;
         if (dataTmpBufTempBufUnionSelector == (0).toByte()) {
-            dataTmpBufTempBuf = (thisDeserializer.readString() as string)
+            dataTmpBufTempBuf = (thisDeserializer.readString() as string);
         } else if (dataTmpBufTempBufUnionSelector == (1).toByte()) {
-            dataTmpBufTempBuf = global_resource_Resource_serializer.read(thisDeserializer)
+            dataTmpBufTempBuf = global_resource_Resource_serializer.read(thisDeserializer);
         } else {
-            throw new Error('One of the branches for dataTmpBufTempBuf has to be chosen through deserialisation.')
+            throw new Error('One of the branches for dataTmpBufTempBuf has to be chosen through deserialisation.');
         }
-        dataTmpBuf[dataTmpBufBufCounterI] = (dataTmpBufTempBuf as string | arkui_component_units_Resource)
-    }
+        return (dataTmpBufTempBuf as string | arkui_component_units_Resource);
+    })
     let data: Array<ResourceStr> = dataTmpBuf
     call(data)
 }
@@ -244,10 +241,9 @@ export function deserializeAndCallCallback_Array_String_Void(thisDeserializer: D
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<Array<string>, void>)
     const dataTmpBufLength: int32 = thisDeserializer.readInt32()
-    let dataTmpBuf: Array<string> = new Array<string>(dataTmpBufLength)
-    for (let dataTmpBufBufCounterI = 0; dataTmpBufBufCounterI < dataTmpBufLength; dataTmpBufBufCounterI++) {
-        dataTmpBuf[dataTmpBufBufCounterI] = (thisDeserializer.readString() as string)
-    }
+    const dataTmpBuf: Array<string> = new Array<string>(dataTmpBufLength, (arg0: int32):string => {
+        return (thisDeserializer.readString() as string);
+    })
     let data: Array<string> = dataTmpBuf
     call(data)
 }
@@ -255,10 +251,9 @@ export function deserializeAndCallCallback_Array_TextMenuItem_Void(thisDeseriali
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as ((value: Array<TextMenuItem>) => void))
     const valueTmpBufLength: int32 = thisDeserializer.readInt32()
-    let valueTmpBuf: Array<TextMenuItem> = new Array<TextMenuItem>(valueTmpBufLength)
-    for (let valueTmpBufBufCounterI = 0; valueTmpBufBufCounterI < valueTmpBufLength; valueTmpBufBufCounterI++) {
-        valueTmpBuf[valueTmpBufBufCounterI] = TextMenuItem_serializer.read(thisDeserializer)
-    }
+    const valueTmpBuf: Array<TextMenuItem> = new Array<TextMenuItem>(valueTmpBufLength, (arg0: int32):TextMenuItem => {
+        return TextMenuItem_serializer.read(thisDeserializer);
+    })
     let value: Array<TextMenuItem> = valueTmpBuf
     call(value)
 }
@@ -266,10 +261,9 @@ export function deserializeAndCallCallback_Array_TouchTestInfo_TouchResult(thisD
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as ((value: Array<TouchTestInfo>) => TouchResult))
     const valueTmpBufLength: int32 = thisDeserializer.readInt32()
-    let valueTmpBuf: Array<TouchTestInfo> = new Array<TouchTestInfo>(valueTmpBufLength)
-    for (let valueTmpBufBufCounterI = 0; valueTmpBufBufCounterI < valueTmpBufLength; valueTmpBufBufCounterI++) {
-        valueTmpBuf[valueTmpBufBufCounterI] = TouchTestInfo_serializer.read(thisDeserializer)
-    }
+    const valueTmpBuf: Array<TouchTestInfo> = new Array<TouchTestInfo>(valueTmpBufLength, (arg0: int32):TouchTestInfo => {
+        return TouchTestInfo_serializer.read(thisDeserializer);
+    })
     let value: Array<TouchTestInfo> = valueTmpBuf
     const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
@@ -1242,10 +1236,9 @@ export function deserializeAndCallCallback_onMeasureSize_SizeResult(thisDeserial
     const call = (ResourceHolder.instance().get(resourceId) as Callback_onMeasureSize_SizeResult)
     let selfLayoutInfo: GeometryInfo = GeometryInfo_serializer.read(thisDeserializer)
     const childrenTmpBufLength: int32 = thisDeserializer.readInt32()
-    let childrenTmpBuf: Array<Measurable> = new Array<Measurable>(childrenTmpBufLength)
-    for (let childrenTmpBufBufCounterI = 0; childrenTmpBufBufCounterI < childrenTmpBufLength; childrenTmpBufBufCounterI++) {
-        childrenTmpBuf[childrenTmpBufBufCounterI] = (Measurable_serializer.read(thisDeserializer) as Measurable)
-    }
+    const childrenTmpBuf: Array<Measurable> = new Array<Measurable>(childrenTmpBufLength, (arg0: int32):Measurable => {
+        return (Measurable_serializer.read(thisDeserializer) as Measurable);
+    })
     let children: Array<Measurable> = childrenTmpBuf
     let constraint: ConstraintSizeOptions = ConstraintSizeOptions_serializer.read(thisDeserializer)
     const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
@@ -1320,10 +1313,9 @@ export function deserializeAndCallCallback_onPlaceChildren_Void(thisDeserializer
     const call = (ResourceHolder.instance().get(resourceId) as Callback_onPlaceChildren_Void)
     let selfLayoutInfo: GeometryInfo = GeometryInfo_serializer.read(thisDeserializer)
     const childrenTmpBufLength: int32 = thisDeserializer.readInt32()
-    let childrenTmpBuf: Array<Layoutable> = new Array<Layoutable>(childrenTmpBufLength)
-    for (let childrenTmpBufBufCounterI = 0; childrenTmpBufBufCounterI < childrenTmpBufLength; childrenTmpBufBufCounterI++) {
-        childrenTmpBuf[childrenTmpBufBufCounterI] = (Layoutable_serializer.read(thisDeserializer) as Layoutable)
-    }
+    const childrenTmpBuf: Array<Layoutable> = new Array<Layoutable>(childrenTmpBufLength, (arg0: int32):Layoutable => {
+        return (Layoutable_serializer.read(thisDeserializer) as Layoutable);
+    })
     let children: Array<Layoutable> = childrenTmpBuf
     let constraint: ConstraintSizeOptions = ConstraintSizeOptions_serializer.read(thisDeserializer)
     call(selfLayoutInfo, children, constraint)
@@ -1463,10 +1455,9 @@ export function deserializeAndCallCallback_Opt_Array_NavDestinationTransition_Vo
     let valueTmpBuf: Array<NavDestinationTransition> | undefined = undefined
     if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
         const valueTmpBufOptLength: int32 = thisDeserializer.readInt32()
-        let valueTmpBufOpt: Array<NavDestinationTransition> = new Array<NavDestinationTransition>(valueTmpBufOptLength)
-        for (let valueTmpBufOptBufCounterI = 0; valueTmpBufOptBufCounterI < valueTmpBufOptLength; valueTmpBufOptBufCounterI++) {
-            valueTmpBufOpt[valueTmpBufOptBufCounterI] = NavDestinationTransition_serializer.read(thisDeserializer)
-        }
+        const valueTmpBufOpt: Array<NavDestinationTransition> = new Array<NavDestinationTransition>(valueTmpBufOptLength, (arg0: int32):NavDestinationTransition => {
+        return NavDestinationTransition_serializer.read(thisDeserializer);
+    })
         valueTmpBuf = valueTmpBufOpt
     }
     let value: Array<NavDestinationTransition> | undefined = valueTmpBuf
@@ -1479,10 +1470,9 @@ export function deserializeAndCallCallback_Opt_Array_String_Void(thisDeserialize
     let errorTmpBuf: Array<string> | undefined = undefined
     if ((errorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
         const errorTmpBufOptLength: int32 = thisDeserializer.readInt32()
-        let errorTmpBufOpt: Array<string> = new Array<string>(errorTmpBufOptLength)
-        for (let errorTmpBufOptBufCounterI = 0; errorTmpBufOptBufCounterI < errorTmpBufOptLength; errorTmpBufOptBufCounterI++) {
-            errorTmpBufOpt[errorTmpBufOptBufCounterI] = (thisDeserializer.readString() as string)
-        }
+        const errorTmpBufOpt: Array<string> = new Array<string>(errorTmpBufOptLength, (arg0: int32):string => {
+        return (thisDeserializer.readString() as string);
+    })
         errorTmpBuf = errorTmpBufOpt
     }
     let error: Array<string> | undefined = errorTmpBuf
@@ -1580,10 +1570,9 @@ export function deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Voi
     let errorTmpBuf: Array<string> | undefined = undefined
     if ((errorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
         const errorTmpBufOptLength: int32 = thisDeserializer.readInt32()
-        let errorTmpBufOpt: Array<string> = new Array<string>(errorTmpBufOptLength)
-        for (let errorTmpBufOptBufCounterI = 0; errorTmpBufOptBufCounterI < errorTmpBufOptLength; errorTmpBufOptBufCounterI++) {
-            errorTmpBufOpt[errorTmpBufOptBufCounterI] = (thisDeserializer.readString() as string)
-        }
+        const errorTmpBufOpt: Array<string> = new Array<string>(errorTmpBufOptLength, (arg0: int32):string => {
+        return (thisDeserializer.readString() as string);
+    })
         errorTmpBuf = errorTmpBufOpt
     }
     let error: Array<string> | undefined = errorTmpBuf
@@ -1613,10 +1602,9 @@ export function deserializeAndCallCallback_Opt_unifiedDataChannel_UnifiedData_Op
     let errorTmpBuf: Array<string> | undefined = undefined
     if ((errorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
         const errorTmpBufOptLength: int32 = thisDeserializer.readInt32()
-        let errorTmpBufOpt: Array<string> = new Array<string>(errorTmpBufOptLength)
-        for (let errorTmpBufOptBufCounterI = 0; errorTmpBufOptBufCounterI < errorTmpBufOptLength; errorTmpBufOptBufCounterI++) {
-            errorTmpBufOpt[errorTmpBufOptBufCounterI] = (thisDeserializer.readString() as string)
-        }
+        const errorTmpBufOpt: Array<string> = new Array<string>(errorTmpBufOptLength, (arg0: int32):string => {
+        return (thisDeserializer.readString() as string);
+    })
         errorTmpBuf = errorTmpBufOpt
     }
     let error: Array<string> | undefined = errorTmpBuf
@@ -2354,19 +2342,17 @@ export function deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeseri
     let event: BaseGestureEvent = (BaseGestureEvent_serializer.read(thisDeserializer) as BaseGestureEvent)
     let current: GestureRecognizer = (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer)
     const recognizersTmpBufLength: int32 = thisDeserializer.readInt32()
-    let recognizersTmpBuf: Array<GestureRecognizer> = new Array<GestureRecognizer>(recognizersTmpBufLength)
-    for (let recognizersTmpBufBufCounterI = 0; recognizersTmpBufBufCounterI < recognizersTmpBufLength; recognizersTmpBufBufCounterI++) {
-        recognizersTmpBuf[recognizersTmpBufBufCounterI] = (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer)
-    }
+    const recognizersTmpBuf: Array<GestureRecognizer> = new Array<GestureRecognizer>(recognizersTmpBufLength, (arg0: int32):GestureRecognizer => {
+        return (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer);
+    })
     let recognizers: Array<GestureRecognizer> = recognizersTmpBuf
     const touchRecognizersTmpBuf_runtimeType = thisDeserializer.readInt8()!.toInt()
     let touchRecognizersTmpBuf: Array<TouchRecognizer> | undefined = undefined
     if ((touchRecognizersTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
         const touchRecognizersTmpBufOptLength: int32 = thisDeserializer.readInt32()
-        let touchRecognizersTmpBufOpt: Array<TouchRecognizer> = new Array<TouchRecognizer>(touchRecognizersTmpBufOptLength)
-        for (let touchRecognizersTmpBufOptBufCounterI = 0; touchRecognizersTmpBufOptBufCounterI < touchRecognizersTmpBufOptLength; touchRecognizersTmpBufOptBufCounterI++) {
-            touchRecognizersTmpBufOpt[touchRecognizersTmpBufOptBufCounterI] = (TouchRecognizer_serializer.read(thisDeserializer) as TouchRecognizer)
-        }
+        const touchRecognizersTmpBufOpt: Array<TouchRecognizer> = new Array<TouchRecognizer>(touchRecognizersTmpBufOptLength, (arg0: int32):TouchRecognizer => {
+        return (TouchRecognizer_serializer.read(thisDeserializer) as TouchRecognizer);
+    })
         touchRecognizersTmpBuf = touchRecognizersTmpBufOpt
     }
     let touchRecognizers: Array<TouchRecognizer> | undefined = touchRecognizersTmpBuf
@@ -2550,10 +2536,9 @@ export function deserializeAndCallModifierKeyStateGetter(thisDeserializer: Deser
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as ModifierKeyStateGetter)
     const keysTmpBufLength: int32 = thisDeserializer.readInt32()
-    let keysTmpBuf: Array<string> = new Array<string>(keysTmpBufLength)
-    for (let keysTmpBufBufCounterI = 0; keysTmpBufBufCounterI < keysTmpBufLength; keysTmpBufBufCounterI++) {
-        keysTmpBuf[keysTmpBufBufCounterI] = (thisDeserializer.readString() as string)
-    }
+    const keysTmpBuf: Array<string> = new Array<string>(keysTmpBufLength, (arg0: int32):string => {
+        return (thisDeserializer.readString() as string);
+    })
     let keys: Array<string> = keysTmpBuf
     const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
@@ -2723,10 +2708,9 @@ export function deserializeAndCallOnCreateMenuCallback(thisDeserializer: Deseria
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as OnCreateMenuCallback)
     const menuItemsTmpBufLength: int32 = thisDeserializer.readInt32()
-    let menuItemsTmpBuf: Array<TextMenuItem> = new Array<TextMenuItem>(menuItemsTmpBufLength)
-    for (let menuItemsTmpBufBufCounterI = 0; menuItemsTmpBufBufCounterI < menuItemsTmpBufLength; menuItemsTmpBufBufCounterI++) {
-        menuItemsTmpBuf[menuItemsTmpBufBufCounterI] = TextMenuItem_serializer.read(thisDeserializer)
-    }
+    const menuItemsTmpBuf: Array<TextMenuItem> = new Array<TextMenuItem>(menuItemsTmpBufLength, (arg0: int32):TextMenuItem => {
+        return TextMenuItem_serializer.read(thisDeserializer);
+    })
     let menuItems: Array<TextMenuItem> = menuItemsTmpBuf
     const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
@@ -3077,10 +3061,9 @@ export function deserializeAndCallOnPrepareMenuCallback(thisDeserializer: Deseri
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as OnPrepareMenuCallback)
     const menuItemsTmpBufLength: int32 = thisDeserializer.readInt32()
-    let menuItemsTmpBuf: Array<TextMenuItem> = new Array<TextMenuItem>(menuItemsTmpBufLength)
-    for (let menuItemsTmpBufBufCounterI = 0; menuItemsTmpBufBufCounterI < menuItemsTmpBufLength; menuItemsTmpBufBufCounterI++) {
-        menuItemsTmpBuf[menuItemsTmpBufBufCounterI] = TextMenuItem_serializer.read(thisDeserializer)
-    }
+    const menuItemsTmpBuf: Array<TextMenuItem> = new Array<TextMenuItem>(menuItemsTmpBufLength, (arg0: int32):TextMenuItem => {
+        return TextMenuItem_serializer.read(thisDeserializer);
+    })
     let menuItems: Array<TextMenuItem> = menuItemsTmpBuf
     const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
@@ -3281,10 +3264,9 @@ export function deserializeAndCallOnTextPickerChangeCallback(thisDeserializer: D
         selectItemTmpBuf = (thisDeserializer.readString() as string)
     } else if (selectItemTmpBufUnionSelector == (1).toByte()) {
         const selectItemTmpBufBufULength: int32 = thisDeserializer.readInt32()
-        let selectItemTmpBufBufU: Array<string> = new Array<string>(selectItemTmpBufBufULength)
-        for (let selectItemTmpBufBufUBufCounterI = 0; selectItemTmpBufBufUBufCounterI < selectItemTmpBufBufULength; selectItemTmpBufBufUBufCounterI++) {
-            selectItemTmpBufBufU[selectItemTmpBufBufUBufCounterI] = (thisDeserializer.readString() as string)
-        }
+        const selectItemTmpBufBufU: Array<string> = new Array<string>(selectItemTmpBufBufULength, (arg0: int32):string => {
+        return (thisDeserializer.readString() as string);
+    })
         selectItemTmpBuf = selectItemTmpBufBufU
     } else {
         throw new Error('One of the branches for selectItemTmpBuf has to be chosen through deserialisation.')
@@ -3296,10 +3278,9 @@ export function deserializeAndCallOnTextPickerChangeCallback(thisDeserializer: D
         indexTmpBuf = thisDeserializer.readInt32()
     } else if (indexTmpBufUnionSelector == (1).toByte()) {
         const indexTmpBufBufULength: int32 = thisDeserializer.readInt32()
-        let indexTmpBufBufU: Array<int32> = new Array<int32>(indexTmpBufBufULength)
-        for (let indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32()
-        }
+        const indexTmpBufBufU: Array<int32> = new Array<int32>(indexTmpBufBufULength, (arg0: int32):int32 => {
+        return thisDeserializer.readInt32();
+    })
         indexTmpBuf = indexTmpBufBufU
     } else {
         throw new Error('One of the branches for indexTmpBuf has to be chosen through deserialisation.')
@@ -3650,10 +3631,9 @@ export function deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(th
     const call = (ResourceHolder.instance().get(resourceId) as ShouldBuiltInRecognizerParallelWithCallback)
     let current: GestureRecognizer = (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer)
     const othersTmpBufLength: int32 = thisDeserializer.readInt32()
-    let othersTmpBuf: Array<GestureRecognizer> = new Array<GestureRecognizer>(othersTmpBufLength)
-    for (let othersTmpBufBufCounterI = 0; othersTmpBufBufCounterI < othersTmpBufLength; othersTmpBufBufCounterI++) {
-        othersTmpBuf[othersTmpBufBufCounterI] = (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer)
-    }
+    const othersTmpBuf: Array<GestureRecognizer> = new Array<GestureRecognizer>(othersTmpBufLength, (arg0: int32):GestureRecognizer => {
+        return (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer);
+    })
     let others: Array<GestureRecognizer> = othersTmpBuf
     const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
@@ -3771,10 +3751,9 @@ export function deserializeAndCallsynthetic_Callback_Array_String_Void(thisDeser
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as ((value: Array<string>) => void))
     const valueTmpBufLength: int32 = thisDeserializer.readInt32()
-    let valueTmpBuf: Array<string> = new Array<string>(valueTmpBufLength)
-    for (let valueTmpBufBufCounterI = 0; valueTmpBufBufCounterI < valueTmpBufLength; valueTmpBufBufCounterI++) {
-        valueTmpBuf[valueTmpBufBufCounterI] = (thisDeserializer.readString() as string)
-    }
+    const valueTmpBuf: Array<string> = new Array<string>(valueTmpBufLength, (arg0: int32):string => {
+        return (thisDeserializer.readString() as string);
+    })
     let value: Array<string> = valueTmpBuf
     call(value)
 }
@@ -3929,10 +3908,9 @@ export function deserializeAndCallTextPickerEnterSelectedAreaCallback(thisDeseri
         valueTmpBuf = (thisDeserializer.readString() as string)
     } else if (valueTmpBufUnionSelector == (1).toByte()) {
         const valueTmpBufBufULength: int32 = thisDeserializer.readInt32()
-        let valueTmpBufBufU: Array<string> = new Array<string>(valueTmpBufBufULength)
-        for (let valueTmpBufBufUBufCounterI = 0; valueTmpBufBufUBufCounterI < valueTmpBufBufULength; valueTmpBufBufUBufCounterI++) {
-            valueTmpBufBufU[valueTmpBufBufUBufCounterI] = (thisDeserializer.readString() as string)
-        }
+        const valueTmpBufBufU: Array<string> = new Array<string>(valueTmpBufBufULength, (arg0: int32):string => {
+        return (thisDeserializer.readString() as string);
+    })
         valueTmpBuf = valueTmpBufBufU
     } else {
         throw new Error('One of the branches for valueTmpBuf has to be chosen through deserialisation.')
@@ -3944,10 +3922,9 @@ export function deserializeAndCallTextPickerEnterSelectedAreaCallback(thisDeseri
         indexTmpBuf = thisDeserializer.readInt32()
     } else if (indexTmpBufUnionSelector == (1).toByte()) {
         const indexTmpBufBufULength: int32 = thisDeserializer.readInt32()
-        let indexTmpBufBufU: Array<int32> = new Array<int32>(indexTmpBufBufULength)
-        for (let indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32()
-        }
+        const indexTmpBufBufU: Array<int32> = new Array<int32>(indexTmpBufBufULength, (arg0: int32):int32 => {
+        return thisDeserializer.readInt32();
+    })
         indexTmpBuf = indexTmpBufBufU
     } else {
         throw new Error('One of the branches for indexTmpBuf has to be chosen through deserialisation.')
@@ -3964,10 +3941,9 @@ export function deserializeAndCallTextPickerScrollStopCallback(thisDeserializer:
         valueTmpBuf = (thisDeserializer.readString() as string)
     } else if (valueTmpBufUnionSelector == (1).toByte()) {
         const valueTmpBufBufULength: int32 = thisDeserializer.readInt32()
-        let valueTmpBufBufU: Array<string> = new Array<string>(valueTmpBufBufULength)
-        for (let valueTmpBufBufUBufCounterI = 0; valueTmpBufBufUBufCounterI < valueTmpBufBufULength; valueTmpBufBufUBufCounterI++) {
-            valueTmpBufBufU[valueTmpBufBufUBufCounterI] = (thisDeserializer.readString() as string)
-        }
+        const valueTmpBufBufU: Array<string> = new Array<string>(valueTmpBufBufULength, (arg0: int32):string => {
+        return (thisDeserializer.readString() as string);
+    })
         valueTmpBuf = valueTmpBufBufU
     } else {
         throw new Error('One of the branches for valueTmpBuf has to be chosen through deserialisation.')
@@ -3979,10 +3955,9 @@ export function deserializeAndCallTextPickerScrollStopCallback(thisDeserializer:
         indexTmpBuf = thisDeserializer.readInt32()
     } else if (indexTmpBufUnionSelector == (1).toByte()) {
         const indexTmpBufBufULength: int32 = thisDeserializer.readInt32()
-        let indexTmpBufBufU: Array<int32> = new Array<int32>(indexTmpBufBufULength)
-        for (let indexTmpBufBufUBufCounterI = 0; indexTmpBufBufUBufCounterI < indexTmpBufBufULength; indexTmpBufBufUBufCounterI++) {
-            indexTmpBufBufU[indexTmpBufBufUBufCounterI] = thisDeserializer.readInt32()
-        }
+        const indexTmpBufBufU: Array<int32> = new Array<int32>(indexTmpBufBufULength, (arg0: int32):int32 => {
+        return thisDeserializer.readInt32();
+    })
         indexTmpBuf = indexTmpBufBufU
     } else {
         throw new Error('One of the branches for indexTmpBuf has to be chosen through deserialisation.')
@@ -4054,10 +4029,9 @@ export function deserializeAndCallTouchTestDoneCallback(thisDeserializer: Deseri
     const call = (ResourceHolder.instance().get(resourceId) as TouchTestDoneCallback)
     let event: BaseGestureEvent = (BaseGestureEvent_serializer.read(thisDeserializer) as BaseGestureEvent)
     const recognizersTmpBufLength: int32 = thisDeserializer.readInt32()
-    let recognizersTmpBuf: Array<GestureRecognizer> = new Array<GestureRecognizer>(recognizersTmpBufLength)
-    for (let recognizersTmpBufBufCounterI = 0; recognizersTmpBufBufCounterI < recognizersTmpBufLength; recognizersTmpBufBufCounterI++) {
-        recognizersTmpBuf[recognizersTmpBufBufCounterI] = (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer)
-    }
+    const recognizersTmpBuf: Array<GestureRecognizer> = new Array<GestureRecognizer>(recognizersTmpBufLength, (arg0: int32):GestureRecognizer => {
+        return (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer);
+    })
     let recognizers: Array<GestureRecognizer> = recognizersTmpBuf
     call(event, recognizers)
 }

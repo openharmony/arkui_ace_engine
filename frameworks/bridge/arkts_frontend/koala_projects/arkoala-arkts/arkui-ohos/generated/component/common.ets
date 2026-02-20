@@ -12518,10 +12518,9 @@ export class BackgroundOptions_serializer {
         let ignoresLayoutSafeAreaEdgesTmpBuf: Array<LayoutSafeAreaEdge> | undefined = undefined
         if ((ignoresLayoutSafeAreaEdgesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const ignoresLayoutSafeAreaEdgesTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let ignoresLayoutSafeAreaEdgesTmpBufOpt: Array<LayoutSafeAreaEdge> = new Array<LayoutSafeAreaEdge>(ignoresLayoutSafeAreaEdgesTmpBufOptLength)
-            for (let ignoresLayoutSafeAreaEdgesTmpBufOptBufCounterI = 0; ignoresLayoutSafeAreaEdgesTmpBufOptBufCounterI < ignoresLayoutSafeAreaEdgesTmpBufOptLength; ignoresLayoutSafeAreaEdgesTmpBufOptBufCounterI++) {
-                ignoresLayoutSafeAreaEdgesTmpBufOpt[ignoresLayoutSafeAreaEdgesTmpBufOptBufCounterI] = LayoutSafeAreaEdge.fromValue(valueDeserializer.readInt32())
-            }
+            const ignoresLayoutSafeAreaEdgesTmpBufOpt: Array<LayoutSafeAreaEdge> = new Array<LayoutSafeAreaEdge>(ignoresLayoutSafeAreaEdgesTmpBufOptLength, (arg0: int32):LayoutSafeAreaEdge => {
+            return LayoutSafeAreaEdge.fromValue(valueDeserializer.readInt32());
+        })
             ignoresLayoutSafeAreaEdgesTmpBuf = ignoresLayoutSafeAreaEdgesTmpBufOpt
         }
         const ignoresLayoutSafeAreaEdgesTmpResult: Array<LayoutSafeAreaEdge> | undefined = ignoresLayoutSafeAreaEdgesTmpBuf
@@ -12544,10 +12543,9 @@ export class Bindable_Array_I32_serializer {
     public static read(buffer: DeserializerBase): Bindable<Array<int32>> {
         let valueDeserializer: DeserializerBase = buffer
         const valueTmpBufLength: int32 = valueDeserializer.readInt32()
-        let valueTmpBuf: Array<int32> = new Array<int32>(valueTmpBufLength)
-        for (let valueTmpBufBufCounterI = 0; valueTmpBufBufCounterI < valueTmpBufLength; valueTmpBufBufCounterI++) {
-            valueTmpBuf[valueTmpBufBufCounterI] = valueDeserializer.readInt32()
-        }
+        const valueTmpBuf: Array<int32> = new Array<int32>(valueTmpBufLength, (arg0: int32):int32 => {
+            return valueDeserializer.readInt32();
+        })
         const valueTmpResult: Array<int32> = valueTmpBuf
         const onChangeTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall: KPointer = valueDeserializer.readPointer()
@@ -12587,10 +12585,9 @@ export class Bindable_Array_Resource_serializer {
     public static read(buffer: DeserializerBase): Bindable<Array<global_resource_Resource>> {
         let valueDeserializer: DeserializerBase = buffer
         const valueTmpBufLength: int32 = valueDeserializer.readInt32()
-        let valueTmpBuf: Array<global_resource_Resource> = new Array<global_resource_Resource>(valueTmpBufLength)
-        for (let valueTmpBufBufCounterI = 0; valueTmpBufBufCounterI < valueTmpBufLength; valueTmpBufBufCounterI++) {
-            valueTmpBuf[valueTmpBufBufCounterI] = global_resource_Resource_serializer.read(valueDeserializer)
-        }
+        const valueTmpBuf: Array<global_resource_Resource> = new Array<global_resource_Resource>(valueTmpBufLength, (arg0: int32):global_resource_Resource => {
+            return global_resource_Resource_serializer.read(valueDeserializer);
+        })
         const valueTmpResult: Array<global_resource_Resource> = valueTmpBuf
         const onChangeTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall: KPointer = valueDeserializer.readPointer()
@@ -12638,19 +12635,18 @@ export class Bindable_Array_ResourceStr_serializer {
     public static read(buffer: DeserializerBase): Bindable<Array<ResourceStr>> {
         let valueDeserializer: DeserializerBase = buffer
         const valueTmpBufLength: int32 = valueDeserializer.readInt32()
-        let valueTmpBuf: Array<ResourceStr> = new Array<ResourceStr>(valueTmpBufLength)
-        for (let valueTmpBufBufCounterI = 0; valueTmpBufBufCounterI < valueTmpBufLength; valueTmpBufBufCounterI++) {
-            const valueTmpBufTempBufUnionSelector: int32 = valueDeserializer.readInt8()
-            let valueTmpBufTempBuf: string | arkui_component_units_Resource | undefined
+        const valueTmpBuf: Array<ResourceStr> = new Array<ResourceStr>(valueTmpBufLength, (arg0: int32):ResourceStr => {
+            const valueTmpBufTempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let valueTmpBufTempBuf: string | arkui_component_units_Resource | undefined;
             if (valueTmpBufTempBufUnionSelector == (0).toByte()) {
-                valueTmpBufTempBuf = (valueDeserializer.readString() as string)
+                valueTmpBufTempBuf = (valueDeserializer.readString() as string);
             } else if (valueTmpBufTempBufUnionSelector == (1).toByte()) {
-                valueTmpBufTempBuf = global_resource_Resource_serializer.read(valueDeserializer)
+                valueTmpBufTempBuf = global_resource_Resource_serializer.read(valueDeserializer);
             } else {
-                throw new Error('One of the branches for valueTmpBufTempBuf has to be chosen through deserialisation.')
+                throw new Error('One of the branches for valueTmpBufTempBuf has to be chosen through deserialisation.');
             }
-            valueTmpBuf[valueTmpBufBufCounterI] = (valueTmpBufTempBuf as string | arkui_component_units_Resource)
-        }
+            return (valueTmpBufTempBuf as string | arkui_component_units_Resource);
+        })
         const valueTmpResult: Array<ResourceStr> = valueTmpBuf
         const onChangeTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall: KPointer = valueDeserializer.readPointer()
@@ -12698,10 +12694,9 @@ export class Bindable_Array_String_serializer {
     public static read(buffer: DeserializerBase): Bindable<Array<string>> {
         let valueDeserializer: DeserializerBase = buffer
         const valueTmpBufLength: int32 = valueDeserializer.readInt32()
-        let valueTmpBuf: Array<string> = new Array<string>(valueTmpBufLength)
-        for (let valueTmpBufBufCounterI = 0; valueTmpBufBufCounterI < valueTmpBufLength; valueTmpBufBufCounterI++) {
-            valueTmpBuf[valueTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const valueTmpBuf: Array<string> = new Array<string>(valueTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const valueTmpResult: Array<string> = valueTmpBuf
         const onChangeTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
         const onChangeTmpBufBufCall: KPointer = valueDeserializer.readPointer()
@@ -13676,12 +13671,11 @@ export class LinearGradientBlurOptions_serializer {
         let fractionStopsTmpBuf: Array<FractionStop> | undefined = undefined
         if ((fractionStopsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fractionStopsTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let fractionStopsTmpBufOpt: Array<FractionStop> = new Array<FractionStop>(fractionStopsTmpBufOptLength)
-            for (let fractionStopsTmpBufOptBufCounterI = 0; fractionStopsTmpBufOptBufCounterI < fractionStopsTmpBufOptLength; fractionStopsTmpBufOptBufCounterI++) {
-                const fractionStopsTmpBufOptTempBufValue0: double = valueDeserializer.readFloat64()
-                const fractionStopsTmpBufOptTempBufValue1: double = valueDeserializer.readFloat64()
-                fractionStopsTmpBufOpt[fractionStopsTmpBufOptBufCounterI] = ([fractionStopsTmpBufOptTempBufValue0, fractionStopsTmpBufOptTempBufValue1] as FractionStop)
-            }
+            const fractionStopsTmpBufOpt: Array<FractionStop> = new Array<FractionStop>(fractionStopsTmpBufOptLength, (arg0: int32):FractionStop => {
+            const fractionStopsTmpBufOptTempBufValue0: double = valueDeserializer.readFloat64();
+            const fractionStopsTmpBufOptTempBufValue1: double = valueDeserializer.readFloat64();
+            return ([fractionStopsTmpBufOptTempBufValue0, fractionStopsTmpBufOptTempBufValue1] as FractionStop);
+        })
             fractionStopsTmpBuf = fractionStopsTmpBufOpt
         }
         const fractionStopsTmpResult: Array<FractionStop> | undefined = fractionStopsTmpBuf
@@ -13780,25 +13774,24 @@ export class LinearGradientOptions_serializer {
         }
         const directionTmpResult: GradientDirection | undefined = directionTmpBuf
         const colorsTmpBufLength: int32 = valueDeserializer.readInt32()
-        let colorsTmpBuf: Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength)
-        for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
-            const colorsTmpBufTempBufValue0TempBufUnionSelector: int32 = valueDeserializer.readInt8()
-            let colorsTmpBufTempBufValue0TempBuf: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+        const colorsTmpBuf: Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength, (arg0: int32):[ ResourceColor, double ] => {
+            const colorsTmpBufTempBufValue0TempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let colorsTmpBufTempBufValue0TempBuf: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined;
             if (colorsTmpBufTempBufValue0TempBufUnionSelector == (0).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+                colorsTmpBufTempBufValue0TempBuf = arkui_component_enums_Color.values()[valueDeserializer.readInt32()];
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (1).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = valueDeserializer.readInt32()
+                colorsTmpBufTempBufValue0TempBuf = valueDeserializer.readInt32();
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (2).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readString() as string)
+                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readString() as string);
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (3).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = global_resource_Resource_serializer.read(valueDeserializer)
+                colorsTmpBufTempBufValue0TempBuf = global_resource_Resource_serializer.read(valueDeserializer);
             } else {
-                throw new Error('One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.')
+                throw new Error('One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.');
             }
-            const colorsTmpBufTempBufValue0: ResourceColor = (colorsTmpBufTempBufValue0TempBuf as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
-            const colorsTmpBufTempBufValue1: double = valueDeserializer.readFloat64()
-            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
-        }
+            const colorsTmpBufTempBufValue0: ResourceColor = (colorsTmpBufTempBufValue0TempBuf as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource);
+            const colorsTmpBufTempBufValue1: double = valueDeserializer.readFloat64();
+            return ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ]);
+        })
         const colorsTmpResult: Array<[ ResourceColor, double ]> = colorsTmpBuf
         const repeatingTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let repeatingTmpBuf: boolean | undefined = undefined
@@ -14091,30 +14084,29 @@ export class PopupBorderLinearGradient_serializer {
         }
         const directionTmpResult: GradientDirection | undefined = directionTmpBuf
         const colorsTmpBufLength: int32 = valueDeserializer.readInt32()
-        let colorsTmpBuf: Array<[ ResourceColor | undefined, double ]> = new Array<[ ResourceColor | undefined, double ]>(colorsTmpBufLength)
-        for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
-            const colorsTmpBufTempBufValue0TempBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-            let colorsTmpBufTempBufValue0TempBuf: ResourceColor | undefined = undefined
+        const colorsTmpBuf: Array<[ ResourceColor | undefined, double ]> = new Array<[ ResourceColor | undefined, double ]>(colorsTmpBufLength, (arg0: int32):[ ResourceColor | undefined, double ] => {
+            const colorsTmpBufTempBufValue0TempBuf_runtimeType = valueDeserializer.readInt8()!.toInt();
+            let colorsTmpBufTempBufValue0TempBuf: ResourceColor | undefined = undefined;
             if ((colorsTmpBufTempBufValue0TempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-                const colorsTmpBufTempBufValue0TempBufOptUnionSelector: int32 = valueDeserializer.readInt8()
-                let colorsTmpBufTempBufValue0TempBufOpt: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+                const colorsTmpBufTempBufValue0TempBufOptUnionSelector: int32 = valueDeserializer.readInt8();
+                let colorsTmpBufTempBufValue0TempBufOpt: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined;
                 if (colorsTmpBufTempBufValue0TempBufOptUnionSelector == (0).toByte()) {
-                    colorsTmpBufTempBufValue0TempBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+                    colorsTmpBufTempBufValue0TempBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()];
                 } else if (colorsTmpBufTempBufValue0TempBufOptUnionSelector == (1).toByte()) {
-                    colorsTmpBufTempBufValue0TempBufOpt = valueDeserializer.readInt32()
+                    colorsTmpBufTempBufValue0TempBufOpt = valueDeserializer.readInt32();
                 } else if (colorsTmpBufTempBufValue0TempBufOptUnionSelector == (2).toByte()) {
-                    colorsTmpBufTempBufValue0TempBufOpt = (valueDeserializer.readString() as string)
+                    colorsTmpBufTempBufValue0TempBufOpt = (valueDeserializer.readString() as string);
                 } else if (colorsTmpBufTempBufValue0TempBufOptUnionSelector == (3).toByte()) {
-                    colorsTmpBufTempBufValue0TempBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+                    colorsTmpBufTempBufValue0TempBufOpt = global_resource_Resource_serializer.read(valueDeserializer);
                 } else {
-                    throw new Error('One of the branches for colorsTmpBufTempBufValue0TempBufOpt has to be chosen through deserialisation.')
+                    throw new Error('One of the branches for colorsTmpBufTempBufValue0TempBufOpt has to be chosen through deserialisation.');
                 }
-                colorsTmpBufTempBufValue0TempBuf = (colorsTmpBufTempBufValue0TempBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+                colorsTmpBufTempBufValue0TempBuf = (colorsTmpBufTempBufValue0TempBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource);
             }
-            const colorsTmpBufTempBufValue0: ResourceColor | undefined = colorsTmpBufTempBufValue0TempBuf
-            const colorsTmpBufTempBufValue1: double = valueDeserializer.readFloat64()
-            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor | undefined, double ])
-        }
+            const colorsTmpBufTempBufValue0: ResourceColor | undefined = colorsTmpBufTempBufValue0TempBuf;
+            const colorsTmpBufTempBufValue1: double = valueDeserializer.readFloat64();
+            return ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor | undefined, double ]);
+        })
         const colorsTmpResult: Array<[ ResourceColor | undefined, double ]> = colorsTmpBuf
         let value: PopupBorderLinearGradient = ({direction: directionTmpResult, colors: colorsTmpResult} as PopupBorderLinearGradient)
         return value
@@ -15038,10 +15030,9 @@ export class VisibleAreaEventOptions_serializer {
     public static read(buffer: DeserializerBase): VisibleAreaEventOptions {
         let valueDeserializer: DeserializerBase = buffer
         const ratiosTmpBufLength: int32 = valueDeserializer.readInt32()
-        let ratiosTmpBuf: Array<double> = new Array<double>(ratiosTmpBufLength)
-        for (let ratiosTmpBufBufCounterI = 0; ratiosTmpBufBufCounterI < ratiosTmpBufLength; ratiosTmpBufBufCounterI++) {
-            ratiosTmpBuf[ratiosTmpBufBufCounterI] = valueDeserializer.readFloat64()
-        }
+        const ratiosTmpBuf: Array<double> = new Array<double>(ratiosTmpBufLength, (arg0: int32):double => {
+            return valueDeserializer.readFloat64();
+        })
         const ratiosTmpResult: Array<double> = ratiosTmpBuf
         const expectedUpdateIntervalTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let expectedUpdateIntervalTmpBuf: int32 | undefined = undefined
@@ -16103,10 +16094,9 @@ export class DragPreviewOptions_serializer {
                 modeTmpBufOpt = DragPreviewMode.fromValue(valueDeserializer.readInt32())
             } else if (modeTmpBufOptUnionSelector == (1).toByte()) {
                 const modeTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
-                let modeTmpBufOptBufU: Array<DragPreviewMode> = new Array<DragPreviewMode>(modeTmpBufOptBufULength)
-                for (let modeTmpBufOptBufUBufCounterI = 0; modeTmpBufOptBufUBufCounterI < modeTmpBufOptBufULength; modeTmpBufOptBufUBufCounterI++) {
-                    modeTmpBufOptBufU[modeTmpBufOptBufUBufCounterI] = DragPreviewMode.fromValue(valueDeserializer.readInt32())
-                }
+                const modeTmpBufOptBufU: Array<DragPreviewMode> = new Array<DragPreviewMode>(modeTmpBufOptBufULength, (arg0: int32):DragPreviewMode => {
+            return DragPreviewMode.fromValue(valueDeserializer.readInt32());
+        })
                 modeTmpBufOpt = modeTmpBufOptBufU
             } else {
                 throw new Error('One of the branches for modeTmpBufOpt has to be chosen through deserialisation.')
@@ -18086,25 +18076,24 @@ export class RadialGradientOptions_serializer {
         }
         const radiusTmpResult: Length = (radiusTmpBuf as string | double | arkui_component_units_Resource)
         const colorsTmpBufLength: int32 = valueDeserializer.readInt32()
-        let colorsTmpBuf: Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength)
-        for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
-            const colorsTmpBufTempBufValue0TempBufUnionSelector: int32 = valueDeserializer.readInt8()
-            let colorsTmpBufTempBufValue0TempBuf: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+        const colorsTmpBuf: Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength, (arg0: int32):[ ResourceColor, double ] => {
+            const colorsTmpBufTempBufValue0TempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let colorsTmpBufTempBufValue0TempBuf: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined;
             if (colorsTmpBufTempBufValue0TempBufUnionSelector == (0).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+                colorsTmpBufTempBufValue0TempBuf = arkui_component_enums_Color.values()[valueDeserializer.readInt32()];
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (1).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = valueDeserializer.readInt32()
+                colorsTmpBufTempBufValue0TempBuf = valueDeserializer.readInt32();
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (2).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readString() as string)
+                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readString() as string);
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (3).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = global_resource_Resource_serializer.read(valueDeserializer)
+                colorsTmpBufTempBufValue0TempBuf = global_resource_Resource_serializer.read(valueDeserializer);
             } else {
-                throw new Error('One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.')
+                throw new Error('One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.');
             }
-            const colorsTmpBufTempBufValue0: ResourceColor = (colorsTmpBufTempBufValue0TempBuf as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
-            const colorsTmpBufTempBufValue1: double = valueDeserializer.readFloat64()
-            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
-        }
+            const colorsTmpBufTempBufValue0: ResourceColor = (colorsTmpBufTempBufValue0TempBuf as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource);
+            const colorsTmpBufTempBufValue1: double = valueDeserializer.readFloat64();
+            return ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ]);
+        })
         const colorsTmpResult: Array<[ ResourceColor, double ]> = colorsTmpBuf
         const repeatingTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let repeatingTmpBuf: boolean | undefined = undefined
@@ -18477,37 +18466,35 @@ export class SweepGradientOptions_serializer {
         }
         const rotationTmpResult: double | string | undefined = rotationTmpBuf
         const colorsTmpBufLength: int32 = valueDeserializer.readInt32()
-        let colorsTmpBuf: Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength)
-        for (let colorsTmpBufBufCounterI = 0; colorsTmpBufBufCounterI < colorsTmpBufLength; colorsTmpBufBufCounterI++) {
-            const colorsTmpBufTempBufValue0TempBufUnionSelector: int32 = valueDeserializer.readInt8()
-            let colorsTmpBufTempBufValue0TempBuf: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+        const colorsTmpBuf: Array<[ ResourceColor, double ]> = new Array<[ ResourceColor, double ]>(colorsTmpBufLength, (arg0: int32):[ ResourceColor, double ] => {
+            const colorsTmpBufTempBufValue0TempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let colorsTmpBufTempBufValue0TempBuf: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined;
             if (colorsTmpBufTempBufValue0TempBufUnionSelector == (0).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+                colorsTmpBufTempBufValue0TempBuf = arkui_component_enums_Color.values()[valueDeserializer.readInt32()];
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (1).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = valueDeserializer.readInt32()
+                colorsTmpBufTempBufValue0TempBuf = valueDeserializer.readInt32();
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (2).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readString() as string)
+                colorsTmpBufTempBufValue0TempBuf = (valueDeserializer.readString() as string);
             } else if (colorsTmpBufTempBufValue0TempBufUnionSelector == (3).toByte()) {
-                colorsTmpBufTempBufValue0TempBuf = global_resource_Resource_serializer.read(valueDeserializer)
+                colorsTmpBufTempBufValue0TempBuf = global_resource_Resource_serializer.read(valueDeserializer);
             } else {
-                throw new Error('One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.')
+                throw new Error('One of the branches for colorsTmpBufTempBufValue0TempBuf has to be chosen through deserialisation.');
             }
-            const colorsTmpBufTempBufValue0: ResourceColor = (colorsTmpBufTempBufValue0TempBuf as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
-            const colorsTmpBufTempBufValue1: double = valueDeserializer.readFloat64()
-            colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
-        }
+            const colorsTmpBufTempBufValue0: ResourceColor = (colorsTmpBufTempBufValue0TempBuf as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource);
+            const colorsTmpBufTempBufValue1: double = valueDeserializer.readFloat64();
+            return ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ]);
+        })
         const colorsTmpResult: Array<[ ResourceColor, double ]> = colorsTmpBuf
         const metricsColorsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let metricsColorsTmpBuf: Array<[ arkui_component_units_ColorMetrics, double ]> | undefined = undefined
         if ((metricsColorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const metricsColorsTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let metricsColorsTmpBufOpt: Array<[ arkui_component_units_ColorMetrics, double ]> = new Array<[ arkui_component_units_ColorMetrics, double ]>(metricsColorsTmpBufOptLength)
-            for (let metricsColorsTmpBufOptBufCounterI = 0; metricsColorsTmpBufOptBufCounterI < metricsColorsTmpBufOptLength; metricsColorsTmpBufOptBufCounterI++) {
-                const metricsColorsTmpBufOptTempBufValue0TempBufDeserialized: ColorMetricsExt = ColorMetricsExt_serializer.read(valueDeserializer)
-                const metricsColorsTmpBufOptTempBufValue0: arkui_component_units_ColorMetrics = extractors.transform_Ark_ColorMetricsExt_to_Ark_ColorMetrics(metricsColorsTmpBufOptTempBufValue0TempBufDeserialized)
-                const metricsColorsTmpBufOptTempBufValue1: double = valueDeserializer.readFloat64()
-                metricsColorsTmpBufOpt[metricsColorsTmpBufOptBufCounterI] = ([metricsColorsTmpBufOptTempBufValue0, metricsColorsTmpBufOptTempBufValue1] as [ arkui_component_units_ColorMetrics, double ])
-            }
+            const metricsColorsTmpBufOpt: Array<[ arkui_component_units_ColorMetrics, double ]> = new Array<[ arkui_component_units_ColorMetrics, double ]>(metricsColorsTmpBufOptLength, (arg0: int32):[ arkui_component_units_ColorMetrics, double ] => {
+            const metricsColorsTmpBufOptTempBufValue0TempBufDeserialized: ColorMetricsExt = ColorMetricsExt_serializer.read(valueDeserializer);
+            const metricsColorsTmpBufOptTempBufValue0: arkui_component_units_ColorMetrics = extractors.transform_Ark_ColorMetricsExt_to_Ark_ColorMetrics(metricsColorsTmpBufOptTempBufValue0TempBufDeserialized);
+            const metricsColorsTmpBufOptTempBufValue1: double = valueDeserializer.readFloat64();
+            return ([metricsColorsTmpBufOptTempBufValue0, metricsColorsTmpBufOptTempBufValue1] as [ arkui_component_units_ColorMetrics, double ]);
+        })
             metricsColorsTmpBuf = metricsColorsTmpBufOpt
         }
         const metricsColorsTmpResult: Array<[ arkui_component_units_ColorMetrics, double ]> | undefined = metricsColorsTmpBuf
@@ -26588,10 +26575,9 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         let buffer: Array<MouseButton> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            let bufferOpt: Array<MouseButton> = new Array<MouseButton>(bufferOptLength)
-            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
-                bufferOpt[bufferOptBufCounterI] = MouseButton.fromValue(retvalDeserializer.readInt32())
-            }
+            const bufferOpt: Array<MouseButton> = new Array<MouseButton>(bufferOptLength, (arg0: int32):MouseButton => {
+            return MouseButton.fromValue(retvalDeserializer.readInt32());
+        })
             buffer = bufferOpt
         }
         const returnResult: Array<MouseButton> | undefined = buffer
@@ -26741,10 +26727,9 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         let buffer: Array<HistoricalPoint> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            let bufferOpt: Array<HistoricalPoint> = new Array<HistoricalPoint>(bufferOptLength)
-            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
-                bufferOpt[bufferOptBufCounterI] = HistoricalPoint_serializer.read(retvalDeserializer)
-            }
+            const bufferOpt: Array<HistoricalPoint> = new Array<HistoricalPoint>(bufferOptLength, (arg0: int32):HistoricalPoint => {
+            return HistoricalPoint_serializer.read(retvalDeserializer);
+        })
             buffer = bufferOpt
         }
         const returnResult: Array<HistoricalPoint> | undefined = buffer
@@ -26764,10 +26749,9 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         const retval = ArkUIGeneratedNativeModule._TouchEvent_getTouches(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<TouchObject> = new Array<TouchObject>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = TouchObject_serializer.read(retvalDeserializer)
-        }
+        const buffer: Array<TouchObject> = new Array<TouchObject>(bufferLength, (arg0: int32):TouchObject => {
+            return TouchObject_serializer.read(retvalDeserializer);
+        })
         const returnResult: Array<TouchObject> = buffer
         return returnResult
     }
@@ -26785,10 +26769,9 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         const retval = ArkUIGeneratedNativeModule._TouchEvent_getChangedTouches(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<TouchObject> = new Array<TouchObject>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = TouchObject_serializer.read(retvalDeserializer)
-        }
+        const buffer: Array<TouchObject> = new Array<TouchObject>(bufferLength, (arg0: int32):TouchObject => {
+            return TouchObject_serializer.read(retvalDeserializer);
+        })
         const returnResult: Array<TouchObject> = buffer
         return returnResult
     }

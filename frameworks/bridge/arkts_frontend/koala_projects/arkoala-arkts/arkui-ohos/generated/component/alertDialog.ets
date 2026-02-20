@@ -3143,10 +3143,9 @@ export class AlertDialogParamWithOptions_serializer {
         }
         const levelOrderTmpResult: LevelOrder | undefined = levelOrderTmpBuf
         const buttonsTmpBufLength: int32 = valueDeserializer.readInt32()
-        let buttonsTmpBuf: Array<AlertDialogButtonOptions> = new Array<AlertDialogButtonOptions>(buttonsTmpBufLength)
-        for (let buttonsTmpBufBufCounterI = 0; buttonsTmpBufBufCounterI < buttonsTmpBufLength; buttonsTmpBufBufCounterI++) {
-            buttonsTmpBuf[buttonsTmpBufBufCounterI] = AlertDialogButtonOptions_serializer.read(valueDeserializer)
-        }
+        const buttonsTmpBuf: Array<AlertDialogButtonOptions> = new Array<AlertDialogButtonOptions>(buttonsTmpBufLength, (arg0: int32):AlertDialogButtonOptions => {
+            return AlertDialogButtonOptions_serializer.read(valueDeserializer);
+        })
         const buttonsTmpResult: Array<AlertDialogButtonOptions> = buttonsTmpBuf
         const buttonDirectionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let buttonDirectionTmpBuf: DialogButtonDirection | undefined = undefined

@@ -376,10 +376,9 @@ export class FileSelectorParam implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptType(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<string> = new Array<string>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
-        }
+        const buffer: Array<string> = new Array<string>(bufferLength, (arg0: int32):string => {
+            return (retvalDeserializer.readString() as string);
+        })
         const returnResult: Array<string> = buffer
         return returnResult
     }
@@ -391,10 +390,9 @@ export class FileSelectorParam implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._FileSelectorParam_getMimeTypes(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<string> = new Array<string>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
-        }
+        const buffer: Array<string> = new Array<string>(bufferLength, (arg0: int32):string => {
+            return (retvalDeserializer.readString() as string);
+        })
         const returnResult: Array<string> = buffer
         return returnResult
     }
@@ -414,10 +412,9 @@ export class FileSelectorParam implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._FileSelectorParam_getDescriptions(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<string> = new Array<string>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
-        }
+        const buffer: Array<string> = new Array<string>(bufferLength, (arg0: int32):string => {
+            return (retvalDeserializer.readString() as string);
+        })
         const returnResult: Array<string> = buffer
         return returnResult
     }
@@ -429,15 +426,13 @@ export class FileSelectorParam implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptableFileTypes(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<Array<AcceptableFileType>> = new Array<Array<AcceptableFileType>>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            const bufferTempBufLength: int32 = retvalDeserializer.readInt32()
-            let bufferTempBuf: Array<AcceptableFileType> = new Array<AcceptableFileType>(bufferTempBufLength)
-            for (let bufferTempBufBufCounterI = 0; bufferTempBufBufCounterI < bufferTempBufLength; bufferTempBufBufCounterI++) {
-                bufferTempBuf[bufferTempBufBufCounterI] = AcceptableFileType_serializer.read(retvalDeserializer)
-            }
-            buffer[bufferBufCounterI] = bufferTempBuf
-        }
+        const buffer: Array<Array<AcceptableFileType>> = new Array<Array<AcceptableFileType>>(bufferLength, (arg0: int32):Array<AcceptableFileType> => {
+            const bufferTempBufLength: int32 = retvalDeserializer.readInt32();
+            const bufferTempBuf: Array<AcceptableFileType> = new Array<AcceptableFileType>(bufferTempBufLength, (arg0: int32):AcceptableFileType => {
+            return AcceptableFileType_serializer.read(retvalDeserializer);
+        });
+            return bufferTempBuf;
+        })
         const returnResult: Array<Array<AcceptableFileType>> = buffer
         return returnResult
     }
@@ -690,10 +685,9 @@ export class PermissionRequest implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._PermissionRequest_getAccessibleResource(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<string> = new Array<string>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
-        }
+        const buffer: Array<string> = new Array<string>(bufferLength, (arg0: int32):string => {
+            return (retvalDeserializer.readString() as string);
+        })
         const returnResult: Array<string> = buffer
         return returnResult
     }
@@ -1216,10 +1210,9 @@ export class WebResourceRequest implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestHeader(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<Header> = new Array<Header>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = Header_serializer.read(retvalDeserializer)
-        }
+        const buffer: Array<Header> = new Array<Header>(bufferLength, (arg0: int32):Header => {
+            return Header_serializer.read(retvalDeserializer);
+        })
         const returnResult: Array<Header> = buffer
         return returnResult
     }
@@ -1382,10 +1375,9 @@ export class WebResourceResponse implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseHeader(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<Header> = new Array<Header>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = Header_serializer.read(retvalDeserializer)
-        }
+        const buffer: Array<Header> = new Array<Header>(bufferLength, (arg0: int32):Header => {
+            return Header_serializer.read(retvalDeserializer);
+        })
         const returnResult: Array<Header> = buffer
         return returnResult
     }
@@ -5624,10 +5616,9 @@ export class AcceptableFileType_serializer {
         let valueDeserializer: DeserializerBase = buffer
         const mimeTypeTmpResult: string = (valueDeserializer.readString() as string)
         const acceptableTypeTmpBufLength: int32 = valueDeserializer.readInt32()
-        let acceptableTypeTmpBuf: Array<string> = new Array<string>(acceptableTypeTmpBufLength)
-        for (let acceptableTypeTmpBufBufCounterI = 0; acceptableTypeTmpBufBufCounterI < acceptableTypeTmpBufLength; acceptableTypeTmpBufBufCounterI++) {
-            acceptableTypeTmpBuf[acceptableTypeTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const acceptableTypeTmpBuf: Array<string> = new Array<string>(acceptableTypeTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const acceptableTypeTmpResult: Array<string> = acceptableTypeTmpBuf
         let value: AcceptableFileType = ({mimeType: mimeTypeTmpResult, acceptableType: acceptableTypeTmpResult} as AcceptableFileType)
         return value
@@ -5649,10 +5640,9 @@ export class AdsBlockedDetails_serializer {
         let valueDeserializer: DeserializerBase = buffer
         const urlTmpResult: string = (valueDeserializer.readString() as string)
         const adsBlockedTmpBufLength: int32 = valueDeserializer.readInt32()
-        let adsBlockedTmpBuf: Array<string> = new Array<string>(adsBlockedTmpBufLength)
-        for (let adsBlockedTmpBufBufCounterI = 0; adsBlockedTmpBufBufCounterI < adsBlockedTmpBufLength; adsBlockedTmpBufBufCounterI++) {
-            adsBlockedTmpBuf[adsBlockedTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const adsBlockedTmpBuf: Array<string> = new Array<string>(adsBlockedTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const adsBlockedTmpResult: Array<string> = adsBlockedTmpBuf
         let value: AdsBlockedDetails = ({url: urlTmpResult, adsBlocked: adsBlockedTmpResult} as AdsBlockedDetails)
         return value
@@ -5727,10 +5717,9 @@ export class BlankScreenDetectionConfig_serializer {
         let detectionTimingTmpBuf: Array<double> | undefined = undefined
         if ((detectionTimingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const detectionTimingTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let detectionTimingTmpBufOpt: Array<double> = new Array<double>(detectionTimingTmpBufOptLength)
-            for (let detectionTimingTmpBufOptBufCounterI = 0; detectionTimingTmpBufOptBufCounterI < detectionTimingTmpBufOptLength; detectionTimingTmpBufOptBufCounterI++) {
-                detectionTimingTmpBufOpt[detectionTimingTmpBufOptBufCounterI] = valueDeserializer.readFloat64()
-            }
+            const detectionTimingTmpBufOpt: Array<double> = new Array<double>(detectionTimingTmpBufOptLength, (arg0: int32):double => {
+            return valueDeserializer.readFloat64();
+        })
             detectionTimingTmpBuf = detectionTimingTmpBufOpt
         }
         const detectionTimingTmpResult: Array<double> | undefined = detectionTimingTmpBuf
@@ -5738,10 +5727,9 @@ export class BlankScreenDetectionConfig_serializer {
         let detectionMethodsTmpBuf: Array<BlankScreenDetectionMethod> | undefined = undefined
         if ((detectionMethodsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const detectionMethodsTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let detectionMethodsTmpBufOpt: Array<BlankScreenDetectionMethod> = new Array<BlankScreenDetectionMethod>(detectionMethodsTmpBufOptLength)
-            for (let detectionMethodsTmpBufOptBufCounterI = 0; detectionMethodsTmpBufOptBufCounterI < detectionMethodsTmpBufOptLength; detectionMethodsTmpBufOptBufCounterI++) {
-                detectionMethodsTmpBufOpt[detectionMethodsTmpBufOptBufCounterI] = BlankScreenDetectionMethod.fromValue(valueDeserializer.readInt32())
-            }
+            const detectionMethodsTmpBufOpt: Array<BlankScreenDetectionMethod> = new Array<BlankScreenDetectionMethod>(detectionMethodsTmpBufOptLength, (arg0: int32):BlankScreenDetectionMethod => {
+            return BlankScreenDetectionMethod.fromValue(valueDeserializer.readInt32());
+        })
             detectionMethodsTmpBuf = detectionMethodsTmpBufOpt
         }
         const detectionMethodsTmpResult: Array<BlankScreenDetectionMethod> | undefined = detectionMethodsTmpBuf
@@ -5964,20 +5952,18 @@ export class JavaScriptProxy_serializer {
         const jsObjectTmpResult: Object = (valueDeserializer.readObject() as object)
         const nameTmpResult: string = (valueDeserializer.readString() as string)
         const methodListTmpBufLength: int32 = valueDeserializer.readInt32()
-        let methodListTmpBuf: Array<string> = new Array<string>(methodListTmpBufLength)
-        for (let methodListTmpBufBufCounterI = 0; methodListTmpBufBufCounterI < methodListTmpBufLength; methodListTmpBufBufCounterI++) {
-            methodListTmpBuf[methodListTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const methodListTmpBuf: Array<string> = new Array<string>(methodListTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const methodListTmpResult: Array<string> = methodListTmpBuf
         const controllerTmpResult: WebviewController = (webview_WebviewController_serializer.read(valueDeserializer) as webview.WebviewController)
         const asyncMethodListTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let asyncMethodListTmpBuf: Array<string> | undefined = undefined
         if ((asyncMethodListTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const asyncMethodListTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let asyncMethodListTmpBufOpt: Array<string> = new Array<string>(asyncMethodListTmpBufOptLength)
-            for (let asyncMethodListTmpBufOptBufCounterI = 0; asyncMethodListTmpBufOptBufCounterI < asyncMethodListTmpBufOptLength; asyncMethodListTmpBufOptBufCounterI++) {
-                asyncMethodListTmpBufOpt[asyncMethodListTmpBufOptBufCounterI] = (valueDeserializer.readString() as string)
-            }
+            const asyncMethodListTmpBufOpt: Array<string> = new Array<string>(asyncMethodListTmpBufOptLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
             asyncMethodListTmpBuf = asyncMethodListTmpBufOpt
         }
         const asyncMethodListTmpResult: Array<string> | undefined = asyncMethodListTmpBuf
@@ -6201,10 +6187,9 @@ export class NativeEmbedParamDataInfo_serializer {
         let paramItemsTmpBuf: Array<NativeEmbedParamItem> | undefined = undefined
         if ((paramItemsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const paramItemsTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let paramItemsTmpBufOpt: Array<NativeEmbedParamItem> = new Array<NativeEmbedParamItem>(paramItemsTmpBufOptLength)
-            for (let paramItemsTmpBufOptBufCounterI = 0; paramItemsTmpBufOptBufCounterI < paramItemsTmpBufOptLength; paramItemsTmpBufOptBufCounterI++) {
-                paramItemsTmpBufOpt[paramItemsTmpBufOptBufCounterI] = NativeEmbedParamItem_serializer.read(valueDeserializer)
-            }
+            const paramItemsTmpBufOpt: Array<NativeEmbedParamItem> = new Array<NativeEmbedParamItem>(paramItemsTmpBufOptLength, (arg0: int32):NativeEmbedParamItem => {
+            return NativeEmbedParamItem_serializer.read(valueDeserializer);
+        })
             paramItemsTmpBuf = paramItemsTmpBufOpt
         }
         const paramItemsTmpResult: Array<NativeEmbedParamItem> | undefined = paramItemsTmpBuf
@@ -6470,16 +6455,14 @@ export class OnClientAuthenticationEvent_serializer {
         const hostTmpResult: string = (valueDeserializer.readString() as string)
         const portTmpResult: int32 = valueDeserializer.readInt32()
         const keyTypesTmpBufLength: int32 = valueDeserializer.readInt32()
-        let keyTypesTmpBuf: Array<string> = new Array<string>(keyTypesTmpBufLength)
-        for (let keyTypesTmpBufBufCounterI = 0; keyTypesTmpBufBufCounterI < keyTypesTmpBufLength; keyTypesTmpBufBufCounterI++) {
-            keyTypesTmpBuf[keyTypesTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const keyTypesTmpBuf: Array<string> = new Array<string>(keyTypesTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const keyTypesTmpResult: Array<string> = keyTypesTmpBuf
         const issuersTmpBufLength: int32 = valueDeserializer.readInt32()
-        let issuersTmpBuf: Array<string> = new Array<string>(issuersTmpBufLength)
-        for (let issuersTmpBufBufCounterI = 0; issuersTmpBufBufCounterI < issuersTmpBufLength; issuersTmpBufBufCounterI++) {
-            issuersTmpBuf[issuersTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const issuersTmpBuf: Array<string> = new Array<string>(issuersTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const issuersTmpResult: Array<string> = issuersTmpBuf
         let value: OnClientAuthenticationEvent = ({handler: handlerTmpResult, host: hostTmpResult, port: portTmpResult, keyTypes: keyTypesTmpResult, issuers: issuersTmpResult} as OnClientAuthenticationEvent)
         return value
@@ -6864,10 +6847,9 @@ export class OnSslErrorEventReceiveEvent_serializer {
         let certChainDataTmpBuf: Array<ArrayBuffer> | undefined = undefined
         if ((certChainDataTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const certChainDataTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let certChainDataTmpBufOpt: Array<ArrayBuffer> = new Array<ArrayBuffer>(certChainDataTmpBufOptLength)
-            for (let certChainDataTmpBufOptBufCounterI = 0; certChainDataTmpBufOptBufCounterI < certChainDataTmpBufOptLength; certChainDataTmpBufOptBufCounterI++) {
-                certChainDataTmpBufOpt[certChainDataTmpBufOptBufCounterI] = (valueDeserializer.readBuffer() as ArrayBuffer)
-            }
+            const certChainDataTmpBufOpt: Array<ArrayBuffer> = new Array<ArrayBuffer>(certChainDataTmpBufOptLength, (arg0: int32):ArrayBuffer => {
+            return (valueDeserializer.readBuffer() as ArrayBuffer);
+        })
             certChainDataTmpBuf = certChainDataTmpBufOpt
         }
         const certChainDataTmpResult: Array<ArrayBuffer> | undefined = certChainDataTmpBuf
@@ -7028,19 +7010,17 @@ export class ScriptItem_serializer {
         let valueDeserializer: DeserializerBase = buffer
         const scriptTmpResult: string = (valueDeserializer.readString() as string)
         const scriptRulesTmpBufLength: int32 = valueDeserializer.readInt32()
-        let scriptRulesTmpBuf: Array<string> = new Array<string>(scriptRulesTmpBufLength)
-        for (let scriptRulesTmpBufBufCounterI = 0; scriptRulesTmpBufBufCounterI < scriptRulesTmpBufLength; scriptRulesTmpBufBufCounterI++) {
-            scriptRulesTmpBuf[scriptRulesTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const scriptRulesTmpBuf: Array<string> = new Array<string>(scriptRulesTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const scriptRulesTmpResult: Array<string> = scriptRulesTmpBuf
         const urlRegexRulesTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let urlRegexRulesTmpBuf: Array<UrlRegexRule> | undefined = undefined
         if ((urlRegexRulesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const urlRegexRulesTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let urlRegexRulesTmpBufOpt: Array<UrlRegexRule> = new Array<UrlRegexRule>(urlRegexRulesTmpBufOptLength)
-            for (let urlRegexRulesTmpBufOptBufCounterI = 0; urlRegexRulesTmpBufOptBufCounterI < urlRegexRulesTmpBufOptLength; urlRegexRulesTmpBufOptBufCounterI++) {
-                urlRegexRulesTmpBufOpt[urlRegexRulesTmpBufOptBufCounterI] = UrlRegexRule_serializer.read(valueDeserializer)
-            }
+            const urlRegexRulesTmpBufOpt: Array<UrlRegexRule> = new Array<UrlRegexRule>(urlRegexRulesTmpBufOptLength, (arg0: int32):UrlRegexRule => {
+            return UrlRegexRule_serializer.read(valueDeserializer);
+        })
             urlRegexRulesTmpBuf = urlRegexRulesTmpBufOpt
         }
         const urlRegexRulesTmpResult: Array<UrlRegexRule> | undefined = urlRegexRulesTmpBuf
@@ -7091,10 +7071,9 @@ export class SslErrorEvent_serializer {
         let certChainDataTmpBuf: Array<ArrayBuffer> | undefined = undefined
         if ((certChainDataTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const certChainDataTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let certChainDataTmpBufOpt: Array<ArrayBuffer> = new Array<ArrayBuffer>(certChainDataTmpBufOptLength)
-            for (let certChainDataTmpBufOptBufCounterI = 0; certChainDataTmpBufOptBufCounterI < certChainDataTmpBufOptLength; certChainDataTmpBufOptBufCounterI++) {
-                certChainDataTmpBufOpt[certChainDataTmpBufOptBufCounterI] = (valueDeserializer.readBuffer() as ArrayBuffer)
-            }
+            const certChainDataTmpBufOpt: Array<ArrayBuffer> = new Array<ArrayBuffer>(certChainDataTmpBufOptLength, (arg0: int32):ArrayBuffer => {
+            return (valueDeserializer.readBuffer() as ArrayBuffer);
+        })
             certChainDataTmpBuf = certChainDataTmpBufOpt
         }
         const certChainDataTmpResult: Array<ArrayBuffer> | undefined = certChainDataTmpBuf

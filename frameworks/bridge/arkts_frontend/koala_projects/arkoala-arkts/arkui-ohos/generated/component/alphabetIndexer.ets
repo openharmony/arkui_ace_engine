@@ -838,10 +838,9 @@ export class AlphabetIndexerOptions_serializer {
     public static read(buffer: DeserializerBase): AlphabetIndexerOptions {
         let valueDeserializer: DeserializerBase = buffer
         const arrayValueTmpBufLength: int32 = valueDeserializer.readInt32()
-        let arrayValueTmpBuf: Array<string> = new Array<string>(arrayValueTmpBufLength)
-        for (let arrayValueTmpBufBufCounterI = 0; arrayValueTmpBufBufCounterI < arrayValueTmpBufLength; arrayValueTmpBufBufCounterI++) {
-            arrayValueTmpBuf[arrayValueTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const arrayValueTmpBuf: Array<string> = new Array<string>(arrayValueTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const arrayValueTmpResult: Array<string> = arrayValueTmpBuf
         const selectedTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
         let selectedTmpBuf: int32 | Bindable<int32> | undefined

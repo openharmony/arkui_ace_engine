@@ -220,10 +220,9 @@ export class BarrierStyle_serializer {
         const idTmpResult: string = (valueDeserializer.readString() as string)
         const directionTmpResult: BarrierDirection = BarrierDirection.fromValue(valueDeserializer.readInt32())
         const referencedIdTmpBufLength: int32 = valueDeserializer.readInt32()
-        let referencedIdTmpBuf: Array<string> = new Array<string>(referencedIdTmpBufLength)
-        for (let referencedIdTmpBufBufCounterI = 0; referencedIdTmpBufBufCounterI < referencedIdTmpBufLength; referencedIdTmpBufBufCounterI++) {
-            referencedIdTmpBuf[referencedIdTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const referencedIdTmpBuf: Array<string> = new Array<string>(referencedIdTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const referencedIdTmpResult: Array<string> = referencedIdTmpBuf
         let value: BarrierStyle = ({id: idTmpResult, direction: directionTmpResult, referencedId: referencedIdTmpResult} as BarrierStyle)
         return value
@@ -248,10 +247,9 @@ export class LocalizedBarrierStyle_serializer {
         const idTmpResult: string = (valueDeserializer.readString() as string)
         const localizedDirectionTmpResult: LocalizedBarrierDirection = LocalizedBarrierDirection.fromValue(valueDeserializer.readInt32())
         const referencedIdTmpBufLength: int32 = valueDeserializer.readInt32()
-        let referencedIdTmpBuf: Array<string> = new Array<string>(referencedIdTmpBufLength)
-        for (let referencedIdTmpBufBufCounterI = 0; referencedIdTmpBufBufCounterI < referencedIdTmpBufLength; referencedIdTmpBufBufCounterI++) {
-            referencedIdTmpBuf[referencedIdTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const referencedIdTmpBuf: Array<string> = new Array<string>(referencedIdTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const referencedIdTmpResult: Array<string> = referencedIdTmpBuf
         let value: LocalizedBarrierStyle = ({id: idTmpResult, localizedDirection: localizedDirectionTmpResult, referencedId: referencedIdTmpResult} as LocalizedBarrierStyle)
         return value
