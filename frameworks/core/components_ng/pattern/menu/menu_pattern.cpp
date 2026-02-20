@@ -999,6 +999,41 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
 
 void MenuPattern::DoCloseSubMenus() const
 {
+    // this function is used to destroy a submenu which contains DetachedFreeRootProxy node.
+    if (showedSubMenu_) {
+        RefPtr<FrameNode> parentMenuItem = nullptr;
+        auto showedSubMenuPattern = showedSubMenu_->GetPattern<MenuPattern>();
+
+        auto detachedProxyNode = showedSubMenu_->GetChildAtIndex(0);
+        bool hasDetachedProxy = false;
+        while (detachedProxyNode) {
+            if (detachedProxyNode->GetTag() == DETACHED_FREE_ROOT_PROXY_TAG) {
+                hasDetachedProxy = true;
+                break;
+            }
+            detachedProxyNode = detachedProxyNode->GetChildAtIndex(0);
+        }
+
+        if (showedSubMenuPattern && showedSubMenuPattern->IsSubMenu() && hasDetachedProxy) {
+            auto wrapperMenu = showedSubMenu_->GetParent();
+            if (wrapperMenu) {
+                wrapperMenu->RemoveChild(showedSubMenu_);
+            }
+            showedSubMenu_= nullptr;
+            // save the pointer to the parent menu item before reseting it in SetParentMenuItem
+            parentMenuItem = showedSubMenuPattern->parentMenuItem_;
+            showedSubMenuPattern->SetParentMenuItem(nullptr);
+            showedSubMenuPattern->SetSubMenuShow(false);
+        }
+
+        if (parentMenuItem) {
+            auto parentMenuItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+            if (parentMenuItemPattern && parentMenuItemPattern->HasDetachedFreeRootProxy()) {
+                parentMenuItemPattern->HandleCloseSubMenu();
+            }
+        }
+    }
+
     for (auto iter = embeddedMenuItems_.begin(); iter != embeddedMenuItems_.end();) {
         auto& menuItem = *iter;
         auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
