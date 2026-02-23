@@ -2129,6 +2129,125 @@ void ListPattern::HandleScrollBarOutBoundary()
     ScrollablePattern::HandleScrollBarOutBoundary(overScroll);
 }
 
+float ListPattern::GetListCrossAxisSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+
+    auto size = host->GetGeometryNode()->GetFrameSize();
+    auto layoutProperty = host->GetLayoutProperty();
+    if (layoutProperty) {
+        auto padding = layoutProperty->CreatePaddingAndBorder();
+        MinusPaddingToSize(padding, size);
+    }
+    return GetCrossAxisSize(size, GetAxis());
+}
+
+void ListPattern::ApplyRtlTransform(float& mainPos) const
+{
+    if (GetAxis() != Axis::HORIZONTAL || !IsRTL()) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+
+    SizeF listMainSize = host->GetGeometryNode()->GetFrameSize();
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, listMainSize);
+
+    mainPos = listMainSize.Width() - mainPos;
+}
+
+int32_t ListPattern::CalculateLaneNumber(int32_t index, const ListLayoutAlgorithm::PositionMap& itemPosition) const
+{
+    auto iter = itemPosition.find(index);
+    if (lanes_ <= 1 || iter == itemPosition.end()) {
+        return 0;
+    }
+    float currentStartPos = iter->second.startPos;
+    int32_t lane = 0;
+    // Traverse backwards to count items before current position in the same row
+    auto rit = std::make_reverse_iterator(iter);
+    for (; rit != itemPosition.rend(); ++rit) {
+        if (!NearEqual(rit->second.startPos, currentStartPos)) {
+            break;
+        }
+        lane++;
+    }
+    return lane % lanes_;
+}
+
+void ListPattern::CalculateCrossAxisPosition(int32_t lane, float listCrossSize,
+    float& crossPos, float& crossSize) const
+{
+    float availableCrossSize = listCrossSize - (lanes_ - 1) * laneGutter_;
+    float columnWidth = availableCrossSize / lanes_;
+
+    if (GetAxis() == Axis::VERTICAL) {
+        if (IsRTL()) {
+            crossPos = listCrossSize - (lane + 1) * columnWidth - lane * laneGutter_;
+        } else {
+            crossPos = lane * (columnWidth + laneGutter_);
+        }
+        crossSize = columnWidth;
+    } else {
+        crossPos = lane * (columnWidth + laneGutter_);
+        crossSize = columnWidth;
+    }
+}
+
+RectF ListPattern::GetItemRectWithItemPosition(
+    int32_t index, const std::map<int32_t, ListItemInfo>& itemPosition) const
+{
+    auto iter = itemPosition.find(index);
+    if (iter == itemPosition.end()) {
+        return RectF();
+    }
+
+    // calc main axis position and size
+    float mainPos = iter->second.startPos;
+    float mainSize = iter->second.endPos - iter->second.startPos;
+    ApplyRtlTransform(mainPos);
+
+    //calc cross axis position and size
+    float listCrossSize = GetListCrossAxisSize();
+    int32_t lane = CalculateLaneNumber(index, itemPosition);
+
+    float crossPos = 0.0f;
+    float crossSize = 0.0f;
+    CalculateCrossAxisPosition(lane, listCrossSize, crossPos, crossSize);
+
+    if (GetAxis() == Axis::VERTICAL) {
+        return RectF(crossPos, mainPos, crossSize, mainSize);
+    } else {
+        return RectF(mainPos, crossPos, mainSize, crossSize);
+    }
+}
+
+bool ListPattern::GetDummyItemRect(int32_t index, RectF& rect) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listLayoutProperty, false);
+    if (!listLayoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
+        return false;
+    }
+
+    if (itemPosition_.count(index) != 0) {
+        rect = GetItemRectWithItemPosition(index, itemPosition_);
+    } else if (cachedItemPosition_.count(index) != 0) {
+        rect = GetItemRectWithItemPosition(index, cachedItemPosition_);
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
 Rect ListPattern::GetItemRect(int32_t index) const
 {
     if (index < 0 || index < startIndex_ || index > endIndex_) {
