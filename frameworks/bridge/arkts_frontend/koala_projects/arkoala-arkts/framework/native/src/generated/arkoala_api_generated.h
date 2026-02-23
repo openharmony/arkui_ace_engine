@@ -296,9 +296,6 @@ typedef struct Opt_ArcSwiperControllerHelper Opt_ArcSwiperControllerHelper;
 typedef struct arkui_component_idlize_BaseShapePeer arkui_component_idlize_BaseShapePeer;
 typedef struct arkui_component_idlize_BaseShapePeer* Ark_arkui_component_idlize_BaseShape;
 typedef struct Opt_arkui_component_idlize_BaseShape Opt_arkui_component_idlize_BaseShape;
-typedef struct arkui_component_idlize_MagnifierPeer arkui_component_idlize_MagnifierPeer;
-typedef struct arkui_component_idlize_MagnifierPeer* Ark_arkui_component_idlize_Magnifier;
-typedef struct Opt_arkui_component_idlize_Magnifier Opt_arkui_component_idlize_Magnifier;
 typedef struct AttributeModifierPeer AttributeModifierPeer;
 typedef struct AttributeModifierPeer* Ark_AttributeModifier;
 typedef struct Opt_AttributeModifier Opt_AttributeModifier;
@@ -7838,10 +7835,6 @@ typedef struct Opt_arkui_component_idlize_BaseShape {
     Ark_Tag tag;
     Ark_arkui_component_idlize_BaseShape value;
 } Opt_arkui_component_idlize_BaseShape;
-typedef struct Opt_arkui_component_idlize_Magnifier {
-    Ark_Tag tag;
-    Ark_arkui_component_idlize_Magnifier value;
-} Opt_arkui_component_idlize_Magnifier;
 typedef struct Opt_AttributeModifier {
     Ark_Tag tag;
     Ark_AttributeModifier value;
@@ -28893,7 +28886,6 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
                                            Ark_Scroller parentScroller,
                                            Ark_Scroller childScroller);
     void (*setCustomKeyboardContinueFeature)(Ark_CustomKeyboardContinueFeature feature);
-    Ark_arkui_component_idlize_Magnifier (*getMagnifier)();
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {
@@ -29133,17 +29125,12 @@ typedef struct GENERATED_ArkUILongPressRecognizerAccessor {
     Ark_Float64 (*getAllowableMovement)(Ark_LongPressRecognizer peer);
 } GENERATED_ArkUILongPressRecognizerAccessor;
 
-typedef struct GENERATED_ArkUIMagnifierAccessor {
-    void (*destroyPeer)(Ark_arkui_component_idlize_Magnifier peer);
-    Ark_arkui_component_idlize_Magnifier (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-    void (*bind)(Ark_arkui_component_idlize_Magnifier peer,
-                 const Ark_String* id);
-    void (*show)(Ark_arkui_component_idlize_Magnifier peer,
-                 Ark_Float64 x,
+typedef struct GENERATED_ArkUIMagnifierExtenderAccessor {
+    void (*bind)(const Ark_String* id);
+    void (*show)(Ark_Float64 x,
                  Ark_Float64 y);
-    void (*unbind)(Ark_arkui_component_idlize_Magnifier peer);
-} GENERATED_ArkUIMagnifierAccessor;
+    void (*unbind)();
+} GENERATED_ArkUIMagnifierExtenderAccessor;
 
 typedef struct GENERATED_ArkUIMatrix2DAccessor {
     void (*destroyPeer)(Ark_Matrix2D peer);
@@ -31384,7 +31371,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIListScrollerAccessor* (*getListScrollerAccessor)();
     const GENERATED_ArkUILongPressGestureEventAccessor* (*getLongPressGestureEventAccessor)();
     const GENERATED_ArkUILongPressRecognizerAccessor* (*getLongPressRecognizerAccessor)();
-    const GENERATED_ArkUIMagnifierAccessor* (*getMagnifierAccessor)();
+    const GENERATED_ArkUIMagnifierExtenderAccessor* (*getMagnifierExtenderAccessor)();
     const GENERATED_ArkUIMatrix2DAccessor* (*getMatrix2DAccessor)();
     const GENERATED_ArkUIMeasurableAccessor* (*getMeasurableAccessor)();
     const GENERATED_ArkUIMenuItemConfigurationAccessor* (*getMenuItemConfigurationAccessor)();

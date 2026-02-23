@@ -3416,9 +3416,6 @@ export class IUIContext {
         IUIContext.setCustomKeyboardContinueFeature_serialize(feature_casted)
         return
     }
-    public static getMagnifier(): Magnifier {
-        return IUIContext.getMagnifier_serialize()
-    }
     private static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? true : false)
     }
@@ -3497,11 +3494,6 @@ export class IUIContext {
     }
     private static setCustomKeyboardContinueFeature_serialize(feature: CustomKeyboardContinueFeature): void {
         ArkUIGeneratedNativeModule._IUIContext_setCustomKeyboardContinueFeature(feature.valueOf())
-    }
-    private static getMagnifier_serialize(): Magnifier {
-        const retval = ArkUIGeneratedNativeModule._IUIContext_getMagnifier()
-        const obj: Magnifier = MagnifierInternal.fromPtr(retval)
-        return obj
     }
 }
 export class LazyBuild {
@@ -3633,52 +3625,30 @@ export class LevelOrderExtender implements MaterializedBase {
         return retval
     }
 }
-export class MagnifierInternal {
-    public static fromPtr(ptr: KPointer): Magnifier {
-        return new Magnifier(MaterializedBaseTag.NOP, ptr)
+export class MagnifierExtender {
+    static bind_serialize(id: string): void {
+        ArkUIGeneratedNativeModule._MagnifierExtender_bind(id)
     }
-}
-export class Magnifier implements MaterializedBase {
-    public peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
+    static show_serialize(x: double, y: double): void {
+        ArkUIGeneratedNativeModule._MagnifierExtender_show(x, y)
     }
-    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, Magnifier.getFinalizer())
+    static unbind_serialize(): void {
+        ArkUIGeneratedNativeModule._MagnifierExtender_unbind()
     }
-    constructor() {
-        this(MaterializedBaseTag.NOP, Magnifier.construct())
-    }
-    static construct(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._Magnifier_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._Magnifier_getFinalizer()
-    }
-    public bind(id: string): void {
+    public static bind(id: string): void {
         const id_casted = id as (string)
-        this.bind_serialize(id_casted)
+        MagnifierExtender.bind_serialize(id_casted)
         return
     }
-    public show(x: double, y: double): void {
+    public static show(x: double, y: double): void {
         const x_casted = x as (double)
         const y_casted = y as (double)
-        this.show_serialize(x_casted, y_casted)
+        MagnifierExtender.show_serialize(x_casted, y_casted)
         return
     }
-    public unbind(): void {
-        this.unbind_serialize()
+    public static unbind(): void {
+        MagnifierExtender.unbind_serialize()
         return
-    }
-    private bind_serialize(id: string): void {
-        ArkUIGeneratedNativeModule._Magnifier_bind(this.peer!.ptr, id)
-    }
-    private show_serialize(x: double, y: double): void {
-        ArkUIGeneratedNativeModule._Magnifier_show(this.peer!.ptr, x, y)
-    }
-    private unbind_serialize(): void {
-        ArkUIGeneratedNativeModule._Magnifier_unbind(this.peer!.ptr)
     }
 }
 export class NavExtender {
@@ -6867,17 +6837,6 @@ export class arkui_component_idlize_BaseShape_serializer {
         let valueDeserializer: DeserializerBase = buffer
         let ptr: KPointer = valueDeserializer.readPointer()
         return BaseShapeInternal.fromPtr(ptr)
-    }
-}
-export class arkui_component_idlize_Magnifier_serializer {
-    public static write(buffer: SerializerBase, value: Magnifier): void {
-        let valueSerializer: SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): Magnifier {
-        let valueDeserializer: DeserializerBase = buffer
-        let ptr: KPointer = valueDeserializer.readPointer()
-        return MagnifierInternal.fromPtr(ptr)
     }
 }
 export class BuilderNodeOps_serializer {

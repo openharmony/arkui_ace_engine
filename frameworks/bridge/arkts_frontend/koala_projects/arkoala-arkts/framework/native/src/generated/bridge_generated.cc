@@ -34703,10 +34703,6 @@ void impl_IUIContext_setCustomKeyboardContinueFeature(Ark_Int32 feature) {
         GetAccessors()->getIUIContextAccessor()->setCustomKeyboardContinueFeature(static_cast<Ark_CustomKeyboardContinueFeature>(feature));
 }
 KOALA_INTEROP_DIRECT_V1(IUIContext_setCustomKeyboardContinueFeature, Ark_Int32)
-Ark_NativePointer impl_IUIContext_getMagnifier() {
-        return GetAccessors()->getIUIContextAccessor()->getMagnifier();
-}
-KOALA_INTEROP_DIRECT_0(IUIContext_getMagnifier, Ark_NativePointer)
 Ark_NativePointer impl_JsGeolocation_construct() {
         return GetAccessors()->getJsGeolocationAccessor()->construct();
 }
@@ -35501,29 +35497,17 @@ KDouble impl_LongPressRecognizer_getAllowableMovement(Ark_NativePointer thisPtr)
         return GetAccessors()->getLongPressRecognizerAccessor()->getAllowableMovement(self);
 }
 KOALA_INTEROP_DIRECT_1(LongPressRecognizer_getAllowableMovement, KDouble, Ark_NativePointer)
-Ark_NativePointer impl_Magnifier_construct() {
-        return GetAccessors()->getMagnifierAccessor()->construct();
+void impl_MagnifierExtender_bind(const KStringPtr& id) {
+        GetAccessors()->getMagnifierExtenderAccessor()->bind((const Ark_String*) (&id));
 }
-KOALA_INTEROP_DIRECT_0(Magnifier_construct, Ark_NativePointer)
-Ark_NativePointer impl_Magnifier_getFinalizer() {
-        return GetAccessors()->getMagnifierAccessor()->getFinalizer();
+KOALA_INTEROP_V1(MagnifierExtender_bind, KStringPtr)
+void impl_MagnifierExtender_show(KDouble x, KDouble y) {
+        GetAccessors()->getMagnifierExtenderAccessor()->show(x, y);
 }
-KOALA_INTEROP_DIRECT_0(Magnifier_getFinalizer, Ark_NativePointer)
-void impl_Magnifier_bind(Ark_NativePointer thisPtr, const KStringPtr& id) {
-        Ark_arkui_component_idlize_Magnifier self = reinterpret_cast<Ark_arkui_component_idlize_Magnifier>(thisPtr);
-        GetAccessors()->getMagnifierAccessor()->bind(self, (const Ark_String*) (&id));
+KOALA_INTEROP_V2(MagnifierExtender_show, KDouble, KDouble)
+void impl_MagnifierExtender_unbind() {
+        GetAccessors()->getMagnifierExtenderAccessor()->unbind();
 }
-KOALA_INTEROP_V2(Magnifier_bind, Ark_NativePointer, KStringPtr)
-void impl_Magnifier_show(Ark_NativePointer thisPtr, KDouble x, KDouble y) {
-        Ark_arkui_component_idlize_Magnifier self = reinterpret_cast<Ark_arkui_component_idlize_Magnifier>(thisPtr);
-        GetAccessors()->getMagnifierAccessor()->show(self, x, y);
-}
-KOALA_INTEROP_DIRECT_V3(Magnifier_show, Ark_NativePointer, KDouble, KDouble)
-void impl_Magnifier_unbind(Ark_NativePointer thisPtr) {
-        Ark_arkui_component_idlize_Magnifier self = reinterpret_cast<Ark_arkui_component_idlize_Magnifier>(thisPtr);
-        GetAccessors()->getMagnifierAccessor()->unbind(self);
-}
-KOALA_INTEROP_DIRECT_V1(Magnifier_unbind, Ark_NativePointer)
 Ark_NativePointer impl_Matrix2D_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto unitValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());

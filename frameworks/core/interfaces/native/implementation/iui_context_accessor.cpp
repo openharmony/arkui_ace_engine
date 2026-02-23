@@ -491,10 +491,6 @@ void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feat
     bool value = (featureVal == NG::CustomKeyboardContinueFeature::ENABLED);
     textFieldManager->SetCustomKeyboardContinueFeature(value);
 }
-Ark_arkui_component_idlize_Magnifier GetMagnifierImpl()
-{
-    return {};
-}
 } // IUIContextAccessor
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
@@ -510,7 +506,6 @@ const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
         IUIContextAccessor::BindTabsToNestedScrollableImpl,
         IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
         IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
-        IUIContextAccessor::GetMagnifierImpl,
     };
     return &IUIContextAccessorImpl;
 }

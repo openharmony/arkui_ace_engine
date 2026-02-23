@@ -4959,8 +4959,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _IUIContext_setCustomKeyboardContinueFeature(feature: KInt): void
     @ani.unsafe.Direct
-    native static _IUIContext_getMagnifier(): KPointer
-    @ani.unsafe.Direct
     native static _JsGeolocation_construct(): KPointer
     @ani.unsafe.Direct
     native static _JsGeolocation_getFinalizer(): KPointer
@@ -5169,16 +5167,12 @@ export class ArkUIGeneratedNativeModule {
     native static _LongPressRecognizer_getDuration(ptr: KPointer): KInt
     @ani.unsafe.Direct
     native static _LongPressRecognizer_getAllowableMovement(ptr: KPointer): KDouble
-    @ani.unsafe.Direct
-    native static _Magnifier_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _Magnifier_getFinalizer(): KPointer
     @ani.unsafe.Quick
-    native static _Magnifier_bind(ptr: KPointer, id: KStringPtr): void
+    native static _MagnifierExtender_bind(id: KStringPtr): void
     @ani.unsafe.Direct
-    native static _Magnifier_show(ptr: KPointer, x: KDouble, y: KDouble): void
+    native static _MagnifierExtender_show(x: KDouble, y: KDouble): void
     @ani.unsafe.Direct
-    native static _Magnifier_unbind(ptr: KPointer): void
+    native static _MagnifierExtender_unbind(): void
     @ani.unsafe.Direct
     native static _Matrix2D_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
     @ani.unsafe.Direct
