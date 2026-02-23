@@ -281,6 +281,7 @@ public:
     //-------force split end-------
 
     int32_t RegisterNavigateChangeCallback(TransitionCallback callback);
+    void UnregisterNavigateChangeCallback(int32_t callbackId);
 
     void FireNavigateChangeCallback(
         const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter = false);

@@ -859,6 +859,11 @@ int32_t NavigationManager::RegisterNavigateChangeCallback(TransitionCallback cal
     return id;
 }
 
+void NavigationManager::UnregisterNavigateChangeCallback(int32_t callbackId)
+{
+    changeCallbacks_.erase(callbackId);
+}
+
 void NavigationManager::FireNavigateChangeCallback(
     const NavigateChangeInfo& from, const NavigateChangeInfo& to, bool isRouter)
 {
