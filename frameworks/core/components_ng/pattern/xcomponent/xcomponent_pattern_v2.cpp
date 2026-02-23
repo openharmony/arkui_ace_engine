@@ -19,7 +19,6 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
-#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
@@ -27,8 +26,8 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_surface_config_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_utils.h"
 #ifdef ENABLE_ROSEN_BACKEND
-#include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
+#include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_sync_transaction_handler.h"
 #include "transaction/rs_transaction.h"
 #include "transaction/rs_transaction_handler.h"
 #include "transaction/rs_transaction_proxy.h"
