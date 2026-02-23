@@ -249,6 +249,7 @@ enum class AccessibilityActionInterceptResult : uint32_t {
 };
 bool CheckBetterRect(const Rect& nodeRect, int direction, const Rect& itemRect, const Rect& tempBest);
 
+
 class AccessibilityUtils {
 public:
     static std::string GetRoleByType(AccessibilityRoleType roleType);
