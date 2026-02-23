@@ -591,6 +591,10 @@ void ImagePattern::OnImageDataReady()
     UpdateOrientation();
     PreprocessYUVDecodeFormat(host);
 
+    if (!host->IsActive()) {
+        ReportCompleteLoadEvent(host);
+    }
+
     if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
@@ -964,7 +968,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
     } else {
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
-        if (pipeline && host->GetId() != INVALID_ID) {
+        if (pipeline && host->GetId() != INVALID_ID && src.IsValid()) {
             pipeline->GetLoadCompleteManager()->AddLoadComponent(host->GetId());
         }
     }
