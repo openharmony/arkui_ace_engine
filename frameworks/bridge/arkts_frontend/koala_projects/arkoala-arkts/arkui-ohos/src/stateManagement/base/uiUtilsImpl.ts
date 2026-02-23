@@ -21,7 +21,9 @@ import { WrappedSet } from './observeWrappedSet';
 import { WrappedMap } from './observeWrappedMap';
 import { ObserveWrappedBase, ObserveWrappedKeyedMeta } from './observeWrappedBase';
 import { Binding, MutableBinding } from '../utils';
+import { IVariableOwner } from '../decorator';
 import { getRawObject, isDynamicObject } from '#generated';
+import { CustomComponentLifecycle } from '../../component/customComponent';
 
 const ArrayTypeName = Class.from<Array<Any>>().getName();
 const SetTypeName = Class.from<Set<Any>>().getName();
