@@ -1492,7 +1492,8 @@ int32_t SystemProperties::getFormSharedImageCacheThreshold()
 
 bool SystemProperties::IsFormSkeletonRSTransactionEnabled()
 {
-    return system::GetBoolParameter("const.form.skeleton_animation.rs_transaction_enabled", true);
+    static bool enabled = system::GetBoolParameter("const.form.skeleton_animation.rs_transaction_enabled", true);
+    return enabled;
 }
 
 bool SystemProperties::IsWhiteBlockEnabled()
