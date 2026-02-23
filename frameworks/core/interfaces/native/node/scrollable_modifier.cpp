@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr bool DEFAULT_BACKTOTOP = false;
-constexpr bool DEFAULT_OFFSET = 0.0f;
+constexpr float DEFAULT_OFFSET = 0.0f;
 constexpr int32_t ERROR_INT_CODE = -1;
 
 ArkUI_Int32 GetContentClip(ArkUINodeHandle node)

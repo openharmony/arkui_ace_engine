@@ -388,14 +388,17 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 
 void GridIrregularLayoutAlgorithm::Jump(float mainSize, bool considerContentOffset)
 {
+    float scrollToEndLine = false;
     if (info_.jumpIndex_ == JUMP_TO_BOTTOM_EDGE) {
         GridIrregularFiller filler(&info_, wrapper_);
         filler.FillMatrixOnly(info_.GetChildrenCount() - 1);
         info_.PrepareJumpToBottom();
+        scrollToEndLine = true;
     }
 
     if (info_.jumpIndex_ == LAST_ITEM) {
         info_.jumpIndex_ = info_.GetChildrenCount() - 1;
+        scrollToEndLine = true;
     }
 
     if (info_.scrollAlign_ == ScrollAlign::AUTO) {
@@ -782,9 +785,7 @@ void GridIrregularLayoutAlgorithm::AdaptToChildMainSize(
     idealSize.SetMainSize(gridMainSize, info_.axis_);
     AddPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
     wrapper_->GetGeometryNode()->SetFrameSize(idealSize);
-    if (!NearEqual(gridMainSize, info_.lastMainSize_)) {
-        info_.lastMainSize_ = gridMainSize;
-        TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
-    }
+    info_.lastMainSize_ = gridMainSize;
+    TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
 }
 } // namespace OHOS::Ace::NG
