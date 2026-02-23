@@ -93,8 +93,8 @@ void XComponentControllerPeerImpl::SetOnSurfaceDestroyedEvent(const Callback_Str
 std::shared_ptr<drawing_CanvasPeer> XComponentControllerPeerImpl::GetCanvas()
 {
     CHECK_NULL_RETURN(controller, nullptr);
-    CHECK_NULL_RETURN(controller->LockCanvas(), nullptr);
     auto canvas = controller->LockCanvas();
+    CHECK_NULL_RETURN(canvas, nullptr);
     if (!rsCanvas_ || rsCanvas_->GetCanvas() != canvas) {
         rsCanvas_ = std::make_shared<drawing_CanvasPeer>(canvas);
     }

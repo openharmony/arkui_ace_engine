@@ -323,9 +323,14 @@ bool AccessibilityProperty::IsMatchAccessibilityResponseRegion(bool isAccessibil
 {
     auto host = host_.Upgrade();
     CHECK_NULL_RETURN(host, false);
-    // virtual node get response region based on transform rect
-    CHECK_EQUAL_RETURN(isAccessibilityVirtualNode, true, false);
     NG::RectF origRect;
+    if (isAccessibilityVirtualNode) {
+        origRect = host->GetTransformRectRelativeToWindow();
+    } else {
+        RefPtr<NG::RenderContext> renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        origRect = renderContext->GetPaintRectWithoutTransform();
+    }
     RefPtr<NG::RenderContext> renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     origRect = renderContext->GetPaintRectWithoutTransform();
@@ -645,7 +650,7 @@ static const std::set<std::string> TAGS_FOCUSABLE = {
     V2::EMBEDDED_COMPONENT_ETS_TAG,
     V2::ISOLATED_COMPONENT_ETS_TAG,
     V2::DYNAMIC_COMPONENT_ETS_TAG,
-    V2::FORM_ETS_TAG
+    V2::FORM_ETS_TAG,
 };
 
 bool AccessibilityProperty::IsAccessibilityFocusableTag(const std::string &tag)
@@ -1112,6 +1117,8 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
         return;
     }
     accessibilityText_ = text;
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetAccessibilityTextWithEvent);
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
@@ -1121,8 +1128,6 @@ void AccessibilityProperty::SetAccessibilityNextFocusInspectorKey(const std::str
         return;
     }
     accessibilityNextFocusInspectorKey_ = accessibilityNextFocusInspectorKey;
-    auto frameNode = host_.Upgrade();
-    FREE_NODE_CHECK(frameNode, SetAccessibilityNextFocusInspectorKey, accessibilityNextFocusInspectorKey);
     UpdateAccessibilityNextFocusIdMap(accessibilityNextFocusInspectorKey);
     NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
 }
@@ -1133,8 +1138,6 @@ void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& tex
         return;
     }
     accessibilityText_ = text;
-    auto frameNode = host_.Upgrade();
-    FREE_NODE_CHECK(frameNode, SetAccessibilityTextWithEvent);
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
@@ -1149,6 +1152,8 @@ void AccessibilityProperty::SetAccessibilityDescription(const std::string& acces
         return;
     }
     accessibilityDescription_ = accessibilityDescription;
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetAccessibilityDescriptionWithEvent);
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
@@ -1158,8 +1163,6 @@ void AccessibilityProperty::SetAccessibilityDescriptionWithEvent(const std::stri
         return;
     }
     accessibilityDescription_ = accessibilityDescription;
-    auto frameNode = host_.Upgrade();
-    FREE_NODE_CHECK(frameNode, SetAccessibilityDescriptionWithEvent);
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
