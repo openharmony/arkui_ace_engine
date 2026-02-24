@@ -1961,53 +1961,6 @@ void ScrollPattern::ReportOnItemScrollEvent(const std::string& event)
 
 int32_t ScrollPattern::OnInjectionEvent(const std::string& command)
 {
-    int reportEventId = 0;
-    float ratio = 0.0f;
-    bool isScrollByRatio = false;
-    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
-    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f) || !isScrollByRatio) {
-        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
-        return RET_FAILED;
-    }
-    if (ret == "scrollForward") {
-        ScrollPageByRatio(true, ratio, reportEventId);
-    } else if (ret == "scrollBackward") {
-        ScrollPageByRatio(false, ratio, reportEventId);
-    } else {
-        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
-        return RET_FAILED;
-    }
-    return RET_SUCCESS;
-}
-
-void ScrollPattern::ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId)
-{
-    auto height = GetMainContentSize();
-    float distance = reverse ? height : -height;
-    distance = distance * ratio;
-    SetIsOverScroll(false);
-    ScrollHandle(distance, reportEventId);
-    ScrollBy(distance, distance, false);
-}
-
-void ScrollPattern::ScrollHandle(float distance, int32_t reportEventId)
-{
-    if (LessOrEqual(scrollableDistance_, 0.0)) {
-        ReportScroll(true, ScrollError::SCROLL_NOT_SCROLLABLE_ERROR, reportEventId);
-        return;
-    }
-
-    if (HandleEdgeEffect(distance, SCROLL_FROM_JUMP, viewSize_)) {
-        ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
-        return;
-    }
-
-    ScrollError error = ScrollError::SCROLL_ERROR_OTHER;
-    if (IsAtTop()) {
-        error = ScrollError::SCROLL_TOP_ERROR;
-    } else if (IsAtBottom()) {
-        error = ScrollError::SCROLL_BOTTOM_ERROR;
-    }
-    ReportScroll(false, error, reportEventId);
+    return OnInjectionEventByRatio(command);
 }
 } // namespace OHOS::Ace::NG

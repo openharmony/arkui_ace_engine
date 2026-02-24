@@ -5144,4 +5144,65 @@ void ScrollablePattern::ReportOnItemStopEvent()
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
+
+int32_t ScrollablePattern::OnInjectionEventByRatio(const std::string& command)
+{
+    int reportEventId = 0;
+    float ratio = 0.0f;
+    bool isScrollByRatio = false;
+    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
+
+    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f)) {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    if (ret == "scrollForward") {
+        HandleScrollByRatio(isScrollByRatio, true, ratio, reportEventId);
+    } else if (ret == "scrollBackward") {
+        HandleScrollByRatio(isScrollByRatio, false, ratio, reportEventId);
+    } else {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+ScrollError ScrollablePattern::ScrollByRatio(bool reverse, float ratio)
+{
+    auto height = GetMainContentSize();
+
+    float distance = reverse ? height : -height;
+    distance = distance * ratio;
+    SetIsOverScroll(false);
+    StopAnimate();
+    if ((IsAtBottom() && IsAtTop()) || !IsScrollable()) {
+        return ScrollError::SCROLL_NOT_SCROLLABLE_ERROR;
+    }
+
+    ScrollError error = ScrollError::SCROLL_ERROR_OTHER;
+    if (IsAtTop() && reverse) {
+        return ScrollError::SCROLL_TOP_ERROR;
+    } else if (IsAtBottom() && !reverse) {
+        return ScrollError::SCROLL_BOTTOM_ERROR;
+    }
+
+    if (UpdateCurrentOffset(distance, SCROLL_FROM_JUMP)) {
+        return ScrollError::SCROLL_NO_ERROR;
+    }
+    return error;
+}
+
+void ScrollablePattern::HandleScrollByRatio(bool isScrollByRatio, bool reverse, float ratio, int reportEventId)
+{
+    if (isScrollByRatio) {
+        auto scrollError = ScrollByRatio(reverse, ratio);
+        if (scrollError == ScrollError::SCROLL_NO_ERROR) {
+            ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+        } else {
+            ReportScroll(false, scrollError, reportEventId);
+        }
+    } else {
+        ScrollPage(reverse);
+    }
+}
 } // namespace OHOS::Ace::NG
