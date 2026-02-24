@@ -44,7 +44,7 @@ void UpdateIdealSize(Axis axis, const SizeF& childSize, const OptionalSizeF& par
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value()) {
-        const auto& layoutConstraint = layoutProperty->GetLayoutConstraint().value();
+        const auto& layoutConstraint = layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF());
         auto isVertical = axis == Axis::VERTICAL;
         auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
         auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
