@@ -142,6 +142,7 @@ public:
     static void CreateWithResourceObj(FrameNode* frameNode, JsProgressResourceType jsResourceType,
         const RefPtr<ResourceObject>& resObj);
     static void SetGradientColorByUser(FrameNode* frameNode, bool value);
+    static void SetBorderColorSetByUser(FrameNode* frameNode, bool value);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

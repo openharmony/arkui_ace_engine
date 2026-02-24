@@ -1360,6 +1360,11 @@ void ProgressModelNG::SetGradientColorByUser(FrameNode* frameNode, bool value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, GradientColorSetByUser, value, frameNode);
 }
 
+void ProgressModelNG::SetBorderColorSetByUser(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderColorSetByUser, value, frameNode);
+}
+
 void ProgressModelNG::CreateWithResourceObj(JsProgressResourceType type, const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -304,7 +304,7 @@ void SetImmutableFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
 
 void SetOnClick(ArkUINodeHandle node, void* callback)
 {
-    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     GestureEventFunc* click = nullptr;
     if (callback) {
@@ -317,7 +317,7 @@ void SetOnClick(ArkUINodeHandle node, void* callback)
 
 void ResetOnClick(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ClearOnClick(frameNode);
 }
@@ -345,7 +345,7 @@ void SetResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const 
 
 void ResetResponseRegion(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ClearResponseRegion(frameNode);
 }
@@ -461,7 +461,8 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPt
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj;
         if (!fontColorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontColorRawPtr));
         }
@@ -498,7 +499,8 @@ void SetFontColorPtr(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* 
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj;
         if (!fontColorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontColorRawPtr));
         }
@@ -1567,7 +1569,7 @@ void ResetTextCaretColor(ArkUINodeHandle node)
 
 void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* selectedBackgroundColorRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
@@ -1575,7 +1577,8 @@ void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, vo
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj;
         if (!selectedBackgroundColorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(selectedBackgroundColorRawPtr));
         }
@@ -1784,11 +1787,6 @@ void SetTextSelectionMenuOptions(
     } else {
         TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, nullptr);
     }
-}
-
-void SetTextSelectionMenuOptionsForCJ(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
-{
-    SetTextSelectionMenuOptions(node, onCreateMenuCallback, onMenuItemClickCallback, nullptr);
 }
 
 void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
@@ -2302,7 +2300,8 @@ void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
         auto color = Color(static_cast<uint32_t>(colorValue));
         if (isNeedCompleteResObj) {
             RefPtr<ResourceObject> colorResObj;
-            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                colorResObj, color, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
             objs.emplace_back(colorResObj);
         }
         auto hasDimension = static_cast<bool>(colorHasDimension);
@@ -2347,7 +2346,8 @@ void SetLinearGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
 
         if (!colorRawPtr) {
             RefPtr<ResourceObject> colorResObj;
-            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                colorResObj, color, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
             objs.emplace_back(colorResObj);
         }
 
@@ -2503,7 +2503,8 @@ void SetColorShaderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorSh
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj;
         if (!colorShaderColorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorShaderColorRawPtr));
         }
@@ -2730,7 +2731,8 @@ void SetTextSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, v
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -3102,20 +3104,6 @@ const CJUITextModifier* GetCJUITextModifier()
         .resetTextOnCopy = ResetTextOnCopy,
         .setTextOnTextSelectionChange = SetTextOnTextSelectionChange,
         .resetTextOnTextSelectionChange = ResetTextOnTextSelectionChange,
-        .setFontWeightWithOption = SetFontWeightWithOption,
-        .setTextMinFontScale = SetTextMinFontScale,
-        .resetTextMinFontScale = ResetTextMinFontScale,
-        .setTextMaxFontScale = SetTextMaxFontScale,
-        .resetTextMaxFontScale = ResetTextMaxFontScale,
-        .setTextSelectionMenuOptions = SetTextSelectionMenuOptionsForCJ,
-        .resetTextSelectionMenuOptions = ResetTextSelectionMenuOptions,
-        .setTextHalfLeading = SetTextHalfLeading,
-        .resetTextHalfLeading = ResetTextHalfLeading,
-        .getTextHalfLeading = GetTextHalfLeading,
-        .setTextOnClick = SetOnClick,
-        .resetTextOnClick = ResetOnClick,
-        .setTextResponseRegion = SetResponseRegion,
-        .resetTextResponseRegion = ResetResponseRegion,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

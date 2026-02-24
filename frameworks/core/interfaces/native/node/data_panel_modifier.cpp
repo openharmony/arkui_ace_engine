@@ -46,6 +46,9 @@ void SetDataPanelTrackBackgroundColor(ArkUINodeHandle node, uint32_t value)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DataPanelModelNG::SetTrackBackground(frameNode, Color(value));
+    if (SystemProperties::ConfigChangePerform()) {
+        DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, true);
+    }
 }
 
 void SetDataPanelTrackBackgroundColorPtr(ArkUINodeHandle node, uint32_t value, void* colorRawPtr)
@@ -57,8 +60,8 @@ void SetDataPanelTrackBackgroundColorPtr(ArkUINodeHandle node, uint32_t value, v
     if (SystemProperties::ConfigChangePerform()) {
         auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
         auto colorResObj = AceType::Claim(color);
-        DataPanelModelNG::CreateWithResourceObj(
-            frameNode, DataPanelResourceType::TRACK_BACKGROUND_COLOR, colorResObj);
+        DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::TRACK_BACKGROUND_COLOR, colorResObj);
+        DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, true);
     }
 }
 
@@ -67,7 +70,10 @@ void ResetDataPanelTrackBackgroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     DataPanelModelNG::ResetTrackBackground(frameNode);
-    DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::TRACK_BACKGROUND_COLOR, nullptr);
+    if (SystemProperties::ConfigChangePerform()) {
+        DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::TRACK_BACKGROUND_COLOR, nullptr);
+        DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, false);
+    }
 }
 
 void SetDataPanelStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
@@ -76,6 +82,9 @@ void SetDataPanelStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t 
     CHECK_NULL_VOID(frameNode);
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
     DataPanelModelNG::SetStrokeWidth(frameNode, Dimension(value, unitEnum));
+    if (SystemProperties::ConfigChangePerform()) {
+        DataPanelModelNG::SetStrokeWidthSetByUser(frameNode, true);
+    }
 }
 
 void SetDataPanelStrokeWidthPtr(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit, void* strokeWidthRawPtr)
@@ -89,6 +98,7 @@ void SetDataPanelStrokeWidthPtr(ArkUINodeHandle node, ArkUI_Float32 value, int32
         auto* strokeWidth = reinterpret_cast<ResourceObject*>(strokeWidthRawPtr);
         auto strokeWidthResObj = AceType::Claim(strokeWidth);
         DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::STROKE_WIDTH, strokeWidthResObj);
+        DataPanelModelNG::SetStrokeWidthSetByUser(frameNode, true);
     }
 }
 
@@ -99,6 +109,7 @@ void ResetDataPanelStrokeWidth(ArkUINodeHandle node)
     DataPanelModelNG::ResetStrokeWidth(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::STROKE_WIDTH, nullptr);
+        DataPanelModelNG::SetStrokeWidthSetByUser(frameNode, false);
     }
 }
 
