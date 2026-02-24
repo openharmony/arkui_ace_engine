@@ -1879,7 +1879,7 @@ ani_array GetAllUIContexts(ani_env* env, [[maybe_unused]] ani_object obj)
     status = env->FindClass("std.core.Int", &intCls);
     status = env->Class_FindMethod(intCls, "<ctor>", "i:", &intCtor);
     ani_object result {};
-    for (int i = 0; i < arraySize; ++i) {
+    for (size_t i = 0; i < arraySize; ++i) {
         status = env->Object_New(intCls, intCtor, &result, ani_int(instanceIds[i]));
         status = env->Array_Set(resultArray, i, result);
     }
