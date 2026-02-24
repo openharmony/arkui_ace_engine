@@ -226,14 +226,14 @@ const CustomComponentLifecycleState = __CustomComponentLifecycleState__Internal;
 class UIUtils {
   /**
    * Determine whether the data object is observable and return the observation result.
-	 *
+   *
    * @param { T } source - input source object data.
    * @returns { ObservedResult } return result of whether a class is observable.
    * @syscap SystemCapability.ArkUI.ArkUI.Full
    * @stagemodelonly
    * @crossplatform
    * @atomicservice
-   * @since 23 dynamic
+   * @since 23
    */
   static canBeObserved(source) {
     return UIUtils.uiUtilsImpl_.canBeObserved(source);
