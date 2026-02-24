@@ -336,7 +336,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     switchHasBeenRecycle(recycle: boolean): void {
-        this.instance.__switchHasBeenRecycle_Ineternal(recycle);
+        this.instance.__switchHasBeenRecycle_Internal(recycle);
     }
 
     aboutToReuse(param: RecordData, initializers?: T_Options): void {
