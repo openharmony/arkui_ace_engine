@@ -2651,7 +2651,7 @@ export class NodeAdapter implements MaterializedBase {
         }
         return result;
     }
-    onAttachToNodePtr(nodeId: number) {
+    onAttachToNodePtr(nodeId: double) {
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
             if (frameNode === undefined) {
@@ -2683,7 +2683,7 @@ export class NodeAdapter implements MaterializedBase {
         }
         this.nodeRefs_.splice(0, this.nodeRefs_.length);
     }
-    onCreateNewNodePtr(index: number): pointer {
+    onCreateNewNodePtr(index: double): pointer {
         if (this.onCreateChild !== undefined) {
             let frameNode = this.onCreateChild(index as int32);
             if (!this.nodeRefs_.find((node) => {
@@ -2698,7 +2698,7 @@ export class NodeAdapter implements MaterializedBase {
         return nullptr;
     }
 
-    onDisposeNodePtr(index: number, nodeId: number) {
+    onDisposeNodePtr(index: double, nodeId: double) {
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
             if (this.onDisposeChild !== undefined && frameNode !== undefined) {
@@ -2711,7 +2711,7 @@ export class NodeAdapter implements MaterializedBase {
         }
     }
 
-    onUpdateNodePtr(index: number, nodeId: number) {
+    onUpdateNodePtr(index: double, nodeId: double) {
         if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
             let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
             if (this.onUpdateChild !== undefined && frameNode !== undefined) {
