@@ -89,7 +89,8 @@ private:
     bool IsNeedMove(const RectF& nearRect, const RectF& rect, Axis axis, float axisDelta);
     RefPtr<FrameNode> GetListFrameNode() const;
     OffsetF GetParentPaddingOffset();
-    
+    bool GetDummyItemRect(int32_t index, RectF& rect) const;
+    bool CheckItemExistence(int32_t index) const;
     OffsetF dragOffset_;
     WeakPtr<FrameNode> frameNode_;
     WeakPtr<ForEachBaseNode> forEachNode_;
