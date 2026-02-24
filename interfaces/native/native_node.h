@@ -9173,6 +9173,15 @@ typedef enum {
     NODE_ON_CHILD_TOUCH_TEST = 32,
 
     /**
+     * @brief Defines the crown event.
+     * This event is triggered when the crown is rotated. \n
+     * When the event callback occurs, the {@link ArkUI_UIInputEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     * @since 24
+    */
+    NODE_ON_DIGITAL_CROWN = 33,
+
+    /**
  	 * @brief Defines the event is triggered when the <b>ARKUI_NODE_CUSTOM</b> content is scrolled.
  	 * 
  	 * The event is triggered when the component's content is scrolled. \n

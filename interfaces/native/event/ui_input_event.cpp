@@ -28,6 +28,19 @@ extern "C" {
 thread_local ArkUI_ErrorCode g_latestEventStatus = ARKUI_ERROR_CODE_NO_ERROR;
 thread_local ArkUI_ErrorCode g_scenarioSupportCheckResult = ARKUI_ERROR_CODE_NO_ERROR;
 
+ArkUI_CrownEvent_Action ToCrownEventAction(ArkUI_CrownAction action)
+{
+    switch (action) {
+        case ArkUI_CrownAction::UPDATE:
+            return ARKUI_CROWNEVENT_ACTION_UPDATE;
+        case ArkUI_CrownAction::END:
+            return ARKUI_CROWNEVENT_ACTION_END;
+        case ArkUI_CrownAction::UNKNOWN:
+        default:
+            return ARKUI_CROWNEVENT_ACTION_UNKNOWN;
+    }
+}
+
 bool isCurrentCTouchEventParamValid(const ArkUITouchEvent* touchEvent, uint32_t pointerIndex)
 {
     if (!touchEvent) {
@@ -3991,6 +4004,9 @@ ArkUI_ErrorCode CheckIsSupportedScenario(uint32_t scenarioExpr, const ArkUI_UIIn
         case C_COASTING_AXIS_EVENT_ID: {
             return CheckScenario(scenarioExpr, S_NODE_ON_COASTING_AXIS_EVENT);
         }
+        case C_DIGITAL_CROWN_ID: {
+            return CheckScenario(scenarioExpr, S_NODE_ON_DIGITAL_CROWN);
+        }
         default: {
             LOGE("received event with unknown eventType");
         }
@@ -4249,6 +4265,116 @@ ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_SetTouchResultId(ArkUI_TouchTestInfo* inf
     srcId.copy(touchTestInfo->resultId, srcLen);
     touchTestInfo->resultId[srcLen] = '\0';
     return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int64_t OH_ArkUI_DigitalCrownEvent_GetEventTime(const ArkUI_UIInputEvent* event)
+{
+    CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_DIGITAL_CROWN, event);
+    int64_t crownEventTime = 0;
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(crownEventTime, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    switch (event->eventTypeId) {
+        case C_DIGITAL_CROWN_ID: {
+            const auto* crownEvent = reinterpret_cast<const ArkUICrownEvent*>(event->inputEvent);
+            if (crownEvent) {
+                crownEventTime = crownEvent->timeStamp;
+                RETURN_RET_WITH_STATUS_CHECK(crownEventTime, ARKUI_ERROR_CODE_NO_ERROR);
+            }
+            break;
+        }
+        default:
+            RETURN_RET_WITH_STATUS_CHECK(crownEventTime, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(crownEventTime, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+double OH_ArkUI_DigitalCrownEvent_GetAngularVelocity(const ArkUI_UIInputEvent* event)
+{
+    CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_DIGITAL_CROWN, event);
+    double crownEventAngularVelocity = 0.0;
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(crownEventAngularVelocity, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    switch (event->eventTypeId) {
+        case C_DIGITAL_CROWN_ID: {
+            const auto* crownEvent = reinterpret_cast<const ArkUICrownEvent*>(event->inputEvent);
+            if (crownEvent) {
+                crownEventAngularVelocity = crownEvent->angularVelocity;
+                RETURN_RET_WITH_STATUS_CHECK(crownEventAngularVelocity, ARKUI_ERROR_CODE_NO_ERROR);
+            }
+            break;
+        }
+        default:
+            RETURN_RET_WITH_STATUS_CHECK(crownEventAngularVelocity, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(crownEventAngularVelocity, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+double OH_ArkUI_DigitalCrownEvent_GetDegree(const ArkUI_UIInputEvent* event)
+{
+    CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_DIGITAL_CROWN, event);
+    double crownEventDegree = 0.0;
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(crownEventDegree, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    switch (event->eventTypeId) {
+        case C_DIGITAL_CROWN_ID: {
+            const auto* crownEvent = reinterpret_cast<const ArkUICrownEvent*>(event->inputEvent);
+            if (crownEvent) {
+                crownEventDegree = crownEvent->degree;
+                RETURN_RET_WITH_STATUS_CHECK(crownEventDegree, ARKUI_ERROR_CODE_NO_ERROR);
+            }
+            break;
+        }
+        default:
+            RETURN_RET_WITH_STATUS_CHECK(crownEventDegree, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(crownEventDegree, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+ArkUI_CrownEvent_Action OH_ArkUI_DigitalCrownEvent_GetAction(const ArkUI_UIInputEvent* event)
+{
+    CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_DIGITAL_CROWN, event);
+    ArkUI_CrownEvent_Action crownEventAction = ArkUI_CrownEvent_Action::ARKUI_CROWNEVENT_ACTION_UNKNOWN;
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(crownEventAction, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    switch (event->eventTypeId) {
+        case C_DIGITAL_CROWN_ID: {
+            const auto* crownEvent = reinterpret_cast<const ArkUICrownEvent*>(event->inputEvent);
+            if (crownEvent) {
+                crownEventAction = ToCrownEventAction(crownEvent->action);
+                RETURN_RET_WITH_STATUS_CHECK(crownEventAction, ARKUI_ERROR_CODE_NO_ERROR);
+            }
+            break;
+        }
+        default:
+            RETURN_RET_WITH_STATUS_CHECK(crownEventAction, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(crownEventAction, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+ArkUI_ErrorCode OH_ArkUI_DigitalCrownEvent_SetStopPropagation(const ArkUI_UIInputEvent* event, bool stopPropagation)
+{
+    CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_DIGITAL_CROWN, event);
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    switch (event->eventTypeId) {
+        case C_DIGITAL_CROWN_ID: {
+            auto* crownEvent = reinterpret_cast<ArkUICrownEvent*>(event->inputEvent);
+            if (crownEvent) {
+                crownEvent->stopPropagation = stopPropagation;
+                RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_NO_ERROR);
+            }
+            break;
+        }
+        default:
+            RETURN_RET_WITH_STATUS_CHECK(
+                ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 #ifdef __cplusplus
 };

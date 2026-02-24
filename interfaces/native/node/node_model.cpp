@@ -549,6 +549,13 @@ void HandleCoastingAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerE
     uiEvent.inputEvent = &(innerEvent->coastingAxisEvent);
 }
 
+void HandleCrownEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_DIGITAL_CROWN;
+    uiEvent.eventTypeId = C_DIGITAL_CROWN_ID;
+    uiEvent.inputEvent = &(innerEvent->crownEvent);
+}
+
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -593,6 +600,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_HOVER_EVENT, HandleHoverEvent},
             {NODE_ON_HOVER_MOVE, HandleTouchEvent},
             {NODE_ON_COASTING_AXIS_EVENT, HandleCoastingAxisEvent},
+            {NODE_ON_DIGITAL_CROWN, HandleCrownEvent},
         };
 
         auto it = eventHandlers.find(eventType);
@@ -670,6 +678,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent)
             break;
         case CHILD_TOUCH_TEST_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->touchTestInfo.subKind);
+            break;
+        case DIGITAL_CROWN_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->crownEvent.subKind);
             break;
         case PREVENTABLE_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->preventableEvent.subKind);

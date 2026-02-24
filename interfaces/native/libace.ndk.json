@@ -5541,6 +5541,26 @@
     },
     {
         "first_introduced": "24",
+        "name": "OH_ArkUI_DigitalCrownEvent_GetEventTime"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DigitalCrownEvent_GetAngularVelocity"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DigitalCrownEvent_GetDegree"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DigitalCrownEvent_GetAction"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DigitalCrownEvent_SetStopPropagation"
+    },
+    {
+        "first_introduced": "24",
         "name": "OH_ArkUI_FontWeightConfigs_Create"
     },
     {

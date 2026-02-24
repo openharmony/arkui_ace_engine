@@ -424,6 +424,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_COASTING_AXIS_EVENT;
         case NODE_ON_CHILD_TOUCH_TEST:
             return ON_CHILD_TOUCH_TEST;
+        case NODE_ON_DIGITAL_CROWN:
+            return ON_DIGITAL_CROWN;
         case NODE_ON_CUSTOM_OVERFLOW_SCROLL:
             return ON_CUSTOM_OVERFLOW_SCROLL;
         case NODE_ON_STACK_OVERFLOW_SCROLL:
@@ -742,6 +744,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_COASTING_AXIS_EVENT;
         case ON_CHILD_TOUCH_TEST:
             return NODE_ON_CHILD_TOUCH_TEST;
+        case ON_DIGITAL_CROWN:
+            return NODE_ON_DIGITAL_CROWN;
         case ON_CUSTOM_OVERFLOW_SCROLL:
             return NODE_ON_CUSTOM_OVERFLOW_SCROLL;
         case ON_STACK_OVERFLOW_SCROLL:
@@ -881,6 +885,12 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case CHILD_TOUCH_TEST_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->touchTestInfo.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case DIGITAL_CROWN_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->crownEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }

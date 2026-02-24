@@ -1364,6 +1364,7 @@ enum ArkUIEventCategory {
     COASTING_AXIS_EVENT = 19,
     CHILD_TOUCH_TEST_EVENT = 20,
     PREVENTABLE_EVENT = 21,
+    DIGITAL_CROWN_EVENT = 22,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -1404,9 +1405,10 @@ enum ArkUIEventSubKind {
     ON_SIZE_CHANGE,
     ON_COASTING_AXIS_EVENT,
     ON_CHILD_TOUCH_TEST,
-    ON_CUSTOM_OVERFLOW_SCROLL = 34,
-    ON_STACK_OVERFLOW_SCROLL = 35,
-    ON_NEED_SOFTKEYBOARD = 36,
+    ON_DIGITAL_CROWN,
+    ON_CUSTOM_OVERFLOW_SCROLL,
+    ON_STACK_OVERFLOW_SCROLL,
+    ON_NEED_SOFTKEYBOARD,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_TEXT_SPAN_LONG_PRESS,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
@@ -1879,6 +1881,21 @@ struct ArkUITouchTestInfo {
     ArkUI_CommonCharPtr resultId;
 };
 
+enum class ArkUI_CrownAction : int32_t {
+    UPDATE,
+    END,
+    UNKNOWN,
+};
+
+struct ArkUICrownEvent {
+    ArkUI_Int32 subKind;
+    bool stopPropagation;
+    ArkUI_CrownAction action;
+    ArkUI_Int64 timeStamp;
+    ArkUI_Float64 angularVelocity;
+    ArkUI_Float64 degree;
+};
+
 struct ArkUIPreventableEvent {
     ArkUI_Bool preventDefault;
     ArkUI_Int32 subKind;
@@ -1910,6 +1927,7 @@ struct ArkUINodeEvent {
         ArkUICoastingAxisEvent coastingAxisEvent;
         ArkUITouchTestInfo touchTestInfo;
         ArkUIPreventableEvent preventableEvent;
+        ArkUICrownEvent crownEvent;
     };
 };
 
