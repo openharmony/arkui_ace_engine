@@ -741,11 +741,6 @@ void UINode::DoAddChild(
     if (DetectLoop(child, Claim(this))) {
         return;
     }
-    if (!IsFree() && child->IsFree()) {
-        child->MarkNodeTreeNotFree();
-    } else if (IsFree() && !child->IsFree()) {
-        MarkNodeTreeNotFree();
-    }
     children_.insert(it, child);
 
     if (IsAccessibilityVirtualNode()) {
@@ -759,6 +754,11 @@ void UINode::DoAddChild(
     UpdateDrawLayoutChildObserver(child);
 
     child->SetParent(WeakClaim(this), false);
+    if (!IsFree() && child->IsFree()) {
+        child->MarkNodeTreeNotFree();
+    } else if (IsFree() && !child->IsFree()) {
+        MarkNodeTreeNotFree();
+    }
     auto themeScopeId = GetThemeScopeId();
     if (child->IsAllowUseParentTheme() && child->GetThemeScopeId() != themeScopeId) {
         child->UpdateThemeScopeId(themeScopeId);
