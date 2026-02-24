@@ -1096,6 +1096,17 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node,
     eventInfo.AddContent(elementInfo.GetContent());
     eventInfo.SetElementInfo(elementInfo);
 }
+
+void RequestFrameByWindow(const RefPtr<PipelineBase>& context)
+{
+    CHECK_NULL_VOID(context);
+    auto window = context->GetWindow();
+    if (window) {
+        window->SetForceVsyncRequests(true);
+    }
+    context->RequestFrame();
+}
+
 #ifdef WEB_SUPPORTED
 
 void FillWebElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo,
@@ -2787,7 +2798,6 @@ void JsAccessibilityManager::UpdateVirtualNodeFocus()
         CHECK_NULL_VOID(parentFrame);
         renderContext = parentFrame->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        // FOCUS_WITHOUT_EVENT used to dont send a11y event, just update rect
         renderContext->UpdateAccessibilityFocus(false, ACCESSIBILITY_FOCUS_WITHOUT_EVENT);
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
@@ -2797,7 +2807,6 @@ void JsAccessibilityManager::UpdateVirtualNodeFocus()
         } else {
             renderContext->UpdateAccessibilityFocusRect(GetFrameNodeRectInt(frameNode));
         }
-        // used to dont send a11y event, just update rect
         renderContext->UpdateAccessibilityFocus(true, ACCESSIBILITY_FOCUS_WITHOUT_EVENT);
         accessibilityProperty->SetAccessibilityFocusState(true);
     }
@@ -6107,7 +6116,7 @@ void JsAccessibilityManager::SearchElementInfoBySpecificProperty(const int64_t e
                     elementId, param, requestId, callback, windowId);
             }
         );
-        ngPipeline->RequestFrame();
+        RequestFrameByWindow(ngPipeline);
     } else {
         SearchElementInfoBySpecificPropertyInner(elementId, param, requestId, callback, windowId);
     }
