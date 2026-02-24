@@ -53,7 +53,7 @@ struct makeObserved0140 {
   colors: Array<string> = ['#FFC0CB', '#DA70D6', '#6B8E23', '#6A5ACD', '#00FFFF', '#00FF7F'] as Array<string>
   sections: WaterFlowSections = UIUtils.makeObserved(new WaterFlowSections())
   scroller: Scroller = new Scroller()
-  @Local private arr: Array<number> = new Array<number>(8).fill(0)
+  @Local private arr: Array<number> = Array.create<number>(8, 0)
   oneColumnSection: SectionOptions = {
     itemsCount: 3,
     crossCount: 1,
