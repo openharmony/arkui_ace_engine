@@ -619,7 +619,7 @@ bool AccessibilityManagerNG::IsEventTypeChangeDirectHandleHover(
     return false;
 }
 
-bool AccessibilityManagerNG::IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root)
+bool AccessibilityManagerNG::IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root) const
 {
     auto pipeline = root->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
