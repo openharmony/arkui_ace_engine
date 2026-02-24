@@ -12,8 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/jsview/js_accessibility.h"
-
 #include "bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -42,10 +40,10 @@ void JSViewAbstract::JsAccessibilityGroup(const JSCallbackInfo& info)
     }
     auto obj = JSRef<JSObject>::Cast(info[1]);
 
-    auto preferAccessibilityTextObj = obj->GetProperty("AccessibilityProferred");
+    auto preferAccessibilityTextObj = obj->GetProperty("accessibilityPreferred");
     auto preferAccessibilityText =
         preferAccessibilityTextObj->IsBoolean() ? preferAccessibilityTextObj->ToBoolean() : false;
-    
+
     auto stateControllerTypeObj = obj->GetProperty("stateControllerRoleType");
     auto stateControllerTypeNumber = stateControllerTypeObj->IsNumber() ?
         stateControllerTypeObj->ToNumber<int32_t>() : static_cast<int32_t>(AccessibilityRoleType::ROLE_NONE);
