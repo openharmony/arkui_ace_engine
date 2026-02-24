@@ -15,6 +15,9 @@
 
 /// <reference path='./import.ts' />
 class ArkQRCodeComponent extends ArkComponent implements QRCodeAttribute {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
+  }
   allowChildCount(): number {
     return 0;
   }
