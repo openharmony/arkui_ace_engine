@@ -835,6 +835,7 @@ private:
     void LoadCompleteManagerStartCollect();
     void LoadCompleteManagerStopCollect();
     void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
+    void UpdatePlaceholderVisibilityIfNeeded();
 
     //-------for force split------- begin------
     bool IsNavBarValid();
