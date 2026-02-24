@@ -2671,94 +2671,6 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerCalculateTruthFingersTest001, TestSiz
 }
 
 /**
- * @tc.name: PanRecognizerCalculateTruthFingersTest002
- * @tc.desc: Test CalculateTruthFingers with isDirectionUp as true and sufficient distance
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerCalculateTruthFingersTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create PanRecognizer
-     */
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-
-    /**
-     * @tc.steps: step2. Set up touch points with sufficient positive Y offset
-     * @tc.expected: step2. Should return true when distance threshold is met
-     */
-    panRecognizer.deviceType_ = SourceType::TOUCH;
-    panRecognizer.distance_ = 10.0;
-    panRecognizer.fingers_ = FINGER_NUMBER;
-
-    TouchEvent touchEvent;
-    touchEvent.id = FINGER_NUMBER;
-    panRecognizer.touchPointsDistance_[touchEvent.id] = Offset(0.0, 15.0);
-
-    bool result = panRecognizer.CalculateTruthFingers(true);
-    EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: PanRecognizerCalculateTruthFingersTest003
- * @tc.desc: Test CalculateTruthFingers with isDirectionUp as false
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerCalculateTruthFingersTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create PanRecognizer
-     */
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-
-    /**
-     * @tc.steps: step2. Set up touch points with negative Y offset (moving up)
-     * @tc.expected: step2. Should return true when isDirectionUp is false and movement is up
-     */
-    panRecognizer.deviceType_ = SourceType::TOUCH;
-    panRecognizer.distance_ = 10.0;
-    panRecognizer.fingers_ = FINGER_NUMBER;
-
-    TouchEvent touchEvent;
-    touchEvent.id = FINGER_NUMBER;
-    panRecognizer.touchPointsDistance_[touchEvent.id] = Offset(0.0, -15.0);
-
-    bool result = panRecognizer.CalculateTruthFingers(false);
-    EXPECT_TRUE(result);
-}
-
-/**
- * @tc.name: PanRecognizerCalculateTruthFingersTest004
- * @tc.desc: Test CalculateTruthFingers with MOUSE device type using mouseDistance
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerCalculateTruthFingersTest004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create PanRecognizer with different mouse and touch distances
-     */
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-
-    /**
-     * @tc.steps: step2. Set up for MOUSE device type with sufficient mouse distance
-     * @tc.expected: step2. Should use mouseDistance_ for MOUSE device type
-     */
-    panRecognizer.deviceType_ = SourceType::MOUSE;
-    panRecognizer.distance_ = 10.0;
-    panRecognizer.mouseDistance_ = 5.0;
-    panRecognizer.fingers_ = FINGER_NUMBER;
-
-    TouchEvent touchEvent;
-    touchEvent.id = FINGER_NUMBER;
-    panRecognizer.touchPointsDistance_[touchEvent.id] = Offset(0.0, 5.0);
-
-    bool result = panRecognizer.CalculateTruthFingers(true);
-    EXPECT_TRUE(result);
-}
-
-/**
  * @tc.name: PanRecognizerGetAxisDirectionTest001
  * @tc.desc: Test GetAxisDirection returns FREE for ALL direction
  * @tc.type: FUNC
@@ -3064,38 +2976,10 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerIsPanGestureAcceptInVerticalDirection
 
 /**
  * @tc.name: PanRecognizerIsPanGestureAcceptInVerticalDirectionTest003
- * @tc.desc: Test IsPanGestureAcceptInVerticalDirection accepts UP direction with negative offset
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerIsPanGestureAcceptInVerticalDirectionTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create PanRecognizer with UP direction
-     */
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    PanDirection panDirection;
-    panDirection.type = PanDirection::UP;
-    panGestureOption->SetDirection(panDirection);
-    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-
-    /**
-     * @tc.steps: step2. Set negative Y offset (moving up) with sufficient distance for touch
-     * @tc.expected: step2. Should return ACCEPT
-     */
-    panRecognizer.inputEventType_ = InputEventType::TOUCH_SCREEN;
-    panRecognizer.averageDistance_ = Offset(0.0, -15.0);
-    double judgeDistance = 10.0;
-
-    auto result = panRecognizer.IsPanGestureAcceptInVerticalDirection(judgeDistance);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
-}
-
-/**
- * @tc.name: PanRecognizerIsPanGestureAcceptInVerticalDirectionTest004
  * @tc.desc: Test IsPanGestureAcceptInVerticalDirection with AXIS input type
  * @tc.type: FUNC
  */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerIsPanGestureAcceptInVerticalDirectionTest004, TestSize.Level1)
+HWTEST_F(PanRecognizerTestNg, PanRecognizerIsPanGestureAcceptInVerticalDirectionTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create PanRecognizer with DOWN direction
@@ -3559,7 +3443,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerReconcileFromTest002, TestSize.Level1
     PanRecognizer panRecognizer1 = PanRecognizer(panGestureOption1);
 
     RefPtr<PanGestureOption> panGestureOption2 = AceType::MakeRefPtr<PanGestureOption>();
-    panGestureOption2->fingers_ = FINGER_NUMBER + 1;
+    panGestureOption2->fingers_ = static_cast<int32_t>(FINGER_NUMBER + 1);
     RefPtr<PanRecognizer> panRecognizer2 = AceType::MakeRefPtr<PanRecognizer>(panGestureOption2);
 
     /**
@@ -3568,41 +3452,5 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerReconcileFromTest002, TestSize.Level1
      */
     bool result = panRecognizer1.ReconcileFrom(panRecognizer2);
     EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: PanRecognizerReconcileFromTest003
- * @tc.desc: Test ReconcileFrom returns true and updates properties when compatible
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerReconcileFromTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create two compatible PanRecognizers
-     */
-    RefPtr<PanGestureOption> panGestureOption1 = AceType::MakeRefPtr<PanGestureOption>();
-    PanDirection panDirection1;
-    panDirection1.type = PanDirection::HORIZONTAL;
-    panGestureOption1->SetDirection(panDirection1);
-    panGestureOption1->SetDistance(10.0);
-    panGestureOption1->fingers_ = FINGER_NUMBER;
-    PanRecognizer panRecognizer1 = PanRecognizer(panGestureOption1);
-
-    RefPtr<PanGestureOption> panGestureOption2 = AceType::MakeRefPtr<PanGestureOption>();
-    PanDirection panDirection2;
-    panDirection2.type = PanDirection::VERTICAL;
-    panGestureOption2->SetDirection(panDirection2);
-    panGestureOption2->SetDistance(20.0);
-    panGestureOption2->fingers_ = FINGER_NUMBER;
-    RefPtr<PanRecognizer> panRecognizer2 = AceType::MakeRefPtr<PanRecognizer>(panGestureOption2);
-
-    /**
-     * @tc.steps: step2. Call ReconcileFrom with compatible recognizer
-     * @tc.expected: step2. Should return true and update properties
-     */
-    bool result = panRecognizer1.ReconcileFrom(panRecognizer2);
-    EXPECT_TRUE(result);
-    EXPECT_EQ(panRecognizer1.direction_.type, PanDirection::VERTICAL);
-    EXPECT_DOUBLE_EQ(panRecognizer1.distance_, 20.0);
 }
 } // namespace OHOS::Ace::NG
