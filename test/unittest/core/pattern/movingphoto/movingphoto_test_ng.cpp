@@ -954,6 +954,10 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest022, TestSize.Level1)
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, oldAutoPlayPeriodStartTime_);
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, oldAutoPlayPeriodEndTime_);
 
+    movingphotoPattern->AutoPlayPeriod(0, 0);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, oldAutoPlayPeriodStartTime_);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, oldAutoPlayPeriodEndTime_);
+
     movingphotoPattern->AutoPlayPeriod(100, 5000);
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, 100);
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, 5000);
@@ -965,6 +969,10 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest022, TestSize.Level1)
     movingphotoPattern->AutoPlayPeriod(0, 3000);
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, 0);
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, 3000);
+
+    movingphotoPattern->AutoPlayPeriod(0, 4000);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, 0);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, 4000);
 }
 
 /**
