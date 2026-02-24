@@ -864,7 +864,6 @@ private:
 
     ActionType ConvertAceAction(AceAction aceAction);
 
-    // *< element info
     void CheckStateTakeOver(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
     void CheckActionTakeOver(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
     void UpdateUserAccessibilityElementInfo(
