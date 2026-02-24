@@ -207,7 +207,7 @@ void JSWaterFlowSectionsBinding::Destructor(JSWaterFlowSections* section)
 
 void JSWaterFlowSectionsBinding::OnSectionChanged(const JSCallbackInfo& info)
 {
-    JSWaterFlowSections* jsWaterFlowSections = JSRef<JSObject>::Cast(info.This())->Unwrap<JSWaterFlowSections>();
+    JSWaterFlowSections* jsWaterFlowSections = info.This()->Unwrap<JSWaterFlowSections>();
     auto infoThis = info.This()->GetHandle();
     if (infoThis.ToLocal()->IsProxy(infoThis.GetEcmaVM())) {
         panda::Local<panda::ProxyRef> thisProxiedObj = static_cast<panda::Local<panda::ProxyRef>>(infoThis.ToLocal());
