@@ -706,22 +706,6 @@ struct CJUITextModifier {
     void (*resetTextOnCopy)(ArkUINodeHandle node);
     void (*setTextOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnTextSelectionChange)(ArkUINodeHandle node);
-    void (*setFontWeightWithOption)(ArkUINodeHandle node, const struct ArkUIFontWeightWithOptionsStruct* weightInfo);
-    void (*setTextMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 number, void* minFontScaleRawPtr);
-    void (*resetTextMinFontScale)(ArkUINodeHandle node);
-    void (*setTextMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number, void* maxFontScaleRawPtr);
-    void (*resetTextMaxFontScale)(ArkUINodeHandle node);
-    void (*setTextSelectionMenuOptions)(
-        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
-    void (*resetTextSelectionMenuOptions)(ArkUINodeHandle node);
-    void (*setTextHalfLeading)(ArkUINodeHandle node, ArkUI_Bool value);
-    void (*resetTextHalfLeading)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getTextHalfLeading)(ArkUINodeHandle node);
-    void (*setTextOnClick)(ArkUINodeHandle node, void* callback);
-    void (*resetTextOnClick)(ArkUINodeHandle node);
-    void (*setTextResponseRegion)(
-        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 lengthk);
-    void (*resetTextResponseRegion)(ArkUINodeHandle node);
 };
 
 struct CJUIButtonModifier {

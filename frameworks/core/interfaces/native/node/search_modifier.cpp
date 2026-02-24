@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,9 @@
 #include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
-namespace{
+namespace {
 
+constexpr uint32_t DEFAULT_SEARCH_COLOR = 0x99182431; 
 constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
@@ -106,7 +107,7 @@ void ResetSearchPlaceholderColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::ResetPlaceholderColor(frameNode);
+    SearchModelNG::SetPlaceholderColor(frameNode, Color(DEFAULT_SEARCH_COLOR));
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -503,20 +504,6 @@ void ResetSearchFontFeature(ArkUINodeHandle node)
     SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
 }
 
-void SetSearchInspectorId(ArkUINodeHandle node, ArkUI_CharPtr key)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetId(frameNode, key);
-}
-
-void ResetSearchInspectorId(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetId(frameNode, "");
-}
-
 void SetSearchDividerColor(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint32 colorSpace, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -527,7 +514,8 @@ void SetSearchDividerColor(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint3
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -1233,6 +1221,20 @@ void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
     SearchModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenuCallback));
 }
 
+void SetSearchInspectorId(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetId(frameNode, key);
+}
+
+void ResetSearchInspectorId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetId(frameNode, "");
+}
+
 void SetSearchMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1328,7 +1330,6 @@ void ResetStopBackPress(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetStopBackPress(frameNode, true);
 }
-
 
 void SetSearchStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
@@ -1517,6 +1518,7 @@ ArkUI_Uint32 GetSearchSelectedDragPreviewStyle(ArkUINodeHandle node)
     return SearchModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
 }
 } // namespace
+
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -1553,8 +1555,10 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchEnterKeyType = ResetSearchEnterKeyType,
         .setSearchHeight = SetSearchHeight,
         .resetSearchHeight = ResetSearchHeight,
-        .setSearchInspectorId = SetSearchInspectorId,
-        .resetSearchInspectorId = ResetSearchInspectorId,
+        .setSearchFontFeature = SetSearchFontFeature,
+        .resetSearchFontFeature = ResetSearchFontFeature,
+        .setSearchDividerColor = SetSearchDividerColor,
+        .resetSearchDividerColor = ResetSearchDividerColor,
         .setSearchDecoration = SetSearchDecoration,
         .resetSearchDecoration = ResetSearchDecoration,
         .setSearchLetterSpacing = SetSearchLetterSpacing,
@@ -1563,10 +1567,6 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchLineHeight = ResetSearchLineHeight,
         .setSearchHalfLeading = SetSearchHalfLeading,
         .resetSearchHalfLeading = ResetSearchHalfLeading,
-        .setSearchFontFeature = SetSearchFontFeature,
-        .resetSearchFontFeature = ResetSearchFontFeature,
-        .setSearchDividerColor = SetSearchDividerColor,
-        .resetSearchDividerColor = ResetSearchDividerColor,
         .setSearchAdaptMinFontSize = SetSearchAdaptMinFontSize,
         .resetSearchAdaptMinFontSize = ResetSearchAdaptMinFontSize,
         .setSearchAdaptMaxFontSize = SetSearchAdaptMaxFontSize,
@@ -1575,14 +1575,6 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchSelectedBackgroundColor = ResetSearchSelectedBackgroundColor,
         .setSearchTextIndent = SetSearchTextIndent,
         .resetSearchTextIndent = ResetSearchTextIndent,
-        .setSearchValue = SetSearchValue,
-        .resetSearchValue = ResetSearchValue,
-        .setSearchPlaceholder = SetSearchPlaceholder,
-        .resetSearchPlaceholder = ResetSearchPlaceholder,
-        .setSearchIcon = SetSearchIcon,
-        .resetSearchIcon = ResetSearchIcon,
-        .setSearchCaretPosition = SetSearchCaretPosition,
-        .resetSearchCaretPosition = ResetSearchCaretPosition,
         .setSearchMaxLength = SetSearchMaxLength,
         .resetSearchMaxLength = ResetSearchMaxLength,
         .setSearchType = SetSearchType,
@@ -1606,6 +1598,12 @@ const ArkUISearchModifier* GetSearchModifier()
         .setSearchShowCounter = SetSearchShowCounterOptions,
         .resetSearchShowCounter = ResetSearchShowCounterOptions,
         .getSearchController = GetSearchController,
+        .setSearchValue = SetSearchValue,
+        .resetSearchValue = ResetSearchValue,
+        .setSearchPlaceholder = SetSearchPlaceholder,
+        .resetSearchPlaceholder = ResetSearchPlaceholder,
+        .setSearchIcon = SetSearchIcon,
+        .resetSearchIcon = ResetSearchIcon,
         .setSearchOnWillChange = SetSearchOnWillChange,
         .resetSearchOnWillChange = ResetSearchOnWillChange,
         .setSearchOnWillInsert = SetSearchOnWillInsert,
@@ -1618,8 +1616,12 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchOnDidDelete = ResetSearchOnDidDelete,
         .setSearchEnablePreviewText = SetSearchEnablePreviewText,
         .resetSearchEnablePreviewText = ResetSearchEnablePreviewText,
+        .setSearchCaretPosition = SetSearchCaretPosition,
+        .resetSearchCaretPosition = ResetSearchCaretPosition,
         .setSearchSelectionMenuOptions = SetSearchSelectionMenuOptions,
         .resetSearchSelectionMenuOptions = ResetSearchSelectionMenuOptions,
+        .setSearchInspectorId = SetSearchInspectorId,
+        .resetSearchInspectorId = ResetSearchInspectorId,
         .setSearchEnableHapticFeedback = SetSearchEnableHapticFeedback,
         .resetSearchEnableHapticFeedback = ResetSearchEnableHapticFeedback,
         .setSearchAutoCapitalizationMode = SetSearchAutoCapitalizationMode,

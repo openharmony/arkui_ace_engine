@@ -284,7 +284,8 @@ void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor, void* fontColorR
         CHECK_NULL_VOID(spanNode);
         RefPtr<ResourceObject> resObj;
         if (!fontColorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, uiNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(uiNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontColorRawPtr));
         }

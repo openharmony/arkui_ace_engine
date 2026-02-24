@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "ecmascript/napi/include/jsnapi.h"
+#include "ui/resource/node_info.h"
 
 namespace OHOS::Rosen {
 class BrightnessBlender;
@@ -56,11 +57,6 @@ enum class ResourceType : uint32_t {
     MEDIA = 20000,
     RAWFILE = 30000,
     NONE = 40000
-};
-
-struct NodeInfo {
-    std::string nodeTag;
-    ColorMode localColorMode;
 };
 
 struct BorderRadiusOption {

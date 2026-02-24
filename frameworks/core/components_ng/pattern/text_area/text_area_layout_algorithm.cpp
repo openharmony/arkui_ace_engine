@@ -294,7 +294,7 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
-    parentGlobalOffset_ = frameNode->GetPaintRectOffsetNG(false, true) - context->GetRootRect().GetOffset();
+    parentGlobalOffset_ = frameNode->GetPaintRectOffset(false, true) - context->GetRootRect().GetOffset();
     auto align = Alignment::TOP_CENTER;
 
     auto border = pattern->GetBorderWidthProperty();

@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,16 +139,12 @@ void SetProgressColor(ArkUINodeHandle node, uint32_t color)
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
-    ProgressModelNG::SetModifierInitiatedColor(frameNode, true);
     ProgressModelNG::SetColor(frameNode, Color(color));
 }
 
 void CreateWithResourceObjIfNeeded(FrameNode* node, JsProgressResourceType type, void* rawPtr, bool needDecRef = true)
 {
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
-    }
-    if (rawPtr) {
+    if (SystemProperties::ConfigChangePerform()) {
         auto* obj = reinterpret_cast<ResourceObject*>(rawPtr);
         if (obj != nullptr) {
             auto resObj = AceType::Claim(obj);
@@ -158,9 +154,9 @@ void CreateWithResourceObjIfNeeded(FrameNode* node, JsProgressResourceType type,
             if (needDecRef) {
                 obj->DecRefCount();
             }
+        } else {
+           ProgressModelNG::CreateWithResourceObj(node, type, nullptr);
         }
-    } else {
-        ProgressModelNG::CreateWithResourceObj(node, type, nullptr);
     }
 }
 
@@ -178,12 +174,12 @@ void SetProgressColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
-    ProgressModelNG::SetModifierInitiatedColor(frameNode, true);
     Color colorValue = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, colorValue, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, colorValue, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             auto* resourceObj = static_cast<ResourceObject*>(colorRawPtr);
             resObj = AceType::Claim(resourceObj);
@@ -216,17 +212,17 @@ void ResetProgressColor(ArkUINodeHandle node)
         beginColor = progressTheme->GetRingProgressBeginSideColor();
         isGradientColor = true;
     } else if (progresstype == ProgressType::CAPSULE) {
-        colorVal = progressTheme->GetCapsuleParseFailedSelectColor();
+        colorVal = progressTheme->GetCapsuleSelectColor();
         endColor = colorVal;
         beginColor = colorVal;
         isGradientColor = true;
     } else if (progresstype == ProgressType::LINEAR) {
-        colorVal = progressTheme->GetTrackParseFailedSelectedColor();
+        colorVal = progressTheme->GetTrackSelectedColor();
         endColor = colorVal;
         beginColor = colorVal;
         isGradientColor = true;
     } else {
-        colorVal = progressTheme->GetTrackParseFailedSelectedColor();
+        colorVal = progressTheme->GetTrackSelectedColor();
     }
 
     OHOS::Ace::NG::Gradient gradient;
@@ -320,7 +316,7 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
             families.at(i) = std::string(*(fontFamilies + i));
         }
     }
-    if ((value->borderWidthValue < 0) ||
+    if ((Negative(value->borderWidthValue)) ||
         (static_cast<DimensionUnit>(value->borderWidthUnit) == DimensionUnit::PERCENT)) {
         ProgressModelNG::SetBorderWidth(node, Dimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP));
     } else {
@@ -330,6 +326,7 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     auto styleRes = value->styleResource;
     CreateWithResourceObjIfNeeded(node, JsProgressResourceType::CapsuleBorderWidth, styleRes.borderWidthRawPtr);
     ProgressModelNG::SetBorderColor(node, Color(value->borderColor));
+    ProgressModelNG::SetBorderColorSetByUser(node, true);
     CreateWithResourceObjIfNeeded(node, JsProgressResourceType::CapsuleBorderColor, styleRes.borderColorRawPtr);
     ProgressModelNG::SetSweepingEffect(node, value->enableScanEffect);
     ProgressModelNG::SetShowText(node, value->showDefaultPercentage);
@@ -430,6 +427,7 @@ void SetCapsuleStyleOptions(FrameNode* node)
     ProgressModelNG::SetCapsuleStyleFontColor(node, false);
     ProgressModelNG::SetBorderWidth(node, Dimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP));
     ProgressModelNG::SetBorderColor(node, Color(0x33006cde));
+    ProgressModelNG::SetBorderColorSetByUser(node, false);
     ProgressModelNG::SetSweepingEffect(node, false);
     ProgressModelNG::SetShowText(node, false);
     ProgressModelNG::SetText(node, textOpt);
@@ -509,11 +507,11 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
 
     Color backgroundColor;
     if (progresstype == ProgressType::CAPSULE) {
-        backgroundColor = theme->GetCapsuleParseFailedBgColor();
+        backgroundColor = theme->GetCapsuleBgColor();
     } else if (progresstype == ProgressType::RING) {
-        backgroundColor = theme->GetRingProgressParseFailedBgColor();
+        backgroundColor = theme->GetRingProgressBgColor();
     } else {
-        backgroundColor = theme->GetTrackParseFailedBgColor();
+        backgroundColor = theme->GetTrackBgColor();
     }
 
     if (SystemProperties::ConfigChangePerform()) {
@@ -561,7 +559,7 @@ void GetProgressLinearStyle(ArkUINodeHandle node, ArkUIProgressLinearStyleOption
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-
+ 
     option.scanEffectEnable = paintProperty->GetEnableLinearScanEffect().value_or(false);
     option.smoothEffectEnable = paintProperty->GetEnableSmoothEffect().value_or(true);
     auto strokeWidth = layoutProperty->GetStrokeWidth().value_or(
