@@ -13,21 +13,81 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
-
-#include "core/common/dynamic_module_helper.h"
-#include "ui/base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/counter/counter_model_ng.h"
+#include "core/components_ng/pattern/counter/counter_model_static.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace CounterModifier {
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
+{
+    auto frameNode = CounterModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+} // CounterModifier
+namespace CounterInterfaceModifier {
+void SetCounterOptionsImpl(Ark_NativePointer node)
+{
+    // keep it empty because Counter don`t have any options
+}
+} // CounterInterfaceModifier
+namespace CounterAttributeModifier {
+void SetOnIncImpl(Ark_NativePointer node,
+                  const Opt_VoidCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
+        arkCallback.Invoke();
+    };
+    CounterModelStatic::SetOnInc(frameNode, onEvent);
+}
+void SetOnDecImpl(Ark_NativePointer node,
+                  const Opt_VoidCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
+        arkCallback.Invoke();
+    };
+    CounterModelStatic::SetOnDec(frameNode, onEvent);
+}
+void SetEnableDecImpl(Ark_NativePointer node,
+                      const Opt_Boolean* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    CounterModelNG::SetEnableDec(frameNode, convValue.value_or(true));
+}
+void SetEnableIncImpl(Ark_NativePointer node,
+                      const Opt_Boolean* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    CounterModelNG::SetEnableInc(frameNode, convValue.value_or(true));
+}
+} // CounterAttributeModifier
 const GENERATED_ArkUICounterModifier* GetCounterModifier()
 {
-    static const GENERATED_ArkUICounterModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Counter");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const GENERATED_ArkUICounterModifier*>(module->GetStaticModifier());
-    }
-
-    return cachedModifier;
+    static const GENERATED_ArkUICounterModifier ArkUICounterModifierImpl {
+        CounterModifier::ConstructImpl,
+        CounterInterfaceModifier::SetCounterOptionsImpl,
+        CounterAttributeModifier::SetOnIncImpl,
+        CounterAttributeModifier::SetOnDecImpl,
+        CounterAttributeModifier::SetEnableDecImpl,
+        CounterAttributeModifier::SetEnableIncImpl,
+    };
+    return &ArkUICounterModifierImpl;
 }
+
 }

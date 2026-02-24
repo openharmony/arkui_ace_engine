@@ -455,7 +455,7 @@ struct BorderWidthPropertyT<float> {
     }
 };
 
-struct ACE_FORCE_EXPORT BorderStyleProperty {
+struct BorderStyleProperty {
     std::optional<BorderStyle> styleLeft;
     std::optional<BorderStyle> styleRight;
     std::optional<BorderStyle> styleTop;

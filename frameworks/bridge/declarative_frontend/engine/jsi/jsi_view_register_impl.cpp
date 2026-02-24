@@ -51,6 +51,7 @@
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
 #include "bridge/declarative_frontend/jsview/js_data_panel.h"
+#include "bridge/declarative_frontend/jsview/js_counter.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
@@ -106,7 +107,7 @@
 #include "bridge/declarative_frontend/jsview/js_paste_button.h"
 #include "bridge/declarative_frontend/jsview/js_path.h"
 #include "bridge/declarative_frontend/jsview/js_path_shape.h"
-#include "bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding.h"
+#include "bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "bridge/declarative_frontend/jsview/js_persistent.h"
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
 #include "bridge/declarative_frontend/jsview/js_polyline.h"
@@ -460,6 +461,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
+    { "Counter", JSCounter::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -551,6 +553,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
+    { "Counter", JSCounter::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -701,7 +704,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },
-    { "PatternLockController", JSPatternLockControllerBinding::JSBind },
+    { "PatternLock", JSPatternLock::JSBind },
+    { "PatternLockController", JSPatternLockController::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },

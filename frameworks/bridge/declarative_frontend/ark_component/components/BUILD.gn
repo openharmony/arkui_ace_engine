@@ -32,8 +32,6 @@ template("arkui_abc") {
 
 arkui_modules = [
   "gauge",
-  "patternlock",
-  "counter",
   "sidebarcontainer",
   "checkbox",
   "checkboxgroup",

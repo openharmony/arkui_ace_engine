@@ -63,7 +63,7 @@
       OHOS::Ace::NG::CalendarPattern::UpdateDayRadius*;
       OHOS::Ace::CalendarPickerModel::*;
       OHOS::Ace::NG::CalendarPickerModelNG::*;
-      OHOS::Ace::NG::BorderRadiusPropertyT*;
+      OHOS::Ace::NG::BorderRadiusProperty*;
       OHOS::Ace::NG::BorderWidthPropertyT*;
       OHOS::Ace::ConnectServerManager::*;
       OHOS::Ace::Container::*;
@@ -166,14 +166,6 @@
       OHOS::Ace::DividerModel::*;
       OHOS::Ace::EllipseModel::*;
       OHOS::Ace::ForEachModel::*;
-      OHOS::Ace::NG::BorderRadiusPropertyT*;
-      OHOS::Ace::NG::BorderStyleProperty::*;
-      OHOS::Ace::NG::ButtonPattern*;
-      OHOS::Ace::NG::CommonBridge::ParseLayoutPolicy*;
-      OHOS::Ace::ResourceParseUtils::ConvertFromResObjNG*;
-      "bool OHOS::Ace::ResourceParseUtils::ConvertFromResObjNG<OHOS::Ace::Dimension>(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, OHOS::Ace::Dimension&)";
-      OHOS::Ace::CounterComponent*;
-      OHOS::Ace::AceForwardCompatibility::IsUseNG*;
       OHOS::Ace::NG::GaugeModelNG::*;
       "OHOS::Ace::GaugeModel::GetInstance()";
       "OHOS::Ace::GaugeModel::instance_";
@@ -523,7 +515,6 @@
       OHOS::Ace::NG::Modifier::*;
       OHOS::Ace::NG::ArkTSUtils::*;
       "OHOS::Ace::NG::TextPattern::TextPattern()";
-      OHOS::Ace::NG::TextPattern::UpdateFontColor*;
       OHOS::Ace::NG::ViewAbstractModelStatic::*;
       OHOS::Ace::FlexElement::*;
       OHOS::Ace::FocusGroup::*;
@@ -672,6 +663,8 @@
       vtable?for?OHOS::Ace::Framework::DOMDocument;
       vtable?for?OHOS::Ace::NG::ButtonPattern;
       vtable?for?OHOS::Ace::CounterComponent;
+      vtable?for?OHOS::Ace::DataPanelComponent;
+      vtable?for?OHOS::Ace::PercentageDataPanelComponent;
       vtable?for?OHOS::Ace::NG::TapGesture;
       vtable?for?OHOS::Ace::NG::LongPressGesture;
       vtable?for?OHOS::Ace::NG::PinchGesture;
@@ -735,6 +728,8 @@
       VTT?for?OHOS::Ace::Framework::DOMDocument;
       VTT?for?OHOS::Ace::NG::ButtonPattern;
       VTT?for?OHOS::Ace::CounterComponent;
+      VTT?for?OHOS::Ace::DataPanelComponent;
+      VTT?for?OHOS::Ace::PercentageDataPanelComponent;
       VTT?for?OHOS::Ace::NG::TapGesture;
       VTT?for?OHOS::Ace::NG::LongPressGesture;
       VTT?for?OHOS::Ace::NG::PinchGesture;
@@ -913,7 +908,6 @@
       *OHOS::Ace::NG::Converter::Convert*;
       *OHOS::Ace::NG::Converter::AssignCast*;
       *OHOS::Ace::NG::Converter::AssignArkValue*;
-      OHOS::Ace::V2::PatternLockComponent::*;
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
@@ -1057,6 +1051,11 @@
       VTT?for?OHOS::Ace::BoxComponent;
       VTT?for?OHOS::Ace::FocusNode;
       VTT?for?OHOS::Ace::ImageComponent;
+      OHOS::Ace::NG::ButtonPattern*;
+      vtable?for?OHOS::Ace::NG::ButtonPattern::*;
+      virtual?thunk?to?OHOS::Ace::NG::ButtonPattern::*;
+      VTT?for?OHOS::Ace::NG::ButtonPattern::*;
+      VTT?for?OHOS::Ace::NG::ButtonPattern;
       
       OHOS::Ace::GestureRecognizer::HandleEvent*;
       OHOS::Ace::GestureRecognizer::AddToReferee*;

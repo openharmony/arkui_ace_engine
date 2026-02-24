@@ -697,58 +697,10 @@ class ColumnSplitModifier extends LazyArkColumnSplitComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class LazyArkCounterComponent extends ArkComponent {
-    static module = undefined;
-
-    constructor(nativePtr, classType) {
-      super(nativePtr, classType);
-      if (LazyArkCounterComponent.module === undefined) {
-        LazyArkCounterComponent.module = globalThis.requireNapi('arkui.components.arkcounter');
-      }
-      this.lazyComponent = LazyArkCounterComponent.module.createComponent(nativePtr, classType);
-      console.log("LazyArkCounterComponent lazyload nativeModule");
-    }
-    setMap() {
-      this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
-    }
-    onInc(event) {
-      this.lazyComponent.onInc(event);
-      return this;
-    }
-    onDec(event) {
-      this.lazyComponent.onDec(event);
-      return this;
-    }
-    enableDec(value) {
-      this.lazyComponent.enableDec(value);
-      return this;
-    }
-    enableInc(value) {
-      this.lazyComponent.enableInc(value);
-      return this;
-    }
-    backgroundColor(value) {
-      this.lazyComponent.backgroundColor(value);
-      return this;
-    }
-    width(value) {
-      this.lazyComponent.width(value);
-      return this;
-    }
-    height(value) {
-      this.lazyComponent.height(value);
-      return this;
-    }
-    size(value) {
-      this.lazyComponent.size(value);
-      return this;
-    }
-}
-class CounterModifier extends LazyArkCounterComponent {
+class CounterModifier extends ArkCounterComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
-    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
@@ -1213,78 +1165,10 @@ class PathModifier extends ArkPathComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-
-class LazyArkPatternLockComponent extends ArkComponent {
-  static module = undefined;
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-    if (LazyArkPatternLockComponent.module === undefined) {
-      LazyArkPatternLockComponent.module = globalThis.requireNapi('arkui.components.arkpatternlock');
-    }
-    this.lazyComponent = LazyArkPatternLockComponent.module.createComponent(nativePtr, classType);
-    console.log('LazyArkPatternLockComponent lazyload nativeModule');
-  }
-  setMap() {
-    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
-  }
-  sideLength(value) {
-    this.lazyComponent.sideLength(value);
-    return this;
-  }
-  circleRadius(value) {
-    this.lazyComponent.circleRadius(value);
-    return this;
-  }
-  regularColor(value) {
-    this.lazyComponent.regularColor(value);
-    return this;
-  }
-  selectedColor(value) {
-    this.lazyComponent.selectedColor(value);
-    return this;
-  }
-  activeColor(value) {
-    this.lazyComponent.activeColor(value);
-    return this;
-  }
-  pathColor(value) {
-    this.lazyComponent.pathColor(value);
-    return this;
-  }
-  pathStrokeWidth(value) {
-    this.lazyComponent.pathStrokeWidth(value);
-    return this;
-  }
-  autoReset(value) {
-    this.lazyComponent.autoReset(value);
-    return this;
-  }
-  activateCircleStyle(value) {
-    this.lazyComponent.activateCircleStyle(value);
-    return this;
-  }
-  skipUnselectedPoint(value) {
-    this.lazyComponent.skipUnselectedPoint(value);
-    return this;
-  }
-  backgroundColor(value) {
-    this.lazyComponent.backgroundColor(value);
-    return this;
-  }
-  onPatternComplete(callback) {
-    this.lazyComponent.onPatternComplete(callback);
-    return this;
-  }
-  onDotConnect(callback) {
-    this.lazyComponent.onDotConnect(callback);
-    return this;
-  }
-}
-class PatternLockModifier extends LazyArkPatternLockComponent {
+class PatternLockModifier extends ArkPatternLockComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
-    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

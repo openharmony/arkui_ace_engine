@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_H
 
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
 #include "ui/view/theme/token_theme.h"

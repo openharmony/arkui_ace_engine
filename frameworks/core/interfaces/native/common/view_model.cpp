@@ -693,11 +693,7 @@ void* createContainerSpanNode(ArkUI_Int32 nodeId)
 
 void* createCounterNode(ArkUI_Int32 nodeId)
 {
-    auto nodeModifier = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifier, nullptr);
-    auto counterModifier = nodeModifier->getCounterModifier();
-    CHECK_NULL_RETURN(counterModifier, nullptr);
-    return counterModifier->createFrameNode(nodeId);
+    return nullptr;
 }
 
 void* createDataPanelNode(ArkUI_Int32 nodeId)
@@ -864,11 +860,11 @@ void* createPathNode(ArkUI_Int32 nodeId)
 
 void* createPatternLockNode(ArkUI_Int32 nodeId)
 {
-    auto nodeModifier = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifier, nullptr);
-    auto patternlockModifier = nodeModifier->getPatternLockModifier();
-    CHECK_NULL_RETURN(patternlockModifier, nullptr);
-    return patternlockModifier->createFrameNode(nodeId);
+    // auto frameNode = PatternLockModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createPluginComponentNode(ArkUI_Int32 nodeId)

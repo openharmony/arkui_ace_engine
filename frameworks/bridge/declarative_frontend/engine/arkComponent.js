@@ -9946,17 +9946,290 @@ if (globalThis.ImageSpan !== undefined) {
   };
 }
 
-// @ts-ignore
-if (globalThis.PatternLock === undefined) {
-  globalThis.PatternLock = {
-    create: function(value) {
-      getUINativeModule().loadNativeModule('PatternLock');
-      let module = globalThis.requireNapi('arkui.components.arkpatternlock');
-      module.exportView();
-      getUINativeModule().patternlock.create(value);
-    },
-    name: 'JSPatternLock'
+/// <reference path='./import.ts' />
+class PatternLockActiveColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
   }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetActiveColor(node);
+    }
+    else {
+      getUINativeModule().patternLock.setActiveColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PatternLockActiveColorModifier.identity = Symbol('patternLockActiveColor');
+class PatternLockSelectedColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetSelectedColor(node);
+    }
+    else {
+      getUINativeModule().patternLock.setSelectedColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PatternLockSelectedColorModifier.identity = Symbol('patternLockSelectedColor');
+class PatternLockPathColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetPathColor(node);
+    }
+    else {
+      getUINativeModule().patternLock.setPathColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PatternLockPathColorModifier.identity = Symbol('patternLockPathColor');
+class PatternLockRegularColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetRegularColor(node);
+    }
+    else {
+      getUINativeModule().patternLock.setRegularColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PatternLockRegularColorModifier.identity = Symbol('patternLockRegularColor');
+class PatternLockSideLengthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetSideLength(node);
+    }
+    else {
+      getUINativeModule().patternLock.setSideLength(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PatternLockSideLengthModifier.identity = Symbol('patternLockSideLength');
+class PatternLockPathStrokeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetPathStrokeWidth(node);
+    }
+    else {
+      getUINativeModule().patternLock.setPathStrokeWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+PatternLockPathStrokeModifier.identity = Symbol('patternLockPathStroke');
+class PatternLockCircleRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetCircleRadius(node);
+    }
+    else {
+      getUINativeModule().patternLock.setCircleRadius(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PatternLockCircleRadiusModifier.identity = Symbol('patternLockCircleRadius');
+class PatternLockAutoResetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetAutoReset(node);
+    }
+    else {
+      getUINativeModule().patternLock.setAutoReset(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+PatternLockAutoResetModifier.identity = Symbol('patternlockautoreset');
+class PatternLockActivateCircleStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetActivateCircleStyle(node);
+    }
+    else {
+      getUINativeModule().patternLock.setActivateCircleStyle(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PatternLockActivateCircleStyleModifier.identity = Symbol('patternLockActivateCircleStyle');
+class PatternLockSkipUnselectedPointModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetSkipUnselectedPoint(node);
+    }
+    else {
+      getUINativeModule().patternLock.setSkipUnselectedPoint(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+PatternLockSkipUnselectedPointModifier.identity = Symbol('patternlockSkipUnselectedPoint');
+class PatternLockBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().common.setBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PatternLockBackgroundColorModifier.identity = Symbol('patternLockBackgroundColor');
+
+class PatternLockOnPatternCompleteModifer extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetPatternLockOnPatternComplete(node);
+    } else {
+      getUINativeModule().patternLock.setPatternLockOnPatternComplete(node, this.value);
+    }
+  }
+}
+PatternLockOnPatternCompleteModifer.identity = Symbol('patternLockOnPatternComplete');
+
+class PatternLockOnDotConnectModifer extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().patternLock.resetPatternLockOnDotConnect(node);
+    } else {
+      getUINativeModule().patternLock.setPatternLockOnDotConnect(node, this.value);
+    }
+  }
+}
+PatternLockOnDotConnectModifer.identityl = Symbol('patternLockOnDotConnect');
+
+class ArkPatternLockComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  sideLength(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockSideLengthModifier.identity, PatternLockSideLengthModifier, value);
+    return this;
+  }
+  circleRadius(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockCircleRadiusModifier.identity, PatternLockCircleRadiusModifier, value);
+    return this;
+  }
+  regularColor(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockRegularColorModifier.identity, PatternLockRegularColorModifier, value);
+    return this;
+  }
+  selectedColor(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockSelectedColorModifier.identity, PatternLockSelectedColorModifier, value);
+    return this;
+  }
+  activeColor(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockActiveColorModifier.identity, PatternLockActiveColorModifier, value);
+    return this;
+  }
+  pathColor(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockPathColorModifier.identity, PatternLockPathColorModifier, value);
+    return this;
+  }
+  pathStrokeWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockPathStrokeModifier.identity, PatternLockPathStrokeModifier, value);
+    return this;
+  }
+  autoReset(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockAutoResetModifier.identity, PatternLockAutoResetModifier, value);
+    return this;
+  }
+  activateCircleStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockActivateCircleStyleModifier.identity, PatternLockActivateCircleStyleModifier, value);
+    return this;
+  }
+  skipUnselectedPoint(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockSkipUnselectedPointModifier.identity, PatternLockSkipUnselectedPointModifier, value);
+    return this;
+  }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockBackgroundColorModifier.identity,
+        PatternLockBackgroundColorModifier, value);
+    return this;
+  }
+  onPatternComplete(callback) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockOnPatternCompleteModifer.identity, PatternLockOnPatternCompleteModifer, callback);
+    return this;
+  }
+  onDotConnect(callback) {
+    modifierWithKey(this._modifiersWithKeys, PatternLockOnDotConnectModifer.identity, PatternLockOnDotConnectModifer, callback);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.PatternLock !== undefined) {
+  globalThis.PatternLock.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkPatternLockComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.PatternLockModifier(nativePtr, classType);
+    });
+  };
 }
 
 /// <reference path='./import.ts' />
@@ -24899,17 +25172,182 @@ if (globalThis.NavDestination !== undefined) {
     });
   };
 }
-// @ts-ignore
-if (globalThis.Counter === undefined) {
-  globalThis.Counter = {
-    create: function() {
-      getUINativeModule().loadNativeModule("Counter");
-      let module = globalThis.requireNapi('arkui.components.arkcounter');
-      module.exportView();
-      getUINativeModule().counter.create();
+
+/// <reference path='./import.ts' />
+class ArkCounterComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  onInc(event) {
+    modifierWithKey(this._modifiersWithKeys, CounterOnIncModifier.identity, CounterOnIncModifier, event);
+    return this;
+  }
+  onDec(event) {
+    modifierWithKey(this._modifiersWithKeys, CounterOnDecModifier.identity, CounterOnDecModifier, event);
+    return this;
+  }
+  enableDec(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableDecModifier.identity, EnableDecModifier, value);
+    return this;
+  }
+  enableInc(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableIncModifier.identity, EnableIncModifier, value);
+    return this;
+  }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, CounterBackgroundColorModifier.identity, CounterBackgroundColorModifier, value);
+    return this;
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, CounterWidthModifier.identity, CounterWidthModifier, value);
+    return this;
+  }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, CounterHeightModifier.identity, CounterHeightModifier, value);
+    return this;
+  }
+  size(value) {
+    modifierWithKey(this._modifiersWithKeys, CounterSizeModifier.identity, CounterSizeModifier, value);
+    return this;
+  }
+}
+
+class CounterOnIncModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterOnInc(node);
+    } else {
+      getUINativeModule().counter.setCounterOnInc(node, this.value);
     }
   }
 }
+CounterOnIncModifier.identity = Symbol('counterOnInc');
+
+class CounterOnDecModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterOnDec(node);
+    } else {
+      getUINativeModule().counter.setCounterOnDec(node, this.value);
+    }
+  }
+}
+CounterOnDecModifier.identity = Symbol('counterOnDec');
+
+class CounterHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterHeight(node);
+    }
+    else {
+      getUINativeModule().counter.setCounterHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CounterHeightModifier.identity = Symbol('CounterHeight');
+class CounterWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterWidth(node);
+    }
+    else {
+      getUINativeModule().counter.setCounterWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CounterWidthModifier.identity = Symbol('CounterWidth');
+class CounterBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().counter.setCounterBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CounterBackgroundColorModifier.identity = Symbol('CounterBackgroundColor');
+class CounterSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterSize(node);
+    }
+    else {
+      getUINativeModule().counter.setCounterSize(node, this.value.width, this.value.height);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
+}
+CounterSizeModifier.identity = Symbol('CounterSize');
+class EnableIncModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetEnableInc(node);
+    }
+    else {
+      getUINativeModule().counter.setEnableInc(node, this.value);
+    }
+  }
+}
+EnableIncModifier.identity = Symbol('enableInc');
+class EnableDecModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetEnableDec(node);
+    }
+    else {
+      getUINativeModule().counter.setEnableDec(node, this.value);
+    }
+  }
+}
+EnableDecModifier.identity = Symbol('enableDec');
+// @ts-ignore
+if (globalThis.Counter !== undefined) {
+  globalThis.Counter.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkCounterComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.CounterModifier(nativePtr, classType);
+    });
+  };
+}
+
 /// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent {
   constructor(nativePtr, classType) {

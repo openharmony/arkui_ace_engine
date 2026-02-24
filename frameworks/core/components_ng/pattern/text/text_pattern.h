@@ -824,7 +824,7 @@ public:
 
     size_t GetSubComponentInfos(std::vector<SubComponentInfo>& subComponentInfos);
 
-    void ACE_FORCE_EXPORT UpdateFontColor(const Color& value);
+    void UpdateFontColor(const Color& value);
     void BeforeCreatePaintWrapper() override;
 
     void OnTextOverflowChanged();
