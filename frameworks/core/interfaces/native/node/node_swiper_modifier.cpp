@@ -30,6 +30,7 @@ constexpr int32_t DEFAULT_CACHED_COUNT = 1;
 constexpr int32_t DEFAULT_DISPLAY_COUNT = 1;
 constexpr bool DEFAULT_SWIPE_BY_GROUP = false;
 constexpr bool DEFAULT_CACHED_IS_SHOWN = false;
+constexpr bool DEFAULT_CACHED_INDEPENDENT = false;
 constexpr bool DEFAULT_AUTO_PLAY = false;
 constexpr bool DEFAULT_LOOP = true;
 constexpr bool DEAFULT_DISABLE_SWIPE = false;
@@ -1041,6 +1042,27 @@ ArkUI_Int32 GetSwiperCachedIsShown(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(SwiperModelNG::GetCachedIsShown(frameNode));
+}
+
+void SetSwiperCachedIndependent(ArkUINodeHandle node, ArkUI_Bool independent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetCachedCountIndependent(frameNode, independent);
+}
+
+void ResetSwiperCachedIndependent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetCachedCountIndependent(frameNode, DEFAULT_CACHED_INDEPENDENT);
+}
+
+ArkUI_Int32 GetSwiperCachedIndependent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_CACHED_INDEPENDENT);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetCachedCountIndependent(frameNode));
 }
 
 void SetSwiperDisplayMode(ArkUINodeHandle node, ArkUI_Int32 displayMode)
@@ -2099,6 +2121,9 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .callSwiperIsFakeDragging = CallSwiperIsFakeDragging,
         .callSwiperShowPrevious = CallSwiperShowPrevious,
         .callSwiperShowNext = CallSwiperShowNext,
+        .setSwiperCachedIndependent = SetSwiperCachedIndependent,
+        .resetSwiperCachedIndependent = ResetSwiperCachedIndependent,
+        .getSwiperCachedIndependent = GetSwiperCachedIndependent,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

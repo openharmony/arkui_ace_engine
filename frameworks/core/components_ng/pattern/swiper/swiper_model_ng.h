@@ -54,6 +54,7 @@ public:
     void SetItemSpace(const Dimension& itemSpace) override;
     void SetCachedCount(int32_t cachedCount) override;
     void SetCachedIsShown(bool isShown) override;
+    void SetCachedIndependent(bool independent) override;
     void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;
     void SetOnUnselected(std::function<void(const BaseEventInfo* info)>&& onUnselected) override;
     void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
@@ -110,6 +111,8 @@ public:
     static int32_t GetCachedCount(FrameNode* frameNode);
     static void SetCachedIsShown(FrameNode* frameNode, bool isShown);
     static bool GetCachedIsShown(FrameNode* frameNode);
+    static void SetCachedCountIndependent(FrameNode* frameNode, bool independent);
+    static bool GetCachedCountIndependent(FrameNode* frameNode);
     static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetDirection(FrameNode* frameNode, Axis axis);

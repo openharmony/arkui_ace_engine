@@ -570,7 +570,7 @@ void SwiperLayoutAlgorithm::CalcCachedItemIndex(LayoutWrapper* layoutWrapper)
     auto displayCount = GetDisplayCount(layoutWrapper);
     auto firstIndexInWindow = GetCurrentFirstIndexInWindow(layoutWrapper);
     auto lastIndexInWindow = GetCurrentLastIndexInWindow(layoutWrapper);
-    if (swipeByGroup_) {
+    if (swipeByGroup_ && !cachedIndependent_) {
         cachedCount *= displayCount;
         firstIndexInWindow = SwiperUtils::ComputePageIndex(firstIndexInWindow, displayCount);
         lastIndexInWindow = SwiperUtils::ComputePageEndIndex(lastIndexInWindow, displayCount);

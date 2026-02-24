@@ -891,6 +891,16 @@ public:
         return isFakeDragging_;
     }
 
+    void SetCachedCountIndependent(bool independent)
+    {
+        independent_ = independent;
+    }
+
+    bool GetCachedCountIndependent()
+    {
+        return independent_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -1545,6 +1555,7 @@ private:
     OffsetF captureFinalOffset_;
     bool isInAutoPlay_ = false;
     bool isAutoPlayAnimationRunning_ = false;
+    bool independent_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
     // Indicates whether previous frame animation is running, only used on swiper custom animation.

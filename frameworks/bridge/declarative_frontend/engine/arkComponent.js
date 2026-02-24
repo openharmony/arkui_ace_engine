@@ -18349,10 +18349,10 @@ class ArkDisplayCount {
 class ArkSwiperCachedCount {
   constructor() {
     this.value = undefined;
-    this.isShown = undefined;
+    this.options = undefined;
   }
   isEqual(another) {
-    return this.value === another.value && this.isShown === another.isShown;
+    return this.value === another.value && this.options === another.options;
   }
 }
 
@@ -29556,10 +29556,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperDisplayModeModifier.identity, SwiperDisplayModeModifier, value);
     return this;
   }
-  cachedCount(value, isShown) {
+  cachedCount(value, options) {
     let arkCachedCount = new ArkSwiperCachedCount();
     arkCachedCount.value = value;
-    arkCachedCount.isShown = isShown;
+    arkCachedCount.options = options;
     modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, arkCachedCount);
     return this;
   }
@@ -30025,15 +30025,25 @@ class SwiperCachedCountModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().swiper.resetSwiperCachedCount(node);
       getUINativeModule().swiper.resetSwiperIsShown(node);
+      getUINativeModule().swiper.resetSwiperCachedIndependent(node);
     }
     else {
       getUINativeModule().swiper.setSwiperCachedCount(node, this.value.value);
-      getUINativeModule().swiper.setSwiperIsShown(node, this.value.isShown);
+      if (typeof this.value.options === 'boolean') {
+        getUINativeModule().swiper.setSwiperIsShown(node, this.value.options);
+      } else if (typeof this.value.options === 'object') {
+        if ('isShown' in this.value.options) {
+          getUINativeModule().swiper.setSwiperIsShown(node, this.value.options.isShown);
+        }
+        if ('independent' in this.value.options) {
+          getUINativeModule().swiper.setSwiperCachedIndependent(node, this.value.options.independent);
+        }
+      }
     }
   }
   checkObjectDiff() {
     return (!isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
-      !isBaseOrResourceEqual(this.stageValue.isShown, this.value.isShown));
+      !isBaseOrResourceEqual(this.stageValue.options, this.value.options));
   }
 }
 SwiperCachedCountModifier.identity = Symbol('swiperCachedCount');

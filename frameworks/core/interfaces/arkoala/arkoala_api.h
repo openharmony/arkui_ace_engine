@@ -4278,6 +4278,9 @@ struct ArkUISwiperModifier {
     void (*callSwiperIsFakeDragging)(ArkUINodeHandle node, bool* isFakeDragging);
     void (*callSwiperShowPrevious)(ArkUINodeHandle node);
     void (*callSwiperShowNext)(ArkUINodeHandle node);
+    void (*setSwiperCachedIndependent)(ArkUINodeHandle node, ArkUI_Bool independent);
+    void (*resetSwiperCachedIndependent)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperCachedIndependent)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
