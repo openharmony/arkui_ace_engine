@@ -69,7 +69,9 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     if (!hasDeco_) {
         isShow = false;
     }
+
     isTitleShow_ = isShow;
+
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -1148,23 +1150,6 @@ void ContainerModalPattern::EnableContainerModalCustomGesture(RefPtr<PipelineCon
     containerPattern->InitColumnTouchTestFunc();
 }
 
-void ContainerModalPattern::SetToolbarBuilder(
-    const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>&& builder)
-{
-    CHECK_NULL_VOID(parent);
-    if (titleMgr_ == nullptr) {
-        auto title = GetCustomTitleRow();
-        titleMgr_ = MakeRefPtr<ContainerModalToolBar>(WeakClaim(this), title, false);
-    }
-    if (floatTitleMgr_ == nullptr) {
-        auto title = GetFloatingTitleRow();
-        floatTitleMgr_ = MakeRefPtr<ContainerModalToolBar>(WeakClaim(this), title, true);
-    }
-
-    titleMgr_->SetToolbarBuilder(parent, builder);
-    floatTitleMgr_->SetToolbarBuilder(parent, builder);
-}
-
 void ContainerModalPattern::UpdateContainerBgColor()
 {
     if (isCustomColor_) {
@@ -1188,6 +1173,24 @@ void ContainerModalPattern::UpdateContainerBgColor()
         containerContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     }
 }
+
+void ContainerModalPattern::SetToolbarBuilder(
+    const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>&& builder)
+{
+    CHECK_NULL_VOID(parent);
+    if (titleMgr_ == nullptr) {
+        auto title = GetCustomTitleRow();
+        titleMgr_ = MakeRefPtr<ContainerModalToolBar>(WeakClaim(this), title, false);
+    }
+    if (floatTitleMgr_ == nullptr) {
+        auto title = GetFloatingTitleRow();
+        floatTitleMgr_ = MakeRefPtr<ContainerModalToolBar>(WeakClaim(this), title, true);
+    }
+
+    titleMgr_->SetToolbarBuilder(parent, builder);
+    floatTitleMgr_->SetToolbarBuilder(parent, builder);
+}
+
 RefPtr<PipelineContext> ContainerModalPattern::GetContextRefPtr()
 {
     auto containerNode = GetHost();
