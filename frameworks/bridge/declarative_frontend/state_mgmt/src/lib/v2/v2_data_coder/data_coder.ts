@@ -32,7 +32,7 @@ class DataCoder {
     if (forceLegacyFormat) {
       return JSONCoder.stringify(value);
     }
-  
+
     const origValue = ObserveV2.IsMakeObserved(value)
       ? UIUtilsImpl.instance().getTarget(value)
       : value;
@@ -333,7 +333,7 @@ class DataCoder {
     if (target != null && globalThis.isSendable(target) === false) {
       const type = target.constructor?.name ?? typeof target;
       const msg = `Not supported type! The target (${type}) is not @Sendable`;
-      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, msg);
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, msg);
     }
   }
 
