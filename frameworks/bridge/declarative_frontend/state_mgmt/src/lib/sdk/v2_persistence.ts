@@ -280,7 +280,7 @@ class PersistenceV2Impl extends StorageHelper {
   public static readonly MIN_PERSISTENCE_ID = 0x1020000000000;
   public static nextPersistId_ = PersistenceV2Impl.MIN_PERSISTENCE_ID;
   // TODO
-  protected static readonly NOT_SUPPORT_TYPE_MESSAGE_: string = 'Not supported type! Can only use the class,  in Persistence';
+  protected static readonly NOT_SUPPORT_TYPE_MESSAGE_: string = 'Not supported type! The type should have function constructor signature.';
   protected static readonly NOT_SUPPORT_AREAMODE_MESSAGE_: string = 'AreaMode Value Error! value range can only in EL1-EL5';
   protected static readonly KEYS_DUPLICATE_: string = 'ERROR, Duplicate key used when connect';
   protected static readonly KEYS_ARR_: string = '___keys_arr';
@@ -421,7 +421,7 @@ class PersistenceV2Impl extends StorageHelper {
     }
 
     let observedValue: T | undefined =
-      this.getConnectDefaultValue(key, type, connectOptions.defaultCreator);
+    this.getConnectDefaultValue(key, type, connectOptions.defaultCreator);
 
     if (!observedValue) {
       return undefined;
