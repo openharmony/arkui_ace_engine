@@ -5572,9 +5572,10 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
         TaskExecutor::TaskType::UI, "ArkUIStatusBarItemColor");
 }
 
-void UIContentImpl::SetForceSplitEnable(bool isForceSplit)
+void UIContentImpl::SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "UIContent SetForceSplitEnable isForceSplit %{public}d", isForceSplit);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "UIContent SetForceSplitEnable isForceSplit:%{public}d "
+        "needUpdateViewport:%{public}d", isForceSplit, needUpdateViewport);
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -5582,12 +5583,12 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit)
     CHECK_NULL_VOID(context);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit]() {
+    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, needUpdateViewport]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
         auto forceSplitMgr = context->GetForceSplitManager();
         CHECK_NULL_VOID(forceSplitMgr);
-        forceSplitMgr->SetForceSplitEnable(isForceSplit);
+        forceSplitMgr->SetForceSplitEnable(isForceSplit, needUpdateViewport);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         forceSplitTask();

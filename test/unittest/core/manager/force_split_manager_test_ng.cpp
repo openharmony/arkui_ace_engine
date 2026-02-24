@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include <optional>
 
 #include "gtest/gtest.h"
@@ -25,6 +26,8 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/common/force_split/force_split_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -281,5 +284,128 @@ HWTEST_F(ForceSplitManagerTestNg, SetNavigationForceSplitEnableInternal004, Test
 
     manager->SetNavigationForceSplitEnableInternal(false);
     EXPECT_TRUE(manager->GetDisableNavForceSplitInternal());
+}
+
+/**
+ * @tc.name: SetForceSplitEnable001
+ * @tc.desc: Branch: if (needUpdateViewport) { => false
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable001, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    // Test with needUpdateViewport=false
+    manager->SetForceSplitEnable(true, false);
+    EXPECT_TRUE(manager->isForceSplitSupported_);
+    EXPECT_TRUE(manager->isForceSplitEnable_);
+
+    manager->SetForceSplitEnable(false, false);
+    EXPECT_FALSE(manager->isForceSplitEnable_);
+}
+
+/**
+ * @tc.name: SetForceSplitEnable002
+ * @tc.desc: Branch: if (needUpdateViewport) { => true
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ForceSplitManagerTestNg, SetForceSplitEnable002, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->SetForceSplitEnable(true, true);
+    EXPECT_TRUE(manager->isForceSplitSupported_);
+    EXPECT_TRUE(manager->delayedIsForceSplitEnable_.has_value());
+    EXPECT_TRUE(manager->delayedIsForceSplitEnable_.value());
+    EXPECT_TRUE(manager->surfaceChangeCallbackId_.has_value());
+
+    // Reset for next test
+    manager->delayedIsForceSplitEnable_ = std::nullopt;
+    manager->surfaceChangeCallbackId_ = std::nullopt;
+
+    manager->SetForceSplitEnable(false, true);
+    EXPECT_TRUE(manager->delayedIsForceSplitEnable_.has_value());
+    EXPECT_FALSE(manager->delayedIsForceSplitEnable_.value());
+    EXPECT_TRUE(manager->surfaceChangeCallbackId_.has_value());
+}
+
+/**
+ * @tc.name: RegisterSurfaceChangeCallbackIfNeeded001
+ * @tc.desc: Test RegisterSurfaceChangeCallbackIfNeeded when callback already registered
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ForceSplitManagerTestNg, RegisterSurfaceChangeCallbackIfNeeded001, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    context->surfaceChangedCallbackMap_.clear();
+    manager->surfaceChangeCallbackId_ = std::nullopt;
+    manager->RegisterSurfaceChangeCallbackIfNeeded();
+    EXPECT_TRUE(manager->surfaceChangeCallbackId_.has_value());
+    EXPECT_EQ(context->surfaceChangedCallbackMap_.size(), 1);
+
+    // Try to register again - should not register duplicate
+    int32_t originalId = manager->surfaceChangeCallbackId_.value();
+    manager->RegisterSurfaceChangeCallbackIfNeeded();
+    ASSERT_TRUE(manager->surfaceChangeCallbackId_.has_value());
+    EXPECT_EQ(manager->surfaceChangeCallbackId_.value(), originalId);
+    EXPECT_EQ(context->surfaceChangedCallbackMap_.size(), 1);
+}
+
+/**
+ * @tc.name: ChangeForceSplitModeIfNeeded001
+ * @tc.desc: Test ChangeForceSplitModeIfNeeded when delayedIsForceSplitEnable_ has value
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ForceSplitManagerTestNg, ChangeForceSplitModeIfNeeded001, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    // Set delayed force split enable
+    manager->delayedIsForceSplitEnable_ = true;
+    // Change force split mode
+    manager->ChangeForceSplitModeIfNeeded();
+
+    // Verify that delayed flag is cleared
+    EXPECT_FALSE(manager->delayedIsForceSplitEnable_.has_value());
+}
+
+/**
+ * @tc.name: ChangeForceSplitModeIfNeeded002
+ * @tc.desc: Test ChangeForceSplitModeIfNeeded when delayedIsForceSplitEnable_ has no value
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ForceSplitManagerTestNg, ChangeForceSplitModeIfNeeded002, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+
+    // Ensure delayed flag is not set
+    manager->delayedIsForceSplitEnable_ = std::nullopt;
+
+    // Change force split mode - should do nothing
+    manager->ChangeForceSplitModeIfNeeded();
+
+    // Verify that delayed flag remains null
+    EXPECT_FALSE(manager->delayedIsForceSplitEnable_.has_value());
 }
 } // namespace OHOS::Ace::NG

@@ -383,7 +383,7 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit) override;
+    void SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport = false) override;
     void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
                              const std::optional<AppForceSplitConfig>& appConfig) override;
 
