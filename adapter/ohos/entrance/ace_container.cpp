@@ -4888,11 +4888,21 @@ void AceContainer::RegisterAvoidInfoCallback()
     CHECK_NULL_VOID(avoidInfoMgr);
     auto uiExtMgr = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtMgr);
-    auto checkTask = [weakMgr = WeakPtr(uiExtMgr)]() {
-        auto mgr = weakMgr.Upgrade();
-        CHECK_NULL_VOID(mgr);
-        mgr->NotifyUECProviderIfNeedded();
+    auto checkTask = [uiExtMgr](auto notifyFunc) {
+        return [weakMgr = WeakPtr(uiExtMgr), notifyFunc]() {
+            auto mgr = weakMgr.Upgrade();
+            CHECK_NULL_VOID(mgr);
+            notifyFunc(mgr);
+        };
     };
+
+    if (IsUIExtensionWindow()) {
+        pipeline->AddPersistAfterLayoutTask(checkTask(
+            [](auto mgr) { mgr->NotifyNestedUECProvidersIfNeeded(); }));
+    } else {
+        pipeline->AddPersistAfterLayoutTask(checkTask(
+            [](auto mgr) { mgr->NotifyUECProviderIfNeedded(); }));
+    }
     auto registerCallback = [weakMgr = WeakPtr(uiExtMgr)](NG::UECAvoidInfoConsumer&& consumer) {
         auto mgr = weakMgr.Upgrade();
         CHECK_NULL_VOID(mgr);
@@ -4905,7 +4915,6 @@ void AceContainer::RegisterAvoidInfoCallback()
         mgr->SendBusinessToHost(
             NG::UIContentBusinessCode::GET_AVOID_INFO, std::move(want), NG::BusinessDataSendType::ASYNC);
     };
-    pipeline->AddPersistAfterLayoutTask(std::move(checkTask));
     avoidInfoMgr->SetRegisterUECAvoidInfoConsumerCallback(std::move(registerCallback));
     avoidInfoMgr->SetRequestAvoidInfoCallback(std::move(requestCallback));
 #endif

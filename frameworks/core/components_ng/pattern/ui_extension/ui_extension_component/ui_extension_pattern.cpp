@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_avoid_listener.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
@@ -218,6 +219,9 @@ void UIExtensionPattern::OnAttachContext(PipelineContext *context)
     } else if (detachContextHappened) {
         RegisterEvent(instanceId_);
     }
+
+    RegisterAvoidInfoChangeListener(instanceId_);
+
     /* only for 1.2 begin */
     if (context->GetFrontendType() == FrontendType::ARK_TS) {
         auto wantWrap = GetWantWrap();
@@ -302,6 +306,7 @@ void UIExtensionPattern::UnRegisterEvent(int32_t instanceId)
 {
     UnRegisterUIExtensionManagerEvent(instanceId);
     UnRegisterPipelineEvent(instanceId);
+    UnRegisterAvoidInfoChangeListener();
     hasDetachContext_ = true;
 }
 
@@ -1433,6 +1438,7 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
                 MountPlaceholderNode(GetSizeChangeReason());
             }
             sessionWrapper_->NotifyDisplayArea(displayArea_);
+            isUpdateDisplayArea_ = true;
         } else {
             displayAreaChanged_ = true;
         }
@@ -2219,6 +2225,20 @@ void UIExtensionPattern::RegisterGetAvoidInfoCallback()
         return 0;
     };
     RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::GET_AVOID_INFO, callback);
+}
+
+void UIExtensionPattern::RegisterAvoidInfoChangeListener(int32_t instanceId)
+{
+    if (!avoidListener_) {
+        avoidListener_ = AceType::MakeRefPtr<UIExtensionAvoidListener>(WeakClaim(this));
+    }
+    avoidListener_->RegisterAvoidInfoChangeListener(instanceId);
+}
+
+void UIExtensionPattern::UnRegisterAvoidInfoChangeListener()
+{
+    CHECK_NULL_VOID(avoidListener_);
+    avoidListener_->UnRegisterAvoidInfoChangeListener();
 }
 
 bool UIExtensionPattern::SendBusinessDataSyncReply(

@@ -108,10 +108,19 @@ public:
     int32_t GetContainerModalTitleHeight();
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttonsRect);
     bool NeedAvoidContainerModal();
+    void GetNewAvoidInfoForUEC(const RefPtr<FrameNode>& uecNode, ContainerModalAvoidInfo& info);
 
     static void GetContainerModalAvoidInfoForUEC(const RefPtr<FrameNode>& uecNode, ContainerModalAvoidInfo& info);
     static bool CheckIfNeedNotifyAvoidInfoChange(
         const ContainerModalAvoidInfo& prevInfo, const ContainerModalAvoidInfo& curInfo);
+    bool IsUpdateButtonRect() const
+    {
+        return isUpdateButtonRect_;
+    }
+    void SetIsUpdateButtonRect(bool isUpdate)
+    {
+        isUpdateButtonRect_ = isUpdate;
+    }
 
 private:
     void RegisterListenerIfNeeded();
@@ -131,6 +140,7 @@ private:
     std::set<WeakPtr<IAvoidInfoListener>> listeners_;
     ContainerModalAvoidInfo avoidInfo_;
     ContainerModalAvoidInfo avoidInfoForUEC_;
+    bool isUpdateButtonRect_ = true;
 };
 } // namespace OHOS::Ace::NG
 
