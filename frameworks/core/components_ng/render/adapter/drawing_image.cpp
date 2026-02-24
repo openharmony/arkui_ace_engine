@@ -17,10 +17,11 @@
 
 #include "include/core/SkGraphics.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
 #include "frameworks/core/image/image_cache.h"
-#include "core/pipeline/pipeline_base.h"
 #include "pipeline/rs_recording_canvas.h"
+
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -199,7 +200,7 @@ RefPtr<CanvasImage> DrawingImage::Clone()
 
 void DrawingImage::Cache(const std::string& key)
 {
-    auto pipelineCtx = PipelineBase::GetCurrentContext();
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineCtx);
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_VOID(cache);
@@ -211,7 +212,7 @@ void DrawingImage::Cache(const std::string& key)
 
 RefPtr<CanvasImage> DrawingImage::QueryFromCache(const std::string& key)
 {
-    auto pipelineCtx = PipelineBase::GetCurrentContext();
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);

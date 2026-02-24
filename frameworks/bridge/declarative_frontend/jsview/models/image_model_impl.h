@@ -65,11 +65,11 @@ public:
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetCopyOption(const CopyOptions& copyOption) override;
     bool UpdateDragItemInfo(DragItemInfo& itemInfo) override;
+    void SetSmoothEdge(float value)  override {}
     void EnableAnalyzer(bool isEnableAnalyzer) override {}
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override {}
     void SetImageAnalyzerConfig(void* config) override {}
     void SetImageAIOptions(void* config) override {}
-    void SetSmoothEdge(float value)  override {}
     void ResetImage() override {}
     void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override {}
     void SetHdrBrightness(float hdrBrightness) override {}

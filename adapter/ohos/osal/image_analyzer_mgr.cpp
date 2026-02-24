@@ -52,7 +52,7 @@ void ImageAnalyzerMgr::BuildNodeFunc(
         return engine_->BuildNodeFunc(pixelMap, config, uiConfig, overlayData);
     }
 }
-void ImageAnalyzerMgr::BuildNodeFunc(std::string uri, void* pixelMap, int frameTimestamp,
+void ImageAnalyzerMgr::BuildNodeFunc(const std::string& uri, void* pixelMap, int frameTimestamp,
     void* config, ImageAnalyzerInnerConfig* uiConfig, void** overlayData)
 {
     if (engine_) {
@@ -66,7 +66,7 @@ void ImageAnalyzerMgr::UpdateImage(
         return engine_->UpdateImage(overlayData, pixelMap, config, uiConfig);
     }
 }
-void ImageAnalyzerMgr::UpdateImage(void** overlayData, std::string uri, void* pixelMap,
+void ImageAnalyzerMgr::UpdateImage(void** overlayData, const std::string& uri, void* pixelMap,
     int frameTimestamp, void* config, ImageAnalyzerInnerConfig* uiConfig)
 {
     if (engine_) {
@@ -121,9 +121,9 @@ void ImageAnalyzerMgr::UpdateAIButtonConfig(void** overlayData, AIButtonConfig* 
 void ImageAnalyzerMgr::UpdateKeyEvent(void** overlayData, void* keyEvent)
 {
     if (engine_ && keyEvent != nullptr) {
-        auto* event = static_cast<OHOS::MMI::KeyEvent*>(keyEvent);
-        LOGI("ImageAnalyzerMgr::UpdateKeyEvent event.action: %{public}d, event.code: %{public}d", event->GetKeyAction(),
-            event->GetKeyCode());
+        auto* event = static_cast<MMI::KeyEvent*>(keyEvent);
+        LOGI("ImageAnalyzerMgr::UpdateKeyEvent event.action: %{public}d, event.code: %{public}d",
+            event->GetKeyAction(), event->GetKeyCode());
         return engine_->UpdateKeyEvent(overlayData, keyEvent);
     }
 }

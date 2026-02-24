@@ -41,7 +41,7 @@ void PixelMapImageObject::MakeCanvasImage(
             CHECK_NULL_VOID(pixelmapObject);
             ctx->SuccessCallback(CanvasImage::Create(pixelmapObject->pixmap_));
         };
-        NG::ImageUtils::PostToUI(task, "ArkUIImageCreateCanvasSuccess", ctx->GetContainerId());
+        NG::ImageUtils::PostToUI(task, "ArkUIImageCreateCanvasSuccess");
     }
 }
 

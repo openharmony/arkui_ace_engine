@@ -31,7 +31,7 @@ constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
-constexpr int32_t IMAGESIZE = 4;
+constexpr int32_t IMAGE_SIZE = 4;
 constexpr FillMode DEFAULT_FILL_MODE = FillMode::FORWARDS;
 ArkUINativeModuleValue ImageAnimatorBridge::SetState(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -265,7 +265,7 @@ ArkUINativeModuleValue ImageAnimatorBridge::SetImages(ArkUIRuntimeCallInfo* runt
     auto images = std::make_unique<ArkUIImagePropertiesStruct[]>(arrayLength);
     for (int32_t i = 0; i < arrayLength; i++) {
         images[i].src = srcArray[i].c_str();
-        for (int32_t j = 0; j < IMAGESIZE; j++) {
+        for (int32_t j = 0; j < IMAGE_SIZE; j++) {
             images[i].number[j] = calcDimension[arrayLength * j + i].Value();
             images[i].unit[j] = static_cast<int8_t>(calcDimension[arrayLength * j + i].Unit());
             images[i].calc[j] = const_cast<char*>(calcDimension[arrayLength * j + i].CalcValue().c_str());

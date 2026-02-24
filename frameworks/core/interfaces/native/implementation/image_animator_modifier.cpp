@@ -192,7 +192,7 @@ void SetOnStartImpl(Ark_NativePointer node,
         return;
     }
     auto onStart = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ImageAnimatorModelNG::SetOnStart(frameNode, std::move(onStart));
 }
@@ -207,7 +207,7 @@ void SetOnPauseImpl(Ark_NativePointer node,
         return;
     }
     auto onPause = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ImageAnimatorModelNG::SetOnPause(frameNode, std::move(onPause));
 }
@@ -222,7 +222,7 @@ void SetOnRepeatImpl(Ark_NativePointer node,
         return;
     }
     auto onRepeat = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ImageAnimatorModelNG::SetOnRepeat(frameNode, onRepeat);
 }
@@ -237,7 +237,7 @@ void SetOnCancelImpl(Ark_NativePointer node,
         return;
     }
     auto onCancel = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ImageAnimatorModelNG::SetOnCancel(frameNode, onCancel);
 }
@@ -252,7 +252,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
         return;
     }
     auto onFinish = [arkCallback = CallbackHelper(*optValue)]() -> void {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     ImageAnimatorModelNG::SetOnFinish(frameNode, onFinish);
 }

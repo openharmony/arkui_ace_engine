@@ -21,10 +21,10 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/layout/constants.h"
@@ -128,9 +128,9 @@ void PushDimensionsToVector(
                 value.value = optDimension.value().Value();
             }
         }
-        results.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(hasValue), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<double>(hasValue), nullptr });
         results.push_back(value);
-        results.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(unit), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<double>(unit), nullptr });
     }
 }
 
