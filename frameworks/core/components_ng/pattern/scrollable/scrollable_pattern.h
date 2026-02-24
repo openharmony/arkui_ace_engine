@@ -1075,6 +1075,9 @@ protected:
 
     std::string ParseCommand(const std::string& command, int& reportEventId, float& moveRatio, bool& isScrollByRatio);
     void ReportScroll(bool isJump, ScrollError error, int32_t reportEventId);
+    int32_t OnInjectionEventByRatio(const std::string& command);
+    ScrollError ScrollByRatio(bool reverse, float ratio);
+    void HandleScrollByRatio(bool isScrollByRatio, bool reverse, float ratio, int reportEventId);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();
