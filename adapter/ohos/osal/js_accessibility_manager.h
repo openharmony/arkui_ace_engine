@@ -453,13 +453,13 @@ public:
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
 
-    void UpdateAccessibilityElementInfo(
-        const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
-        Accessibility::AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline);
-
     void RegisterScreenReaderObserverCallback(
         int64_t elementId, const std::shared_ptr<AccessibilityScreenReaderObserverCallback>& callback) override;
     void DeregisterScreenReaderObserverCallback(int64_t elementId) override;
+
+    void UpdateAccessibilityElementInfo(
+        const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+        Accessibility::AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline);
 
     void DetectElementInfoFocusableThroughAncestor(
         const Accessibility::AccessibilityElementInfo& info,
@@ -477,10 +477,11 @@ public:
     bool NeedChangeToReadableNode(const RefPtr<NG::FrameNode>& curFrameNode,
         RefPtr<NG::FrameNode>& readableNode) override;
 
-    void ResetBlockedEvent();
     int32_t GetTreeId(int32_t instanceId = -1) override;
     void GetCursorPosition(const int64_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback);
+
+    void ResetBlockedEvent();
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -892,6 +893,11 @@ private:
     bool ActAccessibilityAction(Accessibility::ActionType action,
         const std::map<std::string, std::string>& actionArguments,
         RefPtr<NG::AccessibilityProperty> accessibilityProperty, const RefPtr<NG::FrameNode>& frameNode);
+
+    void ClearAccessibilityFocusState();
+
+    // Check if current pipeline context is form render
+    bool IsFormRender();
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
