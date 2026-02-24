@@ -21,7 +21,7 @@
 #include "base/utils/utils.h"
 #include "frameworks/core/accessibility/native_interface_accessibility_impl.h"
 #include "frameworks/core/accessibility/native_interface_accessibility_provider.h"
-#include "node/node_model.h"
+#include "interfaces/native/node/node_model.h"
 #include "native_type.h"
 
 #ifdef __cplusplus
