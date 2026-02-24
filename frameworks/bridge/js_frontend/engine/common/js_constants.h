@@ -160,8 +160,8 @@ ACE_EXPORT extern const char READ_KEY_LENGTH[];
 // for matrix
 ACE_EXPORT extern const char MATRIX_INIT[];
 ACE_EXPORT extern const char MATRIX_IDENTITY[];
-ACE_EXPORT extern const char MATRIX_COPY[];
 ACE_EXPORT extern const char MATRIX_TRANSFER[];
+ACE_EXPORT extern const char MATRIX_COPY[];
 ACE_EXPORT extern const char MATRIX_COMBINE[];
 ACE_EXPORT extern const char MATRIX_INVERT[];
 ACE_EXPORT extern const char MATRIX_TRANSLATE[];
