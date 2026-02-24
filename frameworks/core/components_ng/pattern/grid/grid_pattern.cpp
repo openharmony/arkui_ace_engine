@@ -31,7 +31,6 @@
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -1424,6 +1423,26 @@ void GridPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
 }
 
+void GridPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("LayoutMode: ").append(GetLayoutMode()));
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    DumpLog::GetInstance().AddDesc(std::string("RowsTemplate: ").append(property->GetRowsTemplate().value_or("")));
+    DumpLog::GetInstance().AddDesc(
+        std::string("ColumnsTemplate: ").append(property->GetColumnsTemplate().value_or("")));
+}
+
+void GridPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    DumpLog::GetInstance().AddDesc("---- Grid Component Layout Dump ----");
+    json->Put("LayoutMode", GetLayoutMode().c_str());
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    json->Put("RowsTemplate", property->GetRowsTemplate().value_or("").c_str());
+    json->Put("ColumnsTemplate", property->GetColumnsTemplate().value_or("").c_str());
+}
+
 void GridPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     json->Put("isScrollable",
@@ -1742,8 +1761,8 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("jumpIndex", info_.jumpIndex_);
     json->Put("crossCount", info_.crossCount_);
     json->Put("childrenCount", info_.childrenCount_);
-    json->Put("RowsTemplate", property->GetRowsTemplate()->c_str());
-    json->Put("ColumnsTemplate", property->GetColumnsTemplate()->c_str());
+    json->Put("RowsTemplate", property->GetRowsTemplate().value_or("").c_str());
+    json->Put("ColumnsTemplate", property->GetColumnsTemplate().value_or("").c_str());
     json->Put("CachedCount",
         property->GetCachedCount().has_value() ? std::to_string(property->GetCachedCount().value()).c_str() : "null");
     json->Put("ShowCache", std::to_string(property->GetShowCachedItemsValue(false)).c_str());
@@ -1880,6 +1899,33 @@ void GridPattern::ReportOnItemGridEvent(const std::string& event)
     result->Put("result", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+std::string GridPattern::GetLayoutMode() const
+{
+    if (userDefined_) {
+        return "custom";
+    }
+    if (irregular_) {
+        return "irregular";
+    }
+    auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
+    if (!gridLayoutProperty) {
+        return "unknown";
+    }
+    auto columnsTemplate = gridLayoutProperty->GetColumnsTemplate();
+    auto itemFillPolicy = gridLayoutProperty->GetItemFillPolicy();
+    bool setColumns = itemFillPolicy.has_value() || columnsTemplate.has_value();
+    auto rowTemplate = gridLayoutProperty->GetRowsTemplate();
+    bool setRows = rowTemplate.has_value();
+    if (!setColumns && !setRows) {
+        return "adaptive";
+    }
+    if (setColumns && setRows) {
+        return "static";
+    }
+    auto hasOptions = gridLayoutProperty->GetLayoutOptions().has_value();
+    return hasOptions ? "scrollWithOptions" : "scroll";
 }
 
 int32_t GridPattern::OnInjectionEvent(const std::string& command)
