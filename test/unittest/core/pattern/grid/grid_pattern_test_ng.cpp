@@ -352,7 +352,7 @@ HWTEST_F(GridPatternTestNg, EndHeightTest, TestSize.Level1)
     CreateDone();
 
     EXPECT_EQ(pattern_->endHeight_, 0.0f);
-    
+
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_FLOAT_EQ(pattern_->endHeight_, pattern_->GetTotalHeight() - contentOffset - HEIGHT);
 }
@@ -432,5 +432,136 @@ HWTEST_F(GridPatternTestNg, HandleBlurEventTest, TestSize.Level1)
      */
     pattern_->HandleBlurEvent();
     EXPECT_EQ(focusHub->GetFocusDependence(), FocusDependence::AUTO);
+}
+
+/**
+ * @tc.name: GetLayoutMode001
+ * @tc.desc: Test GetLayoutMode returns "adaptive" when no template is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GetLayoutMode001, TestSize.Level1)
+{
+    // Arrange: Create Grid without any template
+    GridModelNG model = CreateGrid();
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    // Act & Assert
+    EXPECT_EQ(pattern_->GetLayoutMode(), "adaptive");
+}
+
+/**
+ * @tc.name: GetLayoutMode002
+ * @tc.desc: Test GetLayoutMode returns "static" when both row and column templates are set
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GetLayoutMode002, TestSize.Level1)
+{
+    // Arrange: Create Grid with both templates
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsTemplate("1fr 1fr");
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    // Act & Assert
+    EXPECT_EQ(pattern_->GetLayoutMode(), "static");
+}
+
+/**
+ * @tc.name: GetLayoutMode003
+ * @tc.desc: Test GetLayoutMode returns "custom" when userDefined is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GetLayoutMode003, TestSize.Level1)
+{
+    int32_t crossCount = 2;
+    GridLayoutOptions options;
+    auto onGetStartIndexByOffset = [crossCount](float offset) -> GridStartLineInfo {
+        int32_t line = offset / static_cast<int32_t>(ITEM_MAIN_SIZE);
+        float startOffset = std::fmod(offset, ITEM_MAIN_SIZE);
+        return {
+            .startIndex = line * crossCount, .startLine = line, .startOffset = 0.f - startOffset, .totalOffset = offset
+        };
+    };
+    options.getStartIndexByOffset = std::move(onGetStartIndexByOffset);
+
+    auto onGetStartIndexByIndex = [crossCount](int32_t targetIndex) -> GridStartLineInfo {
+        int32_t line = targetIndex / crossCount;
+        return { .startIndex = line * crossCount,
+            .startLine = line,
+            .startOffset = 0.0f,
+            .totalOffset = line * ITEM_MAIN_SIZE };
+    };
+    options.getStartIndexByIndex = std::move(onGetStartIndexByIndex);
+
+    // Arrange: Create Grid with custom layout
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(options);
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    // Act & Assert
+    EXPECT_EQ(pattern_->GetLayoutMode(), "custom");
+}
+
+/**
+ * @tc.name: GetLayoutMode004
+ * @tc.desc: Test GetLayoutMode returns "irregular" when irregular layout is used
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GetLayoutMode004, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize { return { .columns = 2, .rows = 2 }; };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    // Arrange: Create Grid with irregular layout
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    // Act & Assert
+    EXPECT_EQ(pattern_->GetLayoutMode(), "irregular");
+}
+
+/**
+ * @tc.name: GetLayoutMode005
+ * @tc.desc: Test GetLayoutMode returns "scroll" when only column template is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GetLayoutMode005, TestSize.Level1)
+{
+    // Arrange: Create Grid with only column template (scrollable layout)
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    // Act & Assert
+    EXPECT_EQ(pattern_->GetLayoutMode(), "scroll");
+}
+
+/**
+ * @tc.name: GetLayoutMode006
+ * @tc.desc: Test GetLayoutMode returns "scrollWithOptions" when column template and layout options are set
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GetLayoutMode006, TestSize.Level1)
+{
+    // Arrange: Create Grid with column template and layout options
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    GridLayoutOptions options;
+    options.regularSize = { 1, 1 };
+    model.SetLayoutOptions(options);
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    // Act & Assert
+    EXPECT_EQ(pattern_->GetLayoutMode(), "scrollWithOptions");
 }
 } // namespace OHOS::Ace::NG

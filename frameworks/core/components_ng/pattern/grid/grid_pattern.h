@@ -216,6 +216,8 @@ public:
     float EstimateHeight() const;
     float GetAverageHeight() const;
 
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void GetEventDumpInfo() override;
@@ -331,6 +333,8 @@ private:
 
     std::string GetIrregularIndexesString() const;
     float GetOffsetWithLimit(float offset) const override;
+
+    std::string GetLayoutMode() const;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
