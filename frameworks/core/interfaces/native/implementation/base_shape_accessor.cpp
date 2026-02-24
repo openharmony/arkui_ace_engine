@@ -19,10 +19,10 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseShapeAccessor {
-void DestroyPeerImpl(Ark_BaseShape peer)
+void DestroyPeerImpl(Ark_arkui_component_idlize_BaseShape peer)
 {
 }
-Ark_BaseShape ConstructImpl()
+Ark_arkui_component_idlize_BaseShape ConstructImpl()
 {
     return {};
 }
@@ -30,18 +30,18 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_BaseShape WidthImpl(Ark_BaseShape peer,
-                        const Ark_Length* width)
+Ark_arkui_component_idlize_BaseShape WidthImpl(Ark_arkui_component_idlize_BaseShape peer,
+                                               const Ark_Length* width)
 {
     return {};
 }
-Ark_BaseShape HeightImpl(Ark_BaseShape peer,
-                         const Ark_Length* height)
+Ark_arkui_component_idlize_BaseShape HeightImpl(Ark_arkui_component_idlize_BaseShape peer,
+                                                const Ark_Length* height)
 {
     return {};
 }
-Ark_BaseShape SizeImpl(Ark_BaseShape peer,
-                       const Ark_SizeOptions* size)
+Ark_arkui_component_idlize_BaseShape SizeImpl(Ark_arkui_component_idlize_BaseShape peer,
+                                              const Ark_SizeOptions* size)
 {
     return {};
 }

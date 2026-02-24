@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,21 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkContainerSpanPeer, ContainerSpanAttribute } from "./component/containerSpan"
-import { int32 } from "@koalaui/common"
-import { TextBackgroundStyle } from "./component/span"
-import { ModifierState } from "./CommonModifier"
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkContainerSpanPeer, ContainerSpanAttribute } from './component/containerSpan'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { TextBackgroundStyle } from './component/span'
 export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeModifier<ContainerSpanAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    private _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -35,25 +40,27 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
     applyFocusedAttribute(instance: ContainerSpanAttribute): void { }
     applyDisabledAttribute(instance: ContainerSpanAttribute): void { }
     applySelectedAttribute(instance: ContainerSpanAttribute): void { }
-    _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
-    applyModifierPatch(node: PeerNode): void {
+    public _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
+    applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkContainerSpanPeer;
-        if (this._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textBackgroundStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkContainerSpanPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setTextBackgroundStyleAttribute((this._textBackgroundStyle_0_0value as TextBackgroundStyle | undefined));
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setTextBackgroundStyleAttribute((undefined as TextBackgroundStyle | undefined));
                 }
             }
@@ -61,12 +68,15 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
     }
     mergeModifier(modifier: ContainerSpanModifier): void {
         this._state = modifier._state;
-        if (modifier._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textBackgroundStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.textBackgroundStyle(modifier._textBackgroundStyle_0_0value);
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: ContainerSpanModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
+                    this.textBackgroundStyle((modifier._textBackgroundStyle_0_0value as TextBackgroundStyle | undefined));
                     break;
                 }
                 default: {
@@ -76,18 +86,16 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
         }
     }
     textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
-        if (((this._textBackgroundStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._textBackgroundStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

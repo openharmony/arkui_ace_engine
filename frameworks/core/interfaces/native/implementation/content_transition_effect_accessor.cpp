@@ -41,14 +41,12 @@ Ark_ContentTransitionEffect GetIDENTITYImpl()
     peer->type_ = ContentTransitionType::IDENTITY;
     return peer;
 }
-void SetIDENTITYImpl(Ark_ContentTransitionEffect IDENTITY) {}
 Ark_ContentTransitionEffect GetOPACITYImpl()
 {
     ContentTransitionEffectPeer* peer = PeerUtils::CreatePeer<ContentTransitionEffectPeer>();
     peer->type_ = ContentTransitionType::OPACITY;
     return peer;
 }
-void SetOPACITYImpl(Ark_ContentTransitionEffect OPACITY) {}
 } // namespace ContentTransitionEffectAccessor
 const GENERATED_ArkUIContentTransitionEffectAccessor* GetContentTransitionEffectAccessor()
 {
@@ -57,9 +55,7 @@ const GENERATED_ArkUIContentTransitionEffectAccessor* GetContentTransitionEffect
         ContentTransitionEffectAccessor::ConstructImpl,
         ContentTransitionEffectAccessor::GetFinalizerImpl,
         ContentTransitionEffectAccessor::GetIDENTITYImpl,
-        ContentTransitionEffectAccessor::SetIDENTITYImpl,
         ContentTransitionEffectAccessor::GetOPACITYImpl,
-        ContentTransitionEffectAccessor::SetOPACITYImpl,
     };
     return &ContentTransitionEffectAccessorImpl;
 }

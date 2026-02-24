@@ -1398,7 +1398,7 @@ void SelectPattern::UpdateComponentColor(const Color& color, const SelectColorTy
     CHECK_NULL_VOID(pipelineContext);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (selectColorType) {
             case SelectColorType::FONT_COLOR:
                 SetFontColor(color);

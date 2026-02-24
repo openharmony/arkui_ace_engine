@@ -389,7 +389,7 @@ ArkUINativeModuleValue RichEditorBridge::BindSelectionMenu(ArkUIRuntimeCallInfo*
         responseType = static_cast<NG::TextResponseType>(fourthArg->Uint32Value(vm));
     }
     std::function<void(void)> buildFunc = nullptr;
-    if (!builderFunc.IsEmpty() || builderFunc->IsNull() || builderFunc->IsUndefined()) {
+    if (!builderFunc.IsEmpty()) {
         buildFunc = [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, builderFunc)]() {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -2779,7 +2779,7 @@ ArkUINativeModuleValue RichEditorBridge::SetCustomKeyboard(ArkUIRuntimeCallInfo*
             if (!nodeptr.IsEmpty()) {
                 auto* node = nodeptr->ToNativePointer(vm)->Value();
                 nodeModifiers->getRichEditorModifier()->setRichEditorCustomKeyboard(
-                    nativeNode, reinterpret_cast<ArkUINodeHandle>(node), supportAvoidance);
+                    nativeNode, reinterpret_cast<ArkUINodeHandle>(node), supportAvoidance, false);
                 return panda::JSValueRef::Undefined(vm);
             }
         }
@@ -2799,12 +2799,8 @@ ArkUINativeModuleValue RichEditorBridge::SetCustomKeyboardJS(ArkUIRuntimeCallInf
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     bool supportAvoidance = false;
     Local<JSValueRef> isSupportAvoidanceArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    if (isSupportAvoidanceArg->IsObject(vm)) {
-        auto paramObject = isSupportAvoidanceArg->ToObject(vm);
-        auto isSupportAvoidance = ArkTSUtils::GetProperty(vm, paramObject, "supportAvoidance");
-        if (!isSupportAvoidance->IsNull() && isSupportAvoidance->IsBoolean()) {
-            supportAvoidance = isSupportAvoidance->ToBoolean(vm)->Value();
-        }
+    if (isSupportAvoidanceArg->IsBoolean()) {
+        supportAvoidance = isSupportAvoidanceArg->ToBoolean(vm)->Value();
     }
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
@@ -2829,7 +2825,7 @@ ArkUINativeModuleValue RichEditorBridge::SetCustomKeyboardJS(ArkUIRuntimeCallInf
                 ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
             };
             nodeModifiers->getRichEditorModifier()->setRichEditorCustomKeyboard(
-                nativeNode, nullptr, supportAvoidance);
+                nativeNode, nullptr, supportAvoidance, true);
             nodeModifiers->getRichEditorModifier()->setRichEditorCustomKeyboardFunc(
                 nativeNode, reinterpret_cast<void*>(&callback), supportAvoidance);
             return panda::JSValueRef::Undefined(vm);
@@ -2843,7 +2839,7 @@ ArkUINativeModuleValue RichEditorBridge::SetCustomKeyboardJS(ArkUIRuntimeCallInf
                 nodeModifiers->getRichEditorModifier()->setRichEditorCustomKeyboardFunc(
                     nativeNode, nullptr, supportAvoidance);
                 nodeModifiers->getRichEditorModifier()->setRichEditorCustomKeyboard(
-                    nativeNode, reinterpret_cast<ArkUINodeHandle>(node), supportAvoidance);
+                    nativeNode, reinterpret_cast<ArkUINodeHandle>(node), supportAvoidance, true);
                 return panda::JSValueRef::Undefined(vm);
             }
         }

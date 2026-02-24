@@ -18,6 +18,14 @@ function nullOrUndef(value: unknown): boolean {
   return value === null || value === undefined;
 }
 
+function runNoThrow<T>(fn: () => T): T | undefined {
+  try {
+    return fn();
+  } catch {
+    return undefined;
+  }
+}
+
 class DataCoder {
   // Tag to detect payload format
   public static readonly FORMAT_TAG = 'JSON2';
@@ -28,7 +36,11 @@ class DataCoder {
   /**
    * Serialize an object to a JSON2
    */
-  public static stringify<T>(value: T): string {
+  public static stringify<T>(value: T, forceLegacyFormat: boolean = false): string {
+    if (forceLegacyFormat) {
+      return JSONCoder.stringify(value);
+    }
+
     const origValue = ObserveV2.IsMakeObserved(value)
       ? UIUtilsImpl.instance().getTarget(value)
       : value;
@@ -76,7 +88,7 @@ class DataCoder {
     try {
       if (!nullOrUndef(source) && globalThis.isSendable(source)) {
         // The root is Sendable; only properties are restored
-        this.restoreObject(origTarget, source, {});
+        this.restoreObject(origTarget, source, { factory });
       } else {
         const dst = { root: origTarget };
         const src = { root: source };
@@ -235,18 +247,18 @@ class DataCoder {
     }
 
     if (['string','number','boolean','bigint'].includes(typeof srcVal)) {
-      target[targetProp] = srcVal;
+      runNoThrow(() => target[targetProp] = srcVal);
       return;
     }
 
     // try to restore the Date without replacing the existing instance
     if (srcVal instanceof Date && tgtVal instanceof Date) {
-      target[targetProp].setTime(srcVal.getTime())
+      runNoThrow(() => target[targetProp].setTime(srcVal.getTime()));
       return;
     }
 
     if ([Boolean, Date, Number, String].includes(srcVal?.constructor)) {
-      target[targetProp] = srcVal;
+      runNoThrow(() => target[targetProp] = srcVal);
       return;
     }
 
@@ -257,7 +269,7 @@ class DataCoder {
 
     if (!nullOrUndef(srcVal) && globalThis.isSendable(srcVal)) {
       this.throwIfNotSendable(tgtVal);
-      target[targetProp] = srcVal;
+      runNoThrow(() => target[targetProp] = srcVal);
       return;
     }
 
@@ -277,19 +289,19 @@ class DataCoder {
     }
 
     if (nullOrUndef(srcVal)) {
-      target[targetProp] = srcVal;
+      runNoThrow(() => target[targetProp] = srcVal);
       return;
     }
 
     if (nullOrUndef(tgtVal) && opts.factory) {
       const type = opts.factory(srcVal);
-      target[targetProp] = type ? new type() : {};
+      runNoThrow(() => target[targetProp] = type ? new type() : {});
       this.restoreObject(target[targetProp], srcVal, {});
       return;
     }
 
     if (tgtVal === undefined) {
-      target[targetProp] = srcVal;
+      runNoThrow(() => target[targetProp] = srcVal);
       return;
     }
 
@@ -299,7 +311,7 @@ class DataCoder {
 
     if (tgtVal.constructor !== srcVal.constructor && opts.factory !== undefined) {
       const type = opts.factory(srcVal)
-      target[targetProp] = type ? new type() : {};
+      runNoThrow(() => target[targetProp] = type ? new type() : {});
       this.restoreObject(target[targetProp], srcVal, {});
       return;
     }
@@ -311,40 +323,45 @@ class DataCoder {
   private static throwIfNotInstanceOf(target: unknown, clazz: new (...args: unknown[]) => unknown): void {
     if (target instanceof clazz === false) {
       const type = target?.constructor?.name ?? typeof target;
-      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The class of target (${type}) mismatches '${clazz.name}'`);
+      const msg = `The class of target (${type}) mismatches '${clazz.name}'`;
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, msg);
     }
   }
 
   // Ensure target has given type
   private static throwIfNotTypeOf(target: unknown, type: string): void {
     if (typeof target !== type) {
-      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The type of target ('${typeof target}') mismatches '${type}'`);
+      const msg = `The type of target ('${typeof target}') mismatches '${type}'`;
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, msg);
     }
   }
 
   // Ensure target is Sendable
   private static throwIfNotSendable(target: unknown): void {
     if (target != null && globalThis.isSendable(target) === false) {
-      const type = target.constructor?.name ?? typeof target
-      // todo: why need to check twice
-      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, `Not supported type! The target (${type}) is not @Sendable`);
+      const type = target.constructor?.name ?? typeof target;
+      const msg = `Not supported type! The target (${type}) is not @Sendable`;
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, msg);
     }
   }
 
   // Ensure value is not collection
   private static throwIfCollection(value: unknown): void {
     if ([Array, Map, Set, SendableArray, SendableMap, SendableSet].some(clazz => value instanceof clazz)) {
-      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, `Not supported type! Array, Map, Set, or collections.Array/Map/Set cannot be used as collection items`);
+      const msg = `Not supported type! Array, Map, Set, or collections.Array/Map/Set cannot be used as collection items`;
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, msg);
     }
   }
 
   private static throwNoFactory<T>(targetProp: string): void {
-    throw new BusinessError(PERSISTENCE_V2_LACK_TYPE, `Miss @Type in object defined, the property name is ${targetProp}`);
+    const msg = `Miss @Type in object defined, the property name is ${targetProp}`;
+    throw new BusinessError(PERSISTENCE_V2_LACK_TYPE, msg);
   }
 
   // todo: need check error message
   private static throwInvalidSubCreatorResult(): never {
-    throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_INVALID_DEFAULT_CREATOR, `The defaultSubCreator returned invalid value`);
+    const msg = `The defaultSubCreator returned invalid value`;
+    throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_INVALID_DEFAULT_CREATOR, msg);
   }
 
 }

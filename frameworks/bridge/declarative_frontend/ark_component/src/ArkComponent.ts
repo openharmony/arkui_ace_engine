@@ -2187,6 +2187,21 @@ class OnFocusModifier extends ModifierWithKey<VoidCallback> {
   }
 }
 
+declare type OnNeedSoftkeyboardCallback = () => boolean;
+class OnNeedSoftkeyboardModifier extends ModifierWithKey<OnNeedSoftkeyboardCallback> {
+  constructor(value: OnNeedSoftkeyboardCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onNeedSoftkeyboard');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnNeedSoftkeyboard(node);
+    } else {
+      getUINativeModule().common.setOnNeedSoftkeyboard(node, this.value);
+    }
+  }
+}
+
 class OnBlurModifier extends ModifierWithKey<VoidCallback> {
   constructor(value: VoidCallback) {
     super(value);
@@ -4261,6 +4276,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   private _onKeyPreIme: Callback<KeyEvent, boolean> = null;
   private _onKeyEventDispatch: Callback<KeyEvent, boolean> = null;
   private _onFocus: VoidCallback = null;
+  private _onNeedSoftkeyboard: OnNeedSoftkeyboardCallback = null;
   private _onBlur: VoidCallback = null;
   private _onHover: HoverEventCallback = null;
   private _onHoverMove: HoverMoveEventCallback = null;
@@ -5037,6 +5053,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   onFocus(event: () => void): this {
     this._onFocus = event;
     modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
+    return this;
+  }
+
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback: () => boolean): this {
+    this._onNeedSoftkeyboard = onNeedSoftkeyboardCallback;
+    modifierWithKey(this._modifiersWithKeys, OnNeedSoftkeyboardModifier.identity, OnNeedSoftkeyboardModifier, onNeedSoftkeyboardCallback);
     return this;
   }
 

@@ -38,7 +38,7 @@ SnapshotOptions Convert(const Ark_SnapshotOptions& src)
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_arkui_componentSnapshotAccessor {
 void GetImpl(const Ark_String* id,
-             const AsyncCallback_image_PixelMap_Void* callback,
+             const synthetic_AsyncCallback_image_PixelMap_Void* callback,
              const Opt_SnapshotOptions* options)
 {
     CHECK_NULL_VOID(id);

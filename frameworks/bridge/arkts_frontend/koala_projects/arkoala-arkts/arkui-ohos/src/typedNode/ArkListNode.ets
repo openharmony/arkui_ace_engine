@@ -47,6 +47,7 @@ import {
   CacheCountInfo,
   ScrollSnapAnimationSpeed
 } from '../framework';
+import { hookListChildrenMainSizeImpl } from '#handwritten'
 import { Resource } from 'global.resource'
 export class ArkListNode extends ArkScrollableNode implements ListAttribute {
     constructParam(...param: Object[]): this {
@@ -182,9 +183,11 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         return this
     }
     childrenMainSize(value: ChildrenMainSize | undefined): this {
-        const value_casted = value as (ChildrenMainSize | undefined)
-        this.getPeer()?.setChildrenMainSizeAttribute(value_casted);
-        this.markDirty()
+        if (this.getPeer()) {
+            const value_casted = value as (ChildrenMainSize | undefined)
+            hookListChildrenMainSizeImpl(this.getPeer()!, value_casted)
+            this.markDirty()
+        }
         return this
     }
     maintainVisibleContentPosition(value: boolean | undefined): this {

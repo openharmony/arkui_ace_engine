@@ -67,11 +67,11 @@ public:
 };
 
 /**
- * @tc.name: PxTest
+ * @tc.name: pxTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LengthMetricsAccessorTest, PxTest, TestSize.Level1)
+HWTEST_F(LengthMetricsAccessorTest, pxTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : testFixturesDimensionWithPercentAndNegativeValues) {
         auto pointer = reinterpret_cast<LengthMetricsPeer*>(accessor_->px(&value));
@@ -83,11 +83,11 @@ HWTEST_F(LengthMetricsAccessorTest, PxTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: VpTest
+ * @tc.name: vpTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LengthMetricsAccessorTest, VpTest, TestSize.Level1)
+HWTEST_F(LengthMetricsAccessorTest, vpTest, TestSize.Level1)
 {
     for (float number : testFixtureFloatValues) {
         Ark_Number value = Converter::ArkValue<Ark_Number>(number);
@@ -100,11 +100,11 @@ HWTEST_F(LengthMetricsAccessorTest, VpTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: FpTest
+ * @tc.name: fpTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LengthMetricsAccessorTest, FpTest, TestSize.Level1)
+HWTEST_F(LengthMetricsAccessorTest, fpTest, TestSize.Level1)
 {
     for (float number : testFixtureFloatValues) {
         Ark_Number value = Converter::ArkValue<Ark_Number>(number);
@@ -117,11 +117,11 @@ HWTEST_F(LengthMetricsAccessorTest, FpTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: PercentTest
+ * @tc.name: percentTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LengthMetricsAccessorTest, PercentTest, TestSize.Level1)
+HWTEST_F(LengthMetricsAccessorTest, percentTest, TestSize.Level1)
 {
     for (float number : testFixtureFloatValues) {
         Ark_Number value = Converter::ArkValue<Ark_Number>(number);
@@ -134,11 +134,11 @@ HWTEST_F(LengthMetricsAccessorTest, PercentTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: LpxTest
+ * @tc.name: lpxTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LengthMetricsAccessorTest, LpxTest, TestSize.Level1)
+HWTEST_F(LengthMetricsAccessorTest, lpxTest, TestSize.Level1)
 {
     for (float number : testFixtureFloatValues) {
         Ark_Number value = Converter::ArkValue<Ark_Number>(number);
@@ -151,11 +151,11 @@ HWTEST_F(LengthMetricsAccessorTest, LpxTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: ResourceTest
+ * @tc.name: resourceTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LengthMetricsAccessorTest, ResourceTest, TestSize.Level1)
+HWTEST_F(LengthMetricsAccessorTest, resourceTest, TestSize.Level1)
 {
     for (auto& [num_id, str_id, expected] : resourceInitTable) {
         Converter::ConvContext ctx;
@@ -178,11 +178,11 @@ HWTEST_F(LengthMetricsAccessorTest, ResourceTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetUnitTest
+ * @tc.name: getUnitTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LengthMetricsAccessorTest, GetUnitTest, TestSize.Level1)
+HWTEST_F(LengthMetricsAccessorTest, getUnitTest, TestSize.Level1)
 {
     for (auto& [value, expected] : unitTestPlan) {
         peer_->value.SetUnit(value);
@@ -192,11 +192,11 @@ HWTEST_F(LengthMetricsAccessorTest, GetUnitTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetUnitTest
+ * @tc.name: setUnitTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LengthMetricsAccessorTest, SetUnitTest, TestSize.Level1)
+HWTEST_F(LengthMetricsAccessorTest, setUnitTest, TestSize.Level1)
 {
     for (auto& [expected, value] : unitTestPlan) {
         accessor_->setUnit(peer_, value);
@@ -206,11 +206,11 @@ HWTEST_F(LengthMetricsAccessorTest, SetUnitTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetValueTest
+ * @tc.name: getValueTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LengthMetricsAccessorTest, GetValueTest, TestSize.Level1)
+HWTEST_F(LengthMetricsAccessorTest, getValueTest, TestSize.Level1)
 {
     for (auto value : testFixtureFloatValues) {
         peer_->value.SetValue(value);
@@ -220,11 +220,11 @@ HWTEST_F(LengthMetricsAccessorTest, GetValueTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetValueTest
+ * @tc.name: setValueTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LengthMetricsAccessorTest, SetValueTest, TestSize.Level1)
+HWTEST_F(LengthMetricsAccessorTest, setValueTest, TestSize.Level1)
 {
     for (auto& [input, expected, value] : testFixtureNumberFloatAnythingValidValues) {
         accessor_->setValue(peer_, &value);

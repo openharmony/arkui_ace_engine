@@ -1229,7 +1229,8 @@ public:
     {
         return subtreeIgnoreCount_ != 0;
     }
-    void GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name);
+    void GetNodeListByComponentName(
+        int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name, bool onlyVisible);
 
     virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
     void UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver);

@@ -60,7 +60,7 @@ public:
 
     void ApplyTokenTheme(const TokenTheme& theme) override
     {
-        if (const auto& colors = theme.Colors(); colors) {
+        if (auto colors = theme.Colors(); colors) {
             color_ = colors->CompDivider();
             return;
         }

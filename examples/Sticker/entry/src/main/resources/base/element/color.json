@@ -1,0 +1,24 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "sticker_bg",
+      "value": "#F1F3F5"
+    },
+    {
+      "name": "sticker_canvas_bg",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "sticker_primary",
+      "value": "#007DFF"
+    },
+    {
+      "name": "sticker_border",
+      "value": "#E3E3E3"
+    }
+  ]
+}

@@ -37,9 +37,9 @@ build_component_ng("qrcode_pattern_ng") {
     public_deps = [ "//foundation/arkui/napi:ace_napi" ]
   } else {
     external_deps = [ "qrcodegen:ace_engine_qrcode" ]
-    ark_sources += [
-      "bridge/qrcode_static_modifier.cpp",
-    ]
+    if (!ace_engine_feature_wearable) {
+        ark_sources += [ "bridge/qrcode_static_modifier.cpp" ]
+    }
   }
 }
 

@@ -76,6 +76,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "interfaces/napi/kits/observer/ui_observer.h"
 
+#include "ability_manager_client.h"
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
@@ -1651,7 +1652,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
                         OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
                     CHECK_NULL_VOID(abilityContext);
                     LOGI("Start ability: %{private}s", address.c_str());
-                    AAFwk::Want want;
+                    AAFwk::Want want; // hyperlink do not support form, never come here
                     want.AddEntity(Want::ENTITY_BROWSER);
                     want.SetUri(address);
                     want.SetAction(ACTION_VIEWDATA);
@@ -2054,7 +2055,11 @@ RefPtr<Platform::AceContainer> UIContentImpl::CreateContainer(
                 want.AddEntity(Want::ENTITY_BROWSER);
                 want.SetUri(address);
                 want.SetAction(ACTION_VIEWDATA);
-                abilityContext->StartAbility(want, REQUEST_CODE);
+                int32_t errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(
+                    want, sharedContext->GetToken(), REQUEST_CODE);
+                if (!errorCode) {
+                    LOGW("UIContentImpl StartAbility fail, errorCode: %{public}i", errorCode);
+                }
             }),
         false, false, useNewPipe);
     return container;
@@ -2405,23 +2410,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         want.AddEntity(Want::ENTITY_BROWSER);
         want.SetAction(ACTION_SEARCH);
         want.SetParam(PARAM_QUERY_KEY, queryWord);
-        if (container->IsUIExtensionWindow()) {
-            auto uiExtensionContext =
-                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
-            CHECK_NULL_VOID(uiExtensionContext);
-            uiExtensionContext->StartAbility(want, REQUEST_CODE);
-            return;
-        }
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        if (abilityContext) {
-            abilityContext->StartAbility(want, REQUEST_CODE);
-            return;
-        }
-        auto serviceContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ServiceExtensionContext>(sharedContext);
-        if (serviceContext) {
-            serviceContext->StartAbility(want);
+        int32_t errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(
+            want, sharedContext->GetToken(), REQUEST_CODE);
+        if (!errorCode) {
+            LOGW("UIContentImpl AbilityOnSearch fail, errorCode: %{public}i", errorCode);
         }
     });
 
@@ -2440,17 +2432,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                 want.SetParam(param.first, param.second);
             }
             want.SetParam(ACTION_PARAM, ACTION_CALENDAR);
-            if (container->IsUIExtensionWindow()) {
-                auto uiExtensionContext =
-                    OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
-                CHECK_NULL_VOID(uiExtensionContext);
-                uiExtensionContext->StartAbility(want, REQUEST_CODE);
-                return;
+            int32_t errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(
+                want, sharedContext->GetToken(), REQUEST_CODE);
+            if (!errorCode) {
+                LOGW("UIContentImpl AbilityOnCalendar fail, errorCode: %{public}i", errorCode);
             }
-            auto abilityContext =
-                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-            CHECK_NULL_VOID(abilityContext);
-            abilityContext->StartAbility(want, REQUEST_CODE);
         });
 
     container->SetAbilityOnInstallAppInStore([context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(
@@ -2464,30 +2450,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         auto urlPrefix = NG::ExpandedMenuPluginLoader::GetInstance().GetStoreUrlFront();
         auto url = urlPrefix + appName;
         want.SetUri(url);
-        if (container->IsUIExtensionWindow()) {
-            auto uiExtensionContext =
-                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
-            CHECK_NULL_VOID(uiExtensionContext);
-            uiExtensionContext->StartAbility(want, REQUEST_CODE);
-            return;
+        int32_t errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(
+            want, sharedContext->GetToken(), REQUEST_CODE);
+        if (!errorCode) {
+            LOGW("UIContentImpl AbilityOnInstallAppInStore fail, errorCode: %{public}i", errorCode);
         }
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
-        abilityContext->StartAbility(want, REQUEST_CODE);
-    });
-
-    container->SetOpenLinkOnMapSearch([context = context_](const std::string& address) {
-        auto sharedContext = context.lock();
-        CHECK_NULL_VOID(sharedContext);
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
-        AAFwk::Want want;
-        // In practical use, a prefix is required; this function is currently not in use as its logic has been reverted.
-        auto url = address;
-        want.SetUri(url);
-        abilityContext->OpenLink(want, REQUEST_CODE);
     });
 
     container->SetAbilityOnJumpBrowser([context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(
@@ -2501,17 +2468,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         want.SetUri(address);
         auto appName = NG::ExpandedMenuPluginLoader::GetInstance().GetAPPName(TextDataDetectType::URL);
         want.SetBundle(appName);
-        if (container->IsUIExtensionWindow()) {
-            auto uiExtensionContext =
-                OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(sharedContext);
-            CHECK_NULL_VOID(uiExtensionContext);
-            uiExtensionContext->StartAbility(want, REQUEST_CODE);
-            return;
+        int32_t errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(
+            want, sharedContext->GetToken(), REQUEST_CODE);
+        if (!errorCode) {
+            LOGW("UIContentImpl AbilityOnJumpBrowser fail, errorCode: %{public}i", errorCode);
         }
-        auto abilityContext =
-            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-        CHECK_NULL_VOID(abilityContext);
-        abilityContext->StartAbility(want, REQUEST_CODE);
     });
 
     if (window_->IsDecorEnable()) {
@@ -3295,7 +3256,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfiguration, name:%{public}s",
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
         },
-        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
+        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration",
+        PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
 }
 
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
@@ -3327,7 +3289,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfiguration, name:%{public}s", instanceId,
                 bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
         },
-        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfigurationWithResMgr");
+        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfigurationWithResMgr",
+        PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
 }
 
 void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
@@ -4449,6 +4412,26 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
                 context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                 }), false, true);
+        }
+        auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+        if (aceContainer) {
+            aceContainer->SetAbilityOnSearch(
+                [context = context_, containerWeak = AceType::WeakClaim(AceType::RawPtr(container))](
+                    const std::string& queryWord) {
+                auto sharedContext = context.lock();
+                CHECK_NULL_VOID(sharedContext);
+                auto container = containerWeak.Upgrade();
+                CHECK_NULL_VOID(container);
+                AAFwk::Want want;
+                want.AddEntity(Want::ENTITY_BROWSER);
+                want.SetAction(ACTION_SEARCH);
+                want.SetParam(PARAM_QUERY_KEY, queryWord);
+                int32_t errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(
+                    want, sharedContext->GetToken(), REQUEST_CODE);
+                if (!errorCode) {
+                    LOGW("UIContentImpl AbilityOnSearch fail, errorCode: %{public}i", errorCode);
+                }
+            });
         }
 #endif
     }
@@ -6516,14 +6499,15 @@ void UIContentImpl::SetXComponentDisplayConstraintEnabled(bool isEnable)
 void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     auto getStateMgmtInfoCallback = [weakTaskExecutor = taskExecutor](const std::string& componentName,
-                                        const std::string& propertyName, const std::string& jsonPath) {
+                                        const std::string& propertyName, const std::string& jsonPath,
+                                        bool onlyVisible) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [componentName, propertyName, jsonPath]() {
+            [componentName, propertyName, jsonPath, onlyVisible]() {
                 auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
-                pipeline->GetStateMgmtInfo(componentName, propertyName, jsonPath);
+                pipeline->GetStateMgmtInfo(componentName, propertyName, jsonPath, onlyVisible);
             },
             TaskExecutor::TaskType::UI, "UiSessionGetStateMgmtInfo");
     };

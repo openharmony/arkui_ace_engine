@@ -105,14 +105,14 @@ HWTEST_F(TextInputModifierTest2, setAutoCapitalizationModeTest, TestSize.Level1)
     ASSERT_TRUE(modifier_->setAutoCapitalizationMode);
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE) << "Default value is: " << resultStr
-                                        << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_AUTOCAPITALIZATION_MODE_DEFAULT_VALUE))
+                                        << "Method: setAutoCapitalizationMode, attribute: keyboardAppearance";
     auto checkValue = [this](const std::string& input, const std::string& expectedStr,
                           const Opt_AutoCapitalizationMode& value) {
         modifier_->setAutoCapitalizationMode(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTOCAPITALIZATION_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Input value is: " << input
                                         << ", method: setAutoCapitalizationMode, attribute: keyboardAppearance";
     };
     for (auto& [input, value, expected] : testFixtureEnumAutoCapitalizationModeTestPlan) {
@@ -190,11 +190,11 @@ HWTEST_F(TextInputModifierTest2, setOnPasteTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCustomKeyboard_CustomNodeBuilder
+ * @tc.name: setCustomKeyboardTestCustomNodeBuilder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.Level1)
+HWTEST_F(TextInputModifierTest2, setCustomKeyboardTestCustomNodeBuilder, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCustomKeyboard, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -213,11 +213,11 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.L
 }
 
 /*
- * @tc.name: setCustomKeyboard_CustomNodeBuilder_KeyboardOptions
+ * @tc.name: setCustomKeyboardTestCustomNodeBuilderKeyboardOptions
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOptions, TestSize.Level1)
+HWTEST_F(TextInputModifierTest2, setCustomKeyboardTestCustomNodeBuilderKeyboardOptions, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setCustomKeyboard, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -239,11 +239,11 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
 }
 
 /**
- * @tc.name: OnSubmitTest
+ * @tc.name: setOnSubmitTestOnSubmit
  * @tc.desc: setOnSubmit test
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest2, OnSubmitTest, TestSize.Level1)
+HWTEST_F(TextInputModifierTest2, setOnSubmitTestOnSubmit, TestSize.Level1)
 {
     static const int expectedResId = 123;
     static const std::u16string testValue = u"string text";

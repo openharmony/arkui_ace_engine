@@ -61,7 +61,7 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc > 0 && ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_object)) {
         NG::JsArcSwiperController* jsController = nullptr;
-        napi_unwrap(env, argv[0], (void**)&jsController);
+        napi_unwrap_s(env, argv[0], &ARC_SWIPER_CONTROLLER_TYPE_TAG, (void**)&jsController);
         if (jsController) {
             jsController->SetController(controller);
         }
@@ -95,7 +95,7 @@ SwiperArcDotParameters GetArcDotIndicatorInfo(napi_env env, napi_value value)
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(swiperIndicatorTheme, swiperParameters);
     NG::JsArcSwiperIndicator* indicator = nullptr;
-    napi_unwrap(env, value, (void**)&indicator);
+    napi_unwrap_s(env, value, &ARC_SWIPER_INDICATOR_TYPE_TAG, (void**)&indicator);
 
     // parse arcDirection
     swiperParameters.arcDirection = SwiperArcDirection::SIX_CLOCK_DIRECTION;
@@ -458,7 +458,7 @@ napi_value ShowNext(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, NULL));
     NG::JsArcSwiperController* controller = nullptr;
-    napi_unwrap(env, thisVar, (void**)&controller);
+    napi_unwrap_s(env, thisVar, &ARC_SWIPER_CONTROLLER_TYPE_TAG, (void**)&controller);
     napi_value objectValue = ExtNapiUtils::CreateNull(env);
     CHECK_NULL_RETURN(controller, objectValue);
     controller->ShowNext();
@@ -470,7 +470,7 @@ napi_value ShowPrevious(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, NULL));
     NG::JsArcSwiperController* controller = nullptr;
-    napi_unwrap(env, thisVar, (void**)&controller);
+    napi_unwrap_s(env, thisVar, &ARC_SWIPER_CONTROLLER_TYPE_TAG, (void**)&controller);
     napi_value objectValue = ExtNapiUtils::CreateNull(env);
     CHECK_NULL_RETURN(controller, objectValue);
     controller->ShowPrevious();
@@ -484,7 +484,7 @@ napi_value FinishAnimation(napi_env env, napi_callback_info info)
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NG::JsArcSwiperController* controller = nullptr;
-    napi_unwrap(env, thisVal, (void**)&controller);
+    napi_unwrap_s(env, thisVal, &ARC_SWIPER_CONTROLLER_TYPE_TAG, (void**)&controller);
     napi_value objectValue = ExtNapiUtils::CreateNull(env);
     CHECK_NULL_RETURN(controller, objectValue);
 
@@ -511,13 +511,13 @@ napi_value ArcSwiperControllerConstructor(napi_env env, napi_callback_info info)
     auto controller = AceType::MakeRefPtr<NG::JsArcSwiperController>();
     CHECK_NULL_RETURN(controller, ExtNapiUtils::CreateNull(env));
     controller->IncRefCount();
-    napi_wrap(
+    napi_wrap_s(
         env, thisVar, AceType::RawPtr(controller),
         [](napi_env env, void* data, void* hint) {
             auto* controller = reinterpret_cast<NG::JsArcSwiperController*>(data);
             controller->DecRefCount();
         },
-        nullptr, nullptr);
+        nullptr, &ARC_SWIPER_CONTROLLER_TYPE_TAG, nullptr);
     return thisVar;
 }
 
@@ -528,13 +528,13 @@ napi_value ArcDotIndicatorConstructor(napi_env env, napi_callback_info info)
     auto indicator = AceType::MakeRefPtr<NG::JsArcSwiperIndicator>();
     CHECK_NULL_RETURN(indicator, ExtNapiUtils::CreateNull(env));
     indicator->IncRefCount();
-    napi_wrap(
+    napi_wrap_s(
         env, thisVar, AceType::RawPtr(indicator),
         [](napi_env env, void* data, void* hint) {
             auto* indicator = reinterpret_cast<NG::JsArcSwiperIndicator*>(data);
             indicator->DecRefCount();
         },
-        nullptr, nullptr);
+        nullptr, &ARC_SWIPER_INDICATOR_TYPE_TAG, nullptr);
     return thisVar;
 }
 
@@ -546,7 +546,7 @@ napi_value SetArcDirection(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
     NG::JsArcSwiperIndicator* indicator = nullptr;
-    napi_unwrap(env, thisVar, (void**)&indicator);
+    napi_unwrap_s(env, thisVar, &ARC_SWIPER_INDICATOR_TYPE_TAG, (void**)&indicator);
     CHECK_NULL_RETURN(indicator, thisVar);
     SwiperArcDirection arcDirection = SwiperArcDirection::SIX_CLOCK_DIRECTION;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_number)) {
@@ -569,7 +569,7 @@ napi_value SetItemColor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
     NG::JsArcSwiperIndicator* indicator = nullptr;
-    napi_unwrap(env, thisVar, (void**)&indicator);
+    napi_unwrap_s(env, thisVar, &ARC_SWIPER_INDICATOR_TYPE_TAG, (void**)&indicator);
     CHECK_NULL_RETURN(indicator, thisVar);
 
     Color colorVal;
@@ -589,7 +589,7 @@ napi_value SetSelectedItemColor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
     NG::JsArcSwiperIndicator* indicator = nullptr;
-    napi_unwrap(env, thisVar, (void**)&indicator);
+    napi_unwrap_s(env, thisVar, &ARC_SWIPER_INDICATOR_TYPE_TAG, (void**)&indicator);
     CHECK_NULL_RETURN(indicator, thisVar);
 
     Color colorVal;
@@ -609,7 +609,7 @@ napi_value SetBackgroundColor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
     NG::JsArcSwiperIndicator* indicator = nullptr;
-    napi_unwrap(env, thisVar, (void**)&indicator);
+    napi_unwrap_s(env, thisVar, &ARC_SWIPER_INDICATOR_TYPE_TAG, (void**)&indicator);
     CHECK_NULL_RETURN(indicator, thisVar);
 
     Color colorVal;
@@ -659,7 +659,7 @@ napi_value SetMaskColor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
     NG::JsArcSwiperIndicator* indicator = nullptr;
-    napi_unwrap(env, thisVar, (void**)&indicator);
+    napi_unwrap_s(env, thisVar, &ARC_SWIPER_INDICATOR_TYPE_TAG, (void**)&indicator);
     CHECK_NULL_RETURN(indicator, thisVar);
 
     NG::Gradient gradient;

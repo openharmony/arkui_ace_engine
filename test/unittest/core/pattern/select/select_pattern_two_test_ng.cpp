@@ -836,7 +836,7 @@ HWTEST_F(SelectPatternTwoTestNg, UpdateComponentColor001, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         frameNode->SetRerenderable(pair.second);
         pattern->UpdateComponentColor(Color::RED, static_cast<SelectColorType>(7));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             pattern->UpdateComponentColor(Color::RED, SelectColorType::FONT_COLOR);
             EXPECT_EQ(pattern->fontColor_, Color::RED);
             pattern->UpdateComponentColor(Color::RED, SelectColorType::BACKGROUND_COLOR);

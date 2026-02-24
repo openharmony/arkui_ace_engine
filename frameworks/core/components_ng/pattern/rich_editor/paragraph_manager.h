@@ -51,6 +51,9 @@ public:
 
     int32_t GetIndex(Offset offset, bool clamp = false) const;
     PositionWithAffinity GetGlyphPositionAtCoordinate(Offset offset);
+    PositionWithAffinity GetCharacterPositionAtCoordinate(Offset offset);
+    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end);
+    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end);
     float GetHeight() const;
 
     const std::vector<ParagraphInfo>& GetParagraphs() const

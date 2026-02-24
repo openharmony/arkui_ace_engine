@@ -25,6 +25,12 @@
 #include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::Framework {
+
+constexpr napi_type_tag WEB_PIXEL_MAP_TYPE_TAG = {
+    .lower = 0xA7E5D9F3C8B6A4E2,
+    .upper = 0x8E6B4C9D7A3F2E5D,
+};
+
 using JSwebEventCallback = std::function<void()>;
 class JSWeb : public JSContainerBase {
 public:

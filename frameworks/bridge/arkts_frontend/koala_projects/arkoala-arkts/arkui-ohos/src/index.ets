@@ -51,3 +51,10 @@ export * from "./hooks"
 export {
   ArkUIExtensionComponentPeerBase
 } from "./component/uiExtensionComponent"
+export * from "./component/initializers"
+export * from "./component/securityUIExtensionComponent"
+export * from "./component/common"
+export * from "./component/canvas"
+export * from "./component/waterFlow"
+export * from "./component/embeddedComponent"
+export * from "./component/nodeContainer"

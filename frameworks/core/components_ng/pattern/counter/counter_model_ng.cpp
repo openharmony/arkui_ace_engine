@@ -133,7 +133,7 @@ void CounterModelNG::SetEnableDec(bool enableDec)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
+        auto counterTheme = pipeline->GetTheme<CounterTheme>();
         CHECK_NULL_VOID(counterTheme);
         subNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -155,7 +155,7 @@ void CounterModelNG::SetEnableInc(bool enableInc)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
+        auto counterTheme = pipeline->GetTheme<CounterTheme>();
         CHECK_NULL_VOID(counterTheme);
         addNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -172,11 +172,11 @@ void CounterModelNG::SetOnInc(CounterEventFunc&& onInc)
     auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
     CHECK_NULL_VOID(addNode);
     auto gestureHub = addNode->GetOrCreateGestureEventHub();
-    GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) {
-                        clickEvent();
-                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc",
-                            ComponentEventType::COMPONENT_EVENT_SELECT);
-                    };
+    GestureEventFunc gestureEventFunc = [id = frameNode->GetId(), clickEvent = std::move(onInc)](
+        GestureEvent& /*unused*/) {
+        clickEvent();
+        CounterModelNG::ReportComponentChangeEvent(id, "onInc");
+    };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
 
@@ -189,11 +189,11 @@ void CounterModelNG::SetOnDec(CounterEventFunc&& onDec)
     auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
     CHECK_NULL_VOID(subNode);
     auto gestureHub = subNode->GetOrCreateGestureEventHub();
-    GestureEventFunc gestureEventFunc = [clickEvent = std::move(onDec)](GestureEvent& /*unused*/) {
-                        clickEvent();
-                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec",
-                            ComponentEventType::COMPONENT_EVENT_SELECT);
-                    };
+    GestureEventFunc gestureEventFunc = [id = frameNode->GetId(), clickEvent = std::move(onDec)](
+        GestureEvent& /*unused*/) {
+        clickEvent();
+        CounterModelNG::ReportComponentChangeEvent(id, "onDec");
+    };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
 
@@ -263,7 +263,7 @@ void CounterModelNG::SetEnableDec(FrameNode* frameNode, bool enableDec)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
+        auto counterTheme = pipeline->GetTheme<CounterTheme>();
         CHECK_NULL_VOID(counterTheme);
         subNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -283,7 +283,7 @@ void CounterModelNG::SetEnableInc(FrameNode* frameNode, bool enableInc)
     if (!eventHub->IsEnabled()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
+        auto counterTheme = pipeline->GetTheme<CounterTheme>();
         CHECK_NULL_VOID(counterTheme);
         addNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
     } else {
@@ -333,9 +333,13 @@ void CounterModelNG::SetWidth(FrameNode* frameNode, const Dimension& value)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), std::nullopt));
 }
 
-void CounterModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& value)
+void CounterModelNG::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, value, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+    }
 }
 
 void CounterModelNG::ResetBackgroundColor(FrameNode* frameNode)
@@ -381,6 +385,16 @@ void CounterModelNG::SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec)
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
 
+void CounterModelNG::ReportComponentChangeEvent(int32_t id, const std::string& value)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto json = InspectorJsonUtil::Create();
+    json->Put("Counter", value.data());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(id, "event", json,
+        ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
+}
+
 void CounterModelNG::CreateWithResourceObj(JsCounterResourceType jsResourceType, const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -393,6 +407,7 @@ void CounterModelNG::CreateWithResourceObj(
 {
     auto pattern = frameNode->GetPattern<CounterPattern>();
     CHECK_NULL_VOID(pattern);
+
     switch (jsResourceType) {
         case JsCounterResourceType::Height:
             HandleHeightResource(frameNode, resObj);
@@ -404,6 +419,7 @@ void CounterModelNG::CreateWithResourceObj(
             HandleBackgroundColorResource(frameNode, resObj);
             break;
         default:
+            LOGE("Unsupported JsCounterResourceType");
             break;
     }
 }
@@ -427,7 +443,7 @@ void CounterModelNG::HandleHeightResource(FrameNode* frameNode, const RefPtr<Res
         CHECK_NULL_VOID(frameNode);
         auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
-        if (pipelineContext->IsSystmColorChange()) {
+        if (pipelineContext->IsSystemColorChange()) {
             if (!LessNotEqual(height.Value(), 0.0)) {
                 SetHeight(AceType::RawPtr(frameNode), height);
             }
@@ -455,7 +471,7 @@ void CounterModelNG::HandleWidthResource(FrameNode* frameNode, const RefPtr<Reso
         CHECK_NULL_VOID(frameNode);
         auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
-        if (pipelineContext->IsSystmColorChange()) {
+        if (pipelineContext->IsSystemColorChange()) {
             if (!LessNotEqual(width.Value(), 0.0)) {
                 SetWidth(AceType::RawPtr(frameNode), width);
             }
@@ -481,11 +497,83 @@ void CounterModelNG::HandleBackgroundColorResource(FrameNode* frameNode, const R
             CHECK_NULL_VOID(frameNode);
             auto pipelineContext = frameNode->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            if (pipelineContext->IsSystmColorChange()) {
+            if (pipelineContext->IsSystemColorChange()) {
                 SetBackgroundColor(AceType::RawPtr(frameNode), color);
             }
         }
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void CounterModelNG::CreateCounterModelNG()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", COUNTER_ETS_TAG, nodeId);
+    auto counterNode = CounterNode::GetOrCreateCounterNode(
+        COUNTER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CounterPattern>(); });
+    auto counterPattern = counterNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(counterPattern);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto counterTheme = pipeline->GetTheme<CounterTheme>();
+    CHECK_NULL_VOID(counterTheme);
+    counterNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(counterTheme->GetWidth()), CalcLength(counterTheme->GetHeight())));
+    counterNode->GetRenderContext()->SetClipToFrame(true);
+    counterNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
+
+    bool hasSubNode = counterPattern->HasSubNode();
+    bool hasContentNode = counterPattern->HasContentNode();
+    bool hasAddNode = counterPattern->HasAddNode();
+    auto subId = counterPattern->GetSubId();
+    auto contentId = counterPattern->GetContentId();
+    auto addId = counterPattern->GetAddId();
+    if (!hasSubNode) {
+        auto subNode = CreateButtonChildStatic(subId, SUB, counterTheme);
+        subNode->MountToParent(counterNode);
+    }
+    if (!hasContentNode) {
+        auto contentNode = CreateContentNodeChild(contentId, counterTheme);
+        contentNode->MountToParent(counterNode);
+    }
+    if (!hasAddNode) {
+        auto addNode = CreateButtonChildStatic(addId, ADD, counterTheme);
+        addNode->MountToParent(counterNode);
+    }
+    stack->Push(counterNode);
+}
+
+RefPtr<FrameNode> CounterModelNG::CreateButtonChildStatic(
+    int32_t id, const std::u16string& symbol, const RefPtr<CounterTheme>& counterTheme)
+{
+    auto buttonNode =
+        FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateCreateWithLabel(false);
+    buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
+    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonNode->GetLayoutProperty()->UpdateBorderWidth(counterTheme->GetBorderWidth());
+    buttonNode->GetRenderContext()->UpdateBorderStyle(counterTheme->GetBorderStyle());
+    buttonNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());
+    buttonNode->MarkModifyDone();
+
+    auto textNode = FrameNode::GetOrCreateFrameNode(TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->UpdateContent(symbol);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    }
+    textNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
+    textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    textNode->MarkModifyDone();
+
+    textNode->MountToParent(buttonNode);
+    return buttonNode;
 }
 } // namespace OHOS::Ace::NG

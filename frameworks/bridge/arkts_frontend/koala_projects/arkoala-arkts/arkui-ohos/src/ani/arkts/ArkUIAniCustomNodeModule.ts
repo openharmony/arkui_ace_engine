@@ -48,13 +48,13 @@ export class MeasurableLayoutableInner implements Measurable, Layoutable {
     public override layout(position: Position | undefined ) {
         this.layoutInner(position)
     }
-    public override getMargin(): DirectionalEdgesT<number> | undefined {
+    public override getMargin(): DirectionalEdgesT<double> | undefined {
         return this.getMarginInner()
     }
-    public override getPadding(): DirectionalEdgesT<number> | undefined {
+    public override getPadding(): DirectionalEdgesT<double> | undefined {
         return this.getPaddingInner()
     }
-    public override getBorderWidth(): DirectionalEdgesT<number> | undefined {
+    public override getBorderWidth(): DirectionalEdgesT<double> | undefined {
         return this.getBorderWidthInner()
     }
     

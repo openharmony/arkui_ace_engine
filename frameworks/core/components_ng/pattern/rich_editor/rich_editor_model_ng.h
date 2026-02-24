@@ -87,6 +87,7 @@ public:
     static bool IsEditing(FrameNode* frameNode);
     static RectF GetCaretRect(FrameNode* frameNode);
     static void DeleteBackward(FrameNode* frameNode);
+    static void CloseSelectionMenu(FrameNode* frameNode);
     static PreviewTextInfo GetPreviewTextInfo(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateRichEditorStyledStringNode(int32_t nodeId);
     static void CreateModel(bool isStyledStringMode = false);

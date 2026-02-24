@@ -63,6 +63,7 @@ ani_int IsDebugMode(ani_env* env, ani_object obj, ani_int id);
 void OnMeasureInnerMeasure(ani_env* env, ani_object obj, ani_long ptr);
 void OnLayoutInnerLayout(ani_env* env, ani_object obj, ani_long ptr);
 void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel);
+void CheckThreadValid(ani_env* env, ani_object obj, ani_boolean checkUIThread, ani_long node);
 void SetCustomPropertyCallBack(
     ani_env* env, ani_object aniClass, ani_long node, ani_fn_object removeCallback, ani_fn_object getCallback,
     ani_fn_object getAllCustomPropertiesCallback);

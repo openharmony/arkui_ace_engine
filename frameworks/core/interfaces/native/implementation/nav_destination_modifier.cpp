@@ -116,12 +116,13 @@ void SetOnBackPressedImpl(Ark_NativePointer node,
         return;
     }
     auto onBackPressedEvent = [arkCallback = CallbackHelper(*optValue)]() -> bool {
-        return arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>().value_or(false);
+        return arkCallback.InvokeWithOptConvertResult<
+            bool, Ark_Boolean, synthetic_Callback_Boolean_Void>().value_or(false);
     };
     NavDestinationModelStatic::SetOnBackPressed(frameNode, std::move(onBackPressedEvent));
 }
 void SetOnResultImpl(Ark_NativePointer node,
-                     const Opt_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void* value)
+                     const Opt_Callback_Opt_Object_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -164,7 +165,7 @@ void SetOnReadyImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetOnReady(frameNode, std::move(onReady));
 }
 void SetOnWillAppearImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -179,7 +180,7 @@ void SetOnWillAppearImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetOnWillAppear(frameNode, std::move(onWillAppearEvent));
 }
 void SetOnWillDisappearImpl(Ark_NativePointer node,
-                            const Opt_Callback_Void* value)
+                            const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -194,7 +195,7 @@ void SetOnWillDisappearImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetOnWillDisAppear(frameNode, std::move(onWillDisappearEvent));
 }
 void SetOnWillShowImpl(Ark_NativePointer node,
-                       const Opt_Callback_Void* value)
+                       const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -209,7 +210,7 @@ void SetOnWillShowImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetOnWillShow(frameNode, std::move(onWillShowEvent));
 }
 void SetOnWillHideImpl(Ark_NativePointer node,
-                       const Opt_Callback_Void* value)
+                       const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -373,7 +374,7 @@ void SetCustomTransitionImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetCustomTransition(frameNode, onNavigationAnimation);
 }
 void SetOnNewParamImpl(Ark_NativePointer node,
-                       const Opt_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void* value)
+                       const Opt_Callback_Opt_Object_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -421,7 +422,7 @@ void EnableNavigationIndicatorImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetEnableNavigationIndicator(frameNode, navigationIndicator);
 }
 void SetTitleImpl(Ark_NativePointer node,
-    const Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
+    const Opt_Union_String_CustomNodeBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
     const Opt_NavigationTitleOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -521,8 +522,8 @@ void SetHideTitleBar1Impl(Ark_NativePointer node,
         Converter::OptConvertPtr<bool>(animated).value_or(false));
 }
 void SetBackButtonIconImpl(Ark_NativePointer node,
-                            const Opt_Union_ResourceStr_PixelMap_SymbolGlyphModifier* icon,
-                            const Opt_ResourceStr* accessibilityText)
+                           const Opt_Union_ResourceStr_image_PixelMap_SymbolGlyphModifier* icon,
+                           const Opt_ResourceStr* accessibilityText)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -584,8 +585,8 @@ void SetBackButtonIconImpl(Ark_NativePointer node,
         frameNode, iconSymbol, src, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
 }
 void SetMenusImpl(Ark_NativePointer node,
-                   const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
-                   const Opt_NavigationMenuOptions* options)
+                  const Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder* items,
+                  const Opt_NavigationMenuOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -617,7 +618,7 @@ void SetMenusImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetMenuOptions(frameNode, std::move(menuOptions));
 }
 void SetToolbarConfigurationImpl(Ark_NativePointer node,
-                                 const Opt_Union_Array_ToolbarItem_CustomBuilder* toolbarParam,
+                                 const Opt_Union_Array_ToolbarItem_CustomNodeBuilder* toolbarParam,
                                  const Opt_NavigationToolbarOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);

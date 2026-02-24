@@ -342,7 +342,7 @@ void LoadingProgressPattern::UpdateColor(const Color& color, bool isFirstLoad)
     CHECK_NULL_VOID(pipelineContext);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         paintProperty->UpdateColor(color);
         renderContext->UpdateForegroundColor(color);
         renderContext->ResetForegroundColorStrategy();

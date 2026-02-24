@@ -56,10 +56,10 @@ public:
 HWTEST_F(BlankModifierTest, setBlankOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_DEFAULT_VALUE) << "Default value for attribute 'min'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIN_DEFAULT_VALUE)) << "Default value for attribute 'min'";
 }
 
 /*
@@ -86,7 +86,8 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestMinValidValues, TestSize.Level1)
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setBlankOptions, attribute: min";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setBlankOptions, attribute: min";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
@@ -120,7 +121,7 @@ HWTEST_F(BlankModifierTest, DISABLED_setBlankOptionsTestMinInvalidValues, TestSi
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MIN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIN_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setBlankOptions, attribute: min";
     };
 
@@ -144,10 +145,10 @@ HWTEST_F(BlankModifierTest, DISABLED_setBlankOptionsTestMinInvalidValues, TestSi
 HWTEST_F(BlankModifierTest, setColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) << "Default value for attribute 'color'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COLOR_DEFAULT_VALUE)) << "Default value for attribute 'color'";
 }
 
 /*
@@ -170,7 +171,8 @@ HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorValidValues, TestSize.Leve
         modifier_->setColor(node_, &inputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setColor, attribute: color";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setColor, attribute: color";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
@@ -207,7 +209,7 @@ HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Le
         modifier_->setColor(node_, &inputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setColor, attribute: color";
     };
 

@@ -170,4 +170,24 @@ export class getStateMgmtInfoTests implements ITestFile {
     const objectExpected = ['2'];
     eq(JSON.stringify(objectResult), JSON.stringify(objectExpected));
   }
+
+  /**
+   * Test plain string with root path
+   */
+  public testPlainString(): void {
+    const id = [(this as Object as PUV2ViewBase).id__()];
+    const result = getStateMgmtInfo(id, 'plainString', '/');
+    const expected = ['Hello World'];
+    eq(JSON.stringify(result), JSON.stringify(expected));
+  }
+
+  /**
+   * Test empty string with root path
+   */
+  public testEmptyString(): void {
+    const id = [(this as Object as PUV2ViewBase).id__()];
+    const result = getStateMgmtInfo(id, 'emptyString', '/');
+    const expected = [''];
+    eq(JSON.stringify(result), JSON.stringify(expected));
+  }
 }

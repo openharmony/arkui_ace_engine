@@ -16,18 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkCanvasPeer, DrawingRenderingContext, CanvasAttribute } from './component/canvas'
+import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkCanvasPeer, DrawingRenderingContext, CanvasAttribute } from "./component/canvas"
-import { int32 } from "@koalaui/common"
-import { CommonMethod } from "./component/common"
-import { VoidCallback } from "./component/units"
+import { CommonMethod, Callback as arkui_component_common_Callback } from './component/common'
 export class CanvasModifier extends CommonMethodModifier implements CanvasAttribute,AttributeModifier<CanvasAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    private _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -37,46 +42,46 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
     applyFocusedAttribute(instance: CanvasAttribute): void { }
     applyDisabledAttribute(instance: CanvasAttribute): void { }
     applySelectedAttribute(instance: CanvasAttribute): void { }
-    _onReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onReady_0_0value?: VoidCallback | ((value0: DrawingRenderingContext | undefined) => void) | undefined
-    _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableAnalyzer_0_0value?: boolean | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _onReady_0_0value?: arkui_component_common_Callback<DrawingRenderingContext | undefined, void> | undefined
+    public _enableAnalyzer_0_0value?: boolean | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkCanvasPeer;
-        if (this._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onReady_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnReadyAttribute((this._onReady_0_0value as VoidCallback | ((value0: DrawingRenderingContext | undefined) => void) | undefined));
-                    this._onReady_0_flag = AttributeUpdaterFlag.RESET;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkCanvasPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setOnReadyAttribute((this._onReady_0_0value as arkui_component_common_Callback<DrawingRenderingContext | undefined, void> | undefined));
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onReady_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._onReady_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnReadyAttribute((undefined as VoidCallback | ((value0: DrawingRenderingContext | undefined) => void) | undefined));
+                    flagArray[0] = 0;
+                    peer.setOnReadyAttribute((undefined as arkui_component_common_Callback<DrawingRenderingContext | undefined, void> | undefined));
                 }
             }
         }
-        if (this._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableAnalyzer_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setEnableAnalyzerAttribute((this._enableAnalyzer_0_0value as boolean | undefined));
-                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._enableAnalyzer_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setEnableAnalyzerAttribute((undefined as boolean | undefined));
                 }
             }
@@ -85,25 +90,27 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
     mergeModifier(modifier: CanvasModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._onReady_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onReady_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onReady(modifier._onReady_0_0value);
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: CanvasModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
+                    this.onReady((modifier._onReady_0_0value as arkui_component_common_Callback<DrawingRenderingContext | undefined, void> | undefined));
                     break;
                 }
                 default: {
-                    this.onReady((undefined as VoidCallback | ((value0: DrawingRenderingContext | undefined) => void) | undefined));
+                    this.onReady((undefined as arkui_component_common_Callback<DrawingRenderingContext | undefined, void> | undefined));
                 }
             }
         }
-        if (modifier._enableAnalyzer_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableAnalyzer_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableAnalyzer(modifier._enableAnalyzer_0_0value);
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
+                    this.enableAnalyzer((modifier._enableAnalyzer_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -112,31 +119,27 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
             }
         }
     }
-    onReady(value: VoidCallback | ((value0: DrawingRenderingContext | undefined) => void) | undefined): this {
-        if (((this._onReady_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onReady_0_flag = AttributeUpdaterFlag.UPDATE
+    onReady(value: arkui_component_common_Callback<DrawingRenderingContext | undefined, void> | undefined): this {
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._onReady_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onReady_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     enableAnalyzer(value: boolean | undefined): this {
-        if (((this._enableAnalyzer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAnalyzer_0_0value) !== (value)))
-        {
-            this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || ((this._enableAnalyzer_0_0value) !== (value))) {
+            this._flagArray[1] = 1
             this._enableAnalyzer_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

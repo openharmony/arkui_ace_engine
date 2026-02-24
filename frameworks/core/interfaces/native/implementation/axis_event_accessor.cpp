@@ -73,6 +73,10 @@ Ark_Float64 GetVerticalAxisValueImpl(Ark_AxisEvent peer)
     double value = event->GetVerticalAxis();
     return Converter::ArkValue<Ark_Float64>(value);
 }
+Ark_Float64 GetPinchAxisScaleValueImpl(Ark_AxisEvent peer)
+{
+    return {};
+}
 Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
                         Ark_AxisType axisType)
 {
@@ -311,8 +315,10 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::DestroyPeerImpl,
         AxisEventAccessor::ConstructImpl,
         AxisEventAccessor::GetFinalizerImpl,
+        AxisEventAccessor::PropagationImpl,
         AxisEventAccessor::GetHorizontalAxisValueImpl,
         AxisEventAccessor::GetVerticalAxisValueImpl,
+        AxisEventAccessor::GetPinchAxisScaleValueImpl,
         AxisEventAccessor::HasAxisImpl,
         AxisEventAccessor::GetActionImpl,
         AxisEventAccessor::SetActionImpl,
@@ -330,7 +336,6 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::SetYImpl,
         AxisEventAccessor::GetScrollStepImpl,
         AxisEventAccessor::SetScrollStepImpl,
-        AxisEventAccessor::PropagationImpl,
         AxisEventAccessor::GetGlobalDisplayXImpl,
         AxisEventAccessor::SetGlobalDisplayXImpl,
         AxisEventAccessor::GetGlobalDisplayYImpl,

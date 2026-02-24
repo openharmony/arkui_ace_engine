@@ -194,6 +194,12 @@ template<typename T>
 ACE_FORCE_EXPORT
 void TransformStrCase(T& str, int32_t textCase);
 
+// Explicit specialization for std::u16string - uses std::towupper/std::towlower for Unicode support
+// e.g., French 'é' (U+00E9) -> 'É' (U+00C9), 'è' (U+00E8) -> 'È' (U+00C8)
+template<>
+ACE_FORCE_EXPORT
+void TransformStrCase<std::u16string>(std::u16string& str, int32_t textCase);
+
 ACE_FORCE_EXPORT bool IsAscii(const std::string& str);
 } // namespace OHOS::Ace::StringUtils
 

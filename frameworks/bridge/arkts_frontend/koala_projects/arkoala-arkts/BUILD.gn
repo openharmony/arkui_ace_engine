@@ -19,7 +19,7 @@ import("./components.gni")
 koala_root = ".."
 koala_path = ""
 
-node_version = "v16.20.2"
+node_version = "v18.20.1"
 host_arch = "${host_os}-${host_cpu}"
 
 action("ui2abc_annotate") {

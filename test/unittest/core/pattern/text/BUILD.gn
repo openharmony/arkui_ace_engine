@@ -22,6 +22,7 @@ ace_unittest("text_test_ng") {
     "text_arkoala_test.cpp",
     "text_base.cpp",
     "text_pattern_test_ng.cpp",
+    "text_pattern_test_ng_two.cpp",
     "text_test_ng.cpp",
     "text_testeight_ng.cpp",
     "text_testeleven_ng.cpp",

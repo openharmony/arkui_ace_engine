@@ -31,12 +31,9 @@ void DestroyPeerImpl(Ark_UIScrollEvent peer)
     CHECK_NULL_VOID(peer);
     PeerUtils::DestroyPeer(peer);
 }
-Ark_UIScrollEvent ConstructImpl(Ark_NativePointer node)
+Ark_UIScrollEvent ConstructImpl()
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
     auto eventPeer = PeerUtils::CreatePeer<UIScrollEventPeer>();
-    eventPeer->node = frameNode;
     return eventPeer;
 }
 Ark_NativePointer GetFinalizerImpl()

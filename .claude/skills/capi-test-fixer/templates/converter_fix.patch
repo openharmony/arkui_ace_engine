@@ -1,0 +1,29 @@
+# Template patch for fixing Converter API misuse in test files
+# Changes Converter::GetOptPtr(&var) to Converter::GetOpt(var)
+
+--- a/test/unittest/capi/accessors/canvas_renderer_accessor_test.cpp
++++ b/test/unittest/capi/accessors/canvas_renderer_accessor_test.cpp
+@@ -XXX, +XXX @@ TEST_F(CanvasRendererAccessorTest, getPixelMapTest)
+     // Before: Using GetOptPtr with address of local variable
+-    auto optValue = Converter::GetOptPtr(&ptr);
++    auto optValue = Converter::GetOpt(ptr);
+
+     // Test expectation also needs updating
+-    EXPECT_EQ(optValue, nullptr);
++    EXPECT_FALSE(optValue.has_value());
+
+# Common patterns to fix:
+# 1. Converter::GetOptPtr(&local_var) → Converter::GetOpt(local_var)
+# 2. EXPECT_EQ(optValue, nullptr) → EXPECT_FALSE(optValue.has_value())
+# 3. ASSERT_EQ(optValue, nullptr) → ASSERT_FALSE(optValue.has_value())
+# 4. EXPECT_EQ(optValue, std::nullopt) → EXPECT_FALSE(optValue.has_value())
+
+# Search pattern for finding issues:
+# grep -n "Converter::GetOptPtr(&" test/unittest/capi/accessors/*.cpp
+
+# Fix all occurrences in a file:
+# sed -i 's/Converter::GetOptPtr(\&\([a-zA-Z_][a-zA-Z0-9_]*\))/Converter::GetOpt(\1)/g' test/unittest/capi/accessors/*.cpp
+
+# Update test expectations:
+# sed -i 's/EXPECT_EQ(optValue, nullptr)/EXPECT_FALSE(optValue.has_value())/g' test/unittest/capi/accessors/*.cpp
+# sed -i 's/ASSERT_EQ(optValue, nullptr)/ASSERT_FALSE(optValue.has_value())/g' test/unittest/capi/accessors/*.cpp

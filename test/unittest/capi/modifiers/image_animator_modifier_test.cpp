@@ -96,10 +96,10 @@ RefPtr<PixelMap> ImageAnimatorModifierTest::CreatePixelMap(std::string& src)
 HWTEST_F(ImageAnimatorModifierTest, setImagesTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IMAGES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_DEFAULT_VALUE));
 }
 
 /*
@@ -134,8 +134,8 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
     modifier_->setImages(node_, &optInitValueImages);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-    std::unique_ptr<JsonValue> resultImages = GetAttrValue<std::unique_ptr<JsonValue>>(
+    std::optional<std::string> resultStr;
+    std::unique_ptr<JsonValue> resultImages = GetAttrObject(
         jsonValue, ATTRIBUTE_IMAGES_NAME);
 
     if (resultImages->IsArray()) {
@@ -143,17 +143,17 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
         for (int i = 0; i < count; i++) {
             auto resultImage = resultImages->GetArrayItem(i);
             resultStr = GetAttrValue<std::string>(resultImage, ATTRIBUTE_IMAGES_SRC_NAME);
-            EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_SRC_TEST_VALUE);
+            EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_SRC_TEST_VALUE));
             resultStr = GetAttrValue<std::string>(resultImage, ATTRIBUTE_IMAGES_LEFT_NAME);
-            EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_LEFT_TEST_VALUE);
+            EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_LEFT_TEST_VALUE));
             resultStr = GetAttrValue<std::string>(resultImage, ATTRIBUTE_IMAGES_TOP_NAME);
-            EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_TOP_TEST_VALUE);
+            EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_TOP_TEST_VALUE));
             resultStr = GetAttrValue<std::string>(resultImage, ATTRIBUTE_IMAGES_WIDTH_NAME);
-            EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_WIDTH_TEST_VALUE);
+            EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_WIDTH_TEST_VALUE));
             resultStr = GetAttrValue<std::string>(resultImage, ATTRIBUTE_IMAGES_HEIGHT_NAME);
-            EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_HEIGHT_TEST_VALUE);
+            EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_HEIGHT_TEST_VALUE));
             resultStr = GetAttrValue<std::string>(resultImage, ATTRIBUTE_IMAGES_DURATION_NAME);
-            EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_DURATION_TEST_VALUE);
+            EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_DURATION_TEST_VALUE));
         }
     }
 }
@@ -195,8 +195,8 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
 #endif
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-    std::unique_ptr<JsonValue> resultImages = GetAttrValue<std::unique_ptr<JsonValue>>(
+    std::optional<std::string> resultStr;
+    std::unique_ptr<JsonValue> resultImages = GetAttrObject(
         jsonValue, ATTRIBUTE_IMAGES_NAME);
     EXPECT_TRUE(resultImages->IsArray());
     EXPECT_EQ(resultImages->GetArraySize(), 1);
@@ -205,15 +205,15 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
         for (int i = 0; i < count; i++) {
             auto resultImage = resultImages->GetArrayItem(i);
             resultStr = GetAttrValue<std::string>(resultImage, ATTRIBUTE_IMAGES_LEFT_NAME);
-            EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_LEFT_TEST_VALUE);
+            EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_LEFT_TEST_VALUE));
             resultStr = GetAttrValue<std::string>(resultImage, ATTRIBUTE_IMAGES_TOP_NAME);
-            EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_TOP_TEST_VALUE);
+            EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_TOP_TEST_VALUE));
             resultStr = GetAttrValue<std::string>(resultImage, ATTRIBUTE_IMAGES_WIDTH_NAME);
-            EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_WIDTH_TEST_VALUE);
+            EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_WIDTH_TEST_VALUE));
             resultStr = GetAttrValue<std::string>(resultImage, ATTRIBUTE_IMAGES_HEIGHT_NAME);
-            EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_HEIGHT_TEST_VALUE);
+            EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_HEIGHT_TEST_VALUE));
             resultStr = GetAttrValue<std::string>(resultImage, ATTRIBUTE_IMAGES_DURATION_NAME);
-            EXPECT_EQ(resultStr, ATTRIBUTE_IMAGES_DURATION_TEST_VALUE);
+            EXPECT_THAT(resultStr, Eq(ATTRIBUTE_IMAGES_DURATION_TEST_VALUE));
         }
     }
 }
@@ -226,10 +226,10 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
 HWTEST_F(ImageAnimatorModifierTest, setIterationsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ITERATIONS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ITERATIONS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ITERATIONS_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'iterations' of method 'iterations'
@@ -249,7 +249,7 @@ static std::vector<std::tuple<std::string, Ark_Int32, std::string>> iterationsIt
 HWTEST_F(ImageAnimatorModifierTest, setIterationsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     // Initial setup
@@ -266,7 +266,7 @@ HWTEST_F(ImageAnimatorModifierTest, setIterationsTestValidValues, TestSize.Level
         pattern->OnModifyDone();
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ITERATIONS_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << input;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << input;
     }
 }
 
@@ -284,7 +284,7 @@ static std::vector<std::tuple<std::string, Ark_Int32>> iterationsIterationsInval
 HWTEST_F(ImageAnimatorModifierTest, setIterationsTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     // Initial setup
@@ -302,7 +302,7 @@ HWTEST_F(ImageAnimatorModifierTest, setIterationsTestInvalidValues, TestSize.Lev
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ITERATIONS_NAME);
         expectedStr = ATTRIBUTE_ITERATIONS_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << input;
     }
 }
 

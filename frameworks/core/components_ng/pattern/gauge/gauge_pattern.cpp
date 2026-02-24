@@ -39,6 +39,7 @@ void GaugePattern::OnModifyDone()
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
 
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -376,7 +377,7 @@ void GaugePattern::UpdateIndicatorIconPath(
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         paintProperty->UpdateIndicatorIconSourceInfo(ImageSourceInfo(iconPath, bundleName, moduleName));
     }
     if (host->GetRerenderable()) {
@@ -392,7 +393,7 @@ void GaugePattern::UpdateIndicatorSpace(const CalcDimension& space, bool isFirst
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         paintProperty->UpdateIndicatorSpace(space);
     }
     if (host->GetRerenderable()) {

@@ -147,8 +147,8 @@ inline ScrollOptions Convert(const Ark_ScrollOptions& src)
 
 void AssignArkValue(Ark_SizeResult& dst, const SizeF& src)
 {
-    dst.width = Converter::ArkValue<Ark_Number>(src.Width());
-    dst.height = Converter::ArkValue<Ark_Number>(src.Height());
+    dst.width = Converter::ArkValue<Ark_Float64>(src.Width());
+    dst.height = Converter::ArkValue<Ark_Float64>(src.Height());
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -415,7 +415,10 @@ Ark_SizeResult ScrollerPeerImpl::TriggerContentSize(Ark_VMContext vmContext)
         return Converter::ArkValue<Ark_SizeResult>(SizeF(-1, -1));
     }
     ContainerScope scope(instanceId_);
-    return Converter::ArkValue<Ark_SizeResult>(scrollController->ContentSize());
+    auto contentSize = scrollController->ContentSize();
+    auto width = Dimension(contentSize.Width(), DimensionUnit::PX).ConvertToVp();
+    auto height = Dimension(contentSize.Height(), DimensionUnit::PX).ConvertToVp();
+    return Converter::ArkValue<Ark_SizeResult>(SizeF(width, height));
 }
 
 void ScrollerPeerImpl::ThrowParamsError(Ark_VMContext vmContext)

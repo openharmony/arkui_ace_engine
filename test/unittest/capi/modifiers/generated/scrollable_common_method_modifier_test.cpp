@@ -108,10 +108,10 @@ INSTANTIATE_TEST_SUITE_P(Tests, ScrollableCommonMethodModifierTest, testing::Ran
 HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setScrollBarTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCROLL_BAR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SCROLL_BAR_DEFAULT_VALUE) << "Default value for attribute 'scrollBar'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SCROLL_BAR_DEFAULT_VALUE)) << "Default value for attribute 'scrollBar'";
 }
 
 /*
@@ -134,7 +134,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarTestScrollBarValidValue
         modifier_->setScrollBar(node_, &inputValueScrollBar);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCROLL_BAR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setScrollBar, attribute: scrollBar";
     };
 
@@ -163,7 +163,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setScrollBarTestScrollBarI
         modifier_->setScrollBar(node_, &inputValueScrollBar);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCROLL_BAR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SCROLL_BAR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SCROLL_BAR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setScrollBar, attribute: scrollBar";
     };
 
@@ -180,10 +180,11 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setScrollBarTestScrollBarI
 HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SCROLL_BAR_COLOR_DEFAULT_VALUE) << "Default value for attribute 'scrollBarColor'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SCROLL_BAR_COLOR_DEFAULT_VALUE)) <<
+        "Default value for attribute 'scrollBarColor'";
 }
 
 /*
@@ -207,7 +208,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setScrollBarColorTestScrol
         modifier_->setScrollBarColor(node_, &inputValueScrollBarColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setScrollBarColor, attribute: scrollBarColor";
     };
 
@@ -244,7 +245,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestScrollBarColor
         modifier_->setScrollBarColor(node_, &inputValueScrollBarColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SCROLL_BAR_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SCROLL_BAR_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setScrollBarColor, attribute: scrollBarColor";
     };
 
@@ -268,10 +269,11 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestScrollBarColor
 HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCROLL_BAR_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SCROLL_BAR_WIDTH_DEFAULT_VALUE) << "Default value for attribute 'scrollBarWidth'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SCROLL_BAR_WIDTH_DEFAULT_VALUE)) <<
+        "Default value for attribute 'scrollBarWidth'";
 }
 
 /*
@@ -295,7 +297,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarWidthTestScrollBarWidth
         modifier_->setScrollBarWidth(node_, &inputValueScrollBarWidth);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCROLL_BAR_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setScrollBarWidth, attribute: scrollBarWidth";
     };
 
@@ -328,7 +330,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarWidthTestScrollBarWidth
         modifier_->setScrollBarWidth(node_, &inputValueScrollBarWidth);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCROLL_BAR_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SCROLL_BAR_WIDTH_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SCROLL_BAR_WIDTH_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setScrollBarWidth, attribute: scrollBarWidth";
     };
 
@@ -352,16 +354,15 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarWidthTestScrollBarWidth
 HWTEST_P(ScrollableCommonMethodModifierTest, setNestedScrollTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultNestedScroll =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE)) <<
         "Default value for attribute 'nestedScroll.scrollForward'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE)) <<
         "Default value for attribute 'nestedScroll.scrollBackward'";
 }
 
@@ -386,9 +387,9 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setNestedScrollTestNestedScrollScro
         WriteTo(inputValueNestedScroll).scrollForward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollForward";
     };
 
@@ -418,9 +419,9 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setNestedScrollTestNestedScrollScro
         WriteTo(inputValueNestedScroll).scrollForward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollForward";
     };
 
@@ -450,9 +451,9 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setNestedScrollTestNestedScrollScro
         WriteTo(inputValueNestedScroll).scrollBackward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollBackward";
     };
 
@@ -483,9 +484,9 @@ HWTEST_P(
         WriteTo(inputValueNestedScroll).scrollBackward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setNestedScroll, attribute: nestedScroll.scrollBackward";
     };
 
@@ -502,10 +503,10 @@ HWTEST_P(
 HWTEST_P(ScrollableCommonMethodModifierTest, setEnableScrollInteractionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableScrollInteraction'";
 }
 
@@ -530,8 +531,9 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setEnableScrollInteractionTestEnabl
         modifier_->setEnableScrollInteraction(node_, &inputValueEnableScrollInteraction);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
-                                          ", method: setEnableScrollInteraction, attribute: enableScrollInteraction";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input
+            << ", method: setEnableScrollInteraction, attribute: enableScrollInteraction";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
@@ -560,7 +562,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setEnableScrollInteractionTestEnabl
         modifier_->setEnableScrollInteraction(node_, &inputValueEnableScrollInteraction);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE)) <<
             "Input value is: " << input
             << ", method: setEnableScrollInteraction, attribute: enableScrollInteraction";
     };
@@ -577,10 +579,10 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setEnableScrollInteractionTestEnabl
 HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setFrictionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FRICTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FRICTION_DEFAULT_VALUE) << "Default value for attribute 'friction'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FRICTION_DEFAULT_VALUE)) << "Default value for attribute 'friction'";
 }
 
 /*
@@ -604,7 +606,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFrictionTestFrictionValidValues,
         modifier_->setFriction(node_, &inputValueFriction);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FRICTION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFriction, attribute: friction";
     };
 
@@ -637,7 +639,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFrictionTestFrictionInvalidValue
         modifier_->setFriction(node_, &inputValueFriction);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FRICTION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FRICTION_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FRICTION_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFriction, attribute: friction";
     };
 
@@ -661,10 +663,11 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFrictionTestFrictionInvalidValue
 HWTEST_P(ScrollableCommonMethodModifierTest, setFlingSpeedLimitTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLING_SPEED_LIMIT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FLING_SPEED_LIMIT_DEFAULT_VALUE) << "Default value for attribute 'flingSpeedLimit'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FLING_SPEED_LIMIT_DEFAULT_VALUE)) <<
+        "Default value for attribute 'flingSpeedLimit'";
 }
 
 /*
@@ -687,7 +690,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFlingSpeedLimitTestFlingSpeedLim
         modifier_->setFlingSpeedLimit(node_, &inputValueFlingSpeedLimit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLING_SPEED_LIMIT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFlingSpeedLimit, attribute: flingSpeedLimit";
     };
 
@@ -717,7 +720,7 @@ HWTEST_P(
         modifier_->setFlingSpeedLimit(node_, &inputValueFlingSpeedLimit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FLING_SPEED_LIMIT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FLING_SPEED_LIMIT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FLING_SPEED_LIMIT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFlingSpeedLimit, attribute: flingSpeedLimit";
     };
 
@@ -736,10 +739,10 @@ HWTEST_P(
 HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setDigitalCrownSensitivityTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE)) <<
         "Default value for attribute 'digitalCrownSensitivity'";
 }
 
@@ -765,8 +768,9 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setDigitalCrownSensitivity
         modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
-                                          ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input
+            << ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumCrownSensitivityValidValues) {
@@ -797,7 +801,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest,
         modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE)) <<
             "Input value is: " << input
             << ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
     };
@@ -815,10 +819,10 @@ HWTEST_P(ScrollableCommonMethodModifierTest,
 HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACK_TO_TOP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BACK_TO_TOP_DEFAULT_VALUE) << "Default value for attribute 'backToTop'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BACK_TO_TOP_DEFAULT_VALUE)) << "Default value for attribute 'backToTop'";
 }
 
 /*
@@ -841,7 +845,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTestBackToTopV
         modifier_->setBackToTop(node_, &inputValueBackToTop);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACK_TO_TOP_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setBackToTop, attribute: backToTop";
     };
 
@@ -870,7 +874,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTestBackToTopI
         modifier_->setBackToTop(node_, &inputValueBackToTop);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BACK_TO_TOP_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BACK_TO_TOP_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BACK_TO_TOP_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setBackToTop, attribute: backToTop";
     };
 
@@ -886,22 +890,20 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setBackToTopTestBackToTopI
 HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultEdgeEffect =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
-    std::unique_ptr<JsonValue> resultOptions =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultEdgeEffect = GetAttrObject(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
+    std::unique_ptr<JsonValue> resultOptions = GetAttrObject(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_DEFAULT_VALUE)) <<
         "Default value for attribute 'edgeEffect.edgeEffect'";
 
     resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_DEFAULT_VALUE)) <<
         "Default value for attribute 'edgeEffect.options.alwaysEnabled'";
 
     resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_DEFAULT_VALUE)) <<
         "Default value for attribute 'edgeEffect.options.effectEdge'";
 }
 
@@ -929,9 +931,9 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
         inputValueEdgeEffect = value;
         modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
+        auto resultEdgeEffect = GetAttrObject(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEdgeEffect, attribute: edgeEffect.edgeEffect";
     };
 
@@ -966,9 +968,9 @@ HWTEST_P(
         inputValueEdgeEffect = value;
         modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
+        auto resultEdgeEffect = GetAttrObject(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEdgeEffect, attribute: edgeEffect.edgeEffect";
     };
 
@@ -1002,9 +1004,8 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
         WriteTo(inputValueOptions).alwaysEnabled = value;
         modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
-        auto resultOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_NAME);
+        auto resultEdgeEffect = GetAttrObject(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
+        auto resultOptions = GetAttrObject(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultOptions, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1041,11 +1042,10 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
         WriteTo(inputValueOptions).effectEdge = value;
         modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
-        auto resultOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_NAME);
+        auto resultEdgeEffect = GetAttrObject(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
+        auto resultOptions = GetAttrObject(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEdgeEffect, attribute: edgeEffect.options.effectEdge";
     };
 
@@ -1080,11 +1080,10 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
         WriteTo(inputValueOptions).effectEdge = value;
         modifier_->setEdgeEffect(node_, &inputValueEdgeEffect, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
-        auto resultOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_NAME);
+        auto resultEdgeEffect = GetAttrObject(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
+        auto resultOptions = GetAttrObject(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEdgeEffect, attribute: edgeEffect.options.effectEdge";
     };
 
@@ -1100,12 +1099,11 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
 HWTEST_P(ScrollableCommonMethodModifierTest, setFadingEdgeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultFadingEdgeOption =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_FADING_EDGE_OPTION_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultFadingEdgeOption = GetAttrObject(jsonValue, ATTRIBUTE_FADING_EDGE_OPTION_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FADING_EDGE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FADING_EDGE_DEFAULT_VALUE) << "Default value for attribute 'fadingEdge'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FADING_EDGE_DEFAULT_VALUE)) << "Default value for attribute 'fadingEdge'";
 }
 
 /*
@@ -1130,7 +1128,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFadingEdgeTestFadingEdgeValidVal
         modifier_->setFadingEdge(node_, &inputValueFadingEdge, &inputValueFadingEdgeOption);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FADING_EDGE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFadingEdge, attribute: fadingEdge";
     };
 
@@ -1162,7 +1160,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setFadingEdgeTestFadingEdgeInvalidV
         modifier_->setFadingEdge(node_, &inputValueFadingEdge, &inputValueFadingEdgeOption);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FADING_EDGE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FADING_EDGE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FADING_EDGE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFadingEdge, attribute: fadingEdge";
     };
 

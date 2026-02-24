@@ -55,11 +55,11 @@ public:
 };
 
 /**
- * @tc.name: setGestureEventResultTest
+ * @tc.name: setGestureEventResult0Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(EventResultAccessorTest, setGestureEventResultTest, TestSize.Level1)
+HWTEST_F(EventResultAccessorTest, setGestureEventResult0Test, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setGestureEventResult0, nullptr);
 

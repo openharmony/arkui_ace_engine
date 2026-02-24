@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,36 +16,39 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
-import { CommonConfiguration, Bindable_I32_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, MenuKeyboardAvoidMode, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ResourceStr, Font_serializer, DividerStyleOptions_serializer, Offset_serializer, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, EdgeOutlineWidths, EdgeColors, EdgeOutlineWidths_serializer, EdgeColors_serializer } from "./units"
-import { Resource } from "global.resource"
-import { extractors, ContentModifier, AttributeModifier, hookSelectContentModifier, hookSelectSetDividerMethod, hookSelectAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
-import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { TextModifier_serializer } from "./../TextModifier"
-import { LengthMetrics_serializer } from "./../Graphics"
-import { uiMaterial_Material_serializer } from "./../framework/ohos.arkui.uiMaterial"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { Color, OptionWidthMode } from "./enums"
-import { ControlSize } from "./button"
-import { DividerOptions_serializer, DividerOptions } from "./textPicker"
-import { TextModifier } from "arkui.TextModifier"
-import { LengthMetrics } from "arkui.Graphics"
-import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { SelectModifier } from "./../SelectModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-export interface MenuItemConfiguration extends CommonConfiguration<MenuItemConfiguration> {
+import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { SymbolGlyphModifier_serializer } from './../framework/SymbolGlyphModifier'
+import { CommonConfiguration, Bindable_I32_serializer, Bindable_Resource_serializer, Bindable_String_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, MenuKeyboardAvoidMode, SystemUiMaterial, ArkCommonMethodComponent } from './common'
+import { ResourceStr, Resource as arkui_component_units_Resource, arkui_component_units_Font_serializer, DividerStyleOptions_serializer, Offset_serializer, Font as arkui_component_units_Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, EdgeOutlineWidths, EdgeColors, EdgeOutlineWidths_serializer, EdgeColors_serializer } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { extractors, ContentModifier, AttributeModifier, hookSelectContentModifier, hookSelectSetDividerMethod, hookSelectAttributeModifier, AttributeUpdater } from '#handwritten'
+import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { ArkThemeScopeManager } from '#arktheme'
+import { TextModifier_serializer } from './../framework/TextModifier'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { uiMaterial_Material_serializer } from './../framework/ohos.arkui.uiMaterial'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { Color as arkui_component_enums_Color, OptionWidthMode } from './enums'
+import { ControlSize } from './button'
+import { DividerOptions } from './textPicker'
+import { TextModifier } from 'arkui.TextModifier'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
+import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
+import { CustomBuilder } from './builder'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { SelectModifier } from './../SelectModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+export interface MenuItemConfiguration {
+    enabled: boolean
+    contentModifier: ContentModifier<MenuItemConfiguration>
     value: ResourceStr
     icon?: ResourceStr | undefined
     symbolIcon?: SymbolGlyphModifier | undefined
@@ -53,70 +56,47 @@ export interface MenuItemConfiguration extends CommonConfiguration<MenuItemConfi
     index: int32
     triggerSelect(index: int32, value: string): void
 }
-export class MenuItemConfigurationInternal implements MaterializedBase,MenuItemConfiguration {
-    peer?: Finalizable | undefined = undefined
+export class MenuItemConfigurationInternal implements MaterializedBase,CommonConfiguration<MenuItemConfiguration>,MenuItemConfiguration {
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get enabled(): boolean {
-        return this.getEnabled()
-    }
-    set enabled(enabled: boolean) {
-        this.setEnabled(enabled)
-    }
-    get contentModifier(): ContentModifier<MenuItemConfiguration> {
-        return this.getContentModifier()
-    }
-    set contentModifier(contentModifier: ContentModifier<MenuItemConfiguration>) {
-        this.setContentModifier(contentModifier)
-    }
-    get value(): ResourceStr {
-        return this.getValue()
-    }
-    set value(value: ResourceStr) {
-        this.setValue(value)
-    }
-    get icon(): ResourceStr | undefined {
-        return this.getIcon()
-    }
-    set icon(icon: ResourceStr | undefined) {
-        const icon_NonNull  = (icon as ResourceStr)
-        this.setIcon(icon_NonNull)
-    }
-    get symbolIcon(): SymbolGlyphModifier | undefined {
-        return this.getSymbolIcon()
-    }
-    set symbolIcon(symbolIcon: SymbolGlyphModifier | undefined) {
-        const symbolIcon_NonNull  = (symbolIcon as SymbolGlyphModifier)
-        this.setSymbolIcon(symbolIcon_NonNull)
-    }
-    get selected(): boolean {
-        return this.getSelected()
-    }
-    set selected(selected: boolean) {
-        this.setSelected(selected)
-    }
-    get index(): int32 {
-        return this.getIndex()
-    }
-    set index(index: int32) {
-        this.setIndex(index)
-    }
-    constructor(peerPtr: KPointer) {
+    public enabled: boolean
+    public contentModifier: ContentModifier<MenuItemConfiguration>
+    public value: ResourceStr
+    public icon?: ResourceStr | undefined
+    public symbolIcon?: SymbolGlyphModifier | undefined
+    public selected: boolean
+    public index: int32
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, MenuItemConfigurationInternal.getFinalizer())
+        this.enabled = this.getEnabled()
+        this.contentModifier = this.getContentModifier()
+        this.value = this.getValue()
+        this.icon = this.getIcon()
+        this.symbolIcon = this.getSymbolIcon()
+        this.selected = this.getSelected()
+        this.index = this.getIndex()
     }
     constructor() {
-        this(MenuItemConfigurationInternal.construct())
+        this(MaterializedBaseTag.NOP, MenuItemConfigurationInternal.construct())
+        this.enabled = this.getEnabled()
+        this.contentModifier = this.getContentModifier()
+        this.value = this.getValue()
+        this.icon = this.getIcon()
+        this.symbolIcon = this.getSymbolIcon()
+        this.selected = this.getSelected()
+        this.index = this.getIndex()
     }
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_construct()
+        const retval = ArkUIGeneratedNativeModule._MenuItemConfiguration_construct()
         return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._MenuItemConfiguration_getFinalizer()
     }
     public static fromPtr(ptr: KPointer): MenuItemConfigurationInternal {
-        return new MenuItemConfigurationInternal(ptr)
+        return new MenuItemConfigurationInternal(MaterializedBaseTag.NOP, ptr)
     }
     public triggerSelect(index: int32, value: string): void {
         const index_casted = index as (int32)
@@ -180,95 +160,90 @@ export class MenuItemConfigurationInternal implements MaterializedBase,MenuItemC
         this.setIndex_serialize(index_casted)
         return
     }
-    triggerSelect_serialize(index: int32, value: string): void {
+    private triggerSelect_serialize(index: int32, value: string): void {
         ArkUIGeneratedNativeModule._MenuItemConfiguration_triggerSelect(this.peer!.ptr, index, value)
     }
     private getEnabled_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getEnabled(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._MenuItemConfiguration_getEnabled(this.peer!.ptr)
         return retval
     }
     private setEnabled_serialize(enabled: boolean): void {
-        ArkUIGeneratedNativeModule._MenuItemConfiguration_setEnabled(this.peer!.ptr, enabled ? 1 : 0)
+        ArkUIGeneratedNativeModule._MenuItemConfiguration_setEnabled(this.peer!.ptr, enabled ? true : false)
     }
     private getContentModifier_serialize(): ContentModifier<MenuItemConfiguration> {
-        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getContentModifier(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : ContentModifier<MenuItemConfiguration> = (retvalDeserializer.readObject() as ContentModifier<MenuItemConfiguration>)
+        const retval = ArkUIGeneratedNativeModule._MenuItemConfiguration_getContentModifier(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult: ContentModifier<MenuItemConfiguration> = (retvalDeserializer.readObject() as ContentModifier<MenuItemConfiguration>)
         return returnResult
     }
     private setContentModifier_serialize(contentModifier: ContentModifier<MenuItemConfiguration>): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteObject(contentModifier)
         ArkUIGeneratedNativeModule._MenuItemConfiguration_setContentModifier(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getValue_serialize(): ResourceStr {
-        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getValue(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : ResourceStr = ""
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : string | Resource | undefined
-            if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = (retvalDeserializer.readString() as string)
-            } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = Resource_serializer.read(retvalDeserializer)
-            } else {
-                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
-            }
-            buffer = (buffer_ as string | Resource)
+        const retval = ArkUIGeneratedNativeModule._MenuItemConfiguration_getValue(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferUnionSelector: int32 = retvalDeserializer.readInt8()
+        let buffer: string | arkui_component_units_Resource | undefined
+        if (bufferUnionSelector == (0).toByte()) {
+            buffer = (retvalDeserializer.readString() as string)
+        } else if (bufferUnionSelector == (1).toByte()) {
+            buffer = global_resource_Resource_serializer.read(retvalDeserializer)
+        } else {
+            throw new Error('One of the branches for buffer has to be chosen through deserialisation.')
         }
-        const returnResult : ResourceStr = buffer
+        const returnResult: ResourceStr = (buffer as string | arkui_component_units_Resource)
         return returnResult
     }
     private setValue_serialize(value: ResourceStr): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value instanceof string) {
             thisSerializer.writeInt8((0).toByte())
-            const valueForIdx0  = value as string
+            const valueForIdx0 = value as string
             thisSerializer.writeString(valueForIdx0)
-        } else if (value instanceof Resource) {
+        } else if (value instanceof arkui_component_units_Resource) {
             thisSerializer.writeInt8((1).toByte())
-            const valueForIdx1  = value as Resource
-            Resource_serializer.write(thisSerializer, valueForIdx1)
+            const valueForIdx1 = value as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(thisSerializer, valueForIdx1)
         }
         ArkUIGeneratedNativeModule._MenuItemConfiguration_setValue(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getIcon_serialize(): ResourceStr | undefined {
-        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getIcon(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : ResourceStr | undefined = undefined
+        const retval = ArkUIGeneratedNativeModule._MenuItemConfiguration_getIcon(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: ResourceStr | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : string | Resource | undefined
-            if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = (retvalDeserializer.readString() as string)
-            } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = Resource_serializer.read(retvalDeserializer)
+            const bufferOptUnionSelector: int32 = retvalDeserializer.readInt8()
+            let bufferOpt: string | arkui_component_units_Resource | undefined
+            if (bufferOptUnionSelector == (0).toByte()) {
+                bufferOpt = (retvalDeserializer.readString() as string)
+            } else if (bufferOptUnionSelector == (1).toByte()) {
+                bufferOpt = global_resource_Resource_serializer.read(retvalDeserializer)
             } else {
-                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for bufferOpt has to be chosen through deserialisation.')
             }
-            buffer = (buffer_ as string | Resource)
+            buffer = (bufferOpt as string | arkui_component_units_Resource)
         }
-        const returnResult : ResourceStr | undefined = buffer
+        const returnResult: ResourceStr | undefined = buffer
         return returnResult
     }
     private setIcon_serialize(icon: ResourceStr | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (icon !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const iconTmpValue  = icon!
+            const iconTmpValue = icon!
             if (iconTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toByte())
-                const iconTmpValueForIdx0  = iconTmpValue as string
+                const iconTmpValueForIdx0 = iconTmpValue as string
                 thisSerializer.writeString(iconTmpValueForIdx0)
-            } else if (iconTmpValue instanceof Resource) {
+            } else if (iconTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const iconTmpValueForIdx1  = iconTmpValue as Resource
-                Resource_serializer.write(thisSerializer, iconTmpValueForIdx1)
+                const iconTmpValueForIdx1 = iconTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, iconTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -277,21 +252,21 @@ export class MenuItemConfigurationInternal implements MaterializedBase,MenuItemC
         thisSerializer.release()
     }
     private getSymbolIcon_serialize(): SymbolGlyphModifier | undefined {
-        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getSymbolIcon(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : SymbolGlyphModifier | undefined = undefined
+        const retval = ArkUIGeneratedNativeModule._MenuItemConfiguration_getSymbolIcon(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: SymbolGlyphModifier | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (SymbolGlyphModifier_serializer.read(retvalDeserializer) as SymbolGlyphModifier)
         }
-        const returnResult : SymbolGlyphModifier | undefined = buffer
+        const returnResult: SymbolGlyphModifier | undefined = buffer
         return returnResult
     }
     private setSymbolIcon_serialize(symbolIcon: SymbolGlyphModifier | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (symbolIcon !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const symbolIconTmpValue  = symbolIcon!
+            const symbolIconTmpValue = symbolIcon!
             SymbolGlyphModifier_serializer.write(thisSerializer, symbolIconTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -300,14 +275,14 @@ export class MenuItemConfigurationInternal implements MaterializedBase,MenuItemC
         thisSerializer.release()
     }
     private getSelected_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getSelected(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._MenuItemConfiguration_getSelected(this.peer!.ptr)
         return retval
     }
     private setSelected_serialize(selected: boolean): void {
-        ArkUIGeneratedNativeModule._MenuItemConfiguration_setSelected(this.peer!.ptr, selected ? 1 : 0)
+        ArkUIGeneratedNativeModule._MenuItemConfiguration_setSelected(this.peer!.ptr, selected ? true : false)
     }
     private getIndex_serialize(): int32 {
-        const retval  = ArkUIGeneratedNativeModule._MenuItemConfiguration_getIndex(this.peer!.ptr)
+        const retval = ArkUIGeneratedNativeModule._MenuItemConfiguration_getIndex(this.peer!.ptr)
         return retval
     }
     private setIndex_serialize(index: int32): void {
@@ -316,48 +291,48 @@ export class MenuItemConfigurationInternal implements MaterializedBase,MenuItemC
 }
 export class ArkSelectPeer extends ArkCommonMethodPeer {
     attributeSet?: SelectModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkSelectPeer {
-        const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._Select_construct(peerId, flags)
-        const _peer  = new ArkSelectPeer(_peerPtr, peerId, 'Select', flags)
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._Select_construct(peerId, flags)
+        const _peer = new ArkSelectPeer(_peerPtr, peerId, 'Select', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setSelectOptionsAttribute(options: Array<SelectOption>): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((options.length).toInt())
         for (let optionsCounterI = 0; optionsCounterI < options.length; optionsCounterI++) {
-            const optionsTmpElement : SelectOption = options[optionsCounterI]
+            const optionsTmpElement: SelectOption = options[optionsCounterI]
             SelectOption_serializer.write(thisSerializer, optionsTmpElement)
         }
         ArkUIGeneratedNativeModule._SelectInterface_setSelectOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSelectedAttribute(value: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setSelectedAttribute(value: int32 | arkui_component_units_Resource | Bindable<int32> | Bindable<global_resource_Resource> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as int32
+                const valueTmpValueForIdx0 = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Bindable<int32>
+                const valueTmpValueForIdx2 = valueTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(thisSerializer, valueTmpValueForIdx2)
             } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Bindable<Resource>
-                Bindable_Global_Resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3 = valueTmpValue as Bindable<global_resource_Resource>
+                Bindable_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -365,31 +340,31 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setSelected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setValueAttribute(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setValueAttribute(value: ResourceStr | Bindable<string> | Bindable<global_resource_Resource> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             if (valueTmpValue instanceof ResourceStr) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as ResourceStr
+                const valueTmpValueForIdx0 = valueTmpValue as ResourceStr
                 if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((0).toByte())
-                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    const valueTmpValueForIdx0ForIdx0 = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
-                } else if (valueTmpValueForIdx0 instanceof Resource) {
+                } else if (valueTmpValueForIdx0 instanceof arkui_component_units_Resource) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as Resource
-                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx1)
+                    const valueTmpValueForIdx0ForIdx1 = valueTmpValueForIdx0 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx1)
                 }
             } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Bindable<string>
+                const valueTmpValueForIdx1 = valueTmpValue as Bindable<string>
                 Bindable_String_serializer.write(thisSerializer, valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Bindable<Resource>
-                Bindable_Global_Resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2 = valueTmpValue as Bindable<global_resource_Resource>
+                Bindable_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -397,12 +372,12 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setValue(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontAttribute(value: Font | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setFontAttribute(value: arkui_component_units_Font | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            Font_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValue = value!
+            arkui_component_units_Font_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -410,26 +385,26 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setFontColorAttribute(value: ResourceColor | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0 = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as int32
+                const valueTmpValueForIdx1 = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
+                const valueTmpValueForIdx2 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -438,26 +413,26 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setSelectedOptionBgColorAttribute(value: ResourceColor | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0 = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as int32
+                const valueTmpValueForIdx1 = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
+                const valueTmpValueForIdx2 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -465,12 +440,12 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setSelectedOptionBgColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSelectedOptionFontAttribute(value: Font | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setSelectedOptionFontAttribute(value: arkui_component_units_Font | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            Font_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValue = value!
+            arkui_component_units_Font_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -478,26 +453,26 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setSelectedOptionFontColorAttribute(value: ResourceColor | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0 = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as int32
+                const valueTmpValueForIdx1 = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
+                const valueTmpValueForIdx2 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -506,26 +481,26 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setOptionBgColorAttribute(value: ResourceColor | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0 = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as int32
+                const valueTmpValueForIdx1 = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
+                const valueTmpValueForIdx2 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -533,12 +508,12 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setOptionBgColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOptionFontAttribute(value: Font | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setOptionFontAttribute(value: arkui_component_units_Font | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            Font_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValue = value!
+            arkui_component_units_Font_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -546,26 +521,26 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setOptionFontColorAttribute(value: ResourceColor | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0 = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as int32
+                const valueTmpValueForIdx1 = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
+                const valueTmpValueForIdx2 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -574,10 +549,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setOnSelectAttribute(value: OnSelectCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -586,22 +561,22 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setSpaceAttribute(value: Length | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as string
+                const valueTmpValueForIdx0 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as double
+                const valueTmpValueForIdx1 = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -610,10 +585,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setArrowPositionAttribute(value: ArrowPosition | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = (value as ArrowPosition)
+            const valueTmpValue = (value as ArrowPosition)
             thisSerializer.writeInt32(valueTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -622,29 +597,29 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setOptionWidthAttribute(value: Dimension | OptionWidthMode | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             if (valueTmpValue instanceof Dimension) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Dimension
+                const valueTmpValueForIdx0 = valueTmpValue as Dimension
                 if (valueTmpValueForIdx0 instanceof string) {
                     thisSerializer.writeInt8((0).toByte())
-                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
+                    const valueTmpValueForIdx0ForIdx0 = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
                 } else if (valueTmpValueForIdx0 instanceof number) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
+                    const valueTmpValueForIdx0ForIdx1 = valueTmpValueForIdx0 as number
                     thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
-                } else if (valueTmpValueForIdx0 instanceof Resource) {
+                } else if (valueTmpValueForIdx0 instanceof global_resource_Resource) {
                     thisSerializer.writeInt8((2).toByte())
-                    const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
-                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
+                    const valueTmpValueForIdx0ForIdx2 = valueTmpValueForIdx0 as global_resource_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx2)
                 }
             } else if (valueTmpValue instanceof OptionWidthMode) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as OptionWidthMode
+                const valueTmpValueForIdx1 = valueTmpValue as OptionWidthMode
                 thisSerializer.writeInt32(valueTmpValueForIdx1.getOrdinal())
             }
         } else {
@@ -654,22 +629,22 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setOptionHeightAttribute(value: Dimension | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as string
+                const valueTmpValueForIdx0 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof number) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as number
+                const valueTmpValueForIdx1 = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2 = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -678,26 +653,26 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setMenuBackgroundColorAttribute(value: ResourceColor | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0 = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as int32
+                const valueTmpValueForIdx1 = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
+                const valueTmpValueForIdx2 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -706,10 +681,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setMenuBackgroundBlurStyleAttribute(value: BlurStyle | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = (value as BlurStyle)
+            const valueTmpValue = (value as BlurStyle)
             thisSerializer.writeInt32(valueTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -718,10 +693,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setControlSizeAttribute(value: ControlSize | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = (value as ControlSize)
+            const valueTmpValue = (value as ControlSize)
             thisSerializer.writeInt32(valueTmpValue.getOrdinal())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -730,10 +705,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setTextModifierAttribute(value: TextModifier | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             TextModifier_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -742,10 +717,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setArrowModifierAttribute(value: SymbolGlyphModifier | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             SymbolGlyphModifier_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -754,10 +729,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setOptionTextModifierAttribute(value: TextModifier | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             TextModifier_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -766,10 +741,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setSelectedOptionTextModifierAttribute(value: TextModifier | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             TextModifier_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -778,10 +753,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setDividerStyleAttribute(value: DividerStyleOptions | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             DividerStyleOptions_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -790,10 +765,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setAvoidanceAttribute(value: AvoidanceMode | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = (value as AvoidanceMode)
+            const valueTmpValue = (value as AvoidanceMode)
             thisSerializer.writeInt32(valueTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -802,10 +777,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setMenuOutlineAttribute(value: MenuOutlineOptions | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             MenuOutlineOptions_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -814,10 +789,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setShowInSubWindowAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeBoolean(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -826,10 +801,10 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setShowDefaultSelectedIconAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeBoolean(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -837,39 +812,11 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setShowDefaultSelectedIcon(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBackgroundColorAttribute(value: ResourceColor | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
-                thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
-            } else if (valueTmpValue instanceof int32) {
-                thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as int32
-                thisSerializer.writeInt32(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof string) {
-                thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
-                thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
-            }
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._SelectAttribute_setBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setKeyboardAvoidModeAttribute(value: MenuKeyboardAvoidMode | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = (value as MenuKeyboardAvoidMode)
+            const valueTmpValue = (value as MenuKeyboardAvoidMode)
             thisSerializer.writeInt32(valueTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -877,23 +824,23 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setKeyboardAvoidMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinKeyboardAvoidDistanceAttribute(value: LengthMetrics | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setMinKeyboardAvoidDistanceAttribute(value: arkui_Graphics_LengthMetrics | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValue = value!
+            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectAttribute_setMinKeyboardAvoidDistance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMenuSystemMaterialAttribute(value: uiMaterial.Material | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setMenuSystemMaterialAttribute(value: SystemUiMaterial | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             uiMaterial_Material_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -902,17 +849,17 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setMenuAlignAttribute(alignType: MenuAlignType | undefined, offset?: Offset): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (alignType !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const alignTypeTmpValue  = (alignType as MenuAlignType)
+            const alignTypeTmpValue = (alignType as MenuAlignType)
             thisSerializer.writeInt32(alignTypeTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (offset !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const offsetTmpValue  = offset!
+            const offsetTmpValue = offset!
             Offset_serializer.write(thisSerializer, offsetTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -946,545 +893,289 @@ export interface MenuOutlineOptions {
 }
 export interface SelectAttribute extends CommonMethod {
     setSelectOptions(options: Array<SelectOption>): this {
-        throw new Error("Unimplemented method setSelectOptions")
+        throw new Error('Unimplemented method setSelectOptions')
     }
-    selected(value: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined): this {
-        throw new Error("Unimplemented method selected")
+    selected(value: int32 | arkui_component_units_Resource | Bindable<int32> | Bindable<global_resource_Resource> | undefined): this {
+        throw new Error('Unimplemented method selected')
     }
-    value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
-        throw new Error("Unimplemented method value")
+    value(value: ResourceStr | Bindable<string> | Bindable<global_resource_Resource> | undefined): this {
+        throw new Error('Unimplemented method value')
     }
-    font(value: Font | undefined): this {
-        throw new Error("Unimplemented method font")
+    font(value: arkui_component_units_Font | undefined): this {
+        throw new Error('Unimplemented method font')
     }
     fontColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method fontColor")
+        throw new Error('Unimplemented method fontColor')
     }
     selectedOptionBgColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method selectedOptionBgColor")
+        throw new Error('Unimplemented method selectedOptionBgColor')
     }
-    selectedOptionFont(value: Font | undefined): this {
-        throw new Error("Unimplemented method selectedOptionFont")
+    selectedOptionFont(value: arkui_component_units_Font | undefined): this {
+        throw new Error('Unimplemented method selectedOptionFont')
     }
     selectedOptionFontColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method selectedOptionFontColor")
+        throw new Error('Unimplemented method selectedOptionFontColor')
     }
     optionBgColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method optionBgColor")
+        throw new Error('Unimplemented method optionBgColor')
     }
-    optionFont(value: Font | undefined): this {
-        throw new Error("Unimplemented method optionFont")
+    optionFont(value: arkui_component_units_Font | undefined): this {
+        throw new Error('Unimplemented method optionFont')
     }
     optionFontColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method optionFontColor")
+        throw new Error('Unimplemented method optionFontColor')
     }
     onSelect(value: OnSelectCallback | undefined): this {
-        throw new Error("Unimplemented method onSelect")
+        throw new Error('Unimplemented method onSelect')
     }
     space(value: Length | undefined): this {
-        throw new Error("Unimplemented method space")
+        throw new Error('Unimplemented method space')
     }
     arrowPosition(value: ArrowPosition | undefined): this {
-        throw new Error("Unimplemented method arrowPosition")
+        throw new Error('Unimplemented method arrowPosition')
     }
     optionWidth(value: Dimension | OptionWidthMode | undefined): this {
-        throw new Error("Unimplemented method optionWidth")
+        throw new Error('Unimplemented method optionWidth')
     }
     optionHeight(value: Dimension | undefined): this {
-        throw new Error("Unimplemented method optionHeight")
+        throw new Error('Unimplemented method optionHeight')
     }
     menuBackgroundColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method menuBackgroundColor")
+        throw new Error('Unimplemented method menuBackgroundColor')
     }
     menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
-        throw new Error("Unimplemented method menuBackgroundBlurStyle")
+        throw new Error('Unimplemented method menuBackgroundBlurStyle')
     }
     controlSize(value: ControlSize | undefined): this {
-        throw new Error("Unimplemented method controlSize")
+        throw new Error('Unimplemented method controlSize')
     }
     menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
-        throw new Error("Unimplemented method menuItemContentModifier")
+        throw new Error('Unimplemented method menuItemContentModifier')
     }
     divider(value: DividerOptions | null | undefined): this {
-        throw new Error("Unimplemented method divider")
+        throw new Error('Unimplemented method divider')
     }
     textModifier(value: TextModifier | undefined): this {
-        throw new Error("Unimplemented method textModifier")
+        throw new Error('Unimplemented method textModifier')
     }
     arrowModifier(value: SymbolGlyphModifier | undefined): this {
-        throw new Error("Unimplemented method arrowModifier")
+        throw new Error('Unimplemented method arrowModifier')
     }
     optionTextModifier(value: TextModifier | undefined): this {
-        throw new Error("Unimplemented method optionTextModifier")
+        throw new Error('Unimplemented method optionTextModifier')
     }
     selectedOptionTextModifier(value: TextModifier | undefined): this {
-        throw new Error("Unimplemented method selectedOptionTextModifier")
+        throw new Error('Unimplemented method selectedOptionTextModifier')
     }
     dividerStyle(value: DividerStyleOptions | undefined): this {
-        throw new Error("Unimplemented method dividerStyle")
+        throw new Error('Unimplemented method dividerStyle')
     }
     avoidance(value: AvoidanceMode | undefined): this {
-        throw new Error("Unimplemented method avoidance")
+        throw new Error('Unimplemented method avoidance')
     }
     menuOutline(value: MenuOutlineOptions | undefined): this {
-        throw new Error("Unimplemented method menuOutline")
+        throw new Error('Unimplemented method menuOutline')
     }
     showInSubWindow(value: boolean | undefined): this {
-        throw new Error("Unimplemented method showInSubWindow")
+        throw new Error('Unimplemented method showInSubWindow')
     }
     showDefaultSelectedIcon(value: boolean | undefined): this {
-        throw new Error("Unimplemented method showDefaultSelectedIcon")
+        throw new Error('Unimplemented method showDefaultSelectedIcon')
     }
-    backgroundColor(value: ResourceColor | undefined): this
     keyboardAvoidMode(value: MenuKeyboardAvoidMode | undefined): this {
-        throw new Error("Unimplemented method keyboardAvoidMode")
+        throw new Error('Unimplemented method keyboardAvoidMode')
     }
-    minKeyboardAvoidDistance(value: LengthMetrics | undefined): this {
-        throw new Error("Unimplemented method minKeyboardAvoidDistance")
+    minKeyboardAvoidDistance(value: arkui_Graphics_LengthMetrics | undefined): this {
+        throw new Error('Unimplemented method minKeyboardAvoidDistance')
     }
-    menuSystemMaterial(value: uiMaterial.Material | undefined): this {
-        throw new Error("Unimplemented method menuSystemMaterial")
+    menuSystemMaterial(value: SystemUiMaterial | undefined): this {
+        throw new Error('Unimplemented method menuSystemMaterial')
     }
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
-        throw new Error("Unimplemented method menuAlign")
+        throw new Error('Unimplemented method menuAlign')
     }
     attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttribute {
-    selected_value?: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined
-    value_value?: ResourceStr | Bindable<string> | Bindable<Resource> | undefined
-    font_value?: Font | undefined
-    fontColor_value?: ResourceColor | undefined
-    selectedOptionBgColor_value?: ResourceColor | undefined
-    selectedOptionFont_value?: Font | undefined
-    selectedOptionFontColor_value?: ResourceColor | undefined
-    optionBgColor_value?: ResourceColor | undefined
-    optionFont_value?: Font | undefined
-    optionFontColor_value?: ResourceColor | undefined
-    onSelect_value?: OnSelectCallback | undefined
-    space_value?: Length | undefined
-    arrowPosition_value?: ArrowPosition | undefined
-    optionWidth_value?: Dimension | OptionWidthMode | undefined
-    optionHeight_value?: Dimension | undefined
-    menuBackgroundColor_value?: ResourceColor | undefined
-    menuBackgroundBlurStyle_value?: BlurStyle | undefined
-    controlSize_value?: ControlSize | undefined
-    menuItemContentModifier_value?: ContentModifier<MenuItemConfiguration> | undefined
-    divider_value?: DividerOptions | null | undefined
-    textModifier_value?: TextModifier | undefined
-    arrowModifier_value?: SymbolGlyphModifier | undefined
-    optionTextModifier_value?: TextModifier | undefined
-    selectedOptionTextModifier_value?: TextModifier | undefined
-    dividerStyle_value?: DividerStyleOptions | undefined
-    avoidance_value?: AvoidanceMode | undefined
-    menuOutline_value?: MenuOutlineOptions | undefined
-    showInSubWindow_value?: boolean | undefined
-    showDefaultSelectedIcon_value?: boolean | undefined
-    attributeModifier_value?: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined
-    backgroundColor_value?: ResourceColor | undefined
-    keyboardAvoidMode_value?: MenuKeyboardAvoidMode | undefined
-    minKeyboardAvoidDistance_value?: LengthMetrics | undefined
-    menuSystemMaterial_value?: uiMaterial.Material | undefined
-    setSelectOptions(options: Array<SelectOption>): this {
-        return this
-    }
-    selected(value: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined): this {
-        return this
-    }
-    value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
-        return this
-    }
-    font(value: Font | undefined): this {
-        return this
-    }
-    fontColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    selectedOptionBgColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    selectedOptionFont(value: Font | undefined): this {
-        return this
-    }
-    selectedOptionFontColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    optionBgColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    optionFont(value: Font | undefined): this {
-        return this
-    }
-    optionFontColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    onSelect(value: OnSelectCallback | undefined): this {
-        return this
-    }
-    space(value: Length | undefined): this {
-        return this
-    }
-    arrowPosition(value: ArrowPosition | undefined): this {
-        return this
-    }
-    optionWidth(value: Dimension | OptionWidthMode | undefined): this {
-        return this
-    }
-    optionHeight(value: Dimension | undefined): this {
-        return this
-    }
-    menuBackgroundColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
-        return this
-    }
-    controlSize(value: ControlSize | undefined): this {
-        return this
-    }
-    menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
-        return this
-    }
-    divider(value: DividerOptions | null | undefined): this {
-        return this
-    }
-    textModifier(value: TextModifier | undefined): this {
-        return this
-    }
-    arrowModifier(value: SymbolGlyphModifier | undefined): this {
-        return this
-    }
-    optionTextModifier(value: TextModifier | undefined): this {
-        return this
-    }
-    selectedOptionTextModifier(value: TextModifier | undefined): this {
-        return this
-    }
-    dividerStyle(value: DividerStyleOptions | undefined): this {
-        return this
-    }
-    avoidance(value: AvoidanceMode | undefined): this {
-        return this
-    }
-    menuOutline(value: MenuOutlineOptions | undefined): this {
-        return this
-    }
-    showInSubWindow(value: boolean | undefined): this {
-        return this
-    }
-    showDefaultSelectedIcon(value: boolean | undefined): this {
-        return this
-    }
-    backgroundColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    keyboardAvoidMode(value: MenuKeyboardAvoidMode | undefined): this {
-        return this
-    }
-    minKeyboardAvoidDistance(value: LengthMetrics | undefined): this {
-        return this
-    }
-    menuSystemMaterial(value: uiMaterial.Material | undefined): this {
-        return this
-    }
-    menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkSelectComponent extends ArkCommonMethodComponent implements SelectAttribute {
     getPeer(): ArkSelectPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkSelectPeer)
     }
     public setSelectOptions(options: Array<SelectOption>): this {
-        if (this.checkPriority("setSelectOptions")) {
-            const options_casted = options as (Array<SelectOption>)
-            this.getPeer()?.setSelectOptionsAttribute(options_casted)
-            this.applyOptionsFinish('SelectAttribute');
-            return this
-        }
+        const options_casted = options as (Array<SelectOption>)
+        this.getPeer()?.setSelectOptionsAttribute(options_casted)
+        this.applyOptionsFinish('SelectAttribute');
         return this
     }
-    public selected(value: int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined): this {
-        if (this.checkPriority("selected")) {
-            const value_casted = value as (int32 | Resource | Bindable<int32> | Bindable<Resource> | undefined)
-            this.getPeer()?.setSelectedAttribute(value_casted)
-            return this
-        }
+    public selected(value: int32 | arkui_component_units_Resource | Bindable<int32> | Bindable<global_resource_Resource> | undefined): this {
+        const value_casted = value as (int32 | arkui_component_units_Resource | Bindable<int32> | Bindable<global_resource_Resource> | undefined)
+        this.getPeer()?.setSelectedAttribute(value_casted)
         return this
     }
-    public value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
-        if (this.checkPriority("value")) {
-            const value_casted = value as (ResourceStr | Bindable<string> | Bindable<Resource> | undefined)
-            this.getPeer()?.setValueAttribute(value_casted)
-            return this
-        }
+    public value(value: ResourceStr | Bindable<string> | Bindable<global_resource_Resource> | undefined): this {
+        const value_casted = value as (ResourceStr | Bindable<string> | Bindable<global_resource_Resource> | undefined)
+        this.getPeer()?.setValueAttribute(value_casted)
         return this
     }
-    public font(value: Font | undefined): this {
-        if (this.checkPriority("font")) {
-            const value_casted = value as (Font | undefined)
-            this.getPeer()?.setFontAttribute(value_casted)
-            return this
-        }
+    public font(value: arkui_component_units_Font | undefined): this {
+        const value_casted = value as (arkui_component_units_Font | undefined)
+        this.getPeer()?.setFontAttribute(value_casted)
         return this
     }
     public fontColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("fontColor")) {
-            const value_casted = value as (ResourceColor | undefined)
-            this.getPeer()?.setFontColorAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ResourceColor | undefined)
+        this.getPeer()?.setFontColorAttribute(value_casted)
         return this
     }
     public selectedOptionBgColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("selectedOptionBgColor")) {
-            const value_casted = value as (ResourceColor | undefined)
-            this.getPeer()?.setSelectedOptionBgColorAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ResourceColor | undefined)
+        this.getPeer()?.setSelectedOptionBgColorAttribute(value_casted)
         return this
     }
-    public selectedOptionFont(value: Font | undefined): this {
-        if (this.checkPriority("selectedOptionFont")) {
-            const value_casted = value as (Font | undefined)
-            this.getPeer()?.setSelectedOptionFontAttribute(value_casted)
-            return this
-        }
+    public selectedOptionFont(value: arkui_component_units_Font | undefined): this {
+        const value_casted = value as (arkui_component_units_Font | undefined)
+        this.getPeer()?.setSelectedOptionFontAttribute(value_casted)
         return this
     }
     public selectedOptionFontColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("selectedOptionFontColor")) {
-            const value_casted = value as (ResourceColor | undefined)
-            this.getPeer()?.setSelectedOptionFontColorAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ResourceColor | undefined)
+        this.getPeer()?.setSelectedOptionFontColorAttribute(value_casted)
         return this
     }
     public optionBgColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("optionBgColor")) {
-            const value_casted = value as (ResourceColor | undefined)
-            this.getPeer()?.setOptionBgColorAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ResourceColor | undefined)
+        this.getPeer()?.setOptionBgColorAttribute(value_casted)
         return this
     }
-    public optionFont(value: Font | undefined): this {
-        if (this.checkPriority("optionFont")) {
-            const value_casted = value as (Font | undefined)
-            this.getPeer()?.setOptionFontAttribute(value_casted)
-            return this
-        }
+    public optionFont(value: arkui_component_units_Font | undefined): this {
+        const value_casted = value as (arkui_component_units_Font | undefined)
+        this.getPeer()?.setOptionFontAttribute(value_casted)
         return this
     }
     public optionFontColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("optionFontColor")) {
-            const value_casted = value as (ResourceColor | undefined)
-            this.getPeer()?.setOptionFontColorAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ResourceColor | undefined)
+        this.getPeer()?.setOptionFontColorAttribute(value_casted)
         return this
     }
     public onSelect(value: OnSelectCallback | undefined): this {
-        if (this.checkPriority("onSelect")) {
-            const value_casted = value as (OnSelectCallback | undefined)
-            this.getPeer()?.setOnSelectAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (OnSelectCallback | undefined)
+        this.getPeer()?.setOnSelectAttribute(value_casted)
         return this
     }
     public space(value: Length | undefined): this {
-        if (this.checkPriority("space")) {
-            const value_casted = value as (Length | undefined)
-            this.getPeer()?.setSpaceAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (Length | undefined)
+        this.getPeer()?.setSpaceAttribute(value_casted)
         return this
     }
     public arrowPosition(value: ArrowPosition | undefined): this {
-        if (this.checkPriority("arrowPosition")) {
-            const value_casted = value as (ArrowPosition | undefined)
-            this.getPeer()?.setArrowPositionAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ArrowPosition | undefined)
+        this.getPeer()?.setArrowPositionAttribute(value_casted)
         return this
     }
     public optionWidth(value: Dimension | OptionWidthMode | undefined): this {
-        if (this.checkPriority("optionWidth")) {
-            const value_casted = value as (Dimension | OptionWidthMode | undefined)
-            this.getPeer()?.setOptionWidthAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (Dimension | OptionWidthMode | undefined)
+        this.getPeer()?.setOptionWidthAttribute(value_casted)
         return this
     }
     public optionHeight(value: Dimension | undefined): this {
-        if (this.checkPriority("optionHeight")) {
-            const value_casted = value as (Dimension | undefined)
-            this.getPeer()?.setOptionHeightAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (Dimension | undefined)
+        this.getPeer()?.setOptionHeightAttribute(value_casted)
         return this
     }
     public menuBackgroundColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("menuBackgroundColor")) {
-            const value_casted = value as (ResourceColor | undefined)
-            this.getPeer()?.setMenuBackgroundColorAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ResourceColor | undefined)
+        this.getPeer()?.setMenuBackgroundColorAttribute(value_casted)
         return this
     }
     public menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
-        if (this.checkPriority("menuBackgroundBlurStyle")) {
-            const value_casted = value as (BlurStyle | undefined)
-            this.getPeer()?.setMenuBackgroundBlurStyleAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (BlurStyle | undefined)
+        this.getPeer()?.setMenuBackgroundBlurStyleAttribute(value_casted)
         return this
     }
     public controlSize(value: ControlSize | undefined): this {
-        if (this.checkPriority("controlSize")) {
-            const value_casted = value as (ControlSize | undefined)
-            this.getPeer()?.setControlSizeAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ControlSize | undefined)
+        this.getPeer()?.setControlSizeAttribute(value_casted)
         return this
     }
     public menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
-        if (this.checkPriority("menuItemContentModifier")) {
-            hookSelectContentModifier(this, value)
-        }
+        hookSelectContentModifier(this, value)
         return this
     }
     public divider(value: DividerOptions | null | undefined): this {
-        if (this.checkPriority("divider")) {
-            hookSelectSetDividerMethod(this, value)
-        }
+        hookSelectSetDividerMethod(this, value)
         return this
     }
     public textModifier(value: TextModifier | undefined): this {
-        if (this.checkPriority("textModifier")) {
-            const value_casted = value as (TextModifier | undefined)
-            this.getPeer()?.setTextModifierAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (TextModifier | undefined)
+        this.getPeer()?.setTextModifierAttribute(value_casted)
         return this
     }
     public arrowModifier(value: SymbolGlyphModifier | undefined): this {
-        if (this.checkPriority("arrowModifier")) {
-            const value_casted = value as (SymbolGlyphModifier | undefined)
-            this.getPeer()?.setArrowModifierAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (SymbolGlyphModifier | undefined)
+        this.getPeer()?.setArrowModifierAttribute(value_casted)
         return this
     }
     public optionTextModifier(value: TextModifier | undefined): this {
-        if (this.checkPriority("optionTextModifier")) {
-            const value_casted = value as (TextModifier | undefined)
-            this.getPeer()?.setOptionTextModifierAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (TextModifier | undefined)
+        this.getPeer()?.setOptionTextModifierAttribute(value_casted)
         return this
     }
     public selectedOptionTextModifier(value: TextModifier | undefined): this {
-        if (this.checkPriority("selectedOptionTextModifier")) {
-            const value_casted = value as (TextModifier | undefined)
-            this.getPeer()?.setSelectedOptionTextModifierAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (TextModifier | undefined)
+        this.getPeer()?.setSelectedOptionTextModifierAttribute(value_casted)
         return this
     }
     public dividerStyle(value: DividerStyleOptions | undefined): this {
-        if (this.checkPriority("dividerStyle")) {
-            const value_casted = value as (DividerStyleOptions | undefined)
-            this.getPeer()?.setDividerStyleAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (DividerStyleOptions | undefined)
+        this.getPeer()?.setDividerStyleAttribute(value_casted)
         return this
     }
     public avoidance(value: AvoidanceMode | undefined): this {
-        if (this.checkPriority("avoidance")) {
-            const value_casted = value as (AvoidanceMode | undefined)
-            this.getPeer()?.setAvoidanceAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (AvoidanceMode | undefined)
+        this.getPeer()?.setAvoidanceAttribute(value_casted)
         return this
     }
     public menuOutline(value: MenuOutlineOptions | undefined): this {
-        if (this.checkPriority("menuOutline")) {
-            const value_casted = value as (MenuOutlineOptions | undefined)
-            this.getPeer()?.setMenuOutlineAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (MenuOutlineOptions | undefined)
+        this.getPeer()?.setMenuOutlineAttribute(value_casted)
         return this
     }
     public showInSubWindow(value: boolean | undefined): this {
-        if (this.checkPriority("showInSubWindow")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setShowInSubWindowAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setShowInSubWindowAttribute(value_casted)
         return this
     }
     public showDefaultSelectedIcon(value: boolean | undefined): this {
-        if (this.checkPriority("showDefaultSelectedIcon")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setShowDefaultSelectedIconAttribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public backgroundColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("backgroundColor")) {
-            const value_casted = value as (ResourceColor | undefined)
-            this.getPeer()?.setBackgroundColorAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setShowDefaultSelectedIconAttribute(value_casted)
         return this
     }
     public keyboardAvoidMode(value: MenuKeyboardAvoidMode | undefined): this {
-        if (this.checkPriority("keyboardAvoidMode")) {
-            const value_casted = value as (MenuKeyboardAvoidMode | undefined)
-            this.getPeer()?.setKeyboardAvoidModeAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (MenuKeyboardAvoidMode | undefined)
+        this.getPeer()?.setKeyboardAvoidModeAttribute(value_casted)
         return this
     }
-    public minKeyboardAvoidDistance(value: LengthMetrics | undefined): this {
-        if (this.checkPriority("minKeyboardAvoidDistance")) {
-            const value_casted = value as (LengthMetrics | undefined)
-            this.getPeer()?.setMinKeyboardAvoidDistanceAttribute(value_casted)
-            return this
-        }
+    public minKeyboardAvoidDistance(value: arkui_Graphics_LengthMetrics | undefined): this {
+        const value_casted = value as (arkui_Graphics_LengthMetrics | undefined)
+        this.getPeer()?.setMinKeyboardAvoidDistanceAttribute(value_casted)
         return this
     }
-    public menuSystemMaterial(value: uiMaterial.Material | undefined): this {
-        if (this.checkPriority("menuSystemMaterial")) {
-            const value_casted = value as (uiMaterial.Material | undefined)
-            this.getPeer()?.setMenuSystemMaterialAttribute(value_casted)
-            return this
-        }
+    public menuSystemMaterial(value: SystemUiMaterial | undefined): this {
+        const value_casted = value as (SystemUiMaterial | undefined)
+        this.getPeer()?.setMenuSystemMaterialAttribute(value_casted)
         return this
     }
     public menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
-        if (this.checkPriority("menuAlign")) {
-            const alignType_casted = alignType as (MenuAlignType | undefined)
-            const offset_casted = offset as (Offset | undefined)
-            this.getPeer()?.setMenuAlignAttribute(alignType_casted, offset_casted)
-            return this
-        }
+        const alignType_casted = alignType as (MenuAlignType | undefined)
+        const offset_casted = offset as (Offset | undefined)
+        this.getPeer()?.setMenuAlignAttribute(alignType_casted, offset_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookSelectAttributeModifier(this, value);
+            hookSelectAttributeModifier(this, value);
         })
         return this
     }
@@ -1499,166 +1190,164 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
 
 @memo
 export function SelectImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: SelectAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkSelectComponent>((): ArkSelectComponent => {
         return new ArkSelectComponent()
     })
-    NodeAttach<ArkSelectPeer>((): ArkSelectPeer => ArkSelectPeer.create(receiver), (peer: ArkSelectPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkSelectPeer>((): ArkSelectPeer => ArkSelectPeer.create(receiver), (_: ArkSelectPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
 export class MenuItemConfiguration_serializer {
     public static write(buffer: SerializerBase, value: MenuItemConfiguration): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): MenuItemConfiguration {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return MenuItemConfigurationInternal.fromPtr(ptr)
     }
 }
 export class SelectOption_serializer {
     public static write(buffer: SerializerBase, value: SelectOption): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForValue  = value.value
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForValue = value.value
         if (valueHolderForValue instanceof string) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForValueForIdx0  = valueHolderForValue as string
+            const valueHolderForValueForIdx0 = valueHolderForValue as string
             valueSerializer.writeString(valueHolderForValueForIdx0)
-        } else if (valueHolderForValue instanceof Resource) {
+        } else if (valueHolderForValue instanceof arkui_component_units_Resource) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForValueForIdx1  = valueHolderForValue as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
+            const valueHolderForValueForIdx1 = valueHolderForValue as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(valueSerializer, valueHolderForValueForIdx1)
         }
-        const valueHolderForIcon  = value.icon
+        const valueHolderForIcon = value.icon
         if (valueHolderForIcon !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForIconTmpValue  = valueHolderForIcon!
+            const valueHolderForIconTmpValue = valueHolderForIcon!
             if (valueHolderForIconTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
+                const valueHolderForIconTmpValueForIdx0 = valueHolderForIconTmpValue as string
                 valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
-            } else if (valueHolderForIconTmpValue instanceof Resource) {
+            } else if (valueHolderForIconTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
+                const valueHolderForIconTmpValueForIdx1 = valueHolderForIconTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForSymbolIcon  = value.symbolIcon
+        const valueHolderForSymbolIcon = value.symbolIcon
         if (valueHolderForSymbolIcon !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForSymbolIconTmpValue  = valueHolderForSymbolIcon!
+            const valueHolderForSymbolIconTmpValue = valueHolderForSymbolIcon!
             SymbolGlyphModifier_serializer.write(valueSerializer, valueHolderForSymbolIconTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): SelectOption {
-        let valueDeserializer : DeserializerBase = buffer
-        const valueTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let valueTmpBuf : string | Resource | undefined
-        if (valueTmpBufUnionSelector == (0).toChar()) {
+        let valueDeserializer: DeserializerBase = buffer
+        const valueTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
+        let valueTmpBuf: string | arkui_component_units_Resource | undefined
+        if (valueTmpBufUnionSelector == (0).toByte()) {
             valueTmpBuf = (valueDeserializer.readString() as string)
-        } else if (valueTmpBufUnionSelector == (1).toChar()) {
-            valueTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else if (valueTmpBufUnionSelector == (1).toByte()) {
+            valueTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
         } else {
-            throw new Error("One of the branches for valueTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for valueTmpBuf has to be chosen through deserialisation.')
         }
-        const valueTmpResult : ResourceStr = (valueTmpBuf as string | Resource)
-        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let iconTmpBuf : ResourceStr | undefined = undefined
+        const valueTmpResult: ResourceStr = (valueTmpBuf as string | arkui_component_units_Resource)
+        const iconTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let iconTmpBuf: ResourceStr | undefined = undefined
         if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const iconTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let iconTmpBuf_ : string | Resource | undefined
-            if (iconTmpBuf_UnionSelector == (0).toChar()) {
-                iconTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (iconTmpBuf_UnionSelector == (1).toChar()) {
-                iconTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const iconTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let iconTmpBufOpt: string | arkui_component_units_Resource | undefined
+            if (iconTmpBufOptUnionSelector == (0).toByte()) {
+                iconTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (iconTmpBufOptUnionSelector == (1).toByte()) {
+                iconTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for iconTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for iconTmpBufOpt has to be chosen through deserialisation.')
             }
-            iconTmpBuf = (iconTmpBuf_ as string | Resource)
+            iconTmpBuf = (iconTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const iconTmpResult : ResourceStr | undefined = iconTmpBuf
-        const symbolIconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let symbolIconTmpBuf : SymbolGlyphModifier | undefined = undefined
+        const iconTmpResult: ResourceStr | undefined = iconTmpBuf
+        const symbolIconTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let symbolIconTmpBuf: SymbolGlyphModifier | undefined = undefined
         if ((symbolIconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             symbolIconTmpBuf = (SymbolGlyphModifier_serializer.read(valueDeserializer) as SymbolGlyphModifier)
         }
-        const symbolIconTmpResult : SymbolGlyphModifier | undefined = symbolIconTmpBuf
-        let value : SelectOption = ({value: valueTmpResult, icon: iconTmpResult, symbolIcon: symbolIconTmpResult} as SelectOption)
+        const symbolIconTmpResult: SymbolGlyphModifier | undefined = symbolIconTmpBuf
+        let value: SelectOption = ({value: valueTmpResult, icon: iconTmpResult, symbolIcon: symbolIconTmpResult} as SelectOption)
         return value
     }
 }
 export class MenuOutlineOptions_serializer {
     public static write(buffer: SerializerBase, value: MenuOutlineOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForWidth  = value.width
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForWidth = value.width
         if (valueHolderForWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForWidthTmpValue  = valueHolderForWidth!
+            const valueHolderForWidthTmpValue = valueHolderForWidth!
             if (valueHolderForWidthTmpValue instanceof Dimension) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as Dimension
+                const valueHolderForWidthTmpValueForIdx0 = valueHolderForWidthTmpValue as Dimension
                 if (valueHolderForWidthTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((0).toByte())
-                    const valueHolderForWidthTmpValueForIdx0ForIdx0  = valueHolderForWidthTmpValueForIdx0 as string
+                    const valueHolderForWidthTmpValueForIdx0ForIdx0 = valueHolderForWidthTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForWidthTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForWidthTmpValueForIdx0ForIdx1  = valueHolderForWidthTmpValueForIdx0 as number
+                    const valueHolderForWidthTmpValueForIdx0ForIdx1 = valueHolderForWidthTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForWidthTmpValueForIdx0ForIdx1)
-                } else if (valueHolderForWidthTmpValueForIdx0 instanceof Resource) {
+                } else if (valueHolderForWidthTmpValueForIdx0 instanceof global_resource_Resource) {
                     valueSerializer.writeInt8((2).toByte())
-                    const valueHolderForWidthTmpValueForIdx0ForIdx2  = valueHolderForWidthTmpValueForIdx0 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx0ForIdx2)
+                    const valueHolderForWidthTmpValueForIdx0ForIdx2 = valueHolderForWidthTmpValueForIdx0 as global_resource_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForWidthTmpValue instanceof EdgeOutlineWidths) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as EdgeOutlineWidths
+                const valueHolderForWidthTmpValueForIdx1 = valueHolderForWidthTmpValue as EdgeOutlineWidths
                 EdgeOutlineWidths_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForColor  = value.color
+        const valueHolderForColor = value.color
         if (valueHolderForColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForColorTmpValue  = valueHolderForColor!
+            const valueHolderForColorTmpValue = valueHolderForColor!
             if (valueHolderForColorTmpValue instanceof ResourceColor) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as ResourceColor
-                if (valueHolderForColorTmpValueForIdx0 instanceof Color) {
+                const valueHolderForColorTmpValueForIdx0 = valueHolderForColorTmpValue as ResourceColor
+                if (valueHolderForColorTmpValueForIdx0 instanceof arkui_component_enums_Color) {
                     valueSerializer.writeInt8((0).toByte())
-                    const valueHolderForColorTmpValueForIdx0ForIdx0  = valueHolderForColorTmpValueForIdx0 as Color
-                    valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0ForIdx0.getOrdinal())
+                    const valueHolderForColorTmpValueForIdx0ForIdx0 = valueHolderForColorTmpValueForIdx0 as arkui_component_enums_Color
+                    valueSerializer.writeInt32((valueHolderForColorTmpValueForIdx0ForIdx0.getOrdinal()) % (12))
                 } else if (valueHolderForColorTmpValueForIdx0 instanceof int32) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForColorTmpValueForIdx0ForIdx1  = valueHolderForColorTmpValueForIdx0 as int32
+                    const valueHolderForColorTmpValueForIdx0ForIdx1 = valueHolderForColorTmpValueForIdx0 as int32
                     valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForColorTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((2).toByte())
-                    const valueHolderForColorTmpValueForIdx0ForIdx2  = valueHolderForColorTmpValueForIdx0 as string
+                    const valueHolderForColorTmpValueForIdx0ForIdx2 = valueHolderForColorTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForColorTmpValueForIdx0ForIdx2)
-                } else if (valueHolderForColorTmpValueForIdx0 instanceof Resource) {
+                } else if (valueHolderForColorTmpValueForIdx0 instanceof arkui_component_units_Resource) {
                     valueSerializer.writeInt8((3).toByte())
-                    const valueHolderForColorTmpValueForIdx0ForIdx3  = valueHolderForColorTmpValueForIdx0 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx0ForIdx3)
+                    const valueHolderForColorTmpValueForIdx0ForIdx3 = valueHolderForColorTmpValueForIdx0 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx0ForIdx3)
                 }
             } else if (valueHolderForColorTmpValue instanceof EdgeColors) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as EdgeColors
+                const valueHolderForColorTmpValueForIdx1 = valueHolderForColorTmpValue as EdgeColors
                 EdgeColors_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx1)
             }
         } else {
@@ -1666,62 +1355,62 @@ export class MenuOutlineOptions_serializer {
         }
     }
     public static read(buffer: DeserializerBase): MenuOutlineOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let widthTmpBuf : Dimension | EdgeOutlineWidths | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const widthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let widthTmpBuf: Dimension | EdgeOutlineWidths | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : Dimension | EdgeOutlineWidths | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                const widthTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let widthTmpBuf_BufU : string | number | Resource | undefined
-                if (widthTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    widthTmpBuf_BufU = (valueDeserializer.readString() as string)
-                } else if (widthTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    widthTmpBuf_BufU = (valueDeserializer.readNumber() as number)
-                } else if (widthTmpBuf_BufUUnionSelector == (2).toChar()) {
-                    widthTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+            const widthTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let widthTmpBufOpt: Dimension | EdgeOutlineWidths | undefined
+            if (widthTmpBufOptUnionSelector == (0).toByte()) {
+                const widthTmpBufOptBufUUnionSelector: int32 = valueDeserializer.readInt8()
+                let widthTmpBufOptBufU: string | number | global_resource_Resource | undefined
+                if (widthTmpBufOptBufUUnionSelector == (0).toByte()) {
+                    widthTmpBufOptBufU = (valueDeserializer.readString() as string)
+                } else if (widthTmpBufOptBufUUnionSelector == (1).toByte()) {
+                    widthTmpBufOptBufU = (valueDeserializer.readNumber() as number)
+                } else if (widthTmpBufOptBufUUnionSelector == (2).toByte()) {
+                    widthTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
                 } else {
-                    throw new Error("One of the branches for widthTmpBuf_BufU has to be chosen through deserialisation.")
+                    throw new Error('One of the branches for widthTmpBufOptBufU has to be chosen through deserialisation.')
                 }
-                widthTmpBuf_ = (widthTmpBuf_BufU as string | number | Resource)
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = EdgeOutlineWidths_serializer.read(valueDeserializer)
+                widthTmpBufOpt = (widthTmpBufOptBufU as string | number | global_resource_Resource)
+            } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
+                widthTmpBufOpt = EdgeOutlineWidths_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for widthTmpBufOpt has to be chosen through deserialisation.')
             }
-            widthTmpBuf = (widthTmpBuf_ as Dimension | EdgeOutlineWidths)
+            widthTmpBuf = (widthTmpBufOpt as Dimension | EdgeOutlineWidths)
         }
-        const widthTmpResult : Dimension | EdgeOutlineWidths | undefined = widthTmpBuf
-        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let colorTmpBuf : ResourceColor | EdgeColors | undefined = undefined
+        const widthTmpResult: Dimension | EdgeOutlineWidths | undefined = widthTmpBuf
+        const colorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorTmpBuf: ResourceColor | EdgeColors | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : ResourceColor | EdgeColors | undefined
-            if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                const colorTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let colorTmpBuf_BufU : Color | int32 | string | Resource | undefined
-                if (colorTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    colorTmpBuf_BufU = Color.values()[valueDeserializer.readInt32()]
-                } else if (colorTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    colorTmpBuf_BufU = valueDeserializer.readInt32()
-                } else if (colorTmpBuf_BufUUnionSelector == (2).toChar()) {
-                    colorTmpBuf_BufU = (valueDeserializer.readString() as string)
-                } else if (colorTmpBuf_BufUUnionSelector == (3).toChar()) {
-                    colorTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+            const colorTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let colorTmpBufOpt: ResourceColor | EdgeColors | undefined
+            if (colorTmpBufOptUnionSelector == (0).toByte()) {
+                const colorTmpBufOptBufUUnionSelector: int32 = valueDeserializer.readInt8()
+                let colorTmpBufOptBufU: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+                if (colorTmpBufOptBufUUnionSelector == (0).toByte()) {
+                    colorTmpBufOptBufU = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+                } else if (colorTmpBufOptBufUUnionSelector == (1).toByte()) {
+                    colorTmpBufOptBufU = valueDeserializer.readInt32()
+                } else if (colorTmpBufOptBufUUnionSelector == (2).toByte()) {
+                    colorTmpBufOptBufU = (valueDeserializer.readString() as string)
+                } else if (colorTmpBufOptBufUUnionSelector == (3).toByte()) {
+                    colorTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
                 } else {
-                    throw new Error("One of the branches for colorTmpBuf_BufU has to be chosen through deserialisation.")
+                    throw new Error('One of the branches for colorTmpBufOptBufU has to be chosen through deserialisation.')
                 }
-                colorTmpBuf_ = (colorTmpBuf_BufU as Color | int32 | string | Resource)
-            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = EdgeColors_serializer.read(valueDeserializer)
+                colorTmpBufOpt = (colorTmpBufOptBufU as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+            } else if (colorTmpBufOptUnionSelector == (1).toByte()) {
+                colorTmpBufOpt = EdgeColors_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for colorTmpBufOpt has to be chosen through deserialisation.')
             }
-            colorTmpBuf = (colorTmpBuf_ as ResourceColor | EdgeColors)
+            colorTmpBuf = (colorTmpBufOpt as ResourceColor | EdgeColors)
         }
-        const colorTmpResult : ResourceColor | EdgeColors | undefined = colorTmpBuf
-        let value : MenuOutlineOptions = ({width: widthTmpResult, color: colorTmpResult} as MenuOutlineOptions)
+        const colorTmpResult: ResourceColor | EdgeColors | undefined = colorTmpBuf
+        let value: MenuOutlineOptions = ({width: widthTmpResult, color: colorTmpResult} as MenuOutlineOptions)
         return value
     }
 }

@@ -25,6 +25,7 @@ import { StateMgmtTool } from '#stateMgmtTool';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { IAniStorage, AniStorage, AreaMode } from './persistentStorage';
 import contextConstant from '@ohos.app.ability.contextConstant';
+import { ElementInfo } from '../utils';
 
 export type StorageDefaultCreator<T> = () => T;
 
@@ -168,6 +169,12 @@ class StoragePropertyV2<T extends object>
         }
         this.key = key;
         this.autoSave = autoSave;
+    }
+    getDFXInfo(): ElementInfo {
+        return {
+            elementName: this.key,
+            elementId: this.id
+        };
     }
 
     private isObservedInterface<T>(value: T): boolean {

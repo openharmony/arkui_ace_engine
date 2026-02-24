@@ -64,10 +64,10 @@ HWTEST_F(GridRowModifierTest, DISABLED_setGridRowOptionsTestValidValues, TestSiz
 HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE) << "Default value for attribute 'alignItems'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE)) << "Default value for attribute 'alignItems'";
 }
 
 /*
@@ -90,7 +90,7 @@ HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsValidValues, T
         modifier_->setAlignItems(node_, &inputValueAlignItems);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignItems, attribute: alignItems";
     };
 
@@ -119,7 +119,7 @@ HWTEST_F(GridRowModifierTest, DISABLED_setAlignItemsTestAlignItemsInvalidValues,
         modifier_->setAlignItems(node_, &inputValueAlignItems);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAlignItems, attribute: alignItems";
     };
 

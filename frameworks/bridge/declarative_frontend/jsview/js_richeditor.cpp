@@ -1189,6 +1189,8 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("setTypingStyle", &JSRichEditorController::SetTypingStyle);
     JSClass<JSRichEditorController>::CustomMethod(
         "setTypingParagraphStyle", &JSRichEditorController::SetTypingParagraphStyle);
+    JSClass<JSRichEditorController>::CustomMethod(
+        "setStyledPlaceholder", &JSRichEditorController::SetPlaceholderStyledString);
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
     JSClass<JSRichEditorController>::CustomMethod("getPreviewText", &JSRichEditorController::GetPreviewTextInfo);
     JSClass<JSRichEditorController>::CustomMethod("getParagraphs", &JSRichEditorController::GetParagraphsInfo);
@@ -1591,6 +1593,26 @@ void JSRichEditorBaseControllerBinding::SetTypingParagraphStyle(const JSCallback
     controller->SetTypingParagraphStyle(std::nullopt);
 }
 
+void JSRichEditorBaseControllerBinding::SetPlaceholderStyledString(const JSCallbackInfo& info)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    if (info.Length() != 1 || !info[0]->IsObject()) {
+        return;
+    }
+    auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
+    CHECK_NULL_VOID(spanString);
+    auto spanStringController = spanString->GetController();
+    CHECK_NULL_VOID(spanStringController);
+    auto controller = controllerWeak_.Upgrade();
+    if (!controller) {
+        auto length = spanStringController->GetLength();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetPlaceholderStyledStringCache length:%{public}d", length);
+        SetPlaceholderStyledStringCache(spanStringController->GetSubSpanString(0, length));
+        return;
+    }
+    controller->SetPlaceholderStyledString(spanStringController);
+}
+
 bool JSRichEditorBaseController::FontSizeRangeIsNegative(const CalcDimension& size)
 {
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1938,6 +1960,16 @@ JSRef<JSObject> JSRichEditorBaseControllerBinding::CreateJsDecorationObj(const s
     return decorationObj;
 }
 
+void JSRichEditorBaseController::SetController(const RefPtr<RichEditorBaseControllerBase>& controller)
+{
+    controllerWeak_ = controller;
+    CHECK_NULL_VOID(controller);
+    auto placeholderStyledString = GetPlaceholderStyledStringCache();
+    CHECK_NULL_VOID(placeholderStyledString);
+    controller->SetPlaceholderStyledString(placeholderStyledString);
+    SetPlaceholderStyledStringCache(nullptr);
+}
+
 void JSRichEditorBaseController::CloseSelectionMenu()
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -2239,6 +2271,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "setTypingStyle", &JSRichEditorStyledStringController::SetTypingStyle);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "setTypingParagraphStyle", &JSRichEditorStyledStringController::SetTypingParagraphStyle);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "setStyledPlaceholder", &JSRichEditorStyledStringController::SetPlaceholderStyledString);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getSelection", &JSRichEditorStyledStringController::GetSelection);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(

@@ -17,7 +17,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/inspector.h"
 
-void MagnifierPeer::Bind(const std::string& id)
+void arkui_component_idlize_MagnifierPeer::Bind(const std::string& id)
 {
     auto pipelineContext = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
@@ -36,7 +36,7 @@ void MagnifierPeer::Bind(const std::string& id)
     pipelineContext->SetMagnifierController(controller);
 }
 
-void MagnifierPeer::Show(const std::optional<float>& x, const std::optional<float>& y)
+void arkui_component_idlize_MagnifierPeer::Show(const std::optional<float>& x, const std::optional<float>& y)
 {
     auto pipelineContext = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
@@ -46,7 +46,7 @@ void MagnifierPeer::Show(const std::optional<float>& x, const std::optional<floa
     controller->SetLocalOffset(OHOS::Ace::NG::OffsetF(x.value() * dipScale, y.value() * dipScale));
 }
 
-void MagnifierPeer::Unbind()
+void arkui_component_idlize_MagnifierPeer::Unbind()
 {
     auto pipelineContext = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);

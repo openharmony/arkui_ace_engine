@@ -264,7 +264,7 @@ const Monitor = function (key : string, ...keys: string[]): (target: any, _: any
   };
 };
 
-const SyncMonitor = function (key : string, ...keys: string[]): (target: any, _: any, descriptor: any) => void {
+const SyncMonitor = function (key : string, ...keys: string[]): (target: Object, _: string, descriptor: PropertyDescriptor) => void {
   // Path can end with the star
   const isValidPath = (typeof key === 'string') && keys.every(item => typeof item === 'string');
   const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;

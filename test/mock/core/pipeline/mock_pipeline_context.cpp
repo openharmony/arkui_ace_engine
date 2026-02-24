@@ -250,9 +250,11 @@ void MockPipelineContext::SetContainerCustomTitleVisible(bool visible)
 }
 
 void PipelineContext::GetComponentOverlayInspector(
-    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const {}
+    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
+    ParamConfig config, bool isInSubWindow) const {}
 
-void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const {}
+void PipelineContext::GetOverlayInspector(
+    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const {}
 
 void MockPipelineContext::SetContainerControlButtonVisible(bool visible)
 {

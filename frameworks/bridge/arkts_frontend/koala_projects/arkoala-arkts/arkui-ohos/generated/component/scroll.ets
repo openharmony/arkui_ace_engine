@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,48 +16,49 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { RectResult_serializer, SizeResult_serializer, RectResult, SizeResult, NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, Bindable_F64_serializer, Bindable, NestedScrollOptions, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from "./common"
-import { Edge, ScrollSource, BarState, Color, EdgeEffect } from "./enums"
-import { Length, VoidCallback, Dimension } from "./units"
-import { Resource } from "global.resource"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { ArkThemeScopeManager } from "#arktheme"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ScrollState, ScrollSnapAlign } from "./list"
-import { AttributeModifier, extractors, hookScrollAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { LengthMetrics } from "arkui.Graphics"
-import { default as curves } from "@ohos.curves"
-import { ScrollModifier } from "./../ScrollModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { curves_ICurve_serializer } from "./../framework/ohos.curves"
-import { LengthMetrics_serializer } from "./../Graphics"
+import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { RectResult_serializer, SizeResult_serializer, RectResult, SizeResult, Bindable_F64_serializer, NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, Bindable, NestedScrollOptions, CommonMethod, EdgeEffectOptions, ICurve, ArkScrollableCommonMethodComponent, ArkCommonMethodComponent, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from './common'
+import { Edge, ScrollSource, BarState, Color as arkui_component_enums_Color, EdgeEffect, Curve } from './enums'
+import { Length, Resource as arkui_component_units_Resource, VoidCallback, LengthMetrics as arkui_component_units_LengthMetrics, Dimension } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { ArkThemeScopeManager } from '#arktheme'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ScrollState, ScrollSnapAlign } from './list'
+import { AttributeModifier, extractors, hookScrollAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CustomBuilder } from './builder'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
+import { default as curves } from '@ohos.curves'
+import { ScrollModifier } from './../ScrollModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { curves_ICurve_serializer } from './../framework/ohos.curves'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 export class ScrollerInternal {
     public static fromPtr(ptr: KPointer): Scroller {
-        return new Scroller(ptr)
+        return new Scroller(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class Scroller implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, Scroller.getFinalizer())
     }
     constructor() {
-        this(Scroller.construct())
+        this(MaterializedBaseTag.NOP, Scroller.construct())
     }
     static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_construct()
+        const retval = ArkUIGeneratedNativeModule._Scroller_construct()
         return retval
     }
     static getFinalizer(): KPointer {
@@ -119,176 +120,151 @@ export class Scroller implements MaterializedBase {
     public contentSize(): SizeResult {
         return this.contentSize_serialize()
     }
-    scrollTo_serialize(options: ScrollOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private scrollTo_serialize(options: ScrollOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         ScrollOptions_serializer.write(thisSerializer, options)
-        try {
-            ArkUIGeneratedNativeModule._Scroller_scrollTo(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        } catch (error) {
-            throw error
-        } finally {
-            thisSerializer.release()
-        }
+        ArkUIGeneratedNativeModule._Scroller_scrollTo(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
-    scrollEdge_serialize(value: Edge, options?: ScrollEdgeOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private scrollEdge_serialize(value: Edge, options?: ScrollEdgeOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
+            const optionsTmpValue = options!
             ScrollEdgeOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        try {
-            ArkUIGeneratedNativeModule._Scroller_scrollEdge(this.peer!.ptr, value.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
-        } catch (error) {
-            throw error
-        } finally {
-            thisSerializer.release()
-        }
+        ArkUIGeneratedNativeModule._Scroller_scrollEdge(this.peer!.ptr, value.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
-    fling_serialize(velocity: double): void {
+    private fling_serialize(velocity: double): void {
         ArkUIGeneratedNativeModule._Scroller_fling(this.peer!.ptr, velocity)
     }
-    scrollPage_serialize(value: ScrollPageOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private scrollPage_serialize(value: ScrollPageOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         ScrollPageOptions_serializer.write(thisSerializer, value)
-        try {
-            ArkUIGeneratedNativeModule._Scroller_scrollPage(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        } catch (error) {
-            throw error
-        } finally {
-            thisSerializer.release()
-        }
+        ArkUIGeneratedNativeModule._Scroller_scrollPage(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
-    currentOffset_serialize(): OffsetResult | undefined {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
-        let buffer : OffsetResult | undefined = undefined
+    private currentOffset_serialize(): OffsetResult | undefined {
+        const retval = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: OffsetResult | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = OffsetResult_serializer.read(retvalDeserializer)
         }
-        const returnResult : OffsetResult | undefined = buffer
+        const returnResult: OffsetResult | undefined = buffer
         return returnResult
     }
-    offset_serialize(): OffsetResult | undefined {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_offset(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : OffsetResult | undefined = undefined
+    private offset_serialize(): OffsetResult | undefined {
+        const retval = ArkUIGeneratedNativeModule._Scroller_offset(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: OffsetResult | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = OffsetResult_serializer.read(retvalDeserializer)
         }
-        const returnResult : OffsetResult | undefined = buffer
+        const returnResult: OffsetResult | undefined = buffer
         return returnResult
     }
-    scrollToIndex_serialize(value: int32, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private scrollToIndex_serialize(value: int32, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (smooth !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const smoothTmpValue  = smooth!
+            const smoothTmpValue = smooth!
             thisSerializer.writeBoolean(smoothTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (align !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const alignTmpValue  = (align as ScrollAlign)
+            const alignTmpValue = (align as ScrollAlign)
             thisSerializer.writeInt32(alignTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
+            const optionsTmpValue = options!
             ScrollToIndexOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        try {
-            ArkUIGeneratedNativeModule._Scroller_scrollToIndex(this.peer!.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
-        } catch (error) {
-            throw error   
-        } finally {
-            thisSerializer.release()
-        }
+        ArkUIGeneratedNativeModule._Scroller_scrollToIndex(this.peer!.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
-    scrollBy_serialize(dx: Length, dy: Length): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private scrollBy_serialize(dx: Length, dy: Length): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (dx instanceof string) {
             thisSerializer.writeInt8((0).toByte())
-            const dxForIdx0  = dx as string
+            const dxForIdx0 = dx as string
             thisSerializer.writeString(dxForIdx0)
         } else if (dx instanceof double) {
             thisSerializer.writeInt8((1).toByte())
-            const dxForIdx1  = dx as double
+            const dxForIdx1 = dx as double
             thisSerializer.writeFloat64(dxForIdx1)
-        } else if (dx instanceof Resource) {
+        } else if (dx instanceof arkui_component_units_Resource) {
             thisSerializer.writeInt8((2).toByte())
-            const dxForIdx2  = dx as Resource
-            Resource_serializer.write(thisSerializer, dxForIdx2)
+            const dxForIdx2 = dx as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(thisSerializer, dxForIdx2)
         }
         if (dy instanceof string) {
             thisSerializer.writeInt8((0).toByte())
-            const dyForIdx0  = dy as string
+            const dyForIdx0 = dy as string
             thisSerializer.writeString(dyForIdx0)
         } else if (dy instanceof double) {
             thisSerializer.writeInt8((1).toByte())
-            const dyForIdx1  = dy as double
+            const dyForIdx1 = dy as double
             thisSerializer.writeFloat64(dyForIdx1)
-        } else if (dy instanceof Resource) {
+        } else if (dy instanceof arkui_component_units_Resource) {
             thisSerializer.writeInt8((2).toByte())
-            const dyForIdx2  = dy as Resource
-            Resource_serializer.write(thisSerializer, dyForIdx2)
+            const dyForIdx2 = dy as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(thisSerializer, dyForIdx2)
         }
-        try {
-            ArkUIGeneratedNativeModule._Scroller_scrollBy(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        } catch (error) {
-            throw error
-        } finally {
-            thisSerializer.release()
-        }
+        ArkUIGeneratedNativeModule._Scroller_scrollBy(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
-    isAtEnd_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_isAtEnd(this.peer!.ptr)
+    private isAtEnd_serialize(): boolean {
+        const retval = ArkUIGeneratedNativeModule._Scroller_isAtEnd(this.peer!.ptr)
         return retval
     }
-    getItemRect_serialize(index: int32): RectResult {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : RectResult = RectResult_serializer.read(retvalDeserializer)
+    private getItemRect_serialize(index: int32): RectResult {
+        const retval = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult: RectResult = RectResult_serializer.read(retvalDeserializer)
         return returnResult
     }
-    getItemIndex_serialize(x: double, y: double): int32 {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_getItemIndex(this.peer!.ptr, x, y)
+    private getItemIndex_serialize(x: double, y: double): int32 {
+        const retval = ArkUIGeneratedNativeModule._Scroller_getItemIndex(this.peer!.ptr, x, y)
         return retval
     }
-    contentSize_serialize(): SizeResult {
-        const retval  = ArkUIGeneratedNativeModule._Scroller_contentSize(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : SizeResult = SizeResult_serializer.read(retvalDeserializer)
+    private contentSize_serialize(): SizeResult {
+        const retval = ArkUIGeneratedNativeModule._Scroller_contentSize(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult: SizeResult = SizeResult_serializer.read(retvalDeserializer)
         return returnResult
     }
 }
 export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
     attributeSet?: ScrollModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkScrollPeer {
-        const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._Scroll_construct(peerId, flags)
-        const _peer  = new ArkScrollPeer(_peerPtr, peerId, 'Scroll', flags)
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._Scroll_construct(peerId, flags)
+        const _peer = new ArkScrollPeer(_peerPtr, peerId, 'Scroll', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setScrollOptionsAttribute(scroller?: Scroller): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (scroller !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const scrollerTmpValue  = scroller!
+            const scrollerTmpValue = scroller!
             Scroller_serializer.write(thisSerializer, scrollerTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -297,10 +273,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setScrollableAttribute(value: ScrollDirection | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = (value as ScrollDirection)
+            const valueTmpValue = (value as ScrollDirection)
             thisSerializer.writeInt32(valueTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -309,10 +285,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setMaxZoomScaleAttribute(value: double | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -321,10 +297,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setMinZoomScaleAttribute(value: double | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -333,17 +309,17 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setZoomScaleAttribute(value: double | Bindable<double> | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as double
+                const valueTmpValueForIdx0 = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Bindable<double>
+                const valueTmpValueForIdx1 = valueTmpValue as Bindable<double>
                 Bindable_F64_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
@@ -353,10 +329,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setEnableBouncesZoomAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeBoolean(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -365,10 +341,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setOnWillScrollAttribute(value: ScrollOnWillScrollCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -377,10 +353,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setOnDidScrollAttribute(value: ScrollOnScrollCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -389,10 +365,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setOnScrollEdgeAttribute(value: OnScrollEdgeCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -401,10 +377,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setOnScrollStartAttribute(value: VoidCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -413,10 +389,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setOnScrollStopAttribute(value: VoidCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -425,10 +401,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setOnDidZoomAttribute(value: ScrollOnDidZoomCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -437,10 +413,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setOnZoomStartAttribute(value: VoidCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -449,10 +425,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setOnZoomStopAttribute(value: VoidCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -461,10 +437,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setScrollBarAttribute(value: BarState | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = (value as BarState)
+            const valueTmpValue = (value as BarState)
             thisSerializer.writeInt32(valueTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -472,27 +448,27 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollAttribute_setScrollBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarColorAttribute(value: Color | int32 | string | Resource | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setScrollBarColorAttribute(value: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0 = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as int32
+                const valueTmpValueForIdx1 = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
+                const valueTmpValueForIdx2 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -501,17 +477,17 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setScrollBarWidthAttribute(value: double | string | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as double
+                const valueTmpValueForIdx0 = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as string
+                const valueTmpValueForIdx1 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
             }
         } else {
@@ -521,10 +497,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setOnScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -533,10 +509,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setNestedScrollAttribute(value: NestedScrollOptions | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             NestedScrollOptions_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -545,10 +521,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setEnableScrollInteractionAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeBoolean(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -556,19 +532,19 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollAttribute_setEnableScrollInteraction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFrictionAttribute(value: double | Resource | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setFrictionAttribute(value: double | arkui_component_units_Resource | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as double
+                const valueTmpValueForIdx0 = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -577,10 +553,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setScrollSnapAttribute(value: ScrollSnapOptions | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             ScrollSnapOptions_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -589,10 +565,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setEnablePagingAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeBoolean(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -601,10 +577,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setInitialOffsetAttribute(value: OffsetOptions | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             OffsetOptions_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -613,17 +589,17 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     setEdgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (edgeEffect !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const edgeEffectTmpValue  = (edgeEffect as EdgeEffect)
+            const edgeEffectTmpValue = (edgeEffect as EdgeEffect)
             thisSerializer.writeInt32(edgeEffectTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
+            const optionsTmpValue = options!
             EdgeEffectOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -633,11 +609,8 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
     }
 }
 export enum ScrollDirection {
-    VERTICAL = 0,
     Vertical = 0,
-    HORIZONTAL = 1,
     Horizontal = 1,
-    NONE = 2,
     None = 2,
     FREE = 4
 }
@@ -655,11 +628,11 @@ export interface ScrollEdgeOptions {
     velocity?: double;
 }
 export interface ScrollToIndexOptions {
-    extraOffset?: LengthMetrics;
+    extraOffset?: arkui_component_units_LengthMetrics;
 }
 export interface ScrollAnimationOptions {
     duration?: int32;
-    curve?: curves.Curve | curves.ICurve;
+    curve?: Curve | ICurve;
     canOverScroll?: boolean;
 }
 export interface OffsetOptions {
@@ -689,170 +662,66 @@ export interface OnScrollFrameBeginHandlerResult {
 export type OnScrollFrameBeginCallback = (offset: double, state: ScrollState) => OnScrollFrameBeginHandlerResult;
 export interface ScrollAttribute extends ScrollableCommonMethod {
     setScrollOptions(scroller?: Scroller): this {
-        throw new Error("Unimplemented method setScrollOptions")
+        throw new Error('Unimplemented method setScrollOptions')
     }
     scrollable(value: ScrollDirection | undefined): this {
-        throw new Error("Unimplemented method scrollable")
+        throw new Error('Unimplemented method scrollable')
     }
     maxZoomScale(value: double | undefined): this {
-        throw new Error("Unimplemented method maxZoomScale")
+        throw new Error('Unimplemented method maxZoomScale')
     }
     minZoomScale(value: double | undefined): this {
-        throw new Error("Unimplemented method minZoomScale")
+        throw new Error('Unimplemented method minZoomScale')
     }
     zoomScale(value: double | Bindable<double> | undefined): this {
-        throw new Error("Unimplemented method zoomScale")
+        throw new Error('Unimplemented method zoomScale')
     }
     enableBouncesZoom(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableBouncesZoom")
+        throw new Error('Unimplemented method enableBouncesZoom')
     }
     onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
-        throw new Error("Unimplemented method onWillScroll")
+        throw new Error('Unimplemented method onWillScroll')
     }
     onDidScroll(value: ScrollOnScrollCallback | undefined): this {
-        throw new Error("Unimplemented method onDidScroll")
+        throw new Error('Unimplemented method onDidScroll')
     }
     onScrollEdge(value: OnScrollEdgeCallback | undefined): this {
-        throw new Error("Unimplemented method onScrollEdge")
+        throw new Error('Unimplemented method onScrollEdge')
     }
     onScrollStart(value: VoidCallback | undefined): this
     onScrollStop(value: VoidCallback | undefined): this
     onDidZoom(value: ScrollOnDidZoomCallback | undefined): this {
-        throw new Error("Unimplemented method onDidZoom")
+        throw new Error('Unimplemented method onDidZoom')
     }
     onZoomStart(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onZoomStart")
+        throw new Error('Unimplemented method onZoomStart')
     }
     onZoomStop(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onZoomStop")
+        throw new Error('Unimplemented method onZoomStop')
     }
     scrollBar(value: BarState | undefined): this
-    scrollBarColor(value: Color | int32 | string | Resource | undefined): this
+    scrollBarColor(value: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined): this
     scrollBarWidth(value: double | string | undefined): this
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
-        throw new Error("Unimplemented method onScrollFrameBegin")
+        throw new Error('Unimplemented method onScrollFrameBegin')
     }
     nestedScroll(value: NestedScrollOptions | undefined): this
     enableScrollInteraction(value: boolean | undefined): this
-    friction(value: double | Resource | undefined): this
+    friction(value: double | arkui_component_units_Resource | undefined): this
     scrollSnap(value: ScrollSnapOptions | undefined): this {
-        throw new Error("Unimplemented method scrollSnap")
+        throw new Error('Unimplemented method scrollSnap')
     }
     enablePaging(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enablePaging")
+        throw new Error('Unimplemented method enablePaging')
     }
     initialOffset(value: OffsetOptions | undefined): this {
-        throw new Error("Unimplemented method initialOffset")
+        throw new Error('Unimplemented method initialOffset')
     }
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
-        throw new Error("Unimplemented method edgeEffect")
+        throw new Error('Unimplemented method edgeEffect')
     }
     attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements ScrollAttribute {
-    scrollable_value?: ScrollDirection | undefined
-    maxZoomScale_value?: double | undefined
-    minZoomScale_value?: double | undefined
-    zoomScale_value?: double | Bindable<double> | undefined
-    enableBouncesZoom_value?: boolean | undefined
-    onWillScroll_value?: ScrollOnWillScrollCallback | undefined
-    onDidScroll_value?: ScrollOnScrollCallback | undefined
-    onScrollEdge_value?: OnScrollEdgeCallback | undefined
-    onScrollStart_value?: VoidCallback | undefined
-    onScrollStop_value?: VoidCallback | undefined
-    onDidZoom_value?: ScrollOnDidZoomCallback | undefined
-    onZoomStart_value?: VoidCallback | undefined
-    onZoomStop_value?: VoidCallback | undefined
-    scrollBar_value?: BarState | undefined
-    scrollBarColor_value?: Color | int32 | string | Resource | undefined
-    scrollBarWidth_value?: double | string | undefined
-    onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
-    nestedScroll_value?: NestedScrollOptions | undefined
-    enableScrollInteraction_value?: boolean | undefined
-    friction_value?: double | Resource | undefined
-    scrollSnap_value?: ScrollSnapOptions | undefined
-    enablePaging_value?: boolean | undefined
-    initialOffset_value?: OffsetOptions | undefined
-    attributeModifier_value?: AttributeModifier<ScrollAttribute> | AttributeModifier<CommonMethod> | undefined
-    setScrollOptions(scroller?: Scroller): this {
-        return this
-    }
-    scrollable(value: ScrollDirection | undefined): this {
-        return this
-    }
-    maxZoomScale(value: double | undefined): this {
-        return this
-    }
-    minZoomScale(value: double | undefined): this {
-        return this
-    }
-    zoomScale(value: double | Bindable<double> | undefined): this {
-        return this
-    }
-    enableBouncesZoom(value: boolean | undefined): this {
-        return this
-    }
-    onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
-        return this
-    }
-    onDidScroll(value: ScrollOnScrollCallback | undefined): this {
-        return this
-    }
-    onScrollEdge(value: OnScrollEdgeCallback | undefined): this {
-        return this
-    }
-    onScrollStart(value: VoidCallback | undefined): this {
-        return this
-    }
-    onScrollStop(value: VoidCallback | undefined): this {
-        return this
-    }
-    onDidZoom(value: ScrollOnDidZoomCallback | undefined): this {
-        return this
-    }
-    onZoomStart(value: VoidCallback | undefined): this {
-        return this
-    }
-    onZoomStop(value: VoidCallback | undefined): this {
-        return this
-    }
-    scrollBar(value: BarState | undefined): this {
-        return this
-    }
-    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
-        return this
-    }
-    scrollBarWidth(value: double | string | undefined): this {
-        return this
-    }
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
-        return this
-    }
-    nestedScroll(value: NestedScrollOptions | undefined): this {
-        return this
-    }
-    enableScrollInteraction(value: boolean | undefined): this {
-        return this
-    }
-    friction(value: double | Resource | undefined): this {
-        return this
-    }
-    scrollSnap(value: ScrollSnapOptions | undefined): this {
-        return this
-    }
-    enablePaging(value: boolean | undefined): this {
-        return this
-    }
-    initialOffset(value: OffsetOptions | undefined): this {
-        return this
-    }
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export type ScrollOnScrollCallback = (xOffset: double, yOffset: double, scrollState: ScrollState) => void;
@@ -861,216 +730,138 @@ export type ScrollOnDidZoomCallback = (scale: double) => void;
 
 export class ArkScrollComponent extends ArkScrollableCommonMethodComponent implements ScrollAttribute {
     getPeer(): ArkScrollPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkScrollPeer)
     }
     public setScrollOptions(scroller?: Scroller): this {
-        if (this.checkPriority("setScrollOptions")) {
-            const scroller_casted = scroller as (Scroller | undefined)
-            this.getPeer()?.setScrollOptionsAttribute(scroller_casted)
-            this.applyOptionsFinish('ScrollAttribute');
-            return this
-        }
+        const scroller_casted = scroller as (Scroller | undefined)
+        this.getPeer()?.setScrollOptionsAttribute(scroller_casted)
+        this.applyOptionsFinish('ScrollAttribute');
         return this
     }
     public scrollable(value: ScrollDirection | undefined): this {
-        if (this.checkPriority("scrollable")) {
-            const value_casted = value as (ScrollDirection | undefined)
-            this.getPeer()?.setScrollableAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ScrollDirection | undefined)
+        this.getPeer()?.setScrollableAttribute(value_casted)
         return this
     }
     public maxZoomScale(value: double | undefined): this {
-        if (this.checkPriority("maxZoomScale")) {
-            const value_casted = value as (double | undefined)
-            this.getPeer()?.setMaxZoomScaleAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (double | undefined)
+        this.getPeer()?.setMaxZoomScaleAttribute(value_casted)
         return this
     }
     public minZoomScale(value: double | undefined): this {
-        if (this.checkPriority("minZoomScale")) {
-            const value_casted = value as (double | undefined)
-            this.getPeer()?.setMinZoomScaleAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (double | undefined)
+        this.getPeer()?.setMinZoomScaleAttribute(value_casted)
         return this
     }
     public zoomScale(value: double | Bindable<double> | undefined): this {
-        if (this.checkPriority("zoomScale")) {
-            const value_casted = value as (double | Bindable<double> | undefined)
-            this.getPeer()?.setZoomScaleAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (double | Bindable<double> | undefined)
+        this.getPeer()?.setZoomScaleAttribute(value_casted)
         return this
     }
     public enableBouncesZoom(value: boolean | undefined): this {
-        if (this.checkPriority("enableBouncesZoom")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setEnableBouncesZoomAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setEnableBouncesZoomAttribute(value_casted)
         return this
     }
     public onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
-        if (this.checkPriority("onWillScroll")) {
-            const value_casted = value as (ScrollOnWillScrollCallback | undefined)
-            this.getPeer()?.setOnWillScrollAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ScrollOnWillScrollCallback | undefined)
+        this.getPeer()?.setOnWillScrollAttribute(value_casted)
         return this
     }
     public onDidScroll(value: ScrollOnScrollCallback | undefined): this {
-        if (this.checkPriority("onDidScroll")) {
-            const value_casted = value as (ScrollOnScrollCallback | undefined)
-            this.getPeer()?.setOnDidScrollAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ScrollOnScrollCallback | undefined)
+        this.getPeer()?.setOnDidScrollAttribute(value_casted)
         return this
     }
     public onScrollEdge(value: OnScrollEdgeCallback | undefined): this {
-        if (this.checkPriority("onScrollEdge")) {
-            const value_casted = value as (OnScrollEdgeCallback | undefined)
-            this.getPeer()?.setOnScrollEdgeAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (OnScrollEdgeCallback | undefined)
+        this.getPeer()?.setOnScrollEdgeAttribute(value_casted)
         return this
     }
     public onScrollStart(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onScrollStart")) {
-            const value_casted = value as (VoidCallback | undefined)
-            this.getPeer()?.setOnScrollStartAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnScrollStartAttribute(value_casted)
         return this
     }
     public onScrollStop(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onScrollStop")) {
-            const value_casted = value as (VoidCallback | undefined)
-            this.getPeer()?.setOnScrollStopAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnScrollStopAttribute(value_casted)
         return this
     }
     public onDidZoom(value: ScrollOnDidZoomCallback | undefined): this {
-        if (this.checkPriority("onDidZoom")) {
-            const value_casted = value as (ScrollOnDidZoomCallback | undefined)
-            this.getPeer()?.setOnDidZoomAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ScrollOnDidZoomCallback | undefined)
+        this.getPeer()?.setOnDidZoomAttribute(value_casted)
         return this
     }
     public onZoomStart(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onZoomStart")) {
-            const value_casted = value as (VoidCallback | undefined)
-            this.getPeer()?.setOnZoomStartAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnZoomStartAttribute(value_casted)
         return this
     }
     public onZoomStop(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onZoomStop")) {
-            const value_casted = value as (VoidCallback | undefined)
-            this.getPeer()?.setOnZoomStopAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnZoomStopAttribute(value_casted)
         return this
     }
     public scrollBar(value: BarState | undefined): this {
-        if (this.checkPriority("scrollBar")) {
-            const value_casted = value as (BarState | undefined)
-            this.getPeer()?.setScrollBarAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (BarState | undefined)
+        this.getPeer()?.setScrollBarAttribute(value_casted)
         return this
     }
-    public scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
-        if (this.checkPriority("scrollBarColor")) {
-            const value_casted = value as (Color | int32 | string | Resource | undefined)
-            this.getPeer()?.setScrollBarColorAttribute(value_casted)
-            return this
-        }
+    public scrollBarColor(value: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined): this {
+        const value_casted = value as (arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined)
+        this.getPeer()?.setScrollBarColorAttribute(value_casted)
         return this
     }
     public scrollBarWidth(value: double | string | undefined): this {
-        if (this.checkPriority("scrollBarWidth")) {
-            const value_casted = value as (double | string | undefined)
-            this.getPeer()?.setScrollBarWidthAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (double | string | undefined)
+        this.getPeer()?.setScrollBarWidthAttribute(value_casted)
         return this
     }
     public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
-        if (this.checkPriority("onScrollFrameBegin")) {
-            const value_casted = value as (OnScrollFrameBeginCallback | undefined)
-            this.getPeer()?.setOnScrollFrameBeginAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (OnScrollFrameBeginCallback | undefined)
+        this.getPeer()?.setOnScrollFrameBeginAttribute(value_casted)
         return this
     }
     public nestedScroll(value: NestedScrollOptions | undefined): this {
-        if (this.checkPriority("nestedScroll")) {
-            const value_casted = value as (NestedScrollOptions | undefined)
-            this.getPeer()?.setNestedScrollAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (NestedScrollOptions | undefined)
+        this.getPeer()?.setNestedScrollAttribute(value_casted)
         return this
     }
     public enableScrollInteraction(value: boolean | undefined): this {
-        if (this.checkPriority("enableScrollInteraction")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setEnableScrollInteractionAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setEnableScrollInteractionAttribute(value_casted)
         return this
     }
-    public friction(value: double | Resource | undefined): this {
-        if (this.checkPriority("friction")) {
-            const value_casted = value as (double | Resource | undefined)
-            this.getPeer()?.setFrictionAttribute(value_casted)
-            return this
-        }
+    public friction(value: double | arkui_component_units_Resource | undefined): this {
+        const value_casted = value as (double | arkui_component_units_Resource | undefined)
+        this.getPeer()?.setFrictionAttribute(value_casted)
         return this
     }
     public scrollSnap(value: ScrollSnapOptions | undefined): this {
-        if (this.checkPriority("scrollSnap")) {
-            const value_casted = value as (ScrollSnapOptions | undefined)
-            this.getPeer()?.setScrollSnapAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ScrollSnapOptions | undefined)
+        this.getPeer()?.setScrollSnapAttribute(value_casted)
         return this
     }
     public enablePaging(value: boolean | undefined): this {
-        if (this.checkPriority("enablePaging")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setEnablePagingAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setEnablePagingAttribute(value_casted)
         return this
     }
     public initialOffset(value: OffsetOptions | undefined): this {
-        if (this.checkPriority("initialOffset")) {
-            const value_casted = value as (OffsetOptions | undefined)
-            this.getPeer()?.setInitialOffsetAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (OffsetOptions | undefined)
+        this.getPeer()?.setInitialOffsetAttribute(value_casted)
         return this
     }
     public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
-        if (this.checkPriority("edgeEffect")) {
-            const edgeEffect_casted = edgeEffect as (EdgeEffect | undefined)
-            const options_casted = options as (EdgeEffectOptions | undefined)
-            this.getPeer()?.setEdgeEffectAttribute(edgeEffect_casted, options_casted)
-            return this
-        }
+        const edgeEffect_casted = edgeEffect as (EdgeEffect | undefined)
+        const options_casted = options as (EdgeEffectOptions | undefined)
+        this.getPeer()?.setEdgeEffectAttribute(edgeEffect_casted, options_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookScrollAttributeModifier(this, value);
+            hookScrollAttributeModifier(this, value);
         })
         return this
     }
@@ -1085,520 +876,526 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
 
 @memo
 export function ScrollImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: ScrollAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkScrollComponent>((): ArkScrollComponent => {
         return new ArkScrollComponent()
     })
-    NodeAttach<ArkScrollPeer>((): ArkScrollPeer => ArkScrollPeer.create(receiver), (peer: ArkScrollPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkScrollPeer>((): ArkScrollPeer => ArkScrollPeer.create(receiver), (_: ArkScrollPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
 export class OffsetResult_serializer {
     public static write(buffer: SerializerBase, value: OffsetResult): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForXOffset  = value.xOffset
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForXOffset = value.xOffset
         valueSerializer.writeFloat64(valueHolderForXOffset)
-        const valueHolderForYOffset  = value.yOffset
+        const valueHolderForYOffset = value.yOffset
         valueSerializer.writeFloat64(valueHolderForYOffset)
     }
     public static read(buffer: DeserializerBase): OffsetResult {
-        let valueDeserializer : DeserializerBase = buffer
-        const xOffsetTmpResult : double = valueDeserializer.readFloat64()
-        const yOffsetTmpResult : double = valueDeserializer.readFloat64()
-        let value : OffsetResult = ({xOffset: xOffsetTmpResult, yOffset: yOffsetTmpResult} as OffsetResult)
+        let valueDeserializer: DeserializerBase = buffer
+        const xOffsetTmpResult: double = valueDeserializer.readFloat64()
+        const yOffsetTmpResult: double = valueDeserializer.readFloat64()
+        let value: OffsetResult = ({xOffset: xOffsetTmpResult, yOffset: yOffsetTmpResult} as OffsetResult)
         return value
     }
 }
 export class OnScrollFrameBeginHandlerResult_serializer {
     public static write(buffer: SerializerBase, value: OnScrollFrameBeginHandlerResult): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForOffsetRemain  = value.offsetRemain
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForOffsetRemain = value.offsetRemain
         valueSerializer.writeFloat64(valueHolderForOffsetRemain)
     }
     public static read(buffer: DeserializerBase): OnScrollFrameBeginHandlerResult {
-        let valueDeserializer : DeserializerBase = buffer
-        const offsetRemainTmpResult : double = valueDeserializer.readFloat64()
-        let value : OnScrollFrameBeginHandlerResult = ({offsetRemain: offsetRemainTmpResult} as OnScrollFrameBeginHandlerResult)
+        let valueDeserializer: DeserializerBase = buffer
+        const offsetRemainTmpResult: double = valueDeserializer.readFloat64()
+        let value: OnScrollFrameBeginHandlerResult = ({offsetRemain: offsetRemainTmpResult} as OnScrollFrameBeginHandlerResult)
         return value
     }
 }
 export class Scroller_serializer {
     public static write(buffer: SerializerBase, value: Scroller): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): Scroller {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return ScrollerInternal.fromPtr(ptr)
     }
 }
 export class UIScrollEvent_serializer {
     public static write(buffer: SerializerBase, value: UIScrollEvent): void {
-        let valueSerializer : SerializerBase = buffer
+        let valueSerializer: SerializerBase = buffer
         valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): UIScrollEvent {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
         return UIScrollEventInternal.fromPtr(ptr)
     }
 }
 export class ScrollAnimationOptions_serializer {
     public static write(buffer: SerializerBase, value: ScrollAnimationOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForDuration  = value.duration
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForDuration = value.duration
         if (valueHolderForDuration !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForDurationTmpValue  = valueHolderForDuration!
+            const valueHolderForDurationTmpValue = valueHolderForDuration!
             valueSerializer.writeInt32(valueHolderForDurationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForCurve  = value.curve
+        const valueHolderForCurve = value.curve
         if (valueHolderForCurve !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForCurveTmpValue  = valueHolderForCurve!
-            if (valueHolderForCurveTmpValue instanceof curves.Curve) {
+            const valueHolderForCurveTmpValue = valueHolderForCurve!
+            if (valueHolderForCurveTmpValue instanceof Curve) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForCurveTmpValueForIdx0  = valueHolderForCurveTmpValue as curves.Curve
+                const valueHolderForCurveTmpValueForIdx0 = valueHolderForCurveTmpValue as Curve
                 valueSerializer.writeInt32(valueHolderForCurveTmpValueForIdx0.valueOf())
-            } else if (valueHolderForCurveTmpValue instanceof curves.ICurve) {
+            } else if (valueHolderForCurveTmpValue instanceof ICurve) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForCurveTmpValueForIdx1  = valueHolderForCurveTmpValue as curves.ICurve
+                const valueHolderForCurveTmpValueForIdx1 = valueHolderForCurveTmpValue as ICurve
                 curves_ICurve_serializer.write(valueSerializer, valueHolderForCurveTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForCanOverScroll  = value.canOverScroll
+        const valueHolderForCanOverScroll = value.canOverScroll
         if (valueHolderForCanOverScroll !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForCanOverScrollTmpValue  = valueHolderForCanOverScroll!
+            const valueHolderForCanOverScrollTmpValue = valueHolderForCanOverScroll!
             valueSerializer.writeBoolean(valueHolderForCanOverScrollTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ScrollAnimationOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const durationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let durationTmpBuf : int32 | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const durationTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let durationTmpBuf: int32 | undefined = undefined
         if ((durationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             durationTmpBuf = valueDeserializer.readInt32()
         }
-        const durationTmpResult : int32 | undefined = durationTmpBuf
-        const curveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let curveTmpBuf : curves.Curve | curves.ICurve | undefined = undefined
+        const durationTmpResult: int32 | undefined = durationTmpBuf
+        const curveTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let curveTmpBuf: Curve | ICurve | undefined = undefined
         if ((curveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const curveTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let curveTmpBuf_ : curves.Curve | curves.ICurve | undefined
-            if (curveTmpBuf_UnionSelector == (0).toByte()) {
-                curveTmpBuf_ = curves.Curve.fromValue(valueDeserializer.readInt32())
-            } else if (curveTmpBuf_UnionSelector == (1).toByte()) {
-                curveTmpBuf_ = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
+            const curveTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let curveTmpBufOpt: Curve | ICurve | undefined
+            if (curveTmpBufOptUnionSelector == (0).toByte()) {
+                curveTmpBufOpt = curves.Curve.fromValue(valueDeserializer.readInt32())
+            } else if (curveTmpBufOptUnionSelector == (1).toByte()) {
+                curveTmpBufOpt = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
             } else {
-                throw new Error("One of the branches for curveTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for curveTmpBufOpt has to be chosen through deserialisation.')
             }
-            curveTmpBuf = (curveTmpBuf_ as curves.Curve | curves.ICurve)
+            curveTmpBuf = (curveTmpBufOpt as Curve | ICurve)
         }
-        const curveTmpResult : curves.Curve | curves.ICurve | undefined = curveTmpBuf
-        const canOverScrollTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let canOverScrollTmpBuf : boolean | undefined = undefined
+        const curveTmpResult: Curve | ICurve | undefined = curveTmpBuf
+        const canOverScrollTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let canOverScrollTmpBuf: boolean | undefined = undefined
         if ((canOverScrollTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             canOverScrollTmpBuf = valueDeserializer.readBoolean()
         }
-        const canOverScrollTmpResult : boolean | undefined = canOverScrollTmpBuf
-        let value : ScrollAnimationOptions = ({duration: durationTmpResult, curve: curveTmpResult, canOverScroll: canOverScrollTmpResult} as ScrollAnimationOptions)
+        const canOverScrollTmpResult: boolean | undefined = canOverScrollTmpBuf
+        let value: ScrollAnimationOptions = ({duration: durationTmpResult, curve: curveTmpResult, canOverScroll: canOverScrollTmpResult} as ScrollAnimationOptions)
         return value
     }
 }
 export class ScrollEdgeOptions_serializer {
     public static write(buffer: SerializerBase, value: ScrollEdgeOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForVelocity  = value.velocity
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForVelocity = value.velocity
         if (valueHolderForVelocity !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForVelocityTmpValue  = valueHolderForVelocity!
+            const valueHolderForVelocityTmpValue = valueHolderForVelocity!
             valueSerializer.writeFloat64(valueHolderForVelocityTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ScrollEdgeOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const velocityTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let velocityTmpBuf : double | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const velocityTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let velocityTmpBuf: double | undefined = undefined
         if ((velocityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             velocityTmpBuf = valueDeserializer.readFloat64()
         }
-        const velocityTmpResult : double | undefined = velocityTmpBuf
-        let value : ScrollEdgeOptions = ({velocity: velocityTmpResult} as ScrollEdgeOptions)
+        const velocityTmpResult: double | undefined = velocityTmpBuf
+        let value: ScrollEdgeOptions = ({velocity: velocityTmpResult} as ScrollEdgeOptions)
         return value
     }
 }
 export class ScrollPageOptions_serializer {
     public static write(buffer: SerializerBase, value: ScrollPageOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForNext  = value.next
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForNext = value.next
         valueSerializer.writeBoolean(valueHolderForNext)
-        const valueHolderForAnimation  = value.animation
+        const valueHolderForAnimation = value.animation
         if (valueHolderForAnimation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForAnimationTmpValue  = valueHolderForAnimation!
+            const valueHolderForAnimationTmpValue = valueHolderForAnimation!
             valueSerializer.writeBoolean(valueHolderForAnimationTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ScrollPageOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const nextTmpResult : boolean = valueDeserializer.readBoolean()
-        const animationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let animationTmpBuf : boolean | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const nextTmpResult: boolean = valueDeserializer.readBoolean()
+        const animationTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let animationTmpBuf: boolean | undefined = undefined
         if ((animationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             animationTmpBuf = valueDeserializer.readBoolean()
         }
-        const animationTmpResult : boolean | undefined = animationTmpBuf
-        let value : ScrollPageOptions = ({next: nextTmpResult, animation: animationTmpResult} as ScrollPageOptions)
+        const animationTmpResult: boolean | undefined = animationTmpBuf
+        let value: ScrollPageOptions = ({next: nextTmpResult, animation: animationTmpResult} as ScrollPageOptions)
         return value
     }
 }
 export class ScrollOptions_serializer {
     public static write(buffer: SerializerBase, value: ScrollOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForXOffset  = value.xOffset
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForXOffset = value.xOffset
         if (valueHolderForXOffset instanceof double) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForXOffsetForIdx0  = valueHolderForXOffset as double
+            const valueHolderForXOffsetForIdx0 = valueHolderForXOffset as double
             valueSerializer.writeFloat64(valueHolderForXOffsetForIdx0)
         } else if (valueHolderForXOffset instanceof string) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForXOffsetForIdx1  = valueHolderForXOffset as string
+            const valueHolderForXOffsetForIdx1 = valueHolderForXOffset as string
             valueSerializer.writeString(valueHolderForXOffsetForIdx1)
         }
-        const valueHolderForYOffset  = value.yOffset
+        const valueHolderForYOffset = value.yOffset
         if (valueHolderForYOffset instanceof double) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForYOffsetForIdx0  = valueHolderForYOffset as double
+            const valueHolderForYOffsetForIdx0 = valueHolderForYOffset as double
             valueSerializer.writeFloat64(valueHolderForYOffsetForIdx0)
         } else if (valueHolderForYOffset instanceof string) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForYOffsetForIdx1  = valueHolderForYOffset as string
+            const valueHolderForYOffsetForIdx1 = valueHolderForYOffset as string
             valueSerializer.writeString(valueHolderForYOffsetForIdx1)
         }
-        const valueHolderForAnimation  = value.animation
+        const valueHolderForAnimation = value.animation
         if (valueHolderForAnimation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForAnimationTmpValue  = valueHolderForAnimation!
+            const valueHolderForAnimationTmpValue = valueHolderForAnimation!
             if (valueHolderForAnimationTmpValue instanceof ScrollAnimationOptions) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForAnimationTmpValueForIdx0  = valueHolderForAnimationTmpValue as ScrollAnimationOptions
+                const valueHolderForAnimationTmpValueForIdx0 = valueHolderForAnimationTmpValue as ScrollAnimationOptions
                 ScrollAnimationOptions_serializer.write(valueSerializer, valueHolderForAnimationTmpValueForIdx0)
             } else if (valueHolderForAnimationTmpValue instanceof boolean) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForAnimationTmpValueForIdx1  = valueHolderForAnimationTmpValue as boolean
+                const valueHolderForAnimationTmpValueForIdx1 = valueHolderForAnimationTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForAnimationTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForCanOverScroll  = value.canOverScroll
+        const valueHolderForCanOverScroll = value.canOverScroll
         if (valueHolderForCanOverScroll !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForCanOverScrollTmpValue  = valueHolderForCanOverScroll!
+            const valueHolderForCanOverScrollTmpValue = valueHolderForCanOverScroll!
             valueSerializer.writeBoolean(valueHolderForCanOverScrollTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ScrollOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const xOffsetTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let xOffsetTmpBuf : double | string | undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const xOffsetTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
+        let xOffsetTmpBuf: double | string | undefined
         if (xOffsetTmpBufUnionSelector == (0).toByte()) {
             xOffsetTmpBuf = valueDeserializer.readFloat64()
         } else if (xOffsetTmpBufUnionSelector == (1).toByte()) {
             xOffsetTmpBuf = (valueDeserializer.readString() as string)
         } else {
-            throw new Error("One of the branches for xOffsetTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for xOffsetTmpBuf has to be chosen through deserialisation.')
         }
-        const xOffsetTmpResult : double | string = (xOffsetTmpBuf as double | string)
-        const yOffsetTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let yOffsetTmpBuf : double | string | undefined
+        const xOffsetTmpResult: double | string = (xOffsetTmpBuf as double | string)
+        const yOffsetTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
+        let yOffsetTmpBuf: double | string | undefined
         if (yOffsetTmpBufUnionSelector == (0).toByte()) {
             yOffsetTmpBuf = valueDeserializer.readFloat64()
         } else if (yOffsetTmpBufUnionSelector == (1).toByte()) {
             yOffsetTmpBuf = (valueDeserializer.readString() as string)
         } else {
-            throw new Error("One of the branches for yOffsetTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for yOffsetTmpBuf has to be chosen through deserialisation.')
         }
-        const yOffsetTmpResult : double | string = (yOffsetTmpBuf as double | string)
-        const animationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let animationTmpBuf : ScrollAnimationOptions | boolean | undefined = undefined
+        const yOffsetTmpResult: double | string = (yOffsetTmpBuf as double | string)
+        const animationTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let animationTmpBuf: ScrollAnimationOptions | boolean | undefined = undefined
         if ((animationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const animationTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let animationTmpBuf_ : ScrollAnimationOptions | boolean | undefined
-            if (animationTmpBuf_UnionSelector == (0).toByte()) {
-                animationTmpBuf_ = ScrollAnimationOptions_serializer.read(valueDeserializer)
-            } else if (animationTmpBuf_UnionSelector == (1).toByte()) {
-                animationTmpBuf_ = valueDeserializer.readBoolean()
+            const animationTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let animationTmpBufOpt: ScrollAnimationOptions | boolean | undefined
+            if (animationTmpBufOptUnionSelector == (0).toByte()) {
+                animationTmpBufOpt = ScrollAnimationOptions_serializer.read(valueDeserializer)
+            } else if (animationTmpBufOptUnionSelector == (1).toByte()) {
+                animationTmpBufOpt = valueDeserializer.readBoolean()
             } else {
-                throw new Error("One of the branches for animationTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for animationTmpBufOpt has to be chosen through deserialisation.')
             }
-            animationTmpBuf = (animationTmpBuf_ as ScrollAnimationOptions | boolean)
+            animationTmpBuf = (animationTmpBufOpt as ScrollAnimationOptions | boolean)
         }
-        const animationTmpResult : ScrollAnimationOptions | boolean | undefined = animationTmpBuf
-        const canOverScrollTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let canOverScrollTmpBuf : boolean | undefined = undefined
+        const animationTmpResult: ScrollAnimationOptions | boolean | undefined = animationTmpBuf
+        const canOverScrollTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let canOverScrollTmpBuf: boolean | undefined = undefined
         if ((canOverScrollTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             canOverScrollTmpBuf = valueDeserializer.readBoolean()
         }
-        const canOverScrollTmpResult : boolean | undefined = canOverScrollTmpBuf
-        let value : ScrollOptions = ({xOffset: xOffsetTmpResult, yOffset: yOffsetTmpResult, animation: animationTmpResult, canOverScroll: canOverScrollTmpResult} as ScrollOptions)
+        const canOverScrollTmpResult: boolean | undefined = canOverScrollTmpBuf
+        let value: ScrollOptions = ({xOffset: xOffsetTmpResult, yOffset: yOffsetTmpResult, animation: animationTmpResult, canOverScroll: canOverScrollTmpResult} as ScrollOptions)
         return value
     }
 }
 export class ScrollToIndexOptions_serializer {
     public static write(buffer: SerializerBase, value: ScrollToIndexOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForExtraOffset  = value.extraOffset
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForExtraOffset = value.extraOffset
         if (valueHolderForExtraOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForExtraOffsetTmpValue  = valueHolderForExtraOffset!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForExtraOffsetTmpValue)
+            const valueHolderForExtraOffsetTmpValue = valueHolderForExtraOffset!
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForExtraOffsetTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ScrollToIndexOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const extraOffsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let extraOffsetTmpBuf : LengthMetrics | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const extraOffsetTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let extraOffsetTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
         if ((extraOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            extraOffsetTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+            extraOffsetTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
-        const extraOffsetTmpResult : LengthMetrics | undefined = extraOffsetTmpBuf
-        let value : ScrollToIndexOptions = ({extraOffset: extraOffsetTmpResult} as ScrollToIndexOptions)
+        const extraOffsetTmpResult: arkui_component_units_LengthMetrics | undefined = extraOffsetTmpBuf
+        let value: ScrollToIndexOptions = ({extraOffset: extraOffsetTmpResult} as ScrollToIndexOptions)
         return value
     }
 }
 export class OffsetOptions_serializer {
     public static write(buffer: SerializerBase, value: OffsetOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForXOffset  = value.xOffset
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForXOffset = value.xOffset
         if (valueHolderForXOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForXOffsetTmpValue  = valueHolderForXOffset!
+            const valueHolderForXOffsetTmpValue = valueHolderForXOffset!
             if (valueHolderForXOffsetTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForXOffsetTmpValueForIdx0  = valueHolderForXOffsetTmpValue as string
+                const valueHolderForXOffsetTmpValueForIdx0 = valueHolderForXOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForXOffsetTmpValueForIdx0)
             } else if (valueHolderForXOffsetTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForXOffsetTmpValueForIdx1  = valueHolderForXOffsetTmpValue as number
+                const valueHolderForXOffsetTmpValueForIdx1 = valueHolderForXOffsetTmpValue as number
                 valueSerializer.writeNumber(valueHolderForXOffsetTmpValueForIdx1)
-            } else if (valueHolderForXOffsetTmpValue instanceof Resource) {
+            } else if (valueHolderForXOffsetTmpValue instanceof global_resource_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForXOffsetTmpValueForIdx2  = valueHolderForXOffsetTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForXOffsetTmpValueForIdx2)
+                const valueHolderForXOffsetTmpValueForIdx2 = valueHolderForXOffsetTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForXOffsetTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForYOffset  = value.yOffset
+        const valueHolderForYOffset = value.yOffset
         if (valueHolderForYOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForYOffsetTmpValue  = valueHolderForYOffset!
+            const valueHolderForYOffsetTmpValue = valueHolderForYOffset!
             if (valueHolderForYOffsetTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForYOffsetTmpValueForIdx0  = valueHolderForYOffsetTmpValue as string
+                const valueHolderForYOffsetTmpValueForIdx0 = valueHolderForYOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForYOffsetTmpValueForIdx0)
             } else if (valueHolderForYOffsetTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForYOffsetTmpValueForIdx1  = valueHolderForYOffsetTmpValue as number
+                const valueHolderForYOffsetTmpValueForIdx1 = valueHolderForYOffsetTmpValue as number
                 valueSerializer.writeNumber(valueHolderForYOffsetTmpValueForIdx1)
-            } else if (valueHolderForYOffsetTmpValue instanceof Resource) {
+            } else if (valueHolderForYOffsetTmpValue instanceof global_resource_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForYOffsetTmpValueForIdx2  = valueHolderForYOffsetTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForYOffsetTmpValueForIdx2)
+                const valueHolderForYOffsetTmpValueForIdx2 = valueHolderForYOffsetTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForYOffsetTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): OffsetOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const xOffsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xOffsetTmpBuf : Dimension | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const xOffsetTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let xOffsetTmpBuf: Dimension | undefined = undefined
         if ((xOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const xOffsetTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xOffsetTmpBuf_ : string | number | Resource | undefined
-            if (xOffsetTmpBuf_UnionSelector == (0).toByte()) {
-                xOffsetTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (xOffsetTmpBuf_UnionSelector == (1).toByte()) {
-                xOffsetTmpBuf_ = (valueDeserializer.readNumber() as number)
-            } else if (xOffsetTmpBuf_UnionSelector == (2).toByte()) {
-                xOffsetTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const xOffsetTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let xOffsetTmpBufOpt: string | number | global_resource_Resource | undefined
+            if (xOffsetTmpBufOptUnionSelector == (0).toByte()) {
+                xOffsetTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (xOffsetTmpBufOptUnionSelector == (1).toByte()) {
+                xOffsetTmpBufOpt = (valueDeserializer.readNumber() as number)
+            } else if (xOffsetTmpBufOptUnionSelector == (2).toByte()) {
+                xOffsetTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for xOffsetTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for xOffsetTmpBufOpt has to be chosen through deserialisation.')
             }
-            xOffsetTmpBuf = (xOffsetTmpBuf_ as string | number | Resource)
+            xOffsetTmpBuf = (xOffsetTmpBufOpt as string | number | global_resource_Resource)
         }
-        const xOffsetTmpResult : Dimension | undefined = xOffsetTmpBuf
-        const yOffsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let yOffsetTmpBuf : Dimension | undefined = undefined
+        const xOffsetTmpResult: Dimension | undefined = xOffsetTmpBuf
+        const yOffsetTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let yOffsetTmpBuf: Dimension | undefined = undefined
         if ((yOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const yOffsetTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let yOffsetTmpBuf_ : string | number | Resource | undefined
-            if (yOffsetTmpBuf_UnionSelector == (0).toByte()) {
-                yOffsetTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (yOffsetTmpBuf_UnionSelector == (1).toByte()) {
-                yOffsetTmpBuf_ = (valueDeserializer.readNumber() as number)
-            } else if (yOffsetTmpBuf_UnionSelector == (2).toByte()) {
-                yOffsetTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const yOffsetTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let yOffsetTmpBufOpt: string | number | global_resource_Resource | undefined
+            if (yOffsetTmpBufOptUnionSelector == (0).toByte()) {
+                yOffsetTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (yOffsetTmpBufOptUnionSelector == (1).toByte()) {
+                yOffsetTmpBufOpt = (valueDeserializer.readNumber() as number)
+            } else if (yOffsetTmpBufOptUnionSelector == (2).toByte()) {
+                yOffsetTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for yOffsetTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for yOffsetTmpBufOpt has to be chosen through deserialisation.')
             }
-            yOffsetTmpBuf = (yOffsetTmpBuf_ as string | number | Resource)
+            yOffsetTmpBuf = (yOffsetTmpBufOpt as string | number | global_resource_Resource)
         }
-        const yOffsetTmpResult : Dimension | undefined = yOffsetTmpBuf
-        let value : OffsetOptions = ({xOffset: xOffsetTmpResult, yOffset: yOffsetTmpResult} as OffsetOptions)
+        const yOffsetTmpResult: Dimension | undefined = yOffsetTmpBuf
+        let value: OffsetOptions = ({xOffset: xOffsetTmpResult, yOffset: yOffsetTmpResult} as OffsetOptions)
         return value
     }
 }
 export class ScrollSnapOptions_serializer {
     public static write(buffer: SerializerBase, value: ScrollSnapOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForSnapAlign  = value.snapAlign
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForSnapAlign = value.snapAlign
         valueSerializer.writeInt32(valueHolderForSnapAlign.valueOf())
-        const valueHolderForSnapPagination  = value.snapPagination
+        const valueHolderForSnapPagination = value.snapPagination
         if (valueHolderForSnapPagination !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForSnapPaginationTmpValue  = valueHolderForSnapPagination!
+            const valueHolderForSnapPaginationTmpValue = valueHolderForSnapPagination!
             if (valueHolderForSnapPaginationTmpValue instanceof Dimension) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForSnapPaginationTmpValueForIdx0  = valueHolderForSnapPaginationTmpValue as Dimension
+                const valueHolderForSnapPaginationTmpValueForIdx0 = valueHolderForSnapPaginationTmpValue as Dimension
                 if (valueHolderForSnapPaginationTmpValueForIdx0 instanceof string) {
                     valueSerializer.writeInt8((0).toByte())
-                    const valueHolderForSnapPaginationTmpValueForIdx0ForIdx0  = valueHolderForSnapPaginationTmpValueForIdx0 as string
+                    const valueHolderForSnapPaginationTmpValueForIdx0ForIdx0 = valueHolderForSnapPaginationTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForSnapPaginationTmpValueForIdx0ForIdx0)
                 } else if (valueHolderForSnapPaginationTmpValueForIdx0 instanceof number) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForSnapPaginationTmpValueForIdx0ForIdx1  = valueHolderForSnapPaginationTmpValueForIdx0 as number
+                    const valueHolderForSnapPaginationTmpValueForIdx0ForIdx1 = valueHolderForSnapPaginationTmpValueForIdx0 as number
                     valueSerializer.writeNumber(valueHolderForSnapPaginationTmpValueForIdx0ForIdx1)
-                } else if (valueHolderForSnapPaginationTmpValueForIdx0 instanceof Resource) {
+                } else if (valueHolderForSnapPaginationTmpValueForIdx0 instanceof global_resource_Resource) {
                     valueSerializer.writeInt8((2).toByte())
-                    const valueHolderForSnapPaginationTmpValueForIdx0ForIdx2  = valueHolderForSnapPaginationTmpValueForIdx0 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForSnapPaginationTmpValueForIdx0ForIdx2)
+                    const valueHolderForSnapPaginationTmpValueForIdx0ForIdx2 = valueHolderForSnapPaginationTmpValueForIdx0 as global_resource_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForSnapPaginationTmpValueForIdx0ForIdx2)
                 }
-            } else if (TypeChecker.isArray_Dimension(valueHolderForSnapPaginationTmpValue)) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSnapPaginationTmpValueForIdx1  = valueHolderForSnapPaginationTmpValue as Array<Dimension>
-                valueSerializer.writeInt32((valueHolderForSnapPaginationTmpValueForIdx1.length).toInt())
-                for (let valueHolderForSnapPaginationTmpValueForIdx1CounterI = 0; valueHolderForSnapPaginationTmpValueForIdx1CounterI < valueHolderForSnapPaginationTmpValueForIdx1.length; valueHolderForSnapPaginationTmpValueForIdx1CounterI++) {
-                    const valueHolderForSnapPaginationTmpValueForIdx1TmpElement : Dimension = valueHolderForSnapPaginationTmpValueForIdx1[valueHolderForSnapPaginationTmpValueForIdx1CounterI]
-                    if (valueHolderForSnapPaginationTmpValueForIdx1TmpElement instanceof string) {
-                        valueSerializer.writeInt8((0).toByte())
-                        const valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx0  = valueHolderForSnapPaginationTmpValueForIdx1TmpElement as string
-                        valueSerializer.writeString(valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx0)
-                    } else if (valueHolderForSnapPaginationTmpValueForIdx1TmpElement instanceof number) {
+            } else if (valueHolderForSnapPaginationTmpValue instanceof Array) {
+                if (valueHolderForSnapPaginationTmpValue.length == 0) {
+                    valueSerializer.writeInt8((1).toByte())
+                    valueSerializer.writeInt32(0)
+                } else {
+                    const valueHolderForSnapPaginationTmpValueElem = valueHolderForSnapPaginationTmpValue[0]
+                    if (valueHolderForSnapPaginationTmpValueElem instanceof Dimension) {
                         valueSerializer.writeInt8((1).toByte())
-                        const valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx1  = valueHolderForSnapPaginationTmpValueForIdx1TmpElement as number
-                        valueSerializer.writeNumber(valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx1)
-                    } else if (valueHolderForSnapPaginationTmpValueForIdx1TmpElement instanceof Resource) {
-                        valueSerializer.writeInt8((2).toByte())
-                        const valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx2  = valueHolderForSnapPaginationTmpValueForIdx1TmpElement as Resource
-                        Resource_serializer.write(valueSerializer, valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx2)
+                        const valueHolderForSnapPaginationTmpValueForIdx1 = valueHolderForSnapPaginationTmpValue as Array<Dimension>
+                        valueSerializer.writeInt32((valueHolderForSnapPaginationTmpValueForIdx1.length).toInt())
+                        for (let valueHolderForSnapPaginationTmpValueForIdx1CounterI = 0; valueHolderForSnapPaginationTmpValueForIdx1CounterI < valueHolderForSnapPaginationTmpValueForIdx1.length; valueHolderForSnapPaginationTmpValueForIdx1CounterI++) {
+                            const valueHolderForSnapPaginationTmpValueForIdx1TmpElement: Dimension = valueHolderForSnapPaginationTmpValueForIdx1[valueHolderForSnapPaginationTmpValueForIdx1CounterI]
+                            if (valueHolderForSnapPaginationTmpValueForIdx1TmpElement instanceof string) {
+                                valueSerializer.writeInt8((0).toByte())
+                                const valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx0 = valueHolderForSnapPaginationTmpValueForIdx1TmpElement as string
+                                valueSerializer.writeString(valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx0)
+                            } else if (valueHolderForSnapPaginationTmpValueForIdx1TmpElement instanceof number) {
+                                valueSerializer.writeInt8((1).toByte())
+                                const valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx1 = valueHolderForSnapPaginationTmpValueForIdx1TmpElement as number
+                                valueSerializer.writeNumber(valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx1)
+                            } else if (valueHolderForSnapPaginationTmpValueForIdx1TmpElement instanceof global_resource_Resource) {
+                                valueSerializer.writeInt8((2).toByte())
+                                const valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx2 = valueHolderForSnapPaginationTmpValueForIdx1TmpElement as global_resource_Resource
+                                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSnapPaginationTmpValueForIdx1TmpElementForIdx2)
+                            }
+                        }
                     }
                 }
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForEnableSnapToStart  = value.enableSnapToStart
+        const valueHolderForEnableSnapToStart = value.enableSnapToStart
         if (valueHolderForEnableSnapToStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEnableSnapToStartTmpValue  = valueHolderForEnableSnapToStart!
+            const valueHolderForEnableSnapToStartTmpValue = valueHolderForEnableSnapToStart!
             valueSerializer.writeBoolean(valueHolderForEnableSnapToStartTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForEnableSnapToEnd  = value.enableSnapToEnd
+        const valueHolderForEnableSnapToEnd = value.enableSnapToEnd
         if (valueHolderForEnableSnapToEnd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEnableSnapToEndTmpValue  = valueHolderForEnableSnapToEnd!
+            const valueHolderForEnableSnapToEndTmpValue = valueHolderForEnableSnapToEnd!
             valueSerializer.writeBoolean(valueHolderForEnableSnapToEndTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ScrollSnapOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const snapAlignTmpResult : ScrollSnapAlign = ScrollSnapAlign.fromValue(valueDeserializer.readInt32())
-        const snapPaginationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let snapPaginationTmpBuf : Dimension | Array<Dimension> | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const snapAlignTmpResult: ScrollSnapAlign = ScrollSnapAlign.fromValue(valueDeserializer.readInt32())
+        const snapPaginationTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let snapPaginationTmpBuf: Dimension | Array<Dimension> | undefined = undefined
         if ((snapPaginationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const snapPaginationTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let snapPaginationTmpBuf_ : Dimension | Array<Dimension> | undefined
-            if (snapPaginationTmpBuf_UnionSelector == (0).toByte()) {
-                const snapPaginationTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let snapPaginationTmpBuf_BufU : string | number | Resource | undefined
-                if (snapPaginationTmpBuf_BufUUnionSelector == (0).toByte()) {
-                    snapPaginationTmpBuf_BufU = (valueDeserializer.readString() as string)
-                } else if (snapPaginationTmpBuf_BufUUnionSelector == (1).toByte()) {
-                    snapPaginationTmpBuf_BufU = (valueDeserializer.readNumber() as number)
-                } else if (snapPaginationTmpBuf_BufUUnionSelector == (2).toByte()) {
-                    snapPaginationTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+            const snapPaginationTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let snapPaginationTmpBufOpt: Dimension | Array<Dimension> | undefined
+            if (snapPaginationTmpBufOptUnionSelector == (0).toByte()) {
+                const snapPaginationTmpBufOptBufUUnionSelector: int32 = valueDeserializer.readInt8()
+                let snapPaginationTmpBufOptBufU: string | number | global_resource_Resource | undefined
+                if (snapPaginationTmpBufOptBufUUnionSelector == (0).toByte()) {
+                    snapPaginationTmpBufOptBufU = (valueDeserializer.readString() as string)
+                } else if (snapPaginationTmpBufOptBufUUnionSelector == (1).toByte()) {
+                    snapPaginationTmpBufOptBufU = (valueDeserializer.readNumber() as number)
+                } else if (snapPaginationTmpBufOptBufUUnionSelector == (2).toByte()) {
+                    snapPaginationTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
                 } else {
-                    throw new Error("One of the branches for snapPaginationTmpBuf_BufU has to be chosen through deserialisation.")
+                    throw new Error('One of the branches for snapPaginationTmpBufOptBufU has to be chosen through deserialisation.')
                 }
-                snapPaginationTmpBuf_ = (snapPaginationTmpBuf_BufU as string | number | Resource)
-            } else if (snapPaginationTmpBuf_UnionSelector == (1).toByte()) {
-                const snapPaginationTmpBuf_BufULength : int32 = valueDeserializer.readInt32()
-                let snapPaginationTmpBuf_BufU : Array<Dimension> = new Array<Dimension>(snapPaginationTmpBuf_BufULength)
-                for (let snapPaginationTmpBuf_BufUBufCounterI = 0; snapPaginationTmpBuf_BufUBufCounterI < snapPaginationTmpBuf_BufULength; snapPaginationTmpBuf_BufUBufCounterI++) {
-                    const snapPaginationTmpBuf_BufUTempBufUnionSelector : int32 = valueDeserializer.readInt8()
-                    let snapPaginationTmpBuf_BufUTempBuf : string | number | Resource | undefined
-                    if (snapPaginationTmpBuf_BufUTempBufUnionSelector == (0).toByte()) {
-                        snapPaginationTmpBuf_BufUTempBuf = (valueDeserializer.readString() as string)
-                    } else if (snapPaginationTmpBuf_BufUTempBufUnionSelector == (1).toByte()) {
-                        snapPaginationTmpBuf_BufUTempBuf = (valueDeserializer.readNumber() as number)
-                    } else if (snapPaginationTmpBuf_BufUTempBufUnionSelector == (2).toByte()) {
-                        snapPaginationTmpBuf_BufUTempBuf = Resource_serializer.read(valueDeserializer)
+                snapPaginationTmpBufOpt = (snapPaginationTmpBufOptBufU as string | number | global_resource_Resource)
+            } else if (snapPaginationTmpBufOptUnionSelector == (1).toByte()) {
+                const snapPaginationTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
+                let snapPaginationTmpBufOptBufU: Array<Dimension> = new Array<Dimension>(snapPaginationTmpBufOptBufULength)
+                for (let snapPaginationTmpBufOptBufUBufCounterI = 0; snapPaginationTmpBufOptBufUBufCounterI < snapPaginationTmpBufOptBufULength; snapPaginationTmpBufOptBufUBufCounterI++) {
+                    const snapPaginationTmpBufOptBufUTempBufUnionSelector: int32 = valueDeserializer.readInt8()
+                    let snapPaginationTmpBufOptBufUTempBuf: string | number | global_resource_Resource | undefined
+                    if (snapPaginationTmpBufOptBufUTempBufUnionSelector == (0).toByte()) {
+                        snapPaginationTmpBufOptBufUTempBuf = (valueDeserializer.readString() as string)
+                    } else if (snapPaginationTmpBufOptBufUTempBufUnionSelector == (1).toByte()) {
+                        snapPaginationTmpBufOptBufUTempBuf = (valueDeserializer.readNumber() as number)
+                    } else if (snapPaginationTmpBufOptBufUTempBufUnionSelector == (2).toByte()) {
+                        snapPaginationTmpBufOptBufUTempBuf = global_resource_Resource_serializer.read(valueDeserializer)
                     } else {
-                        throw new Error("One of the branches for snapPaginationTmpBuf_BufUTempBuf has to be chosen through deserialisation.")
+                        throw new Error('One of the branches for snapPaginationTmpBufOptBufUTempBuf has to be chosen through deserialisation.')
                     }
-                    snapPaginationTmpBuf_BufU[snapPaginationTmpBuf_BufUBufCounterI] = (snapPaginationTmpBuf_BufUTempBuf as string | number | Resource)
+                    snapPaginationTmpBufOptBufU[snapPaginationTmpBufOptBufUBufCounterI] = (snapPaginationTmpBufOptBufUTempBuf as string | number | global_resource_Resource)
                 }
-                snapPaginationTmpBuf_ = snapPaginationTmpBuf_BufU
+                snapPaginationTmpBufOpt = snapPaginationTmpBufOptBufU
             } else {
-                throw new Error("One of the branches for snapPaginationTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for snapPaginationTmpBufOpt has to be chosen through deserialisation.')
             }
-            snapPaginationTmpBuf = (snapPaginationTmpBuf_ as Dimension | Array<Dimension>)
+            snapPaginationTmpBuf = (snapPaginationTmpBufOpt as Dimension | Array<Dimension>)
         }
-        const snapPaginationTmpResult : Dimension | Array<Dimension> | undefined = snapPaginationTmpBuf
-        const enableSnapToStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableSnapToStartTmpBuf : boolean | undefined = undefined
+        const snapPaginationTmpResult: Dimension | Array<Dimension> | undefined = snapPaginationTmpBuf
+        const enableSnapToStartTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableSnapToStartTmpBuf: boolean | undefined = undefined
         if ((enableSnapToStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableSnapToStartTmpBuf = valueDeserializer.readBoolean()
         }
-        const enableSnapToStartTmpResult : boolean | undefined = enableSnapToStartTmpBuf
-        const enableSnapToEndTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableSnapToEndTmpBuf : boolean | undefined = undefined
+        const enableSnapToStartTmpResult: boolean | undefined = enableSnapToStartTmpBuf
+        const enableSnapToEndTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableSnapToEndTmpBuf: boolean | undefined = undefined
         if ((enableSnapToEndTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableSnapToEndTmpBuf = valueDeserializer.readBoolean()
         }
-        const enableSnapToEndTmpResult : boolean | undefined = enableSnapToEndTmpBuf
-        let value : ScrollSnapOptions = ({snapAlign: snapAlignTmpResult, snapPagination: snapPaginationTmpResult, enableSnapToStart: enableSnapToStartTmpResult, enableSnapToEnd: enableSnapToEndTmpResult} as ScrollSnapOptions)
+        const enableSnapToEndTmpResult: boolean | undefined = enableSnapToEndTmpBuf
+        let value: ScrollSnapOptions = ({snapAlign: snapAlignTmpResult, snapPagination: snapPaginationTmpResult, enableSnapToStart: enableSnapToStartTmpResult, enableSnapToEnd: enableSnapToEndTmpResult} as ScrollSnapOptions)
         return value
     }
 }
@@ -1607,18 +1404,21 @@ export interface UIScrollEvent extends UIScrollableCommonEvent {
     setOnDidScroll(callback_: ScrollOnScrollCallback | undefined): void
 }
 export class UIScrollEventInternal extends UIScrollableCommonEventInternal implements MaterializedBase,UIScrollEvent {
-    constructor(peerPtr: KPointer) {
-        super(peerPtr)
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
     }
-    static construct(ptr: KPointer): UIScrollEventInternal {
-        const retval  = ArkUIGeneratedNativeModule._UIScrollEvent_construct(ptr)
-        return new UIScrollEventInternal(retval)
+    constructor() {
+        this(MaterializedBaseTag.NOP, UIScrollEventInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval = ArkUIGeneratedNativeModule._UIScrollEvent_construct()
+        return retval
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._UIScrollEvent_getFinalizer()
     }
     public static fromPtr(ptr: KPointer): UIScrollEventInternal {
-        return new UIScrollEventInternal(ptr)
+        return new UIScrollEventInternal(MaterializedBaseTag.NOP, ptr)
     }
     public setOnWillScroll(callback_: ScrollOnWillScrollCallback | undefined): void {
         const callback__casted = callback_ as (ScrollOnWillScrollCallback | undefined)
@@ -1630,11 +1430,11 @@ export class UIScrollEventInternal extends UIScrollableCommonEventInternal imple
         this.setOnDidScroll_serialize(callback__casted)
         return
     }
-    setOnWillScroll_serialize(callback_: ScrollOnWillScrollCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private setOnWillScroll_serialize(callback_: ScrollOnWillScrollCallback | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const callback_TmpValue  = callback_!
+            const callback_TmpValue = callback_!
             thisSerializer.holdAndWriteCallback(callback_TmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1642,11 +1442,11 @@ export class UIScrollEventInternal extends UIScrollableCommonEventInternal imple
         ArkUIGeneratedNativeModule._UIScrollEvent_setOnWillScroll(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnDidScroll_serialize(callback_: ScrollOnScrollCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    private setOnDidScroll_serialize(callback_: ScrollOnScrollCallback | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const callback_TmpValue  = callback_!
+            const callback_TmpValue = callback_!
             thisSerializer.holdAndWriteCallback(callback_TmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1655,4 +1455,3 @@ export class UIScrollEventInternal extends UIScrollableCommonEventInternal imple
         thisSerializer.release()
     }
 }
-

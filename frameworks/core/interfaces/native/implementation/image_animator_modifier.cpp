@@ -182,7 +182,7 @@ void SetMonitorInvisibleAreaImpl(Ark_NativePointer node,
     ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(frameNode, *convValue);
 }
 void SetOnStartImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+                    const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -197,7 +197,7 @@ void SetOnStartImpl(Ark_NativePointer node,
     ImageAnimatorModelNG::SetOnStart(frameNode, std::move(onStart));
 }
 void SetOnPauseImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+                    const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -212,7 +212,7 @@ void SetOnPauseImpl(Ark_NativePointer node,
     ImageAnimatorModelNG::SetOnPause(frameNode, std::move(onPause));
 }
 void SetOnRepeatImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -227,7 +227,7 @@ void SetOnRepeatImpl(Ark_NativePointer node,
     ImageAnimatorModelNG::SetOnRepeat(frameNode, onRepeat);
 }
 void SetOnCancelImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -242,7 +242,7 @@ void SetOnCancelImpl(Ark_NativePointer node,
     ImageAnimatorModelNG::SetOnCancel(frameNode, onCancel);
 }
 void SetOnFinishImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

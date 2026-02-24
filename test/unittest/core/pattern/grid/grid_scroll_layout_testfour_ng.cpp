@@ -576,6 +576,28 @@ HWTEST_F(GridScrollLayoutTestFourNg, TestIrregularGridWithScrollToIndex001, Test
 }
 
 /**
+ * @tc.name: TestScrollToIndexCenter001
+ * @tc.desc: Test Grid Measure when scroll to index 0 in center
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestFourNg, TestScrollToIndexCenter001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedHeightItems(6, 100);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 3);
+    ScrollToIndex(0, false, ScrollAlign::CENTER);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 3);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 3);
+}
+
+/**
  * @tc.name: TestIrregularGridMeasureForward001
  * @tc.desc: Test Irregular Grid with optional Measure forward
  * @tc.type: FUNC

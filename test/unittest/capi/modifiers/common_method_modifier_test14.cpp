@@ -81,11 +81,11 @@ public:
 };
 
 /*
- * @tc.name: gesture_Tap_Test
+ * @tc.name: setPriorityGestureTestGestureTap
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest14, gesture_Tap_Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest14, setPriorityGestureTestGestureTap, TestSize.Level1)
 {
 #ifdef WRONG_GEN1
     MockTapGestureModel* mockModel = new MockTapGestureModel();
@@ -109,11 +109,11 @@ HWTEST_F(CommonMethodModifierTest14, gesture_Tap_Test, TestSize.Level1)
 }
 
 /*
- * @tc.name: gesture_LongPress_Test
+ * @tc.name: setPriorityGestureTestGestureLongPress
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest14, gesture_LongPress_Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest14, setPriorityGestureTestGestureLongPress, TestSize.Level1)
 {
 #ifdef WRONG_GEN1
     MockLongPressGestureModel* mockModel = new MockLongPressGestureModel();
@@ -137,11 +137,11 @@ HWTEST_F(CommonMethodModifierTest14, gesture_LongPress_Test, TestSize.Level1)
 }
 
 /*
- * @tc.name: gesture_Pan_Test
+ * @tc.name: setPriorityGestureTestGesturePan
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest14, gesture_Pan_Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest14, setPriorityGestureTestGesturePan, TestSize.Level1)
 {
 #ifdef WRONG_GEN1
     MockPanGestureModel* mockModel = new MockPanGestureModel();
@@ -165,11 +165,11 @@ HWTEST_F(CommonMethodModifierTest14, gesture_Pan_Test, TestSize.Level1)
 }
 
 /*
- * @tc.name: gesture_Pinch_Test
+ * @tc.name: setPriorityGestureTestGesturePinch
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest14, gesture_Pinch_Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest14, setPriorityGestureTestGesturePinch, TestSize.Level1)
 {
 #ifdef WRONG_GEN1
     auto mockModel = new MockPinchGestureModel();
@@ -193,11 +193,11 @@ HWTEST_F(CommonMethodModifierTest14, gesture_Pinch_Test, TestSize.Level1)
 }
 
 /*
- * @tc.name: gesture_Swipe_Test
+ * @tc.name: setPriorityGestureTestGestureSwipe
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest14, gesture_Swipe_Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest14, setPriorityGestureTestGestureSwipe, TestSize.Level1)
 {
 #ifdef WRONG_GEN1
     auto mockModel = new MockSwipeGestureModel();
@@ -221,11 +221,11 @@ HWTEST_F(CommonMethodModifierTest14, gesture_Swipe_Test, TestSize.Level1)
 }
 
 /*
- * @tc.name: gesture_Rotation_Test
+ * @tc.name: setPriorityGestureTestGestureRotation
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest14, gesture_Rotation_Test, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest14, setPriorityGestureTestGestureRotation, TestSize.Level1)
 {
 #ifdef WRONG_GEN1
     auto mockModel = new MockRotationGestureModel();

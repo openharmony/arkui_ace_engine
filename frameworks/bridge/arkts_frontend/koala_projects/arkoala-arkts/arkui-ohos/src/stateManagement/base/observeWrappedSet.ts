@@ -40,15 +40,23 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
     private ____V1RenderId: RenderIdType = 0;
     @JSONStringifyIgnore
     private allowDeep_: boolean;
+    private isAPI_ : boolean;
     /**
      * Constructs a Set from another Set
      * @param set another Set
      */
-    constructor(set: Set<K>, allowDeep: boolean) {
+    constructor(set: Set<K>, allowDeep: boolean, isAPI: boolean = false) {
         super();
         this.store_ = set;
         this.allowDeep_ = allowDeep;
-        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedSet');
+        this.isAPI_ = isAPI;
+        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta(
+            (
+                this.allowDeep_ ? 
+                    this.isAPI_ ? '__metaBuiltInMakeObserved_'
+                        : '__metaBuiltInV2_'
+                    : '__metaBuiltInV1_'
+            ) +'WrappedSet', this);
     }
 
     // implementation of ISubscribedWatches by forwarding to subscribedWatches

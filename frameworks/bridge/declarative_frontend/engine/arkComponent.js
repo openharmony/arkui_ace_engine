@@ -2097,6 +2097,19 @@ class OnFocusModifier extends ModifierWithKey {
   }
 }
 OnFocusModifier.identity = Symbol('onFocus');
+class OnNeedSoftkeyboardModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnNeedSoftkeyboard(node);
+    } else {
+      getUINativeModule().common.setOnNeedSoftkeyboard(node, this.value);
+    }
+  }
+}
+OnNeedSoftkeyboardModifier.identity = Symbol('onNeedSoftkeyboard');
 class OnBlurModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4693,6 +4706,10 @@ class ArkComponent {
   }
   onFocus(event) {
     modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
+    return this;
+  }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
+    modifierWithKey(this._modifiersWithKeys, OnNeedSoftkeyboardModifier.identity, OnNeedSoftkeyboardModifier, onNeedSoftkeyboardCallback);
     return this;
   }
   onBlur(event) {
@@ -7699,20 +7716,22 @@ class GridLayoutOptionsModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b, _c, _d;
+    let _a, _b, _c, _d, _e, _f;
     if (reset) {
-      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined);
+      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
     }
     else {
       getUINativeModule().grid.setGridLayoutOptions(node, isArray(this.value.regularSize) ? this.value.regularSize : undefined,
         isArray((_a = this.value) === null || _a === void 0 ? void 0 : _a.irregularIndexes) ? this.value.irregularIndexes : undefined,
         isArray((_b = this.value) === null || _b === void 0 ? void 0 : _b.irregularIndexes) ? this.value.irregularIndexes.length : undefined,
         isFunction((_c = this.value) === null || _c === void 0 ? void 0 : _c.onGetIrregularSizeByIndex) ? this.value.onGetIrregularSizeByIndex : undefined,
-        isFunction((_d = this.value) === null || _d === void 0 ? void 0 : _d.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined);
+        isFunction((_d = this.value) === null || _d === void 0 ? void 0 : _d.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined,
+        isFunction((_e = this.value) === null || _e === void 0 ? void 0 : _e.onGetStartIndexByOffset) ? this.value.onGetStartIndexByOffset : undefined,
+        isFunction((_f = this.value) === null || _f === void 0 ? void 0 : _f.onGetStartIndexByIndex) ? this.value.onGetStartIndexByIndex : undefined);
     }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f, _g, _h;
+    let _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l;
     return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.regularSize,
       (_b = this.value) === null || _b === void 0 ? void 0 : _b.regularSize) ||
       !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.irregularIndexes,
@@ -7720,7 +7739,11 @@ class GridLayoutOptionsModifier extends ModifierWithKey {
       !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.onGetIrregularSizeByIndex,
         (_f = this.value) === null || _f === void 0 ? void 0 : _f.onGetIrregularSizeByIndex) ||
       !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.onGetRectByIndex,
-        (_h = this.value) === null || _h === void 0 ? void 0 : _h.onGetRectByIndex);
+        (_h = this.value) === null || _h === void 0 ? void 0 : _h.onGetRectByIndex) ||
+      !isBaseOrResourceEqual((_i = this.stageValue) === null || _i === void 0 ? void 0 : _i.onGetStartIndexByOffset,
+        (_j = this.value) === null || _j === void 0 ? void 0 : _j.onGetStartIndexByOffset) ||
+      !isBaseOrResourceEqual((_k = this.stageValue) === null || _k === void 0 ? void 0 : _k.onGetStartIndexByIndex,
+        (_l = this.value) === null || _l === void 0 ? void 0 : _l.onGetStartIndexByIndex);
   }
 }
 GridLayoutOptionsModifier.identity = Symbol('gridLayoutOptions');
@@ -10697,6 +10720,9 @@ class ArkSpanComponent {
   }
   onFocus(event) {
     throw new BusinessError(100201, 'onFocus function not supported in attributeModifier scenario.');
+  }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
+    throw new Error('Method not implemented.');
   }
   onBlur(event) {
     throw new BusinessError(100201, 'onBlur function not supported in attributeModifier scenario.');
@@ -27354,6 +27380,12 @@ class ArkXComponentComponent extends ArkComponent {
   onFocus(event) {
     if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
       modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
+    }
+    return this;
+  }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnNeedSoftkeyboardModifier.identity, OnNeedSoftkeyboardModifier, onNeedSoftkeyboardCallback);
     }
     return this;
   }

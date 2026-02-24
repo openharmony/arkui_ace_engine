@@ -68,10 +68,10 @@ const enum MapType {
 }
 
 class StorageHelper {
-  protected static readonly INVALID_DEFAULT_VALUE: string = 'The default creator should be function when first connect';
+  protected static readonly INVALID_DEFAULT_VALUE: string = 'The default creator should be function when first connect.';
   protected static readonly DELETE_NOT_EXIST_KEY: string = 'The key to be deleted does not exist';
   protected static readonly INVALID_TYPE: string = 'Not supported type! The type should have function constructor signature.';
-  protected static readonly INVALID_KEY: string = 'The key is invalid, key must be a string type';
+  protected static readonly INVALID_KEY: string = 'The key is invalid, key must be string or TypeConstructorWithArgs type.';
   protected static readonly EMPTY_STRING_KEY: string = 'Cannot use empty string as the key';
   protected static readonly INVALID_LENGTH_KEY: string = 'Cannot use the key! The length of key should be 2 to 255';
   protected static readonly INVALID_CHARACTER_KEY: string = 'Cannot use the key! The value of key can only consist of letters, digits and underscores';
@@ -496,8 +496,13 @@ class PersistenceV2Impl extends StorageHelper {
       return;
     }
 
-    if (typeof keyOrType !== 'string') {
-      this.throwIfTypeIsNotSupported(keyOrType);
+    // check type is invalid or not
+    if (typeof keyOrType !== 'string' && typeof keyOrType !== 'function') {
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_INVALID_KEY, StorageHelper.INVALID_KEY);
+    }
+
+    if (PersistenceV2Impl.NOT_SUPPORT_TYPES_.includes(keyOrType as any)) {
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
     }
 
     const key: string = this.getKeyOrTypeName(keyOrType);
@@ -515,8 +520,13 @@ class PersistenceV2Impl extends StorageHelper {
       return;
     }
 
-    if (typeof keyOrType !== 'string') {
-      this.throwIfTypeIsNotSupported(keyOrType);
+    // check type is invalid or not
+    if (typeof keyOrType !== 'string' && typeof keyOrType !== 'function') {
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_INVALID_KEY, StorageHelper.INVALID_KEY);
+    }
+
+    if (PersistenceV2Impl.NOT_SUPPORT_TYPES_.includes(keyOrType as any)) {
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
     }
 
     const key: string = this.getKeyOrTypeName(keyOrType);
@@ -530,7 +540,7 @@ class PersistenceV2Impl extends StorageHelper {
       const areaMode = this.globalMapAreaMode_.get(key);
       try {
         const data = this.globalMap_.get(key);
-        const stringified = DataCoder.stringify(data);
+        const stringified = DataCoder.stringify(data, false);
         PersistenceV2Impl.storage_.set(key, stringified, areaMode);
       } catch (err) {
         this.errorHelper(key, PersistError.Serialization, err);
@@ -539,7 +549,7 @@ class PersistenceV2Impl extends StorageHelper {
       // find in module path
       try {
         const data = this.map_.get(key);
-        const stringified = DataCoder.stringify(data);
+        const stringified = DataCoder.stringify(data, true);
         PersistenceV2Impl.storage_.set(key, stringified);
       } catch (err) {
         this.errorHelper(key, PersistError.Serialization, err);
@@ -749,7 +759,7 @@ class PersistenceV2Impl extends StorageHelper {
           const value: object = keyType === MapType.GLOBAL_MAP ? this.globalMap_.get(key) : this.map_.get(key);
 
           ObserveV2.getObserve().startRecordDependencies(this, id);
-          const json = DataCoder.stringify(value);
+          const json = DataCoder.stringify(value, keyType !== MapType.GLOBAL_MAP);
           ObserveV2.getObserve().stopRecordDependencies();
 
           if (keyType === MapType.GLOBAL_MAP) {

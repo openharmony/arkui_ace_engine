@@ -2010,69 +2010,6 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: LocationGetIconResourceStaticTest001
- * @tc.desc: Test security component GetIconResourceStatic
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(SecurityComponentModelTestNg, LocationGetIconResourceStaticTest001, TestSize.Level0)
-{
-    int32_t iconStyle = -1;
-    InternalResource::ResourceId id;
-    ASSERT_FALSE(LocationButtonModelNG::GetIconResourceStatic(iconStyle, id));
-
-    iconStyle = 2;
-    ASSERT_FALSE(LocationButtonModelNG::GetIconResourceStatic(iconStyle, id));
-
-    iconStyle = 0;
-    ASSERT_TRUE(LocationButtonModelNG::GetIconResourceStatic(iconStyle, id));
-}
-
-/**
- * @tc.name: LocationGetTextResourceStatic001
- * @tc.desc: Test security component GetTextResourceStatic
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(SecurityComponentModelTestNg, LocationGetTextResourceStatic001, TestSize.Level0)
-{
-    int32_t textStyle = 0;
-    std::string text;
-
-    ASSERT_TRUE(LocationButtonModelNG::GetTextResourceStatic(textStyle, text));
-}
-
-/**
- * @tc.name: LocationInitLocationButton001
- * @tc.desc: Test security component InitLocationButton001
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(SecurityComponentModelTestNg, LocationInitLocationButton001, TestSize.Level0)
-{
-    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
-        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
-    ASSERT_NE(frameNode, nullptr);
-    bool isArkuiComponent = false;
-    LocationButtonStyle style;
-    style.text = LocationButtonLocationDescription::TEXT_NULL;
-    style.icon = LocationButtonIconStyle::ICON_NULL;
-    ASSERT_TRUE(LocationButtonModelNG::InitLocationButton(frameNode.rawPtr_, style, isArkuiComponent));
-
-    style.text = LocationButtonStyle::DEFAULT_TEXT;
-    style.icon = LocationButtonIconStyle::ICON_NULL;
-    ASSERT_TRUE(LocationButtonModelNG::InitLocationButton(frameNode.rawPtr_, style, isArkuiComponent));
-
-    style.text = LocationButtonLocationDescription::TEXT_NULL;
-    style.icon = LocationButtonStyle::DEFAULT_ICON;
-    ASSERT_TRUE(LocationButtonModelNG::InitLocationButton(frameNode.rawPtr_, style, isArkuiComponent));
-
-    style.text = LocationButtonStyle::DEFAULT_TEXT;
-    style.icon = LocationButtonStyle::DEFAULT_ICON;
-    ASSERT_TRUE(LocationButtonModelNG::InitLocationButton(frameNode.rawPtr_, style, isArkuiComponent));
-}
-
-/**
  * @tc.name: PasteButtonGetIconResourceStaticTest001
  * @tc.desc: Test security component GetIconResourceStatic
  * @tc.type: FUNC

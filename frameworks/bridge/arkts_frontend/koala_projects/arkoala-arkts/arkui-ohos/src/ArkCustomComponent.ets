@@ -63,5 +63,7 @@ export interface ArkCustomComponent {
     // dump info
     onDumpInspector(): string;
 
+    // dfx
+    getName(): string;
     readonly isCustomLayout: boolean;
 }

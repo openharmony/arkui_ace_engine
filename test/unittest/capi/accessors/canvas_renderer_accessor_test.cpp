@@ -26,7 +26,6 @@
 #include "core/interfaces/native/implementation/canvas_gradient_peer.h"
 #include "core/interfaces/native/implementation/matrix2d_peer_impl.h"
 #include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
-#include "core/interfaces/native/implementation/image_data_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/path2d_peer_impl.h"
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
@@ -641,11 +640,11 @@ HWTEST_F(CanvasRendererAccessorTest, resetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: globalAlphaSetterGetterTest
+ * @tc.name: setGlobalAlphaTestSetterGetter
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, globalAlphaSetterGetterTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setGlobalAlphaTestSetterGetter, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setGlobalAlpha, nullptr);
     for (const auto& [actual, expected] : ARK_FLOAT64_ALPHA_TEST_PLAN) {
@@ -843,11 +842,11 @@ HWTEST_F(CanvasRendererAccessorTest, transformTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: globalCompositeOperationSetterGetterTest
+ * @tc.name: setGlobalCompositeOperationTestSetterGetter
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, globalCompositeOperationSetterGetterTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setGlobalCompositeOperationTestSetterGetter, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setGlobalCompositeOperation, nullptr);
     for (const auto& [actual, expected, expectedStr] : ARK_COMPOSITE_TEST_PLAN) {
@@ -875,11 +874,11 @@ HWTEST_F(CanvasRendererAccessorTest, setFilterTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: imageSmoothingEnabledSetterGetterTest
+ * @tc.name: setImageSmoothingEnabledTestSetterGetter
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, imageSmoothingEnabledSetterGetterTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setImageSmoothingEnabledTestSetterGetter, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setImageSmoothingEnabled, nullptr);
     for (const auto& [actual, expected] : ARK_BOOL_TEST_PLAN) {
@@ -892,11 +891,11 @@ HWTEST_F(CanvasRendererAccessorTest, imageSmoothingEnabledSetterGetterTest, Test
 }
 
 /**
- * @tc.name: lineDashOffsetSetterGetterTest
+ * @tc.name: setLineDashOffsetTestSetterGetter
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, lineDashOffsetSetterGetterTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setLineDashOffsetTestSetterGetter, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setLineDashOffset, nullptr);
     for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
@@ -911,11 +910,11 @@ HWTEST_F(CanvasRendererAccessorTest, lineDashOffsetSetterGetterTest, TestSize.Le
 }
 
 /**
- * @tc.name: lineWidthSetterGetterTest
+ * @tc.name: setLineWidthTestSetterGetter
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, lineWidthSetterGetterTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setLineWidthTestSetterGetter, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setLineWidth, nullptr);
     ChangeDensity(DEFAULT_DENSITY);
@@ -931,7 +930,7 @@ HWTEST_F(CanvasRendererAccessorTest, lineWidthSetterGetterTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: miterLimitSetterGetterTest
+ * @tc.name: setMiterLimitTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -951,11 +950,11 @@ HWTEST_F(CanvasRendererAccessorTest, setMiterLimitTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: shadowBlurSetterGetterTest
+ * @tc.name: setShadowBlurTestSetterGetter
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, shadowBlurSetterGetterTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setShadowBlurTestSetterGetter, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShadowBlur, nullptr);
     for (const auto& [actual, expected] : ARK_FLOAT64_SHADOW_BLUR_TEST_PLAN) {
@@ -995,11 +994,11 @@ HWTEST_F(CanvasRendererAccessorTest, setShadowColorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: shadowOffsetXSetterGetterTest
+ * @tc.name: setShadowOffsetXTestSetterGetter
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, shadowOffsetXSetterGetterTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetXTestSetterGetter, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShadowOffsetX, nullptr);
     for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
@@ -1014,11 +1013,11 @@ HWTEST_F(CanvasRendererAccessorTest, shadowOffsetXSetterGetterTest, TestSize.Lev
 }
 
 /**
- * @tc.name: shadowOffsetYSetterGetterTest
+ * @tc.name: setShadowOffsetYTestSetterGetter
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, shadowOffsetYSetterGetterTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetYTestSetterGetter, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setShadowOffsetY, nullptr);
     for (const auto& [actual, expected] : ARK_FLOAT64_TEST_PLAN) {
@@ -1049,11 +1048,11 @@ HWTEST_F(CanvasRendererAccessorTest, strokeTestWithPath, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTransform1ScaleTest
+ * @tc.name: setTransform1TestScale
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setTransform1ScaleTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setTransform1TestScale, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTransform1, nullptr);
     Ark_Matrix2D arkMatrix;
@@ -1079,11 +1078,11 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1ScaleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTransform1SkewTest
+ * @tc.name: setTransform1TestSkew
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setTransform1SkewTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setTransform1TestSkew, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTransform1, nullptr);
     Ark_Matrix2D arkMatrix;
@@ -1104,11 +1103,11 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1SkewTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTransform1TranslateTest
+ * @tc.name: setTransform1TestTranslate
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setTransform1TranslateTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setTransform1TestTranslate, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTransform1, nullptr);
     Ark_Matrix2D arkMatrix;
@@ -1144,11 +1143,11 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1TranslateTest, TestSize.Level1
 
 #ifdef PIXEL_MAP_SUPPORTED
 /**
- * @tc.name: transferFromImageBitmapTest
+ * @tc.name: transferFromImageBitmapTestWithSupport
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTestWithSupport, TestSize.Level1)
 {
     ASSERT_NE(accessor_->transferFromImageBitmap, nullptr);
     RefPtr<AceType> target;
@@ -1164,11 +1163,11 @@ HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level
 #else
 
 /**
- * @tc.name: transferFromImageBitmapTest
+ * @tc.name: transferFromImageBitmapTestWithoutSupport
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTestWithoutSupport, TestSize.Level1)
 {
     ASSERT_NE(accessor_->transferFromImageBitmap, nullptr);
     Ark_ImageBitmap arkBitmap;
@@ -1191,11 +1190,11 @@ HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level
 #endif
 
 /**
- * @tc.name: setFontStyleTest
+ * @tc.name: setFontTestStyle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setFontStyleTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setFontTestStyle, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFont, nullptr);
     for (const auto& [actual, expected] : FONT_STYLE_TEST_PLAN) {
@@ -1207,11 +1206,11 @@ HWTEST_F(CanvasRendererAccessorTest, setFontStyleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFontWeightTest
+ * @tc.name: setFontTestWeight
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setFontWeightTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setFontTestWeight, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFont, nullptr);
     auto style = FONT_STYLE_TEST_PLAN[2].first;
@@ -1229,11 +1228,11 @@ HWTEST_F(CanvasRendererAccessorTest, setFontWeightTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFontSizePxTest
+ * @tc.name: setFontTestSizePx
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setFontSizePxTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setFontTestSizePx, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFont, nullptr);
     for (const auto& [actual, expected] : FONT_SIZE_PX_TEST_PLAN) {
@@ -1247,11 +1246,11 @@ HWTEST_F(CanvasRendererAccessorTest, setFontSizePxTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFontSizeVpTest
+ * @tc.name: setFontTestSizeVp
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setFontSizeVpTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setFontTestSizeVp, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFont, nullptr);
     for (const auto& [actual, expected] : FONT_SIZE_VP_TEST_PLAN) {
@@ -1265,11 +1264,11 @@ HWTEST_F(CanvasRendererAccessorTest, setFontSizeVpTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFontFamiliesTest
+ * @tc.name: setFontTestFamilies
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, setFontFamiliesTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setFontTestFamilies, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFont, nullptr);
     for (const auto& [actual, expected] : FONT_FAMILIES_TEST_PLAN) {
@@ -1333,11 +1332,11 @@ HWTEST_F(CanvasRendererAccessorTest, createLinearGradientTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: createRadialGradientXRTest
+ * @tc.name: createRadialGradientTestXR
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, createRadialGradientXRTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, createRadialGradientTestXR, TestSize.Level1)
 {
     ASSERT_NE(accessor_->createRadialGradient, nullptr);
     auto valD = DEFAULT_DOUBLE_VALUE;
@@ -1369,11 +1368,11 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientXRTest, TestSize.Level1
 }
 
 /**
- * @tc.name: createRadialGradientYRTest
+ * @tc.name: createRadialGradientTestYR
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, createRadialGradientYRTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, createRadialGradientTestYR, TestSize.Level1)
 {
     ASSERT_NE(accessor_->createRadialGradient, nullptr);
     auto valD = DEFAULT_DOUBLE_VALUE;
@@ -1408,11 +1407,11 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientYRTest, TestSize.Level1
 }
 
 /**
- * @tc.name: createRadialGradientXYTest
+ * @tc.name: createRadialGradientTestXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, createRadialGradientXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, createRadialGradientTestXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->createRadialGradient, nullptr);
     auto valD = DEFAULT_DOUBLE_VALUE;
@@ -1501,11 +1500,11 @@ HWTEST_F(CanvasRendererAccessorTest, createConicGradientTest, TestSize.Level1)
 
 #ifdef PIXEL_MAP_SUPPORTED
 /**
- * @tc.name: getPixelMapXYTest
+ * @tc.name: getPixelMapTestXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, getPixelMapXYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, getPixelMapTestXY, TestSize.Level1)
 {
     auto valD = DEFAULT_DOUBLE_VALUE;
     ASSERT_NE(accessor_->getPixelMap, nullptr);
@@ -1549,11 +1548,11 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapXYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getPixelMapWHTest
+ * @tc.name: getPixelMapTestWH
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, getPixelMapWHTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, getPixelMapTestWH, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPixelMap, nullptr);
     for (const auto& actualW : NUMBER_TEST_PLAN) {
@@ -1608,11 +1607,11 @@ HWTEST_F(CanvasRendererAccessorTest, getPixelMapTest, TestSize.Level1)
     auto arkD = Converter::ArkValue<Ark_Float64>(DEFAULT_DOUBLE_VALUE);
     auto arkR = Converter::ArkValue<Ark_Float64>(DEFAULT_SCALE_VALUE);
     auto ptr = accessor_->getPixelMap(peer_, arkD, arkR, arkD, arkR);
-    auto optValue = Converter::GetOptPtr(&ptr);
-    EXPECT_EQ(optValue, nullptr);
+    auto optValue = Converter::GetOpt(ptr);
+    EXPECT_FALSE(optValue.has_value());
     ptr = accessor_->getPixelMap(peer_, arkR, arkD, arkR, arkD);
-    optValue = Converter::GetOptPtr(&ptr);
-    EXPECT_EQ(optValue, nullptr);
+    optValue = Converter::GetOpt(ptr);
+    EXPECT_FALSE(optValue.has_value());
 }
 #endif
 

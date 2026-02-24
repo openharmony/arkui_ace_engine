@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-import { TouchEvent, InputEventType } from './component/common'
+import { TouchEvent } from './component/common'
 import { Size } from "./Graphics"
 import { UIContext } from "@ohos/arkui/UIContext"
-import { Finalizable, InteropNativeModule, KPointer, loadNativeModuleLibrary, nullptr, pointer } from "@koalaui/interop"
+import { Finalizable, InteropNativeModule, KPointer, loadNativeModuleLibrary, nullptr, pointer, InteropNativeModule } from "@koalaui/interop"
 import { finalizerRegister, Thunk, int32 } from "@koalaui/common"
 import { ComputableState, MutableState, rememberMutableState, StateManager, memoEntry, createStateManager, GlobalStateManager, IncrementalNode } from "@koalaui/runtime"
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { WrappedBuilder } from "./component/builder"
 import { BuilderRootFrameNode, FrameNode, FrameNodeUtils } from "./FrameNode"
 import { BuilderRootNodeType, findPeerNode, PeerNode, PeerNodeType } from "./PeerNode"
-import { BuilderNodeOps, BuilderNodeOptions } from "#generated"
+import { BuilderNodeOps, BuilderNodeOptions, InputEventType } from "#generated"
 import { ArkBuilderProxyNodePeer } from "./base/BuilderProxyNode"
 import { setNeedCreate } from "./ArkComponentRoot"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
@@ -205,7 +205,6 @@ export class BuilderNode<T = undefined> {
 }
 
 export class JSBuilderNode<T> extends BuilderNodeOps {
-    peer?: Finalizable | undefined = undefined
     private __root?: BuilderRootNode;
     private __builderRootNode?: PeerNode;
     private __builderProxyNode?: ArkBuilderProxyNodePeer;
@@ -232,9 +231,6 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builder = undefined;
         this.__frameNode = null;
     }
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     constructor(uiContext: UIContext, options?: RenderOptions) {
         super();
         this.__uiContext = uiContext as UIContextImpl;
@@ -250,7 +246,11 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             if (options?.type !== undefined) {
                 buildOptions.type = options.type!;
             }
-            this.setOptions(buildOptions);
+            try {
+                this.setOptions(buildOptions);
+            } catch (e) {
+                InteropNativeModule._NativeLog('BuilderNode Warning: ' + e?.message + ', ' + e?.stack);
+            }
         }
         this.__manager = createStateManager()!;
         let uiData = new ContextRecord();

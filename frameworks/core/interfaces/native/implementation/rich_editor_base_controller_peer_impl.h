@@ -21,6 +21,7 @@
 
 #include "rich_editor_controller_structs.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/interfaces/native/implementation/text_edit_controller_ex_peer.h"
 
@@ -33,6 +34,11 @@ public:
     void AddTargetController(const RefPtr<RichEditorBaseControllerBase>& handler)
     {
         handler_ = WeakPtr(handler);
+        CHECK_NULL_VOID(handler);
+        auto placeholderStyledString = GetPlaceholderStyledStringCache();
+        CHECK_NULL_VOID(placeholderStyledString);
+        handler->SetPlaceholderStyledString(placeholderStyledString);
+        SetPlaceholderStyledStringCache(nullptr);
     }
 
     WeakPtr<RichEditorBaseControllerBase> GetTargetController() const
@@ -68,6 +74,16 @@ public:
     {
         if (auto controller = handler_.Upgrade(); controller) {
             controller->DeleteBackward();
+        }
+    }
+
+    void SetStyledPlaceholder(const RefPtr<SpanString>& spanString)
+    {
+        CHECK_NULL_VOID(spanString);
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->SetPlaceholderStyledString(spanString);
+        } else {
+            SetPlaceholderStyledStringCache(spanString->GetSubSpanString(0, spanString->GetLength()));
         }
     }
 
@@ -162,8 +178,21 @@ public:
         return nullptr;
     }
 
+    void SetPlaceholderStyledStringCache(const RefPtr<SpanString>& styledString)
+    {
+        placeholderStyledString_ = styledString;
+    }
+
+    RefPtr<SpanString> GetPlaceholderStyledStringCache() const
+    {
+        return placeholderStyledString_;
+    }
+
 protected:
     WeakPtr<RichEditorBaseControllerBase> handler_;
+
+private:
+    RefPtr<SpanString> placeholderStyledString_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 

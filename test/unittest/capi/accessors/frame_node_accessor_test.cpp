@@ -61,22 +61,22 @@ public:
 };
 
 /**
- * @tc.name: IsModifiableTest
+ * @tc.name: isModifiableTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, IsModifiableTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, isModifiableTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isModifiable, nullptr);
     EXPECT_EQ(ARK_TRUE, accessor_->isModifiable(peer_));
 }
 
 /**
- * @tc.name: IsModifiableTestNull
+ * @tc.name: isModifiableTestNull
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, IsModifiableTestNull, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, isModifiableTestNull, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isModifiable, nullptr);
     peer_->node = nullptr;
@@ -84,11 +84,11 @@ HWTEST_F(FrameNodeAccessorTest, IsModifiableTestNull, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsModifiableTestNotCustomNode
+ * @tc.name: isModifiableTestNotCustomNode
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, IsModifiableTestNotCustomNode, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, isModifiableTestNotCustomNode, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isModifiable, nullptr);
     peer_->node = NG::FrameNode::CreateFrameNode(
@@ -97,11 +97,11 @@ HWTEST_F(FrameNodeAccessorTest, IsModifiableTestNotCustomNode, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsModifiableTestNotCustomNode2
+ * @tc.name: isModifiableTestNotCustomNode2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, IsModifiableTestNotCustomNode2, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, isModifiableTestNotCustomNode2, TestSize.Level1)
 {
     ASSERT_NE(accessor_->isModifiable, nullptr);
     peer_->node = NG::FrameNode::CreateFrameNode(
@@ -110,11 +110,11 @@ HWTEST_F(FrameNodeAccessorTest, IsModifiableTestNotCustomNode2, TestSize.Level1)
 }
 
 /**
- * @tc.name: AppendChildTest
+ * @tc.name: appendChildTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, AppendChildTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, appendChildTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->appendChild, nullptr);
     auto childPeer = CreatePeer();
@@ -131,11 +131,11 @@ HWTEST_F(FrameNodeAccessorTest, AppendChildTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: InsertChildAfterTest1
+ * @tc.name: insertChildAfterTestVariant1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest1, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, insertChildAfterTestVariant1, TestSize.Level1)
 {
     ASSERT_NE(accessor_->insertChildAfter, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -168,11 +168,11 @@ HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest1, TestSize.Level1)
 }
 
 /**
- * @tc.name: InsertChildAfterTest2
+ * @tc.name: insertChildAfterTestVariant2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest2, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, insertChildAfterTestVariant2, TestSize.Level1)
 {
     ASSERT_NE(accessor_->insertChildAfter, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -205,11 +205,11 @@ HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest2, TestSize.Level1)
 }
 
 /**
- * @tc.name: InsertChildAfterTest3
+ * @tc.name: insertChildAfterTestVariant3
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest3, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, insertChildAfterTestVariant3, TestSize.Level1)
 {
     ASSERT_NE(accessor_->insertChildAfter, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -239,11 +239,11 @@ HWTEST_F(FrameNodeAccessorTest, InsertChildAfterTest3, TestSize.Level1)
 }
 
 /**
- * @tc.name: RemoveChildTest1
+ * @tc.name: removeChildTestVariant1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, RemoveChildTest1, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, removeChildTestVariant1, TestSize.Level1)
 {
     ASSERT_NE(accessor_->removeChild, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -278,11 +278,11 @@ HWTEST_F(FrameNodeAccessorTest, RemoveChildTest1, TestSize.Level1)
 }
 
 /**
- * @tc.name: RemoveChildTest2
+ * @tc.name: removeChildTestVariant2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, RemoveChildTest2, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, removeChildTestVariant2, TestSize.Level1)
 {
     ASSERT_NE(accessor_->removeChild, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -316,11 +316,11 @@ HWTEST_F(FrameNodeAccessorTest, RemoveChildTest2, TestSize.Level1)
 }
 
 /**
- * @tc.name: ClearChildrenTest
+ * @tc.name: clearChildrenTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, ClearChildrenTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, clearChildrenTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->clearChildren, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -350,11 +350,11 @@ HWTEST_F(FrameNodeAccessorTest, ClearChildrenTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetChildTest
+ * @tc.name: getChildTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetChildTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getChildTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getChild, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -386,11 +386,11 @@ HWTEST_F(FrameNodeAccessorTest, GetChildTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFirstChildTest
+ * @tc.name: getFirstChildTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetFirstChildTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getFirstChildTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFirstChild, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -414,11 +414,11 @@ HWTEST_F(FrameNodeAccessorTest, GetFirstChildTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetNextSiblingTest1
+ * @tc.name: getNextSiblingTestVariant1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetNextSiblingTest1, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getNextSiblingTestVariant1, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getNextSibling, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -445,11 +445,11 @@ HWTEST_F(FrameNodeAccessorTest, GetNextSiblingTest1, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetNextSiblingTest2
+ * @tc.name: getNextSiblingTestVariant2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetNextSiblingTest2, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getNextSiblingTestVariant2, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getNextSibling, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -478,11 +478,11 @@ HWTEST_F(FrameNodeAccessorTest, GetNextSiblingTest2, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPreviousSiblingTest1
+ * @tc.name: getPreviousSiblingTestVariant1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetPreviousSiblingTest1, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getPreviousSiblingTestVariant1, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPreviousSibling, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -509,11 +509,11 @@ HWTEST_F(FrameNodeAccessorTest, GetPreviousSiblingTest1, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPreviousSiblingTest2
+ * @tc.name: getPreviousSiblingTestVariant2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetPreviousSiblingTest2, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getPreviousSiblingTestVariant2, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPreviousSibling, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -540,11 +540,11 @@ HWTEST_F(FrameNodeAccessorTest, GetPreviousSiblingTest2, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetChildrenCountTest
+ * @tc.name: getChildrenCountTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetChildrenCountTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getChildrenCountTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getChildrenCount, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -572,11 +572,11 @@ HWTEST_F(FrameNodeAccessorTest, GetChildrenCountTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetParentTest
+ * @tc.name: getParentTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetParentTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getParentTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getParent, nullptr);
     ASSERT_NE(accessor_->appendChild, nullptr);
@@ -606,11 +606,11 @@ HWTEST_F(FrameNodeAccessorTest, GetParentTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DisposeTest
+ * @tc.name: disposeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, DisposeTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, disposeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getParent, nullptr);
     ASSERT_NE(accessor_->dispose, nullptr);
@@ -640,11 +640,11 @@ HWTEST_F(FrameNodeAccessorTest, DisposeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetOpacityTest
+ * @tc.name: getOpacityTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetOpacityTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getOpacityTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getOpacity, nullptr);
     auto opacity = Converter::Convert<float>(accessor_->getOpacity(peer_));
@@ -658,11 +658,11 @@ HWTEST_F(FrameNodeAccessorTest, GetOpacityTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetOpacityInvalidTest
+ * @tc.name: getOpacityTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetOpacityInvalidTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getOpacityTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getOpacity, nullptr);
     auto opacity = Converter::Convert<float>(accessor_->getOpacity(nullptr));
@@ -670,11 +670,11 @@ HWTEST_F(FrameNodeAccessorTest, GetOpacityInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPositionToWindowWithTransformDefaultTest
+ * @tc.name: getPositionToWindowWithTransformTestDefault
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformDefaultTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getPositionToWindowWithTransformTestDefault, TestSize.Level1)
 {
     // default value
     ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
@@ -685,11 +685,11 @@ HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformDefaultTest, Tes
 }
 
 /**
- * @tc.name: GetPositionToWindowWithTransformTest
+ * @tc.name: getPositionToWindowWithTransformTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getPositionToWindowWithTransformTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
     auto renderCtx = peer_->node->GetRenderContext();
@@ -701,11 +701,11 @@ HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformTest, TestSize.L
 }
 
 /**
- * @tc.name: GetPositionToWindowWithTransformInvalidTest
+ * @tc.name: getPositionToWindowWithTransformTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformInvalidTest, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, getPositionToWindowWithTransformTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
     auto position =
@@ -715,11 +715,11 @@ HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformInvalidTest, Tes
 }
 
 /**
- * @tc.name: ReuseImplTest001
+ * @tc.name: reuseTestVariant001
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeAccessorTest, ReuseImplTest001, TestSize.Level1)
+HWTEST_F(FrameNodeAccessorTest, reuseTestVariant001, TestSize.Level1)
 {
     ASSERT_NE(accessor_->reuse, nullptr);
     auto childPeer = CreatePeer();

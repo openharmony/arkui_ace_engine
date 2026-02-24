@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
 #include "base/geometry/calc_dimension_rect.h"
+#include "core/common/click_effect/click_sound_effect_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
@@ -971,6 +972,9 @@ bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr
     target.area.SetWidth(Dimension(size.Width()));
     target.origin = DimensionOffset(host->GetOffsetRelativeToWindow() - offset);
     info.SetTarget(target);
+    ClickSoundEffectManager::GetInstance().PlayClickSoundEffect(host,
+        static_cast<int32_t>(offset.GetX() + size.Width() / 2),
+        static_cast<int32_t>(offset.GetY() + size.Height() / 2));
     click(info);
     return true;
 }

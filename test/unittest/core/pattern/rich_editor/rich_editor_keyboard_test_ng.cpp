@@ -246,6 +246,27 @@ HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboard, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RequestCustomKeyboardBuilder
+ * @tc.desc: test RequestCustomKeyboardBuilder
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboardBuilder, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto oldFunc = richEditorPattern->customKeyboardBuilder_;
+    auto func = []() {};
+
+    richEditorPattern->customKeyboardBuilder_ = func;
+    richEditorPattern->RequestCustomKeyboardBuilder();
+
+    richEditorPattern->customKeyboardBuilder_ = oldFunc;
+    richEditorPattern->RequestCustomKeyboardBuilder();
+}
+
+/**
  * @tc.name: RequestKeyboard001
  * @tc.desc: test RequestKeyboard
  * @tc.type: FUNC

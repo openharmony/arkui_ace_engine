@@ -47,6 +47,8 @@ struct Parent {
   @Local circularVal: Node = a;
   @Local arrayVal: Object | null = JSON.parse(arrayJson);
   @Local objectVal: Object | null = JSON.parse(objectJson);
+  @Local plainString: string = 'Hello World';
+  @Local emptyString: string = '';
   regularVar: Object | null = JSON.parse(json);
 
   aboutToAppear() {

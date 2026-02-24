@@ -32,7 +32,7 @@ import { UIUtils } from '../utils';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { getObservedObject, isDynamicObject } from '../../component/interop';
-import { StateMgmtDFX } from '../tools/stateMgmtDFX';
+import { ObservedObjectRegistry, StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 export class StoragePropRefDecoratedVariable<T>
     extends DecoratedV1VariableBase<T>
@@ -65,6 +65,7 @@ export class StoragePropRefDecoratedVariable<T>
             this.onStorageObjPropChanged(prop);
         });
         this.addPrivateWatchSubscription();
+        this.registerToObservedObject(initValue);
     }
 
     onStorageObjPropChanged(propName: string): void {
@@ -85,6 +86,8 @@ export class StoragePropRefDecoratedVariable<T>
         if (shouldAddRef) {
             ObserveSingleton.instance.setV1RenderId(value as NullableObject);
             uiUtils.builtinContainersAddRefAnyKey(value);
+            this.selfTrack();
+            ObservedObjectRegistry.get(StateMgmtDFX.getObservedObjectFromValue(value))?.addV1InnerRef();
         }
         return value;
     }
@@ -142,8 +145,11 @@ export class StoragePropRefDecoratedVariable<T>
     }
     public aboutToBeDeletedInternal(): void {
         this.backingStorageValue_.onChange(undefined);
-        this.unregisterWatchFromObservedObjectChanges(this.backing_.get(false));
+        const currentValue = this.backing_.get(false);
+        this.unregisterWatchFromObservedObjectChanges(currentValue);
         this.removePrivateWatchSubscription();
+        // Unregister from the observed object before deletion
+        this.unregisterFromObservedObject(currentValue);
         super.aboutToBeDeletedInternal();
     }
 }

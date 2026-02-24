@@ -42,6 +42,15 @@ enum class PriorityType : int32_t {
     IDLE,
 };
 
+enum class VsyncBarrierOption : int32_t {
+    // Not required handling the designated task before handling the vsync.
+    NO_BARRIER = 0,
+    // Required handling the designated task before handling vsync when it is sended by the main thread itself.
+    NEED_BARRIER = 1,
+    // Required handling the designated task before handling vsync for all situations.
+    FORCE_BARRIER = 2,
+};
+
 class TaskExecutor : public AceType {
     DECLARE_ACE_TYPE(TaskExecutor, AceType);
     ACE_DISALLOW_COPY_AND_MOVE(TaskExecutor);
@@ -69,12 +78,14 @@ public:
      * @param task Task which need execution.
      * @param type FrontendType of task, used to specify the thread.
      * @param name Name of the task.
+     * @param barrierOption Vsync barrier option.
      * @return Returns 'true' whether task has been post successfully.
      */
     bool PostTask(
-        Task&& task, TaskType type, const std::string& name, PriorityType priorityType = PriorityType::LOW) const
+        Task&& task, TaskType type, const std::string& name, PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const
     {
-        return PostDelayedTask(std::move(task), type, 0, name, priorityType);
+        return OnPostTask(std::move(task), type, 0, name, priorityType, barrierOption);
     }
 
     /**
@@ -83,12 +94,14 @@ public:
      * @param task Task which need execution.
      * @param type FrontendType of task, used to specify the thread.
      * @param name Name of the task.
+     * @param barrierOption Vsync barrier option.
      * @return Returns 'true' if task has been posted successfully.
      */
     bool PostTask(const Task& task, TaskType type, const std::string& name,
-        PriorityType priorityType = PriorityType::LOW) const
+        PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const
     {
-        return PostDelayedTask(task, type, 0, name, priorityType);
+        return OnPostTask(Task(task), type, 0, name, priorityType, barrierOption);
     }
 
     /**
@@ -295,7 +308,8 @@ protected:
     TaskExecutor() = default;
 
     virtual bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
-        PriorityType priorityType = PriorityType::LOW) const = 0;
+        PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const = 0;
     virtual Task WrapTaskWithTraceId(Task&& task, int32_t id) const = 0;
     virtual bool OnPostTaskWithoutTraceId(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
         PriorityType priorityType = PriorityType::LOW) const = 0;
@@ -365,11 +379,14 @@ public:
      *
      * @param task Task which need execution.
      * @param name Name of the task.
+     * @param barrierOption Vsync barrier option.
      * @return Returns 'true' whether task has been post successfully.
      */
-    bool PostTask(Task&& task, const std::string& name) const
+    bool PostTask(Task&& task, const std::string& name,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const
     {
-        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, name) : false;
+        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, name,
+            PriorityType::LOW, barrierOption) : false;
     }
 
     /**
@@ -378,11 +395,14 @@ public:
      * @param task Task which need execution.
      * @param name Name of the task.
      * @param priorityType Priority of the task.
+     * @param barrierOption Vsync barrier option.
      * @return Returns 'true' whether task has been post successfully.
      */
-    bool PostTask(Task&& task, const std::string& name, PriorityType priorityType) const
+    bool PostTask(Task&& task, const std::string& name, PriorityType priorityType,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const
     {
-        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, name, priorityType) : false;
+        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, name, priorityType, barrierOption)
+                             : false;
     }
 
     /**
@@ -390,11 +410,14 @@ public:
      *
      * @param task Task which need execution.
      * @param name Name of the task.
+     * @param barrierOption Vsync barrier option.
      * @return Returns 'true' whether task has been post successfully.
      */
-    bool PostTask(const Task& task, const std::string& name) const
+    bool PostTask(const Task& task, const std::string& name,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const
     {
-        return taskExecutor_ ? taskExecutor_->PostTask(task, type_, name) : false;
+        return taskExecutor_ ? taskExecutor_->PostTask(task, type_, name,
+            PriorityType::LOW, barrierOption) : false;
     }
 
     /**

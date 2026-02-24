@@ -124,6 +124,7 @@ private:
     bool isShowInSubWindow_ = false;
     bool isSuitableForElderly_ = false;
     bool isSuitOldMeasure_ = false;
+    bool needAdaptForceSplitMode_ = false;
     float dialogMaxHeight_ = 0.0f;
     int32_t gridCount_ = -1;
     int32_t subWindowId_ = -1;

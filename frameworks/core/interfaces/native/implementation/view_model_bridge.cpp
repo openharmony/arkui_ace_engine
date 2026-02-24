@@ -158,7 +158,6 @@ namespace GeneratedBridge {
         switch (type) {
             case GENERATED_ARKUI_CUSTOM_NODE: return GeneratedViewModel::createCustomNodeNode(id);
             case GENERATED_ARKUI_ALPHABET_INDEXER: return GeneratedViewModel::createAlphabetIndexerNode(id);
-            case GENERATED_ARKUI_ANIMATOR: return GeneratedViewModel::createAnimatorNode(id);
             case GENERATED_ARKUI_BADGE: return GeneratedViewModel::createBadgeNode(id);
             case GENERATED_ARKUI_BASE_SPAN: return GeneratedViewModel::createBaseSpanNode(id);
             case GENERATED_ARKUI_BLANK: return GeneratedViewModel::createBlankNode(id);
@@ -196,7 +195,6 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_IMAGE_SPAN: return GeneratedViewModel::createImageSpanNode(id);
             case GENERATED_ARKUI_INDICATOR_COMPONENT: return GeneratedViewModel::createIndicatorComponentNode(id);
             case GENERATED_ARKUI_LINE: return GeneratedViewModel::createLineNode(id);
-            case GENERATED_ARKUI_LINEAR_INDICATOR: return GeneratedViewModel::createLinearIndicatorNode(id);
             case GENERATED_ARKUI_LIST: return GeneratedViewModel::createListNode(id);
             case GENERATED_ARKUI_LIST_ITEM: return GeneratedViewModel::createListItemNode(id);
             case GENERATED_ARKUI_LIST_ITEM_GROUP: return GeneratedViewModel::createListItemGroupNode(id);
@@ -244,8 +242,10 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_SLIDER: return GeneratedViewModel::createSliderNode(id);
             case GENERATED_ARKUI_SPAN: return GeneratedViewModel::createSpanNode(id);
             case GENERATED_ARKUI_STACK: return GeneratedViewModel::createStackNode(id);
+#ifdef WRONG_GEN_v140
             case GENERATED_ARKUI_STEPPER: return GeneratedViewModel::createStepperNode(id);
             case GENERATED_ARKUI_STEPPER_ITEM: return GeneratedViewModel::createStepperItemNode(id);
+#endif // WRONG_GEN_v140
             case GENERATED_ARKUI_SWIPER: return GeneratedViewModel::createSwiperNode(id);
             case GENERATED_ARKUI_SYMBOL_GLYPH: return GeneratedViewModel::createSymbolGlyphNode(id);
             case GENERATED_ARKUI_SYMBOL_SPAN: return GeneratedViewModel::createSymbolSpanNode(id);

@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/slider/bridge/slider_content_modifier_helper.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_static.h"
+#include "core/interfaces/native/common/api_impl.h"
 #include "core/interfaces/native/implementation/color_metrics_linear_gradient_peer_impl.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
@@ -32,7 +33,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_F64_Bindable& value)
+std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_F64_Bindable_F64& value)
 {
     std::optional<float> result;
     Converter::VisitUnion(
@@ -67,7 +68,7 @@ SliderModel::SliderShowStepOptions Convert(const Ark_SliderShowStepOptions& src)
     if (accessibilityOpt.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         return dst;
     }
-    auto stepItemAccessibility = Converter::OptConvert<Map_Float64_SliderStepItemAccessibility>(accessibilityOpt.value);
+    auto stepItemAccessibility = Converter::OptConvert<Map_F64_SliderStepItemAccessibility>(accessibilityOpt.value);
     if (!stepItemAccessibility) {
         return dst;
     }
@@ -497,14 +498,20 @@ void ContentModifierSliderImpl(
             });
         arkConfig.triggerChange = triggerCallback.ArkValue();
 
-        auto sliderNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-        arkBuilder.BuildAsync(
-            [sliderNode](const RefPtr<UINode>& uiNode) mutable {
-                sliderNode->AddChild(uiNode);
-                sliderNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
-            },
-            node, arkConfig);
-        return sliderNode;
+        auto boxNode = GeneratedApiImpl::GetContentNode(node);
+        if (boxNode == nullptr) {
+            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+            GeneratedApiImpl::SetContentNode(node, boxNode);
+        }
+        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
+            auto old = boxNode->GetChildAtIndex(0);
+            if (old != nullptr) {
+                boxNode->RemoveChildSilently(old);
+            }
+            boxNode->AddChild(uiNode);
+            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            }, node, arkConfig);
+        return boxNode;
     };
     SliderModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
 }

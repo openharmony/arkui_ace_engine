@@ -77,6 +77,17 @@ Opt_Int32 AddTextImpl(Ark_TextContentControllerBase peer,
     auto retValue = peer->controller_->AddText(textConv, optionsConv.value_or(defaultOffset));
     return Converter::ArkValue<Opt_Int32>(retValue);
 }
+void SetStyledPlaceholderImpl(Ark_TextContentControllerBase peer,
+                              Ark_StyledString styledString)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(styledString);
+    if (!peer->controller_) {
+        peer->SetStyledStringCache(styledString->spanString);
+        return;
+    }
+    peer->controller_->SetPlaceholderStyledString(styledString->spanString);
+}
 void DeleteTextImpl(Ark_TextContentControllerBase peer,
                     const Opt_TextRange* range)
 {
@@ -131,16 +142,9 @@ void DeleteBackwardImpl(Ark_TextContentControllerBase peer)
     CHECK_NULL_VOID(peer && peer->controller_);
     peer->controller_->DeleteBackward();
 }
-void SetStyledPlaceholderImpl(Ark_TextContentControllerBase peer,
-                              Ark_StyledString styledString)
+void ScrollToVisibleImpl(Ark_TextContentControllerBase peer,
+                         const Opt_TextRange* range)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(styledString);
-    if (!peer->controller_) {
-        peer->SetStyledStringCache(styledString->spanString);
-        return;
-    }
-    peer->controller_->SetPlaceholderStyledString(styledString->spanString);
 }
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()
@@ -153,12 +157,13 @@ const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentController
         TextContentControllerBaseAccessor::GetTextContentRectImpl,
         TextContentControllerBaseAccessor::GetTextContentLineCountImpl,
         TextContentControllerBaseAccessor::AddTextImpl,
+        TextContentControllerBaseAccessor::SetStyledPlaceholderImpl,
         TextContentControllerBaseAccessor::DeleteTextImpl,
         TextContentControllerBaseAccessor::GetSelectionImpl,
         TextContentControllerBaseAccessor::ClearPreviewTextImpl,
         TextContentControllerBaseAccessor::GetTextImpl,
         TextContentControllerBaseAccessor::DeleteBackwardImpl,
-        TextContentControllerBaseAccessor::SetStyledPlaceholderImpl,
+        TextContentControllerBaseAccessor::ScrollToVisibleImpl,
     };
     return &TextContentControllerBaseAccessorImpl;
 }

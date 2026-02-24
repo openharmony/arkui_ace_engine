@@ -171,10 +171,10 @@ Ark_Padding ArkValueFromOptPadding(const OHOS::Ace::NG::PaddingProperty& src)
 void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src, ConvContext *ctx)
 {
     if (src.marginProp) {
-        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(
+        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(
             ArkValueFromOptPadding(src.marginProp.value()));
     } else {
-        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Margin>(Ark_Empty());
+        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty());
     }
     if (src.paddingProp) {
         dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(
@@ -278,8 +278,8 @@ Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
         peer->span->GetImageAttribute()->drawingColorFilter, empty);
     if (peer->span->GetImageAttribute()->colorFilterMatrix) {
         auto& colorFilter = peer->span->GetImageAttribute()->colorFilterMatrix.value();
-        ArkArrayHolder<Array_Float64> colorFilterHolder(colorFilter);
-        auto arrayNumber = ArkValue<Array_Float64>(colorFilterHolder.ArkValue());
+        ArkArrayHolder<Array_F64> colorFilterHolder(colorFilter);
+        auto arrayNumber = ArkValue<Array_F64>(colorFilterHolder.ArkValue());
         auto colorFilterPeer = GeneratedModifier::GetColorFilterAccessor()->construct(&arrayNumber);
         return ArkUnion<Opt_ColorFilterType, Ark_ColorFilter>(colorFilterPeer);
     } else {

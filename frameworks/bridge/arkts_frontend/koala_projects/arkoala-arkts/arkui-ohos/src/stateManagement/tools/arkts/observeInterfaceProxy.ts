@@ -24,7 +24,7 @@ import { UIUtils } from '../../utils';
 import { uiUtils } from '../../base/uiUtilsImpl';
 
 export class InterfaceProxyHandler implements reflect.InvocationHandler, IObservedObject, ISubscribedWatches {
-    private readonly __meta: IMutableStateMeta = STATE_MGMT_FACTORY.makeMutableStateMeta();
+    private readonly __meta: IMutableStateMeta;
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     private ____V1RenderId: RenderIdType = 0;
     private allowDeep_: boolean;
@@ -34,6 +34,8 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
         this._target = target;
         this.allowDeep_ = allowDeep;
         this.isAPI_ = isAPI;
+        this.__meta = STATE_MGMT_FACTORY.makeMutableStateMeta(this,
+            this.allowDeep_ ? '__metaInterfaceMakeObserved_' : '__metaInterfaceV1_');
     }
     public addWatchSubscriber(watchId: WatchIdType): void {
         this.subscribedWatches.addWatchSubscriber(watchId);

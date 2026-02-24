@@ -1007,7 +1007,7 @@ public:
         return fontSize_.value;
     }
 
-    float GetFontSizeActual()
+    float GetFontSizeActual() const
     {
         return fontSize_.actualValue;
     }
@@ -1456,9 +1456,9 @@ inline std::string SymbolColorListToString(const std::vector<Color>& colorList)
 {
     std::string symbolColorList = "";
     if (!colorList.empty()) {
-        symbolColorList = colorList[0].ColorToString();
+        symbolColorList = colorList[0].ToString();
         for (uint32_t i = 1; i < colorList.size(); ++i) {
-            symbolColorList += ", " + colorList[i].ColorToString();
+            symbolColorList += ", " + colorList[i].ToString();
         }
     }
     return symbolColorList;

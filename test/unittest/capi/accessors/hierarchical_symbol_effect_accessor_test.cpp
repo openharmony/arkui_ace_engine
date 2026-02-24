@@ -36,11 +36,11 @@ class HierarchicalSymbolEffectAccessorTest
 };
 
 /**
- * @tc.name: ctorDefaultTest
+ * @tc.name: constructTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(HierarchicalSymbolEffectAccessorTest, ctorDefaultTest, TestSize.Level1)
+HWTEST_F(HierarchicalSymbolEffectAccessorTest, constructTestDefaultValues, TestSize.Level1)
 {
     EXPECT_EQ(peer_->type, SymbolEffectType::HIERARCHICAL);
     EXPECT_EQ(peer_->scope, std::nullopt);
@@ -49,11 +49,11 @@ HWTEST_F(HierarchicalSymbolEffectAccessorTest, ctorDefaultTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: ctorTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(HierarchicalSymbolEffectAccessorTest, ctorTest, TestSize.Level1)
+HWTEST_F(HierarchicalSymbolEffectAccessorTest, constructTest, TestSize.Level1)
 {
     Opt_EffectFillStyle style1 = Converter::ArkValue<Opt_EffectFillStyle, Ark_EffectFillStyle>(
         ARK_EFFECT_FILL_STYLE_CUMULATIVE);

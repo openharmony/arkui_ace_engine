@@ -49,7 +49,13 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
         this.store_ = map;
         this.allowDeep_ = allowDeep;
         this.isAPI_ = isAPI;
-        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedMap');
+        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta(
+            (
+                this.allowDeep_ ? 
+                    this.isAPI_ ? '__metaBuiltInMakeObserved_'
+                        : '__metaBuiltInV2_'
+                    : '__metaBuiltInV1_'
+            ) +'WrappedMap', this);
     }
 
     // implementation of ISubscribedWatches by forwarding to subscribedWatches

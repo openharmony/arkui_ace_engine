@@ -19,6 +19,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_canvas_image.h"
 #include "ui/properties/ui_material.h"
@@ -1233,5 +1234,65 @@ HWTEST_F(NodeContainerTestNg, NodeContainerAlignmentTest, TestSize.Level1)
     ASSERT_TRUE(layoutProperty->GetPositionProperty());
     auto alignment = layoutProperty->GetPositionProperty()->GetAlignment();
     EXPECT_EQ(alignment, Alignment::TOP_LEFT);
+}
+
+/**
+ * @tc.name: NodeContainerEventHubFireOnAppear001
+ * @tc.desc: Test the FireOnAppear function of NodeContainerEventHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnAppear001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node and get eventHub.
+     */
+    RefPtr<FrameNode> node = CreateNode();
+    ASSERT_NE(node, nullptr);
+    node->context_ = AceType::RawPtr(MockPipelineContext::pipeline_);
+    if (node->context_) {
+        node->context_->taskExecutor_ = AceType::MakeRefPtr<::testing::NiceMock<MockTaskExecutor>>();
+    }
+    auto eventHub = node->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    int32_t flag = 0;
+    auto onAppearCallback = [&flag]() { flag = 1; };
+
+    /**
+     * @tc.steps: step2. set callback and call FireOnAppear.
+     * @tc.expected: callback is triggered.
+     */
+    eventHub->SetControllerAboutToAppear(std::move(onAppearCallback));
+    eventHub->FireOnAppear();
+    EXPECT_EQ(flag, 1);
+    if (node->context_) {
+        node->context_->taskExecutor_ = nullptr;
+        node->context_ = nullptr;
+    }
+}
+
+/**
+ * @tc.name: NodeContainerEventHubFireOnDisappear001
+ * @tc.desc: Test the FireOnDisappear function of NodeContainerEventHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnDisappear001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node and get eventHub.
+     */
+    RefPtr<FrameNode> node = CreateNode();
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    int32_t flag = 0;
+    auto onDisappearCallback = [&flag]() { flag = 1; };
+
+    /**
+     * @tc.steps: step2. set callback and call FireOnDisappear.
+     * @tc.expected: callback is triggered.
+     */
+    eventHub->SetControllerAboutToDisappear(std::move(onDisappearCallback));
+    eventHub->FireOnDisappear();
+    EXPECT_EQ(flag, 1);
 }
 } // namespace OHOS::Ace::NG

@@ -20,11 +20,9 @@
 namespace OHOS::Ace::Ani {
 namespace {
 const char* LIBACE_MODULE = "libace_compatible.z.so";
-} // namespace
 
-using GetArkUIModifiersFunc = const ArkUIAniModifiers* (*)();
-
-const ArkUIAniModifiers* GetNodeAniModifier()
+template <typename FuncType, typename ReturnType>
+const ReturnType* LoadModifier(const char* symbolName)
 {
     static void* handle = nullptr;
     static void* aniModifier = nullptr;
@@ -32,19 +30,34 @@ const ArkUIAniModifiers* GetNodeAniModifier()
 
     if (!initialized) {
         handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
-        aniModifier = dlsym(handle, ARKUI_ANI_MODIFIER_FUNCTION_NAME);
+        if (handle != nullptr) {
+            aniModifier = dlsym(handle, symbolName);
+        }
         initialized = true;
     }
     if (handle == nullptr) {
         return nullptr;
     }
-    auto entry = reinterpret_cast<GetArkUIModifiersFunc>(aniModifier);
+    auto entry = reinterpret_cast<FuncType>(aniModifier);
     if (entry == nullptr) {
         return nullptr;
     }
-
     const auto* modifier = entry();
     return modifier;
+}
+} // namespace
+
+using GetArkUIModifiersFunc = const ArkUIAniModifiers* (*)();
+using GetArkUIDrawableDescriptorFunc = const ArkUIDrawableDescriptor* (*)();
+
+const ArkUIAniModifiers* GetNodeAniModifier()
+{
+    return LoadModifier<GetArkUIModifiersFunc, ArkUIAniModifiers>(ARKUI_ANI_MODIFIER_FUNCTION_NAME);
+}
+
+const ArkUIDrawableDescriptor* GetDrawableDescriptorModifier()
+{
+    return LoadModifier<GetArkUIDrawableDescriptorFunc, ArkUIDrawableDescriptor>(DRAWABLE_FUNC_NAME);
 }
 
 } // namespace OHOS::Ace::Ani

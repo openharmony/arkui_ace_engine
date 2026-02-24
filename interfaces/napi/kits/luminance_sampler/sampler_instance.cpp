@@ -82,6 +82,8 @@ void SamplerInstance::SetSamplingOptionsToGraphic()
 
 void SamplerInstance::SetCallBackToGraphic()
 {
+    auto targetRef = targetNode_.Upgrade();
+    CHECK_NULL_VOID(targetRef);
     auto func = [weak = AceType::WeakClaim(this), node = targetNode_](uint32_t luminance) {
         auto samplerInstance = weak.Upgrade();
         CHECK_NULL_VOID(samplerInstance);
@@ -91,6 +93,10 @@ void SamplerInstance::SetCallBackToGraphic()
     };
     if (samplingListeners_.size() > 0) {
         SetSamplingOptionsToGraphic();
+        TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT,
+            "LuminanceSampling | {id:%{public}d,tag:%{public}s,inspectorId:%{public}s} | listener.size: %{public}zu",
+            targetRef->GetId(), targetRef->GetTag().c_str(), targetRef->GetInspectorId().value_or("").c_str(),
+            samplingListeners_.size());
         NG::LuminanceSamplingHelper::RegisterSamplingCallback(targetNode_, func);
     } else {
         NG::LuminanceSamplingHelper::UnRegisterSamplingCallback(targetNode_);

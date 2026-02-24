@@ -19,14 +19,21 @@
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUIMarqueeModifier* GetMarqueeStaticModifier();
+#endif
 const GENERATED_ArkUIMarqueeModifier* GetMarqueeModifier()
 {
     static const GENERATED_ArkUIMarqueeModifier* cachedModifier = nullptr;
 
     if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetMarqueeStaticModifier();
+#else
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Marquee");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const GENERATED_ArkUIMarqueeModifier*>(module->GetStaticModifier());
+#endif
     }
 
     return cachedModifier;

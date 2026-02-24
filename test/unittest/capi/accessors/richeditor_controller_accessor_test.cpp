@@ -331,7 +331,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addSymbolSpanTest, TestSize.Level1)
  * @tc.desc: Check the functionality of addBuilderSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorControllerAccessorTest, AddBuilderSpanTest, TestSize.Level1)
+HWTEST_F(RichEditorControllerAccessorTest, addBuilderSpanTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->addBuilderSpan, nullptr);
 

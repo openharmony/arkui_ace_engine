@@ -18,7 +18,7 @@
 namespace OHOS::Ace {
 UiSessionManager* UiSessionManager::GetInstance()
 {
-    static MockUiSessionManager instance;
+    static ::testing::NiceMock<MockUiSessionManager> instance;
     return &instance;
 }
 } // namespace OHOS::Ace

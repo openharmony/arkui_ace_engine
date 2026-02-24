@@ -1040,7 +1040,8 @@ int32_t UIContentServiceProxy::UnregisterContentChangeCallback()
 }
 
 int32_t UIContentServiceProxy::GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
-    const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback)
+    const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback,
+    bool onlyVisible)
 {
     MessageParcel value;
     MessageParcel reply;
@@ -1059,6 +1060,10 @@ int32_t UIContentServiceProxy::GetStateMgmtInfo(const std::string& componentName
     }
     if (!value.WriteString(jsonPath)) {
         LOGW("GetStateMgmtInfo write jsonPath failed");
+        return FAILED;
+    }
+    if (!value.WriteBool(onlyVisible)) {
+        LOGW("GetStateMgmtInfo write onlyVisible failed");
         return FAILED;
     }
     if (report_ == nullptr) {

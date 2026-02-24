@@ -14,6 +14,54 @@
  */
 
 import { ImageGenerateState } from '../types/Declaration';
+import image from "@ohos.multimedia.image";
+/**
+ * ResultImageShowArea - Result image display area with zoom and pan support
+ * Supports: pinch to zoom, single finger drag, double-tap to zoom in/out
+ */
+@ComponentV2
+export declare struct ResultImageShowArea {
+    @Param
+    readonly pixelMap?: image.PixelMap | undefined;
+    @Local
+    imageScale: number;
+    private minScale;
+    private maxScale;
+    @Local
+    offsetX: number;
+    @Local
+    offsetY: number;
+    @Local
+    initialScale: number;
+    @Local
+    initialOffsetX: number;
+    @Local
+    initialOffsetY: number;
+    @Local
+    isPinching: boolean;
+    @Local
+    focusX: number;
+    @Local
+    focusY: number;
+    @Local
+    focalPointX: number;
+    @Local
+    focalPointY: number;
+    @Local
+    imageWidth: number;
+    @Local
+    imageHeight: number;
+    @Local
+    containerWidth: number;
+    @Local
+    containerHeight: number;
+    @Local
+    imageAspectRatio: number;
+    aboutToAppear(): void;
+    snapScaleToBounds(): void;
+    snapOffsetToBounds(): void;
+    build(): void;
+}
 @ComponentV2
 export declare struct ContinueOperateArea {
     @Param

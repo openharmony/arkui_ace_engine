@@ -1181,10 +1181,12 @@ void MenuItemPattern::CloseMenu()
 
 void MenuItemPattern::HandleCloseSubMenu()
 {
-    CHECK_NULL_VOID(embeddedMenu_);
-    auto menuPattern = embeddedMenu_->GetPattern<MenuPattern>();
-    if (menuPattern) {
-        menuPattern->DoCloseSubMenus();
+    if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
+        CHECK_NULL_VOID(embeddedMenu_);
+        auto menuPattern = embeddedMenu_->GetPattern<MenuPattern>();
+        if (menuPattern) {
+            menuPattern->DoCloseSubMenus();
+        }
     }
     DoCloseSubMenu();
 }
@@ -1192,6 +1194,13 @@ void MenuItemPattern::HandleCloseSubMenu()
 void MenuItemPattern::DoCloseSubMenu()
 {
     if (!HasDetachedFreeRootProxy()) {
+        return;
+    }
+
+    if (expandingMode_ == SubMenuExpandingMode::STACK || expandingMode_ == SubMenuExpandingMode::SIDE) {
+        isSubMenuShowed_ = false;
+        subMenuId_ = -1;
+        detachedProxy_ = nullptr;
         return;
     }
 

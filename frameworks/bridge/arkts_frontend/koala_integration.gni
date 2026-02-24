@@ -25,7 +25,7 @@ koala_mr = {
   is_rri = false
 }
 
-node_version = "v16.20.2"
+node_version = "v18.20.1"
 host_arch = "${host_os}-${host_cpu}"
 koala_node_path = rebase_path(
         "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin")

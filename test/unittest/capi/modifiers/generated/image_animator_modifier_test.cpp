@@ -77,10 +77,10 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setImagesTestPlaceholder, TestSize.
 HWTEST_F(ImageAnimatorModifierTest, setStateTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STATE_DEFAULT_VALUE) << "Default value for attribute 'state'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STATE_DEFAULT_VALUE)) << "Default value for attribute 'state'";
 }
 
 /*
@@ -103,7 +103,8 @@ HWTEST_F(ImageAnimatorModifierTest, setStateTestStateValidValues, TestSize.Level
         modifier_->setState(node_, &inputValueState);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setState, attribute: state";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setState, attribute: state";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumAnimationStatusValidValues) {
@@ -131,7 +132,7 @@ HWTEST_F(ImageAnimatorModifierTest, setStateTestStateInvalidValues, TestSize.Lev
         modifier_->setState(node_, &inputValueState);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STATE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STATE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setState, attribute: state";
     };
 
@@ -148,10 +149,10 @@ HWTEST_F(ImageAnimatorModifierTest, setStateTestStateInvalidValues, TestSize.Lev
 HWTEST_F(ImageAnimatorModifierTest, setDurationTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DURATION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DURATION_DEFAULT_VALUE) << "Default value for attribute 'duration'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DURATION_DEFAULT_VALUE)) << "Default value for attribute 'duration'";
 }
 
 /*
@@ -174,7 +175,7 @@ HWTEST_F(ImageAnimatorModifierTest, setDurationTestDurationValidValues, TestSize
         modifier_->setDuration(node_, &inputValueDuration);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DURATION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDuration, attribute: duration";
     };
 
@@ -203,7 +204,7 @@ HWTEST_F(ImageAnimatorModifierTest, setDurationTestDurationInvalidValues, TestSi
         modifier_->setDuration(node_, &inputValueDuration);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DURATION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DURATION_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DURATION_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setDuration, attribute: duration";
     };
 
@@ -222,10 +223,10 @@ HWTEST_F(ImageAnimatorModifierTest, setDurationTestDurationInvalidValues, TestSi
 HWTEST_F(ImageAnimatorModifierTest, setReverseTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REVERSE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_REVERSE_DEFAULT_VALUE) << "Default value for attribute 'reverse'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_REVERSE_DEFAULT_VALUE)) << "Default value for attribute 'reverse'";
 }
 
 /*
@@ -248,7 +249,8 @@ HWTEST_F(ImageAnimatorModifierTest, setReverseTestReverseValidValues, TestSize.L
         modifier_->setReverse(node_, &inputValueReverse);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REVERSE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setReverse, attribute: reverse";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setReverse, attribute: reverse";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
@@ -276,7 +278,7 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setReverseTestReverseInvalidValues,
         modifier_->setReverse(node_, &inputValueReverse);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REVERSE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_REVERSE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_REVERSE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setReverse, attribute: reverse";
     };
 
@@ -292,10 +294,10 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setReverseTestReverseInvalidValues,
 HWTEST_F(ImageAnimatorModifierTest, setFixedSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FIXED_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FIXED_SIZE_DEFAULT_VALUE) << "Default value for attribute 'fixedSize'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FIXED_SIZE_DEFAULT_VALUE)) << "Default value for attribute 'fixedSize'";
 }
 
 /*
@@ -318,7 +320,7 @@ HWTEST_F(ImageAnimatorModifierTest, setFixedSizeTestFixedSizeValidValues, TestSi
         modifier_->setFixedSize(node_, &inputValueFixedSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FIXED_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFixedSize, attribute: fixedSize";
     };
 
@@ -347,7 +349,7 @@ HWTEST_F(ImageAnimatorModifierTest, setFixedSizeTestFixedSizeInvalidValues, Test
         modifier_->setFixedSize(node_, &inputValueFixedSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FIXED_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FIXED_SIZE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FIXED_SIZE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFixedSize, attribute: fixedSize";
     };
 
@@ -363,10 +365,10 @@ HWTEST_F(ImageAnimatorModifierTest, setFixedSizeTestFixedSizeInvalidValues, Test
 HWTEST_F(ImageAnimatorModifierTest, setFillModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FILL_MODE_DEFAULT_VALUE) << "Default value for attribute 'fillMode'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FILL_MODE_DEFAULT_VALUE)) << "Default value for attribute 'fillMode'";
 }
 
 /*
@@ -389,7 +391,7 @@ HWTEST_F(ImageAnimatorModifierTest, setFillModeTestFillModeValidValues, TestSize
         modifier_->setFillMode(node_, &inputValueFillMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFillMode, attribute: fillMode";
     };
 
@@ -418,7 +420,7 @@ HWTEST_F(ImageAnimatorModifierTest, setFillModeTestFillModeInvalidValues, TestSi
         modifier_->setFillMode(node_, &inputValueFillMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FILL_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FILL_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFillMode, attribute: fillMode";
     };
 
@@ -435,10 +437,10 @@ HWTEST_F(ImageAnimatorModifierTest, setFillModeTestFillModeInvalidValues, TestSi
 HWTEST_F(ImageAnimatorModifierTest, setIterationsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ITERATIONS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ITERATIONS_DEFAULT_VALUE) << "Default value for attribute 'iterations'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ITERATIONS_DEFAULT_VALUE)) << "Default value for attribute 'iterations'";
 }
 
 /*
@@ -461,7 +463,7 @@ HWTEST_F(ImageAnimatorModifierTest, DISABLED_setIterationsTestIterationsValidVal
         modifier_->setIterations(node_, &inputValueIterations);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ITERATIONS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setIterations, attribute: iterations";
     };
 
@@ -490,7 +492,7 @@ HWTEST_F(ImageAnimatorModifierTest, setIterationsTestIterationsInvalidValues, Te
         modifier_->setIterations(node_, &inputValueIterations);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ITERATIONS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ITERATIONS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ITERATIONS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setIterations, attribute: iterations";
     };
 
@@ -509,10 +511,10 @@ HWTEST_F(ImageAnimatorModifierTest, setIterationsTestIterationsInvalidValues, Te
 HWTEST_F(ImageAnimatorModifierTest, setMonitorInvisibleAreaTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MONITOR_INVISIBLE_AREA_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MONITOR_INVISIBLE_AREA_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MONITOR_INVISIBLE_AREA_DEFAULT_VALUE)) <<
         "Default value for attribute 'monitorInvisibleArea'";
 }
 
@@ -536,7 +538,7 @@ HWTEST_F(ImageAnimatorModifierTest, setMonitorInvisibleAreaTestMonitorInvisibleA
         modifier_->setMonitorInvisibleArea(node_, &inputValueMonitorInvisibleArea);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MONITOR_INVISIBLE_AREA_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMonitorInvisibleArea, attribute: monitorInvisibleArea";
     };
 
@@ -566,7 +568,7 @@ HWTEST_F(
         modifier_->setMonitorInvisibleArea(node_, &inputValueMonitorInvisibleArea);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MONITOR_INVISIBLE_AREA_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MONITOR_INVISIBLE_AREA_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MONITOR_INVISIBLE_AREA_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMonitorInvisibleArea, attribute: monitorInvisibleArea";
     };
 

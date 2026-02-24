@@ -177,7 +177,7 @@ void SetMarqueeUpdateStrategyImpl(Ark_NativePointer node,
     MarqueeModelNG::SetMarqueeUpdateStrategy(frameNode, convValue);
 }
 void SetOnStartImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+                    const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -192,7 +192,7 @@ void SetOnStartImpl(Ark_NativePointer node,
     MarqueeModelNG::SetOnStart(frameNode, std::move(onStart));
 }
 void SetOnBounceImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -207,7 +207,7 @@ void SetOnBounceImpl(Ark_NativePointer node,
     MarqueeModelNG::SetOnBounce(frameNode, onBounce);
 }
 void SetOnFinishImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

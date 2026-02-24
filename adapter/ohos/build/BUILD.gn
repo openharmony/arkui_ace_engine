@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 component_modules = [
   "dynamiclayout",
@@ -98,7 +99,7 @@ group("ace_packages") {
 
   deps += [ "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani" ]
 
-  if (is_asan) {
+  if (is_asan || !ace_engine_feature_enable_libace) {
     deps -= [ "$ace_root/build:libace" ]
   }
   deps += component_modules_libs

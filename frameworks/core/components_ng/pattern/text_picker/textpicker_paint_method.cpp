@@ -32,7 +32,7 @@ void UpdateDividerColor(ItemDivider& divider)
 {
     if (SystemProperties::ConfigChangePerform() && divider.isDefaultColor) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
-        if (pipelineContext && pipelineContext->IsSystmColorChange()) {
+        if (pipelineContext && pipelineContext->IsSystemColorChange()) {
             auto pickerTheme = pipelineContext->GetTheme<PickerTheme>();
             if (pickerTheme) {
                 divider.color = pickerTheme->GetDividerColor();

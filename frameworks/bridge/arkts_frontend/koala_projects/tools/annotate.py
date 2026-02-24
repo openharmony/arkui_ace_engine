@@ -28,6 +28,23 @@ class Config:
         self.memoTypeImport = None
         self.commonMethodSrc = ""
 
+class BraceCounter:
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.count = 0
+
+    def update(self, text):
+        for i in range(0, len(text)):
+            if text[i] == "{":
+                self.count += 1
+            elif text[i] == "}":
+                self.count -= 1
+                if self.count <= 0:
+                    return i
+        return -1
+
 memoImport = "@koalaui/runtime/annotations"
 
 def convert_memo(text: str, memo_import: str, memo_type_import: str) -> str:

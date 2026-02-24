@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define _USE_MATH_DEFINES
+
 #include <cmath>
 
 #include "canvas_renderer_peer_impl.h"
@@ -140,7 +140,7 @@ static bool MatchColorWithRGBA(const std::string& colorStr, Color& color)
         char* pEnd = nullptr;
         errno = 0;
         double val = std::strtod(valueProps[i].c_str(), &pEnd);
-        if (pEnd == valueProps[i].c_str() || *pEnd != '\0' || errno == ERANGE) {
+        if (pEnd == nullptr || pEnd == valueProps[i].c_str() || *pEnd != '\0' || errno == ERANGE) {
             return false;
         }
         if (i < RGB_SUB_SIZE) {

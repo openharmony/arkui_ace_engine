@@ -46,8 +46,8 @@ public:
     using NotifySendCommandAsyncFunction = std::function<int32_t(int32_t id, const std::string& command)>;
     using SendCommandFunction = std::function<void(int32_t value)>;
     using GetHitTestInfoFunction = std::function<void(InteractionParamConfig config)>;
-    using GetStateMgmtInfoFunction = std::function<void(
-        const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)>;
+    using GetStateMgmtInfoFunction = std::function<void(const std::string& componentName,
+        const std::string& propertyName, const std::string& jsonPath, bool onlyVisible)>;
     using GetImagesByIdFunction =
         std::function<void(const std::vector<int32_t>&, const std::map<int32_t, std::vector<int32_t>>&)>;
 
@@ -197,8 +197,8 @@ public:
     virtual void SaveProcessId(std::string key, int32_t id) {};
     virtual void EraseProcessId(const std::string& key, int32_t targetPid) {};
     virtual void GetWebTranslateText(std::string extraData, bool isContinued) {};
-    virtual void GetStateMgmtInfo(
-        const std::string& componentName, const std::string& propertyName, const std::string& jsonPath) {};
+    virtual void GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+        const std::string& jsonPath, bool onlyVisible = false) {};
     virtual void SendWebTextToAI(int32_t nodeId, std::string res) {};
     virtual void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) {};
     virtual void SendTranslateResult(int32_t nodeId, std::string result) {};

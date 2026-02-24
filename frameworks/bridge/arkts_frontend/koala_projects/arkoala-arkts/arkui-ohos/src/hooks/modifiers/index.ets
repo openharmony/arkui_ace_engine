@@ -18,10 +18,8 @@
 
 import { AttributeModifier } from "#handwritten"
 import { ArkAlphabetIndexerComponent, AlphabetIndexerAttribute } from "./../../component/alphabetIndexer"
-import { ArkCommonMethodStyle, CommonMethod, ArkCommonShapeMethodStyle, CommonShapeMethod, ArkScrollableCommonMethodStyle, ScrollableCommonMethod } from "./../../component/common"
+import { CommonMethod, CommonShapeMethod, ScrollableCommonMethod } from "./../../component/common"
 import { AlphabetIndexerModifier } from "./../../AlphabetIndexerModifier"
-import { ArkAnimatorComponent, AnimatorAttribute } from "./../../component/animator"
-import { AnimatorModifier } from "./../../AnimatorModifier"
 import { ArkBadgeComponent, BadgeAttribute } from "./../../component/badge"
 import { BadgeModifier } from "./../../BadgeModifier"
 import { ArkBlankComponent, BlankAttribute } from "./../../component/blank"
@@ -91,7 +89,7 @@ import { ImageModifier } from "./../../ImageModifier"
 import { ArkImageAnimatorComponent, ImageAnimatorAttribute } from "./../../component/imageAnimator"
 import { ImageAnimatorModifier } from "./../../ImageAnimatorModifier"
 import { ArkImageSpanComponent, ImageSpanAttribute } from "./../../component/imageSpan"
-import { ArkBaseSpanStyle, BaseSpan } from "./../../component/span"
+import { BaseSpan } from "./../../component/span"
 import { ImageSpanModifier } from "./../../ImageSpanModifier"
 import { ArkLazyVGridLayoutComponent, LazyVGridLayoutAttribute, LazyGridLayoutAttribute } from "./../../component/lazyGridLayout"
 import { LazyVGridLayoutModifier } from "./../../LazyVGridLayoutModifier"
@@ -99,8 +97,6 @@ import { ArkIndicatorComponentComponent, IndicatorComponentAttribute } from "./.
 import { IndicatorComponentModifier } from "./../../IndicatorComponentModifier"
 import { ArkLineComponent, LineAttribute,ArkLinePeer,LineOptions} from './../../component/line';
 import { LineModifier } from "./../../LineModifier"
-import { ArkLinearIndicatorComponent, LinearIndicatorAttribute } from "./../../component/linearindicator"
-import { LinearIndicatorModifier } from "./../../LinearIndicatorModifier"
 import { ArkListComponent, ListAttribute } from "./../../component/list"
 import { ListModifier } from "./../../ListModifier"
 import { ArkListItemComponent, ListItemAttribute } from "./../../component/listItem"
@@ -112,7 +108,7 @@ import { LoadingProgressModifier } from "./../../LoadingProgressModifier"
 import { ArkMarqueeComponent, MarqueeAttribute } from "./../../component/marquee"
 import { MarqueeModifier } from "./../../MarqueeModifier"
 import { ArkMediaCachedImageComponent, MediaCachedImageAttribute } from "./../../component/mediaCachedImage"
-import { ArkImageStyle, ImageAttribute } from "./../../component/image"
+import { ImageAttribute } from "./../../component/image"
 import { MediaCachedImageModifier } from "./../../MediaCachedImageModifier"
 import { ArkMenuComponent, MenuAttribute } from "./../../component/menu"
 import { MenuModifier } from "./../../MenuModifier"
@@ -186,10 +182,6 @@ import { BaseSpanModifier } from "./../../BaseSpanModifier"
 import { SpanModifier } from "./../../SpanModifier"
 import { ArkStackComponent, StackAttribute } from "./../../component/stack"
 import { StackModifier } from "./../../StackModifier"
-import { ArkStepperComponent, StepperAttribute } from "./../../component/stepper"
-import { StepperModifier } from "./../../StepperModifier"
-import { ArkStepperItemComponent, StepperItemAttribute } from "./../../component/stepperItem"
-import { StepperItemModifier } from "./../../StepperItemModifier"
 import { ArkSwiperComponent, SwiperAttribute } from "./../../component/swiper"
 import { SwiperModifier } from "./../../SwiperModifier"
 import { ArkSymbolGlyphComponent, SymbolGlyphAttribute } from "./../../component/symbolglyph"
@@ -266,6 +258,7 @@ import { ArkUIAniModule } from 'arkui.ani';
 import { KPointer } from '@koalaui/interop';
 import { ArkParticleComponent, ParticleAttribute } from './../../component/particle';
 import { ParticleModifier } from './../../ParticleModifier';
+import { ArkUnionEffectContainerComponent, UnionEffectContainerAttribute, UnionEffectContainerModifier, ArkLazyGridLayoutAttributeComponent } from '#generated';
 
 export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndexerComponent, modifier: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
      if (modifier === undefined) {
@@ -298,7 +291,6 @@ export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndex
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<AlphabetIndexerAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
-export function hookAnimatorAttributeModifier(componenet: ArkAnimatorComponent, value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookBadgeAttributeModifier(componenet: ArkBadgeComponent, value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookCanvasAttributeModifier(component: ArkCanvasComponent, modifier: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined):void {
     if (modifier === undefined) {
@@ -513,7 +505,6 @@ export function hookLineAttributeModifier(component: ArkLineComponent, modifier:
     applyAttributeModifierBase(modifier as Object as AttributeModifier<LineAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
-export function hookLinearIndicatorAttributeModifier(componenet: ArkLinearIndicatorComponent, value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookMediaCachedImageAttributeModifier(componenet: ArkMediaCachedImageComponent, value: AttributeModifier<MediaCachedImageAttribute> | AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookNavDestinationAttributeModifier(component: ArkNavDestinationComponent, modifier: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined):void {
         if (modifier === undefined) {
@@ -903,68 +894,6 @@ export function hookSideBarContainerAttributeModifier(component: ArkSideBarConta
     applyAttributeModifierBase(modifier as Object as AttributeModifier<SideBarContainerAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 export function hookBaseSpanAttributeModifier(componenet: ArkBaseSpanComponent, value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookStepperAttributeModifier(component: ArkStepperComponent, modifier: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined):void {
-    if (modifier === undefined) {
-        return;
-    }
-    let isCommonModifier: boolean = modifier instanceof CommonModifier;
-    if (isCommonModifier) {
-        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-        return;
-    }
-    let attributeSet = (): StepperModifier => {
-        let isStepperModifier: boolean = modifier instanceof StepperModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new StepperModifier();
-        if (isStepperModifier) {
-            let stepperModifier = modifier as object as StepperModifier;
-            initModifier.mergeModifier(stepperModifier);
-            component.getPeer().attributeSet = initModifier;
-            return initModifier;
-        } else {
-            component.getPeer().attributeSet = initModifier;
-            return initModifier;
-        }
-    }
-    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-    };
-    let updaterReceiver = (): ArkStepperComponent => {
-        let componentNew: ArkStepperComponent = new ArkStepperComponent();
-        componentNew.setPeer(component.getPeer());
-        return componentNew;
-    };
-    applyAttributeModifierBase(modifier as Object as AttributeModifier<StepperAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
-}
-export function hookStepperItemAttributeModifier(component: ArkStepperItemComponent, modifier: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier === undefined) {
-        return;
-    }
-    let isCommonModifier: boolean = modifier instanceof CommonModifier;
-    if (isCommonModifier) {
-        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-        return;
-    }
-    let attributeSet = (): StepperItemModifier => {
-        let isStepperItemModifier: boolean = modifier instanceof StepperItemModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new StepperItemModifier();
-        if (isStepperItemModifier) {
-            let stepperItemModifier = modifier as object as StepperItemModifier;
-            initModifier.mergeModifier(stepperItemModifier);
-            component.getPeer().attributeSet = initModifier;
-            return initModifier;
-        } else {
-            component.getPeer().attributeSet = initModifier;
-            return initModifier;
-        }
-    }
-    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-    };
-    let updaterReceiver = (): ArkStepperItemComponent => {
-        let componentNew: ArkStepperItemComponent = new ArkStepperItemComponent();
-        componentNew.setPeer(component.getPeer());
-        return componentNew;
-    };
-    applyAttributeModifierBase(modifier as Object as AttributeModifier<StepperItemAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
-}
 export function hookSwiperAttributeModifier(component: ArkSwiperComponent, modifier: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined):void {
         if (modifier === undefined) {
         return;
@@ -2687,6 +2616,11 @@ export function hookToggleAttributeModifier(component: ArkToggleComponent,
     applyAttributeModifierBase(modifier as Object as AttributeModifier<ToggleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
+export function hookLazyGridLayoutAttributeAttributeModifier(component: ArkLazyGridLayoutAttributeComponent,
+    modifier: AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined) {
+
+}
+
 export function hookLazyVGridLayoutAttributeModifier(component: ArkLazyVGridLayoutComponent,
     modifier:AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): void {
     if (modifier === undefined) {
@@ -2718,6 +2652,39 @@ export function hookLazyVGridLayoutAttributeModifier(component: ArkLazyVGridLayo
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<LazyVGridLayoutAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookUnionEffectContainerAttributeModifier(component: ArkUnionEffectContainerComponent,
+    modifier: AttributeModifier<UnionEffectContainerAttribute> | AttributeModifier<CommonMethod> | undefined) {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): UnionEffectContainerModifier => {
+        let isUnionEffectContainerModifier: boolean = modifier instanceof UnionEffectContainerModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new UnionEffectContainerModifier();
+        if (isUnionEffectContainerModifier) {
+            let unionEffectContainerModifier = modifier as object as UnionEffectContainerModifier;
+            initModifier.mergeModifier(unionEffectContainerModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkUnionEffectContainerComponent => {
+        let componentNew: ArkUnionEffectContainerComponent = new ArkUnionEffectContainerComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<GridAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
 export function hookGridAttributeModifier(component: ArkGridComponent,

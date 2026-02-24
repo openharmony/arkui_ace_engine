@@ -432,20 +432,22 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_CONTAINER_PICKER_CHANGE;
         case NODE_PICKER_EVENT_ON_SCROLL_STOP :
             return ON_CONTAINER_PICKER_SCROLL_STOP;
-        case NODE_RICH_EDITOR_ON_SELECTION_CHANGE:
+        case NODE_TEXT_EDITOR_ON_SELECTION_CHANGE:
             return ON_RICH_EDITOR_ON_SELECTION_CHANGE;
-        case NODE_RICH_EDITOR_ON_READY:
+        case NODE_TEXT_EDITOR_ON_READY:
             return ON_RICH_EDITOR_ON_READY;
-        case NODE_RICH_EDITOR_ON_PASTE:
+        case NODE_TEXT_EDITOR_ON_PASTE:
             return ON_RICH_EDITOR_ON_PASTE;
-        case NODE_RICH_EDITOR_ON_EDITING_CHANGE:
+        case NODE_TEXT_EDITOR_ON_EDITING_CHANGE:
             return ON_RICH_EDITOR_ON_EDITING_CHANGE;
-        case NODE_RICH_EDITOR_ON_SUBMIT:
+        case NODE_TEXT_EDITOR_ON_SUBMIT:
             return ON_RICH_EDITOR_ON_SUBMIT;
-        case NODE_RICH_EDITOR_ON_CUT:
+        case NODE_TEXT_EDITOR_ON_CUT:
             return ON_RICH_EDITOR_ON_CUT;
-        case NODE_RICH_EDITOR_ON_COPY:
+        case NODE_TEXT_EDITOR_ON_COPY:
             return ON_RICH_EDITOR_ON_COPY;
+        case NODE_ON_NEED_SOFTKEYBOARD:
+            return ON_NEED_SOFTKEYBOARD;
         default:
             return -1;
     }
@@ -749,19 +751,21 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
         case ON_CONTAINER_PICKER_SCROLL_STOP :
             return NODE_PICKER_EVENT_ON_SCROLL_STOP;
         case ON_RICH_EDITOR_ON_SELECTION_CHANGE:
-            return NODE_RICH_EDITOR_ON_SELECTION_CHANGE;
+            return NODE_TEXT_EDITOR_ON_SELECTION_CHANGE;
         case ON_RICH_EDITOR_ON_READY:
-            return NODE_RICH_EDITOR_ON_READY;
+            return NODE_TEXT_EDITOR_ON_READY;
         case ON_RICH_EDITOR_ON_PASTE:
-            return NODE_RICH_EDITOR_ON_PASTE;
+            return NODE_TEXT_EDITOR_ON_PASTE;
         case ON_RICH_EDITOR_ON_EDITING_CHANGE:
-            return NODE_RICH_EDITOR_ON_EDITING_CHANGE;
+            return NODE_TEXT_EDITOR_ON_EDITING_CHANGE;
         case  ON_RICH_EDITOR_ON_SUBMIT:
-            return NODE_RICH_EDITOR_ON_SUBMIT;
+            return NODE_TEXT_EDITOR_ON_SUBMIT;
         case ON_RICH_EDITOR_ON_CUT:
-            return NODE_RICH_EDITOR_ON_CUT;
+            return NODE_TEXT_EDITOR_ON_CUT;
         case ON_RICH_EDITOR_ON_COPY:
-            return NODE_RICH_EDITOR_ON_COPY;
+            return NODE_TEXT_EDITOR_ON_COPY;
+        case ON_NEED_SOFTKEYBOARD:
+            return NODE_ON_NEED_SOFTKEYBOARD;
         default:
             return -1;
     }
@@ -1239,16 +1243,27 @@ int32_t OH_ArkUI_NodeEvent_GetStringValue(
 
 int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size)
 {
-    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
+    if (!event || (event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT) &&
+        event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT))) {
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
     if (!originNodeEvent) {
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
-    auto* mixedData = reinterpret_cast<ArkUIMixedEvent*>(&(originNodeEvent->mixedEvent));
-    for (int i = 0; i < size; i++) {
-        mixedData->numberReturnData[i].i32 = value[i].i32;
+    if (event->category == static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
+        auto* mixedData = reinterpret_cast<ArkUIMixedEvent*>(&(originNodeEvent->mixedEvent));
+        if (mixedData != nullptr) {
+            for (int i = 0; i < size; i++) {
+                mixedData->numberReturnData[i].i32 = value[i].i32;
+            }
+        }
+    }
+    if (event->kind == NODE_ON_NEED_SOFTKEYBOARD) {
+        auto* keyBoardData = reinterpret_cast<ArkUINodeAsyncEvent*>(&(originNodeEvent->componentAsyncEvent));
+        if (keyBoardData != nullptr) {
+            keyBoardData->data[0].i32 = value[0].i32;
+        }
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }

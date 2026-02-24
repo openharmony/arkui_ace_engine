@@ -95,11 +95,11 @@ public:
 };
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowDefaultTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowDefault
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowDefaultTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowDefault, TestSize.Level1)
 {
     // default value
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -127,27 +127,27 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowD
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_RADIUS);
-    EXPECT_EQ(checkValue, DOUBLE_0_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_0_STR));
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, TEST_COLOR_BLACK_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLACK_STR));
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_X);
-    EXPECT_EQ(checkValue, DOUBLE_0_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_0_STR));
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_Y);
-    EXPECT_EQ(checkValue, DOUBLE_0_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_0_STR));
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_TYPE);
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_FILL);
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowStyleTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowStyle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowStyleTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowStyle, TestSize.Level1)
 {
     // valid value
     auto arkShadowStyle = ARK_SHADOW_STYLE_OUTER_FLOATING_MD;
@@ -178,7 +178,7 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowS
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     auto checkValue = GetAttrValue<std::string>(fullJson, PROP_NAME_SHADOW);
-    EXPECT_EQ(checkValue, "ShadowStyle.OuterFloatingMD");
+    EXPECT_THAT(checkValue, Eq("ShadowStyle.OuterFloatingMD"));
 
     // invalid value
     arkShadowStyle = Converter::INVALID_ENUM_VAL<Ark_ShadowStyle>;
@@ -196,15 +196,16 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowS
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
     checkValue = GetAttrValue<std::string>(fullJson, PROP_NAME_SHADOW);
-    EXPECT_EQ(checkValue, "ShadowStyle.OuterFloatingMD");
+    EXPECT_THAT(checkValue, Eq("ShadowStyle.OuterFloatingMD"));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsRadiusNumberTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsRadiusNumber
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsRadiusNumberTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsRadiusNumber,
+    TestSize.Level1)
 {
     // valid value
     Ark_ShadowOptions arkShadowOptions = {
@@ -235,9 +236,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_RADIUS);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 
     // negative value
     arkShadowOptions = {
@@ -256,17 +257,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_RADIUS);
-    EXPECT_EQ(checkValue, DOUBLE_0_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_0_STR));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsRadiusResourceTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsRadiusResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsRadiusResourceTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsRadiusResource,
     TestSize.Level1)
 {
     // valid value
@@ -299,17 +300,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_RADIUS);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetXNumberTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXNumber
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetXNumberTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXNumber,
     TestSize.Level1)
 {
     // valid value
@@ -341,17 +342,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_X);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetXNumberTest2
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXNumber2
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetXNumberTest2,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXNumber2,
     TestSize.Level1)
 {
     // negative value
@@ -384,17 +385,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_X);
-    EXPECT_EQ(checkValue, DOUBLE_1_NEGATIVE_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_NEGATIVE_STR));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetXResourceTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetXResourceTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetXResource,
     TestSize.Level1)
 {
     // valid value
@@ -427,17 +428,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_X);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetYNumberValidTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYNumberValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetYNumberValidTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYNumberValid,
     TestSize.Level1)
 {
     // valid value
@@ -470,17 +471,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_Y);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetYNumberInvalidTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYNumberInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetYNumberInvalidTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYNumberInvalid,
     TestSize.Level1)
 {
     // valid value
@@ -513,17 +514,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_Y);
-    EXPECT_EQ(checkValue, DOUBLE_1_NEGATIVE_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_NEGATIVE_STR));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsOffsetYResourceTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsOffsetYResourceTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsOffsetYResource,
     TestSize.Level1)
 {
     // valid value
@@ -556,17 +557,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_OFFSET_Y);
-    EXPECT_EQ(checkValue, DOUBLE_1_STR);
+    EXPECT_THAT(checkValue, Eq(DOUBLE_1_STR));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsFillTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsFill
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsFillTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsFill, TestSize.Level1)
 {
     // true value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -597,9 +598,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_FILL);
-    EXPECT_EQ(checkValue, "1");
+    EXPECT_THAT(checkValue, Eq("1"));
 
     // false value
     arkShadowOptions = { .fill = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(false)) };
@@ -616,17 +617,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_FILL);
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsTypeTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsType
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsTypeTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsType, TestSize.Level1)
 {
     // valid value
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -657,9 +658,9 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_TYPE);
-    EXPECT_EQ(checkValue, "1");
+    EXPECT_THAT(checkValue, Eq("1"));
 
     // invalid value
     arkShadowOptions = { .type = Converter::ArkValue<Opt_ShadowType>(
@@ -678,17 +679,18 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_TYPE);
-    EXPECT_EQ(checkValue, "0");
+    EXPECT_THAT(checkValue, Eq("0"));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsColorColorTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsColorColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorColorTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsColorColor,
+    TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     Ark_ShadowOptions arkShadowOptions = {
@@ -719,17 +721,18 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsColorStringTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsColorString
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorStringTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsColorString,
+    TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     Ark_ShadowOptions arkShadowOptions = {
@@ -761,17 +764,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsColorResourceTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsColorResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorResourceTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsColorResource,
     TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
@@ -804,17 +807,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, TEST_COLOR_BLUE_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLUE_STR));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsColorStrategyValidTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsColorStrategyValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorStrategyValidTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsColorStrategyValid,
     TestSize.Level1)
 {
     // valid value
@@ -848,17 +851,17 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, "ColoringStrategy.PRIMARY");
+    EXPECT_THAT(checkValue, Eq("ColoringStrategy.PRIMARY"));
 }
 
 /*
- * @tc.name: bindPopupCustomPopupOptionsShadowOptionsColorStrategyInvalidTest
+ * @tc.name: setBindPopupTestCustomPopupOptionsShadowOptionsColorStrategyInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowOptionsColorStrategyInvalidTest,
+HWTEST_F(CommonMethodModifierTest18, DISABLED_setBindPopupTestCustomPopupOptionsShadowOptionsColorStrategyInvalid,
     TestSize.Level1)
 {
     // invalid value
@@ -892,8 +895,8 @@ HWTEST_F(CommonMethodModifierTest18, DISABLED_bindPopupCustomPopupOptionsShadowO
     ASSERT_NE(childNode, nullptr);
 
     auto fullJson = GetJsonValue(reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(childNode)));
-    auto childObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_SHADOW);
+    auto childObject = GetAttrObject(fullJson, PROP_NAME_SHADOW);
     auto checkValue = GetAttrValue<std::string>(childObject, PROP_NAME_COLOR);
-    EXPECT_EQ(checkValue, TEST_COLOR_BLACK_STR);
+    EXPECT_THAT(checkValue, Eq(TEST_COLOR_BLACK_STR));
 }
 }

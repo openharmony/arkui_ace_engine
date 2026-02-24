@@ -42,6 +42,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace {
 class SpanString;
@@ -1298,6 +1299,16 @@ public:
     void SetOnFocus(OnFocusFunc&& onFocusCallback) override
     {
         ViewAbstract::SetOnFocus(std::move(onFocusCallback));
+    }
+
+    void SetOnNeedSoftkeyboard(OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback) override
+    {
+        ViewAbstract::SetOnNeedSoftkeyboard(std::move(onNeedSoftkeyboardCallback));
+    }
+
+    void ResetOnNeedSoftkeyboard() override
+    {
+        ViewAbstract::ResetOnNeedSoftkeyboard();
     }
 
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override

@@ -55,4 +55,12 @@ void GridComponent::SetScrollTo(float hOffset, float vOffset, const std::vector<
     ArkUI_AttributeItem item = { value, 2 + static_cast<int32_t>(optionalParams.size()) };
     _nodeAPI->setAttribute(_component, NODE_SCROLL_OFFSET, &item);
 }
+void GridComponent::SetLayoutOptions(ArkUI_GridLayoutOptions *option)
+{
+    if (option == nullptr) {
+        return;
+    }
+    ArkUI_AttributeItem item = {.object = option};
+    _nodeAPI->setAttribute(_component, NODE_GRID_LAYOUT_OPTIONS, &item);
+}
 } // namespace ArkUICApiDemo

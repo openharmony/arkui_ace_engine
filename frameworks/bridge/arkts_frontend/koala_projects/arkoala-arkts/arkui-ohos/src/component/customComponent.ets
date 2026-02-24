@@ -148,8 +148,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
  
     /** @memo:intrinsic */
     callStyles(): void {
-        const customComponentInstance = this.instance as BaseCustomComponent<T_Options>;
-        customComponentInstance.__set__commonStyle__Internal(new Array<(instance: CommonMethod) => void>());
+        if (this.instance instanceof BaseCustomComponent) {
+            const customComponentInstance = this.instance as BaseCustomComponent<T_Options>;
+            customComponentInstance.__set__commonStyle__Internal(new Array<(instance: CommonMethod) => void>());
+        }
         this.styles?.(this.instance as T)
     }
  
@@ -504,6 +506,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         const classPath = Class.of(this.instance).getName();
         return classPath.substring(classPath.lastIndexOf('.') + 1);
     }
+
+    getName(): string {
+        return transferTypeName(Class.of(this.instance).getName());
+    }
 }
 
 function createInstance<T extends ExtendableComponent, T_Options>(
@@ -650,6 +656,10 @@ interface ReusableV2LifeCycle<T_Options> {
     aboutToReuse(): void;
 }
 
+export interface CustomComponentInvokeOptions {
+    sClass?: Class
+}
+
 export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableV2LifeCycle<T_Options> {
     /** @memo */
     static _invokeImpl<S extends CustomComponentV2<S, S_Options>, S_Options>(
@@ -661,16 +671,30 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
         /** @memo */
         content?: () => void
     ): void {
+        CustomComponentV2._invokeImpl<S, S_Options>(style, factory, initializers, reuseKey, content, undefined);
+    }
+
+    /** @memo */
+    static _invokeImpl<S extends CustomComponentV2<S, S_Options>, S_Options>(
+        /** @memo */
+        style: ((instance: S) => void) | undefined,
+        factory: () => S,
+        initializers?: () => S_Options,
+        reuseKey?: () => string,
+        /** @memo */
+        content?: () => void,
+        options?: CustomComponentInvokeOptions
+    ): void {
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
         const reuseKeyValue = remember(() => {
             if (reuseKey) {
-                let key: string | undefined | null = reuseKey() as string | undefined | null; // this means reusekey should be only calculated once
-                if (!key) { // include '' empty string
-                    key = transferTypeName((Type.of(factory) as FunctionType).getResultType().toString());
+                let key: string = reuseKey(); // this means reusekey should be only calculated once
+                if (!key && options?.sClass) { // include '' empty string
+                    key = transferTypeName(options!.sClass!.getName());
                 }
-                return key as string;
+                return key;
             }
             return undefined;
         });

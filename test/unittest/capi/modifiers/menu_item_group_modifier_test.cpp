@@ -83,16 +83,16 @@ public:
 };
 
 /*
- * @tc.name: setMenuItemGroupOptionsStringTest
+ * @tc.name: setMenuItemGroupOptionsTestString
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemGroupOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsStringTest, TestSize.Level1)
+HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsTestString, TestSize.Level1)
 {
     auto headerValue = GetAttrValue<std::string>(node_, "header");
     auto footerValue = GetAttrValue<std::string>(node_, "footer");
-    EXPECT_EQ(headerValue, "");
-    EXPECT_EQ(footerValue, "");
+    EXPECT_THAT(headerValue, Eq(""));
+    EXPECT_THAT(footerValue, Eq(""));
 
     auto headerStr = Converter::ArkValue<Ark_String>("Header");
     auto headerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(headerStr);
@@ -105,21 +105,21 @@ HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsStringTest, 
     modifier_->setMenuItemGroupOptions(node_, &optionsOpt);
     headerValue = GetAttrValue<std::string>(node_, "header");
     footerValue = GetAttrValue<std::string>(node_, "footer");
-    EXPECT_EQ(headerValue, "Header");
-    EXPECT_EQ(footerValue, "Footer");
+    EXPECT_THAT(headerValue, Eq("Header"));
+    EXPECT_THAT(footerValue, Eq("Footer"));
 }
 
 /*
- * @tc.name: setMenuItemGroupOptionsResourceTest
+ * @tc.name: setMenuItemGroupOptionsTestResource
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemGroupOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsResourceTest, TestSize.Level1)
+HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsTestResource, TestSize.Level1)
 {
     auto headerValue = GetAttrValue<std::string>(node_, "header");
     auto footerValue = GetAttrValue<std::string>(node_, "footer");
-    EXPECT_EQ(headerValue, "");
-    EXPECT_EQ(footerValue, "");
+    EXPECT_THAT(headerValue, Eq(""));
+    EXPECT_THAT(footerValue, Eq(""));
 
     const auto RES_NAME_HEADER = NamedResourceId{"header", ResourceType::STRING};
     Ark_ResourceStr headerResStr = CreateResourceUnion<Ark_ResourceStr>(RES_NAME_HEADER);
@@ -134,16 +134,16 @@ HWTEST_F(MenuItemGroupModifierTest, DISABLED_setMenuItemGroupOptionsResourceTest
     modifier_->setMenuItemGroupOptions(node_, &optionsOpt);
     headerValue = GetAttrValue<std::string>(node_, "header");
     footerValue = GetAttrValue<std::string>(node_, "footer");
-    EXPECT_EQ(headerValue, "Header");
-    EXPECT_EQ(footerValue, "Footer");
+    EXPECT_THAT(headerValue, Eq("Header"));
+    EXPECT_THAT(footerValue, Eq("Footer"));
 }
 
 /*
- * @tc.name: setMenuItemGroupOptionsCustomBuilderTest
+ * @tc.name: setMenuItemGroupOptionsTestCustomBuilder
  * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemGroupOptions
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsCustomBuilderTest, TestSize.Level1)
+HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsTestCustomBuilder, TestSize.Level1)
 {
     uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto builder = getBuilderCb();

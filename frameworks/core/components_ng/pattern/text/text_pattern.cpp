@@ -4481,6 +4481,11 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, boo
     }
 }
 
+bool TextPattern::GetIsSpecialSymbol() const
+{
+    return isSpecialSymbol_;
+}
+
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
@@ -4500,6 +4505,25 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
     ProcessOverlayAfterLayout();
+    if (textLayoutAlgorithm->GetIsSpecialSymbol() && pManager_) {
+        isSpecialSymbol_ = true;
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(textLayoutProp, false);
+        auto symbolSourceInfo = textLayoutProp->GetSymbolSourceInfo();
+        std::uint32_t unicode = 0;
+        if (symbolSourceInfo) {
+            unicode = symbolSourceInfo->GetUnicode();
+        }
+        TAG_LOGI(AceLogTag::ACE_TEXT,
+            "ACE symbol TextPattern::OnDirtyLayoutWrapperSwap id:%{public}d unicode:%{public}d, paragraph info "
+            "GetMaxWidth:%{public}f  GetHeight:%{public}f GetMaxIntrinsicWidth:%{public}f "
+            "GetLongestLineWithIndent:%{public}f, GetLineCount:%{public}d contentRect:%{public}s",
+            host->GetId(), unicode, pManager_->GetMaxWidth(), pManager_->GetHeight(), pManager_->GetMaxIntrinsicWidth(),
+            pManager_->GetLongestLineWithIndent(), static_cast<int32_t>(pManager_->GetLineCount()),
+            contentRect_.ToString().c_str());
+    }
     return true;
 }
 
@@ -4512,20 +4536,24 @@ void TextPattern::ProcessOverlayAfterLayout()
     }
 }
 
+bool TextPattern::CheckMeasureFlag()
+{
+    auto paintProperty = GetPaintProperty<PaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto flag = paintProperty->GetPropertyChangeFlag();
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    auto layoutFlag = textLayoutProperty->GetPropertyChangeFlag();
+    return CheckNeedMeasure(flag) || CheckNeedMeasure(layoutFlag);
+}
+
 void TextPattern::PreCreateLayoutWrapper()
 {
     auto host = GetContentHost();
     CHECK_NULL_VOID(host);
-
-    auto paintProperty = GetPaintProperty<PaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto flag = paintProperty->GetPropertyChangeFlag();
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto layoutFlag = textLayoutProperty->GetPropertyChangeFlag();
-    if (!CheckNeedMeasure(flag) && !CheckNeedMeasure(layoutFlag)) {
-        return;
-    }
+    CHECK_NULL_VOID(CheckMeasureFlag());
     auto beforeSpanSize = spans_.size();
     spans_.clear();
     childNodes_.clear();
@@ -7038,6 +7066,22 @@ PositionWithAffinity TextPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_
 {
     Offset offset(x, y);
     return pManager_->GetGlyphPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
+}
+
+PositionWithAffinity TextPattern::GetCharacterPositionAtCoordinate(int32_t x, int32_t y)
+{
+    Offset offset(x, y);
+    return pManager_->GetCharacterPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
+}
+
+std::pair<TextRange, TextRange> TextPattern::GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+{
+    return pManager_->GetGlyphRangeForCharacterRange(start, end);
+}
+
+std::pair<TextRange, TextRange> TextPattern::GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+{
+    return pManager_->GetCharacterRangeForGlyphRange(start, end);
 }
 
 void TextPattern::ProcessMarqueeVisibleAreaCallback()

@@ -39,6 +39,7 @@ const CJUITextClockModifier* GetCJUITextClockModifier();
 const ArkUITextClockCustomModifier* GetTextClockCustomModifier();
 constexpr const char* CUSTOM_MODIFIER = "customModifier";
 #ifdef INCLUDE_GENERATED_SOURCES
+constexpr const char* CONTENT_MODIFIER = "contentModifier";
 namespace GeneratedModifier {
 const GENERATED_ArkUITextClockModifier* GetTextClockStaticModifier();
 const GENERATED_ArkUITextClockContentModifier* GetTextClockStaticContentModifier();
@@ -81,8 +82,8 @@ const void* TextClockDynamicModule::GetCustomModifier(const std::string& name)
     if (name == NG::CUSTOM_MODIFIER) {
         return NG::GetTextClockCustomModifier();
     }
-#ifndef INCLUDE_GENERATED_SOURCES
-    if (name == NG::GeneratedModifier::CONTENT_MODIFIER) {
+#ifdef INCLUDE_GENERATED_SOURCES
+    if (name == NG::CONTENT_MODIFIER) {
         return NG::GeneratedModifier::GetTextClockStaticContentModifier();
     }
 #endif

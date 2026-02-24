@@ -763,4 +763,319 @@ HWTEST_F(GridIrregularFillerTest, FillMatrixFromStartIndex002, TestSize.Level1)
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_8);
     EXPECT_EQ(filler.posY_, 4);
 }
+
+/**
+ * @tc.name: GridIrregularFiller::FillMatrixFromStartIndexWithMeasure001
+ * @tc.desc: Test GridIrregularFiller::FillMatrixFromStartIndexWithMeasure with multi-row target item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FillMatrixFromStartIndexWithMeasure001, TestSize.Level1)
+{
+    // Grid config: 3 columns
+    // item0: (row0, col0) 1x1
+    // item1: (row0, col1) 1x1
+    // item2: (row0, col2) 1x1
+    // item3: (row1, col0) 2x2  [occupies row1-2, col0-1]
+    // item4: (row1, col2) 1x1
+    // item5: (row2, col2) 1x1  <- key test point
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        3, // [2 x 2]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 3) {
+            return { .rows = 2, .columns = 2 };
+        }
+        return { .rows = 1, .columns = 1 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateFixedItems(7); // Create 7 items (0-6)
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.childrenCount_ = 7;
+    info.gridMatrix_ = {};
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+
+    GridIrregularFiller::FillParameters params {
+        .crossLens = { 100.0f, 100.0f, 100.0f }, .crossGap = 0.0f, .mainGap = 0.0f
+    };
+
+    // Call FillMatrixFromStartIndexWithMeasure, starting from index 0, target is index 3
+    float height = filler.FillMatrixFromStartIndexWithMeasure(params, 0, 0, 3);
+
+    // Verify gridMatrix_ contains all necessary rows
+    EXPECT_TRUE(info.gridMatrix_.find(0) != info.gridMatrix_.end());
+    EXPECT_TRUE(info.gridMatrix_.find(1) != info.gridMatrix_.end());
+    EXPECT_TRUE(info.gridMatrix_.find(2) != info.gridMatrix_.end());
+
+    // Verify lineHeightMap_ contains all rows occupied by item3 (row1 and row2)
+    EXPECT_TRUE(info.lineHeightMap_.find(1) != info.lineHeightMap_.end());
+    EXPECT_TRUE(info.lineHeightMap_.find(2) != info.lineHeightMap_.end());
+
+    // Verify returned height equals expected value (100 + 100 = 200)
+    EXPECT_EQ(height, 200.0f);
+}
+
+/**
+ * @tc.name: GridIrregularFiller::FillMatrixFromStartIndexWithMeasure002
+ * @tc.desc: Test GridIrregularFiller::FillMatrixFromStartIndexWithMeasure with multiple multi-row items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FillMatrixFromStartIndexWithMeasure002, TestSize.Level1)
+{
+    // Grid config: 4 columns
+    // item3: (row1, col0) 2x2  [occupies row1-2, col0-1]
+    // item4: (row1, col2) 2x2  [occupies row1-2, col2-3]
+    // item5: (row3, col0) 1x1
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        3, // [2 x 2]
+        4, // [2 x 2]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 3 || index == 4) {
+            return { .rows = 2, .columns = 2 };
+        }
+        return { .rows = 1, .columns = 1 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateFixedItems(6); // Create 6 items (0-5)
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 4;
+    info.childrenCount_ = 6;
+    info.gridMatrix_ = {};
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+
+    GridIrregularFiller::FillParameters params {
+        .crossLens = { 100.0f, 100.0f, 100.0f, 100.0f }, .crossGap = 0.0f, .mainGap = 0.0f
+    };
+
+    // Call FillMatrixFromStartIndexWithMeasure, starting from index 0, target is index 3
+    float height = filler.FillMatrixFromStartIndexWithMeasure(params, 0, 0, 3);
+
+    // Verify gridMatrix_ contains all necessary rows
+    EXPECT_TRUE(info.gridMatrix_.find(0) != info.gridMatrix_.end());
+    EXPECT_TRUE(info.gridMatrix_.find(1) != info.gridMatrix_.end());
+    EXPECT_TRUE(info.gridMatrix_.find(2) != info.gridMatrix_.end());
+
+    // Verify lineHeightMap_ contains all rows occupied by item3 (row1 and row2)
+    EXPECT_TRUE(info.lineHeightMap_.find(1) != info.lineHeightMap_.end());
+    EXPECT_TRUE(info.lineHeightMap_.find(2) != info.lineHeightMap_.end());
+
+    // Verify returned height equals expected value (50 + 50 = 100)
+    EXPECT_EQ(height, 100.0f);
+}
+
+/**
+ * @tc.name: GridIrregularFiller::FillAndMeasureUntilIndex001
+ * @tc.desc: Test GridIrregularFiller::FillAndMeasureUntilIndex with regular items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FillAndMeasureUntilIndex001, TestSize.Level1)
+{
+    // Grid config: 3 columns
+    // item0-5: All regular 1x1 items
+    GridLayoutOptions option;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateFixedItems(6); // Create 6 items (0-5)
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.childrenCount_ = 6;
+    info.gridMatrix_ = {};
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+
+    GridIrregularFiller::FillParameters params {
+        .crossLens = { 100.0f, 100.0f, 100.0f }, .crossGap = 0.0f, .mainGap = 0.0f
+    };
+
+    // Test: Fill and measure from index 0 to index 3
+    int32_t targetLine = -1;
+    int32_t lastIdx = filler.FillAndMeasureUntilIndex(params, 0, 3, targetLine);
+
+    // Verify return value
+    EXPECT_EQ(lastIdx, 3);
+
+    // Verify targetLine was recorded
+    EXPECT_EQ(targetLine, 1); // Index 3 should be at row 1 (0-based: row0=[0,1,2], row1=[3,4,5])
+
+    // Verify lineHeightMap_ contains measured rows
+    EXPECT_TRUE(info.lineHeightMap_.find(0) != info.lineHeightMap_.end());
+    EXPECT_TRUE(info.lineHeightMap_.find(1) != info.lineHeightMap_.end());
+
+    // Verify correct number of rows measured
+    EXPECT_EQ(info.lineHeightMap_.size(), 2); // row 0 and row 1
+}
+
+/**
+ * @tc.name: GridIrregularFiller::FillAndMeasureUntilIndex002
+ * @tc.desc: Test GridIrregularFiller::FillAndMeasureUntilIndex with multi-row item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FillAndMeasureUntilIndex002, TestSize.Level1)
+{
+    // Grid config: 3 columns
+    // item3: 2x2 item (occupies row1-2, col0-1)
+    GridLayoutOptions option;
+    option.irregularIndexes = { 3 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 3) {
+            return { .rows = 2, .columns = 2 };
+        }
+        return { .rows = 1, .columns = 1 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateFixedItems(7);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.childrenCount_ = 7;
+    info.gridMatrix_ = {};
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+
+    GridIrregularFiller::FillParameters params {
+        .crossLens = { 100.0f, 100.0f, 100.0f }, .crossGap = 0.0f, .mainGap = 0.0f
+    };
+
+    // Test: Fill and measure from index 0 to index 3 (the 2x2 item)
+    int32_t targetLine = -1;
+    int32_t lastIdx = filler.FillAndMeasureUntilIndex(params, 0, 3, targetLine);
+
+    // Verify return value
+    EXPECT_EQ(lastIdx, 3);
+
+    // Verify targetLine was recorded (item3 at row1)
+    EXPECT_EQ(targetLine, 1);
+
+    // Verify lineHeightMap_ contains measured rows
+    EXPECT_TRUE(info.lineHeightMap_.find(0) != info.lineHeightMap_.end());
+    EXPECT_TRUE(info.lineHeightMap_.find(1) != info.lineHeightMap_.end());
+    EXPECT_TRUE(info.lineHeightMap_.find(2) != info.lineHeightMap_.end());
+
+    // Verify correct number of rows measured
+    EXPECT_EQ(info.lineHeightMap_.size(), 3);
+}
+
+/**
+ * @tc.name: GridIrregularFiller::FillAndMeasureUntilLine001
+ * @tc.desc: Test GridIrregularFiller::FillAndMeasureUntilLine to complete rows
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FillAndMeasureUntilLine001, TestSize.Level1)
+{
+    // Grid config: 3 columns
+    // item3: 2x2 item (occupies row1-2, col0-1)
+    // After measuring up to index 3, we need to measure item5 at row2,col2
+    GridLayoutOptions option;
+    option.irregularIndexes = { 3 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 3) {
+            return { .rows = 2, .columns = 2 };
+        }
+        return { .rows = 1, .columns = 1 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateFixedItems(7);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.childrenCount_ = 7;
+    info.gridMatrix_ = {};
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+
+    GridIrregularFiller::FillParameters params {
+        .crossLens = { 100.0f, 100.0f, 100.0f }, .crossGap = 0.0f, .mainGap = 0.0f
+    };
+
+    // First, fill and measure up to index 3
+    int32_t targetLine = -1;
+    filler.FillAndMeasureUntilIndex(params, 0, 3, targetLine);
+
+    // Then, continue filling until row 3 (which means completing rows 0-2)
+    int32_t lastIdx = filler.FillAndMeasureUntilLine(params, 4, 3);
+
+    // Verify we filled up to index 6 (all items 0-6)
+    EXPECT_EQ(lastIdx, 6);
+
+    // Verify posY_ reached target row
+    EXPECT_EQ(filler.posY_, 3);
+
+    // Verify all rows 0-3 have heights
+    EXPECT_TRUE(info.lineHeightMap_.find(0) != info.lineHeightMap_.end());
+    EXPECT_TRUE(info.lineHeightMap_.find(1) != info.lineHeightMap_.end());
+    EXPECT_TRUE(info.lineHeightMap_.find(2) != info.lineHeightMap_.end());
+    EXPECT_TRUE(info.lineHeightMap_.find(3) != info.lineHeightMap_.end());
+
+    // Verify correct number of rows measured
+    EXPECT_EQ(info.lineHeightMap_.size(), 4);
+}
+
+/**
+ * @tc.name: GridIrregularFiller::FillAndMeasureUntilLine002
+ * @tc.desc: Test GridIrregularFiller::FillAndMeasureUntilLine with boundary conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularFillerTest, FillAndMeasureUntilLine002, TestSize.Level1)
+{
+    // Grid config: 3 columns, all regular items
+    GridLayoutOptions option;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateFixedItems(6);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.childrenCount_ = 6;
+    info.gridMatrix_ = {};
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+
+    GridIrregularFiller::FillParameters params {
+        .crossLens = { 100.0f, 100.0f, 100.0f }, .crossGap = 0.0f, .mainGap = 0.0f
+    };
+
+    // Test: Fill from index 0 until reaching row 2
+    int32_t lastIdx = filler.FillAndMeasureUntilLine(params, 0, 2);
+
+    // Verify we filled all 6 items (row0: 0,1,2; row1: 3,4,5)
+    EXPECT_EQ(lastIdx, 5);
+
+    // Verify posY_ is at row 1 (didn't reach row 2)
+    EXPECT_EQ(filler.posY_, 1);
+
+    // Verify correct number of rows measured (row 0 and row 1)
+    EXPECT_EQ(info.lineHeightMap_.size(), 2);
+}
 } // namespace OHOS::Ace::NG

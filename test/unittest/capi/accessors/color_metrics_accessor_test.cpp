@@ -29,11 +29,11 @@ class ColorMetricsAccessorTest : public AccessorTestBase<GENERATED_ArkUIColorMet
                                     &GENERATED_ArkUIAccessors::getColorMetricsAccessor, ColorMetricsPeer> {};
 
 /**
- * @tc.name: NumericTestValidValues
+ * @tc.name: numericTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColorMetricsAccessorTest, NumericTestValidValues, TestSize.Level1)
+HWTEST_F(ColorMetricsAccessorTest, numericTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->numeric, nullptr);
     using OneTestStep = std::tuple<Ark_Number, uint32_t>;
@@ -45,7 +45,7 @@ HWTEST_F(ColorMetricsAccessorTest, NumericTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Number>(0xffffffff), 0xffffffff }, // Test max value
         { Converter::ArkValue<Ark_Number>(0x00000000), 0xff000000 }  // Test min value
     };
-    Ark_ColorMetrics resultPeer;
+    Ark_ColorMetricsExt resultPeer;
     for (auto [inputValue, expectedValue]: testPlan) {
         resultPeer = accessor_->numeric(&inputValue);
         EXPECT_EQ(resultPeer->colorValue.value, expectedValue) << "Passed value is: " << expectedValue;
@@ -53,11 +53,11 @@ HWTEST_F(ColorMetricsAccessorTest, NumericTestValidValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: RgbaTestValidValues
+ * @tc.name: rgbaTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColorMetricsAccessorTest, RgbaTestValidValues, TestSize.Level1)
+HWTEST_F(ColorMetricsAccessorTest, rgbaTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->rgba, nullptr);
     using OneTestStep = std::tuple<Ark_Number, Ark_Number, Ark_Number, Ark_Number, uint32_t>;
@@ -75,7 +75,7 @@ HWTEST_F(ColorMetricsAccessorTest, RgbaTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Number>(0.f), Converter::ArkValue<Ark_Number>(0x00),
             Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00), 0x00000000 },
     };
-    Ark_ColorMetrics resultPeer;
+    Ark_ColorMetricsExt resultPeer;
     for (auto [inputAlpha, inputRed, inputGreen, inputBlue, expectedValue]: testPlan) {
         resultPeer = accessor_->rgba(&inputRed, &inputGreen, &inputBlue, &inputAlpha);
         EXPECT_EQ(resultPeer->colorValue.value, expectedValue) <<
@@ -84,11 +84,11 @@ HWTEST_F(ColorMetricsAccessorTest, RgbaTestValidValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: ResourceColorTestValidValues
+ * @tc.name: resourceColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColorMetricsAccessorTest, ResourceColorTestValidValues, TestSize.Level1)
+HWTEST_F(ColorMetricsAccessorTest, resourceColorTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->resourceColor, nullptr);
     const auto RES_NAME_ID = NamedResourceId { "color_resource_name", ResourceType::COLOR };
@@ -105,11 +105,11 @@ HWTEST_F(ColorMetricsAccessorTest, ResourceColorTestValidValues, TestSize.Level1
 }
 
 /**
- * @tc.name: BlendColorTestValidValues
+ * @tc.name: blendColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColorMetricsAccessorTest, BlendColorTestValidValues, TestSize.Level1)
+HWTEST_F(ColorMetricsAccessorTest, blendColorTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->blendColor, nullptr);
     using OneTestStep = std::tuple<uint32_t, uint32_t>;
@@ -123,8 +123,8 @@ HWTEST_F(ColorMetricsAccessorTest, BlendColorTestValidValues, TestSize.Level1)
         { 0x00000000, 0xffffffff }
     };
     peer_->colorValue.value = 0x00000000; // Test blend with a full transparent color
-    Ark_ColorMetrics overlayPeer = new ColorMetricsPeer();
-    Ark_ColorMetrics resultPeer;
+    Ark_ColorMetricsExt overlayPeer = new ColorMetricsPeer();
+    Ark_ColorMetricsExt resultPeer;
     for (auto [inputValue, expectedValue]: testPlan) {
         overlayPeer->colorValue.value = inputValue;
         resultPeer = accessor_->blendColor(peer_, overlayPeer);
@@ -133,11 +133,11 @@ HWTEST_F(ColorMetricsAccessorTest, BlendColorTestValidValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetColorTestValidValues
+ * @tc.name: colorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColorMetricsAccessorTest, GetColorTestValidValues, TestSize.Level1)
+HWTEST_F(ColorMetricsAccessorTest, colorTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->color, nullptr);
     using OneTestStep = std::tuple<uint32_t, std::string>;
@@ -160,11 +160,11 @@ HWTEST_F(ColorMetricsAccessorTest, GetColorTestValidValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetRedTestValidValues
+ * @tc.name: redTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColorMetricsAccessorTest, GetRedTestValidValues, TestSize.Level1)
+HWTEST_F(ColorMetricsAccessorTest, redTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->red, nullptr);
     using OneTestStep = std::tuple<uint32_t, int32_t>;
@@ -186,11 +186,11 @@ HWTEST_F(ColorMetricsAccessorTest, GetRedTestValidValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetGreenTestValidValues
+ * @tc.name: greenTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColorMetricsAccessorTest, GetGreenTestValidValues, TestSize.Level1)
+HWTEST_F(ColorMetricsAccessorTest, greenTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->green, nullptr);
     using OneTestStep = std::tuple<uint32_t, int32_t>;
@@ -212,11 +212,11 @@ HWTEST_F(ColorMetricsAccessorTest, GetGreenTestValidValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetBlueTestValidValues
+ * @tc.name: blueTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColorMetricsAccessorTest, GetBlueTestValidValues, TestSize.Level1)
+HWTEST_F(ColorMetricsAccessorTest, blueTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->blue, nullptr);
     using OneTestStep = std::tuple<uint32_t, int32_t>;
@@ -238,11 +238,11 @@ HWTEST_F(ColorMetricsAccessorTest, GetBlueTestValidValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAlphaTestValidValues
+ * @tc.name: alphaTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColorMetricsAccessorTest, GetAlphaTestValidValues, TestSize.Level1)
+HWTEST_F(ColorMetricsAccessorTest, alphaTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->alpha, nullptr);
     using OneTestStep = std::tuple<uint32_t, int32_t>;

@@ -348,6 +348,7 @@ HWTEST_F(MenuViewTestNg, SkipMenuTest002, TestSize.Level1)
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     ASSERT_NE(rootNode, nullptr);
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     /**

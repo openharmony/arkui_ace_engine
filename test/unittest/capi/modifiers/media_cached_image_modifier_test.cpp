@@ -35,7 +35,7 @@ namespace {
     const auto ATTRIBUTE_SRC_NAME("src");
     const auto ATTRIBUTE_SRC_DEFAULT_VALUE("");
 
-    using imageOptions = Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource;
+    using imageOptions = Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource;
 } // namespace
 
 class MediaCachedImageModifierTest : public ModifierTestBase<GENERATED_ArkUIMediaCachedImageModifier,
@@ -63,17 +63,17 @@ RefPtr<PixelMap> MediaCachedImageModifierTest::CreatePixelMap(std::string& src)
 }
 
 /*
- * @tc.name: setImageOptions0TestDefaultValues
+ * @tc.name: setMediaCachedImageOptionsTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) << "Default value for attribute 'src'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SRC_DEFAULT_VALUE)) << "Default value for attribute 'src'";
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_TRUE(frameNode);
@@ -85,7 +85,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestDefaultValu
 }
 
 /*
- * @tc.name: setMediaCachedImageOptionsTest
+ * @tc.name: setMediaCachedImageOptionsTestPixelMap
  * @tc.desc: Check functionality of MediaCachedImageInterface.setMediaCachedImageOptions
  * @tc.type: FUNC
  */
@@ -110,7 +110,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestPixelMap, T
 }
 
 /*
- * @tc.name: setMediaCachedImageOptionsTest
+ * @tc.name: setMediaCachedImageOptionsTestResource
  * @tc.desc: Check functionality of MediaCachedImageInterface.setMediaCachedImageOptions
  * @tc.type: FUNC
  */
@@ -129,7 +129,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestResource, T
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
         "Input value is: " << input << ", method: setMediaCachedImageOptions, attribute: src";
     };
 
@@ -147,17 +147,18 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestResource, T
 }
 
 /*
- * @tc.name: setMediaCachedImageOptionsTest
+ * @tc.name: setMediaCachedImageOptionsTestDrawableDescriptor
  * @tc.desc: Check functionality of MediaCachedImageInterface.setMediaCachedImageOptions
  * @tc.type: FUNC
  */
 HWTEST_F(MediaCachedImageModifierTest, DISABLED_setMediaCachedImageOptionsTestDrawableDescriptor, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setMediaCachedImageOptions, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /*
- * @tc.name: setMediaCachedImageOptionsTest
+ * @tc.name: setMediaCachedImageOptionsTestASTCResource
  * @tc.desc: Check functionality of MediaCachedImageInterface.setMediaCachedImageOptions
  * @tc.type: FUNC
  */
@@ -168,7 +169,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestASTCResourc
     ConvContext ctx;
     std::vector<std::string> vecSrc { "test" };
     Ark_ASTCResource resource {
-        .column = ArkValue<Ark_Number>(frameNode->GetId()),
+        .column = ArkValue<Ark_Int32>(frameNode->GetId()),
         .sources = ArkValue<Array_String>(vecSrc, &ctx)
     };
     auto arkValue =
@@ -176,10 +177,10 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestASTCResourc
     modifier_->setMediaCachedImageOptions(node_, &arkValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) << "Default value for attribute 'src'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SRC_DEFAULT_VALUE)) << "Default value for attribute 'src'";
 
     auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_TRUE(layoutProperty);
@@ -212,7 +213,7 @@ HWTEST_F(MediaCachedImageModifierTest, setMediaCachedImageOptionsTestSrcInvalidV
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_SRC_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMediaCachedImageOptions, attribute: src";
     };
 

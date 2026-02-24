@@ -100,8 +100,6 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModel001, TestSize.Level0)
     ASSERT_NE(paintProperty, nullptr);
     modelNg.SetColor(COLOR_DEFAULT);
     EXPECT_EQ(paintProperty->GetColorValue(), COLOR_DEFAULT);
-    modelNg.ResetColor();
-    EXPECT_EQ(paintProperty->HasColor(), false);
 }
 
 /**
@@ -390,8 +388,6 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest006, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
     modelNg.SetColor(COLOR_DEFAULT);
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
-    modelNg.ResetColor();
-    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
 }
 
 /**

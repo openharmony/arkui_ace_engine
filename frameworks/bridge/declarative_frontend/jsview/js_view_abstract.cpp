@@ -6813,6 +6813,31 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     return ok;
 }
 
+bool JSViewAbstract::ParseJsColorFromResourceForMaterial(
+    const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
+    int32_t type = UNKNOWN_RESOURCE_TYPE;
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
+
+    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj, resIdNum, type);
+    if (ok) {
+        JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
+        if (jsOpacityRatio->IsNumber()) {
+            double opacityRatio = jsOpacityRatio->ToNumber<double>();
+            result = result.BlendOpacity(opacityRatio);
+        }
+        if (type == static_cast<int32_t>(ResourceType::COLOR)) {
+            result.FillColorPlaceholderIfNeed(resIdNum);
+        }
+    }
+    return ok;
+}
+
 bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
     RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
 {
@@ -6995,6 +7020,34 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
     }
     state = ParseJsColorFromResource(jsValue, result, resObj);
     CompleteResourceObjectFromColor(resObj, result, state);
+    return state;
+}
+
+bool JSViewAbstract::ParseJsColorForMaterial(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
+{
+    bool state = false;
+    if (jsValue->IsNumber()) {
+        result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
+        CompleteResourceObjectFromColor(resObj, result, true);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        state = Color::ParseColorString(jsValue->ToString(), result);
+        CompleteResourceObjectFromColor(resObj, result, state);
+        return state;
+    }
+    if (!jsValue->IsObject()) {
+        return state;
+    }
+    if (jsValue->IsObject()) {
+        if (ParseColorMetricsToColor(jsValue, result, resObj)) {
+            CompleteResourceObjectFromColor(resObj, result, true);
+            return true;
+        }
+        state = ParseJsColorFromResourceForMaterial(jsValue, result, resObj);
+        CompleteResourceObjectFromColor(resObj, result, state);
+        return state;
+    }
     return state;
 }
 
@@ -9929,6 +9982,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("getPixelRoundMode", &JSViewAbstract::GetPixelRoundMode);
 
     JSClass<JSViewAbstract>::StaticMethod("allowForceDark", &JSViewAbstract::JSAllowForceDark);
+    JSClass<JSViewAbstract>::StaticMethod("onNeedSoftkeyboard", &JSViewAbstract::JSOnNeedSoftkeyboard);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -12323,7 +12377,7 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
 
         auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
         OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        napi_unwrap_s(env, jsCanvas, &ROSEN_JS_CANVAS_TYPE_TAG, reinterpret_cast<void**>(&unwrapCanvas));
         if (unwrapCanvas) {
             unwrapCanvas->SaveCanvas();
             unwrapCanvas->ClipCanvas(context.width, context.height);
@@ -12336,8 +12390,8 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
         JSValueWrapper valueWrapper = value;
         napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
-        napi_wrap(
-            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+        napi_wrap_s(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, &ROSEN_JS_CANVAS_TYPE_TAG, nullptr);
 
         JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
         if (unwrapCanvas) {
@@ -12378,7 +12432,7 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawOverlayC
 
         auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
         OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        napi_unwrap_s(env, jsCanvas, &ROSEN_JS_CANVAS_TYPE_TAG, reinterpret_cast<void**>(&unwrapCanvas));
         if (unwrapCanvas) {
             unwrapCanvas->SaveCanvas();
             unwrapCanvas->ClipCanvas(context.width, context.height);
@@ -12391,8 +12445,8 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawOverlayC
         JSValueWrapper valueWrapper = value;
         napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
-        napi_wrap(
-            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+        napi_wrap_s(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, &ROSEN_JS_CANVAS_TYPE_TAG, nullptr);
 
         JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
         if (unwrapCanvas) {
@@ -12648,6 +12702,30 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
     };
 
     ViewAbstractModel::GetInstance()->SetOnFocus(std::move(onFocus));
+}
+
+void JSViewAbstract::JSOnNeedSoftkeyboard(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> arg = args[0];
+    if (!arg->IsFunction()) {
+        ViewAbstractModel::GetInstance()->ResetOnNeedSoftkeyboard();
+        return;
+    }
+    auto jsOnNeedSoftkeyboard = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(arg));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onNeedSoftkeyboard = [execCtx = args.GetExecutionContext(),
+        func = std::move(jsOnNeedSoftkeyboard), node = frameNode]() -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        ACE_SCORING_EVENT("onNeedSoftkeyboard");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteJS();
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return false;
+    };
+
+    ViewAbstractModel::GetInstance()->SetOnNeedSoftkeyboard(std::move(onNeedSoftkeyboard));
 }
 
 void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)

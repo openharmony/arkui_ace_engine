@@ -52,7 +52,7 @@ class ACE_EXPORT MenuManager : public virtual AceType {
     DECLARE_ACE_TYPE(MenuManager, AceType);
 
 public:
-    explicit MenuManager(const RefPtr<FrameNode>& rootNode);
+    explicit MenuManager(const RefPtr<UINode>& rootNode);
     ~MenuManager() override;
 
     void HideAllMenusWithoutAnimation(const RefPtr<OverlayManager>& overlayManager, bool showInSubwindow = false);

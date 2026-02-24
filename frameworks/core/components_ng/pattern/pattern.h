@@ -123,7 +123,20 @@ public:
     // The pattern needs softkeyboard is like search, rich editor, text area, text field pattern.
     virtual bool NeedSoftKeyboard() const
     {
+        if (onNeedSoftkeyboardCallback_) {
+            return onNeedSoftkeyboardCallback_();
+        }
         return false;
+    }
+
+    virtual void SetOnNeedSoftKeyboard(std::function<bool()>&& onNeedSoftkeyboardCallback)
+    {
+        onNeedSoftkeyboardCallback_ = std::move(onNeedSoftkeyboardCallback);
+    }
+
+    virtual void ResetOnNeedSoftKeyboard()
+    {
+        onNeedSoftkeyboardCallback_ = nullptr;
     }
 
     virtual bool NeedToRequestKeyboardOnFocus() const
@@ -799,8 +812,14 @@ public:
 
     virtual void UnRegisterResource(const std::string& key);
 
+    /**
+     * @param adaptMaterial Indicates whether the new material is adapted to special resources for color inversion.
+     * Only the Color type has differences. If the value is true, the color resolved from special resources will carry
+     * a non-NONE placeholder.
+     */
     template<typename T>
-    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    void RegisterResource(
+        const std::string& key, const RefPtr<ResourceObject>& resObj, T value, bool adaptMaterial = false)
     {
         if (resourceMgr_ == nullptr) {
             resourceMgr_ = MakeRefPtr<PatternResourceManager>();
@@ -811,7 +830,7 @@ public:
             CHECK_NULL_VOID(pattern);
             pattern->UpdatePropertyImpl(key, valueBase);
         };
-        resourceMgr_->RegisterResource<T>(std::move(propUpdateFunc), key, resObj, value);
+        resourceMgr_->RegisterResource<T>(std::move(propUpdateFunc), key, resObj, value, adaptMaterial);
     }
 
     virtual void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> valueBase) {};
@@ -909,6 +928,7 @@ protected:
     WeakPtr<FrameNode> frameNode_;
     RefPtr<PatternResourceManager> resourceMgr_;
 
+    std::function<bool()> onNeedSoftkeyboardCallback_;
 private:
     bool onDetach_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);

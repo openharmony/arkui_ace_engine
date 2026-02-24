@@ -15,13 +15,14 @@
 
 import { int32 } from '@koalaui/common';
 import { ArkUIAniModule } from 'arkui.ani';
-import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
-import { Dependent, MutableState, GlobalStateManager } from '@koalaui/runtime';
+import { IMutableStateMeta, IMutableKeyedStateMeta, IObservedObject } from '../decorator';
+import { Dependent, MutableState, GlobalStateManager, IncrementalNode } from '@koalaui/runtime';
 import { ObserveSingleton } from './observeSingleton';
 import { RenderIdType } from '../decorator';
 import { StateUpdateLoop } from './stateUpdateLoop';
 import { StateTracker } from '../tests/lib/stateTracker';
-import { StateMgmtDFX } from '../tools/stateMgmtDFX';
+import { ObservedObjectRegistry, StateMgmtDFX } from '../tools/stateMgmtDFX';
+import { ElementInfo } from '../utils';
 
 class MutableStateMetaBase {
     public readonly info_: string;
@@ -42,6 +43,7 @@ export interface ITrackedDecoratorRef {
     weakThis: WeakRef<ITrackedDecoratorRef>;
     reverseBindings: Set<WeakRef<IBindingSource>>;
     clearReverseBindings(): void;
+    getDFXInfo(): ElementInfo;
 }
 
 // TrackedMutableStateMeta class used by unit test framework only
@@ -166,13 +168,42 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
         const dependency = this.__metaDependency as Object as Dependent;
         return dependency.hasDependencies();
     }
+    getDependentNodeInfo(): Set<IncrementalNode> | undefined {
+        return this.__metaDependency.getDependentInfo();
+    }
+    getMonitorAndComputedInfo(elementInfo: Array<ElementInfo>): Array<ElementInfo> {
+        if (this.bindingRefs_.size > 0) {
+            this.bindingRefs_.forEach((listener: WeakRef<ITrackedDecoratorRef>) => {
+                let trackedObject = listener.deref();
+                if (trackedObject) {
+                    elementInfo.push(trackedObject.getDFXInfo());
+                }
+            });
+        }
+        return elementInfo;
+    }
 }
 
 export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMutableKeyedStateMeta {
     protected readonly __metaDependencies = new Map<string, MutableStateMeta>();
-
+    private observed: IObservedObject | undefined = undefined;
     constructor(info: string = '') {
         super(info);
+    }
+    constructor(info: string, observed: IObservedObject) {
+        super(info);
+        this.observed = observed;
+        const observedObject = this.observed as IObservedObject;
+        const observedInfo = ObservedObjectRegistry.getOrRegister(observedObject!);
+        let resolvedKey: string = ''
+        if (info.startsWith('__metaBuiltInV1_')) {
+            resolvedKey = '__metaBuiltInV1Key_';
+        } else if (info.startsWith('__metaBuiltInV2_')) {
+            resolvedKey = '__metaBuiltInV2Key_';
+        } else if (info.startsWith('__metaBuiltInMakeObserved_')) {
+            resolvedKey = '__metaMakeObservedKey_';
+        }
+        observedInfo.setType(resolvedKey);
     }
 
     public addRef(key: string): void {
@@ -183,6 +214,11 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMuta
                 key,
                 GlobalStateManager.instance.mutableState<int32>(0, true)
             );
+            if (this.observed) {
+                const observedObject = this.observed as IObservedObject;
+                const info = ObservedObjectRegistry.getOrRegister(observedObject!); // type has been set in ctor
+                info.registerMutableStateMeta(metaDependency);
+            }
             this.__metaDependencies.set(key, metaDependency);
         }
         metaDependency.addRef();

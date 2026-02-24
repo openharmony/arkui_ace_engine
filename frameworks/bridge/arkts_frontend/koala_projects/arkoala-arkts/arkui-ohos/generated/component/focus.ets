@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,18 +16,19 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
-import { LengthMetrics_serializer, ColorMetrics_serializer } from "./../Graphics"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { memo, memo_stable } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { LengthMetrics as arkui_Graphics_LengthMetrics, ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { ColorMetricsExt, ColorMetricsExt_serializer } from './idlize'
+import { extractors } from '#handwritten'
+import { CallbackTransformer } from './../CallbackTransformer'
 export interface FocusBoxStyle {
-    margin?: LengthMetrics;
-    strokeColor?: ColorMetrics;
-    strokeWidth?: LengthMetrics;
+    margin?: arkui_Graphics_LengthMetrics;
+    strokeColor?: arkui_Graphics_ColorMetrics;
+    strokeWidth?: arkui_Graphics_LengthMetrics;
 }
 export enum FocusPriority {
     AUTO = 0,
@@ -40,53 +41,55 @@ export enum KeyProcessingMode {
 }
 export class FocusBoxStyle_serializer {
     public static write(buffer: SerializerBase, value: FocusBoxStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForMargin  = value.margin
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForMargin = value.margin
         if (valueHolderForMargin !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForMarginTmpValue  = valueHolderForMargin!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForMarginTmpValue)
+            const valueHolderForMarginTmpValue = valueHolderForMargin!
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForMarginTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForStrokeColor  = value.strokeColor
+        const valueHolderForStrokeColor = value.strokeColor
         if (valueHolderForStrokeColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForStrokeColorTmpValue  = valueHolderForStrokeColor!
-            ColorMetrics_serializer.write(valueSerializer, valueHolderForStrokeColorTmpValue)
+            const valueHolderForStrokeColorTmpValue = valueHolderForStrokeColor!
+            const valueHolderForStrokeColorTmpValueTransformed: ColorMetricsExt = extractors.transform_Ark_ColorMetrics_to_Ark_ColorMetricsExt(valueHolderForStrokeColorTmpValue)
+            ColorMetricsExt_serializer.write(valueSerializer, valueHolderForStrokeColorTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForStrokeWidth  = value.strokeWidth
+        const valueHolderForStrokeWidth = value.strokeWidth
         if (valueHolderForStrokeWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForStrokeWidthTmpValue  = valueHolderForStrokeWidth!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValue)
+            const valueHolderForStrokeWidthTmpValue = valueHolderForStrokeWidth!
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): FocusBoxStyle {
-        let valueDeserializer : DeserializerBase = buffer
-        const marginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let marginTmpBuf : LengthMetrics | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const marginTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let marginTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((marginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            marginTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+            marginTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
-        const marginTmpResult : LengthMetrics | undefined = marginTmpBuf
-        const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let strokeColorTmpBuf : ColorMetrics | undefined = undefined
+        const marginTmpResult: arkui_Graphics_LengthMetrics | undefined = marginTmpBuf
+        const strokeColorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let strokeColorTmpBuf: arkui_Graphics_ColorMetrics | undefined = undefined
         if ((strokeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeColorTmpBuf = ColorMetrics_serializer.read(valueDeserializer)
+            const strokeColorTmpBufOptDeserialized: ColorMetricsExt = ColorMetricsExt_serializer.read(valueDeserializer)
+            strokeColorTmpBuf = extractors.transform_Ark_ColorMetricsExt_to_Ark_ColorMetrics(strokeColorTmpBufOptDeserialized)
         }
-        const strokeColorTmpResult : ColorMetrics | undefined = strokeColorTmpBuf
-        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let strokeWidthTmpBuf : LengthMetrics | undefined = undefined
+        const strokeColorTmpResult: arkui_Graphics_ColorMetrics | undefined = strokeColorTmpBuf
+        const strokeWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let strokeWidthTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeWidthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+            strokeWidthTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
-        const strokeWidthTmpResult : LengthMetrics | undefined = strokeWidthTmpBuf
-        let value : FocusBoxStyle = ({margin: marginTmpResult, strokeColor: strokeColorTmpResult, strokeWidth: strokeWidthTmpResult} as FocusBoxStyle)
+        const strokeWidthTmpResult: arkui_Graphics_LengthMetrics | undefined = strokeWidthTmpBuf
+        let value: FocusBoxStyle = ({margin: marginTmpResult, strokeColor: strokeColorTmpResult, strokeWidth: strokeWidthTmpResult} as FocusBoxStyle)
         return value
     }
 }

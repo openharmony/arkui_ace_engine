@@ -461,10 +461,8 @@ void ImagePattern::OnImageLoadSuccess()
     image_->SetImageDfxConfig(imageDfxConfig_);
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, srcInfo, frameCount);
-    bool isStaticImage = image_->IsStatic();
     if (srcInfo.IsSvg()) {
         UpdateSvgSmoothEdgeValue();
-        isStaticImage = true;
     }
     PrepareAnimation(image_);
     if (enableDrag_) {
@@ -501,11 +499,6 @@ void ImagePattern::OnImageLoadSuccess()
     if (eventHub) {
         eventHub->FireCompleteEvent(event);
     }
-    /*
-     * Only mark dirty for static images.
-     * Animated images maintain their own dirty marking logic, so no need to trigger here.
-     */
-    CHECK_NULL_VOID(isStaticImage);
     isRecycledImage_ = false;
     host->MarkNeedRenderOnly();
 }
@@ -597,6 +590,10 @@ void ImagePattern::OnImageDataReady()
     // update rotate orientation before decoding
     UpdateOrientation();
     PreprocessYUVDecodeFormat(host);
+
+    if (!host->IsActive()) {
+        ReportCompleteLoadEvent(host);
+    }
 
     if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -971,7 +968,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
     } else {
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
-        if (pipeline && host->GetId() != INVALID_ID) {
+        if (pipeline && host->GetId() != INVALID_ID && src.IsValid()) {
             pipeline->GetLoadCompleteManager()->AddLoadComponent(host->GetId());
         }
     }
@@ -2700,7 +2697,7 @@ void ImagePattern::UpdateImageSourceinfo(const ImageSourceInfo& sourceInfo)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
@@ -2713,7 +2710,7 @@ void ImagePattern::UpdateImageFill(const Color& color)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         auto renderProperty = GetPaintProperty<ImageRenderProperty>();
         CHECK_NULL_VOID(renderProperty);
         renderProperty->UpdateSvgFillColor(color);
@@ -2730,7 +2727,7 @@ void ImagePattern::UpdateImageAlt(const ImageSourceInfo& sourceInfo)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateAlt(sourceInfo);

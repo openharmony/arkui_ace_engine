@@ -21,8 +21,7 @@ import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType
     toPeerPtr, wrapCallback, NativeBuffer, pointer } from '@koalaui/interop';
 import { ComponentBase } from './../ComponentBase';
 import { PeerNode } from './../PeerNode';
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle,
-    TouchEvent } from './common';
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent,TouchEvent } from './common';
 import { NodeAttach, remember } from '@koalaui/runtime';
 import { NodeController } from '../NodeController';
 import { UIContext } from '@ohos/arkui/UIContext';
@@ -81,11 +80,6 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
 export type NodeContainerInterface = (controller: NodeController) => NodeContainerAttribute;
 export interface NodeContainerAttribute extends CommonMethod {
     setNodeContainerOptions(controller: NodeController): this {
-        return this
-    }
-}
-export class ArkNodeContainerStyle extends ArkCommonMethodStyle implements NodeContainerAttribute {
-    public setNodeContainerOptions(controller: NodeController): this {
         return this
     }
 }

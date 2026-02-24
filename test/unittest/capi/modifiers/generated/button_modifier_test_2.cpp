@@ -53,10 +53,10 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleFontSizeValidVa
         WriteTo(WriteTo(inputValueLabelStyle).font).size = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
+        auto resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.size";
     };
 
@@ -107,10 +107,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontSizeInvalidValues, T
         WriteTo(WriteTo(inputValueLabelStyle).font).size = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
+        auto resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LABEL_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.size";
     };
 
@@ -165,10 +165,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontWeightValidValues, T
         WriteTo(WriteTo(inputValueLabelStyle).font).weight = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
+        auto resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.weight";
     };
 
@@ -220,10 +220,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontWeightInvalidValues,
         WriteTo(WriteTo(inputValueLabelStyle).font).weight = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
+        auto resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LABEL_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.weight";
     };
 
@@ -278,10 +278,10 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestLabelStyleFontFamilyValid
         WriteTo(WriteTo(inputValueLabelStyle).font).family = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
+        auto resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.family";
     };
 
@@ -329,10 +329,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontFamilyInvalidValues,
         WriteTo(WriteTo(inputValueLabelStyle).font).family = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
+        auto resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LABEL_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.family";
     };
 
@@ -384,10 +384,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontStyleValidValues, Te
         WriteTo(WriteTo(inputValueLabelStyle).font).style = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
+        auto resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.style";
     };
 
@@ -432,10 +432,10 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontStyleInvalidValues, 
         WriteTo(WriteTo(inputValueLabelStyle).font).style = value;
         modifier_->setLabelStyle(node_, &inputValueLabelStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
+        auto resultLabelStyle = GetAttrObject(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LABEL_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setLabelStyle, attribute: labelStyle.font.style";
     };
 
@@ -452,10 +452,11 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontStyleInvalidValues, 
 HWTEST_F(ButtonModifierTest, DISABLED_setMinFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'minFontScale'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'minFontScale'";
 }
 
 /*
@@ -479,7 +480,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setMinFontScaleTestMinFontScaleValidValues
         modifier_->setMinFontScale(node_, &inputValueMinFontScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
 
@@ -510,7 +511,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setMinFontScaleTestMinFontScaleInvalidValu
         modifier_->setMinFontScale(node_, &inputValueMinFontScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
 
@@ -529,10 +530,11 @@ HWTEST_F(ButtonModifierTest, DISABLED_setMinFontScaleTestMinFontScaleInvalidValu
 HWTEST_F(ButtonModifierTest, DISABLED_setMaxFontScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'maxFontScale'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'maxFontScale'";
 }
 
 /*
@@ -556,7 +558,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleValidValues
         modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
 
@@ -587,7 +589,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleInvalidValu
         modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
 

@@ -85,7 +85,7 @@ void SetTimestampImpl(Ark_BaseEvent peer, Ark_Int64 timestamp)
 }
 Ark_SourceType GetSourceImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), static_cast<Ark_SourceType>(-1));
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN);
     auto value = peer->GetBaseInfo()->GetSourceDevice();
     return Converter::ArkValue<Ark_SourceType>(value);
 }
@@ -202,22 +202,6 @@ void SetSourceToolImpl(Ark_BaseEvent peer,
         peer->GetBaseInfo()->SetSourceTool(*value);
     }
 }
-Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_BaseEvent peer)
-{
-    const auto invalid = Converter::ArkValue<Opt_ModifierKeyStateGetter>(Ark_Empty());
-    CHECK_NULL_RETURN(peer, invalid);
-    auto info = peer->GetBaseInfo();
-    CHECK_NULL_RETURN(info, invalid);
-    auto getter = CallbackKeeper::ReturnReverseCallback<ModifierKeyStateGetter,
-            std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
-            (const Array_String keys, const Callback_Boolean_Void continuation) {
-        auto eventKeys = info->GetPressedKeyCodes();
-        auto keysStr = Converter::Convert<std::vector<std::string>>(keys);
-        Ark_Boolean arkResult = Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
-        CallbackHelper(continuation).InvokeSync(arkResult);
-    });
-    return Converter::ArkValue<Opt_ModifierKeyStateGetter, ModifierKeyStateGetter>(getter);
-}
 void SetGetModifierKeyStateImpl(Ark_BaseEvent peer,
                                 const Opt_ModifierKeyStateGetter* getModifierKeyState)
 {
@@ -256,6 +240,14 @@ void SetTargetDisplayIdImpl(Ark_BaseEvent peer,
         peer->GetBaseInfo()->SetTargetDisplayId(id.value());
     }
 }
+Opt_Float64 GetAxisPinchImpl(Ark_BaseEvent peer)
+{
+    return {};
+}
+void SetAxisPinchImpl(Ark_BaseEvent peer,
+                      const Opt_Float64* axisPinch)
+{
+}
 } // BaseEventAccessor
 
 const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
@@ -284,12 +276,13 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::SetRollAngleImpl,
         BaseEventAccessor::GetSourceToolImpl,
         BaseEventAccessor::SetSourceToolImpl,
-        BaseEventAccessor::GetGetModifierKeyStateImpl,
         BaseEventAccessor::SetGetModifierKeyStateImpl,
         BaseEventAccessor::GetDeviceIdImpl,
         BaseEventAccessor::SetDeviceIdImpl,
         BaseEventAccessor::GetTargetDisplayIdImpl,
         BaseEventAccessor::SetTargetDisplayIdImpl,
+        BaseEventAccessor::GetAxisPinchImpl,
+        BaseEventAccessor::SetAxisPinchImpl,
     };
     return &BaseEventAccessorImpl;
 }

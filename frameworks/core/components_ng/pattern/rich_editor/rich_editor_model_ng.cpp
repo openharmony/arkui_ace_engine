@@ -1209,6 +1209,14 @@ void RichEditorModelNG::DeleteBackward(FrameNode* frameNode)
     pattern->DeleteBackwardFunction();
 }
 
+void RichEditorModelNG::CloseSelectionMenu(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->CloseSelectionMenu();
+}
+
 PreviewTextInfo RichEditorModelNG::GetPreviewTextInfo(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, {});

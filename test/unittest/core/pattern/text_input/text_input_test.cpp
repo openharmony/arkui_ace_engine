@@ -824,6 +824,21 @@ HWTEST_F(TextFieldUXTest, NeedSoftKeyboard001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetCaretTest001
+ * @tc.desc: test textInput SetCaretPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetCaretTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     * @tc.expected:
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->ProcessPendingCaretEvent();
+}
+
+/**
  * @tc.name: MaxLength001
  * @tc.desc: test textInput maxLength
  * @tc.type: FUNC
@@ -1685,6 +1700,69 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo006, TestSize.Lev
     SelectMenuInfo menuInfo;
     textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
     ASSERT_EQ(menuInfo.showAIWrite, true);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnUpdateMenuInfo007
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+    });
+    frameNode_->MarkModifyDone();
+    GetFocus();
+    auto textFieldTheme = pattern_->GetTheme();
+    ASSERT_NE(textFieldTheme, nullptr);
+    pattern_->textSelector_.Update(0, 0);
+    textFieldTheme->aiWriteBundleName_ = "BundleName";
+    textFieldTheme->aiWriteAbilityName_ = "AbilityName";
+    textFieldTheme->aiWriteIsSupport_ = "true";
+    auto textSelectOverlay = pattern_->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+    /**
+     * @tc.steps: step2. Do OnUpdateMenuInfo
+     */
+    SelectMenuInfo menuInfo;
+    textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showAIWrite, false);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnUpdateMenuInfo008
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+*/
+HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::NUMBER);
+    });
+    frameNode_->MarkModifyDone();
+    GetFocus();
+    auto textFieldTheme = pattern_->GetTheme();
+    ASSERT_NE(textFieldTheme, nullptr);
+    pattern_->textSelector_.Update(0, 0);
+    textFieldTheme->aiWriteBundleName_ = "BundleName";
+    textFieldTheme->aiWriteAbilityName_ = "AbilityName";
+    textFieldTheme->aiWriteIsSupport_ = "true";
+    auto textSelectOverlay = pattern_->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+    /**
+     * @tc.steps: step2. Do OnUpdateMenuInfo
+     */
+    SelectMenuInfo menuInfo;
+    textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showAIWrite, false);
 }
 
 /**

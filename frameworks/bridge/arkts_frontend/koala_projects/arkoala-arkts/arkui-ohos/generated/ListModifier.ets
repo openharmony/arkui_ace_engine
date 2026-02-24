@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,23 +16,29 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethod, NestedScrollOptions, OnWillStopDraggingCallback, OnDidStopDraggingCallback, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, ChildrenMainSize, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback } from "./component/common"
-import { BarState, Color, CrownSensitivity, EdgeEffect, Axis, FocusWrapMode, ScrollSource } from "./component/enums"
-import { Resource } from "global.resource"
-import { extractors, AttributeModifier } from "#handwritten"
-import { RectShape } from "@ohos.arkui.shape"
-import { ScrollableCommonMethodModifier } from "./ScrollableCommonMethodModifier"
-import { CommonMethodModifier } from "./CommonMethodModifier"
+import { CommonMethod, NestedScrollOptions, OnWillStopDraggingCallback, OnDidStopDraggingCallback, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback } from './component/common'
+import { BarState, Color as arkui_component_enums_Color, CrownSensitivity, EdgeEffect, Axis, FocusWrapMode, ScrollSource } from './component/enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { ScrollBarMargin, VoidCallback, Resource as arkui_component_units_Resource, LengthConstrain, ItemFillPolicy, Dimension, CacheCountInfo } from './component/units'
+import { extractors, AttributeModifier, ChildrenMainSize, hookListChildrenMainSizeImpl } from '#handwritten'
+import { RectShape } from '@ohos.arkui.shape'
+import { ScrollableCommonMethodModifier } from './ScrollableCommonMethodModifier'
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkListPeer, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, ScrollSnapAnimationSpeed, OnScrollVisibleContentChangeCallback, VisibleListContentInfo, ScrollState, ListAttribute } from './component/list'
+import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkListPeer, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, ScrollSnapAnimationSpeed, OnScrollVisibleContentChangeCallback, VisibleListContentInfo, ScrollState, ListAttribute } from "./component/list"
-import { int32 } from "@koalaui/common"
-import { OnScrollFrameBeginCallback } from "./component/scroll"
-import { VoidCallback, LengthConstrain, Dimension, ItemFillPolicy, CacheCountInfo, ScrollBarMargin } from "./component/units"
+import { OnScrollFrameBeginCallback } from './component/scroll'
 export class ListModifier extends CommonMethodModifier implements ListAttribute,AttributeModifier<ListAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    private _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -42,1091 +48,992 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     applyFocusedAttribute(instance: ListAttribute): void { }
     applyDisabledAttribute(instance: ListAttribute): void { }
     applySelectedAttribute(instance: ListAttribute): void { }
-    _alignListItem_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alignListItem_0_0value?: ListItemAlign | undefined
-    _listDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _listDirection_0_0value?: Axis | undefined
-    _contentStartOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contentStartOffset_0_0value?: double | Resource | undefined
-    _contentEndOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contentEndOffset_0_0value?: double | Resource | undefined
-    _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _divider_0_0value?: ListDividerOptions | null | undefined
-    _multiSelectable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _multiSelectable_0_0value?: boolean | undefined
-    _cachedCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedCount_0_0value?: int32 | undefined
-    _chainAnimation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _chainAnimation_0_0value?: boolean | undefined
-    _chainAnimationOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _chainAnimationOptions_0_0value?: ChainAnimationOptions | undefined
-    _sticky_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _sticky_0_0value?: StickyStyle | undefined
-    _scrollSnapAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollSnapAlign_0_0value?: ScrollSnapAlign | undefined
-    _childrenMainSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _childrenMainSize_0_0value?: ChildrenMainSize | undefined
-    _maintainVisibleContentPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _maintainVisibleContentPosition_0_0value?: boolean | undefined
-    _supportEmptyBranchInLazyLoading_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _supportEmptyBranchInLazyLoading_0_0value?: boolean | undefined
-    _stackFromEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _stackFromEnd_0_0value?: boolean | undefined
-    _focusWrapMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _focusWrapMode_0_0value?: FocusWrapMode | undefined
-    _syncLoad_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _syncLoad_0_0value?: boolean | undefined
-    _scrollSnapAnimationSpeed_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollSnapAnimationSpeed_0_0value?: ScrollSnapAnimationSpeed | undefined
-    _editModeOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _editModeOptions_0_0value?: EditModeOptions | undefined
-    _onScrollIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScrollIndex_0_0value?: ((start: int32,end: int32,center: int32) => void) | undefined
-    _onScrollVisibleContentChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScrollVisibleContentChange_0_0value?: OnScrollVisibleContentChangeCallback | undefined
-    _onItemMove_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemMove_0_0value?: ((from: int32,to: int32) => boolean) | undefined
-    _onItemDragStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemDragStart_0_0value?: OnItemDragStartCallback | undefined
-    _onItemDragEnter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemDragEnter_0_0value?: ((event: ItemDragInfo) => void) | undefined
-    _onItemDragMove_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemDragMove_0_0value?: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined
-    _onItemDragLeave_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemDragLeave_0_0value?: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined
-    _onItemDrop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onItemDrop_0_0value?: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined
-    _onScrollFrameBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScrollFrameBegin_0_0value?: OnScrollFrameBeginCallback | undefined
-    _onWillScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWillScroll_0_0value?: OnWillScrollCallback | undefined
-    _onDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDidScroll_0_0value?: OnScrollCallback | undefined
-    _lanes_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lanes_0_0value?: int32 | LengthConstrain | ItemFillPolicy | undefined
-    _lanes_0_1value?: Dimension | undefined
-    _cachedCount_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedCount_1_0value?: int32 | CacheCountInfo | undefined
-    _cachedCount_1_1value?: boolean | undefined
-    _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBar_0_0value?: BarState | undefined
-    _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarColor_0_0value?: Color | int32 | string | Resource | undefined
-    _scrollBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarWidth_0_0value?: double | string | undefined
-    _scrollBarMargin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarMargin_0_0value?: ScrollBarMargin | undefined
-    _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _nestedScroll_0_0value?: NestedScrollOptions | undefined
-    _enableScrollInteraction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableScrollInteraction_0_0value?: boolean | undefined
-    _friction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _friction_0_0value?: double | Resource | undefined
-    _onWillStartDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWillStartDragging_0_0value?: VoidCallback | undefined
-    _onWillStopDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWillStopDragging_0_0value?: OnWillStopDraggingCallback | undefined
-    _onDidStopDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDidStopDragging_0_0value?: OnDidStopDraggingCallback | undefined
-    _onWillStartFling_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWillStartFling_0_0value?: VoidCallback | undefined
-    _onDidStopFling_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDidStopFling_0_0value?: VoidCallback | undefined
-    _onReachStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onReachStart_0_0value?: (() => void) | undefined
-    _onReachEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onReachEnd_0_0value?: (() => void) | undefined
-    _onScrollStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScrollStart_0_0value?: (() => void) | undefined
-    _onScrollStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScrollStop_0_0value?: (() => void) | undefined
-    _flingSpeedLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _flingSpeedLimit_0_0value?: double | undefined
-    _clipContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _clipContent_0_0value?: ContentClipMode | RectShape | undefined
-    _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
-    _backToTop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _backToTop_0_0value?: boolean | undefined
-    _edgeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _edgeEffect_0_0value?: EdgeEffect | undefined
-    _edgeEffect_0_1value?: EdgeEffectOptions | undefined
-    _fadingEdge_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fadingEdge_0_0value?: boolean | undefined
-    _fadingEdge_0_1value?: FadingEdgeOptions | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _alignListItem_0_0value?: ListItemAlign | undefined
+    public _listDirection_0_0value?: Axis | undefined
+    public _contentStartOffset_0_0value?: double | arkui_component_units_Resource | undefined
+    public _contentEndOffset_0_0value?: double | arkui_component_units_Resource | undefined
+    public _divider_0_0value?: ListDividerOptions | null | undefined
+    public _multiSelectable_0_0value?: boolean | undefined
+    public _cachedCount_0_0value?: int32 | undefined
+    public _chainAnimation_0_0value?: boolean | undefined
+    public _chainAnimationOptions_0_0value?: ChainAnimationOptions | undefined
+    public _sticky_0_0value?: StickyStyle | undefined
+    public _scrollSnapAlign_0_0value?: ScrollSnapAlign | undefined
+    public _childrenMainSize_0_0value?: ChildrenMainSize | undefined
+    public _maintainVisibleContentPosition_0_0value?: boolean | undefined
+    public _supportEmptyBranchInLazyLoading_0_0value?: boolean | undefined
+    public _stackFromEnd_0_0value?: boolean | undefined
+    public _editModeOptions_0_0value?: EditModeOptions
+    public _focusWrapMode_0_0value?: FocusWrapMode | undefined
+    public _syncLoad_0_0value?: boolean | undefined
+    public _scrollSnapAnimationSpeed_0_0value?: ScrollSnapAnimationSpeed | undefined
+    public _onScrollIndex_0_0value?: ((start: int32,end: int32,center: int32) => void) | undefined
+    public _onScrollVisibleContentChange_0_0value?: OnScrollVisibleContentChangeCallback | undefined
+    public _onItemMove_0_0value?: ((from: int32,to: int32) => boolean) | undefined
+    public _onItemDragStart_0_0value?: OnItemDragStartCallback | undefined
+    public _onItemDragEnter_0_0value?: ((event: ItemDragInfo) => void) | undefined
+    public _onItemDragMove_0_0value?: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined
+    public _onItemDragLeave_0_0value?: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined
+    public _onItemDrop_0_0value?: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined
+    public _onScrollFrameBegin_0_0value?: OnScrollFrameBeginCallback | undefined
+    public _onWillScroll_0_0value?: OnWillScrollCallback | undefined
+    public _onDidScroll_0_0value?: OnScrollCallback | undefined
+    public _lanes_0_0value?: int32 | LengthConstrain | ItemFillPolicy | undefined
+    public _lanes_0_1value?: Dimension | undefined
+    public _cachedCount_1_0value?: int32 | CacheCountInfo | undefined
+    public _cachedCount_1_1value?: boolean | undefined
+    public _scrollBar_0_0value?: BarState | undefined
+    public _scrollBarColor_0_0value?: arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined
+    public _scrollBarWidth_0_0value?: double | string | undefined
+    public _scrollBarMargin_0_0value?: ScrollBarMargin | undefined
+    public _nestedScroll_0_0value?: NestedScrollOptions | undefined
+    public _enableScrollInteraction_0_0value?: boolean | undefined
+    public _friction_0_0value?: double | global_resource_Resource | undefined
+    public _onWillStartDragging_0_0value?: VoidCallback | undefined
+    public _onWillStopDragging_0_0value?: OnWillStopDraggingCallback | undefined
+    public _onDidStopDragging_0_0value?: OnDidStopDraggingCallback | undefined
+    public _onWillStartFling_0_0value?: VoidCallback | undefined
+    public _onDidStopFling_0_0value?: VoidCallback | undefined
+    public _onReachStart_0_0value?: (() => void) | undefined
+    public _onReachEnd_0_0value?: (() => void) | undefined
+    public _onScrollStart_0_0value?: (() => void) | undefined
+    public _onScrollStop_0_0value?: (() => void) | undefined
+    public _flingSpeedLimit_0_0value?: double | undefined
+    public _clipContent_0_0value?: ContentClipMode | RectShape | undefined
+    public _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
+    public _backToTop_0_0value?: boolean | undefined
+    public _edgeEffect_0_0value?: EdgeEffect | undefined
+    public _edgeEffect_0_1value?: EdgeEffectOptions | undefined
+    public _fadingEdge_0_0value?: boolean | undefined
+    public _fadingEdge_0_1value?: FadingEdgeOptions | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkListPeer;
-        if (this._alignListItem_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._alignListItem_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+        this.applyModifierPatch1(peer, flagArray);
+        this.applyModifierPatch2(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkListPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setAlignListItemAttribute((this._alignListItem_0_0value as ListItemAlign | undefined));
-                    this._alignListItem_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._alignListItem_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._alignListItem_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setAlignListItemAttribute((undefined as ListItemAlign | undefined));
                 }
             }
         }
-        if (this._listDirection_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._listDirection_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setListDirectionAttribute((this._listDirection_0_0value as Axis | undefined));
-                    this._listDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._listDirection_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._listDirection_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setListDirectionAttribute((undefined as Axis | undefined));
                 }
             }
         }
-        if (this._contentStartOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._contentStartOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | Resource | undefined));
-                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
+                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | arkui_component_units_Resource | undefined));
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setContentStartOffsetAttribute((undefined as double | Resource | undefined));
-                }
-            }
-        }
-        if (this._contentEndOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._contentEndOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | Resource | undefined));
-                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setContentEndOffsetAttribute((undefined as double | Resource | undefined));
+                    flagArray[2] = 0;
+                    peer.setContentStartOffsetAttribute((undefined as double | arkui_component_units_Resource | undefined));
                 }
             }
         }
-        if (this._divider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._divider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
+                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | arkui_component_units_Resource | undefined));
+                    flagArray[3] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[3] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[3] = 0;
+                    peer.setContentEndOffsetAttribute((undefined as double | arkui_component_units_Resource | undefined));
+                }
+            }
+        }
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setDividerAttribute((this._divider_0_0value as ListDividerOptions | null | undefined));
-                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._divider_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setDividerAttribute((undefined as ListDividerOptions | null | undefined));
                 }
             }
         }
-        if (this._multiSelectable_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._multiSelectable_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
                     peer.setMultiSelectableAttribute((this._multiSelectable_0_0value as boolean | undefined));
-                    this._multiSelectable_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._multiSelectable_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._multiSelectable_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[5] = 0;
                     peer.setMultiSelectableAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._cachedCount_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._cachedCount_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
                     peer.setCachedCount0Attribute((this._cachedCount_0_0value as int32 | undefined));
-                    this._cachedCount_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[6] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._cachedCount_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[6] = 2;
                     break;
                 }
                 default: {
-                    this._cachedCount_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[6] = 0;
                     peer.setCachedCount0Attribute((undefined as int32 | undefined));
                 }
             }
         }
-        if (this._chainAnimation_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._chainAnimation_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
                     peer.setChainAnimationAttribute((this._chainAnimation_0_0value as boolean | undefined));
-                    this._chainAnimation_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[7] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._chainAnimation_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[7] = 2;
                     break;
                 }
                 default: {
-                    this._chainAnimation_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[7] = 0;
                     peer.setChainAnimationAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._chainAnimationOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._chainAnimationOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1: {
                     peer.setChainAnimationOptionsAttribute((this._chainAnimationOptions_0_0value as ChainAnimationOptions | undefined));
-                    this._chainAnimationOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[8] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._chainAnimationOptions_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[8] = 2;
                     break;
                 }
                 default: {
-                    this._chainAnimationOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[8] = 0;
                     peer.setChainAnimationOptionsAttribute((undefined as ChainAnimationOptions | undefined));
                 }
             }
         }
-        if (this._sticky_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._sticky_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1: {
                     peer.setStickyAttribute((this._sticky_0_0value as StickyStyle | undefined));
-                    this._sticky_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[9] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._sticky_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[9] = 2;
                     break;
                 }
                 default: {
-                    this._sticky_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[9] = 0;
                     peer.setStickyAttribute((undefined as StickyStyle | undefined));
                 }
             }
         }
-        if (this._scrollSnapAlign_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._scrollSnapAlign_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1: {
                     peer.setScrollSnapAlignAttribute((this._scrollSnapAlign_0_0value as ScrollSnapAlign | undefined));
-                    this._scrollSnapAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[10] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._scrollSnapAlign_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[10] = 2;
                     break;
                 }
                 default: {
-                    this._scrollSnapAlign_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[10] = 0;
                     peer.setScrollSnapAlignAttribute((undefined as ScrollSnapAlign | undefined));
                 }
             }
         }
-        if (this._childrenMainSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._childrenMainSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setChildrenMainSizeAttribute((this._childrenMainSize_0_0value as ChildrenMainSize | undefined));
-                    this._childrenMainSize_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1: {
+                    hookListChildrenMainSizeImpl(peer, (this._childrenMainSize_0_0value as ChildrenMainSize | undefined));
+                    flagArray[11] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._childrenMainSize_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[11] = 2;
                     break;
                 }
                 default: {
-                    this._childrenMainSize_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setChildrenMainSizeAttribute((undefined as ChildrenMainSize | undefined));
+                    flagArray[11] = 0;
+                    hookListChildrenMainSizeImpl(peer, (undefined as ChildrenMainSize | undefined));
                 }
             }
         }
-        if (this._maintainVisibleContentPosition_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._maintainVisibleContentPosition_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1: {
                     peer.setMaintainVisibleContentPositionAttribute((this._maintainVisibleContentPosition_0_0value as boolean | undefined));
-                    this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[12] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[12] = 2;
                     break;
                 }
                 default: {
-                    this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[12] = 0;
                     peer.setMaintainVisibleContentPositionAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._supportEmptyBranchInLazyLoading_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._supportEmptyBranchInLazyLoading_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1: {
                     peer.setSupportEmptyBranchInLazyLoadingAttribute((this._supportEmptyBranchInLazyLoading_0_0value as boolean | undefined));
-                    this._supportEmptyBranchInLazyLoading_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[13] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._supportEmptyBranchInLazyLoading_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[13] = 2;
                     break;
                 }
                 default: {
-                    this._supportEmptyBranchInLazyLoading_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[13] = 0;
                     peer.setSupportEmptyBranchInLazyLoadingAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._stackFromEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._stackFromEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1: {
                     peer.setStackFromEndAttribute((this._stackFromEnd_0_0value as boolean | undefined));
-                    this._stackFromEnd_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[14] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._stackFromEnd_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[14] = 2;
                     break;
                 }
                 default: {
-                    this._stackFromEnd_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[14] = 0;
                     peer.setStackFromEndAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._editModeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._editModeOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEditModeOptionsAttribute((this._editModeOptions_0_0value as EditModeOptions | undefined));
-                    this._editModeOptions_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1: {
+                    peer.setEditModeOptionsAttribute((this._editModeOptions_0_0value as EditModeOptions));
+                    flagArray[15] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._editModeOptions_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[15] = 2;
                     break;
                 }
                 default: {
-                    this._editModeOptions_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEditModeOptionsAttribute((undefined as EditModeOptions | undefined));
+                    flagArray[15] = 0;
                 }
             }
         }
-        if (this._focusWrapMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._focusWrapMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1: {
                     peer.setFocusWrapModeAttribute((this._focusWrapMode_0_0value as FocusWrapMode | undefined));
-                    this._focusWrapMode_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[16] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._focusWrapMode_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[16] = 2;
                     break;
                 }
                 default: {
-                    this._focusWrapMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[16] = 0;
                     peer.setFocusWrapModeAttribute((undefined as FocusWrapMode | undefined));
                 }
             }
         }
-        if (this._syncLoad_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._syncLoad_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1: {
                     peer.setSyncLoadAttribute((this._syncLoad_0_0value as boolean | undefined));
-                    this._syncLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[17] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._syncLoad_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[17] = 2;
                     break;
                 }
                 default: {
-                    this._syncLoad_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[17] = 0;
                     peer.setSyncLoadAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._scrollSnapAnimationSpeed_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._scrollSnapAnimationSpeed_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1: {
                     peer.setScrollSnapAnimationSpeedAttribute((this._scrollSnapAnimationSpeed_0_0value as ScrollSnapAnimationSpeed | undefined));
-                    this._scrollSnapAnimationSpeed_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[18] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._scrollSnapAnimationSpeed_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[18] = 2;
                     break;
                 }
                 default: {
-                    this._scrollSnapAnimationSpeed_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[18] = 0;
                     peer.setScrollSnapAnimationSpeedAttribute((undefined as ScrollSnapAnimationSpeed | undefined));
                 }
             }
         }
-        if (this._onScrollIndex_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onScrollIndex_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1: {
                     peer.setOnScrollIndexAttribute((this._onScrollIndex_0_0value as ((start: int32,end: int32,center: int32) => void) | undefined));
-                    this._onScrollIndex_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[19] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onScrollIndex_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[19] = 2;
                     break;
                 }
                 default: {
-                    this._onScrollIndex_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[19] = 0;
                     peer.setOnScrollIndexAttribute((undefined as ((start: int32,end: int32,center: int32) => void) | undefined));
                 }
             }
         }
-        if (this._onScrollVisibleContentChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onScrollVisibleContentChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+    }
+    applyModifierPatch1(peer: ArkListPeer, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
+                case 1: {
                     peer.setOnScrollVisibleContentChangeAttribute((this._onScrollVisibleContentChange_0_0value as OnScrollVisibleContentChangeCallback | undefined));
-                    this._onScrollVisibleContentChange_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[20] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onScrollVisibleContentChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[20] = 2;
                     break;
                 }
                 default: {
-                    this._onScrollVisibleContentChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[20] = 0;
                     peer.setOnScrollVisibleContentChangeAttribute((undefined as OnScrollVisibleContentChangeCallback | undefined));
                 }
             }
         }
-        if (this._onItemMove_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onItemMove_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
+                case 1: {
                     peer.setOnItemMoveAttribute((this._onItemMove_0_0value as ((from: int32,to: int32) => boolean) | undefined));
-                    this._onItemMove_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[21] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onItemMove_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[21] = 2;
                     break;
                 }
                 default: {
-                    this._onItemMove_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[21] = 0;
                     peer.setOnItemMoveAttribute((undefined as ((from: int32,to: int32) => boolean) | undefined));
                 }
             }
         }
-        if (this._onItemDragStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onItemDragStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
+                case 1: {
                     peer.setOnItemDragStartAttribute((this._onItemDragStart_0_0value as OnItemDragStartCallback | undefined));
-                    this._onItemDragStart_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[22] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onItemDragStart_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[22] = 2;
                     break;
                 }
                 default: {
-                    this._onItemDragStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[22] = 0;
                     peer.setOnItemDragStartAttribute((undefined as OnItemDragStartCallback | undefined));
                 }
             }
         }
-        if (this._onItemDragEnter_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onItemDragEnter_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
+                case 1: {
                     peer.setOnItemDragEnterAttribute((this._onItemDragEnter_0_0value as ((event: ItemDragInfo) => void) | undefined));
-                    this._onItemDragEnter_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[23] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onItemDragEnter_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[23] = 2;
                     break;
                 }
                 default: {
-                    this._onItemDragEnter_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[23] = 0;
                     peer.setOnItemDragEnterAttribute((undefined as ((event: ItemDragInfo) => void) | undefined));
                 }
             }
         }
-        if (this._onItemDragMove_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onItemDragMove_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
+                case 1: {
                     peer.setOnItemDragMoveAttribute((this._onItemDragMove_0_0value as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined));
-                    this._onItemDragMove_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[24] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onItemDragMove_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[24] = 2;
                     break;
                 }
                 default: {
-                    this._onItemDragMove_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[24] = 0;
                     peer.setOnItemDragMoveAttribute((undefined as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined));
                 }
             }
         }
-        if (this._onItemDragLeave_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onItemDragLeave_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
+                case 1: {
                     peer.setOnItemDragLeaveAttribute((this._onItemDragLeave_0_0value as ((event: ItemDragInfo,itemIndex: int32) => void) | undefined));
-                    this._onItemDragLeave_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[25] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onItemDragLeave_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[25] = 2;
                     break;
                 }
                 default: {
-                    this._onItemDragLeave_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[25] = 0;
                     peer.setOnItemDragLeaveAttribute((undefined as ((event: ItemDragInfo,itemIndex: int32) => void) | undefined));
                 }
             }
         }
-        if (this._onItemDrop_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onItemDrop_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
+                case 1: {
                     peer.setOnItemDropAttribute((this._onItemDrop_0_0value as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined));
-                    this._onItemDrop_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[26] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onItemDrop_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[26] = 2;
                     break;
                 }
                 default: {
-                    this._onItemDrop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[26] = 0;
                     peer.setOnItemDropAttribute((undefined as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined));
                 }
             }
         }
-        if (this._onScrollFrameBegin_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onScrollFrameBegin_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
+                case 1: {
                     peer.setOnScrollFrameBeginAttribute((this._onScrollFrameBegin_0_0value as OnScrollFrameBeginCallback | undefined));
-                    this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[27] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[27] = 2;
                     break;
                 }
                 default: {
-                    this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[27] = 0;
                     peer.setOnScrollFrameBeginAttribute((undefined as OnScrollFrameBeginCallback | undefined));
                 }
             }
         }
-        if (this._onWillScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWillScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
+                case 1: {
                     peer.setOnWillScrollAttribute((this._onWillScroll_0_0value as OnWillScrollCallback | undefined));
-                    this._onWillScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[28] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWillScroll_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[28] = 2;
                     break;
                 }
                 default: {
-                    this._onWillScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[28] = 0;
                     peer.setOnWillScrollAttribute((undefined as OnWillScrollCallback | undefined));
                 }
             }
         }
-        if (this._onDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onDidScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
+                case 1: {
                     peer.setOnDidScrollAttribute((this._onDidScroll_0_0value as OnScrollCallback | undefined));
-                    this._onDidScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[29] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onDidScroll_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[29] = 2;
                     break;
                 }
                 default: {
-                    this._onDidScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[29] = 0;
                     peer.setOnDidScrollAttribute((undefined as OnScrollCallback | undefined));
                 }
             }
         }
-        if (this._lanes_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._lanes_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
+                case 1: {
                     peer.setLanesAttribute((this._lanes_0_0value as int32 | LengthConstrain | ItemFillPolicy | undefined), (this._lanes_0_1value as Dimension | undefined | undefined));
-                    this._lanes_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[30] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._lanes_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[30] = 2;
                     break;
                 }
                 default: {
-                    this._lanes_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[30] = 0;
                     peer.setLanesAttribute((undefined as int32 | LengthConstrain | ItemFillPolicy | undefined), (undefined as Dimension | undefined | undefined));
                 }
             }
         }
-        if (this._cachedCount_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._cachedCount_1_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
+                case 1: {
                     peer.setCachedCount1Attribute((this._cachedCount_1_0value as int32 | CacheCountInfo | undefined), (this._cachedCount_1_1value as boolean | undefined));
-                    this._cachedCount_1_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[31] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._cachedCount_1_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[31] = 2;
                     break;
                 }
                 default: {
-                    this._cachedCount_1_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[31] = 0;
                     peer.setCachedCount1Attribute((undefined as int32 | CacheCountInfo | undefined), (undefined as boolean | undefined));
                 }
             }
         }
-        if (this._scrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._scrollBar_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
+                case 1: {
                     peer.setScrollBarAttribute((this._scrollBar_0_0value as BarState | undefined));
-                    this._scrollBar_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[32] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._scrollBar_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[32] = 2;
                     break;
                 }
                 default: {
-                    this._scrollBar_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[32] = 0;
                     peer.setScrollBarAttribute((undefined as BarState | undefined));
                 }
             }
         }
-        if (this._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._scrollBarColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | Resource | undefined));
-                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
+                case 1: {
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined));
+                    flagArray[33] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[33] = 2;
                     break;
                 }
                 default: {
-                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | Resource | undefined));
+                    flagArray[33] = 0;
+                    peer.setScrollBarColorAttribute((undefined as arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined));
                 }
             }
         }
-        if (this._scrollBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._scrollBarWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
+                case 1: {
                     peer.setScrollBarWidthAttribute((this._scrollBarWidth_0_0value as double | string | undefined));
-                    this._scrollBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[34] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._scrollBarWidth_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[34] = 2;
                     break;
                 }
                 default: {
-                    this._scrollBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[34] = 0;
                     peer.setScrollBarWidthAttribute((undefined as double | string | undefined));
                 }
             }
         }
-        if (this._scrollBarMargin_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._scrollBarMargin_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
+                case 1: {
                     peer.setScrollBarMarginAttribute((this._scrollBarMargin_0_0value as ScrollBarMargin | undefined));
-                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[35] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[35] = 2;
                     break;
                 }
                 default: {
-                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[35] = 0;
                     peer.setScrollBarMarginAttribute((undefined as ScrollBarMargin | undefined));
                 }
             }
         }
-        if (this._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._nestedScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
+                case 1: {
                     peer.setNestedScrollAttribute((this._nestedScroll_0_0value as NestedScrollOptions | undefined));
-                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[36] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[36] = 2;
                     break;
                 }
                 default: {
-                    this._nestedScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[36] = 0;
                     peer.setNestedScrollAttribute((undefined as NestedScrollOptions | undefined));
                 }
             }
         }
-        if (this._enableScrollInteraction_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableScrollInteraction_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
+                case 1: {
                     peer.setEnableScrollInteractionAttribute((this._enableScrollInteraction_0_0value as boolean | undefined));
-                    this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[37] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[37] = 2;
                     break;
                 }
                 default: {
-                    this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[37] = 0;
                     peer.setEnableScrollInteractionAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._friction_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._friction_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFrictionAttribute((this._friction_0_0value as double | Resource | undefined));
-                    this._friction_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
+                case 1: {
+                    peer.setFrictionAttribute((this._friction_0_0value as double | global_resource_Resource | undefined));
+                    flagArray[38] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._friction_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[38] = 2;
                     break;
                 }
                 default: {
-                    this._friction_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFrictionAttribute((undefined as double | Resource | undefined));
+                    flagArray[38] = 0;
+                    peer.setFrictionAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
-        if (this._onWillStartDragging_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWillStartDragging_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
+                case 1: {
                     peer.setOnWillStartDraggingAttribute((this._onWillStartDragging_0_0value as VoidCallback | undefined));
-                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[39] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[39] = 2;
                     break;
                 }
                 default: {
-                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[39] = 0;
                     peer.setOnWillStartDraggingAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
-        if (this._onWillStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWillStopDragging_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+    }
+    applyModifierPatch2(peer: ArkListPeer, flagArray: Uint8Array): void {
+        if (flagArray[40] != 0) {
+            switch (flagArray[40]) {
+                case 1: {
                     peer.setOnWillStopDraggingAttribute((this._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
-                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[40] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[40] = 2;
                     break;
                 }
                 default: {
-                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[40] = 0;
                     peer.setOnWillStopDraggingAttribute((undefined as OnWillStopDraggingCallback | undefined));
                 }
             }
         }
-        if (this._onDidStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onDidStopDragging_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[41] != 0) {
+            switch (flagArray[41]) {
+                case 1: {
                     peer.setOnDidStopDraggingAttribute((this._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
-                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[41] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[41] = 2;
                     break;
                 }
                 default: {
-                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[41] = 0;
                     peer.setOnDidStopDraggingAttribute((undefined as OnDidStopDraggingCallback | undefined));
                 }
             }
         }
-        if (this._onWillStartFling_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWillStartFling_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[42] != 0) {
+            switch (flagArray[42]) {
+                case 1: {
                     peer.setOnWillStartFlingAttribute((this._onWillStartFling_0_0value as VoidCallback | undefined));
-                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[42] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[42] = 2;
                     break;
                 }
                 default: {
-                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[42] = 0;
                     peer.setOnWillStartFlingAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
-        if (this._onDidStopFling_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onDidStopFling_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[43] != 0) {
+            switch (flagArray[43]) {
+                case 1: {
                     peer.setOnDidStopFlingAttribute((this._onDidStopFling_0_0value as VoidCallback | undefined));
-                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[43] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[43] = 2;
                     break;
                 }
                 default: {
-                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[43] = 0;
                     peer.setOnDidStopFlingAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
-        if (this._onReachStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onReachStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[44] != 0) {
+            switch (flagArray[44]) {
+                case 1: {
                     peer.setOnReachStartAttribute((this._onReachStart_0_0value as (() => void) | undefined));
-                    this._onReachStart_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[44] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onReachStart_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[44] = 2;
                     break;
                 }
                 default: {
-                    this._onReachStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[44] = 0;
                     peer.setOnReachStartAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
-        if (this._onReachEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onReachEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[45] != 0) {
+            switch (flagArray[45]) {
+                case 1: {
                     peer.setOnReachEndAttribute((this._onReachEnd_0_0value as (() => void) | undefined));
-                    this._onReachEnd_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[45] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onReachEnd_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[45] = 2;
                     break;
                 }
                 default: {
-                    this._onReachEnd_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[45] = 0;
                     peer.setOnReachEndAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
-        if (this._onScrollStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onScrollStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[46] != 0) {
+            switch (flagArray[46]) {
+                case 1: {
                     peer.setOnScrollStartAttribute((this._onScrollStart_0_0value as (() => void) | undefined));
-                    this._onScrollStart_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[46] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onScrollStart_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[46] = 2;
                     break;
                 }
                 default: {
-                    this._onScrollStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[46] = 0;
                     peer.setOnScrollStartAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
-        if (this._onScrollStop_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onScrollStop_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[47] != 0) {
+            switch (flagArray[47]) {
+                case 1: {
                     peer.setOnScrollStopAttribute((this._onScrollStop_0_0value as (() => void) | undefined));
-                    this._onScrollStop_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[47] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onScrollStop_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[47] = 2;
                     break;
                 }
                 default: {
-                    this._onScrollStop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[47] = 0;
                     peer.setOnScrollStopAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
-        if (this._flingSpeedLimit_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._flingSpeedLimit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[48] != 0) {
+            switch (flagArray[48]) {
+                case 1: {
                     peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
-                    this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[48] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[48] = 2;
                     break;
                 }
                 default: {
-                    this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[48] = 0;
                     peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
                 }
             }
         }
-        if (this._clipContent_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._clipContent_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[49] != 0) {
+            switch (flagArray[49]) {
+                case 1: {
                     peer.setClipContentAttribute((this._clipContent_0_0value as ContentClipMode | RectShape | undefined));
-                    this._clipContent_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[49] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._clipContent_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[49] = 2;
                     break;
                 }
                 default: {
-                    this._clipContent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[49] = 0;
                     peer.setClipContentAttribute((undefined as ContentClipMode | RectShape | undefined));
                 }
             }
         }
-        if (this._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._digitalCrownSensitivity_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[50] != 0) {
+            switch (flagArray[50]) {
+                case 1: {
                     peer.setDigitalCrownSensitivityAttribute((this._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
-                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[50] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[50] = 2;
                     break;
                 }
                 default: {
-                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[50] = 0;
                     peer.setDigitalCrownSensitivityAttribute((undefined as CrownSensitivity | undefined));
                 }
             }
         }
-        if (this._backToTop_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._backToTop_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[51] != 0) {
+            switch (flagArray[51]) {
+                case 1: {
                     peer.setBackToTopAttribute((this._backToTop_0_0value as boolean | undefined));
-                    this._backToTop_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[51] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._backToTop_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[51] = 2;
                     break;
                 }
                 default: {
-                    this._backToTop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[51] = 0;
                     peer.setBackToTopAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._edgeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._edgeEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined), (this._edgeEffect_0_1value as EdgeEffectOptions | undefined | undefined));
-                    this._edgeEffect_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[52] != 0) {
+            switch (flagArray[52]) {
+                case 1: {
+                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined), (this._edgeEffect_0_1value as EdgeEffectOptions | undefined));
+                    flagArray[52] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._edgeEffect_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[52] = 2;
                     break;
                 }
                 default: {
-                    this._edgeEffect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEdgeEffectAttribute((undefined as EdgeEffect | undefined), (undefined as EdgeEffectOptions | undefined | undefined));
+                    flagArray[52] = 0;
+                    peer.setEdgeEffectAttribute((undefined as EdgeEffect | undefined), (undefined as EdgeEffectOptions | undefined));
                 }
             }
         }
-        if (this._fadingEdge_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fadingEdge_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined | undefined));
-                    this._fadingEdge_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[53] != 0) {
+            switch (flagArray[53]) {
+                case 1: {
+                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined));
+                    flagArray[53] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fadingEdge_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[53] = 2;
                     break;
                 }
                 default: {
-                    this._fadingEdge_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFadingEdgeAttribute((undefined as boolean | undefined), (undefined as FadingEdgeOptions | undefined | undefined));
+                    flagArray[53] = 0;
+                    peer.setFadingEdgeAttribute((undefined as boolean | undefined), (undefined as FadingEdgeOptions | undefined));
                 }
             }
         }
@@ -1134,12 +1041,17 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     mergeModifier(modifier: ListModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._alignListItem_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._alignListItem_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.alignListItem(modifier._alignListItem_0_0value);
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+        this.mergeModifier1(modifier, flagArray);
+        this.mergeModifier2(modifier, flagArray);
+    }
+    mergeModifier0(modifier: ListModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
+                    this.alignListItem((modifier._alignListItem_0_0value as ListItemAlign | undefined));
                     break;
                 }
                 default: {
@@ -1147,12 +1059,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._listDirection_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._listDirection_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.listDirection(modifier._listDirection_0_0value);
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
+                    this.listDirection((modifier._listDirection_0_0value as Axis | undefined));
                     break;
                 }
                 default: {
@@ -1160,38 +1071,35 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._contentStartOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._contentStartOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.contentStartOffset(modifier._contentStartOffset_0_0value);
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
+                    this.contentStartOffset((modifier._contentStartOffset_0_0value as double | arkui_component_units_Resource | undefined));
                     break;
                 }
                 default: {
-                    this.contentStartOffset((undefined as double | Resource | undefined));
+                    this.contentStartOffset((undefined as double | arkui_component_units_Resource | undefined));
                 }
             }
         }
-        if (modifier._contentEndOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._contentEndOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.contentEndOffset(modifier._contentEndOffset_0_0value);
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
+                    this.contentEndOffset((modifier._contentEndOffset_0_0value as double | arkui_component_units_Resource | undefined));
                     break;
                 }
                 default: {
-                    this.contentEndOffset((undefined as double | Resource | undefined));
+                    this.contentEndOffset((undefined as double | arkui_component_units_Resource | undefined));
                 }
             }
         }
-        if (modifier._divider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._divider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.divider(modifier._divider_0_0value);
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
+                    this.divider((modifier._divider_0_0value as ListDividerOptions | null | undefined));
                     break;
                 }
                 default: {
@@ -1199,12 +1107,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._multiSelectable_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._multiSelectable_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.multiSelectable(modifier._multiSelectable_0_0value);
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
+                    this.multiSelectable((modifier._multiSelectable_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1212,12 +1119,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._cachedCount_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._cachedCount_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.cachedCount(modifier._cachedCount_0_0value);
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
+                    this.cachedCount((modifier._cachedCount_0_0value as int32 | undefined));
                     break;
                 }
                 default: {
@@ -1225,12 +1131,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._chainAnimation_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._chainAnimation_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.chainAnimation(modifier._chainAnimation_0_0value);
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
+                    this.chainAnimation((modifier._chainAnimation_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1238,12 +1143,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._chainAnimationOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._chainAnimationOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.chainAnimationOptions(modifier._chainAnimationOptions_0_0value);
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1:
+                case 3: {
+                    this.chainAnimationOptions((modifier._chainAnimationOptions_0_0value as ChainAnimationOptions | undefined));
                     break;
                 }
                 default: {
@@ -1251,12 +1155,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._sticky_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._sticky_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.sticky(modifier._sticky_0_0value);
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
+                    this.sticky((modifier._sticky_0_0value as StickyStyle | undefined));
                     break;
                 }
                 default: {
@@ -1264,12 +1167,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._scrollSnapAlign_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._scrollSnapAlign_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.scrollSnapAlign(modifier._scrollSnapAlign_0_0value);
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1:
+                case 3: {
+                    this.scrollSnapAlign((modifier._scrollSnapAlign_0_0value as ScrollSnapAlign | undefined));
                     break;
                 }
                 default: {
@@ -1277,12 +1179,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._childrenMainSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._childrenMainSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.childrenMainSize(modifier._childrenMainSize_0_0value);
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1:
+                case 3: {
+                    this.childrenMainSize((modifier._childrenMainSize_0_0value as ChildrenMainSize | undefined));
                     break;
                 }
                 default: {
@@ -1290,12 +1191,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._maintainVisibleContentPosition_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._maintainVisibleContentPosition_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.maintainVisibleContentPosition(modifier._maintainVisibleContentPosition_0_0value);
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1:
+                case 3: {
+                    this.maintainVisibleContentPosition((modifier._maintainVisibleContentPosition_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1303,12 +1203,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._supportEmptyBranchInLazyLoading_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._supportEmptyBranchInLazyLoading_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.supportEmptyBranchInLazyLoading(modifier._supportEmptyBranchInLazyLoading_0_0value);
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1:
+                case 3: {
+                    this.supportEmptyBranchInLazyLoading((modifier._supportEmptyBranchInLazyLoading_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1316,12 +1215,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._stackFromEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._stackFromEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.stackFromEnd(modifier._stackFromEnd_0_0value);
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1:
+                case 3: {
+                    this.stackFromEnd((modifier._stackFromEnd_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1329,25 +1227,22 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._editModeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._editModeOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.editModeOptions(modifier._editModeOptions_0_0value);
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1:
+                case 3: {
+                    this.editModeOptions((modifier._editModeOptions_0_0value as EditModeOptions));
                     break;
                 }
                 default: {
-                    this.editModeOptions((undefined as EditModeOptions | undefined));
                 }
             }
         }
-        if (modifier._focusWrapMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._focusWrapMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.focusWrapMode(modifier._focusWrapMode_0_0value);
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1:
+                case 3: {
+                    this.focusWrapMode((modifier._focusWrapMode_0_0value as FocusWrapMode | undefined));
                     break;
                 }
                 default: {
@@ -1355,12 +1250,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._syncLoad_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._syncLoad_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.syncLoad(modifier._syncLoad_0_0value);
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1:
+                case 3: {
+                    this.syncLoad((modifier._syncLoad_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1368,12 +1262,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._scrollSnapAnimationSpeed_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._scrollSnapAnimationSpeed_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.scrollSnapAnimationSpeed(modifier._scrollSnapAnimationSpeed_0_0value);
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1:
+                case 3: {
+                    this.scrollSnapAnimationSpeed((modifier._scrollSnapAnimationSpeed_0_0value as ScrollSnapAnimationSpeed | undefined));
                     break;
                 }
                 default: {
@@ -1381,12 +1274,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onScrollIndex_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onScrollIndex_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onScrollIndex(modifier._onScrollIndex_0_0value);
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1:
+                case 3: {
+                    this.onScrollIndex((modifier._onScrollIndex_0_0value as ((start: int32,end: int32,center: int32) => void) | undefined));
                     break;
                 }
                 default: {
@@ -1394,12 +1286,13 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onScrollVisibleContentChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onScrollVisibleContentChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onScrollVisibleContentChange(modifier._onScrollVisibleContentChange_0_0value);
+    }
+    mergeModifier1(modifier: ListModifier, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
+                case 1:
+                case 3: {
+                    this.onScrollVisibleContentChange((modifier._onScrollVisibleContentChange_0_0value as OnScrollVisibleContentChangeCallback | undefined));
                     break;
                 }
                 default: {
@@ -1407,12 +1300,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onItemMove_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onItemMove_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onItemMove(modifier._onItemMove_0_0value);
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
+                case 1:
+                case 3: {
+                    this.onItemMove((modifier._onItemMove_0_0value as ((from: int32,to: int32) => boolean) | undefined));
                     break;
                 }
                 default: {
@@ -1420,12 +1312,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onItemDragStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onItemDragStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onItemDragStart(modifier._onItemDragStart_0_0value);
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
+                case 1:
+                case 3: {
+                    this.onItemDragStart((modifier._onItemDragStart_0_0value as OnItemDragStartCallback | undefined));
                     break;
                 }
                 default: {
@@ -1433,12 +1324,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onItemDragEnter_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onItemDragEnter_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onItemDragEnter(modifier._onItemDragEnter_0_0value);
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
+                case 1:
+                case 3: {
+                    this.onItemDragEnter((modifier._onItemDragEnter_0_0value as ((event: ItemDragInfo) => void) | undefined));
                     break;
                 }
                 default: {
@@ -1446,12 +1336,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onItemDragMove_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onItemDragMove_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onItemDragMove(modifier._onItemDragMove_0_0value);
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
+                case 1:
+                case 3: {
+                    this.onItemDragMove((modifier._onItemDragMove_0_0value as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined));
                     break;
                 }
                 default: {
@@ -1459,12 +1348,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onItemDragLeave_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onItemDragLeave_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onItemDragLeave(modifier._onItemDragLeave_0_0value);
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
+                case 1:
+                case 3: {
+                    this.onItemDragLeave((modifier._onItemDragLeave_0_0value as ((event: ItemDragInfo,itemIndex: int32) => void) | undefined));
                     break;
                 }
                 default: {
@@ -1472,12 +1360,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onItemDrop_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onItemDrop_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onItemDrop(modifier._onItemDrop_0_0value);
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
+                case 1:
+                case 3: {
+                    this.onItemDrop((modifier._onItemDrop_0_0value as ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined));
                     break;
                 }
                 default: {
@@ -1485,12 +1372,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onScrollFrameBegin_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onScrollFrameBegin_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onScrollFrameBegin(modifier._onScrollFrameBegin_0_0value);
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
+                case 1:
+                case 3: {
+                    this.onScrollFrameBegin((modifier._onScrollFrameBegin_0_0value as OnScrollFrameBeginCallback | undefined));
                     break;
                 }
                 default: {
@@ -1498,12 +1384,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onWillScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWillScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onWillScroll(modifier._onWillScroll_0_0value);
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
+                case 1:
+                case 3: {
+                    this.onWillScroll((modifier._onWillScroll_0_0value as OnWillScrollCallback | undefined));
                     break;
                 }
                 default: {
@@ -1511,12 +1396,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onDidScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onDidScroll(modifier._onDidScroll_0_0value);
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
+                case 1:
+                case 3: {
+                    this.onDidScroll((modifier._onDidScroll_0_0value as OnScrollCallback | undefined));
                     break;
                 }
                 default: {
@@ -1524,12 +1408,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._lanes_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._lanes_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.lanes(modifier._lanes_0_0value, modifier._lanes_0_1value);
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
+                case 1:
+                case 3: {
+                    this.lanes((modifier._lanes_0_0value as int32 | LengthConstrain | ItemFillPolicy | undefined), (modifier._lanes_0_1value as Dimension | undefined));
                     break;
                 }
                 default: {
@@ -1537,12 +1420,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._cachedCount_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._cachedCount_1_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.cachedCount(modifier._cachedCount_1_0value, modifier._cachedCount_1_1value);
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
+                case 1:
+                case 3: {
+                    this.cachedCount((modifier._cachedCount_1_0value as int32 | CacheCountInfo | undefined), (modifier._cachedCount_1_1value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1550,12 +1432,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._scrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._scrollBar_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.scrollBar(modifier._scrollBar_0_0value);
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
+                case 1:
+                case 3: {
+                    this.scrollBar((modifier._scrollBar_0_0value as BarState | undefined));
                     break;
                 }
                 default: {
@@ -1563,25 +1444,23 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._scrollBarColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.scrollBarColor(modifier._scrollBarColor_0_0value);
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
+                case 1:
+                case 3: {
+                    this.scrollBarColor((modifier._scrollBarColor_0_0value as arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined));
                     break;
                 }
                 default: {
-                    this.scrollBarColor((undefined as Color | int32 | string | Resource | undefined));
+                    this.scrollBarColor((undefined as arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined));
                 }
             }
         }
-        if (modifier._scrollBarWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._scrollBarWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.scrollBarWidth(modifier._scrollBarWidth_0_0value);
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
+                case 1:
+                case 3: {
+                    this.scrollBarWidth((modifier._scrollBarWidth_0_0value as double | string | undefined));
                     break;
                 }
                 default: {
@@ -1589,12 +1468,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._scrollBarMargin_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._scrollBarMargin_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.scrollBarMargin(modifier._scrollBarMargin_0_0value);
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
+                case 1:
+                case 3: {
+                    this.scrollBarMargin((modifier._scrollBarMargin_0_0value as ScrollBarMargin | undefined));
                     break;
                 }
                 default: {
@@ -1602,12 +1480,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._nestedScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.nestedScroll(modifier._nestedScroll_0_0value);
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
+                case 1:
+                case 3: {
+                    this.nestedScroll((modifier._nestedScroll_0_0value as NestedScrollOptions | undefined));
                     break;
                 }
                 default: {
@@ -1615,12 +1492,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._enableScrollInteraction_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableScrollInteraction_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.enableScrollInteraction(modifier._enableScrollInteraction_0_0value);
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
+                case 1:
+                case 3: {
+                    this.enableScrollInteraction((modifier._enableScrollInteraction_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1628,25 +1504,23 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._friction_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._friction_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.friction(modifier._friction_0_0value);
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
+                case 1:
+                case 3: {
+                    this.friction((modifier._friction_0_0value as double | global_resource_Resource | undefined));
                     break;
                 }
                 default: {
-                    this.friction((undefined as double | Resource | undefined));
+                    this.friction((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
-        if (modifier._onWillStartDragging_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWillStartDragging_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onWillStartDragging(modifier._onWillStartDragging_0_0value);
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
+                case 1:
+                case 3: {
+                    this.onWillStartDragging((modifier._onWillStartDragging_0_0value as VoidCallback | undefined));
                     break;
                 }
                 default: {
@@ -1654,12 +1528,13 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onWillStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWillStopDragging_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onWillStopDragging(modifier._onWillStopDragging_0_0value);
+    }
+    mergeModifier2(modifier: ListModifier, flagArray: Uint8Array): void {
+        if (flagArray[40] != 0) {
+            switch (flagArray[40]) {
+                case 1:
+                case 3: {
+                    this.onWillStopDragging((modifier._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
                     break;
                 }
                 default: {
@@ -1667,12 +1542,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onDidStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onDidStopDragging_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onDidStopDragging(modifier._onDidStopDragging_0_0value);
+        if (flagArray[41] != 0) {
+            switch (flagArray[41]) {
+                case 1:
+                case 3: {
+                    this.onDidStopDragging((modifier._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
                     break;
                 }
                 default: {
@@ -1680,12 +1554,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onWillStartFling_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWillStartFling_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onWillStartFling(modifier._onWillStartFling_0_0value);
+        if (flagArray[42] != 0) {
+            switch (flagArray[42]) {
+                case 1:
+                case 3: {
+                    this.onWillStartFling((modifier._onWillStartFling_0_0value as VoidCallback | undefined));
                     break;
                 }
                 default: {
@@ -1693,12 +1566,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onDidStopFling_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onDidStopFling_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onDidStopFling(modifier._onDidStopFling_0_0value);
+        if (flagArray[43] != 0) {
+            switch (flagArray[43]) {
+                case 1:
+                case 3: {
+                    this.onDidStopFling((modifier._onDidStopFling_0_0value as VoidCallback | undefined));
                     break;
                 }
                 default: {
@@ -1706,12 +1578,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onReachStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onReachStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onReachStart(modifier._onReachStart_0_0value);
+        if (flagArray[44] != 0) {
+            switch (flagArray[44]) {
+                case 1:
+                case 3: {
+                    this.onReachStart((modifier._onReachStart_0_0value as (() => void) | undefined));
                     break;
                 }
                 default: {
@@ -1719,12 +1590,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onReachEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onReachEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onReachEnd(modifier._onReachEnd_0_0value);
+        if (flagArray[45] != 0) {
+            switch (flagArray[45]) {
+                case 1:
+                case 3: {
+                    this.onReachEnd((modifier._onReachEnd_0_0value as (() => void) | undefined));
                     break;
                 }
                 default: {
@@ -1732,12 +1602,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onScrollStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onScrollStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onScrollStart(modifier._onScrollStart_0_0value);
+        if (flagArray[46] != 0) {
+            switch (flagArray[46]) {
+                case 1:
+                case 3: {
+                    this.onScrollStart((modifier._onScrollStart_0_0value as (() => void) | undefined));
                     break;
                 }
                 default: {
@@ -1745,12 +1614,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._onScrollStop_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onScrollStop_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onScrollStop(modifier._onScrollStop_0_0value);
+        if (flagArray[47] != 0) {
+            switch (flagArray[47]) {
+                case 1:
+                case 3: {
+                    this.onScrollStop((modifier._onScrollStop_0_0value as (() => void) | undefined));
                     break;
                 }
                 default: {
@@ -1758,12 +1626,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._flingSpeedLimit_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._flingSpeedLimit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.flingSpeedLimit(modifier._flingSpeedLimit_0_0value);
+        if (flagArray[48] != 0) {
+            switch (flagArray[48]) {
+                case 1:
+                case 3: {
+                    this.flingSpeedLimit((modifier._flingSpeedLimit_0_0value as double | undefined));
                     break;
                 }
                 default: {
@@ -1771,12 +1638,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._clipContent_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._clipContent_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.clipContent(modifier._clipContent_0_0value);
+        if (flagArray[49] != 0) {
+            switch (flagArray[49]) {
+                case 1:
+                case 3: {
+                    this.clipContent((modifier._clipContent_0_0value as ContentClipMode | RectShape | undefined));
                     break;
                 }
                 default: {
@@ -1784,12 +1650,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._digitalCrownSensitivity_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.digitalCrownSensitivity(modifier._digitalCrownSensitivity_0_0value);
+        if (flagArray[50] != 0) {
+            switch (flagArray[50]) {
+                case 1:
+                case 3: {
+                    this.digitalCrownSensitivity((modifier._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
                     break;
                 }
                 default: {
@@ -1797,12 +1662,11 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._backToTop_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._backToTop_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.backToTop(modifier._backToTop_0_0value);
+        if (flagArray[51] != 0) {
+            switch (flagArray[51]) {
+                case 1:
+                case 3: {
+                    this.backToTop((modifier._backToTop_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1810,676 +1674,576 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
-        if (modifier._edgeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._edgeEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.edgeEffect(modifier._edgeEffect_0_0value, modifier._edgeEffect_0_1value);
+        if (flagArray[52] != 0) {
+            switch (flagArray[52]) {
+                case 1:
+                case 3: {
+                    this.edgeEffect((modifier._edgeEffect_0_0value as EdgeEffect | undefined), (modifier._edgeEffect_0_1value as EdgeEffectOptions | undefined));
                     break;
                 }
                 default: {
-                    this.edgeEffect((undefined as EdgeEffect | undefined), (undefined as EdgeEffectOptions | undefined | undefined));
+                    this.edgeEffect((undefined as EdgeEffect | undefined), (undefined as EdgeEffectOptions | undefined));
                 }
             }
         }
-        if (modifier._fadingEdge_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fadingEdge_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.fadingEdge(modifier._fadingEdge_0_0value, modifier._fadingEdge_0_1value);
+        if (flagArray[53] != 0) {
+            switch (flagArray[53]) {
+                case 1:
+                case 3: {
+                    this.fadingEdge((modifier._fadingEdge_0_0value as boolean | undefined), (modifier._fadingEdge_0_1value as FadingEdgeOptions | undefined));
                     break;
                 }
                 default: {
-                    this.fadingEdge((undefined as boolean | undefined), (undefined as FadingEdgeOptions | undefined | undefined));
+                    this.fadingEdge((undefined as boolean | undefined), (undefined as FadingEdgeOptions | undefined));
                 }
             }
         }
     }
     alignListItem(value: ListItemAlign | undefined): this {
-        if (((this._alignListItem_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._alignListItem_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._alignListItem_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._alignListItem_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     listDirection(value: Axis | undefined): this {
-        if (((this._listDirection_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._listDirection_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._listDirection_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._listDirection_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
-    contentStartOffset(value: double | Resource | undefined): this {
-        if (((this._contentStartOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentStartOffset_0_0value) !== (value)))
-        {
-            this._contentStartOffset_0_flag = AttributeUpdaterFlag.UPDATE
+    contentStartOffset(value: double | arkui_component_units_Resource | undefined): this {
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._contentStartOffset_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._contentStartOffset_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
-    contentEndOffset(value: double | Resource | undefined): this {
-        if (((this._contentEndOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentEndOffset_0_0value) !== (value)))
-        {
-            this._contentEndOffset_0_flag = AttributeUpdaterFlag.UPDATE
+    contentEndOffset(value: double | arkui_component_units_Resource | undefined): this {
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._contentEndOffset_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._contentEndOffset_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     divider(value: ListDividerOptions | null | undefined): this {
-        if (((this._divider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._divider_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._divider_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._divider_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
     multiSelectable(value: boolean | undefined): this {
-        if (((this._multiSelectable_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._multiSelectable_0_0value) !== (value)))
-        {
-            this._multiSelectable_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[5]) == (0)) || ((this._multiSelectable_0_0value) !== (value))) {
+            this._flagArray[5] = 1
             this._multiSelectable_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._multiSelectable_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
     cachedCount(value: int32 | undefined): this {
-        if (((this._cachedCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_0_0value) !== (value)))
-        {
-            this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[6]) == (0)) || ((this._cachedCount_0_0value) !== (value))) {
+            this._flagArray[6] = 1
             this._cachedCount_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._cachedCount_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[6] = 3
         }
         return this
     }
     chainAnimation(value: boolean | undefined): this {
-        if (((this._chainAnimation_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._chainAnimation_0_0value) !== (value)))
-        {
-            this._chainAnimation_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[7]) == (0)) || ((this._chainAnimation_0_0value) !== (value))) {
+            this._flagArray[7] = 1
             this._chainAnimation_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._chainAnimation_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[7] = 3
         }
         return this
     }
     chainAnimationOptions(value: ChainAnimationOptions | undefined): this {
-        if (((this._chainAnimationOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._chainAnimationOptions_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[8]) == (0)) || (true)) {
+            this._flagArray[8] = 1
             this._chainAnimationOptions_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._chainAnimationOptions_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[8] = 3
         }
         return this
     }
     sticky(value: StickyStyle | undefined): this {
-        if (((this._sticky_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._sticky_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[9]) == (0)) || (true)) {
+            this._flagArray[9] = 1
             this._sticky_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._sticky_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[9] = 3
         }
         return this
     }
     scrollSnapAlign(value: ScrollSnapAlign | undefined): this {
-        if (((this._scrollSnapAlign_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._scrollSnapAlign_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[10]) == (0)) || (true)) {
+            this._flagArray[10] = 1
             this._scrollSnapAlign_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._scrollSnapAlign_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[10] = 3
         }
         return this
     }
     childrenMainSize(value: ChildrenMainSize | undefined): this {
-        if (((this._childrenMainSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._childrenMainSize_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[11]) == (0)) || (true)) {
+            this._flagArray[11] = 1
             this._childrenMainSize_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._childrenMainSize_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[11] = 3
         }
         return this
     }
     maintainVisibleContentPosition(value: boolean | undefined): this {
-        if (((this._maintainVisibleContentPosition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maintainVisibleContentPosition_0_0value) !== (value)))
-        {
-            this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[12]) == (0)) || ((this._maintainVisibleContentPosition_0_0value) !== (value))) {
+            this._flagArray[12] = 1
             this._maintainVisibleContentPosition_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[12] = 3
         }
         return this
     }
     supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
-        if (((this._supportEmptyBranchInLazyLoading_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._supportEmptyBranchInLazyLoading_0_0value) !== (value)))
-        {
-            this._supportEmptyBranchInLazyLoading_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[13]) == (0)) || ((this._supportEmptyBranchInLazyLoading_0_0value) !== (value))) {
+            this._flagArray[13] = 1
             this._supportEmptyBranchInLazyLoading_0_0value = value
-        } else
-        {
-            this._supportEmptyBranchInLazyLoading_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[13] = 3
         }
         return this
     }
     stackFromEnd(value: boolean | undefined): this {
-        if (((this._stackFromEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._stackFromEnd_0_0value) !== (value)))
-        {
-            this._stackFromEnd_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[14]) == (0)) || ((this._stackFromEnd_0_0value) !== (value))) {
+            this._flagArray[14] = 1
             this._stackFromEnd_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._stackFromEnd_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[14] = 3
         }
         return this
     }
-    editModeOptions(value: EditModeOptions | undefined): this {
-        if (((this._editModeOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._editModeOptions_0_flag = AttributeUpdaterFlag.UPDATE
+    editModeOptions(value: EditModeOptions): this {
+        if (((this._flagArray[15]) == (0)) || (true)) {
+            this._flagArray[15] = 1
             this._editModeOptions_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._editModeOptions_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[15] = 3
         }
         return this
     }
     focusWrapMode(value: FocusWrapMode | undefined): this {
-        if (((this._focusWrapMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._focusWrapMode_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[16]) == (0)) || (true)) {
+            this._flagArray[16] = 1
             this._focusWrapMode_0_0value = value
-        } else
-        {
-            this._focusWrapMode_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[16] = 3
         }
         return this
     }
     syncLoad(value: boolean | undefined): this {
-        if (((this._syncLoad_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._syncLoad_0_0value) !== (value)))
-        {
-            this._syncLoad_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[17]) == (0)) || ((this._syncLoad_0_0value) !== (value))) {
+            this._flagArray[17] = 1
             this._syncLoad_0_0value = value
-        } else
-        {
-            this._syncLoad_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[17] = 3
         }
         return this
     }
     scrollSnapAnimationSpeed(value: ScrollSnapAnimationSpeed | undefined): this {
-        if (((this._scrollSnapAnimationSpeed_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._scrollSnapAnimationSpeed_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[18]) == (0)) || (true)) {
+            this._flagArray[18] = 1
             this._scrollSnapAnimationSpeed_0_0value = value
-        } else
-        {
-            this._scrollSnapAnimationSpeed_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[18] = 3
         }
         return this
     }
     onScrollIndex(value: ((start: int32,end: int32,center: int32) => void) | undefined): this {
-        if (((this._onScrollIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onScrollIndex_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[19]) == (0)) || (true)) {
+            this._flagArray[19] = 1
             this._onScrollIndex_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onScrollIndex_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[19] = 3
         }
         return this
     }
     onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback | undefined): this {
-        if (((this._onScrollVisibleContentChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onScrollVisibleContentChange_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[20]) == (0)) || (true)) {
+            this._flagArray[20] = 1
             this._onScrollVisibleContentChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onScrollVisibleContentChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[20] = 3
         }
         return this
     }
     onItemMove(value: ((from: int32,to: int32) => boolean) | undefined): this {
-        if (((this._onItemMove_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onItemMove_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[21]) == (0)) || (true)) {
+            this._flagArray[21] = 1
             this._onItemMove_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onItemMove_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[21] = 3
         }
         return this
     }
     onItemDragStart(value: OnItemDragStartCallback | undefined): this {
-        if (((this._onItemDragStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onItemDragStart_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[22]) == (0)) || (true)) {
+            this._flagArray[22] = 1
             this._onItemDragStart_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onItemDragStart_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[22] = 3
         }
         return this
     }
     onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
-        if (((this._onItemDragEnter_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onItemDragEnter_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[23]) == (0)) || (true)) {
+            this._flagArray[23] = 1
             this._onItemDragEnter_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onItemDragEnter_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[23] = 3
         }
         return this
     }
     onItemDragMove(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32) => void) | undefined): this {
-        if (((this._onItemDragMove_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onItemDragMove_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[24]) == (0)) || (true)) {
+            this._flagArray[24] = 1
             this._onItemDragMove_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onItemDragMove_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[24] = 3
         }
         return this
     }
     onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: int32) => void) | undefined): this {
-        if (((this._onItemDragLeave_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onItemDragLeave_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[25]) == (0)) || (true)) {
+            this._flagArray[25] = 1
             this._onItemDragLeave_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onItemDragLeave_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[25] = 3
         }
         return this
     }
     onItemDrop(value: ((event: ItemDragInfo,itemIndex: int32,insertIndex: int32,isSuccess: boolean) => void) | undefined): this {
-        if (((this._onItemDrop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onItemDrop_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[26]) == (0)) || (true)) {
+            this._flagArray[26] = 1
             this._onItemDrop_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onItemDrop_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[26] = 3
         }
         return this
     }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
-        if (((this._onScrollFrameBegin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[27]) == (0)) || (true)) {
+            this._flagArray[27] = 1
             this._onScrollFrameBegin_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[27] = 3
         }
         return this
     }
     onWillScroll(value: OnWillScrollCallback | undefined): this {
-        if (((this._onWillScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWillScroll_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[28]) == (0)) || (true)) {
+            this._flagArray[28] = 1
             this._onWillScroll_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onWillScroll_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[28] = 3
         }
         return this
     }
     onDidScroll(value: OnScrollCallback | undefined): this {
-        if (((this._onDidScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[29]) == (0)) || (true)) {
+            this._flagArray[29] = 1
             this._onDidScroll_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onDidScroll_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[29] = 3
         }
         return this
     }
     lanes(value: int32 | LengthConstrain | ItemFillPolicy | undefined, gutter?: Dimension): this {
-        if (((this._lanes_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
-        {
-            this._lanes_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[30]) == (0)) || (true) || (true)) {
+            this._flagArray[30] = 1
             this._lanes_0_0value = value
             this._lanes_0_1value = gutter
             this._state.fireChange()
-        } else
-        {
-            this._lanes_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[30] = 3
         }
         return this
     }
     cachedCount(count: int32 | CacheCountInfo | undefined, show: boolean | undefined): this {
-        if (((this._cachedCount_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_1_0value) !== (count)) || ((this._cachedCount_1_1value) !== (show)))
-        {
-            this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[31]) == (0)) || (true) || ((this._cachedCount_1_1value) !== (show))) {
+            this._flagArray[31] = 1
             this._cachedCount_1_0value = count
             this._cachedCount_1_1value = show
             this._state.fireChange()
-        } else
-        {
-            this._cachedCount_1_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[31] = 3
         }
         return this
     }
     scrollBar(value: BarState | undefined): this {
-        if (((this._scrollBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._scrollBar_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[32]) == (0)) || (true)) {
+            this._flagArray[32] = 1
             this._scrollBar_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._scrollBar_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[32] = 3
         }
         return this
     }
-    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
-        if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
+    scrollBarColor(value: arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined): this {
+        if (((this._flagArray[33]) == (0)) || (true)) {
+            this._flagArray[33] = 1
             this._scrollBarColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[33] = 3
         }
         return this
     }
     scrollBarWidth(value: double | string | undefined): this {
-        if (((this._scrollBarWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollBarWidth_0_0value) !== (value)))
-        {
-            this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[34]) == (0)) || ((this._scrollBarWidth_0_0value) !== (value))) {
+            this._flagArray[34] = 1
             this._scrollBarWidth_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._scrollBarWidth_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[34] = 3
         }
         return this
     }
     scrollBarMargin(value: ScrollBarMargin | undefined): this {
-        if (((this._scrollBarMargin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollBarMargin_0_0value) !== (value)))
-        {
-            this._scrollBarMargin_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[35]) == (0)) || (true)) {
+            this._flagArray[35] = 1
             this._scrollBarMargin_0_0value = value
-        } else
-        {
-            this._scrollBarMargin_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[35] = 3
         }
         return this
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
-        if (((this._nestedScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[36]) == (0)) || (true)) {
+            this._flagArray[36] = 1
             this._nestedScroll_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[36] = 3
         }
         return this
     }
     enableScrollInteraction(value: boolean | undefined): this {
-        if (((this._enableScrollInteraction_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableScrollInteraction_0_0value) !== (value)))
-        {
-            this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[37]) == (0)) || ((this._enableScrollInteraction_0_0value) !== (value))) {
+            this._flagArray[37] = 1
             this._enableScrollInteraction_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[37] = 3
         }
         return this
     }
-    friction(value: double | Resource | undefined): this {
-        if (((this._friction_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._friction_0_flag = AttributeUpdaterFlag.UPDATE
+    friction(value: double | global_resource_Resource | undefined): this {
+        if (((this._flagArray[38]) == (0)) || (true)) {
+            this._flagArray[38] = 1
             this._friction_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._friction_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[38] = 3
         }
         return this
     }
     onWillStartDragging(value: VoidCallback | undefined): this {
-        if (((this._onWillStartDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWillStartDragging_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[39]) == (0)) || (true)) {
+            this._flagArray[39] = 1
             this._onWillStartDragging_0_0value = value
-        } else
-        {
-            this._onWillStartDragging_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[39] = 3
         }
         return this
     }
     onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
-        if (((this._onWillStopDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWillStopDragging_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[40]) == (0)) || (true)) {
+            this._flagArray[40] = 1
             this._onWillStopDragging_0_0value = value
-        } else
-        {
-            this._onWillStopDragging_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[40] = 3
         }
         return this
     }
     onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
-        if (((this._onDidStopDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onDidStopDragging_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[41]) == (0)) || (true)) {
+            this._flagArray[41] = 1
             this._onDidStopDragging_0_0value = value
-        } else
-        {
-            this._onDidStopDragging_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[41] = 3
         }
         return this
     }
     onWillStartFling(value: VoidCallback | undefined): this {
-        if (((this._onWillStartFling_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWillStartFling_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[42]) == (0)) || (true)) {
+            this._flagArray[42] = 1
             this._onWillStartFling_0_0value = value
-        } else
-        {
-            this._onWillStartFling_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[42] = 3
         }
         return this
     }
     onDidStopFling(value: VoidCallback | undefined): this {
-        if (((this._onDidStopFling_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onDidStopFling_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[43]) == (0)) || (true)) {
+            this._flagArray[43] = 1
             this._onDidStopFling_0_0value = value
-        } else
-        {
-            this._onDidStopFling_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[43] = 3
         }
         return this
     }
     onReachStart(value: (() => void) | undefined): this {
-        if (((this._onReachStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onReachStart_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[44]) == (0)) || (true)) {
+            this._flagArray[44] = 1
             this._onReachStart_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onReachStart_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[44] = 3
         }
         return this
     }
     onReachEnd(value: (() => void) | undefined): this {
-        if (((this._onReachEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onReachEnd_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[45]) == (0)) || (true)) {
+            this._flagArray[45] = 1
             this._onReachEnd_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onReachEnd_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[45] = 3
         }
         return this
     }
     onScrollStart(value: (() => void) | undefined): this {
-        if (((this._onScrollStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onScrollStart_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[46]) == (0)) || (true)) {
+            this._flagArray[46] = 1
             this._onScrollStart_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onScrollStart_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[46] = 3
         }
         return this
     }
     onScrollStop(value: (() => void) | undefined): this {
-        if (((this._onScrollStop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onScrollStop_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[47]) == (0)) || (true)) {
+            this._flagArray[47] = 1
             this._onScrollStop_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onScrollStop_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[47] = 3
         }
         return this
     }
     flingSpeedLimit(value: double | undefined): this {
-        if (((this._flingSpeedLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._flingSpeedLimit_0_0value) !== (value)))
-        {
-            this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[48]) == (0)) || ((this._flingSpeedLimit_0_0value) !== (value))) {
+            this._flagArray[48] = 1
             this._flingSpeedLimit_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[48] = 3
         }
         return this
     }
     clipContent(value: ContentClipMode | RectShape | undefined): this {
-        if (((this._clipContent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._clipContent_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[49]) == (0)) || (true)) {
+            this._flagArray[49] = 1
             this._clipContent_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._clipContent_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[49] = 3
         }
         return this
     }
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
-        if (((this._digitalCrownSensitivity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[50]) == (0)) || (true)) {
+            this._flagArray[50] = 1
             this._digitalCrownSensitivity_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[50] = 3
         }
         return this
     }
     backToTop(value: boolean | undefined): this {
-        if (((this._backToTop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._backToTop_0_0value) !== (value)))
-        {
-            this._backToTop_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[51]) == (0)) || ((this._backToTop_0_0value) !== (value))) {
+            this._flagArray[51] = 1
             this._backToTop_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._backToTop_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[51] = 3
         }
         return this
     }
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
-        if (((this._edgeEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
-        {
-            this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[52]) == (0)) || (true) || (true)) {
+            this._flagArray[52] = 1
             this._edgeEffect_0_0value = edgeEffect
             this._edgeEffect_0_1value = options
             this._state.fireChange()
-        } else
-        {
-            this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[52] = 3
         }
         return this
     }
     fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
-        if (((this._fadingEdge_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fadingEdge_0_0value) !== (enabled)) || (true))
-        {
-            this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[53]) == (0)) || ((this._fadingEdge_0_0value) !== (enabled)) || (true)) {
+            this._flagArray[53] = 1
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
             this._state.fireChange()
-        } else
-        {
-            this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[53] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

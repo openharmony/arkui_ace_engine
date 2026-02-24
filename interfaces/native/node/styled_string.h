@@ -38,6 +38,11 @@ struct ArkUI_StyledString {
     std::stack<void*> poppedStyles;
 };
 
+struct ArkUI_Boundary {
+    int32_t leftIndex;
+    int32_t rightIndex;
+};
+
 #ifdef __cplusplus
 };
 #endif

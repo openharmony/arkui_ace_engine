@@ -126,6 +126,10 @@ bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::isOpenYuvDecode_ = false;
 int32_t SystemProperties::previewStatus_ = 0;
+bool SystemProperties::isDeviceAccess_ = false;
+std::atomic<bool> SystemProperties::unZipHap_(true);
+float SystemProperties::fontScale_ = 1.0f;
+float SystemProperties::fontWeightScale_ = 1.0f;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -161,6 +165,11 @@ bool SystemProperties::GetIsUseMemoryMonitor()
 int32_t SystemProperties::GetComponentLoadNumber()
 {
     return 1;
+}
+
+int32_t SystemProperties::GetStopCollectTimeWait()
+{
+    return 800; // 800 : Stop collecting asynchronous task waiting time.
 }
 
 bool SystemProperties::GetMultiInstanceEnabled()
@@ -291,6 +300,11 @@ bool SystemProperties::GetAllowWindowOpenMethodEnabled()
 }
 
 bool SystemProperties::IsSmallFoldProduct()
+{
+    return false;
+}
+
+bool SystemProperties::IsPortraitFoldProduct()
 {
     return false;
 }

@@ -28,7 +28,7 @@ final class CONSTANT {
 export class WrappedArray<T> extends Array<T> implements IObservedObject, ObserveWrappedKeyedMeta, ISubscribedWatches {
     public store_: Array<T>;
     @JSONStringifyIgnore
-    private meta_: IMutableKeyedStateMeta;
+    meta_: IMutableKeyedStateMeta;
     // support for @Watch
     // each IObservedObject manages a set of @Wtch subscribers
     // when a object property changes need to call execureOnSubscribingWatches
@@ -37,7 +37,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
     @JSONStringifyIgnore
-    private ____V1RenderId: RenderIdType = 0;
+    ____V1RenderId: RenderIdType = 0;
     @JSONStringifyIgnore
     private allowDeep_: boolean;
     private isAPI_: boolean;
@@ -47,7 +47,13 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         this.store_ = src;
         this.allowDeep_ = allowDeep;
         this.isAPI_ = isAPI;
-        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedArray');
+        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta(
+            (
+                this.allowDeep_ ? 
+                    this.isAPI_ ? '__metaBuiltInMakeObserved_'
+                        : '__metaBuiltInV2_'
+                    : '__metaBuiltInV1_'
+            ) +'WrappedArray', this);
     }
 
     public getRaw(): Object {
@@ -437,9 +443,9 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param index Zero-based index of the array element to be returned.
      * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
      * @returns The element in the array matching the given index.
-     * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+     * Throw range error if `index` < `-length()` or `index` >= `length()`.
      */
-    public override at(index: int): T | undefined {
+    public override at(index: int): T {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
             this.meta_.addRef(String(index as Object | undefined | null));

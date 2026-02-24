@@ -220,6 +220,50 @@ HWTEST_F(WindowPatternTest, DelayAddAppWindowForDmaResume, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateSnapshotWindow
+ * @tc.desc: CreateSnapshotWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, CreateSnapshotWindow, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+    windowScene_->isBlankForSnapshot_ = true;
+    windowScene_->CreateSnapshotWindow();
+    auto key = Rosen::defaultStatus;
+    sceneSession_->scenePersistence_->SetHasSnapshot(true, key);
+    sceneSession_->isPersistentImageFit_ = true;
+    sceneSession_->lastLayoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 100,
+        .height_ = 100,
+    };
+    sceneSession_->layoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 100,
+        .height_ = 100,
+    };
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isBlankForSnapshot_, false);
+
+    sceneSession_->layoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 200,
+        .height_ = 200,
+    };
+    windowScene_->CreateSnapshotWindow();
+
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
+    sceneSession_->freeMultiWindow_.store(true);
+    sceneSession_->isPersistentImageFit_ = false;
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isBlankForSnapshot_, true);
+}
+
+/**
  * @tc.name: OnAttachToFrameNode
  * @tc.desc: OnAttachToFrameNode Test
  * @tc.type: FUNC

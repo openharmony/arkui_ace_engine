@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/radio/bridge/radio_content_modifier_helper.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_static.h"
+#include "core/interfaces/native/common/api_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -28,7 +29,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-std::optional<bool> ProcessBindableChecked(FrameNode* frameNode, const Opt_Union_Boolean_Bindable* value)
+std::optional<bool> ProcessBindableChecked(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(
@@ -104,7 +105,7 @@ void SetRadioOptionsImpl(Ark_NativePointer node, const Ark_RadioOptions* options
 }
 } // namespace RadioInterfaceModifier
 namespace RadioAttributeModifier {
-void SetCheckedImpl(Ark_NativePointer node, const Opt_Union_Boolean_Bindable* value)
+void SetCheckedImpl(Ark_NativePointer node, const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -157,16 +158,25 @@ void ContentModifierRadioImpl(Ark_NativePointer node,
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.value = Converter::ArkValue<Ark_String>(config.value_, Converter::FC);
         arkConfig.checked = Converter::ArkValue<Ark_Boolean>(config.checked_);
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>([frameNode](bool change) {
+        auto triggerCallback = CallbackKeeper::Claim<arkui_component_common_Callback_Boolean_Void>(
+            [frameNode](bool change) {
             RadioModelNG::SetChangeValue(frameNode, change);
         });
         arkConfig.triggerChange = triggerCallback.ArkValue();
-        auto radioNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-        arkBuilder.BuildAsync([radioNode](const RefPtr<UINode>& uiNode) mutable {
-            radioNode->AddChild(uiNode);
-            radioNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        auto boxNode = GeneratedApiImpl::GetContentNode(node);
+        if (boxNode == nullptr) {
+            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+            GeneratedApiImpl::SetContentNode(node, boxNode);
+        }
+        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
+            auto old = boxNode->GetChildAtIndex(0);
+            if (old != nullptr) {
+                boxNode->RemoveChildSilently(old);
+            }
+            boxNode->AddChild(uiNode);
+            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
             }, node, arkConfig);
-        return radioNode;
+        return boxNode;
     };
     RadioModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
 }

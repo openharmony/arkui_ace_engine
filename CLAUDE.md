@@ -623,11 +623,15 @@ Bytecode files compiled from ArkTS source code, dynamically loaded at runtime:
 # Run specific test executable
 ./out/rk3568/tests/ace_engine/unittest/components_ng/text/text_pattern_test
 
-# Run withgtest_filter for specific test cases
+# Run with gtest_filter for specific test cases
 ./out/rk3568/tests/ace_engine/unittest/components_ng/text/text_pattern_test --gtest_filter=TextPatternTest.OnModifyDone
 
 # Run performance benchmarks
 ./out/rk3568/tests/ace_engine/benchmark/text/text_benchmark --benchmark_filter=TextRender
+
+# Run specific test target (from build output directory)
+# Tests are located in out/rk3568/tests/ace_engine/ (ARM target device)
+# X86 tests: out/rk3568/<x64 target>/tests/unittest/ace_engine/ (see C API Unit Tests section)
 ```
 
 **Test locations**:
@@ -640,6 +644,49 @@ Bytecode files compiled from ArkTS source code, dynamically loaded at runtime:
 - Layout algorithm tests: `[component]_layout_algorithm_test.cpp`
 - Property tests: `[component]_property_test.cpp`
 - Render tests: `[component]_render_test.cpp`
+
+### C API Unit Tests
+
+#### Git Configuration
+- Primary remote is `gitcode` (not `origin`)
+- Check remotes: `git remote -v`
+
+#### Build Commands
+```bash
+# Build C API unit tests
+./build.sh --product-name rk3568 --build-target linux_unittest_capi --ccache
+```
+
+#### Test Execution Locations
+**Target Device (ARM) tests**: `out/rk3568/tests/unittest/ace_engine/C-API-Main/components/`
+**X86 Host tests**: `out/rk3568/<x64 target>/tests/unittest/ace_engine/C-API-Main/components/`
+
+#### Key C API Test Executables
+- `capi_all_modifiers_test` - 1348 modifier tests
+- `capi_all_accessors_test` - 444 accessor tests
+- `capi_all_utils_test` - 16 utility tests
+- `capi_generated_modifiers_test` - 22 generated modifier tests
+- **Total**: 1830 C API unit tests
+
+#### Running Tests
+```bash
+# List available tests
+./capi_all_modifiers_test --gtest_list_tests
+
+# Run all tests
+./capi_all_modifiers_test
+
+# Check architecture
+file ./capi_all_modifiers_test
+# Should show: ELF 64-bit LSB pie executable, x86-64
+```
+
+#### Verification Workflow
+After code changes or rebase operations:
+1. **Build verification**: Run `linux_capi_unittest` target to ensure compilation success
+2. **Test execution**: Run x86 test executables from x64 target directory
+3. **Result validation**: All tests should pass (1830 total C API tests)
+4. **Architecture check**: Verify executables are x86-64 for host testing
 
 ## Architecture
 

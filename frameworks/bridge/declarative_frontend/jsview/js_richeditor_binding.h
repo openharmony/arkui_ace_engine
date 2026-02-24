@@ -60,6 +60,7 @@ public:
     void GetCaretRect(const JSCallbackInfo& args);
     void SetTypingStyle(const JSCallbackInfo& info);
     void SetTypingParagraphStyle(const JSCallbackInfo& info);
+    void SetPlaceholderStyledString(const JSCallbackInfo& info);
     void ParseJsTextStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);

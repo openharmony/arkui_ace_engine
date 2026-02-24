@@ -356,6 +356,15 @@ struct ArkUIComponentSnapshotAsync {
     std::function<void(std::shared_ptr<ArkUIComponentSnapshotAsync>)> callBackJsFunction;
 };
 
+struct ArkUIDrawableAsync {
+    int32_t imageWidth_ = 0;
+    int32_t imageHeight_ = 0;
+    int32_t errorCode = -1;
+    ani_env* env = nullptr;
+    ani_resolver deferred = nullptr;
+    std::function<void(std::shared_ptr<ArkUIDrawableAsync>)> callBackJsFunction;
+};
+
 typedef struct ArkUIAniTranslateOptions {
     ArkUIAniNumberString x;
     ArkUIAniNumberString y;
@@ -560,6 +569,7 @@ struct ArkUIAniCommonModifier {
     void (*onMeasureInnerMeasure)(ani_long ptr);
     void (*onLayoutInnerLayout)(ani_long ptr);
     void (*setParallelScoped)(ani_boolean parallel);
+    void (*checkThreadValid)(ani_boolean checkUIThread, ani_long node);
     void (*setCustomPropertyCallBack)(
         ArkUINodeHandle node, std::function<void()>&& func,
         std::function<std::string(const std::string&)>&& getFunc,

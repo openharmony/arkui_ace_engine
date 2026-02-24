@@ -48,6 +48,11 @@ class CalcDimensionRect;
 
 namespace OHOS::Ace::Framework {
 
+constexpr napi_type_tag ROSEN_JS_CANVAS_TYPE_TAG = {
+    .lower = 0x2710bc10cdee8db3,
+    .upper = 0xc5189f88510eadc1
+};
+
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
 constexpr int32_t DEFAULT_TAP_COUNTS = 1;
 constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
@@ -432,6 +437,8 @@ public:
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsColorFromResourceForMaterial(
+        const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
         RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
@@ -440,6 +447,7 @@ public:
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
         const Color& defaultColor, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsColorForMaterial(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, ShadowColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
@@ -598,6 +606,7 @@ public:
     static void JsOnKeyEvent(const JSCallbackInfo& args);
     static void JsDispatchKeyEvent(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
+    static void JSOnNeedSoftkeyboard(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
     static void JsTabIndex(const JSCallbackInfo& info);
     static void JsFocusOnTouch(const JSCallbackInfo& info);
@@ -896,14 +905,20 @@ public:
         const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
         const std::optional<Dimension>& radiusBottomEnd);
     static void ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    /**
+     * @param adaptMaterial Indicates whether the new material is adapted to special resources for color inversion.
+     * Only the Color type has differences. If the value is true, the color resolved from special resources will carry
+     * a non-NONE placeholder.
+     */
     template<typename T>
-    static void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    static void RegisterResource(
+        const std::string& key, const RefPtr<ResourceObject>& resObj, T value, bool adaptMaterial = false)
     {
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        pattern->RegisterResource<T>(key, resObj, value);
+        pattern->RegisterResource<T>(key, resObj, value, adaptMaterial);
     }
     static void UnRegisterResource(const std::string& key);
     static void ParseDragSpringLoadingConfiguration(

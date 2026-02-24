@@ -284,3 +284,4 @@ export namespace dragController {
         }
     }
 }
+export default dragController;

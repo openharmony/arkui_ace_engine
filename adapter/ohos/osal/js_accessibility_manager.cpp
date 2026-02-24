@@ -37,6 +37,14 @@
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
 
+#define CHECK_NULL_VOID_WITH_ACTION(ptr, ...) \
+    do {                                        \
+        if (!(ptr)) {                           \
+            __VA_ARGS__;                        \
+            return;                             \
+        }                                       \
+    } while (0)
+
 namespace OHOS::Ace::Framework {
 namespace {
 const char DUMP_ORDER[] = "-accessibility";
@@ -159,6 +167,14 @@ bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node)
     return manager->IsShowPlaceholder(node->GetId());
 #endif
     return true;
+}
+
+void SetCursorPositionResult(
+    Accessibility::AccessibilityElementOperatorCallback& callback, int32_t cursorPosition, int32_t requestId)
+{
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "cursorPosition: %{public}d, requestId: %{public}d",
+        cursorPosition, requestId);
+    callback.SetCursorPositionResult(cursorPosition, requestId);
 }
 
 bool NeedUpdateChildrenOfAccessibilityElementInfo(const RefPtr<NG::UINode>& node)
@@ -6970,9 +6986,9 @@ void JsAccessibilityManager::JsInteractionOperation::GetCursorPosition(const int
     const int32_t requestId, AccessibilityElementOperatorCallback &callback)
 {
     auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
+    CHECK_NULL_VOID_WITH_ACTION(jsAccessibilityManager, SetCursorPositionResult(callback, 0, requestId));
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID_WITH_ACTION(context, SetCursorPositionResult(callback, 0, requestId));
     auto instanceId = context->GetInstanceId();
     context->GetTaskExecutor()->PostTask(
         [weak = GetHandler(), elementId, requestId, &callback, instanceId]() {
@@ -6993,36 +7009,51 @@ void JsAccessibilityManager::GetCursorPosition(
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
 
     auto context = GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID_WITH_ACTION(context, SetCursorPositionResult(callback, 0, requestId));
     RefPtr<NG::FrameNode> node;
     auto ngPipeline = FindPipelineByElementId(splitElementId, node);
-    CHECK_NULL_VOID(ngPipeline);
+    CHECK_NULL_VOID_WITH_ACTION(ngPipeline, SetCursorPositionResult(callback, 0, requestId));
     auto instanceId = ngPipeline->GetInstanceId();
     ContainerScope scope(instanceId);
+
+    ngPipeline->AddAfterRenderTask(
+        [weak = WeakClaim(this), weakNgPipeline = WeakClaim(AceType::RawPtr(ngPipeline)),
+            splitElementId, elementId, requestId, &callback]() {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID_WITH_ACTION(jsAccessibilityManager, SetCursorPositionResult(callback, 0, requestId));
+            auto ngPipeline = weakNgPipeline.Upgrade();
+            CHECK_NULL_VOID_WITH_ACTION(ngPipeline, SetCursorPositionResult(callback, 0, requestId));
+            auto instanceId = ngPipeline->GetInstanceId();
+            ContainerScope scope(instanceId);
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
-    CHECK_NULL_VOID(uiExtensionManager);
-    if (uiExtensionManager->IsWrapExtensionAbilityId(splitElementId)) {
-        auto unWrapIdPair = uiExtensionManager->UnWrapExtensionAbilityId(NG::UI_EXTENSION_OFFSET_MAX, elementId);
-        int64_t uiExtensionId = unWrapIdPair.first;
-        auto rootNode = ngPipeline->GetRootElement();
-        CHECK_NULL_VOID(rootNode);
-        auto uiExtensionNode = FindNodeFromRootByExtensionId(rootNode, uiExtensionId);
-        CHECK_NULL_VOID(uiExtensionNode);
-        auto accessibilityProperty = uiExtensionNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        CHECK_NULL_VOID(accessibilityProperty);
-        auto callNumber = accessibilityProperty->ActActionGetIndex();
-        callback.SetCursorPositionResult(callNumber, requestId);
-        return;
-    }
+            auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+            CHECK_NULL_VOID_WITH_ACTION(uiExtensionManager, SetCursorPositionResult(callback, 0, requestId));
+            if (uiExtensionManager->IsWrapExtensionAbilityId(splitElementId)) {
+                auto unWrapIdPair =
+                    uiExtensionManager->UnWrapExtensionAbilityId(NG::UI_EXTENSION_OFFSET_MAX, elementId);
+                int64_t uiExtensionId = unWrapIdPair.first;
+                auto rootNode = ngPipeline->GetRootElement();
+                CHECK_NULL_VOID_WITH_ACTION(rootNode, SetCursorPositionResult(callback, 0, requestId));
+                auto uiExtensionNode = jsAccessibilityManager->FindNodeFromRootByExtensionId(rootNode, uiExtensionId);
+                CHECK_NULL_VOID_WITH_ACTION(uiExtensionNode, SetCursorPositionResult(callback, 0, requestId));
+                auto accessibilityProperty = uiExtensionNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+                CHECK_NULL_VOID_WITH_ACTION(accessibilityProperty, SetCursorPositionResult(callback, 0, requestId));
+                auto callNumber = accessibilityProperty->ActActionGetIndex();
+                SetCursorPositionResult(callback, callNumber, requestId);
+                return;
+            }
 #endif
-    auto frameNode =
-        NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(ngPipeline->GetRootElement(), splitElementId);
-    CHECK_NULL_VOID(frameNode);
-    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    auto callNumber = accessibilityProperty->ActActionGetIndex();
-    callback.SetCursorPositionResult(callNumber, requestId);
+            auto frameNode =
+                NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(
+                    ngPipeline->GetRootElement(), splitElementId);
+            CHECK_NULL_VOID_WITH_ACTION(frameNode, SetCursorPositionResult(callback, 0, requestId));
+            auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            CHECK_NULL_VOID_WITH_ACTION(accessibilityProperty, SetCursorPositionResult(callback, 0, requestId));
+            auto callNumber = accessibilityProperty->ActActionGetIndex();
+            SetCursorPositionResult(callback, callNumber, requestId);
+        }
+    );
+    ngPipeline->RequestFrame();
 }
 
 void JsAccessibilityManager::JsInteractionOperation::ClearFocus()

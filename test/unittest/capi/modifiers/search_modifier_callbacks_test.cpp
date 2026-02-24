@@ -181,7 +181,7 @@ HWTEST_F(SearchModifierCallbackTest, DISABLED_setInputFilterTest, TestSize.Level
     auto filterValue = GetAttrValue<std::string>(jsonValue, INPUT_FILTER_ATTR);
     EXPECT_EQ(checkEvent->nodeId, textFieldChild->GetId());
     EXPECT_EQ(checkEvent->textBreakpoints, UtfUtils::Str16ToStr8(ERROR_TEXT));
-    EXPECT_EQ(filterValue, UtfUtils::Str16ToStr8(ERROR_TEXT));
+    EXPECT_THAT(filterValue, Eq(UtfUtils::Str16ToStr8(ERROR_TEXT)));
     // reset callback
     optCallback = ArkValue<Opt_Callback_String_Void>();
     checkEvent.reset();
@@ -278,7 +278,7 @@ HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnCutTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setOnCutTest
+ * @tc.name: setOnPasteTestCallEvent
  * @tc.desc: Test Seacrh setOnCut event.
  * @tc.type: FUNC
  */
@@ -404,7 +404,7 @@ HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnEditChangeTest, TestSize.Leve
     auto onEditChange = [](Ark_Int32 nodeId, const Ark_Boolean isEditChange) {
         checkEvent = Converter::Convert<bool>(isEditChange);
     };
-    auto inputValue = Converter::ArkCallback<Opt_Callback_Boolean_Void>(onEditChange);
+    auto inputValue = Converter::ArkCallback<Opt_arkui_component_common_Callback_Boolean_Void>(onEditChange);
     modifier_->setOnEditChange(node_, &inputValue);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
@@ -412,10 +412,10 @@ HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnEditChangeTest, TestSize.Leve
     ASSERT_NE(textFieldEventHub, nullptr);
     checkEvent.reset();
     textFieldEventHub->FireOnEditChanged(false);
-    EXPECT_THAT(checkEvent, Optional(Eq(false)));
+    EXPECT_THAT(checkEvent, Eq(false));
     checkEvent.reset();
     textFieldEventHub->FireOnEditChanged(true);
-    EXPECT_THAT(checkEvent, Optional(Eq(true)));
+    EXPECT_THAT(checkEvent, Eq(true));
 }
 
 /**

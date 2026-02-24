@@ -50,11 +50,11 @@ public:
 };
 
 /**
- * @tc.name: OffsetTest
+ * @tc.name: offsetTest
  * @tc.desc:
  * @tc.type: FUNC
 */
-HWTEST_F(PathShapeAccessorTest, OffsetTest, TestSize.Level1)
+HWTEST_F(PathShapeAccessorTest, offsetTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->offset, nullptr);
     ASSERT_NE(peer_, nullptr);
@@ -80,11 +80,11 @@ HWTEST_F(PathShapeAccessorTest, OffsetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: PositionTest
+ * @tc.name: positionTest
  * @tc.desc:
  * @tc.type: FUNC
 */
-HWTEST_F(PathShapeAccessorTest, PositionTest, TestSize.Level1)
+HWTEST_F(PathShapeAccessorTest, positionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->position, nullptr);
     ASSERT_NE(peer_, nullptr);
@@ -151,11 +151,11 @@ HWTEST_F(PathShapeAccessorTest, fillTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: fillFromResourceTest
+ * @tc.name: fillTestFromResource
  * @tc.desc: Color from Resource
  * @tc.type: FUNC
  */
-HWTEST_F(PathShapeAccessorTest, fillFromResourceTest, TestSize.Level1)
+HWTEST_F(PathShapeAccessorTest, fillTestFromResource, TestSize.Level1)
 {
     ASSERT_NE(accessor_->fill, nullptr);
     ASSERT_NE(peer_, nullptr);

@@ -145,7 +145,7 @@ public:
 protected:
     static RefPtr<SecurityComponentTheme> GetTheme();
     static void InitChildNode(FrameNode* frameNode, const SecurityComponentElementStyle& style,
-    GetIconResourceFuncType getIconResource, GetTextResourceFuncType getTextResource);
+        GetIconResourceFuncType getIconResource, GetTextResourceFuncType getTextResource);
     static bool InitSecurityComponent(FrameNode* frameNode,
         const SecurityComponentElementStyle& style, bool isArkuiComponent,
         GetIconResourceFuncType getIconResource, GetTextResourceFuncType getTextResource);

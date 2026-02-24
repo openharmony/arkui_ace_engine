@@ -47,7 +47,10 @@ ohos_shared_library("arkoala_native_ani") {
     "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/",
   ]
 
-  deps = [ ":ani_utils_common" ]
+  deps = [
+    ":ani_utils_common",
+    "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
+  ]
   if (!build_ohos_sdk) {
     deps += [ "$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark" ]
   }
@@ -67,6 +70,7 @@ ohos_shared_library("arkoala_native_ani") {
     "detached_free_root_node/detached_free_root_node.cpp",
     "dragController/drag_controller_module.cpp",
     "drag_and_drop/native_drag_drop_global.cpp",
+    "drawable/drawable_module.cpp",
     "image/image_module.cpp",
     "image_span/image_span_module.cpp",
     "interop/interop_module.cpp",

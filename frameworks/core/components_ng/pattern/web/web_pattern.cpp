@@ -1394,6 +1394,9 @@ void WebPattern::OnContextMenuHide()
 
 bool WebPattern::NeedSoftKeyboard() const
 {
+    if (onNeedSoftkeyboardCallback_ && !Pattern::NeedSoftKeyboard()) {
+        return false;
+    }
     if (delegate_) {
         return delegate_->NeedSoftKeyboard();
     }
@@ -1546,6 +1549,18 @@ void WebPattern::SetRotation(uint32_t rotation)
     delegate_->SetTransformHint(rotation);
 }
 
+void WebPattern::InitEventAfterUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    InitLightTouchEvent(inputHub);
+}
+
 void WebPattern::InitEvent()
 {
     auto host = GetHost();
@@ -1565,7 +1580,6 @@ void WebPattern::InitEvent()
     CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
     InitHoverEvent(inputHub);
-    InitLightTouchEvent(inputHub);
 
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -1598,7 +1612,7 @@ void WebPattern::HandleCancelFling()
 
 void WebPattern::InitLightTouchEvent(const RefPtr<InputEventHub>& inputHub)
 {
-    auto lightTouchCallback = [weak = WeakClaim(this)]() {
+    auto lightTouchCallback = [weak = WeakClaim(this)](PointF point) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleCancelFling();
@@ -4297,6 +4311,7 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     InitializeAccessibility();
     InitSurfaceDensityCallback(pipelineContext);
     pipeline_ = WeakClaim(context);
+    InitEventAfterUpdate();
 }
 
 void WebPattern::OnDetachContext(PipelineContext *contextPtr)

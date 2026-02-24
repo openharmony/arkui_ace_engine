@@ -588,7 +588,8 @@ int32_t UiContentStub::GetStateMgmtInfoInner(MessageParcel& data, MessageParcel&
     std::string componentName = data.ReadString();
     std::string propertyName = data.ReadString();
     std::string jsonPath = data.ReadString();
-    reply.WriteInt32(GetStateMgmtInfo(componentName, propertyName, jsonPath, nullptr));
+    bool onlyVisible = data.ReadBool();
+    reply.WriteInt32(GetStateMgmtInfo(componentName, propertyName, jsonPath, nullptr, onlyVisible));
     return NO_ERROR;
 }
 

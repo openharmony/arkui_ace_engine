@@ -18,6 +18,7 @@
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
  
 namespace OHOS::Ace::NG {
 namespace {
@@ -28,13 +29,22 @@ std::shared_ptr<Rosen::RSNode> GetRsNode(const RefPtr<FrameNode>& node)
     CHECK_NULL_RETURN(renderContext, nullptr);
     return renderContext->GetRSNode();
 }
+
+void RequestNextFrame(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RequestFrame();
+}
 } // namespace
 LuminanceSamplingHelper::LuminanceSamplingHelper() {}
 
 void LuminanceSamplingHelper::SetSamplingOptions(const WeakPtr<FrameNode>& node, int32_t samplingInterval,
     int32_t brightThreshold, int32_t darkThreshold, const std::optional<EdgesParam>& region)
 {
-    auto rsNode = GetRsNode(node.Upgrade());
+    auto nodeRef = node.Upgrade();
+    auto rsNode = GetRsNode(nodeRef);
     CHECK_NULL_VOID(rsNode);
     std::optional<Rosen::Vector4f> setRegion = std::nullopt;
     if (region) {
@@ -50,22 +60,43 @@ void LuminanceSamplingHelper::SetSamplingOptions(const WeakPtr<FrameNode>& node,
             left = region->left->ConvertToPx();
             right = region->right->ConvertToPx();
             setRegion = Rosen::Vector4f(left, top, right, bottom);
+            TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT,
+                "LuminanceSampling | {id:%{public}d,tag:%{public}s,inspectorId:%{public}s} | region: {%{public}f, "
+                "%{public}f, %{public}f, %{public}f}",
+                nodeRef->GetId(), nodeRef->GetTag().c_str(), nodeRef->GetInspectorId().value_or("").c_str(), left, top,
+                right, bottom);
         }
     }
+    TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT,
+        "LuminanceSampling | {id:%{public}d,tag:%{public}s,inspectorId:%{public}s} | samplingInterval: %{public}d | "
+        "{dark,bright}:{%{public}d, %{public}d}",
+        nodeRef->GetId(), nodeRef->GetTag().c_str(), nodeRef->GetInspectorId().value_or("").c_str(), samplingInterval,
+        darkThreshold, brightThreshold);
     rsNode->SetColorPickerOptions(samplingInterval, std::make_pair(darkThreshold, brightThreshold), setRegion);
+    RequestNextFrame(nodeRef);
 }
 
 void LuminanceSamplingHelper::RegisterSamplingCallback(const WeakPtr<NG::FrameNode>& node, const SamplingCallback& func)
 {
-    auto rsNode = GetRsNode(node.Upgrade());
+    auto nodeRef = node.Upgrade();
+    auto rsNode = GetRsNode(nodeRef);
     CHECK_NULL_VOID(rsNode);
+    TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT,
+        "LuminanceSampling | {id:%{public}d,tag:%{public}s,inspectorId:%{public}s} | SetColorPickerCallback",
+        nodeRef->GetId(), nodeRef->GetTag().c_str(), nodeRef->GetInspectorId().value_or("").c_str());
     rsNode->SetColorPickerCallback(func);
+    RequestNextFrame(nodeRef);
 }
 
 void LuminanceSamplingHelper::UnRegisterSamplingCallback(const WeakPtr<NG::FrameNode>& node)
 {
-    auto rsNode = GetRsNode(node.Upgrade());
+    auto nodeRef = node.Upgrade();
+    auto rsNode = GetRsNode(nodeRef);
     CHECK_NULL_VOID(rsNode);
+    TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT,
+        "LuminanceSampling | {id:%{public}d,tag:%{public}s,inspectorId:%{public}s} | UnregisterColorPickerCallback",
+        nodeRef->GetId(), nodeRef->GetTag().c_str(), nodeRef->GetInspectorId().value_or("").c_str());
     rsNode->UnregisterColorPickerCallback();
+    RequestNextFrame(nodeRef);
 }
 } // namespace OHOS::Ace::NG

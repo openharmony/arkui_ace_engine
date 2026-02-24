@@ -2,6 +2,7 @@ import { int32 } from "@koalaui/common";
 import { KPointer, nullptr } from '@koalaui/interop';
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
+import { ColorMetricsExt } from '#generated'
 import { NodeController } from "arkui.NodeController";
 import { default as curves } from "@ohos.curves";
 import { default as matrix4 } from "@ohos.matrix4";
@@ -84,6 +85,12 @@ import { ComponentContentBase } from 'arkui/ComponentContent';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
 import { ComponentContent } from 'arkui.ComponentContent';
 import { InputMethodExtraConfig } from "@ohos.inputMethod.ExtraConfig"
+import { BusinessErrorInterface, BusinessError } from "#generated";
+import { WaterFlowSections } from "#handwritten";
+import { WaterFlowSectionsInterface } from "#generated";
+import { CustomBuilderT, CustomNodeBuilderT, ResponseType } from '#generated'
+import { CommonModifier } from '#generated'
+import { CallbackTransformer } from './../CallbackTransformer'
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -95,14 +102,6 @@ export namespace extractors {
 
   export function toInputMethodExtraConfigPtr(config: InputMethodExtraConfig): KPointer {
     return ArkUIAniModule._Extractors_ToInputMethodExtraConfigPtr(config);
-  }
-
-  export function toColorMetricsPtr(value: ColorMetrics): KPointer {
-    return 123;
-  }
-  export function fromColorMetricsPtr(ptr: KPointer): ColorMetrics {
-    const x: Object = {};
-    return x as ColorMetrics;
   }
 
   export function toComponentContentBasePtr(value: ComponentContentBase): KPointer {
@@ -641,5 +640,63 @@ export namespace extractors {
   export function fromComponentContentPtr(ptr: KPointer): ComponentContent {
     const x: Object = {};
     return x as ComponentContent;
+  }
+
+  export function transform_Ark_ColorMetrics_to_Ark_ColorMetricsExt(colorMetrics: ColorMetrics): ColorMetricsExt {
+    const colorMetricsExt = new ColorMetricsExt()
+    colorMetricsExt.red = colorMetrics.red
+    colorMetricsExt.green = colorMetrics.green
+    colorMetricsExt.blue = colorMetrics.blue
+    colorMetricsExt.alpha = colorMetrics.alpha
+    colorMetricsExt.resourceId = colorMetrics.getResourceId()
+    colorMetricsExt.colorSpace = colorMetrics.getColorSpace()
+    return colorMetricsExt
+  }
+
+  export function transform_Ark_ColorMetricsExt_to_Ark_ColorMetrics(colorMetricsExt: ColorMetricsExt): ColorMetrics {
+    const colorMetrics = ColorMetrics.colorWithSpace(
+      colorMetricsExt.colorSpace,
+      colorMetricsExt.red,
+      colorMetricsExt.green,
+      colorMetricsExt.blue,
+      colorMetricsExt.alpha
+    )
+    colorMetrics.setResourceId(colorMetricsExt.resourceId)
+    return colorMetrics
+  }
+  export function transform_Ark_BusinessError_Void_to_Ark_BusinessErrorInterface_Void(from: BusinessError<void>): BusinessErrorInterface<void> {
+        return {
+            name: from.name,
+            message: from.message,
+            stack: from.stack,
+            code: from.code,
+            data: undefined,
+        }
+    }
+  export function transform_Ark_BusinessErrorInterface_Void_to_Ark_BusinessError_Void(from: BusinessErrorInterface<void>): BusinessError<void> {
+    return new BusinessError(from.code, new Error()) // TODO how to construct error correctly?
+  }
+  export function transform_Ark_WaterFlowSections_to_Ark_WaterFlowSectionsInterface(from: WaterFlowSections): WaterFlowSectionsInterface {
+    throw new Error("Not implemented")
+  }
+  export function transform_Ark_WaterFlowSectionsInterface_to_Ark_WaterFlowSections(from: WaterFlowSectionsInterface): WaterFlowSections {
+    throw new Error("Not implemented")
+  }
+
+  export function transform_CustomBuilderT_ResponseType_to_CustomNodeBuilderT_ResponseType(
+    content: CustomBuilderT<ResponseType>): CustomNodeBuilderT<ResponseType> {
+      return CallbackTransformer.transformFromCustomBuilderT(content)
+    }
+  export function toCommonModifierPtr(value: CommonModifier): KPointer {
+    throw new Error("Not implemented")
+  }
+  export function fromCommonModifierPtr(ptr: KPointer): CommonModifier {
+    throw new Error("Not implemented")
+  }
+  export function toUiEffectHdrBrightnessBlenderPtr(value: uiEffect.HdrBrightnessBlender): KPointer {
+    throw new Error("Not implemented")
+  }
+  export function fromUiEffectHdrBrightnessBlenderPtr(ptr: KPointer): uiEffect.HdrBrightnessBlender {
+    throw new Error("Not implemented")
   }
 }

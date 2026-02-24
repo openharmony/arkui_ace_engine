@@ -258,6 +258,18 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest005)
 }
 
 /**
+ * @tc.name: ArkoalaLazyNodeTest006
+ * @tc.desc: Test ArkoalaLazyNode OnDataChange.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest006)
+{
+    auto repeatNode = CreateRepeatNode(GetNextId());
+    EXPECT_NE(repeatNode, nullptr);
+    repeatNode->OnDataChange(0, TOTAL_COUNT, UINode::NotificationType::START_CHANGE_POSITION);
+}
+
+/**
  * @tc.name: ArkoalaLazyNodeTest007
  * @tc.desc: Test ArkoalaLazyNode SetJSViewActive.
  * @tc.type: FUNC
@@ -499,6 +511,20 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest018)
         ret.push_back(node);
     });
     EXPECT_EQ(ret.size(), TOTAL_COUNT);
+}
+
+/**
+ * @tc.name: ArkoalaLazyNodeTest019
+ * @tc.desc: Test ArkoalaLazyNode BuildAllChildren.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest019)
+{
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    int32_t totalCount = 50;
+    CreateChildren(lazyNode, totalCount);
+    lazyNode->BuildAllChildren();
+    EXPECT_EQ(lazyNode->children_.size(), totalCount);
 }
 
 /**

@@ -421,6 +421,12 @@ int32_t ReadComponentLoadNumber()
         "persist.ace.componentload.number", 1); // Number of components loaded in 100 milliseconds.
 }
 
+int32_t ReadStopCollectTimeWait()
+{
+    return system::GetIntParameter(
+        "persist.ace.stopCollect.timeWait", 800); // 800 : Stop collecting asynchronous task waiting time.
+}
+
 bool IsExtSurfaceEnabled()
 {
 #ifdef EXT_SURFACE_ENABLE
@@ -1110,6 +1116,12 @@ ACE_WEAK_SYM int32_t SystemProperties::GetComponentLoadNumber()
     return componentLoadNumber;
 }
 
+ACE_WEAK_SYM int32_t SystemProperties::GetStopCollectTimeWait()
+{
+    static int32_t stopCollectTimeWait = ReadStopCollectTimeWait();
+    return stopCollectTimeWait;
+}
+
 bool SystemProperties::IsFormAnimationLimited()
 {
     return system::GetBoolParameter("persist.sys.arkui.formAnimationLimit", true);
@@ -1336,6 +1348,13 @@ ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
 {
     InitFoldScreenTypeBySystemProperty();
     return foldScreenType_ == FoldScreenType::SMALL_FOLDER;
+}
+
+ACE_WEAK_SYM bool SystemProperties::IsPortraitFoldProduct()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::SMALL_FOLDER ||
+        foldScreenType_ == FoldScreenType::PORTRAIT_FOLDER;
 }
 
 ACE_WEAK_SYM bool SystemProperties::IsBigFoldProduct()

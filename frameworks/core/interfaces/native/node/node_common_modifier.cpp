@@ -9391,7 +9391,7 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node = AceType::WeakClaim(frameNode), eventReceiver](const bool isOn) {
+    std::function<void(const bool)> onChange = [node = AceType::WeakClaim(frameNode), eventReceiver](const bool isOn) {
         auto frameNode = node.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
@@ -9404,9 +9404,9 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
         CHECK_NULL_VOID(checkboxModifier);
         return checkboxModifier->setCheckboxOnChange(node, reinterpret_cast<void*>(&onChange));
     } else {
-        auto* radioModifier = GetArkUINodeModifiers()->getRadioModifier();
+        auto radioModifier = GetArkUINodeModifiers()->getRadioModifier();
         CHECK_NULL_VOID(radioModifier);
-        radioModifier->setRadioOnChange(reinterpret_cast<ArkUINodeHandle>(node), reinterpret_cast<void*>(&onChange));
+        radioModifier->setRadioOnChange(node, reinterpret_cast<void*>(&onChange));
     }
 }
 
@@ -12677,6 +12677,23 @@ void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
     accessibilityProperty->SetActions(onEvent);
 }
 
+void SetOnNeedSoftkeyboard(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onNeedSoftkeyboardCallback = [nodeId, extraParam]() -> bool {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_NEED_SOFTKEYBOARD;
+        SendArkUISyncEvent(&event);
+        return event.componentAsyncEvent.data[0].i32;
+    };
+    ViewAbstract::SetOnNeedSoftkeyboard(frameNode, std::move(onNeedSoftkeyboardCallback));
+}
+
 void ResetOnAppear(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -12841,6 +12858,13 @@ void ResetOnStackOverflowScroll(ArkUINodeHandle node)
         CHECK_NULL_VOID(hub);
         hub->ClearOverflowScrollEvent();
     }
+}
+
+void ResetOnNeedSoftkeyboard(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetOnNeedSoftkeyboard(frameNode);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

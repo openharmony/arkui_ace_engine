@@ -100,10 +100,11 @@ public:
 HWTEST_F(RichEditorModifierTest, DISABLED_setCopyOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE) << "Default value for attribute 'copyOptions'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE)) <<
+        "Default value for attribute 'copyOptions'";
 }
 
 /*
@@ -126,7 +127,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setCopyOptionsTestCopyOptionsValidValu
         modifier_->setCopyOptions(node_, &inputValueCopyOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
     };
 
@@ -155,7 +156,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setCopyOptionsTestCopyOptionsInvalidVa
         modifier_->setCopyOptions(node_, &inputValueCopyOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
     };
 
@@ -172,10 +173,10 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setCopyOptionsTestCopyOptionsInvalidVa
 HWTEST_F(RichEditorModifierTest, setEnableDataDetectorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_DATA_DETECTOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_DATA_DETECTOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_DATA_DETECTOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableDataDetector'";
 }
 
@@ -199,7 +200,7 @@ HWTEST_F(RichEditorModifierTest, setEnableDataDetectorTestEnableDataDetectorVali
         modifier_->setEnableDataDetector(node_, &inputValueEnableDataDetector);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_DATA_DETECTOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnableDataDetector, attribute: enableDataDetector";
     };
 
@@ -228,7 +229,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setEnableDataDetectorTestEnableDataDet
         modifier_->setEnableDataDetector(node_, &inputValueEnableDataDetector);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_DATA_DETECTOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_DATA_DETECTOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_DATA_DETECTOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEnableDataDetector, attribute: enableDataDetector";
     };
 
@@ -254,30 +255,29 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setEnablePreviewTextTestPlaceholder, T
 HWTEST_F(RichEditorModifierTest, DISABLED_setDataDetectorConfigTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultDataDetectorConfig =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME);
-    std::unique_ptr<JsonValue> resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(
-        resultDataDetectorConfig, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultDataDetectorConfig = GetAttrObject(jsonValue, ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME);
+    std::unique_ptr<JsonValue> resultDecoration =
+        GetAttrObject(resultDataDetectorConfig, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultDataDetectorConfig, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_TYPES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_TYPES_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DATA_DETECTOR_CONFIG_I_TYPES_DEFAULT_VALUE)) <<
         "Default value for attribute 'dataDetectorConfig.types'";
 
     resultStr = GetAttrValue<std::string>(resultDataDetectorConfig, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_COLOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DATA_DETECTOR_CONFIG_I_COLOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'dataDetectorConfig.color'";
 
     resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_TYPE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_TYPE_DEFAULT_VALUE)) <<
         "Default value for attribute 'dataDetectorConfig.decoration.type'";
 
     resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_COLOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_COLOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'dataDetectorConfig.decoration.color'";
 
     resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_STYLE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DATA_DETECTOR_CONFIG_I_DECORATION_I_STYLE_DEFAULT_VALUE)) <<
         "Default value for attribute 'dataDetectorConfig.decoration.style'";
 }
 
@@ -329,10 +329,10 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setEnterKeyTypeTestPlaceholder, TestSi
 HWTEST_F(RichEditorModifierTest, setEnableKeyboardOnFocusTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableKeyboardOnFocus'";
 }
 
@@ -356,7 +356,7 @@ HWTEST_F(RichEditorModifierTest, setEnableKeyboardOnFocusTestEnableKeyboardOnFoc
         modifier_->setEnableKeyboardOnFocus(node_, &inputValueEnableKeyboardOnFocus);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnableKeyboardOnFocus, attribute: enableKeyboardOnFocus";
     };
 
@@ -385,7 +385,7 @@ HWTEST_F(RichEditorModifierTest, setEnableKeyboardOnFocusTestEnableKeyboardOnFoc
         modifier_->setEnableKeyboardOnFocus(node_, &inputValueEnableKeyboardOnFocus);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEnableKeyboardOnFocus, attribute: enableKeyboardOnFocus";
     };
 
@@ -401,10 +401,10 @@ HWTEST_F(RichEditorModifierTest, setEnableKeyboardOnFocusTestEnableKeyboardOnFoc
 HWTEST_F(RichEditorModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableHapticFeedback'";
 }
 
@@ -428,7 +428,7 @@ HWTEST_F(RichEditorModifierTest, setEnableHapticFeedbackTestEnableHapticFeedback
         modifier_->setEnableHapticFeedback(node_, &inputValueEnableHapticFeedback);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
     };
 
@@ -457,7 +457,7 @@ HWTEST_F(RichEditorModifierTest, setEnableHapticFeedbackTestEnableHapticFeedback
         modifier_->setEnableHapticFeedback(node_, &inputValueEnableHapticFeedback);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
     };
 
@@ -473,10 +473,10 @@ HWTEST_F(RichEditorModifierTest, setEnableHapticFeedbackTestEnableHapticFeedback
 HWTEST_F(RichEditorModifierTest, DISABLED_setBarStateTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_DEFAULT_VALUE) << "Default value for attribute 'barState'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BAR_STATE_DEFAULT_VALUE)) << "Default value for attribute 'barState'";
 }
 
 /*
@@ -499,7 +499,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setBarStateTestBarStateValidValues, Te
         modifier_->setBarState(node_, &inputValueBarState);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setBarState, attribute: barState";
     };
 
@@ -528,7 +528,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setBarStateTestBarStateInvalidValues, 
         modifier_->setBarState(node_, &inputValueBarState);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BAR_STATE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setBarState, attribute: barState";
     };
 
@@ -545,10 +545,10 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setBarStateTestBarStateInvalidValues, 
 HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLengthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LENGTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE) << "Default value for attribute 'maxLength'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE)) << "Default value for attribute 'maxLength'";
 }
 
 /*
@@ -571,7 +571,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLengthTestMaxLengthValidValues, 
         modifier_->setMaxLength(node_, &inputValueMaxLength);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LENGTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMaxLength, attribute: maxLength";
     };
 
@@ -600,7 +600,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLengthTestMaxLengthInvalidValues
         modifier_->setMaxLength(node_, &inputValueMaxLength);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LENGTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMaxLength, attribute: maxLength";
     };
 
@@ -616,10 +616,10 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLengthTestMaxLengthInvalidValues
 HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLinesTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_VALUE) << "Default value for attribute 'maxLines'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MAX_LINES_DEFAULT_VALUE)) << "Default value for attribute 'maxLines'";
 }
 
 /*
@@ -642,7 +642,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLinesTestMaxLinesValidValues, Te
         modifier_->setMaxLines(node_, &inputValueMaxLines);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
     };
 
@@ -671,7 +671,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLinesTestMaxLinesInvalidValues, 
         modifier_->setMaxLines(node_, &inputValueMaxLines);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MAX_LINES_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
     };
 
@@ -687,10 +687,10 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLinesTestMaxLinesInvalidValues, 
 HWTEST_F(RichEditorModifierTest, DISABLED_setKeyboardAppearanceTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE)) <<
         "Default value for attribute 'keyboardAppearance'";
 }
 
@@ -715,7 +715,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setKeyboardAppearanceTestKeyboardAppea
         modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setKeyboardAppearance, attribute: keyboardAppearance";
     };
 
@@ -746,7 +746,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setKeyboardAppearanceTestKeyboardAppea
         modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setKeyboardAppearance, attribute: keyboardAppearance";
     };
 
@@ -763,10 +763,11 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setKeyboardAppearanceTestKeyboardAppea
 HWTEST_F(RichEditorModifierTest, DISABLED_setStopBackPressTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE) << "Default value for attribute 'stopBackPress'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE)) <<
+        "Default value for attribute 'stopBackPress'";
 }
 
 /*
@@ -789,7 +790,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setStopBackPressTestStopBackPressValid
         modifier_->setStopBackPress(node_, &inputValueStopBackPress);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
     };
 
@@ -818,7 +819,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setStopBackPressTestStopBackPressInval
         modifier_->setStopBackPress(node_, &inputValueStopBackPress);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
     };
 
@@ -834,36 +835,33 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setStopBackPressTestStopBackPressInval
 HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultPlaceholder =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-    std::unique_ptr<JsonValue> resultStyle =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
-    std::unique_ptr<JsonValue> resultFont =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+    std::unique_ptr<JsonValue> resultStyle = GetAttrObject(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
+    std::unique_ptr<JsonValue> resultFont = GetAttrObject(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_VALUE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_VALUE_DEFAULT_VALUE)) <<
         "Default value for attribute 'placeholder.value'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE)) <<
         "Default value for attribute 'placeholder.style.font.size'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'placeholder.style.font.weight'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_FAMILY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE)) <<
         "Default value for attribute 'placeholder.style.font.family'";
 
     resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE)) <<
         "Default value for attribute 'placeholder.style.font.style'";
 
     resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_COLOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_COLOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'placeholder.style.fontColor'";
 }
 
@@ -898,9 +896,9 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderValueVali
         inputValueValue = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_VALUE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.value";
     };
 
@@ -943,9 +941,9 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderValueInva
         inputValueValue = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_VALUE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_VALUE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_VALUE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.value";
     };
 
@@ -986,13 +984,11 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         WriteTo(WriteTo(inputValueStyle).font).size = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        auto resultStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
-        auto resultFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultStyle = GetAttrObject(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.style.font.size";
     };
 
@@ -1038,13 +1034,11 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         WriteTo(WriteTo(inputValueStyle).font).size = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        auto resultStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
-        auto resultFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultStyle = GetAttrObject(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.style.font.size";
     };
 
@@ -1094,13 +1088,11 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         WriteTo(WriteTo(inputValueStyle).font).weight = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        auto resultStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
-        auto resultFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultStyle = GetAttrObject(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.style.font.weight";
     };
 
@@ -1147,13 +1139,11 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         WriteTo(WriteTo(inputValueStyle).font).weight = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        auto resultStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
-        auto resultFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultStyle = GetAttrObject(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.style.font.weight";
     };
 
@@ -1197,13 +1187,11 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         WriteTo(WriteTo(inputValueStyle).font).family = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        auto resultStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
-        auto resultFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultStyle = GetAttrObject(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.style.font.family";
     };
 
@@ -1245,13 +1233,11 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         WriteTo(WriteTo(inputValueStyle).font).family = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        auto resultStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
-        auto resultFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultStyle = GetAttrObject(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.style.font.family";
     };
 
@@ -1293,13 +1279,11 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         WriteTo(WriteTo(inputValueStyle).font).style = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        auto resultStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
-        auto resultFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultStyle = GetAttrObject(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.style.font.style";
     };
 
@@ -1339,13 +1323,11 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         WriteTo(WriteTo(inputValueStyle).font).style = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        auto resultStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
-        auto resultFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultStyle = GetAttrObject(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.style.font.style";
     };
 
@@ -1385,11 +1367,10 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         WriteTo(inputValueStyle).fontColor = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        auto resultStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultStyle = GetAttrObject(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.style.fontColor";
     };
 
@@ -1439,11 +1420,10 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTestPlaceholderStyleFont
         WriteTo(inputValueStyle).fontColor = value;
         modifier_->setPlaceholder(node_, &inputValueValue, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholder = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-        auto resultStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
+        auto resultPlaceholder = GetAttrObject(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        auto resultStyle = GetAttrObject(resultPlaceholder, ATTRIBUTE_PLACEHOLDER_I_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPlaceholder, attribute: placeholder.style.fontColor";
     };
 

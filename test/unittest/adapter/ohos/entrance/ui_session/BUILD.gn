@@ -13,7 +13,7 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-config("ui_session_stub_test_config") {
+config("ui_session_test_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "$ace_root/interfaces/inner_api/ui_session",
@@ -21,23 +21,24 @@ config("ui_session_stub_test_config") {
   ]
 }
 
-ohos_unittest("ui_session_stub_unittest") {
+ohos_unittest("ui_content_stub_unittest") {
   module_out_path = adapter_test_output_path
   sources = [
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_stub.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_stub_impl.cpp",
     "$ace_root/test/mock/adapter/mock_ui_session_manager.cpp",
+    "$ace_root/test/mock/adapter/mock_ui_session_manager_ohos.cpp",
 
     # mocker
     "accesstoken_kit.cpp",
 
     # test source file
-    "ui_session_stub_test.cpp",
+    "ui_content_stub_test.cpp",
   ]
 
   configs = [
     "$ace_root/test/unittest:ace_unittest_config",
-    ":ui_session_stub_test_config",
+    ":ui_session_test_config",
   ]
 
   deps = [

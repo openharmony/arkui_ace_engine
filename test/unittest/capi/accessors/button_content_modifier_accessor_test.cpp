@@ -45,11 +45,11 @@ static const std::string TEST_DEFAULT_NAME = "";
 static constexpr bool TEST_DEFAULT_PRESSED = false;
 
 /**
- * @tc.name: ButtonContentModifierHelperAccessorTest
+ * @tc.name: contentModifierButtonTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonContentModifierHelperAccessor, DISABLED_buttonContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(ButtonContentModifierHelperAccessor, DISABLED_contentModifierButtonTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierButton, nullptr);
 

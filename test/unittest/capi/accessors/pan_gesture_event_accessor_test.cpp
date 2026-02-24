@@ -45,11 +45,11 @@ private:
 };
 
 /**
- * @tc.name: GetOffsetXTest
+ * @tc.name: getOffsetXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureEventAccessorTest, GetOffsetXTest, TestSize.Level1)
+HWTEST_F(PanGestureEventAccessorTest, getOffsetXTest, TestSize.Level1)
 {
     PipelineBase::GetCurrentDensity();
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberDoubleValues) {
@@ -63,11 +63,11 @@ HWTEST_F(PanGestureEventAccessorTest, GetOffsetXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetOffsetXTest
+ * @tc.name: setOffsetXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureEventAccessorTest, SetOffsetXTest, TestSize.Level1)
+HWTEST_F(PanGestureEventAccessorTest, setOffsetXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setOffsetX(peer_, &value);
@@ -79,11 +79,11 @@ HWTEST_F(PanGestureEventAccessorTest, SetOffsetXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetOffsetYTest
+ * @tc.name: getOffsetYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureEventAccessorTest, GetOffsetYTest, TestSize.Level1)
+HWTEST_F(PanGestureEventAccessorTest, getOffsetYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberDoubleValues) {
         auto event = peer_->GetEventInfo();
@@ -96,11 +96,11 @@ HWTEST_F(PanGestureEventAccessorTest, GetOffsetYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetOffsetYTest
+ * @tc.name: setOffsetYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureEventAccessorTest, SetOffsetYTest, TestSize.Level1)
+HWTEST_F(PanGestureEventAccessorTest, setOffsetYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setOffsetY(peer_, &value);
@@ -112,11 +112,11 @@ HWTEST_F(PanGestureEventAccessorTest, SetOffsetYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetVelocityXTest
+ * @tc.name: getVelocityXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureEventAccessorTest, GetVelocityXTest, TestSize.Level1)
+HWTEST_F(PanGestureEventAccessorTest, getVelocityXTest, TestSize.Level1)
 {
     const double velocityY = 2.3;
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberDoubleValues) {
@@ -131,11 +131,11 @@ HWTEST_F(PanGestureEventAccessorTest, GetVelocityXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetVelocityXTest
+ * @tc.name: setVelocityXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureEventAccessorTest, SetVelocityXTest, TestSize.Level1)
+HWTEST_F(PanGestureEventAccessorTest, setVelocityXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setVelocityX(peer_, &value);
@@ -147,11 +147,11 @@ HWTEST_F(PanGestureEventAccessorTest, SetVelocityXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetVelocityYTest
+ * @tc.name: getVelocityYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureEventAccessorTest, GetVelocityYTest, TestSize.Level1)
+HWTEST_F(PanGestureEventAccessorTest, getVelocityYTest, TestSize.Level1)
 {
     const double velocityX = 2.3;
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberDoubleValues) {
@@ -166,11 +166,11 @@ HWTEST_F(PanGestureEventAccessorTest, GetVelocityYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetVelocityYTest
+ * @tc.name: setVelocityYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureEventAccessorTest, SetVelocityYTest, TestSize.Level1)
+HWTEST_F(PanGestureEventAccessorTest, setVelocityYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setVelocityY(peer_, &value);
@@ -182,11 +182,11 @@ HWTEST_F(PanGestureEventAccessorTest, SetVelocityYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetVelocityTest
+ * @tc.name: getVelocityTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureEventAccessorTest, GetVelocityTest, TestSize.Level1)
+HWTEST_F(PanGestureEventAccessorTest, getVelocityTest, TestSize.Level1)
 {
     for (auto& [input, velocityX, velocityY, expected] : AccessorTestFixtures::testFixtureVelocity_half_Values) {
         auto event = peer_->GetEventInfo();
@@ -200,11 +200,11 @@ HWTEST_F(PanGestureEventAccessorTest, GetVelocityTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetVelocityYTest
+ * @tc.name: setVelocityTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureEventAccessorTest, SetVelocityTest, TestSize.Level1)
+HWTEST_F(PanGestureEventAccessorTest, setVelocityTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setVelocity(peer_, &value);

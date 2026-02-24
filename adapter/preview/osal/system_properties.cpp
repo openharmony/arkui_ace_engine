@@ -294,6 +294,11 @@ int32_t SystemProperties::GetComponentLoadNumber()
     return 1;
 }
 
+int32_t SystemProperties::GetStopCollectTimeWait()
+{
+    return 800; // 800 : Stop collecting asynchronous task waiting time.
+}
+
 bool SystemProperties::IsFormAnimationLimited()
 {
     return true;
@@ -415,6 +420,11 @@ bool SystemProperties::IsVelocityWithoutUpPoint()
 }
 
 bool SystemProperties::IsSmallFoldProduct()
+{
+    return false;
+}
+
+bool SystemProperties::IsPortraitFoldProduct()
 {
     return false;
 }

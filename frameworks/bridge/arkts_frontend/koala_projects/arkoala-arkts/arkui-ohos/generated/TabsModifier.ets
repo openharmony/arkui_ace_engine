@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,21 +16,27 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier, extractors } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkTabsPeer, BarPosition, AnimationMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, TabsNestedScrollMode, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, OnTabsContentDidScrollCallback, BarMode, ScrollableBarModeOptions, TabsCacheMode } from './component/tabs'
+import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier, extractors } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkTabsPeer, BarPosition, AnimationMode, TabsNestedScrollMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, OnTabsContentDidScrollCallback, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
-import { int32 } from "@koalaui/common"
-import { CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions } from "./component/common"
-import { Length, ResourceColor } from "./component/units"
-import { Resource } from "global.resource"
-import { default as curves } from "@ohos.curves"
-import { EdgeEffect, Color, PageFlipMode } from "./component/enums"
+import { CommonMethod, ICurve, Callback as arkui_component_common_Callback, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions } from './component/common'
+import { Length, Resource as arkui_component_units_Resource, ResourceColor } from './component/units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { Curve, EdgeEffect, Color as arkui_component_enums_Color, PageFlipMode } from './component/enums'
+import { default as curves } from '@ohos.curves'
 export class TabsModifier extends CommonMethodModifier implements TabsAttribute,AttributeModifier<TabsAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    private _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -40,650 +46,593 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     applyFocusedAttribute(instance: TabsAttribute): void { }
     applyDisabledAttribute(instance: TabsAttribute): void { }
     applySelectedAttribute(instance: TabsAttribute): void { }
-    _vertical_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _vertical_0_0value?: boolean | undefined
-    _barPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barPosition_0_0value?: BarPosition | undefined
-    _scrollable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollable_0_0value?: boolean | undefined
-    _barWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barWidth_0_0value?: Length | undefined
-    _animationCurve_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _animationCurve_0_0value?: curves.Curve | curves.ICurve | undefined
-    _animationDuration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _animationDuration_0_0value?: int32 | undefined
-    _animationMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _animationMode_0_0value?: AnimationMode | undefined
-    _edgeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _edgeEffect_0_0value?: EdgeEffect | undefined
-    _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onChange_0_0value?: ((value0: int32) => void) | undefined
-    _onSelected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSelected_0_0value?: ((value0: int32) => void) | undefined
-    _onTabBarClick_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onTabBarClick_0_0value?: ((value0: int32) => void) | undefined
-    _onUnselected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onUnselected_0_0value?: ((value0: int32) => void) | undefined
-    _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _nestedScroll_0_0value?: TabsNestedScrollMode | undefined
-    _onAnimationStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onAnimationStart_0_0value?: OnTabsAnimationStartCallback | undefined
-    _onAnimationEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onAnimationEnd_0_0value?: OnTabsAnimationEndCallback | undefined
-    _onGestureSwipe_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onGestureSwipe_0_0value?: OnTabsGestureSwipeCallback | undefined
-    _fadingEdge_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fadingEdge_0_0value?: boolean | undefined
-    _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _divider_0_0value?: DividerStyle | null | undefined
-    _barOverlap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barOverlap_0_0value?: boolean | undefined
-    _barBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barBackgroundColor_0_0value?: ResourceColor | undefined
-    _barGridAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barGridAlign_0_0value?: BarGridColumnOptions | undefined
-    _customContentTransition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _customContentTransition_0_0value?: TabsCustomContentTransitionCallback | undefined
-    _barBackgroundBlurStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barBackgroundBlurStyle_0_0value?: BlurStyle | undefined
-    _pageFlipMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _pageFlipMode_0_0value?: PageFlipMode | undefined
-    _barBackgroundEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barBackgroundEffect_0_0value?: BackgroundEffectOptions | undefined
-    _onContentWillChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onContentWillChange_0_0value?: OnTabsContentWillChangeCallback | undefined
-    _onContentDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onContentDidScroll_0_0value?: OnTabsContentDidScrollCallback | undefined
-    _barMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barMode_0_0value?: BarMode | undefined
-    _barMode_0_1value?: ScrollableBarModeOptions | undefined
-    _barHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barHeight_0_0value?: Length | undefined
-    _barHeight_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barHeight_1_0value?: Length | undefined
-    _barHeight_1_1value?: boolean | undefined
-    _barBackgroundBlurStyle_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _barBackgroundBlurStyle_1_0value?: BlurStyle | undefined
-    _barBackgroundBlurStyle_1_1value?: BackgroundBlurStyleOptions | undefined
-    _cachedMaxCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedMaxCount_0_0value?: int32 | undefined
-    _cachedMaxCount_0_1value?: TabsCacheMode | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _vertical_0_0value?: boolean | undefined
+    public _barPosition_0_0value?: BarPosition | undefined
+    public _scrollable_0_0value?: boolean | undefined
+    public _barWidth_0_0value?: Length | undefined
+    public _barHeight_0_0value?: Length | undefined
+    public _animationCurve_0_0value?: Curve | ICurve | undefined
+    public _animationDuration_0_0value?: int32 | undefined
+    public _animationMode_0_0value?: AnimationMode | undefined
+    public _edgeEffect_0_0value?: EdgeEffect | undefined
+    public _onChange_0_0value?: arkui_component_common_Callback<int32, void> | undefined
+    public _onSelected_0_0value?: arkui_component_common_Callback<int32, void> | undefined
+    public _onTabBarClick_0_0value?: arkui_component_common_Callback<int32, void> | undefined
+    public _onUnselected_0_0value?: arkui_component_common_Callback<int32, void> | undefined
+    public _onAnimationStart_0_0value?: OnTabsAnimationStartCallback | undefined
+    public _onAnimationEnd_0_0value?: OnTabsAnimationEndCallback | undefined
+    public _onGestureSwipe_0_0value?: OnTabsGestureSwipeCallback | undefined
+    public _fadingEdge_0_0value?: boolean | undefined
+    public _divider_0_0value?: DividerStyle | null | undefined
+    public _nestedScroll_0_0value?: TabsNestedScrollMode | undefined
+    public _barOverlap_0_0value?: boolean | undefined
+    public _barBackgroundColor_0_0value?: ResourceColor | undefined
+    public _barGridAlign_0_0value?: BarGridColumnOptions | undefined
+    public _customContentTransition_0_0value?: TabsCustomContentTransitionCallback | undefined
+    public _barBackgroundBlurStyle_0_0value?: BlurStyle | undefined
+    public _pageFlipMode_0_0value?: PageFlipMode | undefined
+    public _barBackgroundEffect_0_0value?: BackgroundEffectOptions | undefined
+    public _onContentWillChange_0_0value?: OnTabsContentWillChangeCallback | undefined
+    public _onContentDidScroll_0_0value?: OnTabsContentDidScrollCallback | undefined
+    public _barMode_0_0value?: BarMode | undefined
+    public _barMode_0_1value?: ScrollableBarModeOptions | undefined
+    public _barHeight_1_0value?: Length | undefined
+    public _barHeight_1_1value?: boolean | undefined
+    public _barBackgroundBlurStyle_1_0value?: BlurStyle | undefined
+    public _barBackgroundBlurStyle_1_1value?: BackgroundBlurStyleOptions | undefined
+    public _cachedMaxCount_0_0value?: int32 | undefined
+    public _cachedMaxCount_0_1value?: TabsCacheMode | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkTabsPeer;
-        if (this._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._vertical_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+        this.applyModifierPatch1(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkTabsPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setVerticalAttribute((this._vertical_0_0value as boolean | undefined));
-                    this._vertical_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._vertical_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._vertical_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setVerticalAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._barPosition_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barPosition_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setBarPositionAttribute((this._barPosition_0_0value as BarPosition | undefined));
-                    this._barPosition_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barPosition_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._barPosition_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setBarPositionAttribute((undefined as BarPosition | undefined));
                 }
             }
         }
-        if (this._scrollable_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._scrollable_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setScrollableAttribute((this._scrollable_0_0value as boolean | undefined));
-                    this._scrollable_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._scrollable_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._scrollable_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setScrollableAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._barWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setBarWidthAttribute((this._barWidth_0_0value as Length | undefined));
-                    this._barWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barWidth_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._barWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setBarWidthAttribute((undefined as Length | undefined));
                 }
             }
         }
-        if (this._animationCurve_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._animationCurve_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAnimationCurveAttribute((this._animationCurve_0_0value as curves.Curve | curves.ICurve | undefined));
-                    this._animationCurve_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._animationCurve_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._animationCurve_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAnimationCurveAttribute((undefined as curves.Curve | curves.ICurve | undefined));
-                }
-            }
-        }
-        if (this._animationDuration_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._animationDuration_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAnimationDurationAttribute((this._animationDuration_0_0value as int32 | undefined));
-                    this._animationDuration_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._animationDuration_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._animationDuration_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAnimationDurationAttribute((undefined as int32 | undefined));
-                }
-            }
-        }
-        if (this._animationMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._animationMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAnimationModeAttribute((this._animationMode_0_0value as AnimationMode | undefined));
-                    this._animationMode_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._animationMode_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._animationMode_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAnimationModeAttribute((undefined as AnimationMode | undefined));
-                }
-            }
-        }
-        if (this._edgeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._edgeEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined));
-                    this._edgeEffect_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._edgeEffect_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._edgeEffect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEdgeEffectAttribute((undefined as EdgeEffect | undefined));
-                }
-            }
-        }
-        if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value0: int32) => void) | undefined));
-                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnChangeAttribute((undefined as ((value0: int32) => void) | undefined));
-                }
-            }
-        }
-        if (this._onSelected_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onSelected_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnSelectedAttribute((this._onSelected_0_0value as ((value0: int32) => void) | undefined));
-                    this._onSelected_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onSelected_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onSelected_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnSelectedAttribute((undefined as ((value0: int32) => void) | undefined));
-                }
-            }
-        }
-        if (this._onTabBarClick_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onTabBarClick_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnTabBarClickAttribute((this._onTabBarClick_0_0value as ((value0: int32) => void) | undefined));
-                    this._onTabBarClick_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onTabBarClick_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onTabBarClick_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnTabBarClickAttribute((undefined as ((value0: int32) => void) | undefined));
-                }
-            }
-        }
-        if (this._onUnselected_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onUnselected_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnUnselectedAttribute((this._onUnselected_0_0value as ((value0: int32) => void) | undefined));
-                    this._onUnselected_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onUnselected_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onUnselected_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnUnselectedAttribute((undefined as ((value0: int32) => void) | undefined));
-                }
-            }
-        }
-        if (this._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._nestedScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setNestedScrollAttribute((this._nestedScroll_0_0value as TabsNestedScrollMode | undefined));
-                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._nestedScroll_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setNestedScrollAttribute((undefined as TabsNestedScrollMode | undefined));
-                }
-            }
-        }
-        if (this._onAnimationStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onAnimationStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnAnimationStartAttribute((this._onAnimationStart_0_0value as OnTabsAnimationStartCallback | undefined));
-                    this._onAnimationStart_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onAnimationStart_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onAnimationStart_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnAnimationStartAttribute((undefined as OnTabsAnimationStartCallback | undefined));
-                }
-            }
-        }
-        if (this._onAnimationEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onAnimationEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnAnimationEndAttribute((this._onAnimationEnd_0_0value as OnTabsAnimationEndCallback | undefined));
-                    this._onAnimationEnd_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onAnimationEnd_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onAnimationEnd_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnAnimationEndAttribute((undefined as OnTabsAnimationEndCallback | undefined));
-                }
-            }
-        }
-        if (this._onGestureSwipe_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onGestureSwipe_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnGestureSwipeAttribute((this._onGestureSwipe_0_0value as OnTabsGestureSwipeCallback | undefined));
-                    this._onGestureSwipe_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onGestureSwipe_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onGestureSwipe_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnGestureSwipeAttribute((undefined as OnTabsGestureSwipeCallback | undefined));
-                }
-            }
-        }
-        if (this._fadingEdge_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fadingEdge_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined));
-                    this._fadingEdge_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fadingEdge_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._fadingEdge_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFadingEdgeAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._divider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._divider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDividerAttribute((this._divider_0_0value as DividerStyle | null | undefined));
-                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._divider_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._divider_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDividerAttribute((undefined as DividerStyle | null | undefined));
-                }
-            }
-        }
-        if (this._barOverlap_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barOverlap_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarOverlapAttribute((this._barOverlap_0_0value as boolean | undefined));
-                    this._barOverlap_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barOverlap_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._barOverlap_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBarOverlapAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._barBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barBackgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarBackgroundColorAttribute((this._barBackgroundColor_0_0value as ResourceColor | undefined));
-                    this._barBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barBackgroundColor_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._barBackgroundColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBarBackgroundColorAttribute((undefined as ResourceColor | undefined));
-                }
-            }
-        }
-        if (this._barGridAlign_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barGridAlign_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarGridAlignAttribute((this._barGridAlign_0_0value as BarGridColumnOptions | undefined));
-                    this._barGridAlign_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barGridAlign_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._barGridAlign_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBarGridAlignAttribute((undefined as BarGridColumnOptions | undefined));
-                }
-            }
-        }
-        if (this._customContentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._customContentTransition_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomContentTransitionAttribute((this._customContentTransition_0_0value as TabsCustomContentTransitionCallback | undefined));
-                    this._customContentTransition_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._customContentTransition_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._customContentTransition_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCustomContentTransitionAttribute((undefined as TabsCustomContentTransitionCallback | undefined));
-                }
-            }
-        }
-        if (this._barBackgroundBlurStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barBackgroundBlurStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarBackgroundBlurStyle0Attribute((this._barBackgroundBlurStyle_0_0value as BlurStyle | undefined));
-                    this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBarBackgroundBlurStyle0Attribute((undefined as BlurStyle | undefined));
-                }
-            }
-        }
-        if (this._pageFlipMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._pageFlipMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setPageFlipModeAttribute((this._pageFlipMode_0_0value as PageFlipMode | undefined));
-                    this._pageFlipMode_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._pageFlipMode_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._pageFlipMode_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setPageFlipModeAttribute((undefined as PageFlipMode | undefined));
-                }
-            }
-        }
-        if (this._barBackgroundEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barBackgroundEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarBackgroundEffectAttribute((this._barBackgroundEffect_0_0value as BackgroundEffectOptions | undefined));
-                    this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBarBackgroundEffectAttribute((undefined as BackgroundEffectOptions | undefined));
-                }
-            }
-        }
-        if (this._onContentWillChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onContentWillChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnContentWillChangeAttribute((this._onContentWillChange_0_0value as OnTabsContentWillChangeCallback | undefined));
-                    this._onContentWillChange_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onContentWillChange_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onContentWillChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnContentWillChangeAttribute((undefined as OnTabsContentWillChangeCallback | undefined));
-                }
-            }
-        }
-        if (this._onContentDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onContentDidScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnContentDidScrollAttribute((this._onContentDidScroll_0_0value as OnTabsContentDidScrollCallback | undefined));
-                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onContentDidScroll_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnContentDidScrollAttribute((undefined as OnTabsContentDidScrollCallback | undefined));
-                }
-            }
-        }
-        if (this._barMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarModeAttribute((this._barMode_0_0value as BarMode | undefined), (this._barMode_0_1value as ScrollableBarModeOptions | undefined | undefined));
-                    this._barMode_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barMode_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._barMode_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBarModeAttribute((undefined as BarMode | undefined), (undefined as ScrollableBarModeOptions | undefined | undefined));
-                }
-            }
-        }
-        if (this._barHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setBarHeight0Attribute((this._barHeight_0_0value as Length | undefined));
-                    this._barHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barHeight_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._barHeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setBarHeight0Attribute((undefined as Length | undefined));
                 }
             }
         }
-        if (this._barHeight_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barHeight_1_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarHeight1Attribute((this._barHeight_1_0value as Length | undefined), (this._barHeight_1_1value as boolean | undefined));
-                    this._barHeight_1_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
+                    peer.setAnimationCurveAttribute((this._animationCurve_0_0value as Curve | ICurve | undefined));
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barHeight_1_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._barHeight_1_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[5] = 0;
+                    peer.setAnimationCurveAttribute((undefined as Curve | ICurve | undefined));
+                }
+            }
+        }
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
+                    peer.setAnimationDurationAttribute((this._animationDuration_0_0value as int32 | undefined));
+                    flagArray[6] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[6] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[6] = 0;
+                    peer.setAnimationDurationAttribute((undefined as int32 | undefined));
+                }
+            }
+        }
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
+                    peer.setAnimationModeAttribute((this._animationMode_0_0value as AnimationMode | undefined));
+                    flagArray[7] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[7] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[7] = 0;
+                    peer.setAnimationModeAttribute((undefined as AnimationMode | undefined));
+                }
+            }
+        }
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1: {
+                    peer.setEdgeEffectAttribute((this._edgeEffect_0_0value as EdgeEffect | undefined));
+                    flagArray[8] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[8] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[8] = 0;
+                    peer.setEdgeEffectAttribute((undefined as EdgeEffect | undefined));
+                }
+            }
+        }
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1: {
+                    peer.setOnChangeAttribute((this._onChange_0_0value as arkui_component_common_Callback<int32, void> | undefined));
+                    flagArray[9] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[9] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[9] = 0;
+                    peer.setOnChangeAttribute((undefined as arkui_component_common_Callback<int32, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1: {
+                    peer.setOnSelectedAttribute((this._onSelected_0_0value as arkui_component_common_Callback<int32, void> | undefined));
+                    flagArray[10] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[10] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[10] = 0;
+                    peer.setOnSelectedAttribute((undefined as arkui_component_common_Callback<int32, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1: {
+                    peer.setOnTabBarClickAttribute((this._onTabBarClick_0_0value as arkui_component_common_Callback<int32, void> | undefined));
+                    flagArray[11] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[11] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[11] = 0;
+                    peer.setOnTabBarClickAttribute((undefined as arkui_component_common_Callback<int32, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1: {
+                    peer.setOnUnselectedAttribute((this._onUnselected_0_0value as arkui_component_common_Callback<int32, void> | undefined));
+                    flagArray[12] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[12] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[12] = 0;
+                    peer.setOnUnselectedAttribute((undefined as arkui_component_common_Callback<int32, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1: {
+                    peer.setOnAnimationStartAttribute((this._onAnimationStart_0_0value as OnTabsAnimationStartCallback | undefined));
+                    flagArray[13] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[13] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[13] = 0;
+                    peer.setOnAnimationStartAttribute((undefined as OnTabsAnimationStartCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1: {
+                    peer.setOnAnimationEndAttribute((this._onAnimationEnd_0_0value as OnTabsAnimationEndCallback | undefined));
+                    flagArray[14] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[14] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[14] = 0;
+                    peer.setOnAnimationEndAttribute((undefined as OnTabsAnimationEndCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1: {
+                    peer.setOnGestureSwipeAttribute((this._onGestureSwipe_0_0value as OnTabsGestureSwipeCallback | undefined));
+                    flagArray[15] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[15] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[15] = 0;
+                    peer.setOnGestureSwipeAttribute((undefined as OnTabsGestureSwipeCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1: {
+                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined));
+                    flagArray[16] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[16] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[16] = 0;
+                    peer.setFadingEdgeAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1: {
+                    peer.setDividerAttribute((this._divider_0_0value as DividerStyle | null | undefined));
+                    flagArray[17] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[17] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[17] = 0;
+                    peer.setDividerAttribute((undefined as DividerStyle | null | undefined));
+                }
+            }
+        }
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1: {
+                    peer.setNestedScrollAttribute((this._nestedScroll_0_0value as TabsNestedScrollMode | undefined));
+                    flagArray[18] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[18] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[18] = 0;
+                    peer.setNestedScrollAttribute((undefined as TabsNestedScrollMode | undefined));
+                }
+            }
+        }
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1: {
+                    peer.setBarOverlapAttribute((this._barOverlap_0_0value as boolean | undefined));
+                    flagArray[19] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[19] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[19] = 0;
+                    peer.setBarOverlapAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    applyModifierPatch1(peer: ArkTabsPeer, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
+                case 1: {
+                    peer.setBarBackgroundColorAttribute((this._barBackgroundColor_0_0value as ResourceColor | undefined));
+                    flagArray[20] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[20] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[20] = 0;
+                    peer.setBarBackgroundColorAttribute((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
+                case 1: {
+                    peer.setBarGridAlignAttribute((this._barGridAlign_0_0value as BarGridColumnOptions | undefined));
+                    flagArray[21] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[21] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[21] = 0;
+                    peer.setBarGridAlignAttribute((undefined as BarGridColumnOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
+                case 1: {
+                    peer.setCustomContentTransitionAttribute((this._customContentTransition_0_0value as TabsCustomContentTransitionCallback | undefined));
+                    flagArray[22] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[22] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[22] = 0;
+                    peer.setCustomContentTransitionAttribute((undefined as TabsCustomContentTransitionCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
+                case 1: {
+                    peer.setBarBackgroundBlurStyle0Attribute((this._barBackgroundBlurStyle_0_0value as BlurStyle | undefined));
+                    flagArray[23] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[23] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[23] = 0;
+                    peer.setBarBackgroundBlurStyle0Attribute((undefined as BlurStyle | undefined));
+                }
+            }
+        }
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
+                case 1: {
+                    peer.setPageFlipModeAttribute((this._pageFlipMode_0_0value as PageFlipMode | undefined));
+                    flagArray[24] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[24] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[24] = 0;
+                    peer.setPageFlipModeAttribute((undefined as PageFlipMode | undefined));
+                }
+            }
+        }
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
+                case 1: {
+                    peer.setBarBackgroundEffectAttribute((this._barBackgroundEffect_0_0value as BackgroundEffectOptions | undefined));
+                    flagArray[25] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[25] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[25] = 0;
+                    peer.setBarBackgroundEffectAttribute((undefined as BackgroundEffectOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
+                case 1: {
+                    peer.setOnContentWillChangeAttribute((this._onContentWillChange_0_0value as OnTabsContentWillChangeCallback | undefined));
+                    flagArray[26] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[26] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[26] = 0;
+                    peer.setOnContentWillChangeAttribute((undefined as OnTabsContentWillChangeCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
+                case 1: {
+                    peer.setOnContentDidScrollAttribute((this._onContentDidScroll_0_0value as OnTabsContentDidScrollCallback | undefined));
+                    flagArray[27] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[27] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[27] = 0;
+                    peer.setOnContentDidScrollAttribute((undefined as OnTabsContentDidScrollCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
+                case 1: {
+                    peer.setBarModeAttribute((this._barMode_0_0value as BarMode | undefined), (this._barMode_0_1value as ScrollableBarModeOptions | undefined | undefined));
+                    flagArray[28] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[28] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[28] = 0;
+                    peer.setBarModeAttribute((undefined as BarMode | undefined), (undefined as ScrollableBarModeOptions | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
+                case 1: {
+                    peer.setBarHeight1Attribute((this._barHeight_1_0value as Length | undefined), (this._barHeight_1_1value as boolean | undefined));
+                    flagArray[29] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[29] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[29] = 0;
                     peer.setBarHeight1Attribute((undefined as Length | undefined), (undefined as boolean | undefined));
                 }
             }
         }
-        if (this._barBackgroundBlurStyle_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._barBackgroundBlurStyle_1_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
+                case 1: {
                     peer.setBarBackgroundBlurStyle1Attribute((this._barBackgroundBlurStyle_1_0value as BlurStyle | undefined), (this._barBackgroundBlurStyle_1_1value as BackgroundBlurStyleOptions | undefined));
-                    this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[30] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[30] = 2;
                     break;
                 }
                 default: {
-                    this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[30] = 0;
                     peer.setBarBackgroundBlurStyle1Attribute((undefined as BlurStyle | undefined), (undefined as BackgroundBlurStyleOptions | undefined));
                 }
             }
         }
-        if (this._cachedMaxCount_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._cachedMaxCount_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
+                case 1: {
                     peer.setCachedMaxCountAttribute((this._cachedMaxCount_0_0value as int32 | undefined), (this._cachedMaxCount_0_1value as TabsCacheMode | undefined));
-                    this._cachedMaxCount_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[31] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._cachedMaxCount_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[31] = 2;
                     break;
                 }
                 default: {
-                    this._cachedMaxCount_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[31] = 0;
                     peer.setCachedMaxCountAttribute((undefined as int32 | undefined), (undefined as TabsCacheMode | undefined));
                 }
             }
@@ -692,12 +641,16 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     mergeModifier(modifier: TabsModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._vertical_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._vertical_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.vertical(modifier._vertical_0_0value);
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+        this.mergeModifier1(modifier, flagArray);
+    }
+    mergeModifier0(modifier: TabsModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
+                    this.vertical((modifier._vertical_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -705,12 +658,11 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
-        if (modifier._barPosition_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barPosition_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barPosition(modifier._barPosition_0_0value);
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
+                    this.barPosition((modifier._barPosition_0_0value as BarPosition | undefined));
                     break;
                 }
                 default: {
@@ -718,12 +670,11 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
-        if (modifier._scrollable_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._scrollable_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.scrollable(modifier._scrollable_0_0value);
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
+                    this.scrollable((modifier._scrollable_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -731,12 +682,11 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
-        if (modifier._barWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barWidth(modifier._barWidth_0_0value);
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
+                    this.barWidth((modifier._barWidth_0_0value as Length | undefined));
                     break;
                 }
                 default: {
@@ -744,324 +694,11 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
-        if (modifier._animationCurve_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._animationCurve_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.animationCurve(modifier._animationCurve_0_0value);
-                    break;
-                }
-                default: {
-                    this.animationCurve((undefined as curves.Curve | curves.ICurve | undefined));
-                }
-            }
-        }
-        if (modifier._animationDuration_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._animationDuration_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.animationDuration(modifier._animationDuration_0_0value);
-                    break;
-                }
-                default: {
-                    this.animationDuration((undefined as int32 | undefined));
-                }
-            }
-        }
-        if (modifier._animationMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._animationMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.animationMode(modifier._animationMode_0_0value);
-                    break;
-                }
-                default: {
-                    this.animationMode((undefined as AnimationMode | undefined));
-                }
-            }
-        }
-        if (modifier._edgeEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._edgeEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.edgeEffect(modifier._edgeEffect_0_0value);
-                    break;
-                }
-                default: {
-                    this.edgeEffect((undefined as EdgeEffect | undefined));
-                }
-            }
-        }
-        if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onChange(modifier._onChange_0_0value);
-                    break;
-                }
-                default: {
-                    this.onChange((undefined as ((value0: int32) => void) | undefined));
-                }
-            }
-        }
-        if (modifier._onSelected_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onSelected_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onSelected(modifier._onSelected_0_0value);
-                    break;
-                }
-                default: {
-                    this.onSelected((undefined as ((value0: int32) => void) | undefined));
-                }
-            }
-        }
-        if (modifier._onTabBarClick_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onTabBarClick_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onTabBarClick(modifier._onTabBarClick_0_0value);
-                    break;
-                }
-                default: {
-                    this.onTabBarClick((undefined as ((value0: int32) => void) | undefined));
-                }
-            }
-        }
-        if (modifier._onUnselected_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onUnselected_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onUnselected(modifier._onUnselected_0_0value);
-                    break;
-                }
-                default: {
-                    this.onUnselected((undefined as ((value0: int32) => void) | undefined));
-                }
-            }
-        }
-        if (modifier._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._nestedScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.nestedScroll(modifier._nestedScroll_0_0value);
-                    break;
-                }
-                default: {
-                    this.nestedScroll((undefined as TabsNestedScrollMode | undefined));
-                }
-            }
-        }
-        if (modifier._onAnimationStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onAnimationStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onAnimationStart(modifier._onAnimationStart_0_0value);
-                    break;
-                }
-                default: {
-                    this.onAnimationStart((undefined as OnTabsAnimationStartCallback | undefined));
-                }
-            }
-        }
-        if (modifier._onAnimationEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onAnimationEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onAnimationEnd(modifier._onAnimationEnd_0_0value);
-                    break;
-                }
-                default: {
-                    this.onAnimationEnd((undefined as OnTabsAnimationEndCallback | undefined));
-                }
-            }
-        }
-        if (modifier._onGestureSwipe_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onGestureSwipe_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onGestureSwipe(modifier._onGestureSwipe_0_0value);
-                    break;
-                }
-                default: {
-                    this.onGestureSwipe((undefined as OnTabsGestureSwipeCallback | undefined));
-                }
-            }
-        }
-        if (modifier._fadingEdge_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fadingEdge_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.fadingEdge(modifier._fadingEdge_0_0value);
-                    break;
-                }
-                default: {
-                    this.fadingEdge((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._divider_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._divider_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.divider(modifier._divider_0_0value);
-                    break;
-                }
-                default: {
-                    this.divider((undefined as DividerStyle | null | undefined));
-                }
-            }
-        }
-        if (modifier._barOverlap_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barOverlap_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barOverlap(modifier._barOverlap_0_0value);
-                    break;
-                }
-                default: {
-                    this.barOverlap((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._barBackgroundColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barBackgroundColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barBackgroundColor(modifier._barBackgroundColor_0_0value);
-                    break;
-                }
-                default: {
-                    this.barBackgroundColor((undefined as ResourceColor | undefined));
-                }
-            }
-        }
-        if (modifier._barGridAlign_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barGridAlign_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barGridAlign(modifier._barGridAlign_0_0value);
-                    break;
-                }
-                default: {
-                    this.barGridAlign((undefined as BarGridColumnOptions | undefined));
-                }
-            }
-        }
-        if (modifier._customContentTransition_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._customContentTransition_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.customContentTransition(modifier._customContentTransition_0_0value);
-                    break;
-                }
-                default: {
-                    this.customContentTransition((undefined as TabsCustomContentTransitionCallback | undefined));
-                }
-            }
-        }
-        if (modifier._barBackgroundBlurStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barBackgroundBlurStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barBackgroundBlurStyle(modifier._barBackgroundBlurStyle_0_0value);
-                    break;
-                }
-                default: {
-                    this.barBackgroundBlurStyle((undefined as BlurStyle | undefined));
-                }
-            }
-        }
-        if (modifier._pageFlipMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._pageFlipMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.pageFlipMode(modifier._pageFlipMode_0_0value);
-                    break;
-                }
-                default: {
-                    this.pageFlipMode((undefined as PageFlipMode | undefined));
-                }
-            }
-        }
-        if (modifier._barBackgroundEffect_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barBackgroundEffect_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barBackgroundEffect(modifier._barBackgroundEffect_0_0value);
-                    break;
-                }
-                default: {
-                    this.barBackgroundEffect((undefined as BackgroundEffectOptions | undefined));
-                }
-            }
-        }
-        if (modifier._onContentWillChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onContentWillChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onContentWillChange(modifier._onContentWillChange_0_0value);
-                    break;
-                }
-                default: {
-                    this.onContentWillChange((undefined as OnTabsContentWillChangeCallback | undefined));
-                }
-            }
-        }
-        if (modifier._onContentDidScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onContentDidScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onContentDidScroll(modifier._onContentDidScroll_0_0value);
-                    break;
-                }
-                default: {
-                    this.onContentDidScroll((undefined as OnTabsContentDidScrollCallback | undefined));
-                }
-            }
-        }
-        if (modifier._barMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barMode(modifier._barMode_0_0value, modifier._barMode_0_1value);
-                    break;
-                }
-                default: {
-                    this.barMode((undefined as BarMode | undefined), (undefined as ScrollableBarModeOptions | undefined | undefined));
-                }
-            }
-        }
-        if (modifier._barHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barHeight(modifier._barHeight_0_0value);
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
+                    this.barHeight((modifier._barHeight_0_0value as Length | undefined));
                     break;
                 }
                 default: {
@@ -1069,12 +706,301 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
-        if (modifier._barHeight_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barHeight_1_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barHeight(modifier._barHeight_1_0value, modifier._barHeight_1_1value);
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
+                    this.animationCurve((modifier._animationCurve_0_0value as Curve | ICurve | undefined));
+                    break;
+                }
+                default: {
+                    this.animationCurve((undefined as Curve | ICurve | undefined));
+                }
+            }
+        }
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
+                    this.animationDuration((modifier._animationDuration_0_0value as int32 | undefined));
+                    break;
+                }
+                default: {
+                    this.animationDuration((undefined as int32 | undefined));
+                }
+            }
+        }
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
+                    this.animationMode((modifier._animationMode_0_0value as AnimationMode | undefined));
+                    break;
+                }
+                default: {
+                    this.animationMode((undefined as AnimationMode | undefined));
+                }
+            }
+        }
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1:
+                case 3: {
+                    this.edgeEffect((modifier._edgeEffect_0_0value as EdgeEffect | undefined));
+                    break;
+                }
+                default: {
+                    this.edgeEffect((undefined as EdgeEffect | undefined));
+                }
+            }
+        }
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
+                    this.onChange((modifier._onChange_0_0value as arkui_component_common_Callback<int32, void> | undefined));
+                    break;
+                }
+                default: {
+                    this.onChange((undefined as arkui_component_common_Callback<int32, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1:
+                case 3: {
+                    this.onSelected((modifier._onSelected_0_0value as arkui_component_common_Callback<int32, void> | undefined));
+                    break;
+                }
+                default: {
+                    this.onSelected((undefined as arkui_component_common_Callback<int32, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1:
+                case 3: {
+                    this.onTabBarClick((modifier._onTabBarClick_0_0value as arkui_component_common_Callback<int32, void> | undefined));
+                    break;
+                }
+                default: {
+                    this.onTabBarClick((undefined as arkui_component_common_Callback<int32, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1:
+                case 3: {
+                    this.onUnselected((modifier._onUnselected_0_0value as arkui_component_common_Callback<int32, void> | undefined));
+                    break;
+                }
+                default: {
+                    this.onUnselected((undefined as arkui_component_common_Callback<int32, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1:
+                case 3: {
+                    this.onAnimationStart((modifier._onAnimationStart_0_0value as OnTabsAnimationStartCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.onAnimationStart((undefined as OnTabsAnimationStartCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1:
+                case 3: {
+                    this.onAnimationEnd((modifier._onAnimationEnd_0_0value as OnTabsAnimationEndCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.onAnimationEnd((undefined as OnTabsAnimationEndCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1:
+                case 3: {
+                    this.onGestureSwipe((modifier._onGestureSwipe_0_0value as OnTabsGestureSwipeCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.onGestureSwipe((undefined as OnTabsGestureSwipeCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1:
+                case 3: {
+                    this.fadingEdge((modifier._fadingEdge_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.fadingEdge((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1:
+                case 3: {
+                    this.divider((modifier._divider_0_0value as DividerStyle | null | undefined));
+                    break;
+                }
+                default: {
+                    this.divider((undefined as DividerStyle | null | undefined));
+                }
+            }
+        }
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1:
+                case 3: {
+                    this.nestedScroll((modifier._nestedScroll_0_0value as TabsNestedScrollMode | undefined));
+                    break;
+                }
+                default: {
+                    this.nestedScroll((undefined as TabsNestedScrollMode | undefined));
+                }
+            }
+        }
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1:
+                case 3: {
+                    this.barOverlap((modifier._barOverlap_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.barOverlap((undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    mergeModifier1(modifier: TabsModifier, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
+                case 1:
+                case 3: {
+                    this.barBackgroundColor((modifier._barBackgroundColor_0_0value as ResourceColor | undefined));
+                    break;
+                }
+                default: {
+                    this.barBackgroundColor((undefined as ResourceColor | undefined));
+                }
+            }
+        }
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
+                case 1:
+                case 3: {
+                    this.barGridAlign((modifier._barGridAlign_0_0value as BarGridColumnOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.barGridAlign((undefined as BarGridColumnOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
+                case 1:
+                case 3: {
+                    this.customContentTransition((modifier._customContentTransition_0_0value as TabsCustomContentTransitionCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.customContentTransition((undefined as TabsCustomContentTransitionCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
+                case 1:
+                case 3: {
+                    this.barBackgroundBlurStyle((modifier._barBackgroundBlurStyle_0_0value as BlurStyle | undefined));
+                    break;
+                }
+                default: {
+                    this.barBackgroundBlurStyle((undefined as BlurStyle | undefined));
+                }
+            }
+        }
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
+                case 1:
+                case 3: {
+                    this.pageFlipMode((modifier._pageFlipMode_0_0value as PageFlipMode | undefined));
+                    break;
+                }
+                default: {
+                    this.pageFlipMode((undefined as PageFlipMode | undefined));
+                }
+            }
+        }
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
+                case 1:
+                case 3: {
+                    this.barBackgroundEffect((modifier._barBackgroundEffect_0_0value as BackgroundEffectOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.barBackgroundEffect((undefined as BackgroundEffectOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
+                case 1:
+                case 3: {
+                    this.onContentWillChange((modifier._onContentWillChange_0_0value as OnTabsContentWillChangeCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.onContentWillChange((undefined as OnTabsContentWillChangeCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
+                case 1:
+                case 3: {
+                    this.onContentDidScroll((modifier._onContentDidScroll_0_0value as OnTabsContentDidScrollCallback | undefined));
+                    break;
+                }
+                default: {
+                    this.onContentDidScroll((undefined as OnTabsContentDidScrollCallback | undefined));
+                }
+            }
+        }
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
+                case 1:
+                case 3: {
+                    this.barMode((modifier._barMode_0_0value as BarMode | undefined), (modifier._barMode_0_1value as ScrollableBarModeOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.barMode((undefined as BarMode | undefined), (undefined as ScrollableBarModeOptions | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
+                case 1:
+                case 3: {
+                    this.barHeight((modifier._barHeight_1_0value as Length | undefined), (modifier._barHeight_1_1value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -1082,12 +1008,11 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
-        if (modifier._barBackgroundBlurStyle_1_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._barBackgroundBlurStyle_1_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.barBackgroundBlurStyle(modifier._barBackgroundBlurStyle_1_0value, modifier._barBackgroundBlurStyle_1_1value);
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
+                case 1:
+                case 3: {
+                    this.barBackgroundBlurStyle((modifier._barBackgroundBlurStyle_1_0value as BlurStyle | undefined), (modifier._barBackgroundBlurStyle_1_1value as BackgroundBlurStyleOptions | undefined));
                     break;
                 }
                 default: {
@@ -1095,12 +1020,11 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
-        if (modifier._cachedMaxCount_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._cachedMaxCount_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.cachedMaxCount(modifier._cachedMaxCount_0_0value, modifier._cachedMaxCount_0_1value);
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
+                case 1:
+                case 3: {
+                    this.cachedMaxCount((modifier._cachedMaxCount_0_0value as int32 | undefined), (modifier._cachedMaxCount_0_1value as TabsCacheMode | undefined));
                     break;
                 }
                 default: {
@@ -1110,394 +1034,330 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         }
     }
     vertical(value: boolean | undefined): this {
-        if (((this._vertical_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._vertical_0_0value) !== (value)))
-        {
-            this._vertical_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || ((this._vertical_0_0value) !== (value))) {
+            this._flagArray[0] = 1
             this._vertical_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._vertical_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     barPosition(value: BarPosition | undefined): this {
-        if (((this._barPosition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._barPosition_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._barPosition_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._barPosition_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     scrollable(value: boolean | undefined): this {
-        if (((this._scrollable_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollable_0_0value) !== (value)))
-        {
-            this._scrollable_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || ((this._scrollable_0_0value) !== (value))) {
+            this._flagArray[2] = 1
             this._scrollable_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._scrollable_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     barWidth(value: Length | undefined): this {
-        if (((this._barWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._barWidth_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._barWidth_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._barWidth_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    animationCurve(value: curves.Curve | curves.ICurve | undefined): this {
-        if (((this._animationCurve_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._animationCurve_0_flag = AttributeUpdaterFlag.UPDATE
-            this._animationCurve_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._animationCurve_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    animationDuration(value: int32 | undefined): this {
-        if (((this._animationDuration_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._animationDuration_0_0value) !== (value)))
-        {
-            this._animationDuration_0_flag = AttributeUpdaterFlag.UPDATE
-            this._animationDuration_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._animationDuration_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    animationMode(value: AnimationMode | undefined): this {
-        if (((this._animationMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._animationMode_0_flag = AttributeUpdaterFlag.UPDATE
-            this._animationMode_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._animationMode_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    edgeEffect(value: EdgeEffect | undefined): this {
-        if (((this._edgeEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
-            this._edgeEffect_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onChange(value: ((value0: int32) => void) | undefined): this {
-        if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onChange_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._onChange_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onSelected(value: ((value0: int32) => void) | undefined): this {
-        if (((this._onSelected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onSelected_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onSelected_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._onSelected_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onTabBarClick(value: ((value0: int32) => void) | undefined): this {
-        if (((this._onTabBarClick_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onTabBarClick_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onTabBarClick_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._onTabBarClick_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onUnselected(value: ((value0: int32) => void) | undefined): this {
-        if (((this._onUnselected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onUnselected_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onUnselected_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._onUnselected_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    nestedScroll(value: TabsNestedScrollMode | undefined): this {
-        if (((this._nestedScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
-            this._nestedScroll_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
-        if (((this._onAnimationStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onAnimationStart_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onAnimationStart_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._onAnimationStart_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onAnimationEnd(value: OnTabsAnimationEndCallback | undefined): this {
-        if (((this._onAnimationEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onAnimationEnd_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onAnimationEnd_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._onAnimationEnd_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onGestureSwipe(value: OnTabsGestureSwipeCallback | undefined): this {
-        if (((this._onGestureSwipe_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onGestureSwipe_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onGestureSwipe_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._onGestureSwipe_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    fadingEdge(value: boolean | undefined): this {
-        if (((this._fadingEdge_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fadingEdge_0_0value) !== (value)))
-        {
-            this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
-            this._fadingEdge_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    divider(value: DividerStyle | null | undefined): this {
-        if (((this._divider_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._divider_0_flag = AttributeUpdaterFlag.UPDATE
-            this._divider_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._divider_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    barOverlap(value: boolean | undefined): this {
-        if (((this._barOverlap_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._barOverlap_0_0value) !== (value)))
-        {
-            this._barOverlap_0_flag = AttributeUpdaterFlag.UPDATE
-            this._barOverlap_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._barOverlap_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    barBackgroundColor(value: ResourceColor | undefined): this {
-        if (((this._barBackgroundColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._barBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
-            this._barBackgroundColor_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._barBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    barGridAlign(value: BarGridColumnOptions | undefined): this {
-        if (((this._barGridAlign_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._barGridAlign_0_flag = AttributeUpdaterFlag.UPDATE
-            this._barGridAlign_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._barGridAlign_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    customContentTransition(value: TabsCustomContentTransitionCallback | undefined): this {
-        if (((this._customContentTransition_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._customContentTransition_0_flag = AttributeUpdaterFlag.UPDATE
-            this._customContentTransition_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._customContentTransition_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    barBackgroundBlurStyle(value: BlurStyle | undefined): this {
-        if (((this._barBackgroundBlurStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.UPDATE
-            this._barBackgroundBlurStyle_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._barBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    pageFlipMode(value: PageFlipMode | undefined): this {
-        if (((this._pageFlipMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._pageFlipMode_0_flag = AttributeUpdaterFlag.UPDATE
-            this._pageFlipMode_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._pageFlipMode_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
-        if (((this._barBackgroundEffect_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.UPDATE
-            this._barBackgroundEffect_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._barBackgroundEffect_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
-        if (((this._onContentWillChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onContentWillChange_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onContentWillChange_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._onContentWillChange_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onContentDidScroll(value: OnTabsContentDidScrollCallback | undefined): this {
-        if (((this._onContentDidScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onContentDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onContentDidScroll_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._onContentDidScroll_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
-        if (((this._barMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
-        {
-            this._barMode_0_flag = AttributeUpdaterFlag.UPDATE
-            this._barMode_0_0value = value
-            this._barMode_0_1value = options
-            this._state.fireChange()
-        } else
-        {
-            this._barMode_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     barHeight(value: Length | undefined): this {
-        if (((this._barHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._barHeight_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._barHeight_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._barHeight_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
-    barHeight(height: Length | undefined, noMinHeightLimit: boolean | undefined): this {
-        if (((this._barHeight_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._barHeight_1_1value) !== (noMinHeightLimit)))
-        {
-            this._barHeight_1_flag = AttributeUpdaterFlag.UPDATE
-            this._barHeight_1_0value = height
+    animationCurve(value: Curve | ICurve | undefined): this {
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
+            this._animationCurve_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[5] = 3
+        }
+        return this
+    }
+    animationDuration(value: int32 | undefined): this {
+        if (((this._flagArray[6]) == (0)) || ((this._animationDuration_0_0value) !== (value))) {
+            this._flagArray[6] = 1
+            this._animationDuration_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[6] = 3
+        }
+        return this
+    }
+    animationMode(value: AnimationMode | undefined): this {
+        if (((this._flagArray[7]) == (0)) || (true)) {
+            this._flagArray[7] = 1
+            this._animationMode_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[7] = 3
+        }
+        return this
+    }
+    edgeEffect(value: EdgeEffect | undefined): this {
+        if (((this._flagArray[8]) == (0)) || (true)) {
+            this._flagArray[8] = 1
+            this._edgeEffect_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[8] = 3
+        }
+        return this
+    }
+    onChange(value: arkui_component_common_Callback<int32, void> | undefined): this {
+        if (((this._flagArray[9]) == (0)) || (true)) {
+            this._flagArray[9] = 1
+            this._onChange_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[9] = 3
+        }
+        return this
+    }
+    onSelected(value: arkui_component_common_Callback<int32, void> | undefined): this {
+        if (((this._flagArray[10]) == (0)) || (true)) {
+            this._flagArray[10] = 1
+            this._onSelected_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[10] = 3
+        }
+        return this
+    }
+    onTabBarClick(value: arkui_component_common_Callback<int32, void> | undefined): this {
+        if (((this._flagArray[11]) == (0)) || (true)) {
+            this._flagArray[11] = 1
+            this._onTabBarClick_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[11] = 3
+        }
+        return this
+    }
+    onUnselected(value: arkui_component_common_Callback<int32, void> | undefined): this {
+        if (((this._flagArray[12]) == (0)) || (true)) {
+            this._flagArray[12] = 1
+            this._onUnselected_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[12] = 3
+        }
+        return this
+    }
+    onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
+        if (((this._flagArray[13]) == (0)) || (true)) {
+            this._flagArray[13] = 1
+            this._onAnimationStart_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[13] = 3
+        }
+        return this
+    }
+    onAnimationEnd(value: OnTabsAnimationEndCallback | undefined): this {
+        if (((this._flagArray[14]) == (0)) || (true)) {
+            this._flagArray[14] = 1
+            this._onAnimationEnd_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[14] = 3
+        }
+        return this
+    }
+    onGestureSwipe(value: OnTabsGestureSwipeCallback | undefined): this {
+        if (((this._flagArray[15]) == (0)) || (true)) {
+            this._flagArray[15] = 1
+            this._onGestureSwipe_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[15] = 3
+        }
+        return this
+    }
+    fadingEdge(value: boolean | undefined): this {
+        if (((this._flagArray[16]) == (0)) || ((this._fadingEdge_0_0value) !== (value))) {
+            this._flagArray[16] = 1
+            this._fadingEdge_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[16] = 3
+        }
+        return this
+    }
+    divider(value: DividerStyle | null | undefined): this {
+        if (((this._flagArray[17]) == (0)) || (true)) {
+            this._flagArray[17] = 1
+            this._divider_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[17] = 3
+        }
+        return this
+    }
+    nestedScroll(value: TabsNestedScrollMode | undefined): this {
+        if (((this._flagArray[18]) == (0)) || (true)) {
+            this._flagArray[18] = 1
+            this._nestedScroll_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[18] = 3
+        }
+        return this
+    }
+    barOverlap(value: boolean | undefined): this {
+        if (((this._flagArray[19]) == (0)) || ((this._barOverlap_0_0value) !== (value))) {
+            this._flagArray[19] = 1
+            this._barOverlap_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[19] = 3
+        }
+        return this
+    }
+    barBackgroundColor(value: ResourceColor | undefined): this {
+        if (((this._flagArray[20]) == (0)) || (true)) {
+            this._flagArray[20] = 1
+            this._barBackgroundColor_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[20] = 3
+        }
+        return this
+    }
+    barGridAlign(value: BarGridColumnOptions | undefined): this {
+        if (((this._flagArray[21]) == (0)) || (true)) {
+            this._flagArray[21] = 1
+            this._barGridAlign_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[21] = 3
+        }
+        return this
+    }
+    customContentTransition(value: TabsCustomContentTransitionCallback | undefined): this {
+        if (((this._flagArray[22]) == (0)) || (true)) {
+            this._flagArray[22] = 1
+            this._customContentTransition_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[22] = 3
+        }
+        return this
+    }
+    barBackgroundBlurStyle(value: BlurStyle | undefined): this {
+        if (((this._flagArray[23]) == (0)) || (true)) {
+            this._flagArray[23] = 1
+            this._barBackgroundBlurStyle_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[23] = 3
+        }
+        return this
+    }
+    pageFlipMode(value: PageFlipMode | undefined): this {
+        if (((this._flagArray[24]) == (0)) || (true)) {
+            this._flagArray[24] = 1
+            this._pageFlipMode_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[24] = 3
+        }
+        return this
+    }
+    barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
+        if (((this._flagArray[25]) == (0)) || (true)) {
+            this._flagArray[25] = 1
+            this._barBackgroundEffect_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[25] = 3
+        }
+        return this
+    }
+    onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
+        if (((this._flagArray[26]) == (0)) || (true)) {
+            this._flagArray[26] = 1
+            this._onContentWillChange_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[26] = 3
+        }
+        return this
+    }
+    onContentDidScroll(value: OnTabsContentDidScrollCallback | undefined): this {
+        if (((this._flagArray[27]) == (0)) || (true)) {
+            this._flagArray[27] = 1
+            this._onContentDidScroll_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[27] = 3
+        }
+        return this
+    }
+    barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
+        if (((this._flagArray[28]) == (0)) || (true) || (true)) {
+            this._flagArray[28] = 1
+            this._barMode_0_0value = value
+            this._barMode_0_1value = options
+            this._state.fireChange()
+        } else {
+            this._flagArray[28] = 3
+        }
+        return this
+    }
+    barHeight(value: Length | undefined, noMinHeightLimit: boolean | undefined): this {
+        if (((this._flagArray[29]) == (0)) || (true) || ((this._barHeight_1_1value) !== (noMinHeightLimit))) {
+            this._flagArray[29] = 1
+            this._barHeight_1_0value = value
             this._barHeight_1_1value = noMinHeightLimit
             this._state.fireChange()
-        } else
-        {
-            this._barHeight_1_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[29] = 3
         }
         return this
     }
     barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this {
-        if (((this._barBackgroundBlurStyle_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
-        {
-            this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[30]) == (0)) || (true) || (true)) {
+            this._flagArray[30] = 1
             this._barBackgroundBlurStyle_1_0value = style
             this._barBackgroundBlurStyle_1_1value = options
             this._state.fireChange()
-        } else
-        {
-            this._barBackgroundBlurStyle_1_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[30] = 3
         }
         return this
     }
     cachedMaxCount(count: int32 | undefined, mode: TabsCacheMode | undefined): this {
-        if (((this._cachedMaxCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedMaxCount_0_0value) !== (count)) || (true))
-        {
-            this._cachedMaxCount_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[31]) == (0)) || ((this._cachedMaxCount_0_0value) !== (count)) || (true)) {
+            this._flagArray[31] = 1
             this._cachedMaxCount_0_0value = count
             this._cachedMaxCount_0_1value = mode
             this._state.fireChange()
-        } else
-        {
-            this._cachedMaxCount_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[31] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

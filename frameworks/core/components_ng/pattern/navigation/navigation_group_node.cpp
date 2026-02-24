@@ -194,7 +194,7 @@ bool NavigationGroupNode::ReorderNavDestination(
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_RETURN(pattern, false);
     auto stack = pattern->GetNavigationStack();
-    for (uint32_t i = 0; i != navDestinationNodes.size(); ++i) {
+    for (uint32_t i = 0; i < navDestinationNodes.size(); ++i) {
         const auto& childNode = navDestinationNodes[i];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));

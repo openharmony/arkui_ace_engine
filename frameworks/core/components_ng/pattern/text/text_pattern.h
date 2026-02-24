@@ -162,6 +162,8 @@ public:
 
     void OnWindowShow() override;
 
+    bool CheckMeasureFlag();
+
     void PreCreateLayoutWrapper();
 
     void BeforeCreateLayoutWrapper() override;
@@ -777,6 +779,9 @@ public:
     std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
+    PositionWithAffinity GetCharacterPositionAtCoordinate(int32_t x, int32_t y) override;
+    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end) override;
+    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end) override;
 
     void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
@@ -995,6 +1000,7 @@ public:
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
     void ResetHighLightValue();
     ACE_FORCE_EXPORT void ReportSelectedText(bool isRegister = false) override;
+    bool GetIsSpecialSymbol() const;
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
@@ -1369,6 +1375,7 @@ private:
 
     int32_t highlightAppearAnimationId_ = 0;
     int32_t highlightDisappearAnimationId_ = 0;
+    bool isSpecialSymbol_ = false;
 
     // ----- multi thread state variables -----
     // ----- multi thread state variables end -----

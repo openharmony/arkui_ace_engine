@@ -40,11 +40,14 @@
 #include "core/components/web/web_property.h" // Unscoped enum types
 #include "core/components_ng/pattern/list/list_item_group_pattern.h" // Unscoped enum types
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
+#include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 
 #include "converter_union.h"
 #include "generated/converter_generated.h"
+
+#include "patch.h"
 
 #define OPT_CONVERT_FIELD(type, src, field) ((src).has_value() ? \
             Converter::OptConvert<type>((src)->field) : std::nullopt)
@@ -276,7 +279,7 @@ namespace Converter {
     std::optional<Dimension> OptConvertFromResourceStr(const Ark_ResourceStr& src, DimensionUnit defaultUnit);
     std::optional<Dimension> OptConvertFromF64ResourceStr(
         const Opt_Union_F64_ResourceStr& src, DimensionUnit defaultUnit);
-    Font OptConvertFromFont(const Opt_Font& src, bool isSubTabStyle);
+    Font OptConvertFromFont(const Opt_arkui_component_units_Font& src, bool isSubTabStyle);
 
     template<typename T, typename P>
     ACE_FORCE_EXPORT void AssignCast(std::optional<T>& dst, const P& src)
@@ -412,7 +415,6 @@ namespace Converter {
     }
 
     // Implementation is in cpp
-    void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_Number *colors);
     void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_F64 *colors);
     void AssignGradientMetricsColors(Gradient *gradient, const Opt_Array_Tuple_ColorMetrics_F64 *colorMetrics);
     void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient>& linear,
@@ -420,8 +422,6 @@ namespace Converter {
     // if src is not string or number, return directly. If src is invalid string, use defaultValue.
     void ConvertAngleWithDefault(const Opt_Union_F64_String& src, std::optional<float>& angle, float defaultValue);
     void ConvertAngleWithDefault(const Ark_Union_F64_String& src, std::optional<float>& angle, float defaultValue);
-    void ConvertAngleWithDefault(const Opt_Union_Number_String& src, std::optional<float>& angle, float defaultValue);
-    void ConvertAngleWithDefault(const Ark_Union_Number_String& src, std::optional<float>& angle, float defaultValue);
 
     template<>
     inline uint32_t Convert(const Ark_Number& src)
@@ -436,7 +436,7 @@ namespace Converter {
     }
 
     template<>
-    inline uint32_t Convert(const Array_Int32& src)
+    inline uint32_t Convert(const Array_I32& src)
     {
         return src.array && src.length > 0 ? Convert<uint32_t>(src.array[0]) : 0;
     }
@@ -448,7 +448,7 @@ namespace Converter {
     }
 
     template<>
-    inline std::vector<uint32_t> Convert(const Array_Int32& src)
+    inline std::vector<uint32_t> Convert(const Array_I32& src)
     {
         std::vector<uint32_t> dst;
         auto length = Converter::Convert<int>(src.length);
@@ -634,7 +634,7 @@ namespace Converter {
     template<> CalcLength Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT CalcLength Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT CaretStyle Convert(const Ark_CaretStyle& src);
-    template<> ACE_FORCE_EXPORT Color Convert(const Ark_ColorMetrics& src);
+    template<> ACE_FORCE_EXPORT Color Convert(const Ark_ColorMetricsExt& src);
     template<> ACE_FORCE_EXPORT Color Convert(const Ark_Float64& src);
     template<> ACE_FORCE_EXPORT Color Convert(const Ark_Int32& src);
     template<> ACE_FORCE_EXPORT Color Convert(const Ark_Int64& src);
@@ -655,10 +655,10 @@ namespace Converter {
     template<> EventLocationInfo Convert(const Ark_EventLocationInfo& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
-    template<> ACE_FORCE_EXPORT Font Convert(const Ark_Font& src);
+    template<> ACE_FORCE_EXPORT Font Convert(const Ark_arkui_component_units_Font& src);
     template<> ACE_FORCE_EXPORT FontFamilies Convert(const Ark_String& src);
     template<> FontInfo Convert(const Ark_font_FontInfo& src);
-    template<> FontMetaData Convert(const Ark_Font& src);
+    template<> FontMetaData Convert(const Ark_arkui_component_units_Font& src);
     template<> FontWeightInt Convert(const Ark_FontWeight& src);
     template<> FontWeightInt Convert(const Ark_Int32& src);
     template<> FontWeightInt Convert(const Ark_String& src);
@@ -666,14 +666,14 @@ namespace Converter {
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
     template<> Gradient Convert(const Ark_RadialGradientOptions& value);
+    template<> Gradient Convert(const Ark_Union_ResourceColor_LinearGradient& src);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_F64& value);
-    template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
     template<> Header Convert(const Ark_Header& src);
     template<> ImageResizableSlice Convert(const Ark_EdgeWidths& src);
     template<> ImageSpanSize Convert(const Ark_SizeOptions& value);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
-    template<> KeyboardAppearanceConfig Convert(const Ark_KeyboardAppearanceConfig& src);
     template<> ACE_FORCE_EXPORT KeyboardOptions Convert(const Ark_KeyboardOptions& src);
+    template<> IconStyle Convert(const Ark_TabBarIconStyle& src);
     template<> NG::LeadingMarginSpanOptions Convert(const Ark_LeadingMarginSpanDrawInfo& src);
     template<> NG::DrawableLeadingMargin Convert(const Ark_LeadingMarginSpan& src);
     template<> LightSource Convert(const Ark_LightSource& src);
@@ -713,13 +713,14 @@ namespace Converter {
     template<> PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src);
     template<> PickerRangeType Convert(const Array_TextPickerRangeContent& src);
     template<> PickerSelectedType Convert(const Ark_Int32& src);
-    template<> PickerSelectedType Convert(const Array_Int32& src);
+    template<> PickerSelectedType Convert(const Array_I32& src);
     template<> ACE_FORCE_EXPORT PickerTextStyle Convert(const Ark_PickerTextStyle& src);
     template<> PickerTextStyle Convert(const Ark_TextPickerTextStyle& src);
     template<> PickerTime Convert(const Ark_TimePickerResult& src);
     template<> PickerValueType Convert(const Ark_Resource& src);
     template<> PickerValueType Convert(const Ark_String& src);
     template<> PickerValueType Convert(const Array_ResourceStr& src);
+    template<> PickerValueType Convert(const Array_String& src);
     template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
     template<> ACE_FORCE_EXPORT PresetFillType Convert(const Ark_ItemFillPolicy& src);
     template<> PreviewText Convert(const Ark_PreviewText& src);
@@ -752,7 +753,7 @@ namespace Converter {
     template<> SelectionOptions Convert(const Ark_SelectionOptions& options);
     template<> Shadow Convert(const Ark_Int32& src);
     template<> ACE_FORCE_EXPORT Shadow Convert(const Ark_ShadowOptions& src);
-    template<> ShadowColorStrategy Convert(const Ark_Color& src);
+    template<> ShadowColorStrategy Convert(const Ark_arkui_component_enums_Color& src);
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);
     template<> ShadowColorStrategy Convert(const Ark_String& src);
     template<> ShapePoint Convert(const Ark_ShapePoint& src);
@@ -783,7 +784,6 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT float Convert(const Ark_Float64& src);
     template<> int Convert(const Ark_Float64& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_F64& src);
-    template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src);
@@ -832,6 +832,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
     template<> void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleActivePolicy& src);
     template<> void AssignCast(std::optional<BlurStyleOption>& dst, const Ark_BlurStyle& src);
+    template<> void AssignCast(std::optional<BoardStyle>& dst, const Ark_BoardStyle& src);
     template<> void AssignCast(std::optional<BorderImageRepeat>& dst, const Ark_RepeatMode& src);
     template<> void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src);
     template<> void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src);
@@ -845,8 +846,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<ChainStyle>& dst, const Ark_ChainStyle& src);
     template<> void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src);
     template<> void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src);
-    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const Ark_Color& src);
-    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const Ark_arkui_component_enums_Color& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const Ark_ColorMetricsExt& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<ColorSpace>& dst, const Ark_ColorSpace& src);
     template<> void AssignCast(std::optional<ConsoleMessageSource>& dst, const Ark_ConsoleMessageSource& src);
@@ -911,13 +912,16 @@ namespace Converter {
     template<> void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageAlt& value);
     template<> void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_image_PixelMap& value);
     template<> void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src);
+    template<> void AssignCast(std::optional<IndicatorStyle>& dst, const Ark_SubTabBarIndicatorStyle& src);
     template<> void AssignCast(std::optional<InputStyle>& dst, const Ark_TextContentStyle& src);
     template<> void AssignCast(std::optional<InputStyle>& dst, const Ark_TextInputStyle& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<KeyboardAppearance>& dst, const Ark_KeyboardAppearance& src);
     template<> void AssignCast(std::optional<KeyboardFluidLightMode>& dst, const Ark_KeyboardFluidLightMode& src);
     template<> void AssignCast(std::optional<KeyboardGradientMode>& dst, const Ark_KeyboardGradientMode& src);
     template<> void AssignCast(std::optional<LaunchMode>& dst, const Ark_LaunchMode& src);
+    template<> void AssignCast(std::optional<LabelStyle>& dst, const Ark_TabBarLabelStyle& src);
     template<> void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src);
+    template<> void AssignCast(std::optional<LayoutMode>& dst, const Ark_LayoutMode& src);
     template<> void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src);
     template<> void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src);
     template<> void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
@@ -974,6 +978,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ScrollSnapAlign>& dst, const Ark_ScrollSnapAlign& src);
     template<> void AssignCast(std::optional<ScrollSnapAnimationSpeed>& dst, const Ark_ScrollSnapAnimationSpeed& src);
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
+    template<> void AssignCast(std::optional<SelectedMode>& dst, const Ark_SelectedMode& src);
     template<> void AssignCast(std::optional<SelectionMenuType>& dst, const Ark_MenuType& src);
     template<> void AssignCast(std::optional<SessionType>& dst, const Ark_EmbeddedType& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src);

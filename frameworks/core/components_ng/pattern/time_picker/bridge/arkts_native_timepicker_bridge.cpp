@@ -593,6 +593,7 @@ ArkUINativeModuleValue TimePickerBridge::SetTimepickerBackgroundColor(ArkUIRunti
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_EQUAL_RETURN(GetNativeNode(nativeNode, firstArg, vm), false, panda::JSValueRef::Undefined(vm));
     if (IsJsView(firstArg, vm)) {
+        nativeNode = nodePtr(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         Color color = Color::TRANSPARENT;
         if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> colorResObj;
@@ -600,10 +601,12 @@ ArkUINativeModuleValue TimePickerBridge::SetTimepickerBackgroundColor(ArkUIRunti
             GetArkUINodeModifiers()->getTimepickerModifier()->setBackgroundColorWithResourceObj(
                 color.GetValue(), reinterpret_cast<void*>(AceType::RawPtr(colorResObj)));
         } else {
+            RefPtr<ResourceObject> colorResObj;
             ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color);
-            GetArkUINodeModifiers()->getTimepickerModifier()->setBackgroundColor(color.GetValue());
+            auto bgColorRawPtr = AceType::RawPtr(colorResObj);
+            GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorWithColorSpace(
+                nativeNode, color.GetValue(), color.GetColorSpace(), bgColorRawPtr);
         }
-        nativeNode = nodePtr(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerBackgroundColor(nativeNode, color.GetValue());
     } else {
         uint32_t color = secondArg->Uint32Value(vm);

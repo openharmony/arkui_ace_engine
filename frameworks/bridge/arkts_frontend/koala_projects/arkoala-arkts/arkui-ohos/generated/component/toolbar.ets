@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,38 +16,40 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { hookToolBarItemAttributeModifier, AttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
-import { ToolBarItemModifier } from "./../ToolBarItemModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CustomBuilder } from './builder'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { ToolBarItemModifier } from './../ToolBarItemModifier'
+import { hookToolBarItemAttributeModifier, AttributeModifier, AttributeUpdater } from '#handwritten'
+import { CommonMethod } from './common'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkToolBarItemPeer extends PeerNode {
     attributeSet?: ToolBarItemModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkToolBarItemPeer {
-        const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._ToolBarItem_construct(peerId, flags)
-        const _peer  = new ArkToolBarItemPeer(_peerPtr, peerId, 'ToolBarItem', flags)
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._ToolBarItem_construct(peerId, flags)
+        const _peer = new ArkToolBarItemPeer(_peerPtr, peerId, 'ToolBarItem', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setToolBarItemOptionsAttribute(options?: ToolBarItemOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
+            const optionsTmpValue = options!
             ToolBarItemOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -65,40 +67,26 @@ export interface ToolBarItemOptions {
 }
 export interface ToolBarItemAttribute {
     setToolBarItemOptions(options?: ToolBarItemOptions): this {
-        throw new Error("Unimplemented method setToolBarItemOptions")
+        throw new Error('Unimplemented method setToolBarItemOptions')
     }
     attributeModifier(value: AttributeModifier<ToolBarItemAttribute> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkToolBarItemStyle implements ToolBarItemAttribute {
-    setToolBarItemOptions(options?: ToolBarItemOptions): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<ToolBarItemAttribute> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkToolBarItemComponent extends ComponentBase implements ToolBarItemAttribute {
     getPeer(): ArkToolBarItemPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkToolBarItemPeer)
     }
     public setToolBarItemOptions(options?: ToolBarItemOptions): this {
-        if (this.checkPriority("setToolBarItemOptions")) {
-            const options_casted = options as (ToolBarItemOptions | undefined)
-            this.getPeer()?.setToolBarItemOptionsAttribute(options_casted)
-            this.applyOptionsFinish('ToolBarItemAttribute');
-            return this
-        }
+        const options_casted = options as (ToolBarItemOptions | undefined)
+        this.getPeer()?.setToolBarItemOptionsAttribute(options_casted)
+        this.applyOptionsFinish('ToolBarItemAttribute');
         return this
     }
     public attributeModifier(value: AttributeModifier<ToolBarItemAttribute> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookToolBarItemAttributeModifier(this, value);
+            hookToolBarItemAttributeModifier(this, value);
         })
         return this
     }
@@ -113,43 +101,41 @@ export class ArkToolBarItemComponent extends ComponentBase implements ToolBarIte
 
 @memo
 export function ToolBarItemImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: ToolBarItemAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkToolBarItemComponent>((): ArkToolBarItemComponent => {
         return new ArkToolBarItemComponent()
     })
-    NodeAttach<ArkToolBarItemPeer>((): ArkToolBarItemPeer => ArkToolBarItemPeer.create(receiver), (peer: ArkToolBarItemPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkToolBarItemPeer>((): ArkToolBarItemPeer => ArkToolBarItemPeer.create(receiver), (_: ArkToolBarItemPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
 export class ToolBarItemOptions_serializer {
     public static write(buffer: SerializerBase, value: ToolBarItemOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForPlacement  = value.placement
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForPlacement = value.placement
         if (valueHolderForPlacement !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPlacementTmpValue  = (valueHolderForPlacement as ToolBarItemPlacement)
+            const valueHolderForPlacementTmpValue = (valueHolderForPlacement as ToolBarItemPlacement)
             valueSerializer.writeInt32(valueHolderForPlacementTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): ToolBarItemOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const placementTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let placementTmpBuf : ToolBarItemPlacement | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const placementTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let placementTmpBuf: ToolBarItemPlacement | undefined = undefined
         if ((placementTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             placementTmpBuf = ToolBarItemPlacement.fromValue(valueDeserializer.readInt32())
         }
-        const placementTmpResult : ToolBarItemPlacement | undefined = placementTmpBuf
-        let value : ToolBarItemOptions = ({placement: placementTmpResult} as ToolBarItemOptions)
+        const placementTmpResult: ToolBarItemPlacement | undefined = placementTmpBuf
+        let value: ToolBarItemOptions = ({placement: placementTmpResult} as ToolBarItemOptions)
         return value
     }
 }

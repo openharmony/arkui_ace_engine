@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,67 +16,67 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ResourceColor, Length, ResourceStr } from "./units"
-import { Color, FontWeight, MarqueeUpdateStrategy } from "./enums"
-import { Resource } from "global.resource"
-import { AttributeModifier, hookMarqueeAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { LengthMetrics } from "arkui.Graphics"
-import { MarqueeModifier } from "./../MarqueeModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { LengthMetrics_serializer } from "./../Graphics"
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { ResourceColor, Resource as arkui_component_units_Resource, Length, ResourceStr, LengthMetrics as arkui_component_units_LengthMetrics } from './units'
+import { Color as arkui_component_enums_Color, FontWeight, MarqueeUpdateStrategy } from './enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { AttributeModifier, hookMarqueeAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
+import { MarqueeModifier } from './../MarqueeModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 export class ArkMarqueePeer extends ArkCommonMethodPeer {
     attributeSet?: MarqueeModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkMarqueePeer {
-        const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._Marquee_construct(peerId, flags)
-        const _peer  = new ArkMarqueePeer(_peerPtr, peerId, 'Marquee', flags)
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._Marquee_construct(peerId, flags)
+        const _peer = new ArkMarqueePeer(_peerPtr, peerId, 'Marquee', flags)
         component?.setPeer(_peer)
         return _peer
     }
     setMarqueeOptionsAttribute(options: MarqueeOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         MarqueeOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._MarqueeInterface_setMarqueeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setFontColorAttribute(value: ResourceColor | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0 = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as int32
+                const valueTmpValueForIdx1 = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx1)
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
+                const valueTmpValueForIdx2 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -85,22 +85,22 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setFontSizeAttribute(value: Length | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as string
+                const valueTmpValueForIdx0 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as double
+                const valueTmpValueForIdx1 = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2 = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -109,10 +109,10 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setAllowScaleAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeBoolean(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -121,29 +121,29 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setFontWeightAttribute(value: int32 | FontWeight | ResourceStr | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as int32
+                const valueTmpValueForIdx0 = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof FontWeight) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as FontWeight
+                const valueTmpValueForIdx1 = valueTmpValue as FontWeight
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
             } else if (valueTmpValue instanceof ResourceStr) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as ResourceStr
+                const valueTmpValueForIdx2 = valueTmpValue as ResourceStr
                 if (valueTmpValueForIdx2 instanceof string) {
                     thisSerializer.writeInt8((0).toByte())
-                    const valueTmpValueForIdx2ForIdx0  = valueTmpValueForIdx2 as string
+                    const valueTmpValueForIdx2ForIdx0 = valueTmpValueForIdx2 as string
                     thisSerializer.writeString(valueTmpValueForIdx2ForIdx0)
-                } else if (valueTmpValueForIdx2 instanceof Resource) {
+                } else if (valueTmpValueForIdx2 instanceof arkui_component_units_Resource) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueForIdx2ForIdx1  = valueTmpValueForIdx2 as Resource
-                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx1)
+                    const valueTmpValueForIdx2ForIdx1 = valueTmpValueForIdx2 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx1)
                 }
             }
         } else {
@@ -152,19 +152,19 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._MarqueeAttribute_setFontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontFamilyAttribute(value: string | Resource | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setFontFamilyAttribute(value: string | global_resource_Resource | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as string
+                const valueTmpValueForIdx0 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1 = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -173,10 +173,10 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setMarqueeUpdateStrategyAttribute(value: MarqueeUpdateStrategy | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = (value as MarqueeUpdateStrategy)
+            const valueTmpValue = (value as MarqueeUpdateStrategy)
             thisSerializer.writeInt32(valueTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -185,10 +185,10 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setOnStartAttribute(value: (() => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -197,10 +197,10 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setOnBounceAttribute(value: (() => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -209,10 +209,10 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setOnFinishAttribute(value: (() => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -227,181 +227,103 @@ export interface MarqueeOptions {
     loop?: int32;
     fromStart?: boolean;
     src: string | undefined;
+    spacing?: arkui_component_units_LengthMetrics;
     delay?: int32;
-    spacing?: LengthMetrics;
 }
 export interface MarqueeAttribute extends CommonMethod {
     setMarqueeOptions(options: MarqueeOptions): this {
-        throw new Error("Unimplemented method setMarqueeOptions")
+        throw new Error('Unimplemented method setMarqueeOptions')
     }
     fontColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method fontColor")
+        throw new Error('Unimplemented method fontColor')
     }
     fontSize(value: Length | undefined): this {
-        throw new Error("Unimplemented method fontSize")
+        throw new Error('Unimplemented method fontSize')
     }
     allowScale(value: boolean | undefined): this {
-        throw new Error("Unimplemented method allowScale")
+        throw new Error('Unimplemented method allowScale')
     }
     fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
-        throw new Error("Unimplemented method fontWeight")
+        throw new Error('Unimplemented method fontWeight')
     }
-    fontFamily(value: string | Resource | undefined): this {
-        throw new Error("Unimplemented method fontFamily")
+    fontFamily(value: string | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method fontFamily')
     }
     marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this {
-        throw new Error("Unimplemented method marqueeUpdateStrategy")
+        throw new Error('Unimplemented method marqueeUpdateStrategy')
     }
     onStart(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onStart")
+        throw new Error('Unimplemented method onStart')
     }
     onBounce(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onBounce")
+        throw new Error('Unimplemented method onBounce')
     }
     onFinish(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onFinish")
+        throw new Error('Unimplemented method onFinish')
     }
     attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttribute {
-    fontColor_value?: ResourceColor | undefined
-    fontSize_value?: Length | undefined
-    allowScale_value?: boolean | undefined
-    fontWeight_value?: int32 | FontWeight | ResourceStr | undefined
-    fontFamily_value?: string | Resource | undefined
-    marqueeUpdateStrategy_value?: MarqueeUpdateStrategy | undefined
-    onStart_value?: (() => void) | undefined
-    onBounce_value?: (() => void) | undefined
-    onFinish_value?: (() => void) | undefined
-    attributeModifier_value?: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined
-    setMarqueeOptions(options: MarqueeOptions): this {
-        return this
-    }
-    fontColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    fontSize(value: Length | undefined): this {
-        return this
-    }
-    allowScale(value: boolean | undefined): this {
-        return this
-    }
-    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
-        return this
-    }
-    fontFamily(value: string | Resource | undefined): this {
-        return this
-    }
-    marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this {
-        return this
-    }
-    onStart(value: (() => void) | undefined): this {
-        return this
-    }
-    onBounce(value: (() => void) | undefined): this {
-        return this
-    }
-    onFinish(value: (() => void) | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkMarqueeComponent extends ArkCommonMethodComponent implements MarqueeAttribute {
     getPeer(): ArkMarqueePeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkMarqueePeer)
     }
     public setMarqueeOptions(options: MarqueeOptions): this {
-        if (this.checkPriority("setMarqueeOptions")) {
-            const options_casted = options as (MarqueeOptions)
-            this.getPeer()?.setMarqueeOptionsAttribute(options_casted)
-            this.applyOptionsFinish('MarqueeAttribute');
-            return this
-        }
+        const options_casted = options as (MarqueeOptions)
+        this.getPeer()?.setMarqueeOptionsAttribute(options_casted)
+        this.applyOptionsFinish('MarqueeAttribute');
         return this
     }
     public fontColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("fontColor")) {
-            const value_casted = value as (ResourceColor | undefined)
-            this.getPeer()?.setFontColorAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (ResourceColor | undefined)
+        this.getPeer()?.setFontColorAttribute(value_casted)
         return this
     }
     public fontSize(value: Length | undefined): this {
-        if (this.checkPriority("fontSize")) {
-            const value_casted = value as (Length | undefined)
-            this.getPeer()?.setFontSizeAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (Length | undefined)
+        this.getPeer()?.setFontSizeAttribute(value_casted)
         return this
     }
     public allowScale(value: boolean | undefined): this {
-        if (this.checkPriority("allowScale")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setAllowScaleAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setAllowScaleAttribute(value_casted)
         return this
     }
     public fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
-        if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (int32 | FontWeight | ResourceStr | undefined)
-            this.getPeer()?.setFontWeightAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (int32 | FontWeight | ResourceStr | undefined)
+        this.getPeer()?.setFontWeightAttribute(value_casted)
         return this
     }
-    public fontFamily(value: string | Resource | undefined): this {
-        if (this.checkPriority("fontFamily")) {
-            const value_casted = value as (string | Resource | undefined)
-            this.getPeer()?.setFontFamilyAttribute(value_casted)
-            return this
-        }
+    public fontFamily(value: string | global_resource_Resource | undefined): this {
+        const value_casted = value as (string | global_resource_Resource | undefined)
+        this.getPeer()?.setFontFamilyAttribute(value_casted)
         return this
     }
     public marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this {
-        if (this.checkPriority("marqueeUpdateStrategy")) {
-            const value_casted = value as (MarqueeUpdateStrategy | undefined)
-            this.getPeer()?.setMarqueeUpdateStrategyAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (MarqueeUpdateStrategy | undefined)
+        this.getPeer()?.setMarqueeUpdateStrategyAttribute(value_casted)
         return this
     }
     public onStart(value: (() => void) | undefined): this {
-        if (this.checkPriority("onStart")) {
-            const value_casted = value as ((() => void) | undefined)
-            this.getPeer()?.setOnStartAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as ((() => void) | undefined)
+        this.getPeer()?.setOnStartAttribute(value_casted)
         return this
     }
     public onBounce(value: (() => void) | undefined): this {
-        if (this.checkPriority("onBounce")) {
-            const value_casted = value as ((() => void) | undefined)
-            this.getPeer()?.setOnBounceAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as ((() => void) | undefined)
+        this.getPeer()?.setOnBounceAttribute(value_casted)
         return this
     }
     public onFinish(value: (() => void) | undefined): this {
-        if (this.checkPriority("onFinish")) {
-            const value_casted = value as ((() => void) | undefined)
-            this.getPeer()?.setOnFinishAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as ((() => void) | undefined)
+        this.getPeer()?.setOnFinishAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookMarqueeAttributeModifier(this, value);
+            hookMarqueeAttributeModifier(this, value);
         })
         return this
     }
@@ -416,124 +338,122 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
 
 @memo
 export function MarqueeImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: MarqueeAttribute) => void) | undefined,
 ): void {
     const receiver = remember<ArkMarqueeComponent>((): ArkMarqueeComponent => {
         return new ArkMarqueeComponent()
     })
-    NodeAttach<ArkMarqueePeer>((): ArkMarqueePeer => ArkMarqueePeer.create(receiver), (peer: ArkMarqueePeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkMarqueePeer>((): ArkMarqueePeer => ArkMarqueePeer.create(receiver), (_: ArkMarqueePeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
     })
 }
 
 export class MarqueeOptions_serializer {
     public static write(buffer: SerializerBase, value: MarqueeOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForStart  = value.start
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForStart = value.start
         if (valueHolderForStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForStartTmpValue  = valueHolderForStart!
+            const valueHolderForStartTmpValue = valueHolderForStart!
             valueSerializer.writeBoolean(valueHolderForStartTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForStep  = value.step
+        const valueHolderForStep = value.step
         if (valueHolderForStep !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForStepTmpValue  = valueHolderForStep!
+            const valueHolderForStepTmpValue = valueHolderForStep!
             valueSerializer.writeFloat64(valueHolderForStepTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForLoop  = value.loop
+        const valueHolderForLoop = value.loop
         if (valueHolderForLoop !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForLoopTmpValue  = valueHolderForLoop!
+            const valueHolderForLoopTmpValue = valueHolderForLoop!
             valueSerializer.writeInt32(valueHolderForLoopTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForFromStart  = value.fromStart
+        const valueHolderForFromStart = value.fromStart
         if (valueHolderForFromStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForFromStartTmpValue  = valueHolderForFromStart!
+            const valueHolderForFromStartTmpValue = valueHolderForFromStart!
             valueSerializer.writeBoolean(valueHolderForFromStartTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForSrc  = value.src
+        const valueHolderForSrc = value.src
         if (valueHolderForSrc !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForSrcTmpValue  = valueHolderForSrc!
+            const valueHolderForSrcTmpValue = valueHolderForSrc!
             valueSerializer.writeString(valueHolderForSrcTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForDelay  = value.delay
-        if (valueHolderForDelay !== undefined) {
+        const valueHolderForSpacing = value.spacing
+        if (valueHolderForSpacing !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForDelayTmpValue  = valueHolderForDelay!
-            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
+            const valueHolderForSpacingTmpValue = valueHolderForSpacing!
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForSpacingTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForSpacing  = value.spacing
-        if (valueHolderForSpacing !== undefined) {
+        const valueHolderForDelay = value.delay
+        if (valueHolderForDelay !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForSpacingTmpValue  = valueHolderForSpacing!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForSpacingTmpValue)
+            const valueHolderForDelayTmpValue = valueHolderForDelay!
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): MarqueeOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let startTmpBuf : boolean | undefined = undefined
+        let valueDeserializer: DeserializerBase = buffer
+        const startTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let startTmpBuf: boolean | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             startTmpBuf = valueDeserializer.readBoolean()
         }
-        const startTmpResult : boolean | undefined = startTmpBuf
-        const stepTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let stepTmpBuf : double | undefined = undefined
+        const startTmpResult: boolean | undefined = startTmpBuf
+        const stepTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let stepTmpBuf: double | undefined = undefined
         if ((stepTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             stepTmpBuf = valueDeserializer.readFloat64()
         }
-        const stepTmpResult : double | undefined = stepTmpBuf
-        const loopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let loopTmpBuf : int32 | undefined = undefined
+        const stepTmpResult: double | undefined = stepTmpBuf
+        const loopTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let loopTmpBuf: int32 | undefined = undefined
         if ((loopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             loopTmpBuf = valueDeserializer.readInt32()
         }
-        const loopTmpResult : int32 | undefined = loopTmpBuf
-        const fromStartTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fromStartTmpBuf : boolean | undefined = undefined
+        const loopTmpResult: int32 | undefined = loopTmpBuf
+        const fromStartTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let fromStartTmpBuf: boolean | undefined = undefined
         if ((fromStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             fromStartTmpBuf = valueDeserializer.readBoolean()
         }
-        const fromStartTmpResult : boolean | undefined = fromStartTmpBuf
-        const srcTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let srcTmpBuf : string | undefined = undefined
+        const fromStartTmpResult: boolean | undefined = fromStartTmpBuf
+        const srcTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let srcTmpBuf: string | undefined = undefined
         if ((srcTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             srcTmpBuf = (valueDeserializer.readString() as string)
         }
-        const srcTmpResult : string | undefined = srcTmpBuf
-        const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let delayTmpBuf : int32 | undefined = undefined
+        const srcTmpResult: string | undefined = srcTmpBuf
+        const spacingTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let spacingTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
+        if ((spacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            spacingTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const spacingTmpResult: arkui_component_units_LengthMetrics | undefined = spacingTmpBuf
+        const delayTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let delayTmpBuf: int32 | undefined = undefined
         if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             delayTmpBuf = valueDeserializer.readInt32()
         }
-        const delayTmpResult : int32 | undefined = delayTmpBuf
-        const spacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let spacingTmpBuf : LengthMetrics | undefined = undefined
-        if ((spacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            spacingTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
-        }
-        const spacingTmpResult : LengthMetrics | undefined = spacingTmpBuf
-        let value : MarqueeOptions = ({start: startTmpResult, step: stepTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, src: srcTmpResult, delay: delayTmpResult, spacing: spacingTmpResult} as MarqueeOptions)
+        const delayTmpResult: int32 | undefined = delayTmpBuf
+        let value: MarqueeOptions = ({start: startTmpResult, step: stepTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, src: srcTmpResult, spacing: spacingTmpResult, delay: delayTmpResult} as MarqueeOptions)
         return value
     }
 }

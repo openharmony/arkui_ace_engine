@@ -920,12 +920,12 @@ void UiSessionManagerOhos::SetStopContentChangeDetectCallback(std::function<void
     stopContentChangeDetectCallback_ = stopCallback;
 }
 
-void UiSessionManagerOhos::GetStateMgmtInfo(
-    const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)
+void UiSessionManagerOhos::GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+    const std::string& jsonPath, bool onlyVisible)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     if (getStateMgmtInfoFunction_) {
-        getStateMgmtInfoFunction_(componentName, propertyName, jsonPath);
+        getStateMgmtInfoFunction_(componentName, propertyName, jsonPath, onlyVisible);
     }
 }
 

@@ -90,8 +90,7 @@ class JSON2 {
     }
 
     // wrap value to ensure the root is always a regular object
-    const ret =  serialize({ $: value });
-    return ret;
+    return serialize({ $: value });
   }
 
   /**
@@ -162,7 +161,14 @@ class JSON2 {
     const result: any = {};
 
     Object.keys(value).forEach(key => {
-      const baseKey = key.replace(new RegExp('^' + V2_STATE_PREFIX), '');
+      let baseKey = key;
+      if (baseKey.startsWith(ComputedV2.COMPUTED_PREFIX)) {
+        return;
+      }
+      if (baseKey.startsWith(ObserveV2.OB_PREFIX)) {
+        baseKey = baseKey.substring(ObserveV2.OB_PREFIX.length)
+      }
+
       const options = meta?.[baseKey];
       if (options?.disabled) { return; }
       result[options?.alias || baseKey] = (value as Record<string, unknown>)[baseKey];
@@ -283,7 +289,8 @@ class JSON2 {
 
     for (const [key, val] of Object.entries(value)) {
       if (typeof val === 'object' && val !== null) {
-        throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, `Not supported type! PersistenceV2: @Sendable only allows plain property types. Invalid key: ${key}`);
+        const msg = `Not supported type! PersistenceV2: @Sendable only allows plain property types. Invalid key: ${key}`;
+        throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, msg);
       }
     }
   }

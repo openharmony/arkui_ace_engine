@@ -47,6 +47,9 @@
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+#include "transaction/rs_transaction_proxy.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -567,7 +570,7 @@ static void HandleAccessibilityPageEventControl(const RefPtr<FrameNode>& node, b
 }
 } // namespace
 
-MenuManager::MenuManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode)
+MenuManager::MenuManager(const RefPtr<UINode>& rootNode) : rootNodeWeak_(rootNode)
 {
     if (rootNode) {
         context_ = rootNode->GetContext();

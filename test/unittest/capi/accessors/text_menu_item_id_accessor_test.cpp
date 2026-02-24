@@ -129,11 +129,11 @@ HWTEST_F(TextMenuItemIdAccessorTest, equalsTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getCUT_Test
+ * @tc.name: getCUTTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextMenuItemIdAccessorTest, getCUT_Test, TestSize.Level1)
+HWTEST_F(TextMenuItemIdAccessorTest, getCUTTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getCUT, nullptr);
     Ark_TextMenuItemId peer = accessor_->getCUT();
@@ -142,11 +142,11 @@ HWTEST_F(TextMenuItemIdAccessorTest, getCUT_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: getCOPY_Test
+ * @tc.name: getCOPYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextMenuItemIdAccessorTest, getCOPY_Test, TestSize.Level1)
+HWTEST_F(TextMenuItemIdAccessorTest, getCOPYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getCOPY, nullptr);
     Ark_TextMenuItemId peer = accessor_->getCOPY();
@@ -155,11 +155,11 @@ HWTEST_F(TextMenuItemIdAccessorTest, getCOPY_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: getPASTE_Test
+ * @tc.name: getPASTETest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextMenuItemIdAccessorTest, getPASTE_Test, TestSize.Level1)
+HWTEST_F(TextMenuItemIdAccessorTest, getPASTETest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPASTE, nullptr);
     Ark_TextMenuItemId peer = accessor_->getPASTE();
@@ -168,11 +168,11 @@ HWTEST_F(TextMenuItemIdAccessorTest, getPASTE_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: getSELECT_ALL_Test
+ * @tc.name: getSELECT_ALLTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextMenuItemIdAccessorTest, getSELECT_ALL_Test, TestSize.Level1)
+HWTEST_F(TextMenuItemIdAccessorTest, getSELECT_ALLTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSELECT_ALL, nullptr);
     Ark_TextMenuItemId peer = accessor_->getSELECT_ALL();
@@ -181,11 +181,11 @@ HWTEST_F(TextMenuItemIdAccessorTest, getSELECT_ALL_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: getCOLLABORATION_SERVICE_Test
+ * @tc.name: getCOLLABORATION_SERVICETest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextMenuItemIdAccessorTest, getCOLLABORATION_SERVICE_Test, TestSize.Level1)
+HWTEST_F(TextMenuItemIdAccessorTest, getCOLLABORATION_SERVICETest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getCOLLABORATION_SERVICE, nullptr);
     Ark_TextMenuItemId peer = accessor_->getCOLLABORATION_SERVICE();
@@ -194,11 +194,11 @@ HWTEST_F(TextMenuItemIdAccessorTest, getCOLLABORATION_SERVICE_Test, TestSize.Lev
 }
 
 /**
- * @tc.name: getCAMERA_INPUT_Test
+ * @tc.name: getCAMERA_INPUTTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextMenuItemIdAccessorTest, getCAMERA_INPUT_Test, TestSize.Level1)
+HWTEST_F(TextMenuItemIdAccessorTest, getCAMERA_INPUTTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getCAMERA_INPUT, nullptr);
     Ark_TextMenuItemId peer = accessor_->getCAMERA_INPUT();
@@ -207,11 +207,11 @@ HWTEST_F(TextMenuItemIdAccessorTest, getCAMERA_INPUT_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: getAI_WRITER_Test
+ * @tc.name: getAI_WRITERTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextMenuItemIdAccessorTest, getAI_WRITER_Test, TestSize.Level1)
+HWTEST_F(TextMenuItemIdAccessorTest, getAI_WRITERTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getAI_WRITER, nullptr);
     Ark_TextMenuItemId peer = accessor_->getAI_WRITER();
@@ -220,11 +220,11 @@ HWTEST_F(TextMenuItemIdAccessorTest, getAI_WRITER_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: getTRANSLATE_Test
+ * @tc.name: getTRANSLATETest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextMenuItemIdAccessorTest, getTRANSLATE_Test, TestSize.Level1)
+HWTEST_F(TextMenuItemIdAccessorTest, getTRANSLATETest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTRANSLATE, nullptr);
     Ark_TextMenuItemId peer = accessor_->getTRANSLATE();
@@ -233,11 +233,11 @@ HWTEST_F(TextMenuItemIdAccessorTest, getTRANSLATE_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: getSEARCH_Test
+ * @tc.name: getSEARCHTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextMenuItemIdAccessorTest, getSEARCH_Test, TestSize.Level1)
+HWTEST_F(TextMenuItemIdAccessorTest, getSEARCHTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSEARCH, nullptr);
     Ark_TextMenuItemId peer = accessor_->getSEARCH();
@@ -246,11 +246,11 @@ HWTEST_F(TextMenuItemIdAccessorTest, getSEARCH_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: getSHARE_Test
+ * @tc.name: getSHARETest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextMenuItemIdAccessorTest, getSHARE_Test, TestSize.Level1)
+HWTEST_F(TextMenuItemIdAccessorTest, getSHARETest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSHARE, nullptr);
     Ark_TextMenuItemId peer = accessor_->getSHARE();

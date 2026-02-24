@@ -2511,7 +2511,9 @@ void AceContainer::DumpSimplifyTreeWithParamConfig(
     std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
 {
     CHECK_NULL_VOID(pipelineContext_);
-    pipelineContext_->GetComponentOverlayInspector(root, config, isInSubWindow);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetComponentOverlayInspector(root, pipelineContext->GetRootElement(), config, isInSubWindow);
 }
 
 void AceContainer::TriggerGarbageCollection()
@@ -2887,24 +2889,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     };
     if (fontManager) {
         fontManager->SetStartAbilityOnJumpBrowserHandler(startAbilityOnJumpBrowserHandler);
-    }
-
-    auto&& openLinkOnMapSearchHandler = [weak = WeakClaim(this), instanceId](const std::string& address) {
-        auto container = weak.Upgrade();
-        CHECK_NULL_VOID(container);
-        ContainerScope scope(instanceId);
-        auto context = container->GetPipelineContext();
-        CHECK_NULL_VOID(context);
-        context->GetTaskExecutor()->PostTask(
-            [weak = WeakPtr<AceContainer>(container), address]() {
-                auto container = weak.Upgrade();
-                CHECK_NULL_VOID(container);
-                container->OnOpenLinkOnMapSearch(address);
-            },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleOpenLinkOnMapSearch");
-    };
-    if (fontManager) {
-        fontManager->SetOpenLinkOnMapSearchHandler(openLinkOnMapSearchHandler);
     }
 
     auto&& startAbilityOnCalendar = [weak = WeakClaim(this), instanceId](
@@ -3790,7 +3774,8 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                 }
                 container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange");
+            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange",
+            PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
         return;
     }
     taskExecutor->PostTask(
@@ -3812,9 +3797,11 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                     CHECK_NULL_VOID(container);
                     container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-                TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition");
+                TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition",
+                PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
         },
-        TaskExecutor::TaskType::JS, "ArkUINotifyConfigurationChange");
+        TaskExecutor::TaskType::JS, "ArkUINotifyConfigurationChange",
+        PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
 }
 
 void AceContainer::HotReload()

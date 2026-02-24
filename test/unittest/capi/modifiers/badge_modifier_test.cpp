@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 
-#include "arkoala_api_generated.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 
@@ -139,9 +138,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptionsTestDefaultValues, TestSize.Level1)
     auto jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
 
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : DEFAULT_0_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected);
@@ -172,11 +171,11 @@ static const std::vector<TestVector> EMPTY_0_TEST2_PLAN = {
 };
 
 /*
- * @tc.name: setBadgeOptions0TestEmptyValues
+ * @tc.name: setBadgeOptionsTestNumberEmptyValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeModifierTest, setBadgeOptions0TestEmptyValues, TestSize.Level1)
+HWTEST_F(BadgeModifierTest, setBadgeOptionsTestNumberEmptyValues, TestSize.Level1)
 {
     Ark_BadgeParamWithNumber inputValueOptions;
     InitNumberOptions(inputValueOptions);
@@ -187,9 +186,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestEmptyValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : EMPTY_0_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected);
@@ -220,11 +219,11 @@ static const std::vector<TestVector> VALID_0_TEST2_PLAN = {
 };
 
 /*
- * @tc.name: setBadgeOptions0TestValidValues
+ * @tc.name: setBadgeOptionsTestNumberValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeModifierTest, setBadgeOptions0TestValidValues, TestSize.Level1)
+HWTEST_F(BadgeModifierTest, setBadgeOptionsTestNumberValidValues, TestSize.Level1)
 {
     Ark_BadgeParamWithNumber inputValueOptions;
     InitNumberOptions(inputValueOptions);
@@ -251,9 +250,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestValidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : VALID_0_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected) << "Attribute style." << key;
@@ -284,11 +283,11 @@ static const std::vector<TestVector> INVALID_0_TEST2_PLAN = {
 };
 
 /*
- * @tc.name: setBadgeOptions0TestInvalidValues
+ * @tc.name: setBadgeOptionsTestNumberInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeModifierTest, setBadgeOptions0TestInvalidValues, TestSize.Level1)
+HWTEST_F(BadgeModifierTest, setBadgeOptionsTestNumberInvalidValues, TestSize.Level1)
 {
     Ark_BadgeParamWithNumber inputValueOptions;
     InitNumberOptions(inputValueOptions);
@@ -317,9 +316,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestInvalidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : INVALID_0_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected) << "Attribute style." << key;
@@ -349,11 +348,11 @@ static const std::vector<TestVector> EMPTY_1_TEST2_PLAN = {
 };
 
 /*
- * @tc.name: setBadgeOptions1TestEmptyValues
+ * @tc.name: setBadgeOptionsTestStringEmptyValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeModifierTest, setBadgeOptions1TestEmptyValues, TestSize.Level1)
+HWTEST_F(BadgeModifierTest, setBadgeOptionsTestStringEmptyValues, TestSize.Level1)
 {
     Ark_BadgeParamWithString inputValueOptions;
     InitStringOptions(inputValueOptions);
@@ -364,9 +363,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestEmptyValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : EMPTY_1_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected) << "Attribute style." << key;
@@ -396,11 +395,11 @@ static const std::vector<TestVector> VALID_1_TEST2_PLAN = {
 };
 
 /*
- * @tc.name: setBadgeOptions1TestValidValues
+ * @tc.name: setBadgeOptionsTestStringValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeModifierTest, setBadgeOptions1TestValidValues, TestSize.Level1)
+HWTEST_F(BadgeModifierTest, setBadgeOptionsTestStringValidValues, TestSize.Level1)
 {
     Ark_BadgeParamWithString inputValueOptions;
     InitStringOptions(inputValueOptions);
@@ -425,9 +424,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestValidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : VALID_1_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected) << "Attribute style." << key;
@@ -457,11 +456,11 @@ static const std::vector<TestVector> INVALID_1_TEST2_PLAN = {
 };
 
 /*
- * @tc.name: setBadgeOptions1TestInvalidValues
+ * @tc.name: setBadgeOptionsTestStringInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeModifierTest, setBadgeOptions1TestInvalidValues, TestSize.Level1)
+HWTEST_F(BadgeModifierTest, setBadgeOptionsTestStringInvalidValues, TestSize.Level1)
 {
     Ark_BadgeParamWithString inputValueOptions;
     InitStringOptions(inputValueOptions);
@@ -488,9 +487,9 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestInvalidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-    auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
+    auto badgeStyleAttrs = GetAttrObject(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    std::string strResult;
+    std::optional<std::string> strResult;
     for (const auto& [key, expected] : INVALID_1_TEST1_PLAN) {
         strResult = jsonValue->GetString(key);
         EXPECT_EQ(strResult, expected) << "Attribute style." << key;

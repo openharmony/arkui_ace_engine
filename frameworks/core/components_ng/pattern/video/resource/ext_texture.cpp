@@ -47,22 +47,22 @@ ExtTexture::~ExtTexture()
     CHECK_NULL_VOID(context);
     auto resRegister = context->GetPlatformResRegister();
     CHECK_NULL_VOID(resRegister);
+    const auto refreshHash = MakeEventHash(TEXTURE_METHOD_REFRESH);
+    const auto onChangedHash = MakeEventHash(TEXTURE_METHOD_ONCHANGED);
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
-        resRegister->UnregisterEvent(MakeEventHash(TEXTURE_METHOD_REFRESH));
-        resRegister->UnregisterEvent(MakeEventHash(TEXTURE_METHOD_ONCHANGED));
+        resRegister->UnregisterEvent(refreshHash);
+        resRegister->UnregisterEvent(onChangedHash);
     } else {
         WeakPtr<PlatformResRegister> weak = resRegister;
-        platformTaskExecutor.PostTask([eventHash = MakeEventHash(TEXTURE_METHOD_REFRESH), weak] {
-            auto resRegister = weak.Upgrade();
-            CHECK_NULL_VOID(resRegister);
-            resRegister->UnregisterEvent(eventHash);
-        }, "ArkUIVideoExtTextureUnregisterEvent");
-        platformTaskExecutor.PostTask([eventHash = MakeEventHash(TEXTURE_METHOD_ONCHANGED), weak] {
-            auto resRegister = weak.Upgrade();
-            CHECK_NULL_VOID(resRegister);
-            resRegister->UnregisterEvent(eventHash);
-        }, "ArkUIVideoExtTextureUnregisterEvent");
+        platformTaskExecutor.PostTask(
+            [weak, refreshHash, onChangedHash]() {
+                auto resRegister = weak.Upgrade();
+                CHECK_NULL_VOID(resRegister);
+                resRegister->UnregisterEvent(refreshHash);
+                resRegister->UnregisterEvent(onChangedHash);
+            },
+            "ArkUIVideoExtTextureUnregisterEvent");
     }
 }
 
@@ -184,8 +184,6 @@ void ExtTexture::SetBounds(int64_t textureId, int32_t left, int32_t top, int32_t
 
 void* ExtTexture::AttachNativeWindow()
 {
-    std::stringstream paramStream;
-    
     void* nativeWindow = nullptr;
     CallSyncResRegisterMethod(MakeMethodHash(ATTACH_NATIVE_WINDOW), PARAM_NONE,
         [this, &nativeWindow](std::string& result) {

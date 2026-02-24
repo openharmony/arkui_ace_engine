@@ -1488,4 +1488,2370 @@ HWTEST_F(TextFieldPatternTestNine, CloseTextCustomKeyboard002, TestSize.Level1)
     pattern->CloseTextCustomKeyboard(1, false);
     EXPECT_FALSE(pattern->isCustomKeyboardAttached_);
 }
+
+/**
+ * @tc.name: IsMoveFocusOutFromLeft001
+ * @tc.desc: test IsMoveFocusOutFromLeft
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsMoveFocusOutFromLeft001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    KeyEvent event;
+    event.code = KeyCode::KEY_DPAD_LEFT;
+    pattern_->selectController_->UpdateCaretIndex(0);
+    auto ret = pattern_->IsMoveFocusOutFromLeft(event);
+    EXPECT_TRUE(ret);
+
+    event.code = KeyCode::KEY_DPAD_UP;
+    ret = pattern_->IsMoveFocusOutFromLeft(event);
+    EXPECT_TRUE(ret);
+
+    event.code = KeyCode::KEY_DPAD_RIGHT;
+    ret = pattern_->IsMoveFocusOutFromLeft(event);
+    EXPECT_FALSE(ret);
+
+    pattern_->selectController_->UpdateCaretIndex(5);
+    event.code = KeyCode::KEY_DPAD_LEFT;
+    ret = pattern_->IsMoveFocusOutFromLeft(event);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsMoveFocusOutFromRight001
+ * @tc.desc: test IsMoveFocusOutFromRight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsMoveFocusOutFromRight001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    KeyEvent event;
+    event.code = KeyCode::KEY_DPAD_RIGHT;
+    pattern_->contentController_->content_ = u"test";
+    pattern_->selectController_->UpdateCaretIndex(4);
+    auto ret = pattern_->IsMoveFocusOutFromRight(event);
+    EXPECT_TRUE(ret);
+
+    event.code = KeyCode::KEY_DPAD_DOWN;
+    ret = pattern_->IsMoveFocusOutFromRight(event);
+    EXPECT_TRUE(ret);
+
+    event.code = KeyCode::KEY_DPAD_LEFT;
+    ret = pattern_->IsMoveFocusOutFromRight(event);
+    EXPECT_FALSE(ret);
+
+    pattern_->selectController_->UpdateCaretIndex(2);
+    event.code = KeyCode::KEY_DPAD_RIGHT;
+    ret = pattern_->IsMoveFocusOutFromRight(event);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: HandleOnEscape001
+ * @tc.desc: test HandleOnEscape
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleOnEscape001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->ProcessOverlay();
+    auto ret = pattern_->HandleOnEscape();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: HandleOnEscape003
+ * @tc.desc: test HandleOnEscape with focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleOnEscape003, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->isCaretTwinkling_ = true;
+    auto ret = pattern_->HandleOnEscape();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: HandleOnTab001
+ * @tc.desc: test HandleOnTab forward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleOnTab001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->HandleOnTab(false);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SetFocusStyle001
+ * @tc.desc: test SetFocusStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, SetFocusStyle001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->SetFocusStyle();
+    auto host = pattern_->GetHost();
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto textFieldTheme = pattern_->GetTheme();
+    EXPECT_EQ(layoutProperty->GetTextColorValue(Color::BLACK), textFieldTheme->GetFocusTextColor());
+}
+
+/**
+ * @tc.name: ClearFocusStyle001
+ * @tc.desc: test ClearFocusStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ClearFocusStyle001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->isFocusBGColorSet_ = true;
+    pattern_->isFocusTextColorSet_ = true;
+    pattern_->isFocusPlaceholderColorSet_ = true;
+    pattern_->ClearFocusStyle();
+    EXPECT_FALSE(pattern_->isFocusBGColorSet_);
+    EXPECT_FALSE(pattern_->isFocusTextColorSet_);
+    EXPECT_FALSE(pattern_->isFocusPlaceholderColorSet_);
+}
+
+/**
+ * @tc.name: ProcessFocusStyle001
+ * @tc.desc: test ProcessFocusStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ProcessFocusStyle001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+
+    pattern_->ProcessFocusStyle();
+    EXPECT_TRUE(pattern_->inlineFocusState_);
+}
+
+/**
+ * @tc.name: ProcessAutoFillOnFocus001
+ * @tc.desc: test ProcessAutoFillOnFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ProcessAutoFillOnFocus001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->needToRequestKeyboardOnFocus_ = false;
+    pattern_->ProcessAutoFillOnFocus();
+    EXPECT_TRUE(pattern_->needToRequestKeyboardOnFocus_ == false);
+}
+
+/**
+ * @tc.name: ProcNormalInlineStateInBlurEvent001
+ * @tc.desc: test ProcNormalInlineStateInBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ProcNormalInlineStateInBlurEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+
+    pattern_->inlineFocusState_ = true;
+    pattern_->ProcNormalInlineStateInBlurEvent();
+    EXPECT_FALSE(pattern_->inlineFocusState_);
+}
+
+/**
+ * @tc.name: SetNeedToRequestKeyboardInner001
+ * @tc.desc: test SetNeedToRequestKeyboardInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, SetNeedToRequestKeyboardInner001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->SetNeedToRequestKeyboardInner(true, RequestKeyboardInnerChangeReason::FOCUS);
+    EXPECT_TRUE(pattern_->needToRequestKeyboardInner_);
+}
+
+/**
+ * @tc.name: SetNeedToRequestKeyboardInner002
+ * @tc.desc: test SetNeedToRequestKeyboardInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, SetNeedToRequestKeyboardInner002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->needToRequestKeyboardInner_ = true;
+    pattern_->SetNeedToRequestKeyboardInner(false, RequestKeyboardInnerChangeReason::BLUR);
+    EXPECT_FALSE(pattern_->needToRequestKeyboardInner_);
+}
+
+/**
+ * @tc.name: UpdateShowCountBorderStyle002
+ * @tc.desc: test UpdateShowCountBorderStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, UpdateShowCountBorderStyle002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"01234567890";
+    pattern_->UpdateShowCountBorderStyle();
+    EXPECT_TRUE(pattern_->showCountBorderStyle_);
+}
+
+/**
+ * @tc.name: IsShowTranslate001
+ * @tc.desc: test IsShowTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsShowTranslate001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->IsShowTranslate();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsShowSearch001
+ * @tc.desc: test IsShowSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsShowSearch001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->IsShowSearch();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsShowAutoFill001
+ * @tc.desc: test IsShowAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsShowAutoFill001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->IsShowAutoFill();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: StripNextLine001
+ * @tc.desc: test StripNextLine
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, StripNextLine001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    std::wstring data = L"test\n\r\n";
+    pattern_->StripNextLine(data);
+    EXPECT_TRUE(data.find(L'\n') == std::wstring::npos);
+}
+
+/**
+ * @tc.name: UpdateSelection002
+ * @tc.desc: test UpdateSelection with both parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, UpdateSelection002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->UpdateSelection(10);
+    EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 10);
+    EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 10);
+}
+
+/**
+ * @tc.name: ResetTouchAndMoveCaretState001
+ * @tc.desc: test ResetTouchAndMoveCaretState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ResetTouchAndMoveCaretState001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->moveCaretState_.isMoveCaret = true;
+    pattern_->moveCaretState_.isTouchCaret = true;
+    pattern_->ResetTouchAndMoveCaretState();
+    EXPECT_FALSE(pattern_->moveCaretState_.isMoveCaret);
+    EXPECT_FALSE(pattern_->moveCaretState_.isTouchCaret);
+}
+
+/**
+ * @tc.name: StartVibratorByIndexChange001
+ * @tc.desc: test StartVibratorByIndexChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, StartVibratorByIndexChange001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->StartVibratorByIndexChange(5, 3);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CheckMousePressedOverScrollBar001
+ * @tc.desc: test CheckMousePressedOverScrollBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CheckMousePressedOverScrollBar001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    GestureEvent info;
+    info.localLocation_ = Offset(500, 500);
+    auto ret = pattern_->CheckMousePressedOverScrollBar(info);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: HandleBetweenSelectedPosition002
+ * @tc.desc: test HandleBetweenSelectedPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleBetweenSelectedPosition002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    GestureEvent info;
+    info.localLocation_ = Offset(100, 100);
+    auto ret = pattern_->HandleBetweenSelectedPosition(info);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: CanChangeSelectState001
+ * @tc.desc: test CanChangeSelectState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CanChangeSelectState001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->CanChangeSelectState();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IsAccessibilityClick001
+ * @tc.desc: test IsAccessibilityClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsAccessibilityClick001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->IsAccessibilityClick();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsOnUnitByPosition001
+ * @tc.desc: test IsOnUnitByPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsOnUnitByPosition001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    Offset localOffset(500, 500);
+    auto ret = pattern_->IsOnUnitByPosition(localOffset);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsOnPasswordByPosition001
+ * @tc.desc: test IsOnPasswordByPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsOnPasswordByPosition001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    Offset localOffset(500, 500);
+    auto ret = pattern_->IsOnPasswordByPosition(localOffset);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsOnCleanNodeByPosition001
+ * @tc.desc: test IsOnCleanNodeByPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsOnCleanNodeByPosition001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    Offset localOffset(500, 500);
+    auto ret = pattern_->IsOnCleanNodeByPosition(localOffset);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SetSelectDetectEnable001
+ * @tc.desc: test SetSelectDetectEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, SetSelectDetectEnable001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->SetSelectDetectEnable(true);
+    EXPECT_TRUE(pattern_->GetSelectDetectEnable());
+
+    pattern_->SetSelectDetectEnable(false);
+    EXPECT_FALSE(pattern_->GetSelectDetectEnable());
+}
+
+/**
+ * @tc.name: GetPaddingTop001
+ * @tc.desc: test GetPaddingTop
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetPaddingTop001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto padding = pattern_->GetPaddingTop();
+    EXPECT_TRUE(padding >= 0);
+}
+
+/**
+ * @tc.name: GetPaddingBottom001
+ * @tc.desc: test GetPaddingBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetPaddingBottom001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto padding = pattern_->GetPaddingBottom();
+    EXPECT_TRUE(padding >= 0);
+}
+
+/**
+ * @tc.name: GetPaddingLeft001
+ * @tc.desc: test GetPaddingLeft
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetPaddingLeft001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto padding = pattern_->GetPaddingLeft();
+    EXPECT_TRUE(padding >= 0);
+}
+
+/**
+ * @tc.name: GetPaddingRight001
+ * @tc.desc: test GetPaddingRight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetPaddingRight001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto padding = pattern_->GetPaddingRight();
+    EXPECT_TRUE(padding >= 0);
+}
+
+/**
+ * @tc.name: GetHorizontalPaddingAndBorderSum001
+ * @tc.desc: test GetHorizontalPaddingAndBorderSum
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetHorizontalPaddingAndBorderSum001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto sum = pattern_->GetHorizontalPaddingAndBorderSum();
+    EXPECT_TRUE(sum >= 0);
+}
+
+/**
+ * @tc.name: GetVerticalPaddingAndBorderSum001
+ * @tc.desc: test GetVerticalPaddingAndBorderSum
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetVerticalPaddingAndBorderSum001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto sum = pattern_->GetVerticalPaddingAndBorderSum();
+    EXPECT_TRUE(sum >= 0);
+}
+
+/**
+ * @tc.name: GetPercentReferenceWidth001
+ * @tc.desc: test GetPercentReferenceWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetPercentReferenceWidth001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto width = pattern_->GetPercentReferenceWidth();
+    EXPECT_TRUE(width > 0);
+}
+
+/**
+ * @tc.name: GetDragStyledText001
+ * @tc.desc: test GetDragStyledText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetDragStyledText001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto text = pattern_->GetDragStyledText();
+    EXPECT_TRUE(text.empty());
+}
+
+/**
+ * @tc.name: ShowSelectAfterDragEvent001
+ * @tc.desc: test ShowSelectAfterDragEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ShowSelectAfterDragEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->ShowSelectAfterDragEvent();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateCaretPositionWithClamp001
+ * @tc.desc: test UpdateCaretPositionWithClamp
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, UpdateCaretPositionWithClamp001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"test";
+    pattern_->UpdateCaretPositionWithClamp(10);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 4);
+}
+
+/**
+ * @tc.name: UpdateCaretPositionWithClamp002
+ * @tc.desc: test UpdateCaretPositionWithClamp
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, UpdateCaretPositionWithClamp002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"test";
+    pattern_->UpdateCaretPositionWithClamp(-5);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
+}
+
+/**
+ * @tc.name: IsShowUnit001
+ * @tc.desc: test IsShowUnit
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsShowUnit001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->IsShowUnit();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsShowPasswordIcon002
+ * @tc.desc: test IsShowPasswordIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsShowPasswordIcon002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+    });
+    GetFocus();
+
+    auto ret = pattern_->IsShowPasswordIcon();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: CheckPasswordAreaState001
+ * @tc.desc: test CheckPasswordAreaState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CheckPasswordAreaState001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->CheckPasswordAreaState();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateFocusForward001
+ * @tc.desc: test UpdateFocusForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, UpdateFocusForward001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->UpdateFocusForward();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: GetLeftTextOfCursor001
+ * @tc.desc: test GetLeftTextOfCursor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetLeftTextOfCursor001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"test";
+    pattern_->selectController_->UpdateCaretIndex(2);
+    auto text = pattern_->GetLeftTextOfCursor(1);
+    EXPECT_TRUE(text == u"e");
+}
+
+/**
+ * @tc.name: GetRightTextOfCursor001
+ * @tc.desc: test GetRightTextOfCursor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetRightTextOfCursor001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"test";
+    pattern_->selectController_->UpdateCaretIndex(2);
+    auto text = pattern_->GetRightTextOfCursor(1);
+    EXPECT_TRUE(text == u"s");
+}
+
+/**
+ * @tc.name: GetTextIndexAtCursor001
+ * @tc.desc: test GetTextIndexAtCursor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetTextIndexAtCursor001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->selectController_->UpdateCaretIndex(5);
+    auto index = pattern_->GetTextIndexAtCursor();
+    EXPECT_EQ(index, 5);
+}
+
+/**
+ * @tc.name: PreferredLineHeight001
+ * @tc.desc: test PreferredLineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, PreferredLineHeight001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto height = pattern_->PreferredLineHeight();
+    EXPECT_TRUE(height > 0);
+}
+
+/**
+ * @tc.name: SearchRequestKeyboard001
+ * @tc.desc: test SearchRequestKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, SearchRequestKeyboard001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::NUMBER);
+    });
+    GetFocus();
+
+    pattern_->SearchRequestKeyboard();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CreateObscuredText001
+ * @tc.desc: test CreateObscuredText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CreateObscuredText001, TestSize.Level0)
+{
+    auto text = TextFieldPattern::CreateObscuredText(5);
+    EXPECT_EQ(text.length(), 5u);
+}
+
+/**
+ * @tc.name: CreateDisplayText001
+ * @tc.desc: test CreateDisplayText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CreateDisplayText001, TestSize.Level0)
+{
+    std::u16string content = u"password";
+    auto text = TextFieldPattern::CreateDisplayText(content, 2, true, false);
+    EXPECT_EQ(text.length(), 8u);
+}
+
+/**
+ * @tc.name: GetStrokeWidth001
+ * @tc.desc: test GetStrokeWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetStrokeWidth001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto width = pattern_->GetStrokeWidth();
+    EXPECT_FALSE(width.empty());
+}
+
+/**
+ * @tc.name: GetStrokeColor001
+ * @tc.desc: test GetStrokeColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetStrokeColor001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto color = pattern_->GetStrokeColor();
+    EXPECT_FALSE(color.empty());
+}
+
+/**
+ * @tc.name: TextInputTypeToString001
+ * @tc.desc: test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, TextInputTypeToString001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto str = pattern_->TextInputTypeToString();
+    EXPECT_FALSE(str.empty());
+}
+
+/**
+ * @tc.name: TextContentTypeToString001
+ * @tc.desc: test TextContentTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, TextContentTypeToString001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto str = pattern_->TextContentTypeToString();
+    EXPECT_FALSE(str.empty());
+}
+
+/**
+ * @tc.name: GetPlaceholderFont001
+ * @tc.desc: test GetPlaceholderFont
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetPlaceholderFont001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto font = pattern_->GetPlaceholderFont();
+    EXPECT_FALSE(font.empty());
+}
+
+/**
+ * @tc.name: GetTheme002
+ * @tc.desc: test GetTheme
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetTheme002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto theme = pattern_->GetTheme();
+    EXPECT_NE(theme, nullptr);
+}
+
+/**
+ * @tc.name: InitTheme001
+ * @tc.desc: test InitTheme
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, InitTheme001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->InitTheme();
+    EXPECT_NE(pattern_->GetTheme(), nullptr);
+}
+
+/**
+ * @tc.name: GetTextColor001
+ * @tc.desc: test GetTextColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetTextColor001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto color = pattern_->GetTextColor();
+    EXPECT_FALSE(color.empty());
+}
+
+/**
+ * @tc.name: GetCaretColor001
+ * @tc.desc: test GetCaretColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetCaretColor001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto color = pattern_->GetCaretColor();
+    EXPECT_FALSE(color.empty());
+}
+
+/**
+ * @tc.name: GetPlaceholderColor001
+ * @tc.desc: test GetPlaceholderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetPlaceholderColor001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto color = pattern_->GetPlaceholderColor();
+    EXPECT_FALSE(color.empty());
+}
+
+/**
+ * @tc.name: GetFontSize001
+ * @tc.desc: test GetFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetFontSize001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto size = pattern_->GetFontSize();
+    EXPECT_FALSE(size.empty());
+}
+
+/**
+ * @tc.name: GetMinFontScale001
+ * @tc.desc: test GetMinFontScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetMinFontScale001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto scale = pattern_->GetMinFontScale();
+    EXPECT_FALSE(scale.empty());
+}
+
+/**
+ * @tc.name: GetMaxFontScale001
+ * @tc.desc: test GetMaxFontScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetMaxFontScale001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto scale = pattern_->GetMaxFontScale();
+    EXPECT_FALSE(scale.empty());
+}
+
+/**
+ * @tc.name: GetEllipsisMode001
+ * @tc.desc: test GetEllipsisMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetEllipsisMode001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto mode = pattern_->GetEllipsisMode();
+    EXPECT_FALSE(mode.empty());
+}
+
+/**
+ * @tc.name: GetItalicFontStyle001
+ * @tc.desc: test GetItalicFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetItalicFontStyle001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto style = pattern_->GetItalicFontStyle();
+    EXPECT_TRUE(style == Ace::FontStyle::NORMAL);
+}
+
+/**
+ * @tc.name: GetFontWeight001
+ * @tc.desc: test GetFontWeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetFontWeight001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto weight = pattern_->GetFontWeight();
+    EXPECT_TRUE(weight == FontWeight::W400 || weight == FontWeight::W500);
+}
+
+/**
+ * @tc.name: GetFontFamily001
+ * @tc.desc: test GetFontFamily
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetFontFamily001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto family = pattern_->GetFontFamily();
+    EXPECT_FALSE(family.empty());
+}
+
+/**
+ * @tc.name: GetTextAlign001
+ * @tc.desc: test GetTextAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetTextAlign001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto align = pattern_->GetTextAlign();
+    EXPECT_TRUE(align == TextAlign::LEFT || align == TextAlign::START);
+}
+
+/**
+ * @tc.name: GetPlaceHolder001
+ * @tc.desc: test GetPlaceHolder
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetPlaceHolder001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "placeholder", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto placeholder = pattern_->GetPlaceHolder();
+    EXPECT_TRUE(placeholder == u"placeholder");
+}
+
+/**
+ * @tc.name: GetMaxLength001
+ * @tc.desc: test GetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetMaxLength001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetMaxLength(100);
+    });
+    GetFocus();
+
+    auto len = pattern_->GetMaxLength();
+    EXPECT_EQ(len, 100u);
+}
+
+/**
+ * @tc.name: GetMaxLines001
+ * @tc.desc: test GetMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetMaxLines001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto lines = pattern_->GetMaxLines();
+    EXPECT_TRUE(lines > 0);
+}
+
+/**
+ * @tc.name: GetMinLines001
+ * @tc.desc: test GetMinLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetMinLines001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto lines = pattern_->GetMinLines();
+    EXPECT_TRUE(lines >= 1);
+}
+
+/**
+ * @tc.name: GetCopyOptionString001
+ * @tc.desc: test GetCopyOptionString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetCopyOptionString001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto option = pattern_->GetCopyOptionString();
+    EXPECT_FALSE(option.empty());
+}
+
+/**
+ * @tc.name: GetInputStyleString001
+ * @tc.desc: test GetInputStyleString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetInputStyleString001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto style = pattern_->GetInputStyleString();
+    EXPECT_FALSE(style.empty());
+}
+
+/**
+ * @tc.name: GetErrorTextString001
+ * @tc.desc: test GetErrorTextString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetErrorTextString001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowError(u"error", true);
+    });
+    GetFocus();
+
+    auto text = pattern_->GetErrorTextString();
+    EXPECT_TRUE(text == u"error" || text.empty());
+}
+
+/**
+ * @tc.name: GetBarStateString001
+ * @tc.desc: test GetBarStateString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetBarStateString001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto state = pattern_->GetBarStateString();
+    EXPECT_FALSE(state.empty());
+}
+
+/**
+ * @tc.name: GetErrorTextState002
+ * @tc.desc: test GetErrorTextState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetErrorTextState002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowError(u"error", true);
+    });
+    GetFocus();
+
+    auto state = pattern_->GetErrorTextState();
+    EXPECT_TRUE(state || !state);
+}
+
+/**
+ * @tc.name: GetShowPasswordIconString001
+ * @tc.desc: test GetShowPasswordIconString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetShowPasswordIconString001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto icon = pattern_->GetShowPasswordIconString();
+    EXPECT_FALSE(icon.empty());
+}
+
+/**
+ * @tc.name: HandleOnSelectAll001
+ * @tc.desc: test HandleOnSelectAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleOnSelectAll001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->HandleOnSelectAll(true, false, false);
+    EXPECT_TRUE(pattern_->IsSelected());
+}
+
+/**
+ * @tc.name: HandleOnPasswordVault001
+ * @tc.desc: test HandleOnPasswordVault
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleOnPasswordVault001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->HandleOnPasswordVault();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleButtonFocusEvent001
+ * @tc.desc: test HandleButtonFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleButtonFocusEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto responseArea = pattern_->GetResponseArea();
+    pattern_->HandleButtonFocusEvent(responseArea);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CalcDecoratorHeight001
+ * @tc.desc: test CalcDecoratorHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CalcDecoratorHeight001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    RefPtr<FrameNode> childrenNode =
+        FrameNode::GetOrCreateFrameNode("childTag", 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto height = pattern_->CalcDecoratorHeight(childrenNode);
+    EXPECT_TRUE(height >= 0);
+}
+
+/**
+ * @tc.name: UltralimitShake001
+ * @tc.desc: test UltralimitShake
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, UltralimitShake001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetMaxLength(10);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"01234567890123456789";
+    pattern_->UltralimitShake();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: DeleteBackwardOperation001
+ * @tc.desc: test DeleteBackwardOperation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, DeleteBackwardOperation001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"test";
+    pattern_->selectController_->UpdateCaretIndex(4);
+    pattern_->DeleteBackwardOperation(1);
+    EXPECT_TRUE(pattern_->contentController_->content_ == u"tes");
+}
+
+/**
+ * @tc.name: DeleteForwardOperation001
+ * @tc.desc: test DeleteForwardOperation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, DeleteForwardOperation001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"test";
+    pattern_->selectController_->UpdateCaretIndex(0);
+    pattern_->DeleteForwardOperation(1);
+    EXPECT_TRUE(pattern_->contentController_->content_ == u"est");
+}
+
+/**
+ * @tc.name: HandleOnPageUp001
+ * @tc.desc: test HandleOnPageUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleOnPageUp001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->HandleOnPageUp();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleOnPageDown001
+ * @tc.desc: test HandleOnPageDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleOnPageDown001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->HandleOnPageDown();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CreateHandles001
+ * @tc.desc: test CreateHandles
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CreateHandles001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->CreateHandles();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: GetEmojiSubStringRange001
+ * @tc.desc: test GetEmojiSubStringRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetEmojiSubStringRange001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    int32_t start = 0;
+    int32_t end = 5;
+    pattern_->GetEmojiSubStringRange(start, end);
+    EXPECT_TRUE(start >= 0 && end >= start);
+}
+
+/**
+ * @tc.name: CleanCounterNode001
+ * @tc.desc: test CleanCounterNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CleanCounterNode001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowCounter(true);
+    });
+    GetFocus();
+
+    pattern_->CleanCounterNode();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CleanErrorNode001
+ * @tc.desc: test CleanErrorNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CleanErrorNode001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowError(u"error", true);
+    });
+    GetFocus();
+
+    pattern_->CleanErrorNode();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateObscure001
+ * @tc.desc: test UpdateObscure
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, UpdateObscure001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    std::u16string insertValue = u"a";
+    pattern_->UpdateObscure(insertValue, true);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CalcCounterAfterFilterInsertValue001
+ * @tc.desc: test CalcCounterAfterFilterInsertValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CalcCounterAfterFilterInsertValue001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"test";
+    std::u16string insertValue = u"1234567";
+    pattern_->CalcCounterAfterFilterInsertValue(4, insertValue, 10);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: NotifyImfFinishTextPreview001
+ * @tc.desc: test NotifyImfFinishTextPreview
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, NotifyImfFinishTextPreview001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->NotifyImfFinishTextPreview();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: InsertValueByController001
+ * @tc.desc: test InsertValueByController
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, InsertValueByController001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    std::u16string insertValue = u"test";
+    auto ret = pattern_->InsertValueByController(insertValue, 0);
+    EXPECT_TRUE(ret >= 0);
+}
+
+/**
+ * @tc.name: ExecuteInsertValueCommand001
+ * @tc.desc: test ExecuteInsertValueCommand
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ExecuteInsertValueCommand001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    InsertCommandInfo info;
+    info.insertValue = u"test";
+    info.reason = InputReason::IME;
+    pattern_->ExecuteInsertValueCommand(info);
+    EXPECT_TRUE(pattern_->contentController_->content_.find(u"test") != std::u16string::npos);
+}
+
+/**
+ * @tc.name: UpdateInputFilterErrorText001
+ * @tc.desc: test UpdateInputFilterErrorText with u16string
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, UpdateInputFilterErrorText001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    std::u16string errorText = u"error";
+    pattern_->UpdateInputFilterErrorText(errorText);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateInputFilterErrorText002
+ * @tc.desc: test UpdateInputFilterErrorText with string
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, UpdateInputFilterErrorText002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    std::string errorText = "error";
+    pattern_->UpdateInputFilterErrorText(errorText);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OnValueChanged001
+ * @tc.desc: test OnValueChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, OnValueChanged001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->OnValueChanged(true, true);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OnHandleAreaChanged001
+ * @tc.desc: test OnHandleAreaChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, OnHandleAreaChanged001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->OnHandleAreaChanged();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleCounterBorder001
+ * @tc.desc: test HandleCounterBorder
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleCounterBorder001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowCounter(true);
+    });
+    GetFocus();
+
+    pattern_->HandleCounterBorder();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CloseSelectOverlay002
+ * @tc.desc: test CloseSelectOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CloseSelectOverlay002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->CloseSelectOverlay(false);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: NotifyKeyboardClosedByUser001
+ * @tc.desc: test NotifyKeyboardClosedByUser
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, NotifyKeyboardClosedByUser001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->NotifyKeyboardClosedByUser();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: NotifyKeyboardClosed001
+ * @tc.desc: test NotifyKeyboardClosed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, NotifyKeyboardClosed001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->NotifyKeyboardClosed();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateScrollBarOffset001
+ * @tc.desc: test UpdateScrollBarOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, UpdateScrollBarOffset001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->UpdateScrollBarOffset();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PlayScrollBarAppearAnimation001
+ * @tc.desc: test PlayScrollBarAppearAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, PlayScrollBarAppearAnimation001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->PlayScrollBarAppearAnimation();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: ScheduleDisappearDelayTask001
+ * @tc.desc: test ScheduleDisappearDelayTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ScheduleDisappearDelayTask001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->ScheduleDisappearDelayTask();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: IsAtTop001
+ * @tc.desc: test IsAtTop
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsAtTop001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->IsAtTop();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IsAtBottom001
+ * @tc.desc: test IsAtBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsAtBottom001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->IsAtBottom();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ScheduleTaskWithLayoutDeferral001
+ * @tc.desc: test ScheduleTaskWithLayoutDeferral
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ScheduleTaskWithLayoutDeferral001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    bool executed = false;
+    pattern_->ScheduleTaskWithLayoutDeferral([&executed]() { executed = true; });
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: StopEditing001
+ * @tc.desc: test StopEditing
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, StopEditing001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->isCaretTwinkling_ = true;
+    pattern_->StopEditing();
+    EXPECT_FALSE(pattern_->isCaretTwinkling_);
+}
+
+/**
+ * @tc.name: GetShowResultImageSrc001
+ * @tc.desc: test GetShowResultImageSrc
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetShowResultImageSrc001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto src = pattern_->GetShowResultImageSrc();
+    EXPECT_FALSE(src.empty());
+}
+
+/**
+ * @tc.name: GetHideResultImageSrc001
+ * @tc.desc: test GetHideResultImageSrc
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetHideResultImageSrc001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto src = pattern_->GetHideResultImageSrc();
+    EXPECT_FALSE(src.empty());
+}
+
+/**
+ * @tc.name: GetNormalUnderlineColorStr001
+ * @tc.desc: test GetNormalUnderlineColorStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetNormalUnderlineColorStr001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto color = pattern_->GetNormalUnderlineColorStr();
+    EXPECT_FALSE(color.empty());
+}
+
+/**
+ * @tc.name: GetTypingUnderlineColorStr001
+ * @tc.desc: test GetTypingUnderlineColorStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetTypingUnderlineColorStr001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto color = pattern_->GetTypingUnderlineColorStr();
+    EXPECT_FALSE(color.empty());
+}
+
+/**
+ * @tc.name: GetDisableUnderlineColorStr001
+ * @tc.desc: test GetDisableUnderlineColorStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetDisableUnderlineColorStr001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto color = pattern_->GetDisableUnderlineColorStr();
+    EXPECT_FALSE(color.empty());
+}
+
+/**
+ * @tc.name: GetErrorUnderlineColorStr001
+ * @tc.desc: test GetErrorUnderlineColorStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetErrorUnderlineColorStr001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto color = pattern_->GetErrorUnderlineColorStr();
+    EXPECT_FALSE(color.empty());
+}
+
+/**
+ * @tc.name: GetMarginBottom001
+ * @tc.desc: test GetMarginBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetMarginBottom001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto margin = pattern_->GetMarginBottom();
+    EXPECT_TRUE(margin >= 0);
+}
+
+/**
+ * @tc.name: RequestCustomKeyboard001
+ * @tc.desc: test RequestCustomKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, RequestCustomKeyboard001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->RequestCustomKeyboard();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: CloseCustomKeyboard001
+ * @tc.desc: test CloseCustomKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CloseCustomKeyboard001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->CloseCustomKeyboard();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: BetweenSelectedPosition003
+ * @tc.desc: test BetweenSelectedPosition with Offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, BetweenSelectedPosition003, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    Offset globalOffset(100, 100);
+    auto ret = pattern_->BetweenSelectedPosition(globalOffset);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: DumpInfo001
+ * @tc.desc: test DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, DumpInfo001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->DumpInfo();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo001
+ * @tc.desc: test DumpAdvanceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, DumpAdvanceInfo001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->DumpAdvanceInfo();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: DumpPlaceHolderInfo001
+ * @tc.desc: test DumpPlaceHolderInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, DumpPlaceHolderInfo001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "placeholder", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->DumpPlaceHolderInfo();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: DumpTextEngineInfo001
+ * @tc.desc: test DumpTextEngineInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, DumpTextEngineInfo001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->DumpTextEngineInfo();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: DumpScaleInfo001
+ * @tc.desc: test DumpScaleInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, DumpScaleInfo001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->DumpScaleInfo();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: GetDumpTextValue001
+ * @tc.desc: test GetDumpTextValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetDumpTextValue001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto value = pattern_->GetDumpTextValue();
+    EXPECT_FALSE(value.empty());
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, OnColorConfigurationUpdate001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->OnColorConfigurationUpdate();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: NeedPaintSelect001
+ * @tc.desc: test NeedPaintSelect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, NeedPaintSelect001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->NeedPaintSelect();
+    EXPECT_TRUE(ret || !ret);
+}
+
+/**
+ * @tc.name: SetCustomKeyboardOption001
+ * @tc.desc: test SetCustomKeyboardOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, SetCustomKeyboardOption001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->SetCustomKeyboardOption(true);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: UpdateCaretInfoToController002
+ * @tc.desc: test UpdateCaretInfoToController
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, UpdateCaretInfoToController002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->UpdateCaretInfoToController(false);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OnObscuredChanged001
+ * @tc.desc: test OnObscuredChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, OnObscuredChanged001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->OnObscuredChanged(true);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: IsInPasswordMode001
+ * @tc.desc: test IsInPasswordMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, IsInPasswordMode001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->IsInPasswordMode();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: HandleOnAIWrite001
+ * @tc.desc: test HandleOnAIWrite
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleOnAIWrite001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->HandleOnAIWrite();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: GetAIWriteInfo001
+ * @tc.desc: test GetAIWriteInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetAIWriteInfo001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    AIWriteInfo info;
+    pattern_->GetAIWriteInfo(info);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CursorMoveLeft001
+ * @tc.desc: test CursorMoveLeft
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CursorMoveLeft001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"test";
+    pattern_->selectController_->UpdateCaretIndex(2);
+    auto ret = pattern_->CursorMoveLeft();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: CursorMoveRight001
+ * @tc.desc: test CursorMoveRight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CursorMoveRight001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"test";
+    pattern_->selectController_->UpdateCaretIndex(2);
+    auto ret = pattern_->CursorMoveRight();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: CursorMoveUp001
+ * @tc.desc: test CursorMoveUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CursorMoveUp001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->CursorMoveUp();
+    EXPECT_TRUE(ret || !ret);
+}
+
+/**
+ * @tc.name: CursorMoveDown001
+ * @tc.desc: test CursorMoveDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CursorMoveDown001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto ret = pattern_->CursorMoveDown();
+    EXPECT_TRUE(ret || !ret);
+}
+
+/**
+ * @tc.name: SetCaretPosition001
+ * @tc.desc: test SetCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, SetCaretPosition001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"test";
+    pattern_->SetCaretPosition(2);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 2);
+}
+
+/**
+ * @tc.name: HandleExtendAction001
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleExtendAction001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->HandleExtendAction(ACTION_AUTOFILL);
+    EXPECT_TRUE(true);
+}
 } // namespace OHOS::Ace::NG

@@ -596,7 +596,7 @@ void ViewAbstractModelStatic::BindSheet(FrameNode* frameNode, bool isShow,
         titleBuildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         CHECK_NULL_RETURN(customNode, nullptr);
-        return customNode->GetFrameChildByIndex(0, true);
+        return customNode;
     };
     auto context = GetSheetContext(sheetStyle);
     CHECK_NULL_VOID(context);

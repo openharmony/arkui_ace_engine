@@ -84,7 +84,7 @@ export class FrameNodeTransfer {
 
 export class TransFrameNode extends FrameNode {
     constructor(uiContext?: UIContext, type?: string, ptr?: KPointer) {
-        super(uiContext, type, ptr);
+        super(uiContext, undefined, type, ptr);
     }
     public isTransferred(): boolean {
         return true;

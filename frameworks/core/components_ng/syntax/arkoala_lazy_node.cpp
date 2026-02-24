@@ -244,6 +244,8 @@ void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, Notificat
     if (parent) {
         if (isRepeat_ && parent->GetHostTag() == V2::LIST_ETS_TAG) {
             parent->NotifyChange(changeIndex, count, accessibilityId, NotificationType::START_AND_END_CHANGE_POSITION);
+        } else if (parent->GetHostTag() == V2::SWIPER_ETS_TAG) {
+            parent->NotifyChange(changeIndex, count, accessibilityId, NotificationType::START_AND_END_CHANGE_POSITION);
         } else {
             parent->NotifyChange(changeIndex, count, accessibilityId, type);
         }
@@ -267,6 +269,13 @@ void ArkoalaLazyNode::BuildAllChildren()
 {
     for (int32_t i = 0; i < FrameCount(); i++) {
         GetFrameChildByIndex(i, true, false, false);
+    }
+    children_.clear();
+    for (const auto& [index, node] : node4Index_) {
+        if (node) {
+            RemoveDisappearingChild(node);
+            children_.push_back(node);
+        }
     }
 }
 

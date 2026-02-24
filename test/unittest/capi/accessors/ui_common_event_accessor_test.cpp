@@ -316,7 +316,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnMouseTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setOnVisibleAreaApproximateChange
+ * @tc.name: setOnVisibleAreaApproximateChangeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -365,11 +365,11 @@ HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnKeyEventTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setOnSizeChangeEventTest
+ * @tc.name: setOnSizeChangeTestEvent
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnSizeChangeEventTest, TestSize.Level1)
+HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnSizeChangeTestEvent, TestSize.Level1)
 {
     static std::optional<TestEvent> testEvent = std::nullopt;
     const auto frameNode = AceType::MakeRefPtr<FrameNode>("TEST", 0, AceType::MakeRefPtr<Pattern>());

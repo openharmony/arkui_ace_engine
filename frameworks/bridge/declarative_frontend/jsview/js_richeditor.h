@@ -25,11 +25,7 @@
 namespace OHOS::Ace::Framework {
 class JSRichEditorBaseController : public Referenced {
 public:
-    virtual void SetController(const RefPtr<RichEditorBaseControllerBase>& controller)
-    {
-        controllerWeak_ = controller;
-    }
-
+    virtual void SetController(const RefPtr<RichEditorBaseControllerBase>& controller);
     void CloseSelectionMenu();
     void StopEditing();
     bool FontSizeRangeIsNegative(const CalcDimension& size);
@@ -56,12 +52,25 @@ public:
         return controller->GetColorMode();
     }
 
+    void SetPlaceholderStyledStringCache(const RefPtr<SpanString>& styledString)
+    {
+        placeholderStyledString_ = styledString;
+    }
+
+    RefPtr<SpanString> GetPlaceholderStyledStringCache() const
+    {
+        return placeholderStyledString_;
+    }
+
 protected:
     friend class JSRichEditorBaseControllerBinding;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     WeakPtr<RichEditorBaseControllerBase> controllerWeak_;
     struct UpdateSpanStyle typingStyle_;
     bool isStyledStringMode_ = false;
+
+private:
+    RefPtr<SpanString> placeholderStyledString_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H

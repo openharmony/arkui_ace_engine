@@ -42,11 +42,11 @@ namespace {
 }
 
 /**
- * @tc.name: RegisterFontTest
+ * @tc.name: registerFontTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_RegisterFontTest, TestSize.Level1)
+HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_registerFontTest, TestSize.Level1)
 {
 #ifdef WRONG_GEN1
     ASSERT_NE(accessor_->registerFont, nullptr);
@@ -76,11 +76,11 @@ HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_RegisterFontTest, TestSize.Le
 }
 
 /**
- * @tc.name: RegisterFontTestResource
+ * @tc.name: registerFontTestResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_RegisterFontTestResource, TestSize.Level1)
+HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_registerFontTestResource, TestSize.Level1)
 {
 #ifdef WRONG_GEN1
     ASSERT_NE(accessor_->registerFont, nullptr);
@@ -115,11 +115,11 @@ HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_RegisterFontTestResource, Tes
 }
 
 /**
- * @tc.name: GetSystemFontListTest
+ * @tc.name: getSystemFontListTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_GetSystemFontListTest, TestSize.Level1)
+HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_getSystemFontListTest, TestSize.Level1)
 {
 #ifdef WRONG_GEN1
     ASSERT_NE(accessor_->getSystemFontList, nullptr);
@@ -138,11 +138,11 @@ HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_GetSystemFontListTest, TestSi
 }
 
 /**
- * @tc.name: GetFontByNameTest
+ * @tc.name: getFontByNameTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_GetFontByNameTest, TestSize.Level1)
+HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_getFontByNameTest, TestSize.Level1)
 {
 #ifdef WRONG_GEN1
     ASSERT_NE(accessor_->getFontByName, nullptr);
