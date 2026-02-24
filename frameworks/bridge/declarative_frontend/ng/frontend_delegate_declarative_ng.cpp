@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "frameworks/core/common/ace_engine.h"
-#include "base/subwindow/subwindow_manager.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -85,9 +84,9 @@ void FrontendDelegateDeclarativeNG::SetDrawChildrenInspectorCallback(
 }
 
 void FrontendDelegateDeclarativeNG::SetIsDrawChildrenCallbackFuncExistCallback(
-    const IsDrawChildrenCallbackFuncExistCallback& IsDrawChildrenCallbackFuncExistCallback)
+    const IsDrawChildrenCallbackFuncExistCallback& isDrawChildrenCallbackFuncExistCallback)
 {
-    isDrawChildrenCallbackFuncExistCallback_ = IsDrawChildrenCallbackFuncExistCallback;
+    isDrawChildrenCallbackFuncExistCallback_ = isDrawChildrenCallbackFuncExistCallback;
 }
 
 void FrontendDelegateDeclarativeNG::SetOnStartContinuationCallBack(
@@ -1540,7 +1539,8 @@ bool FrontendDelegateDeclarativeNG::SetOverlayManagerOptions(const NG::OverlayMa
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
     return overlayManager->SetOverlayManagerOptions(overlayInfo);
-};
+}
+
 std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarativeNG::GetOverlayManagerOptions()
 {
     auto context = NG::PipelineContext::GetCurrentContext();
@@ -1548,5 +1548,5 @@ std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarativeNG::GetOverlayM
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_RETURN(context, std::nullopt);
     return overlayManager->GetOverlayManagerOptions();
-};
+}
 } // namespace OHOS::Ace::Framework
