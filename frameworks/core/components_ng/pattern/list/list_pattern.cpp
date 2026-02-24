@@ -1826,7 +1826,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             jumpIndex_ = index;
             scrollAlign_ = align;
             jumpIndexInGroup_.reset();
-            ContentChangeReport(GetHost());
+            ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO_INDEX);
         }
         MarkDirtyNodeSelf();
     }

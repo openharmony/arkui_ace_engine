@@ -34,8 +34,9 @@ class ContentChangeManager final : public AceType {
     DECLARE_ACE_TYPE(ContentChangeManager, AceType);
 public:
     enum ContentIgnoreEventType : uint32_t {
-        NONE = 0,            // no event
-        SCROLL_TO = 1 << 0,  // SCROLL: scrollTo
+        NONE = 0,                 // no event
+        SCROLL_TO = 1 << 0,       // SCROLL: scrollTo
+        SCROLL_TO_INDEX = 1 << 1, // SCROLL: scrollToIndex
     };
 
     ContentChangeManager();
