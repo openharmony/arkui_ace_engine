@@ -175,7 +175,7 @@ generated_sources = [
   "implementation/loading_progress_modifier.cpp",
   "implementation/long_press_gesture_event_accessor.cpp",
   "implementation/long_press_recognizer_accessor.cpp",
-  "implementation/magnifier_accessor.cpp",
+  "implementation/magnifier_extender_accessor.cpp",
   "implementation/marquee_modifier.cpp",
   "implementation/matrix2d_accessor.cpp",
   "implementation/measurable_accessor.cpp",

@@ -30,7 +30,7 @@ import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, Con
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
     KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType, PageInfo,
-    CustomKeyboardContinueFeature, Magnifier as UIMagnifier } from '@ohos/arkui/UIContext';
+    CustomKeyboardContinueFeature, Magnifier } from '@ohos/arkui/UIContext';
 import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
@@ -80,8 +80,7 @@ import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, Anim
     DialogExtender, IUIContext, ContextMenu } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback, BusinessError } from "@ohos.base"
-import { IUIContext, SystemOps, UIObserverGestureEventOps, Magnifier as MagnifierIdlize,
-    MagnifierInternal } from 'arkui/component/idlize';
+import { IUIContext, SystemOps, UIObserverGestureEventOps, MagnifierExtender } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
@@ -1396,29 +1395,25 @@ export class DetachedRootEntryManager {
     }
 }
 
-export class MagnifierImpl extends UIMagnifier {
+export class MagnifierImpl extends Magnifier {
     instanceId_: int32;
-    peerPtr: KPointer;
-    magnifier: MagnifierIdlize;
     constructor(instanceId: int32) {
         super()
         this.instanceId_ = instanceId;
-        this.peerPtr = MagnifierIdlize.construct();
-        this.magnifier = MagnifierInternal.fromPtr(this.peerPtr);
     }
     public bind(id: string): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        this.magnifier.bind(id)
+        MagnifierExtender.bind(id)
         ArkUIAniModule._Common_Restore_InstanceId();
     }
     public show(x: double, y: double): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        this.magnifier.show(x, y)
+        MagnifierExtender.show(x, y)
         ArkUIAniModule._Common_Restore_InstanceId();
     }
     public unbind(): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        this.magnifier.unbind()
+        MagnifierExtender.unbind()
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 }
@@ -2132,7 +2127,7 @@ export class UIContextImpl extends UIContext {
         this.isUpdateConfiguration_ = value;
     }
 
-    public getMagnifier(): UIMagnifier {
+    public getMagnifier(): Magnifier {
         return this.magnifier_;
     }
 }

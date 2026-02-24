@@ -33895,17 +33895,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_arkui_component_idlize_Magnifier GetMagnifierImpl()
-    {
-        if (!needGroupedLog(1)) {
-            return reinterpret_cast<Ark_arkui_component_idlize_Magnifier>(300);
-        }
-        string out("getMagnifier(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_arkui_component_idlize_Magnifier>(300)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_arkui_component_idlize_Magnifier>(300);
-    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -35344,40 +35333,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return 0;
     }
     } // LongPressRecognizerAccessor
-    namespace MagnifierAccessor {
-    void DestroyPeerImpl(Ark_arkui_component_idlize_Magnifier peer)
-    {
-        if (!needGroupedLog(1)) {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_arkui_component_idlize_Magnifier ConstructImpl()
-    {
-        if (!needGroupedLog(1)) {
-            return reinterpret_cast<Ark_arkui_component_idlize_Magnifier>(100);
-        }
-        string out("new Magnifier(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_arkui_component_idlize_Magnifier>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_arkui_component_idlize_Magnifier>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1)) {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    void BindImpl(Ark_arkui_component_idlize_Magnifier peer,
-                  const Ark_String* id)
+    namespace MagnifierExtenderAccessor {
+    void BindImpl(const Ark_String* id)
     {
         if (!needGroupedLog(1)) {
             return;
@@ -35387,8 +35344,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void ShowImpl(Ark_arkui_component_idlize_Magnifier peer,
-                  Ark_Float64 x,
+    void ShowImpl(Ark_Float64 x,
                   Ark_Float64 y)
     {
         if (!needGroupedLog(1)) {
@@ -35401,7 +35357,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void UnbindImpl(Ark_arkui_component_idlize_Magnifier peer)
+    void UnbindImpl()
     {
         if (!needGroupedLog(1)) {
             return;
@@ -35410,7 +35366,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    } // MagnifierAccessor
+    } // MagnifierExtenderAccessor
     namespace Matrix2DAccessor {
     void DestroyPeerImpl(Ark_Matrix2D peer)
     {
@@ -49133,7 +49089,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
             IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
-            IUIContextAccessor::GetMagnifierImpl,
         };
         return &IUIContextAccessorImpl;
     }
@@ -49435,22 +49390,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct LongPressRecognizerPeer {
         virtual ~LongPressRecognizerPeer() = default;
     };
-    const GENERATED_ArkUIMagnifierAccessor* GetMagnifierAccessor()
+    const GENERATED_ArkUIMagnifierExtenderAccessor* GetMagnifierExtenderAccessor()
     {
-        static const GENERATED_ArkUIMagnifierAccessor MagnifierAccessorImpl {
-            MagnifierAccessor::DestroyPeerImpl,
-            MagnifierAccessor::ConstructImpl,
-            MagnifierAccessor::GetFinalizerImpl,
-            MagnifierAccessor::BindImpl,
-            MagnifierAccessor::ShowImpl,
-            MagnifierAccessor::UnbindImpl,
+        static const GENERATED_ArkUIMagnifierExtenderAccessor MagnifierExtenderAccessorImpl {
+            MagnifierExtenderAccessor::BindImpl,
+            MagnifierExtenderAccessor::ShowImpl,
+            MagnifierExtenderAccessor::UnbindImpl,
         };
-        return &MagnifierAccessorImpl;
+        return &MagnifierExtenderAccessorImpl;
     }
 
-    struct MagnifierPeer {
-        virtual ~MagnifierPeer() = default;
-    };
     const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
     {
         static const GENERATED_ArkUIMatrix2DAccessor Matrix2DAccessorImpl {
@@ -51633,7 +51582,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetListScrollerAccessor,
             GetLongPressGestureEventAccessor,
             GetLongPressRecognizerAccessor,
-            GetMagnifierAccessor,
+            GetMagnifierExtenderAccessor,
             GetMatrix2DAccessor,
             GetMeasurableAccessor,
             GetMenuItemConfigurationAccessor,

@@ -102,6 +102,7 @@ RefPtr<ImageSpan> Convert(const Ark_ResourceImageAttachmentOptions& value)
     imageStyle.verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign).value_or(VerticalAlign::BOTTOM);
     imageStyle.objectFit = OptConvert<ImageFit>(value.objectFit).value_or(ImageFit::COVER);
     imageStyle.size = OptConvert<ImageSpanSize>(value.size);
+    imageStyle.supportSvg2 = OptConvert<bool>(value.supportSvg2).value_or(false);
     std::optional<Ark_ColorFilterType> colorFilter = GetOpt(value.colorFilter);
     if (colorFilter) {
         Converter::VisitUnion(
