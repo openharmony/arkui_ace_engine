@@ -167,6 +167,8 @@ const std::string ACTION_CALENDAR = "JUMP_TO_VIEW_BY_AGENDA_PREVIEW";
 const std::string ABILITYNAME_CALENDAR = "MainAbility";
 const std::string ACTION_PARAM = "action";
 const std::string UIEXTENSION_CONFIG_MENUBAR = "ohos.system.atomicservice.menubar.params";
+const std::string UIEXTENSION_CONFIG_WINDOW_MODE = "ohos.system.window.mode";
+constexpr int32_t INVALID_WINDOW_MODE = 1000;
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
@@ -2754,6 +2756,32 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
                 systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str());
         }
     }
+    InitWindowMode(container);
+}
+
+void UIContentImpl::InitWindowMode(const RefPtr<Platform::AceContainer>& container)
+{
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto hostWantParams = hostWindowInfo_.hostWantParams;
+    if (hostWantParams == nullptr) {
+        return;
+    }
+    auto windowMode = hostWantParams->GetParams().GetIntParam(UIEXTENSION_CONFIG_WINDOW_MODE, INVALID_WINDOW_MODE);
+    if (windowMode == INVALID_WINDOW_MODE) {
+        return;
+    }
+    taskExecutor->PostTask(
+        [weak = WeakPtr<PipelineBase>(pipeline), windowMode]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetIsLayoutFullScreen(
+                static_cast<Rosen::WindowMode>(windowMode) == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+        },
+        TaskExecutor::TaskType::UI, "ArkUINotifyLayoutFullScreen");
 }
 
 void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceContainer>& container)
