@@ -1245,14 +1245,26 @@ void PipelineContext::HandleSpecialContainerNode()
     if (!SystemProperties::GetContainerDeleteFlag()) {
         return;
     }
-
     auto positionZSet = GetPositionZNodes();
+    // Group child nodes by their parent to avoid duplicate processing
+    // Key: parent node ID, Value: list of child node IDs (only used for grouping)
+    std::unordered_map<uint64_t, std::vector<uint64_t>> parentToChildrenMap;
     for (auto positionZNodeId : positionZSet) {
         auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(positionZNodeId));
         if (!frameNode) {
             continue;
         }
         auto parentNode = frameNode->GetParentFrameNode();
+        if (!parentNode) {
+            continue;
+        }
+        // Group by parent node ID
+        auto parentId = parentNode->GetId();
+        parentToChildrenMap[parentId].push_back(positionZNodeId);
+    }
+    // Process each unique parent node only once
+    for (const auto& [parentId, childIds] : parentToChildrenMap) {
+        auto parentNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(parentId));
         if (!parentNode) {
             continue;
         }
