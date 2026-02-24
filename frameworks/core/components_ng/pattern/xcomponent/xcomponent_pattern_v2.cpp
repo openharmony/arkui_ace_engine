@@ -393,8 +393,7 @@ void XComponentPatternV2::FlushImplicitTransaction(const RefPtr<FrameNode>& fram
         if (transactionProxy != nullptr) {
             transactionProxy->FlushImplicitTransaction();
         }
-    }
-    else if (auto transactionHandler = GetRSTransactionHandler(frameNode)) {
+    } else if (auto transactionHandler = GetRSTransactionHandler(frameNode)) {
         transactionHandler->FlushImplicitTransaction();
     }
 #endif

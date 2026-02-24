@@ -110,8 +110,9 @@ void XComponentPattern::InitControllerMultiThread()
 {
     CHECK_NULL_VOID(xcomponentController_);
     auto* controllerNG = static_cast<XComponentControllerNG*>(xcomponentController_.get());
-    CHECK_NULL_VOID(controllerNG);
-    controllerNG->SetPattern(AceType::Claim(this));
+    if (controllerNG) {
+        controllerNG->SetPattern(AceType::Claim(this));
+    }
     if (!isTypedNode_) {
         xcomponentController_->SetSurfaceId(surfaceId_);
     }

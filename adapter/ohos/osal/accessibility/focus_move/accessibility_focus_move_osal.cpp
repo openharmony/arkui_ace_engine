@@ -424,6 +424,27 @@ void JsAccessibilityManager::ProcessGetScrollAncestorNode(
     callback.SetFocusMoveSearchWithConditionResult(infos, result, requestId);
 }
 
+RefPtr<NG::FrameNode> GetParentNodeWithOffScreen(const RefPtr<NG::FrameNode>& curFrameNode)
+{
+    auto parent = curFrameNode->GetParent();
+    while (parent) {
+        auto parentFrame = AceType::DynamicCast<NG::FrameNode>(parent);
+        if (parentFrame) {
+            return parentFrame;
+        }
+        parent = parent->GetParent();
+    }
+ 
+    if (curFrameNode->IsAccessibilityVirtualNode()) {
+        auto parent = curFrameNode->GetVirtualNodeParent().Upgrade();
+        auto parentFrameNode = AceType::DynamicCast<NG::FrameNode>(parent);
+        if (parentFrameNode) {
+            return parentFrameNode;
+        }
+    }
+    return nullptr;
+}
+
 bool JsAccessibilityManager::NeedChangeToReadableNode(const RefPtr<NG::FrameNode>& curFrameNode,
     RefPtr<NG::FrameNode>& readableNode)
 {
@@ -450,7 +471,7 @@ bool JsAccessibilityManager::NeedChangeToReadableNode(const RefPtr<NG::FrameNode
             readableNode = targetCheckNode;
             return true;
         }
-        targetCheckNode = targetCheckNode->GetParentFrameNode();
+        targetCheckNode = GetParentNodeWithOffScreen(targetCheckNode);
     }
     // if cannot find in childtree, need to continue to find readable in parent process
     auto context = curFrameNode->GetContextRefPtr();
