@@ -20866,18 +20866,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
-                                         const Opt_Boolean* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setEnableDefaultContextMenu(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                         const Opt_String* tag,
                                         const Opt_String* type)

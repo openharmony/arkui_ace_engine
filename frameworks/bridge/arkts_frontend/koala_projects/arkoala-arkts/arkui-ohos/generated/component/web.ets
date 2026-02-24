@@ -4276,9 +4276,6 @@ export interface WebAttribute extends CommonMethod {
     enableDefaultContextMenu(value: boolean | undefined): this {
         throw new Error('Unimplemented method enableDefaultContextMenu')
     }
-    enableDefaultContextMenu(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableDefaultContextMenu")
-    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         throw new Error('Unimplemented method registerNativeEmbedRule')
     }
@@ -5083,14 +5080,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
     public enableDefaultContextMenu(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setEnableDefaultContextMenuAttribute(value_casted)
-        return this
-    }
-    public enableDefaultContextMenu(value: boolean | undefined): this {
-        if (this.checkPriority("enableDefaultContextMenu")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setEnableDefaultContextMenuAttribute(value_casted)
-            return this
-        }
         return this
     }
     public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {

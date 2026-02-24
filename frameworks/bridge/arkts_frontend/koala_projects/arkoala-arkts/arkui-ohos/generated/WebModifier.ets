@@ -5969,18 +5969,6 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         }
         return this
     }
-    enableDefaultContextMenu(value: boolean | undefined): this {
-        if ((this._enableDefaultContextMenu_0_flag == (AttributeUpdaterFlag.INITIAL)) || ((this._enableDefaultContextMenu_0_0value) !== (value)))
-        {
-            this._enableDefaultContextMenu_0_flag = AttributeUpdaterFlag.UPDATE
-            this._enableDefaultContextMenu_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._enableDefaultContextMenu_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         if (((this._flagArray[145]) == (0)) || ((this._registerNativeEmbedRule_0_0value) !== (tag)) || ((this._registerNativeEmbedRule_0_1value) !== (type))) {
             this._flagArray[145] = 1
