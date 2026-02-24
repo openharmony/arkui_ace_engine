@@ -952,13 +952,13 @@ public:
         return scrollBar_;
     }
 
-    static double GetDefaultFriction();
-
     bool IsInitialized() const
     {
         return isInitialized_;
     }
     void ProcessScrollOverDrag(double velocity, bool isNestScroller);
+
+    static double GetDefaultFriction();
 
     void SetCanOverScroll(bool val);
 
