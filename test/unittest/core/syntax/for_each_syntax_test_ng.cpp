@@ -709,4 +709,60 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxCollectRemovingIdsTest001, TestSize.L
     forEachNode->CollectRemovingIds(removedElmtId);
     EXPECT_EQ(forEachNode->oldNodeByIdMap_.size(), 4);
 }
+
+/**
+ * @tc.name: ForEachMappingChildWithIdTest001
+ * @tc.desc: Test ForEach mapping child with id functionality.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachMappingChildWithIdTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ForEach node and set up children nodes.
+     */
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Create child nodes for mapping.
+     */
+    std::list<RefPtr<UINode>> additionalChildComps;
+    for (auto iter = FOR_EACH_ARRAY.begin(); iter != FOR_EACH_ARRAY.end(); iter++) {
+        auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+        additionalChildComps.push_back(childFrameNode);
+    }
+
+    /**
+     * @tc.steps: step3. Create old ids set and populate oldNodeByIdMap for mapping.
+     * oldNodeByIdMap should be populated before calling MappingChildWithId, simulating
+     * the behavior of CollectRemovingIds in the actual workflow.
+     */
+    std::unordered_set<std::string> oldIdsSet = { "0", "1", "2" };
+    std::map<std::string, RefPtr<UINode>> oldNodeByIdMap;
+    
+    // Populate oldNodeByIdMap: map "0"->child0, "1"->child1, "2"->child2
+    auto it = additionalChildComps.begin();
+    oldNodeByIdMap["0"] = *it++;
+    oldNodeByIdMap["1"] = *it++;
+    oldNodeByIdMap["2"] = *it++;
+
+    /**
+     * @tc.steps: step4. Call MappingChildWithId to map children with ids.
+     */
+    forEachNode->MappingChildWithId(oldIdsSet, additionalChildComps, oldNodeByIdMap);
+
+    /**
+     * @tc.steps: step5. Verify mapping result - children should be properly mapped.
+     * The function uses oldNodeByIdMap to find existing nodes for reuse.
+     */
+    EXPECT_EQ(oldNodeByIdMap.size(), 3);
+    EXPECT_TRUE(oldNodeByIdMap.find("0") != oldNodeByIdMap.end());
+    EXPECT_TRUE(oldNodeByIdMap.find("1") != oldNodeByIdMap.end());
+    EXPECT_TRUE(oldNodeByIdMap.find("2") != oldNodeByIdMap.end());
+}
 } // namespace OHOS::Ace::NG
