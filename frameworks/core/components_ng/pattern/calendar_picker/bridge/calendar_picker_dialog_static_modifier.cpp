@@ -228,8 +228,7 @@ void ShowImpl(const Opt_CalendarDialogOptions* options)
             overlayManager->ShowCalendarDialog(
                 dialogProps, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker");
 }
 } // namespace CalendarPickerDialogAccessor
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()

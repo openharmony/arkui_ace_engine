@@ -58,8 +58,7 @@ void ShowCalendarPickerDialog(const CalendarPickerDialogOption* option)
             overlayManager->ShowCalendarDialog(
                 dialogProperties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker");
 }
 
 void JSRemoveResObj(ArkUI_CharPtr key)
