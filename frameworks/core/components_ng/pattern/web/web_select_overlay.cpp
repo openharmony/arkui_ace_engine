@@ -159,6 +159,25 @@ void WebSelectOverlay::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebT
     }
 }
 
+void WebSelectOverlay::IsNeedResetHandleReverse(SelectHandleInfo firstHandleInfo, SelectHandleInfo secondHandleInfo)
+{
+    auto firstRect = firstHandleInfo.paintRect;
+    auto secondRect = secondHandleInfo.paintRect;
+    float lowerHandleTop = 0.0f;
+    RectF heighterHandleRect;
+    if (GreatNotEqual(firstRect.Top(), secondRect.Top())) {
+        lowerHandleTop = firstRect.Top() + 0.5f;
+        heighterHandleRect = secondRect;
+    } else {
+        lowerHandleTop = secondRect.Top() + 0.5f;
+        heighterHandleRect = firstRect;
+    }
+    bool inSameLine = GreatNotEqual(lowerHandleTop, heighterHandleRect.Top()) &&
+                      LessNotEqual(lowerHandleTop, heighterHandleRect.Bottom());
+    needResetHandleReverse_ = inSameLine ? GreatNotEqual(firstRect.Left(), secondRect.Left())
+                                         : GreatNotEqual(firstRect.Top(), secondRect.Top());
+}
+
 void WebSelectOverlay::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
 {
     selectInfo.onClick = [weak = AceType::WeakClaim(this)](const GestureEvent& info, bool isFirst) {
@@ -334,6 +353,7 @@ void WebSelectOverlay::UpdateTouchHandleForOverlay(bool fromOverlay)
             webSelectInfo_.isNewAvoid = false;
         }
         webSelectInfo_.handleReverse = false;
+        IsNeedResetHandleReverse(firstHandleInfo, secondHandleInfo);
         if (SelectOverlayIsOn()) {
             UpdateIsSelectAll();
             UpdateAllHandlesOffset();
@@ -567,6 +587,7 @@ void WebSelectOverlay::UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInf
         CheckHandles(selectInfo.firstHandle, beginTouchHandle);
         CheckHandles(selectInfo.secondHandle, endTouchHandle);
         QuickMenuIsNeedNewAvoid(selectInfo, params, beginTouchHandle, endTouchHandle);
+        IsNeedResetHandleReverse(selectInfo.firstHandle, selectInfo.secondHandle);
         if (pattern && !(pattern->onCreateMenuCallback_ && pattern->onMenuItemClick_)) {
             selectInfo.menuOptionItems = pattern->menuOptionParam_;
         }
@@ -1337,39 +1358,67 @@ bool WebSelectOverlay::IsNeedMenuShareForWeb()
     return trimmedLen <= maxShareLength;
 }
 
+/**
+ * @brief 处理选择覆盖层标记信息变化的函数
+ * @param info 选择覆盖层信息的共享指针
+ * @param flag 标记信息变化的标志位
+ */
 void WebSelectOverlay::OnHandleMarkInfoChange(
     const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
 {
+    // 获取选择内容覆盖层管理器指针
     auto manager = GetManager<SelectContentOverlayManager>();
-    CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(manager);  // 检查管理器指针是否为空，为空则直接返回
+    // 检查是否需要处理手柄颜色变化
     if ((flag & DIRTY_HANDLE_COLOR_FLAG) == DIRTY_HANDLE_COLOR_FLAG) {
+        // 更新手柄颜色
         info->handlerColor = GetHandleColor();
+        // 标记手柄节点需要渲染更新
         manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    // 检查是否需要处理第一个或第二个手柄的变化
     if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE || (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
+        // 获取Web模式指针
         auto pattern = GetPattern<WebPattern>();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern);  // 检查模式指针是否为空，为空则直接返回
+        // 获取委托指针
         auto delegate = pattern->delegate_;
-        CHECK_NULL_VOID(delegate);
+        CHECK_NULL_VOID(delegate);  // 检查委托指针是否为空，为空则直接返回
+        // 获取复制选项模式
         auto copyOption = delegate->GetCopyOptionMode();
+        // 判断是否可以复制出应用
         bool canCopyOut = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
                           (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
+        // 检查分享菜单显示状态是否需要更新
         if (info->menuInfo.showShare != (IsSupportMenuShare() && IsNeedMenuShareForWeb())) {
+            // 更新分享菜单显示状态
             info->menuInfo.showShare = !info->menuInfo.showShare && canCopyOut;
+            // 通知工具栏更新
             manager->NotifyUpdateToolBar(true);
         }
+        // 检查AI菜单选项类型是否需要更新
         if (info->menuInfo.aiMenuOptionType != aiMenuType_) {
+            // 记录AI菜单选项类型变化的日志
             TAG_LOGI(AceLogTag::ACE_WEB, "WebSelectOverlay::OnHandleMarkInfoChange aiMenuOptionType change.");
+            // 更新AI菜单选项类型
             info->menuInfo.aiMenuOptionType = aiMenuType_;
+            // 更新是否启用询问Celia功能的标志
             info->menuInfo.isAskCeliaEnabled = canShowAIMenu_ && (aiMenuType_ == TextDataDetectType::INVALID);
+            // 通知工具栏更新
             manager->NotifyUpdateToolBar(true);
         }
     }
+    // 检查是否需要处理双手柄变化
     if ((flag & DIRTY_DOUBLE_HANDLE) == DIRTY_DOUBLE_HANDLE) {
+        // 检查是否需要重置手柄反向状态
         if (needResetHandleReverse_) {
+            // 记录重置手柄反向状态的日志
             TAG_LOGI(AceLogTag::ACE_WEB, "WebSelectOverlay OnHandleMarkInfoChange reset handleReverse.");
+            // 重置手柄反向状态
             info->handleReverse = webSelectInfo_.handleReverse;
+            // 标记手柄节点需要渲染更新
             manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
+            // 重置需要重置手柄反向状态的标志
             needResetHandleReverse_ = false;
         }
     }
