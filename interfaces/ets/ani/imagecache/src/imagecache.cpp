@@ -56,7 +56,9 @@ static void setImageRawDataCacheSize([[maybe_unused]] ani_env *env, [[maybe_unus
         return;
     }
     auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext) {
+        return;
+    }
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     if (!taskExecutor) {
         return;
@@ -88,12 +90,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    std::array staticMethods = {
+    std::array methods = {
         ani_native_function {"setImageCacheCount", nullptr, reinterpret_cast<void *>(setImageCacheCount)},
         ani_native_function {"setImageRawDataCacheSize", nullptr, reinterpret_cast<void *>(setImageRawDataCacheSize)},
     };
 
-    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
         std::cerr << "Cannot bind native methods to '" << className << "'" << std::endl;
         return ANI_ERROR;
     };

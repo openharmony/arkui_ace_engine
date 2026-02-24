@@ -352,8 +352,8 @@ void PixelMapImage::DrawToRSCanvas(
     Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0, static_cast<int32_t>(config.dynamicMode) };
-    rsImageInfo.fitMatrix = ToDrawingMatrix(config.imageMatrix_);
     rsImageInfo.rotateDegree = CalculateRotateDegree(config.orientation_);
+    rsImageInfo.fitMatrix = ToDrawingMatrix(config.imageMatrix_);
     rsImageInfo.orientationNum = static_cast<int32_t>(CalculateFlip(config.orientation_));
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {

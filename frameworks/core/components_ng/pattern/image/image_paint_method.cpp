@@ -221,7 +221,7 @@ void ImagePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto size = paintWrapper->GetContentSize();
     imageContentModifier_->SetSize(size);
     imageContentModifier_->SetSensitive(sensitive_);
-    imageContentModifier_->SetCanvasImageWrapper(CanvasImageModifierWrapper(canvasImage_));;
+    imageContentModifier_->SetCanvasImageWrapper(CanvasImageModifierWrapper(canvasImage_));
 }
 
 bool ImagePaintMethod::NeedsContentTransition()

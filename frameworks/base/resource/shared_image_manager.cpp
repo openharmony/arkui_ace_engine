@@ -23,7 +23,7 @@ namespace {
 constexpr uint32_t DELAY_TIME_FOR_IMAGE_DATA_CLEAN = 30000;
 constexpr char MEMORY_IMAGE_HEAD[] = "memory://";
 
-constexpr size_t MAX_SIZE_FOR_TOTAL_IMAGE = 10000000;
+constexpr size_t MAX_SIZE_FOR_TOTAL_IMAGE = 10 * 1024 * 1024;
 
 } // namespace
 
@@ -37,7 +37,7 @@ std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const s
         {
             std::lock_guard<std::mutex> lockImageMap(sharedImageManager->sharedImageMapMutex_);
             sharedImageManager->sharedImageMap_.erase(picName);
-            LOGI("clear image cache name: %{public}s", picName.c_str());
+            LOGW("clear image cache name: %{public}s", picName.c_str());
             if (sharedImageManager->sharedImageTotalSize_ > dataSize) {
                 sharedImageManager->sharedImageTotalSize_ -= dataSize;
             } else {

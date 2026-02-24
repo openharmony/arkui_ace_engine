@@ -60,12 +60,19 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(host, std::nullopt);
     auto pattern = host->GetPattern<ImagePattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto type = pattern->GetImageType();
     auto rawImageSize = pattern->GetImageSizeForMeasure();
     if (rawImageSize == std::nullopt) {
         return std::nullopt;
     }
     SizeF size(rawImageSize.value());
     do {
+        if (type == ImageType::ANIMATED_DRAWABLE) {
+            auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+            MinusPaddingToSize(padding, size);
+            break;
+        }
+
         auto aspectRatio = static_cast<float>(Size::CalcRatio(rawImageSize.value()));
         if (NearZero(aspectRatio)) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "image aspectRatio is 0");

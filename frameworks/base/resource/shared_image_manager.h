@@ -44,8 +44,9 @@ class SharedImageManager : public AceType {
     DECLARE_ACE_TYPE(SharedImageManager, AceType);
 
 public:
-    explicit SharedImageManager(const RefPtr<TaskExecutor>& taskExecutor) :
-        sharedImageTotalSize_(0), taskExecutor_(taskExecutor) {
+    explicit SharedImageManager(const RefPtr<TaskExecutor>& taskExecutor)
+        : sharedImageTotalSize_(0), taskExecutor_(taskExecutor)
+    {
         sharedImageCacheThreshold_ = SystemProperties::getFormSharedImageCacheThreshold();
         LOGI("getFormSharedImageCacheThreshold %{public}d", sharedImageCacheThreshold_);
     }

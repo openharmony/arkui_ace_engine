@@ -255,7 +255,7 @@ std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string&
     std::scoped_lock lock(std::adopt_lock, taskMtx_);
     auto it = tasks_.find(key);
     if (it == tasks_.end()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Task InvalidKey %{private}s", key.c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "task not found in map %{private}s", key.c_str());
         return {};
     }
     auto ctxs = it->second.ctxs_;

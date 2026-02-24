@@ -452,17 +452,17 @@ std::shared_ptr<RSData> AssetImageLoader::LoadImageData(const ImageSourceInfo& i
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
         TAG_LOGW(
-            AceLogTag::ACE_IMAGE, "invalid pipeline context. %{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
+            AceLogTag::ACE_IMAGE, "invalid pipeline context. %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto assetManager = pipelineContext->GetAssetManager();
     if (!assetManager) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "NoAssetManager! %{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "No asset manager! %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto assetData = assetManager->GetAsset(assetSrc);
     if (!assetData) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "NoAssetData-%{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "No asset data! %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
         errorInfo = { ImageErrorCode::GET_IMAGE_ASSET_GET_FAILED, "get asset failed." };
         return nullptr;
     }
@@ -774,7 +774,7 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
     return nullptr;
 #else
     auto& errorInfo = loadResultInfo.errorInfo;
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("LoadDecodedImageData [%s]", src.ToString().c_str());
     auto pipeline = pipelineWk.Upgrade();
     auto imageDfxConfig = src.GetImageDfxConfig();
     if (!pipeline) {

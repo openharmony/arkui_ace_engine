@@ -16,10 +16,10 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 
 #include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
@@ -442,6 +442,11 @@ bool ImageLoadingContext::NeedAlt() const
 {
     auto state = stateManager_->GetCurrentState();
     return state != ImageLoadingState::LOAD_SUCCESS;
+}
+
+const std::optional<Color>& ImageLoadingContext::GetSvgFillColor() const
+{
+    return src_.GetFillColor();
 }
 
 void ImageLoadingContext::ResetLoading()

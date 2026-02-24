@@ -135,7 +135,7 @@ std::string ImageSourceOhos::GetProperty(const std::string& key)
     std::string value;
     uint32_t res = imageSource_->GetImagePropertyString(0, key, value);
     if (res != Media::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Get ImageSource property %{public}s failed, errorCode = %{public}u",
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Get ImageSource property %{public}s failed, errorCode = %{public}u",
             key.c_str(), res);
     }
     return value;

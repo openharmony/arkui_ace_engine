@@ -77,6 +77,7 @@ void ControlledAnimator::ClearInterpolators()
 
 void ControlledAnimator::AddInterpolator(const std::vector<PictureInfo>& pictureInfos)
 {
+    isFirstRun_ = true;
     pictureInfos_ = std::move(pictureInfos);
 }
 

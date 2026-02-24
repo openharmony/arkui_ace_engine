@@ -21,7 +21,7 @@
 #include <memory>
 
 #include "interfaces/inner_api/ace/ai/image_analyzer_interface.h"
-#include "js_native_api_types.h"
+typedef struct napi_env__* napi_env;
 
 namespace OHOS::Ace {
 using ImageAnalyzerInstance = std::unique_ptr<ImageAnalyzerInterface, std::function<void(ImageAnalyzerInterface*)>>;

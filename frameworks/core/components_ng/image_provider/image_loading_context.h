@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_LOADING_CONTEXT_H
 
 #include <cstdint>
-
 #include "base/geometry/ng/size_t.h"
 #include "base/image/pixel_map.h"
 #include "base/thread/task_executor.h"
@@ -74,6 +73,7 @@ public:
     bool GetAutoResize() const;
     std::optional<SizeF> GetSourceSize() const;
     bool NeedAlt() const;
+    const std::optional<Color>& GetSvgFillColor() const;
 
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
@@ -96,14 +96,24 @@ public:
     void FailCallback(const std::string& errorMsg, const ImageErrorInfo& errorInfo = {});
     const std::string GetCurrentLoadingState();
     void ResizableCalcDstSize();
-    bool Downloadable();
-    void OnDataReady();
 
     // Needed to restore the relevant containerId from the originating thread
     int32_t GetContainerId() const
     {
         return containerId_;
     }
+    bool Downloadable();
+    void OnDataReady();
+    bool RemoveDownloadTask(const std::string& src);
+    void FinishMeasure()
+    {
+        measureFinish_ = true;
+    }
+
+    void CallbackAfterMeasureIfNeed();
+
+    void OnDataReadyOnCompleteCallBack();
+    void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
 
     void SetIsHdrDecoderNeed(bool isHdrDecoderNeed)
     {
@@ -135,15 +145,6 @@ public:
         return photoDecodeFormat_;
     }
 
-    void FinishMeasure()
-    {
-        measureFinish_ = true;
-    }
-
-    void CallbackAfterMeasureIfNeed();
-
-    void OnDataReadyOnCompleteCallBack();
-    void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
     const std::string& GetErrorMsg()
     {
         return errorMsg_;
@@ -201,7 +202,7 @@ private:
     {
         return dstSize_.IsPositive() && dstSize != dstSize_;
     }
-
+    
     ImageSourceInfo src_;
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
@@ -213,11 +214,11 @@ private:
     // the container of the creator thread of this image loading context
     const int32_t containerId_ {0};
 
-    bool isHdrDecoderNeed_ = false;
-    PixelFormat photoDecodeFormat_ = PixelFormat::UNKNOWN;
     bool autoResize_ = true;
     bool syncLoad_ = false;
     bool isSceneBoardWindow_ = false;
+    bool isHdrDecoderNeed_ = false;
+    PixelFormat photoDecodeFormat_ = PixelFormat::UNKNOWN;
 
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
 

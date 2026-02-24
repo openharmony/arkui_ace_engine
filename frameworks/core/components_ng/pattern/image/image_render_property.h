@@ -23,6 +23,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/image/image_source_info.h"
+#include "base/geometry/matrix4.h"
 
 namespace OHOS::Ace::NG {
 
