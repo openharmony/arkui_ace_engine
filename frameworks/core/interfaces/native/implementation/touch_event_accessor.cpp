@@ -147,15 +147,15 @@ const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
         TouchEventAccessor::DestroyPeerImpl,
         TouchEventAccessor::ConstructImpl,
         TouchEventAccessor::GetFinalizerImpl,
+        TouchEventAccessor::StopPropagationImpl,
         TouchEventAccessor::GetHistoricalPointsImpl,
+        TouchEventAccessor::PreventDefaultImpl,
         TouchEventAccessor::GetTypeImpl,
         TouchEventAccessor::SetTypeImpl,
         TouchEventAccessor::GetTouchesImpl,
         TouchEventAccessor::SetTouchesImpl,
         TouchEventAccessor::GetChangedTouchesImpl,
         TouchEventAccessor::SetChangedTouchesImpl,
-        TouchEventAccessor::StopPropagationImpl,
-        TouchEventAccessor::PreventDefaultImpl,
     };
     return &TouchEventAccessorImpl;
 }

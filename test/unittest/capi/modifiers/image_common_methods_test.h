@@ -16,6 +16,7 @@
 #pragma once
 
 #include "core/interfaces/native/implementation/image_common_methods.h"
+#include "capi_gen140_compat.h"
 
 namespace OHOS::Ace::NG {
 namespace GeneratedModifier {

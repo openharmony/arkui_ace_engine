@@ -28,4 +28,9 @@ bool MockDisplayManager::ConvertScreenIdToRsScreenId(uint64_t screenId, uint64_t
     rsScreenId = screenId;
     return rsScreenId != 0;
 }
+
+FoldDisplayMode MockDisplayManager::GetFoldDisplayMode()
+{
+    return static_cast<FoldDisplayMode>(1);
+}
 } // namespace OHOS::Ace

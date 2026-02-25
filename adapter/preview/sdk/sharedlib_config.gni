@@ -174,7 +174,12 @@ common_bin = [
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
-    {
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_hyperlink"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
     label = "//foundation/arkui/ace_engine/build:libace_compatible_components"
     subsystem_name = "arkui"
     part_name = "ace_engine"
@@ -195,7 +200,22 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_datapanel"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_gauge"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_patternlock"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_textclock"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
@@ -206,6 +226,11 @@ common_bin = [
   },
   {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_indexer"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_dynamiclayout"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
@@ -235,12 +260,22 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_richeditor"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_stepper"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
   {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_marquee"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_search"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
@@ -255,12 +290,22 @@ common_bin = [
     part_name = "ace_engine"
   },
   {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_symbol"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_folderstack"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
   {
     label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_timepicker"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_menu"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },

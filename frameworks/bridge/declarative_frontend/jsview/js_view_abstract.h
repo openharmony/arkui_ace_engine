@@ -48,6 +48,11 @@ class CalcDimensionRect;
 
 namespace OHOS::Ace::Framework {
 
+constexpr napi_type_tag ROSEN_JS_CANVAS_TYPE_TAG = {
+    .lower = 0x2710bc10cdee8db3,
+    .upper = 0xc5189f88510eadc1
+};
+
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
 constexpr int32_t DEFAULT_TAP_COUNTS = 1;
 constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
@@ -124,6 +129,8 @@ std::function<std::string()> JsGetCustomMapFunc(panda::ecmascript::EcmaVM* vm, i
 class JSViewAbstract {
 public:
     static RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
+    static RefPtr<ResourceObject> GetResourceObjectInternal(const JSRef<JSObject>& jsObj, bool hasGetterOnId);
+    static RefPtr<ResourceObject> GetResourceObjectWithId(const JSRef<JSObject>& jsObj, bool hasGetterOnId);
     static void SetPixelRoundMode(const JSCallbackInfo& info);
     static uint8_t GetPixelRoundMode();
     static void GetAngle(
@@ -385,8 +392,8 @@ public:
 
     // for dynamic $r
     static void CompleteResourceObject(JSRef<JSObject>& jsObj);
-    static void CompleteResourceObjectWithBundleName(
-        JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId);
+    static void CompleteResourceObjectWithBundleName(JSRef<JSObject>& jsObj, std::string& bundleName,
+        std::string& moduleName, int32_t& resId, JSRef<JSVal>& resIdJsValue);
     static void CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType);
     static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
     static bool ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
@@ -430,6 +437,8 @@ public:
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsColorFromResourceForMaterial(
+        const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
         RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
@@ -438,6 +447,7 @@ public:
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
         const Color& defaultColor, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsColorForMaterial(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, ShadowColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
@@ -596,6 +606,7 @@ public:
     static void JsOnKeyEvent(const JSCallbackInfo& args);
     static void JsDispatchKeyEvent(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
+    static void JSOnNeedSoftkeyboard(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
     static void JsTabIndex(const JSCallbackInfo& info);
     static void JsFocusOnTouch(const JSCallbackInfo& info);
@@ -894,14 +905,20 @@ public:
         const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
         const std::optional<Dimension>& radiusBottomEnd);
     static void ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    /**
+     * @param adaptMaterial Indicates whether the new material is adapted to special resources for color inversion.
+     * Only the Color type has differences. If the value is true, the color resolved from special resources will carry
+     * a non-NONE placeholder.
+     */
     template<typename T>
-    static void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    static void RegisterResource(
+        const std::string& key, const RefPtr<ResourceObject>& resObj, T value, bool adaptMaterial = false)
     {
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        pattern->RegisterResource<T>(key, resObj, value);
+        pattern->RegisterResource<T>(key, resObj, value, adaptMaterial);
     }
     static void UnRegisterResource(const std::string& key);
     static void ParseDragSpringLoadingConfiguration(
@@ -924,7 +941,7 @@ private:
     static bool ParseJSMediaWithRawFile(const JSRef<JSObject>& jsObj, std::string& result,
         RefPtr<ResourceWrapper>& resourceWrapper);
     static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result,
-        RefPtr<ResourceObject>& resObj);
+        RefPtr<ResourceObject>& resObj, JSRef<JSVal>& resId);
     static bool ParseResourceToDoubleByName(
         const JSRef<JSObject>& jsObj, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
     static bool ParseResourceToDoubleById(
@@ -943,7 +960,7 @@ private:
     static JSRef<JSArray> CreateJsOnMenuItemClick(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSVal> CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems);
     static void CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName,
-        int32_t& resIdValue, int32_t& resTypeValue);
+        int32_t& resIdValue, int32_t& resTypeValue, JSRef<JSVal>& resId);
     static NG::LayoutSafeAreaEdge ParseJsLayoutSafeAreaEdgeArray(
         const JSRef<JSArray>& jsSafeAreaEdges, NG::LayoutSafeAreaEdge defaultVal);
     static bool ParseAllBorderRadiusesForOutLine(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);

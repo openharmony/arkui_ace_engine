@@ -42,6 +42,10 @@ private:
     bool ShouldReMeasurePlaceholder(const RefPtr<TextFieldPattern>& pattern) const;
     std::optional<SizeF> ReMeasureContentForPlaceholder(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper, TextStyle& textStyle, LayoutConstraintF& textFieldContentConstraint);
+    LayoutConstraintF BuildLayoutConstraintWithoutResponseArea(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+
+    void LayoutCounterAndVoiceButton(LayoutWrapper* layoutWrapper);
 };
 } // namespace OHOS::Ace::NG
 

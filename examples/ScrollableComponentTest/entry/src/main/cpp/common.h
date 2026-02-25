@@ -107,5 +107,6 @@ namespace ArkUICApiDemo {
  * Log print domain.
  */
 const unsigned int LOG_PRINT_DOMAIN = 0xFF00;
+#define NAPI_VERSION 8
 } // namespace ArkUICApiDemo
 #endif // ARKUI_CAPI_DEMO_COMMON_TEST_H

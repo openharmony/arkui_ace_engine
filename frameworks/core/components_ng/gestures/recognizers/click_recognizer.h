@@ -31,7 +31,7 @@
 namespace OHOS::Ace::NG {
 using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;
 
-class ClickRecognizer : public MultiFingersRecognizer {
+class ACE_FORCE_EXPORT ClickRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(ClickRecognizer, MultiFingersRecognizer);
 
 public:
@@ -127,7 +127,6 @@ private:
     void DeadlineTimer(CancelableCallback<void()>& deadlineTimer, int32_t time);
     Offset ComputeFocusPoint();
 
-    void PlayClickSoundEffect(Offset clickPoint);
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();

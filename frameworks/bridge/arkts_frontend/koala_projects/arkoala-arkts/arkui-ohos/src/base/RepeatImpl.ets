@@ -29,6 +29,8 @@ import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
 import { SyntaxItemPeer, ForEachNodePeer, NodeHolder } from './SyntaxNodeBase'
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 import { ExtendableComponent } from '../component/extendableComponent'
+import { IMutableStateMeta } from '../stateManagement/decorator'
+import { FactoryInternal } from '../stateManagement/base/iFactoryInternal'
 
 /** @memo:intrinsic */
 export function RepeatImplForOptions<T>(
@@ -60,28 +62,29 @@ export function RepeatImplForOptions<T>(
 }
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
-    arr_: RepeatArray<T>;
-    index_: int32;
+    private arr_: RepeatArray<T>;
+    private index_: int32;
+    private version: IMutableStateMeta;
 
-    constructor(arr: RepeatArray<T>, initialIndex: int32) {
+    constructor(arr: RepeatArray<T>, index: int32) {
         this.arr_ = arr;
-        this.index_ = initialIndex;
-    }
-
-    get item(): T {
-        return this.arr_[this.index_];
+        this.index_ = index;
+        this.version = FactoryInternal.mkMutableStateMeta('__backing_repeat_item_version');
     }
 
     get arr(): RepeatArray<T> {
+        this.version;
         return this.arr_;
     }
 
-    get index(): int32 {
-        return this.index_;
+    get item(): T {
+        this.version;
+        return this.arr_[this.index_];
     }
 
-    public updateIndex(newIndex: int32): void {
-        this.index_ = newIndex;
+    get index(): int32 {
+        this.version;
+        return this.index_;
     }
 }
 

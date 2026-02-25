@@ -250,9 +250,11 @@ void MockPipelineContext::SetContainerCustomTitleVisible(bool visible)
 }
 
 void PipelineContext::GetComponentOverlayInspector(
-    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const {}
+    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
+    ParamConfig config, bool isInSubWindow) const {}
 
-void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const {}
+void PipelineContext::GetOverlayInspector(
+    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const {}
 
 void MockPipelineContext::SetContainerControlButtonVisible(bool visible)
 {
@@ -1316,6 +1318,13 @@ double PipelineBase::GetCurrentDensity()
     return pipelineContext ? pipelineContext->GetDensity() : 1.0;
 }
 
+ColorMode PipelineBase::GetCurrentColorMode()
+{
+    auto currentContainer = MockContainer::CurrentSafely();
+    CHECK_NULL_RETURN(currentContainer, ColorMode::LIGHT);
+    return currentContainer->GetColorMode();
+}
+
 double PipelineBase::Px2VpWithCurrentDensity(double px)
 {
     double density = GetCurrentDensity();
@@ -1655,6 +1664,16 @@ void NG::PipelineContext::SetParentPipeline(const WeakPtr<PipelineBase>& weakPip
 RefPtr<NG::ContentChangeManager>& NG::PipelineContext::GetContentChangeManager()
 {
     return contentChangeMgr_;
+}
+
+void NG::PipelineContext::SetMagnifierController(const RefPtr<NG::MagnifierController>& magnifierController)
+{
+    magnifierController_ = magnifierController;
+}
+
+RefPtr<NG::MagnifierController> NG::PipelineContext::GetMagnifierController() const
+{
+    return magnifierController_;
 }
 
 void NG::PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const {}

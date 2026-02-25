@@ -251,7 +251,7 @@ export class LocalStorage {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    delete(propName: string): boolean {
+    public delete(propName: string): boolean {
         return this.store_.delete(propName);
     }
 
@@ -265,7 +265,7 @@ export class LocalStorage {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    clear(): boolean {
+    public clear(): boolean {
         return this.store_.clear();
     }
 

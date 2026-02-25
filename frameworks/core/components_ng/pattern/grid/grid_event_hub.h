@@ -21,6 +21,11 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_v2/grid/grid_event.h"
+#include "core/gestures/gesture_event.h"
+
+namespace OHOS::Ace {
+class ItemDragInfo;
+}
 
 namespace OHOS::Ace::NG {
 
@@ -32,6 +37,8 @@ using ItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_
 using ItemDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;
 using ItemDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>;
 using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
+
+class DragDropProxy;
 
 class GridEventHub : public ScrollableEventHub {
     DECLARE_ACE_TYPE(GridEventHub, ScrollableEventHub);

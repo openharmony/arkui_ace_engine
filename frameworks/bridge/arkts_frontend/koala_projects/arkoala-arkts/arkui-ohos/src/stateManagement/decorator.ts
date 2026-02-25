@@ -19,6 +19,11 @@ import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
 import { LocalStorage } from './storage/localStorage';
 import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
 import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
+import { IncrementalNode } from '@koalaui/runtime';
+
+export interface IDecoratorBaseRegistry {
+    registerToOwningView(): void;
+}
 
 export interface IVariableOwner {
     getUniqueId(): int;
@@ -28,6 +33,9 @@ export interface IVariableOwner {
     __findProvide__Internal<T>(alias: string): IProvideDecoratedVariable<T> | undefined;
     __addProvider__Internal<T>(alias: string, v: IProviderDecoratedVariable<T>): void;
     __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
+    __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void;
+    __addEnv__Internal(alias: string, v: Object): void;
+    __findEnv__Internal(alias: string): Object | undefined;
 }
 
 export interface IDecoratedVariable {
@@ -111,6 +119,7 @@ export type LinkSourceType<T> = IDecoratedV1Variable<T>;
 export interface IMutableStateMeta {
     addRef(): void;
     fireChange(): void;
+    getDependentNodeInfo(): Set<IncrementalNode> | undefined;
 }
 
 export interface IMutableKeyedStateMeta {
@@ -138,8 +147,15 @@ export interface ConsumeOptions<T> {
     defaultValue?: T
 }
 
+export interface EnvOptions<T> {
+    initValue?: T
+}
+
+export interface IEnvDecoratedVariable<T> extends IDecoratedImmutableVariable<T>, IDecoratedV2Variable<T> {};
+
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
+    makeMutableStateMeta(observedObject: IObservedObject | undefined, propertyName: string): IMutableStateMeta;
     makeSubscribedWatches(): ISubscribedWatches;
     makeLocal<T>(owningView: IVariableOwner, varName: string, initValue: T): ILocalDecoratedVariable<T>;
     makeStaticLocal<T>(varName: string, initValue: T): ILocalDecoratedVariable<T>;
@@ -238,6 +254,12 @@ export interface IStateMgmtFactory {
     ): ILocalStoragePropRefDecoratedVariable<T>;
     makeComputed<T>(computeFunction: ComputeCallback<T>, varName: string): IComputedDecoratedVariable<T>;
     makeMonitor(pathLabmda: IMonitorPathInfo[], monitorFunction: MonitorCallback, owningView?: IVariableOwner): IMonitorDecoratedVariable;
+    makeEnv<T>(
+        owningView: IVariableOwner,
+        envValue: string,
+        varName: string,
+        envOptions?: EnvOptions<T>
+    ): IEnvDecoratedVariable<T>;
 }
 
 export type WatchFuncType = (propertyName: string) => void;

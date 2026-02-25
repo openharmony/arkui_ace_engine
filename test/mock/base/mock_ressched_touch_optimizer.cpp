@@ -35,7 +35,7 @@ ResSchedTouchOptimizer::~ResSchedTouchOptimizer()
 }
 
 
-void ResSchedTouchOptimizer::SetSlideAccepted(bool accept)
+void ResSchedTouchOptimizer::SetSlideAccept(bool accept)
 {
 }
 

@@ -29,6 +29,9 @@ void SetGeometryTransitionMultiThread(ArkUINodeHandle node, ArkUI_CharPtr id,
         CHECK_NULL_VOID(node);
         ViewAbstract::SetGeometryTransition(AceType::RawPtr(node), idStr, follow, strategy);
     });
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetGeometryTransitionInfo(idStr, follow, strategy);
 }
 
 void ResetGeometryTransitionMultiThread(ArkUINodeHandle node)
@@ -41,5 +44,8 @@ void ResetGeometryTransitionMultiThread(ArkUINodeHandle node)
         CHECK_NULL_VOID(node);
         ViewAbstract::SetGeometryTransition(AceType::RawPtr(node), "", false, true);
     });
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetGeometryTransitionInfo("", false, true);
 }
 }

@@ -199,7 +199,8 @@ public:
     MOCK_METHOD(void, RemoveTask, (TaskType type, const std::string& name), (override));
 
     MOCK_METHOD(bool, OnPostTask,
-        (Task && task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType),
+        (Task && task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType,
+        Ace::VsyncBarrierOption barrierOption),
         (const, override));
     MOCK_METHOD(Task, WrapTaskWithTraceId, (Task && task, int32_t id), (const, override));
     MOCK_METHOD(bool, OnPostTaskWithoutTraceId,
@@ -587,6 +588,57 @@ HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition002, TestSize.Level0)
     int32_t res = richEditorPattern->GetLeftWordPosition(-9999);
 
     EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: GetLeftWordPosition003
+ * @tc.desc: test GetLeftWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test content");
+    richEditorPattern->caretPosition_ = 5;
+
+    int32_t result = richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_);
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetLeftWordPosition004
+ * @tc.desc: test GetLeftWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test@content");
+    richEditorPattern->caretPosition_ = 5;
+
+    int32_t result = richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_);
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetLeftWordPosition005
+ * @tc.desc: test GetLeftWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition005, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test content@");
+    richEditorPattern->caretPosition_ = 12;
+
+    int32_t result = richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_);
+    EXPECT_GE(result, 0);
 }
 
 /**

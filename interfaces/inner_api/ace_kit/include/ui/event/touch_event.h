@@ -159,7 +159,7 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent CloneWith(float scale, float offsetX, float offsetY, std::optional<int32_t> pointId) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void FromJson(const std::unique_ptr<JsonValue>& json);
-    Offset GetOffset() const;
+    ACE_FORCE_EXPORT Offset GetOffset() const;
     Offset GetScreenOffset() const;
     Offset GetGlobalDisplayOffset() const;
     int32_t GetTargetDisplayId() const;
@@ -299,6 +299,31 @@ private:
 using TouchEventFunc = std::function<void(TouchEventInfo&)>;
 using OnTouchEventCallback = std::function<void(const TouchEventInfo&)>;
 using CatchTouchEventCallback = std::function<void()>;
+
+namespace NG {
+class TouchEventImpl : public virtual AceType {
+    DECLARE_ACE_TYPE(TouchEventImpl, AceType);
+public:
+    explicit TouchEventImpl(TouchEventFunc&& callback) : callback_(std::move(callback)) {}
+    TouchEventImpl(const TouchEventFunc& callback) : callback_(callback) {}
+    ~TouchEventImpl() override = default;
+
+    const TouchEventFunc& GetTouchEventCallback() const
+    {
+        return callback_;
+    }
+
+    void operator()(TouchEventInfo& info) const
+    {
+        if (callback_) {
+            callback_(info);
+        }
+    }
+
+private:
+    TouchEventFunc callback_;
+};
+} // namespace NG
 
 } // namespace OHOS::Ace
 

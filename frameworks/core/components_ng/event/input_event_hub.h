@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "base/geometry/ng/point_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event.h"
@@ -26,6 +27,12 @@
 namespace OHOS::Ace::NG {
 
 class EventHub;
+
+using TouchpadInteractionCallback = std::function<void(PointF)>;
+struct TouchpadInteractionListener {
+    WeakPtr<FrameNode> frameNode;
+    TouchpadInteractionCallback callback;
+};
 
 // The gesture event hub is mainly used to handle common gesture events.
 class ACE_EXPORT InputEventHub : public virtual AceType {
@@ -143,7 +150,7 @@ public:
         }
         hoverMoveEventActuator_->ReplaceJSFrameNodeInputEvent(std::move(onHoverMoveEventFunc));
     }
-    
+
     void AddOnHoverEvent(const RefPtr<InputEvent>& onHoverEvent)
     {
         if (!hoverEventActuator_) {
@@ -301,6 +308,8 @@ public:
             coastingAxisEventActuator_->ClearUserCallback();
         }
     }
+
+    void AddTouchpadInteractionListenerInner(TouchpadInteractionCallback&& listener);
 
 private:
     WeakPtr<EventHub> eventHub_;

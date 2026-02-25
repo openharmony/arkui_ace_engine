@@ -24,7 +24,7 @@ import { UIUtils } from '../../utils';
 import { uiUtils } from '../../base/uiUtilsImpl';
 
 export class InterfaceProxyHandler implements reflect.InvocationHandler, IObservedObject, ISubscribedWatches {
-    private readonly __meta: IMutableStateMeta = STATE_MGMT_FACTORY.makeMutableStateMeta();
+    private readonly __meta: IMutableStateMeta;
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     private ____V1RenderId: RenderIdType = 0;
     private allowDeep_: boolean;
@@ -34,6 +34,8 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
         this._target = target;
         this.allowDeep_ = allowDeep;
         this.isAPI_ = isAPI;
+        this.__meta = STATE_MGMT_FACTORY.makeMutableStateMeta(this,
+            this.allowDeep_ ? '__metaInterfaceMakeObserved_' : '__metaInterfaceV1_');
     }
     public addWatchSubscriber(watchId: WatchIdType): void {
         this.subscribedWatches.addWatchSubscriber(watchId);
@@ -59,8 +61,8 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
         if (makeObserved === value) {
             return value;
         }
-        const varName = method.getName().substring(5);
-        const SETTER_PREFIX = '<set>';
+        const varName = method.getName().substring(6);
+        const SETTER_PREFIX = '%%set-';
         const targetType = Class.of(this._target);
         try {
             const setter = targetType.getInstanceMethod(SETTER_PREFIX + varName);
@@ -73,8 +75,8 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
         return makeObserved;
     }
     set (target: Object, method: reflect.InstanceMethod, newValue: Any): void {
-        const varName = method.getName().substring(5);
-        const GETTER_PREFIX = '<get>';
+        const varName = method.getName().substring(6);
+        const GETTER_PREFIX = '%%get-';
         const targetType = Class.of(this._target);
         try {
             const getter = targetType.getInstanceMethod(GETTER_PREFIX + varName);

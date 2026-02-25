@@ -48,9 +48,7 @@ constexpr int32_t WEEK_ROW_INDEX = 1;
 RefPtr<NodePaintMethod> CalendarMonthPattern::CreateNodePaintMethod()
 {
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         InitCurrentVirtualNode();
     }
@@ -1168,7 +1166,7 @@ void CalendarMonthPattern::UpdateDayRadius(const CalcDimension& dayRadius)
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         paintProperty->UpdateDayRadius(dayRadius);
     }
 

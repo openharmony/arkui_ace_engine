@@ -137,4 +137,15 @@ void InputEventHub::SetHoverEffect(HoverEffectType type)
     hoverEffectType_ = type;
 }
 
+void InputEventHub::AddTouchpadInteractionListenerInner(TouchpadInteractionCallback&& callback)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto weakPtr = WeakPtr<FrameNode>(frameNode);
+    eventManager->AddTouchpadInteractionListenerInner(frameNode->GetId(), { weakPtr, std::move(callback) });
+}
 } // namespace OHOS::Ace::NG

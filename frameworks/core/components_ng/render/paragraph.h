@@ -19,6 +19,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/common/ime/text_range.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_layout_info.h"
@@ -289,7 +290,7 @@ class Paragraph : public virtual AceType {
 public:
     ACE_FORCE_EXPORT static RefPtr<Paragraph> Create(
         const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
-    static RefPtr<Paragraph> CreateRichEditorParagraph(
+    ACE_FORCE_EXPORT static RefPtr<Paragraph> CreateRichEditorParagraph(
         const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection, bool isSingleLineMode);
 
     static RefPtr<Paragraph> Create(void* paragraph);
@@ -330,6 +331,21 @@ public:
     {
         PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
         return finalResult;
+    }
+    virtual PositionWithAffinity GetCharacterPositionAtCoordinate(const Offset& offset)
+    {
+        PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+        return finalResult;
+    }
+    virtual std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+    {
+        std::pair<TextRange, TextRange> ranges;
+        return ranges;
+    }
+    virtual std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+    {
+        std::pair<TextRange, TextRange> ranges;
+        return ranges;
     }
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
     virtual std::pair<size_t, size_t> GetEllipsisTextRange() = 0;
@@ -381,6 +397,10 @@ public:
     virtual std::optional<void*> GetRawParagraph()
     {
         return std::nullopt;
+    }
+    virtual int32_t GetPlaceholderCnt() const
+    {
+        return 0;
     }
 };
 } // namespace OHOS::Ace::NG

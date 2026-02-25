@@ -2155,14 +2155,18 @@ ArkUINativeModuleValue TextAreaBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCa
     // Border Radius args start index
     ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9);
 
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    std::vector<RefPtr<ResourceObject>> vectorResObj;
+
     std::vector<uint32_t> colorAndStyleOptions;
     // Border Color args start index
-    ArkTSUtils::ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5);
+    ArkTSUtils::ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, vectorResObj, nodeInfo);
     // Border Style args start index
     ArkTSUtils::ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13);
     
-    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorder(
-        nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
+    auto resRawPtr = static_cast<void*>(&vectorResObj);
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorder(nativeNode, options.data(),
+        options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size(), resRawPtr);
 
     SetBorderDash(runtimeCallInfo, vm, nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -2997,10 +3001,13 @@ ArkUINativeModuleValue TextAreaBridge::SetStrokeColor(ArkUIRuntimeCallInfo *runt
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaStrokeColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaStrokeColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaStrokeColor(nativeNode, color.GetValue(),
+            AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }

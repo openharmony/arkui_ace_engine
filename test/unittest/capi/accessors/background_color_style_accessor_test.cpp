@@ -39,11 +39,11 @@ public:
 };
 
 /**
- * @tc.name: CtorTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BackgroundColorStyleAccessorTest, CtorTest, TestSize.Level1)
+HWTEST_F(BackgroundColorStyleAccessorTest, constructTest, TestSize.Level1)
 {
     const std::vector<std::pair<std::string, Dimension>> TEST_PLAN = {
         { "#FF0000FF", Dimension(10.0, DimensionUnit::PX) },
@@ -81,11 +81,11 @@ HWTEST_F(BackgroundColorStyleAccessorTest, CtorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTextBackgroundStyleTest
+ * @tc.name: getTextBackgroundStyleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BackgroundColorStyleAccessorTest, GetTextBackgroundStyleTest, TestSize.Level1)
+HWTEST_F(BackgroundColorStyleAccessorTest, getTextBackgroundStyleTest, TestSize.Level1)
 {
     const std::vector<std::pair<std::string, Dimension>> TEST_PLAN = {
         { "#FF0000FF", Dimension(10.0, DimensionUnit::PX) },

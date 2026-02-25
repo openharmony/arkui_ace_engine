@@ -2531,8 +2531,8 @@ napi_value WrapNapiValue(napi_env env, const JSRef<JSVal>& obj, void* nativeValu
     if (valueType != napi_object) {
         return undefined;
     }
-    napi_wrap(env, napiValue, nativeValue,
-        [](napi_env env, void *data, void *hint) {}, nullptr, nullptr);
+    napi_wrap_s(env, napiValue, nativeValue,
+        [](napi_env env, void *data, void *hint) {}, nullptr, &WEB_PIXEL_MAP_TYPE_TAG, nullptr);
     return napiValue;
 }
 
@@ -4626,6 +4626,8 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
+    auto execCtx = args.GetExecutionContext();
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
     auto paramObject = JSRef<JSObject>::Cast(args[0]);
     auto controllerObj = paramObject->GetProperty("controller");
     auto object = JSRef<JSVal>::Cast(paramObject->GetProperty("object"));

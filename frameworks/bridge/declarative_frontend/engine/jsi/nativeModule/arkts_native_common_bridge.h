@@ -482,7 +482,8 @@ public:
     static ArkUINativeModuleValue SetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RegisterFrameNodeDestructorCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static Local<panda::ObjectRef> CreateAxisEventInfo(EcmaVM* vm, AxisInfo& info);
+    static Local<panda::ObjectRef> CreateAxisEventInfo(
+        EcmaVM* vm, std::shared_ptr<AxisInfo> infoPtr, const WeakPtr<FrameNode>& node);
     static ArkUINativeModuleValue SetOnAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnPreDrag(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -522,6 +523,8 @@ public:
     static ArkUINativeModuleValue ResetChainWeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetUseUnionEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetUseUnionEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnNeedSoftkeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnNeedSoftkeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

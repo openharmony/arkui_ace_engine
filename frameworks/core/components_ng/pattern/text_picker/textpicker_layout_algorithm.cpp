@@ -116,7 +116,10 @@ void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutPrope
         }
     }
     uint32_t showCount = pickerTheme->GetShowCountPortrait();
-    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto isFloatingWindow = container->IsFloatingWindow();
+    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE && !isFloatingWindow) {
         showCount = pickerTheme->GetShowCountLandscape();
     }
     auto textPickerPattern = pickerNode->GetPattern<TextPickerPattern>();

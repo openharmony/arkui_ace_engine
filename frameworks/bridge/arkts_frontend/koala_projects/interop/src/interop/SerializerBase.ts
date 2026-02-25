@@ -139,7 +139,10 @@ export class SerializerBase {
             return new SerializerBase()
         }
         if (this.poolTop === this.pool.length) {
-            throw new Error('Pool empty! Release one of taken serializers')
+            // Dynamically expand the pool when all serializers are in use
+            const newSerializer = new SerializerBase()
+            this.pool.push(newSerializer)
+            console.log(`SerializerBase pool expanded to size ${this.pool.length}`)
         }
         return SerializerBase.pool[this.poolTop++]
     }

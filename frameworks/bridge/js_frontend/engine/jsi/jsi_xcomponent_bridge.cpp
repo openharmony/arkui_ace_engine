@@ -17,6 +17,7 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/core/common/ace_view.h"
+#include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 
 namespace OHOS::Ace::Framework {
 JsiXComponentBridge::JsiXComponentBridge()

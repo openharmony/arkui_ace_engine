@@ -45,6 +45,7 @@ void RatingPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetAlphaOffscreen(true);
@@ -186,6 +187,7 @@ void RatingPattern::UpdatePaintConfig()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto layoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto starsNum = layoutProperty->GetStarsValue(themeStarNum_);
@@ -274,6 +276,7 @@ bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    ACE_UINODE_TRACE(host);
     std::optional<SizeF> contentSize = GetHostContentSize();
     CHECK_NULL_RETURN(contentSize, false);
     auto layoutProperty = GetLayoutProperty<RatingLayoutProperty>();
@@ -333,6 +336,7 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(ratingLayoutProperty);
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
@@ -496,6 +500,7 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
     CHECK_NULL_VOID(ratingRenderProperty);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     const auto& content = host->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto contentOffset = content->GetRect().GetOffset();
@@ -532,6 +537,7 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     const auto& content = host->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto singleStarHeight = content->GetRect().Height();
@@ -609,6 +615,7 @@ void RatingPattern::PaintFocusState(double ratingScore)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     isfocus_ = true;
     focusRatingScore_ = ratingScore;
     RoundRect focusRect;
@@ -745,6 +752,7 @@ void RatingPattern::SetRatingScore(double ratingScore)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
@@ -809,6 +817,7 @@ void RatingPattern::HandleMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(!IsIndicator() && isHover_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     const auto& content = host->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto contentOffset = content->GetRect().GetOffset();
@@ -950,6 +959,7 @@ void RatingPattern::OnModifyDone()
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
@@ -983,6 +993,7 @@ void RatingPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -1007,6 +1018,7 @@ void RatingPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
@@ -1083,6 +1095,7 @@ void RatingPattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
     image->SetRedrawCallback([weak = WeakPtr(GetHost())] {
         auto ratingNode = weak.Upgrade();
         CHECK_NULL_VOID(ratingNode);
+        ACE_UINODE_TRACE(ratingNode);
         ratingNode->MarkNeedRenderOnly();
     });
 }
@@ -1126,6 +1139,7 @@ void RatingPattern::FireBuilder()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     if (!makeFunc_.has_value()) {
         host->RemoveChildAndReturnIndex(contentModifierNode_);
         contentModifierNode_ = nullptr;
@@ -1153,6 +1167,7 @@ RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
+    ACE_UINODE_TRACE(host);
     auto property = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_RETURN(property, nullptr);
     auto renderProperty = GetPaintProperty<RatingRenderProperty>();
@@ -1176,6 +1191,7 @@ void RatingPattern::OnColorModeChange(uint32_t colorMode)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();

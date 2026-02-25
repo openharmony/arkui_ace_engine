@@ -45,7 +45,12 @@ void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam);
 void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam);
 void SetOnCoastingAxisEvent(ArkUINodeHandle node, void* extraParam);
 void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam);
-
+#ifdef SUPPORT_DIGITAL_CROWN
+void SetOnDigitalCrownEvent(ArkUINodeHandle node, void* extraParam);
+#endif
+void SetOnCustomOverflowScroll(ArkUINodeHandle node, void* extraParam);
+void SetOnStackOverflowScroll(ArkUINodeHandle node, void* extraParam);
+void SetOnNeedSoftkeyboard(ArkUINodeHandle node, void* extraParam);
 
 void ResetOnAppear(ArkUINodeHandle node);
 void ResetOnDisappear(ArkUINodeHandle node);
@@ -69,5 +74,11 @@ void ResetOnKeyPreIme(ArkUINodeHandle node);
 void ResetOnFocusAxisEvent(ArkUINodeHandle node);
 void ResetOnCoastingAxisEvent(ArkUINodeHandle node);
 void ResetOnChildTouchTest(ArkUINodeHandle node);
+#ifdef SUPPORT_DIGITAL_CROWN
+void ResetOnDigitalCrownEvent(ArkUINodeHandle node);
+#endif
+void ResetOnCustomOverflowScroll(ArkUINodeHandle node);
+void ResetOnStackOverflowScroll(ArkUINodeHandle node);
+void ResetOnNeedSoftkeyboard(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_COMMON_MODIFIER_H

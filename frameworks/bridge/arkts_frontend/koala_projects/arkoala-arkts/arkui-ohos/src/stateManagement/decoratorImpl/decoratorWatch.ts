@@ -18,7 +18,7 @@ import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 // WatchFunc: Representaton of a @Watch function isnide V1 decorator class
 export class WatchFunc {
     private static nextWatchId_: WatchIdType = 1;
-    private static readonly watchId2WatchFunc: Map<WatchIdType, WeakRef<WatchFunc>> = new Map<
+    public static readonly watchId2WatchFunc: Map<WatchIdType, WeakRef<WatchFunc>> = new Map<
         WatchIdType,
         WeakRef<WatchFunc>
     >();
@@ -46,7 +46,7 @@ export class WatchFunc {
         }
     }
 
-    public func_: WatchFuncType;
+    public func_?: WatchFuncType;
     private readonly id_: WatchIdType;
 
     constructor(func: WatchFuncType) {
@@ -60,6 +60,9 @@ export class WatchFunc {
 
     public id(): WatchIdType {
         return this.id_;
+    }
+    aboutToBeDeleted(): void {
+        this.func_ = undefined;
     }
 
     // replace the watch function
@@ -78,7 +81,7 @@ export class WatchFunc {
         obj.removeWatchSubscriber(this.id_);
     }
     execute(propertyName: string): void {
-        this.func_(propertyName);
+        this.func_?.(propertyName);
     }
 }
 

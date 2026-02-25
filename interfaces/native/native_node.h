@@ -100,10 +100,10 @@ typedef enum {
      */
     ARKUI_NODE_CHECKBOX_GROUP = 21,
     /**
-     * RichEditor.
+     * TextEditor.
      * @since 24
      */
-    ARKUI_NODE_RICH_EDITOR = 22,
+    ARKUI_NODE_TEXT_EDITOR = 22,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
     /** Swiper. */
@@ -3068,6 +3068,43 @@ typedef enum {
      */
     NODE_SPAN_BASELINE_OFFSET,
     /**
+     * @brief Defines the text style attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * ?.string: font family. Optional. Use commas (,) to separate multiple fonts. \n
+     * .value[0].f32: font size, in fp. \n
+     * .value[1]?.i32: font weight. Optional.
+     * .value[2]?.i32: font style. Optional. The parameter type is {@link ArkUI_FontStyle}.
+     * The default value is <b>ARKUI_FONT_STYLE_NORMAL</b>.
+     * ?.object: Optional. The font configurations. The parameter type is {@link OH_ArkUI_FontConfigs}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: font family. Use commas (,) to separate multiple fonts. \n
+     * .value[0].f32: font size, in fp. \n
+     * .value[1].i32: font weight. \n
+     * .value[2].i32: font style. The parameter type is {@link ArkUI_FontStyle}.
+     * The default value is <b>ARKUI_FONT_STYLE_NORMAL</b>.
+     * .object: the font configurations. The parameter type is {@link OH_ArkUI_FontConfigs}.\n
+     *
+     * @since 24
+     */
+    NODE_SPAN_FONT = 2003,
+
+    /**
+     * @brief Defines the font weight attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: font weight. The default value is 400.\n
+     * ?.object: Optional. The font weight configurations. The parameter type is {@link OH_ArkUI_FontWeightConfigs}.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: font weight.\n
+     * .object: the font weight configurations. The parameter type is {@link OH_ArkUI_FontWeightConfigs}.\n
+     *
+     * @since 24
+     */
+    NODE_SPAN_FONT_WEIGHT = 2004,
+    /**
      * @brief Defines the image source of the image span.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4087,6 +4124,21 @@ typedef enum {
     NODE_TEXT_INPUT_TEXT_CONTENT_CONTROLLER_BASE = 7041,
 
     /**
+     * @brief Defines the ellipsis position.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_EllipsisMode}, the default value
+     * is ARKUI_ELLIPSIS_MODE_END. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_EllipsisMode}. \n
+     * 
+     *  @since 24
+     */
+    NODE_TEXT_INPUT_ELLIPSIS_MODE = 7042,
+
+    /**
      * @brief Whether to compress punctuation at the beginning of line.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -4153,6 +4205,20 @@ typedef enum {
      * @since 23
      */
     NODE_TEXT_INPUT_SELECTED_DRAG_PREVIEW_STYLE = 7048,
+
+    /**
+     * @brief Defines the textinput textOverflow attribute.
+     * which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: display mode when the text is too long {@link ArkUI_TextOverflow}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: display mode when the text is too long {@link ArkUI_TextOverflow}. \n
+     * 
+     *  @since 24
+     */
+    NODE_TEXT_INPUT_TEXT_OVERFLOW = 7049,
 
     /**
      * @brief Defines the default placeholder text for the multi-line text box.
@@ -4652,6 +4718,21 @@ typedef enum {
     NODE_TEXT_AREA_TEXT_CONTENT_CONTROLLER_BASE = 8037,
 
     /**
+     * @brief Defines the ellipsis position.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_EllipsisMode}, the default value
+     * is ARKUI_ELLIPSIS_MODE_END. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The parameter type is {@link ArkUI_EllipsisMode}. \n
+     * 
+     *  @since 24
+     */
+    NODE_TEXT_AREA_ELLIPSIS_MODE = 8038,
+
+    /**
      * @brief Whether to compress punctuation at the beginning of line.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -4718,6 +4799,20 @@ typedef enum {
      * @since 23
      */
     NODE_TEXT_AREA_SELECTED_DRAG_PREVIEW_STYLE = 8045,
+
+    /**
+     * @brief Defines the textarea textOverflow attribute.
+     * which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: display mode when the text is too long {@link ArkUI_TextOverflow}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: display mode when the text is too long {@link ArkUI_TextOverflow}. \n
+     * 
+     *  @since 24
+     */
+    NODE_TEXT_AREA_TEXT_OVERFLOW = 8046,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -6051,89 +6146,385 @@ typedef enum {
     NODE_CHECKBOX_GROUP_SHAPE = 21005,
 
     /**
-     * @brief Defines type of the Enter key.
+     * @brief Defines the type of the Enter key.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: type of the Enter key{@link ArkUI_EnterKeyType}. The default value is
+     * .value[0].i32: type of the Enter key {@link ArkUI_EnterKeyType}. The default value is
      * <b>ARKUI_ENTER_KEY_TYPE_NEW_LINE</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: type of the Enter key{@link ArkUI_EnterKeyType}. \n
+     * .value[0].i32: type of the Enter key {@link ArkUI_EnterKeyType}. \n
      *
      * @since 24
      */
-    NODE_RICH_EDITOR_ENTER_KEY_TYPE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RICH_EDITOR,
- 
+    NODE_TEXT_EDITOR_ENTER_KEY_TYPE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_EDITOR,
+
     /**
      * @brief Defines caret color attribute.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].u32: background color, in 0xARGB format. For example, 0xFFFF0000 indicates red. \n
+     * .value[0].u32: caret color, in 0xARGB format. For example, 0xFFFF0000 indicates red. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].u32: background color, in 0xARGB format. \n
+     * .value[0].u32: caret color, in 0xARGB format. \n
      *
      * @since 24
      */
-    NODE_RICH_EDITOR_CARET_COLOR,
- 
+    NODE_TEXT_EDITOR_CARET_COLOR,
+
     /**
      * @brief Defines color of the scrollbar. This attribute can be set, reset, and obtained as required
      * through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
+     * .data[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
+     * .data[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
      *
      * @since 24
      */
-    NODE_RICH_EDITOR_SCROLL_BAR_COLOR,
- 
+    NODE_TEXT_EDITOR_SCROLL_BAR_COLOR,
+
     /**
-     * @brief Define bar state of the richEditor.
+     * @brief Defines the scroll bar state of the TextEditor.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: bar state of the text area, specified using the {@link ArkUI_BarState}
+     * .value[0].i32: scroll bar state of the text area, specified using the {@link ArkUI_BarState}
      * enum. The default value is <b>ARKUI_BAR_STATE_AUTO</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: bar state of the text area, specified using the {@link ArkUI_BarState}
+     * .value[0].i32: scroll bar state of the text area, specified using the {@link ArkUI_BarState}
      * enum. \n
      *
      * @since 24
      */
-    NODE_RICH_EDITOR_BAR_STATE,
- 
+    NODE_TEXT_EDITOR_BAR_STATE,
+
     /**
-     * @brief Enables selected data detector.
+     * @brief Enables data detector.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: Enable selected text recognition, default value true.\n
+     * .value[0].i32: whether to enable data detector, default is true.
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: Whether selected text recognition is enabled.\n
+     * .value[0].i32: whether data detector is enabled.\n
      *
      * @since 24
      */
-    NODE_RICH_EDITOR_ENABLE_DATA_DETECTOR,
- 
+    NODE_TEXT_EDITOR_ENABLE_DATA_DETECTOR,
+
     /**
      * @brief Sets recognition configuration.
      * This attribute can be set and reset as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .object: the recognition configuration.
-     *     The parameter type is {@link ArkUI_TextDataDetectorConfig}.\n
+     * The parameter type is {@link OH_ArkUI_TextDataDetectorConfig}.\n
      * 
      * @since 24
      */
-    NODE_RICH_EDITOR_DATA_DETECTOR_CONFIG,
+    NODE_TEXT_EDITOR_DATA_DETECTOR_CONFIG,
+
+    /**
+     * @brief Sets the edit menu options of the TextEditor.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the edit menu options of the text editor. The parameter type is {@link ArkUI_TextEditMenuOptions}.
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_EDIT_MENU_OPTIONS,
+
+    /**
+     * @brief Sets the placeholder options of the TextEditor.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the placeholder options of the text editor. The parameter type is\n
+     * {@link OH_ArkUI_TextEditorPlaceholderOptions}.\n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_PLACEHOLDER,
+
+    /**
+     * @brief Sets the styled string controller of the text editor.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the styled string controller of text editor. The parameter type is
+     * {@link OH_ArkUI_TextEditorStyledStringController}.\n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_STYLED_STRING_CONTROLLER,
+
+    /**
+     * @brief Defines whether preview text is enabled.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable. The value <b>true</b> means to enable, and
+     * <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable.
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ENABLE_PREVIEW_TEXT,
+
+    /**
+     * @brief Gets the TextLayoutManager of the text editor.
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: the layout manager of text editor.\n
+     * The parameter type is {@link OH_ArkUI_TextLayoutManager}.\n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_LAYOUT_MANAGER,
+
+    /**
+      * @brief Whether to enable AI menu for selected data detector.
+      * This attribute can be set, reset, and obtained as required through APIs.
+      *
+      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+      * .value[0].i32: whether to enable AI menu for selected text recognition, default value true.\n
+      * \n
+      * Format of the return value {@link ArkUI_AttributeItem}:\n
+      * .value[0].i32: whether AI menu for selected text recognition is enabled.\n
+      *
+      * @since 24
+      */
+    NODE_TEXT_EDITOR_ENABLE_SELECTED_DATA_DETECTOR,
+
+    /**
+     * @brief Defines background color of the selected content.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .data[0].u32: background color of the selected content, in 0xARGB format. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .data[0].u32: background color of the selected content, in 0xARGB format. \n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_SELECTED_BACKGROUND_COLOR,
+
+    /**
+     * @brief Sets whether to enable the input method when the TextEditor component obtains focus
+     * in a way other than clicking.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable the input method, default value true.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the input method is enabled.\n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ENABLE_KEYBOARD_ON_FOCUS,
+
+    /**
+     * @brief Defines the maximum number of characters in TextEditor.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: maximum number of characters in TextEditor. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: maximum number of characters in TextEditor. \n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_MAX_LENGTH,
+
+    /**
+     * @brief Defines the maximum lines of content in TextEditor.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: maximum lines of content in TextEditor. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: maximum lines of content in TextEditor. \n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_MAX_LINES,
+
+    /**
+     * @brief Sets whether to enable haptic feedback in TextEditor.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable haptic feedback in TextEditor, default value true.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether haptic feedback is enabled.
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ENABLE_HAPTIC_FEEDBACK,
+
+    /**
+     * @brief Defines the copy options attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: copy options {@link ArkUI_CopyOptions}. The default value is <b>ARKUI_COPY_OPTIONS_LOCAL_DEVICE</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: copy options {@link ArkUI_CopyOptions}. \n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_COPY_OPTIONS,
+
+    /**
+    * @brief Sets the keyboard style of TextEditor.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: keyboard style, the parameter type is {@link ArkUI_KeyboardAppearance}.
+    * The default value is <b>ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE</b>.\n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].i32: keyboard style, the parameter type is {@link ArkUI_KeyboardAppearance}.\n
+    *
+    * @since 24
+    */
+    NODE_TEXT_EDITOR_KEYBOARD_APPEARANCE,
+  
+    /**
+     * @brief Sets whether to prevent the back button press from being propagated to other components or applications.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to prevent the back button press, default value true.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to prevent the back button press.\n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_STOP_BACK_PRESS,
+  
+    /**
+     * @brief Sets whether to enable automatic spacing between Chinese and Western characters.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable automatic spacing, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable automatic spacing.\n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ENABLE_AUTO_SPACING,
+  
+    /**
+     * @brief Sets up a custom keyboard.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: custom keyboard, the parameter type is {@link ArkUI_NodeHandle}.\n
+     * .value[0]?.i32: Sets whether the custom keyboard supports the avoidance feature, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: custom keyboard, the parameter type is {@link ArkUI_NodeHandle}.
+     * .value[0].i32: Sets whether the custom keyboard supports the avoidance feature.\n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_CUSTOM_KEYBOARD,
+  
+    /**
+     * @brief Binds the selection menu for the TextEditor.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the selection menu of TextEditor.
+     *     The parameter type is {@link OH_ArkUI_TextEditorSelectionMenuOptions}.\n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_BIND_SELECTION_MENU,
+  
+    /**
+     * @brief Sets whether to add a spacing between the first and last lines to avoid text truncation.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to add spacing, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to add spacing.\n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_INCLUDE_FONT_PADDING,
+  
+    /**
+     * @brief Sets whether the line height is adaptive based on the actual text height.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the line height is adaptive, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the line height is adaptive.\n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_FALLBACK_LINE_SPACING,
+  
+    /**
+     * @brief Sets whether to enable punctuation compression at the beginning of a line.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable punctuation compression, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable punctuation compression.\n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_COMPRESS_LEADING_PUNCTUATION,
+  
+    /**
+     * @brief Sets the selected drag preview style. \n
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: 
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is {@link ArkUI_SelectedDragPreviewStyle}. 
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .object: selected drag preview style configuration. \n
+     * The parameter type is {@link ArkUI_SelectedDragPreviewStyle}. \n
+     * 
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_SELECTED_DRAG_PREVIEW_STYLE,
+  
+    /**
+     * @brief Sets whether to enable the single-line mode. \n
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable the single-line mode, default value false.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable the single-line mode.\n
+     * 
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_SINGLE_LINE,
 
     /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
@@ -8381,6 +8772,16 @@ typedef struct {
 } ArkUI_TextChangeEvent;
 
 /**
+ * @brief Defines a interceptable data structure for component events.
+ *
+ * @since 24
+ */
+typedef struct {
+    /** Bool data */
+    bool prevent;
+} ArkUI_PreventableEvent;
+
+/**
  * @brief Enumerates the event types supported by the NativeNode component.
  *
  * @since 12
@@ -8770,6 +9171,51 @@ typedef enum {
      * @since 22
      */
     NODE_ON_CHILD_TOUCH_TEST = 32,
+
+    /**
+     * @brief Defines the crown event.
+     * This event is triggered when the crown is rotated. \n
+     * When the event callback occurs, the {@link ArkUI_UIInputEvent} object can be obtained from the
+     * {@link ArkUI_NodeEvent} object. \n
+     * @since 24
+    */
+    NODE_ON_DIGITAL_CROWN = 33,
+
+    /**
+ 	 * @brief Defines the event is triggered when the <b>ARKUI_NODE_CUSTOM</b> content is scrolled.
+ 	 * 
+ 	 * The event is triggered when the component's content is scrolled. \n
+ 	 * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
+ 	 * {@link ArkUI_NodeComponentEvent}. \n
+ 	 * {@link ArkUI_NodeComponentEvent} contains one parameters:\n
+ 	 * ArkUI_NodeComponentEvent.data[0].i32: id of scrolling child component. \n
+ 	 * ArkUI_NodeComponentEvent.data[1].f32: offset of the frame scrolling, measured in px. \n
+ 	 * @since 24
+ 	*/
+    NODE_ON_CUSTOM_OVERFLOW_SCROLL = 34,
+
+	/**
+ 	 * @brief Defines the event is triggered when the <b>ARKUI_NODE_STACK</b> content is scrolled.
+ 	 * 
+ 	 * The event is triggered when the component's content is scrolled. \n
+ 	 * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
+ 	 * {@link ArkUI_NodeComponentEvent}. \n
+ 	 * {@link ArkUI_NodeComponentEvent} contains one parameters:\n
+ 	 * ArkUI_NodeComponentEvent.data[0].i32: id of scrolling child component. \n
+ 	 * ArkUI_NodeComponentEvent.data[1].f32: offset of the frame scrolling, measured in px. \n
+ 	 * @since 24
+ 	*/
+    NODE_ON_STACK_OVERFLOW_SCROLL = 35,
+
+    /**
+    * @brief Defines the click event.
+    *
+    * This event is triggered when the component is focused and need to decide whether softkeyboard is needed. \n
+    * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+    * {@link ArkUI_NodeComponentEvent}. \n
+    * The flag of whether need soft keyboard can be configured by {@link OH_ArkUI_NodeEvent_SetOnNeedSoftkeyboardFlag}. \n
+    */
+    NODE_ON_NEED_SOFTKEYBOARD = 36,
 
     /**
      * @brief Triggers onDetectResultUpdate callback
@@ -9322,18 +9768,92 @@ typedef enum {
     NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX_GROUP,
 
     /**
-      * @brief Defines the event triggered when selection area or caret position is changed in
-      * <b>ARKUI_NODE_RICH_EDITOR</b> component.
-      *
-      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * @brief Defines the event triggered when the selection area or caret position changes in
+     * <b>ARKUI_NODE_TEXT_EDITOR</b> component.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
      * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: start index of selection area. \n
      * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: end index of selection area. \n
-      *
-      * @since 24
-      */
-    NODE_RICH_EDITOR_ON_SELECTION_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RICH_EDITOR,
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ON_SELECTION_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_EDITOR,
+
+    /**
+     * @brief Defines the event triggered when the <b>ARKUI_NODE_TEXT_EDITOR</b> component is initialized
+     * for the first time.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ON_READY,
+
+    /**
+    * @brief Defines the event triggered when the paste button on the pasteboard, which appears
+    * after a long press on the<b>ARKUI_NODE_TEXT_EDITOR</b> component is long pressed, is clicked.
+    *
+    * @return Whether to intercept the component's default behavior. \n
+    * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+    * value.i32 at index 0 in the return value indicates whether to intercept the component's default behavior.
+    * <b>0</b>: not intercept. <b>1</b>: intercept. \n
+    *
+    * @since 24
+    */
+    NODE_TEXT_EDITOR_ON_PASTE,
+
+    /**
+     * @brief Defines the event triggered when the <b>ARKUI_NODE_TEXT_EDITOR</b> component's editing state has changed.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the editing state of the component.
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ON_EDITING_CHANGE,
+
+    /**
+     * @brief Defines the event triggered when the Enter key of the TextEditor input method is pressed.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: Enter key type of the input method.
+     * 
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ON_SUBMIT,
+
+    /**
+     * @brief Defines the event triggered when the cut button on the pasteboard, which appears
+     * after a long press on the <b>ARKUI_NODE_TEXT_EDITOR</b> component is long pressed, is clicked.
+     *
+     * @return Whether to intercept the component's default behavior. \n
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     * value.i32 at index 0 in the return value indicates whether to intercept the component's default behavior.
+     * <b>0</b>: not intercept. <b>1</b>: intercept. \n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ON_CUT,
+
+    /**
+     * @brief Defines the event triggered when the copy button on the pasteboard, which displays when the content of the
+     * <b>ARKUI_NODE_TEXT_EDITOR</b> component is selected, is clicked.
+     *
+     * @return Whether to intercept the component's default behavior. \n
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     * value.i32 at index 0 in the return value indicates whether to intercept the component's default behavior.
+     * <b>0</b>: not intercept. <b>1</b>: intercept. \n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ON_COPY,
 
     /**
      * @brief Defines the event triggered when the index of the currently displayed element of this
@@ -10174,6 +10694,15 @@ ArkUI_StringAsyncEvent* OH_ArkUI_NodeEvent_GetStringAsyncEvent(ArkUI_NodeEvent* 
  * @since 16
  */
 ArkUI_TextChangeEvent* OH_ArkUI_NodeEvent_GetTextChangeEvent(ArkUI_NodeEvent* event);
+
+/**
+ * @brief Obtain data of the ArkUI_PreventableEvent type.
+ *
+ * @param event Indicates the pointer to the component event.
+ * @return Returns the pointer to the data of the ArkUI_PreventableEvent type.
+ * @since 24
+ */
+ArkUI_PreventableEvent* OH_ArkUI_NodeEvent_GetPreventableEvent(ArkUI_NodeEvent* event);
 
 /**
  * @brief Obtains the custom data in a component event.
@@ -12016,6 +12545,99 @@ int32_t OH_ArkUI_Swiper_FinishAnimation(ArkUI_NodeHandle node);
  * @since 23
  */
 int32_t OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible(ArkUI_ContextHandle uiContext, bool visible);
+
+/**
+ * @brief Start a fake drag of the Swiper node.
+ * Call OH_ArkUI_Swiper_FakeDragBy to simulate the drag motion. Call OH_ArkUI_Swiper_StopFakeDrag to complete the
+ * fake drag. A fake drag can be interrupted by a real drag. If you need to ignore touch events and other user input
+ * during a fake drag, use NODE_SWIPER_DISABLE_SWIPE.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param isSuccessful If the fake drag started successfully, return true.
+ *     If the Swiper is not ready to start the fake drag, or a real or fake drag is already in progress, return false.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 23
+ */
+int32_t OH_ArkUI_Swiper_StartFakeDrag(ArkUI_NodeHandle node, bool* isSuccessful);
+
+/**
+ * @brief Fake drag by an offset of the Swiper node.
+ * The OH_ArkUI_Swiper_StartFakeDrag must be called first.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param offset The offset that needs to be scrolled. The unit is vp.
+ * @param isConsumedOffset If not in a fake drag progress, or no offset is consumed, return false.
+ *     If any offset is consumed, return true.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 23
+ */
+int32_t OH_ArkUI_Swiper_FakeDragBy(ArkUI_NodeHandle node, float offset, bool* isConsumedOffset);
+
+/**
+ * @brief Stop a fake drag of the Swiper node.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param isSuccessful If the fake drag stopped successfully, return true.
+ *     If the Swiper is not ready to stop the fake drag, or no fake drag is in progress, return false.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 23
+ */
+int32_t OH_ArkUI_Swiper_StopFakeDrag(ArkUI_NodeHandle node, bool* isSuccessful);
+
+/**
+ * @brief Get the fake drag state of the Swiper node.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param isFakeDragging If a fake drag is in progress return true, otherwise return false
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 23
+ */
+int32_t OH_ArkUI_Swiper_IsFakeDragging(ArkUI_NodeHandle node, bool* isFakeDragging);
+
+/**
+ * @brief Show the previous page of the Swiper node.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 23
+ */
+int32_t OH_ArkUI_Swiper_ShowPrevious(ArkUI_NodeHandle node);
+
+/**
+ * @brief Show the next page of the Swiper node.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 23
+ */
+int32_t OH_ArkUI_Swiper_ShowNext(ArkUI_NodeHandle node);
+
+/**
+ * @brief Get the root node handle of the corresponding page of the Context.
+ *
+ * @param context A UIContext pointer to a page.
+ * @param rootNode The handle of target root node handle.
+ * @return Error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is
+ * successful. Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter
+ * error occurs. Returns {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI
+ * init error. Returns {@link ARKUI_ERROR_CODE_UI_CONTEXT_INVALID} if the
+ * uiContext is invalid.
+ * @since 24
+ */
+int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle context, ArkUI_NodeHandle* rootNode);
 
 #ifdef __cplusplus
 }

@@ -16,6 +16,8 @@
 #include <sstream>
 #include <vector>
 
+#include "api_impl.h"
+
 // SORTED_SECTION
 #include "base/error/error_code.h"
 #include "core/common/card_scope.h"
@@ -468,6 +470,20 @@ Ark_Int32 GetAlignment(Ark_NodeHandle node)
     return companion->GetAlignmentValue();
 }
 
+void SetContentNode(void *node, const RefPtr<FrameNode>& value)
+{
+    auto* companion = GetCompanion(reinterpret_cast<Ark_NodeHandle>(node));
+    CHECK_NULL_VOID(companion);
+    companion->SetContentNode(value);
+}
+
+RefPtr<FrameNode> GetContentNode(void *node)
+{
+    auto* companion = GetCompanion(reinterpret_cast<Ark_NodeHandle>(node));
+    CHECK_NULL_RETURN(companion, nullptr);
+    return companion->GetContentNode();
+}
+
 void GetLayoutConstraint(Ark_NodeHandle node, Ark_Int32* value)
 {
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
@@ -508,7 +524,7 @@ void SetRangeUpdater(Ark_NodeHandle nodePtr, int updaterId)
         continuations.emplace(continuation->Id(), continuation);
         auto requestFunc = [updaterId, id = continuation->Id()](int start, int end) {
             ArkUINodeEvent event;
-            event.kind = ArkUIEventCategory::CALLBACK_EVENT;
+            event.kind = ArkUIEventCategory::CALL_BACK_EVENT;
             event.callback.id = updaterId;
             event.callback.continuationId = id;
             event.callback.numArgs = 2;
@@ -524,7 +540,7 @@ void SetRangeUpdater(Ark_NodeHandle nodePtr, int updaterId)
         continuations.emplace(continuation->Id(), continuation);
         auto requestFunc = [updaterId, id = continuation->Id()](int start, int end) {
             ArkUINodeEvent event;
-            event.kind = ArkUIEventCategory::CALLBACK_EVENT;
+            event.kind = ArkUIEventCategory::CALL_BACK_EVENT;
             event.callback.id = updaterId;
             event.callback.continuationId = id;
             event.callback.numArgs = 2;

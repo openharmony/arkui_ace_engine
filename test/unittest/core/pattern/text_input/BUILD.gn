@@ -37,6 +37,7 @@ ace_unittest("text_input_test") {
     "text_input_check_test.cpp",
     "text_input_cursor_test.cpp",
     "text_input_decoration_test.cpp",
+    "text_input_decorator_test.cpp",
     "text_input_menu_test.cpp",
     "text_input_modify_test.cpp",
     "text_input_preview_test.cpp",
@@ -108,4 +109,25 @@ ace_unittest("text_emoji_test") {
     "icu:shared_icui18n",
     "icu:shared_icuuc",
   ]
+}
+
+ace_unittest("text_input_listener_test") {
+  module_name = "TextSet-InputListener"
+  type = "new"
+  sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/text_field/on_text_changed_listener_impl.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
+    "on_text_changed_listener_impl_test.cpp",
+    "text_field_pattern_multi_thread_test.cpp",
+    "text_input_base.cpp",
+  ]
+  cflags = [ "-fno-access-control" ]
+
+  external_deps = [
+    "input:libmmi-client",
+    "hilog:libhilog",
+  ]
+  if (defined(global_parts_info.inputmethod_imf)) {
+    external_deps += [ "imf:inputmethod_client" ]
+  }
 }

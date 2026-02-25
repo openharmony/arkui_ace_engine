@@ -41,7 +41,7 @@ struct OverlayRequest {
 
 enum class DragHandleIndex { NONE, FIRST, SECOND };
 
-class BaseTextSelectOverlay : public SelectOverlayHolder, public SelectOverlayCallback {
+class ACE_FORCE_EXPORT BaseTextSelectOverlay : public SelectOverlayHolder, public SelectOverlayCallback {
     DECLARE_ACE_TYPE(BaseTextSelectOverlay, SelectOverlayHolder, SelectOverlayCallback);
 
 public:
@@ -60,7 +60,7 @@ public:
     {
         return hostTextBase_;
     }
-    void CheckHasPasteData(const std::function<void(bool)>& callback);
+    void CheckHasPasteData(const std::function<void(bool, bool)>& callback);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void ProcessOverlayOnAreaChanged(const OverlayRequest& request = OverlayRequest());
     virtual bool PreProcessOverlay(const OverlayRequest& request)
@@ -327,6 +327,10 @@ public:
     bool GetDragViewHandleRects(RectF& firstRect, RectF& secondRect);
     void UpdateIsSingleHandle(bool isSingleHandle);
     void AddTaskAfterShowOverlay(std::function<void()>&& task);
+    bool IsAutoFillPaste ()
+    {
+        return isAutoFillPaste;
+    }
 
 protected:
     RectF MergeSelectedBoxes(
@@ -414,6 +418,7 @@ protected:
     EdgeF ConvertWindowToScreenDomain(EdgeF edge);
     std::string GetTranslateParamRectStr(RectF rect, EdgeF rectLeftTop, EdgeF rectRightBottom);
     void FlushAfterOverlayShowTask();
+    bool isAutoFillPaste = false;
 
 private:
     void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);

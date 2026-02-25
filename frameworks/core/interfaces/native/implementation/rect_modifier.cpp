@@ -125,7 +125,7 @@ void SetRectOptionsImpl(Ark_NativePointer node,
 } // RectInterfaceModifier
 namespace RectAttributeModifier {
 void SetRadiusWidthImpl(Ark_NativePointer node,
-                        const Opt_Union_F64_String* value)
+                        const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -133,7 +133,7 @@ void SetRadiusWidthImpl(Ark_NativePointer node,
     RectModelNG::SetRadiusWidth(frameNode, radiusWidth.value_or(DEFAULT_RADIUS));
 }
 void SetRadiusHeightImpl(Ark_NativePointer node,
-                         const Opt_Union_F64_String* value)
+                         const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

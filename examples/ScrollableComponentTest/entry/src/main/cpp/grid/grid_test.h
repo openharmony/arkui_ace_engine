@@ -18,6 +18,7 @@
 
 #include "common.h"
 #include "components/grid/Grid1.h"
+#include <js_native_api_types.h>
 
 namespace ArkUICApiDemo {
 
@@ -26,7 +27,6 @@ public:
     ~GridTest();
     static napi_value CreateNativeNode(napi_env env, napi_callback_info info);
 
-private:
     static std::shared_ptr<GridComponent> CreatGrid(int32_t type);
     static std::shared_ptr<GridComponent> CreatGrid1(int32_t type);
     static std::shared_ptr<GridComponent> CreatGrid2(int32_t type);

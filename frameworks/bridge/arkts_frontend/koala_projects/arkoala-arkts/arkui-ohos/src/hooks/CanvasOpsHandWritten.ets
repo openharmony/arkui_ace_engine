@@ -15,7 +15,7 @@
 
 import { SerializerBase, runtimeType, RuntimeType } from "@koalaui/interop"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext, ImageAIOptions, ImageAnalyzerConfig, CanvasParams } from "#generated"
+import { ArkCanvasComponent, CanvasRenderingContext2D, CanvasRenderingContext2DExtender, DrawingRenderingContext, ImageAIOptions, ImageAnalyzerConfig, CanvasParams } from "#generated"
 import { ImageAIOptions_serializer, VideoOptions_serializer } from "#generated"
 
 export class CanvasOpsHandWritten {
@@ -83,7 +83,7 @@ export class CanvasOpsHandWritten {
         context: CanvasRenderingContext2D, config: ImageAnalyzerConfig): Promise<void> {
         const peer = context.getPeer();
         if (peer === undefined) {
-            return context.startImageAnalyzer_serialize(config);
+            return CanvasRenderingContext2DExtender.startImageAnalyzer(context, config);
         }
         const peerPtr = peer.ptr;
         let configObj = ESValue.instantiateEmptyObject();
@@ -100,6 +100,6 @@ export class CanvasOpsHandWritten {
         if (!(analyzerConfigFunc.isNull() || analyzerConfigFunc.isUndefined())) {
             analyzerConfigFunc.invoke(ESObject.wrap(peerPtr), configObj);
         }
-        return context.startImageAnalyzer_serialize(config);
+        return CanvasRenderingContext2DExtender.startImageAnalyzer(context, config);
     }
 }

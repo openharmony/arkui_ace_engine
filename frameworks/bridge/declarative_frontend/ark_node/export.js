@@ -16,6 +16,10 @@ const fs = require("fs");
 
 function AddExportToDistFile(fileName, exportContent) {
     let content = fs.readFileSync(fileName);
+    if (content.includes('export default {')) {
+        console.log(`[INFO] Export statement already exists in ${fileName}, skipping.`);
+        return;
+    }
     fs.writeFileSync(fileName, content + exportContent);
 }
 

@@ -72,7 +72,7 @@ public:
 };
 
 /**
- * @tc.name: asetTransformTest
+ * @tc.name: setTransformTest
  * @tc.desc:
  * @tc.type: FUNC
  */

@@ -14,7 +14,6 @@
  */
 
 #include "common_method_modifier_test.h"
-
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
@@ -32,9 +31,9 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
     const auto ATTRIBUTE_GEOMETRY_TRANSITION_NAME = "geometryTransition";
-    const auto ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_RESTORE_ID_NAME = "restoreId";
-    const auto ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE = std::nullopt;
     const auto ATTRIBUTE_MONOPOLIZE_EVENTS_NAME = "monopolizeEvents";
     const auto ATTRIBUTE_MONOPOLIZE_EVENTS_DEFAULT_VALUE = "false";
     const auto ACTUAL_TRUE = true;
@@ -167,13 +166,14 @@ public:
     {
         checkNestedEvent.reset();
         auto dismissCallback = [](const Ark_Int32 resourceId, const Ark_DismissContentCoverAction parameter) {
+            auto accessors = fullAPI_->getAccessors();
+            auto accessor = accessors->getDismissContentCoverActionAccessor();
             checkNestedEvent = {
                 .resourceId = resourceId,
-                .reason = Converter::OptConvert<BindSheetDismissReason>(parameter.reason)
+                .reason = Converter::OptConvert<BindSheetDismissReason>(accessor->getReason(parameter))
             };
-            auto helper = CallbackHelper(parameter.dismiss);
             checkNestedEvent->fired = true;
-            helper.Invoke();
+            accessor->dismiss(parameter);
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_DismissContentCoverAction_Void>(dismissCallback, frameNode->GetId());
@@ -189,8 +189,8 @@ public:
  */
 HWTEST_F(CommonMethodModifierTest8, setGeometryTransitionTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_GEOMETRY_TRANSITION_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_GEOMETRY_TRANSITION_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_GEOMETRY_TRANSITION_DEFAULT_VALUE));
 }
 
 /*
@@ -200,16 +200,17 @@ HWTEST_F(CommonMethodModifierTest8, setGeometryTransitionTestDefaultValues, Test
  */
 HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransitionTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setGeometryTransition0, nullptr);
+    ASSERT_NE(modifier_->setGeometryTransition, nullptr);
     using OneTestStep = std::tuple<Opt_String, std::string>;
-    const std::vector<OneTestStep> testPlan = {
+    static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_String>("id1"), "id1"},
     };
+    Opt_GeometryTransitionOptions optOptions = Converter::ArkValue<Opt_GeometryTransitionOptions>(Ark_Empty());
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setGeometryTransition0(node_, &inputValue);
+        modifier_->setGeometryTransition(node_, &inputValue, &optOptions);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GEOMETRY_TRANSITION_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -221,8 +222,8 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransitionTestValidValue
  */
 HWTEST_F(CommonMethodModifierTest8, setRestoreIdTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_RESTORE_ID_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_RESTORE_ID_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_RESTORE_ID_DEFAULT_VALUE));
 }
 
 /*
@@ -243,7 +244,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setRestoreIdTestValidValues, TestSi
         modifier_->setRestoreId(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_RESTORE_ID_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_THAT(resultValue, Eq(expectedValue)) << "Passed value is: " << expectedValue;
     }
 }
 
@@ -260,27 +261,27 @@ HWTEST_F(CommonMethodModifierTest8, setMonopolizeEventsTest, TestSize.Level1)
 
     auto fullJson = GetJsonValue(node_);
     auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MONOPOLIZE_EVENTS_NAME);
-    EXPECT_EQ(resultValue, ATTRIBUTE_MONOPOLIZE_EVENTS_DEFAULT_VALUE);
+    EXPECT_THAT(resultValue, Eq(ATTRIBUTE_MONOPOLIZE_EVENTS_DEFAULT_VALUE));
 
     auto arkTrueValue = Converter::ArkValue<Opt_Boolean>(ACTUAL_TRUE);
     modifier_->setMonopolizeEvents(node_, &arkTrueValue);
     fullJson = GetJsonValue(node_);
     resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MONOPOLIZE_EVENTS_NAME);
-    EXPECT_EQ(resultValue, EXPECTED_TRUE);
+    EXPECT_THAT(resultValue, Eq(EXPECTED_TRUE));
 
     auto arkFalseValue = Converter::ArkValue<Opt_Boolean>(ACTUAL_FALSE);
     modifier_->setMonopolizeEvents(node_, &arkFalseValue);
     fullJson = GetJsonValue(node_);
     resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_MONOPOLIZE_EVENTS_NAME);
-    EXPECT_EQ(resultValue, EXPECTED_FALSE);
+    EXPECT_THAT(resultValue, Eq(EXPECTED_FALSE));
 }
 
 /*
- * @tc.name: setBindContentCover0IsShowTest
+ * @tc.name: setBindContentCover0TestIsShow
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover0IsShowTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, setBindContentCover0TestIsShow, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover0, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
@@ -302,11 +303,11 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover0IsShowTest, TestSize.Lev
 }
 
 /*
- * @tc.name: setBindContentCover0ModalTransitionTest
+ * @tc.name: setBindContentCover0TestModalTransition
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover0ModalTransitionTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover0TestModalTransition, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover0, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
@@ -327,11 +328,11 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover0ModalTransition
 }
 
 /*
- * @tc.name: setBindContentCover1Test
+ * @tc.name: setBindContentCover1TestIsShow
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1IsShowTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TestIsShow, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -355,11 +356,11 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1IsShowTest, Tes
 }
 
 /*
- * @tc.name: setBindContentCover1OnAppearTest
+ * @tc.name: setBindContentCover1TestOnAppear
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TestOnAppear, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -373,8 +374,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnAppearTest, T
             .nodeId = nodeId,
         };
     };
-    auto arkOnAppearCallback = Converter::ArkValue<Callback_Void>(onAppearCallback, frameNode->GetId());
-    auto optOnAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnAppearCallback);
+    auto optOnAppearCallback = Converter::ArkCallback<Opt_VoidCallback>(onAppearCallback, frameNode->GetId());
 
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
@@ -398,11 +398,11 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnAppearTest, T
 }
 
 /*
- * @tc.name: setBindContentCover1OnDisAppearTest
+ * @tc.name: setBindContentCover1TestOnDisAppear
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnDisAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TestOnDisAppear, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -416,8 +416,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnDisAppearTest
             .nodeId = nodeId,
         };
     };
-    auto arkOnDisAppearCallback = Converter::ArkValue<Callback_Void>(onDisAppearCallback, frameNode->GetId());
-    auto optOnDisAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnDisAppearCallback);
+    auto optOnDisAppearCallback = Converter::ArkCallback<Opt_VoidCallback>(onDisAppearCallback, frameNode->GetId());
 
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
@@ -446,11 +445,11 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnDisAppearTest
 }
 
 /*
- * @tc.name: setBindContentCover1OnWillAppearTest
+ * @tc.name: setBindContentCover1TestOnWillAppear
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TestOnWillAppear, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -464,8 +463,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillAppearTes
             .nodeId = nodeId,
         };
     };
-    auto arkOnWillAppearCallback = Converter::ArkValue<Callback_Void>(onWillAppearCallback, frameNode->GetId());
-    auto optOnWillAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillAppearCallback);
+    auto optOnWillAppearCallback = Converter::ArkCallback<Opt_VoidCallback>(onWillAppearCallback, frameNode->GetId());
 
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
@@ -487,11 +485,11 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillAppearTes
 }
 
 /*
- * @tc.name: setBindContentCover1Test
+ * @tc.name: setBindContentCover1TestOnWillDisAppear
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillDisAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TestOnWillDisAppear, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -505,8 +503,8 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillDisAppear
             .nodeId = nodeId,
         };
     };
-    auto arkOnWillDisAppearCallback = Converter::ArkValue<Callback_Void>(onWillDisAppearCallback, frameNode->GetId());
-    auto optOnWillDisAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillDisAppearCallback);
+    auto optOnWillDisAppearCallback =
+        Converter::ArkCallback<Opt_VoidCallback>(onWillDisAppearCallback, frameNode->GetId());
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onWillDisappear = optOnWillDisAppearCallback,
@@ -534,11 +532,11 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillDisAppear
 }
 
 /*
- * @tc.name: setBindContentCover1Test
+ * @tc.name: setBindContentCover1TestDismissCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1DismissCallbackTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TestDismissCallback, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -574,11 +572,11 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1DismissCallback
 }
 
 /*
- * @tc.name: setBindContentCover1Test
+ * @tc.name: setBindContentCover1TestBackgroundColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1BackgroundColorTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TestBackgroundColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -605,11 +603,11 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1BackgroundColor
 }
 
 /*
- * @tc.name: setBindContentCover1Test
+ * @tc.name: setBindContentCover1TestModalTransition
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1ModalTransitionTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TestModalTransition, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -634,11 +632,11 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1ModalTransition
 }
 
 /*
- * @tc.name: setBindContentCover1Test
+ * @tc.name: setBindContentCover1TestTransitionEffect
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TransitionEffectTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TestTransitionEffect, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     FrameNode* frameNode = reinterpret_cast<FrameNode*>(node_);

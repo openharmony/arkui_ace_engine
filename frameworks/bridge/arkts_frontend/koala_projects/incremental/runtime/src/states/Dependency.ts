@@ -14,6 +14,7 @@
  */
 
 import { UID, Unique, UniqueMap, UniqueSet } from '../common/Unique'
+import { IncrementalNode } from '../tree/IncrementalNode'
 
 let uidCounter: UID = 0
 
@@ -80,6 +81,10 @@ export class StateToScopes implements Unique {
             that.add(this)
         }
     }
+
+    getDependencies(): UniqueSet<ScopeToStates> {
+        return this.dependencies;
+    }
 }
 
 /** This class is intended to store dependencies to all used states. */
@@ -90,8 +95,11 @@ export class ScopeToStates implements Unique {
 
     readonly invalidate: () => void
 
-    constructor(invalidate: () => void) {
+    readonly getNodeRef?: () => (IncrementalNode | undefined)
+
+    constructor(invalidate: () => void, getNodeRef?: () => (IncrementalNode | undefined)) {
         this.invalidate = invalidate
+        this.getNodeRef = getNodeRef
     }
 
     get uid(): UID {

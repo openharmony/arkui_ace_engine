@@ -107,6 +107,7 @@ struct DelayTaskRecord {
 using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
 using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
 
+class UIExtensionAvoidListener;
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
@@ -223,7 +224,14 @@ public:
     {
         isModal_ = isModal;
     }
-
+    bool GetIsModalFixFocus() const
+    {
+        return isModalFixFocus_;
+    }
+    void SetIsModalFixFocus(bool isModalFixFocus)
+    {
+        isModalFixFocus_ = isModalFixFocus;
+    }
     void SetNeedCheckWindowSceneId(bool needCheckWindowSceneId)
     {
         needCheckWindowSceneId_ = needCheckWindowSceneId;
@@ -255,6 +263,10 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
+    void AddExtraInfoWithParamConfig(
+        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
+    void ExecuteDumpTask(
+        std::shared_ptr<JsonValue>& json, const std::vector<std::string>& params, const RefPtr<FrameNode>& host);
     int32_t GetInstanceIdFromHost() const;
     void DispatchDisplayArea(bool isForce = false);
     void DispatchDisplayAreaWithDelay(uint32_t delayMs);
@@ -306,6 +318,15 @@ public:
 
     void UpdateSessionViewportConfigFromContext();
 
+    bool IsUpdateDisplayArea() const
+    {
+        return isUpdateDisplayArea_;
+    }
+    void SetIsUpdateDisplayArea(bool isUpdate)
+    {
+        isUpdateDisplayArea_ = isUpdate;
+    }
+
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual void DispatchKeyEvent(const KeyEvent& event);
@@ -349,6 +370,8 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitTouchpadInteraction(const RefPtr<InputEventHub>& inputHub);
+    bool IsInComponent(PointF point);
     void InitializeAccessibility();
     bool HandleKeyEvent(const KeyEvent& event);
     void HandleFocusEvent();
@@ -407,6 +430,8 @@ private:
     void RegisterEventProxyFlagCallback();
 
     void RegisterGetAvoidInfoCallback();
+    void RegisterAvoidInfoChangeListener(int32_t instanceId);
+    void UnRegisterAvoidInfoChangeListener();
 
     void SendPageModeToProvider();
     void RegisterReceivePageModeRequestCallback();
@@ -459,6 +484,7 @@ private:
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
+    bool isModalFixFocus_ = false;
     bool isKeyAsync_ = false;
     bool hasDetachContext_ = false;
     // Whether to send the focus to the UIExtension
@@ -494,6 +520,8 @@ private:
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ContainerModalAvoidInfo avoidInfo_;
+    RefPtr<UIExtensionAvoidListener> avoidListener_;
+    bool isUpdateDisplayArea_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

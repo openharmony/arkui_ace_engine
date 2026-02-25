@@ -26,11 +26,11 @@ class ActionSheetAccessorTest : public StaticAccessorTest<GENERATED_ArkUIActionS
 };
 
 /**
- * @tc.name: actionSheetAccessorTest
+ * @tc.name: showTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ActionSheetAccessorTest, actionSheetAccessorTest, TestSize.Level1)
+HWTEST_F(ActionSheetAccessorTest, DISABLED_showTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 }

@@ -113,7 +113,7 @@ struct SelectHandleInfo {
         return paintRect;
     }
 
-    static Dimension GetDefaultLineWidth();
+    ACE_FORCE_EXPORT static Dimension GetDefaultLineWidth();
 
     std::string ToString() const
     {
@@ -229,7 +229,9 @@ enum class NativeMenuId : int32_t {
     ID_AI_MENU_PHONE = 12,
     ID_AI_MENU_ADDRESS = 13,
     ID_AI_MENU_DATETIME = 14,
-    ID_ASK_CELIA = 15
+    ID_ASK_CELIA = 15,
+    ID_AUTO_FILL = 16,
+    ID_PASSWORD_VAULT = 17
 };
 
 struct HoldSelectionInfo {

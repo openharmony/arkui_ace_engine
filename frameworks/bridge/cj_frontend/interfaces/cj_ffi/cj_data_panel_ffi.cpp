@@ -16,6 +16,8 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_data_panel_ffi.h"
 
 
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "core/components/data_panel/data_panel_theme.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
@@ -64,6 +66,17 @@ namespace {
             gradientColor.SetDimension(Dimension(defaultOffset));
         }
     }
+}
+
+// Should use CJUIModifier API later
+NG::DataPanelModelNG* GetDataPanelModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("DataPanel");
+    if (module == nullptr) {
+        LOGF("Can't find data_panel dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::DataPanelModelNG*>(module->GetModel());
 }
 
 extern "C" {
@@ -117,12 +130,12 @@ void FfiOHOSAceFrameworkDataPanelCreate(VectorDoubleHandle values, double max, i
         maxValue = dataSum;
     }
 
-    DataPanelModel::GetInstance()->Create(dateValues, maxValue, panelType);
+    GetDataPanelModel()->Create(dateValues, maxValue, panelType);
 }
 
 void FfiOHOSAceFrameworkDataPanelSetCloseEffect(bool isCloseEffect)
 {
-    DataPanelModel::GetInstance()->SetEffect(isCloseEffect);
+    GetDataPanelModel()->SetEffect(isCloseEffect);
 }
 
 void FfiOHOSAceFrameworkDataPanelSetValueColors(VectorStringPtr vecContent)
@@ -146,7 +159,7 @@ void FfiOHOSAceFrameworkDataPanelSetValueColors(VectorStringPtr vecContent)
         valueColors.emplace_back(gradient);
     }
 
-    DataPanelModel::GetInstance()->SetValueColors(valueColors);
+    GetDataPanelModel()->SetValueColors(valueColors);
 }
 
 // reset valuecolors from datapanel theme
@@ -154,12 +167,12 @@ void FfiOHOSAceFrameworkDataPanelResetValueColors()
 {
     std::vector<OHOS::Ace::NG::Gradient> valueColors;
     ConvertThemeColor(valueColors);
-    DataPanelModel::GetInstance()->SetValueColors(valueColors);
+    GetDataPanelModel()->SetValueColors(valueColors);
 }
 
 void FfiOHOSAceFrameworkDataPanelSetTrackBackgroundColor(uint32_t color)
 {
-    DataPanelModel::GetInstance()->SetTrackBackground(Color(color));
+    GetDataPanelModel()->SetTrackBackground(Color(color));
 }
 
 void FfiOHOSAceFrameworkDataPanelSetStrokeWidth(double strokeWidth, int32_t widthUnit)
@@ -168,7 +181,7 @@ void FfiOHOSAceFrameworkDataPanelSetStrokeWidth(double strokeWidth, int32_t widt
         strokeWidth = DEFAULT_STROKE_WIDTH;
     }
     Dimension dimStrokeWidth(strokeWidth, static_cast<DimensionUnit>(widthUnit));
-    DataPanelModel::GetInstance()->SetStrokeWidth(dimStrokeWidth);
+    GetDataPanelModel()->SetStrokeWidth(dimStrokeWidth);
 }
 
 void FfiOHOSAceFrameworkDataPanelSetTrackShadow(NativeDataPanelShadow nativeDataPanelShadow)
@@ -195,6 +208,6 @@ void FfiOHOSAceFrameworkDataPanelSetTrackShadow(NativeDataPanelShadow nativeData
     shadow.offsetX = nativeDataPanelShadow.offsetX;
     shadow.offsetY = nativeDataPanelShadow.offsetY;
     shadow.colors = valueColors;
-    DataPanelModel::GetInstance()->SetShadowOption(shadow);
+    GetDataPanelModel()->SetShadowOption(shadow);
 }
 }

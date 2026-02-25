@@ -320,6 +320,8 @@ public:
 
     virtual void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) = 0;
 
+    virtual bool OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args) = 0;
+
     virtual void JsCallback(const std::string& callbackId, const std::string& args) = 0;
 
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {}

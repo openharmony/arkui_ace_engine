@@ -33,11 +33,11 @@ class SwiperContentTransitionProxyAccessorTest : public AccessorTestBase<
 };
 
 /**
- * @tc.name: initialStateTest
+ * @tc.name: getSelectedIndexTestInitialState
  * @tc.desc: Check the functionality of SwiperContentTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperContentTransitionProxyAccessorTest, initialStateTest, TestSize.Level1)
+HWTEST_F(SwiperContentTransitionProxyAccessorTest, getSelectedIndexTestInitialState, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSelectedIndex, nullptr);
     ASSERT_NE(accessor_->getIndex, nullptr);
@@ -51,11 +51,11 @@ HWTEST_F(SwiperContentTransitionProxyAccessorTest, initialStateTest, TestSize.Le
 }
 
 /**
- * @tc.name: nothingHandlerStateTest
+ * @tc.name: getSelectedIndexTestNothingHandlerState
  * @tc.desc: Check the functionality of SwiperContentTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperContentTransitionProxyAccessorTest, nothingHandlerStateTest, TestSize.Level1)
+HWTEST_F(SwiperContentTransitionProxyAccessorTest, getSelectedIndexTestNothingHandlerState, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSelectedIndex, nullptr);
     ASSERT_NE(accessor_->getIndex, nullptr);
@@ -71,11 +71,11 @@ HWTEST_F(SwiperContentTransitionProxyAccessorTest, nothingHandlerStateTest, Test
 }
 
 /**
- * @tc.name: settersGettersTest
+ * @tc.name: getSelectedIndexTestSettersGetters
  * @tc.desc: Check the functionality of SwiperContentTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperContentTransitionProxyAccessorTest, settersGettersTest, TestSize.Level1)
+HWTEST_F(SwiperContentTransitionProxyAccessorTest, getSelectedIndexTestSettersGetters, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSelectedIndex, nullptr);
     ASSERT_NE(accessor_->setSelectedIndex, nullptr);
@@ -107,11 +107,11 @@ HWTEST_F(SwiperContentTransitionProxyAccessorTest, settersGettersTest, TestSize.
 }
 
 /**
- * @tc.name: finishTransactionTest
+ * @tc.name: finishTransitionTest
  * @tc.desc: Check the functionality of SwiperContentTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperContentTransitionProxyAccessorTest, finishTransactionTest, TestSize.Level1)
+HWTEST_F(SwiperContentTransitionProxyAccessorTest, finishTransitionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->finishTransition, nullptr);
 

@@ -88,7 +88,7 @@ public:
 
 void TextClockModifierTest::InitTextShadow(Ark_Union_ShadowOptions_Array_ShadowOptions &options)
 {
-    WriteToUnion<Ark_ShadowOptions>(options).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+    WriteToUnion<Ark_ShadowOptions>(options).radius = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
         std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(options).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
@@ -150,8 +150,8 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestDefaultValues, TestSize.L
     EXPECT_TRUE(checkInvokeStop);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TIME_ZONE_OFFSET_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE) <<
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TIME_ZONE_OFFSET_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE)) <<
         "Default value for attribute 'options.timeZoneOffset'";
 }
 
@@ -186,7 +186,7 @@ static std::vector<std::tuple<std::string, Opt_TextClockOptions, std::string>> s
 HWTEST_F(TextClockModifierTest, setTextClockOptionsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_TextClockOptions inputValueOptions = Converter::ArkValue<Opt_TextClockOptions>();
 
     // Verifying attribute's  values
@@ -195,7 +195,7 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestValidValues, TestSize.Lev
         modifier_->setTextClockOptions(node_, &inputValueOptions);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TIME_ZONE_OFFSET_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << print;
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << print;
     }
 }
 
@@ -216,7 +216,7 @@ static std::vector<std::tuple<std::string, Opt_TextClockOptions>> setTextClockOp
 HWTEST_F(TextClockModifierTest, setTextClockOptionsTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_TextClockOptions realInputValue = Converter::ArkValue<Opt_TextClockOptions>();
     Ark_TextClockOptions& inputValueOptions = realInputValue.value;
@@ -231,16 +231,16 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestInvalidValues, TestSize.L
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TIME_ZONE_OFFSET_NAME);
         expectedStr = ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
 /*
- * @tc.name: setOnDateChange
+ * @tc.name: setOnDateChangeTest
  * @tc.desc: Check the functionality of DatePickerModifier.SelectedTextStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockModifierTest, setOnDateChange, TestSize.Level1)
+HWTEST_F(TextClockModifierTest, setOnDateChangeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnDateChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -335,7 +335,7 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusVa
     InitTextShadow(initValueTextShadow);
 
     auto checkValue = [this, frameNode, &initValueTextShadow](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_F64_Resource& value) {
+                          const Opt_Union_F64_Resource& value) {
         Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow;
         WriteTo(inputValueTextShadow) = initValueTextShadow;
 
@@ -354,10 +354,10 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusVa
     };
 
     for (auto& [input, value, expected] : testFixtureShadowRadiusNumberValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureShadowRadiusResValidValues) {
-        checkValue(input, expected, ArkUnion<Ark_Union_F64_Resource, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(value));
     }
 }
 
@@ -380,7 +380,7 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusIn
     InitTextShadow(initValueTextShadow);
 
     auto checkValue = [this, textClockProperty, &initValueTextShadow](
-        const std::string& input, const Ark_Union_F64_Resource& value) {
+        const std::string& input, const Opt_Union_F64_Resource& value) {
         Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow;
         WriteTo(inputValueTextShadow) = initValueTextShadow;
 
@@ -398,13 +398,13 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusIn
     };
 
     for (auto& [input, value] : testFixtureShadowRadiusNumberInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureShadowRadiusResInvalidValues) {
-        checkValue(input, ArkUnion<Ark_Union_F64_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_F64_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr));
 }
 
 /*

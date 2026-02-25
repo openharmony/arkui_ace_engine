@@ -242,6 +242,9 @@ void FrontendDelegateDeclarative::RunPage(
         [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), content, params]() {
             auto pageRouterManager = weakPtr.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
+            if (delegate) {
+                NG::AppBarView::BuildAppbar(delegate->GetPipelineContext());
+            }
             pageRouterManager->RunPage(content, params);
             auto pipeline = delegate->GetPipelineContext();
         },
@@ -3610,6 +3613,17 @@ void FrontendDelegateDeclarative::CancelAnimationFrame(const std::string& callba
     } else {
         LOGW("cancelAnimationFrame callbackId not found");
     }
+}
+
+
+void FrontendDelegateDeclarative::SetMonitorForCrownEvents(const std::string& callbackId)
+{
+    LOGW("Not supported in declarative frontend.");
+}
+
+void FrontendDelegateDeclarative::ClearMonitorForCrownEvents()
+{
+    LOGW("Not supported in declarative frontend.");
 }
 
 void FrontendDelegateDeclarative::FlushAnimationTasks()

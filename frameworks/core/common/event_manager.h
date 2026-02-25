@@ -23,6 +23,7 @@
 #include "core/common/event_dump.h"
 #include "core/common/key_event_manager.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -38,6 +39,7 @@
 #include "core/event/resample_algo.h"
 
 namespace OHOS::Ace {
+class EventInfoManager;
 namespace NG {
 class FrameNode;
 class SelectOverlayManager;
@@ -212,6 +214,8 @@ public:
         }
         return refereeNG_;
     }
+
+    const RefPtr<EventInfoManager>& GetEventInfoManager() const;
 
     RefPtr<MouseStyleManager> GetMouseStyleManager() const
     {
@@ -440,7 +444,7 @@ public:
     void FalsifyCancelEventWithDifferentDeviceId(const AxisEvent& axisEvent, int32_t deviceId, bool sendOnTouch = true);
     bool HandleAxisEventWithDifferentDeviceId(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode);
     void NotifyAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node = nullptr) const;
-    bool OnTouchpadInteractionBegin() const;
+    bool OnTouchpadInteractionBegin();
     void NotifyCoastingAxisEventStop() const;
     std::string GetLastHitTestNodeInfosForTouch(bool isTopMost);
     void AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& frameNode);
@@ -449,6 +453,9 @@ public:
     void RegisterHitTestFrameNodeListener(int32_t uniqueIdentify, std::function<void(const TouchEvent&)> callback);
     void UnRegisterHitTestFrameNodeListener(int32_t uniqueIdentify);
     void NotifyHitTestFrameNodeListener(const TouchEvent& touchEvent);
+    void AddTouchpadInteractionListenerInner(int32_t frameNodeId, NG::TouchpadInteractionListener&& listener);
+    void UnregisterTouchpadInteractionListenerInner(int32_t frameNodeId);
+    void NotifyTouchpadInteraction();
 
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
@@ -529,6 +536,7 @@ private:
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
+    RefPtr<EventInfoManager> eventInfoManager_;
     RefPtr<MouseStyleManager> mouseStyleManager_;
     RefPtr<CoastingAxisEventGenerator> coastingAxisEventGenerator_;
     NG::EventTreeRecord eventTree_;
@@ -546,10 +554,12 @@ private:
     MarkProcessedEventInfo lastConsumedEvent_;
     int32_t lastDownFingerNumber_ = 0;
     SourceTool lastSourceTool_ = SourceTool::UNKNOWN;
+    std::unordered_map<int32_t, NG::TouchpadInteractionListener> touchpadInteractionListeners_;
     // used to pseudo cancel event.
     TouchEvent lastTouchEvent_;
     // used to pseudo hover out event.
     MouseEvent lastMouseEvent_;
+    AxisEvent lastAxisEvent_;
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::unordered_map<int32_t, int32_t> deviceIdChecker_;

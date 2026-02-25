@@ -17,8 +17,15 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_UI_MATERIAL_NAPI_H
  
 #include "core/components_ng/common_napi_utils/common_napi_utils.h"
+
 namespace OHOS::Ace::Napi {
- 
+
+// Type tag for napi_wrap_s/napi_unwrap_s type safety
+constexpr napi_type_tag UI_MATERIAL_TYPE_TAG = {
+    .lower = 0x8E4F9C3D7A2B6E5F,
+    .upper = 0x2C7B8D4E9A3F1E6D,
+};
+
 class UiMaterialNapi {
 public:
     UiMaterialNapi() = default;

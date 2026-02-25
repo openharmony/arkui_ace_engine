@@ -104,11 +104,11 @@ static std::vector<std::tuple<int32_t, Opt_Number>> deleteCountInvalidValues = {
 };
 
 /**
- * @tc.name: CtorTest
+ * @tc.name: constructTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ChildrenMainSizeTest, CtorTest, TestSize.Level1)
+HWTEST_F(ChildrenMainSizeTest, constructTestDefaultValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getChildDefaultSize, nullptr);
 
@@ -117,11 +117,11 @@ HWTEST_F(ChildrenMainSizeTest, CtorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SpliceValidValuesTest
+ * @tc.name: spliceTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ChildrenMainSizeTest, SpliceValidValuesTest, TestSize.Level1)
+HWTEST_F(ChildrenMainSizeTest, spliceTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->splice, nullptr);
 
@@ -145,11 +145,11 @@ HWTEST_F(ChildrenMainSizeTest, SpliceValidValuesTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SpliceInvalidValuesTest
+ * @tc.name: spliceTestStartInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ChildrenMainSizeTest, SpliceStartInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ChildrenMainSizeTest, spliceTestStartInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->splice, nullptr);
 
@@ -172,11 +172,11 @@ HWTEST_F(ChildrenMainSizeTest, SpliceStartInvalidValuesTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SpliceDeleteCountInvalidValuesTest
+ * @tc.name: spliceTestDeleteCountInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ChildrenMainSizeTest, SpliceDeleteCountInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ChildrenMainSizeTest, spliceTestDeleteCountInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->splice, nullptr);
 
@@ -205,11 +205,11 @@ HWTEST_F(ChildrenMainSizeTest, SpliceDeleteCountInvalidValuesTest, TestSize.Leve
 }
 
 /**
- * @tc.name: SpliceValidValuesTest
+ * @tc.name: spliceTestChildrenSizeInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ChildrenMainSizeTest, SpliceChildrenSizeInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ChildrenMainSizeTest, spliceTestChildrenSizeInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->splice, nullptr);
 
@@ -229,11 +229,11 @@ HWTEST_F(ChildrenMainSizeTest, SpliceChildrenSizeInvalidValuesTest, TestSize.Lev
 }
 
 /**
- * @tc.name: UpdateValidValuesTest
+ * @tc.name: updateTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ChildrenMainSizeTest, UpdateValidValuesTest, TestSize.Level1)
+HWTEST_F(ChildrenMainSizeTest, updateTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->splice, nullptr);
     ASSERT_NE(accessor_->update, nullptr);
@@ -263,11 +263,11 @@ HWTEST_F(ChildrenMainSizeTest, UpdateValidValuesTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateInvalidValuesTest
+ * @tc.name: updateTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ChildrenMainSizeTest, UpdateInvalidValuesTest, TestSize.Level1)
+HWTEST_F(ChildrenMainSizeTest, updateTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->splice, nullptr);
     ASSERT_NE(accessor_->update, nullptr);
@@ -315,11 +315,11 @@ HWTEST_F(ChildrenMainSizeTest, UpdateInvalidValuesTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetChildDefaultSizeTest
+ * @tc.name: getChildDefaultSizeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ChildrenMainSizeTest, GetChildDefaultSizeTest, TestSize.Level1)
+HWTEST_F(ChildrenMainSizeTest, getChildDefaultSizeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getChildDefaultSize, nullptr);
 
@@ -336,11 +336,11 @@ HWTEST_F(ChildrenMainSizeTest, GetChildDefaultSizeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetChildDefaultSizeTest
+ * @tc.name: setChildDefaultSizeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ChildrenMainSizeTest, SetChildDefaultSizeTest, TestSize.Level1)
+HWTEST_F(ChildrenMainSizeTest, setChildDefaultSizeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setChildDefaultSize, nullptr);
     // valid value

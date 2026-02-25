@@ -89,6 +89,7 @@ struct IndexPage {
     new TextList(55, 'SwipeActionC', 'pages/List/CAPI/SwipeAction'),
     new TextList(56, 'SnapSpeedC', 'pages/List/CAPI/SnapSpeed'),
     new TextList(57, 'SnapSpeedNoLazy', 'pages/List/CAPI/SnapSpeedNoLazy'),
+    new TextList(58, 'EditModeOptions', 'pages/List/ListEditModeOptions'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
@@ -3250,8 +3251,8 @@ class CustomDialogContentComponent extends ViewPU {
     aboutToAppear() {
         try {
             let uiContext = this.getUIContext();
-            this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
-            this.appMaxFontScale = uiContext?.getMaxFontScale();
+            this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale() ?? false;
+            this.appMaxFontScale = uiContext?.getMaxFontScale() ?? 3.2;
         } catch (err) {
             let code = err?.code;
             let message = err?.message;

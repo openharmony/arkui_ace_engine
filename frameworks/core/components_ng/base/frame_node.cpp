@@ -29,6 +29,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
+#include "ui/focus/focus_constants.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/pattern.h"
 
@@ -66,6 +67,7 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #endif
+#include "core/components_ng/render/adapter/sampler_manager.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
@@ -73,6 +75,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -210,6 +213,11 @@ public:
     {
         auto frameNode = AceType::DynamicCast<FrameNode>(UiNode);
         if (frameNode) {
+            auto customNode = AceType::DynamicCast<CustomMeasureLayoutNode>(UiNode);
+            if (customNode) {
+                customNode->Render();
+            }
+
             allFrameNodeChildren.emplace_back(frameNode);
             partFrameNodeChildren[count++] = frameNode;
             return;
@@ -233,6 +241,11 @@ public:
         for (const auto& child : UiNode->GetChildren()) {
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
             if (frameNode) {
+                auto customNode = AceType::DynamicCast<CustomMeasureLayoutNode>(frameNode);
+                if (customNode) {
+                    customNode->Render();
+                }
+
                 allFrameNodeChildren.emplace_back(frameNode);
                 partFrameNodeChildren[count++] = frameNode;
                 continue;
@@ -497,6 +510,9 @@ FrameNode::FrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
     : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern)
 {
+    if (isRoot) {
+        isPendingState_ = true;
+    }
     isLayoutNode_ = isLayoutNode;
     frameProxy_ = std::make_unique<FrameProxy>(this);
     if (IsFree()) {
@@ -585,6 +601,21 @@ void FrameNode::CreateEventHubInner()
     }
 }
 
+const RefPtr<FocusHub>& FrameNode::GetFocusHub() const
+{
+    return focusHub_;
+}
+
+FocusType FrameNode::GetFocusType() const
+{
+    FocusType type = FocusType::DISABLE;
+    auto focusHub = GetFocusHub();
+    if (focusHub) {
+        type = focusHub->GetFocusType();
+    }
+    return type;
+}
+    
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {
@@ -795,6 +826,7 @@ RefPtr<AccessibilityProperty>& FrameNode::GetOrCreateAccessibilityProperty()
     if (isAccessibilityPropertyInitialized_) {
         return accessibilityProperty_;
     }
+    CHECK_NULL_RETURN(pattern_, accessibilityProperty_);
     accessibilityProperty_ = pattern_->CreateAccessibilityProperty();
     accessibilityProperty_->SetHost(WeakClaim(this));
     isAccessibilityPropertyInitialized_ = true;
@@ -1233,7 +1265,7 @@ void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
     json->Put("OverlayOffset", (offsetX.ToString() + "," + offsetY.ToString()).c_str());
 }
 
-bool FrameNode::CheckVisibleAndActive()
+bool FrameNode::IsVisibleAndActive() const
 {
     return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
 }
@@ -1470,6 +1502,7 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     } else if (getCustomPropertyMapFunc_) {
         json->Put("customProperty", getCustomPropertyMapFunc_().c_str());
     }
+    json->Put("enableClickSoundEffect", enableClickSoundEffect_);
 }
 
 void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
@@ -2854,18 +2887,17 @@ void FrameNode::ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChi
             oldChildrenSet.emplace(AceType::RawPtr(child));
         }
     }
-    bool isOnMainTree = renderContext_->IsOnRenderTree();
     for (const auto& item: newChildren) {
         auto* childPtr = AceType::RawPtr(item);
         if (oldChildrenSet.find(childPtr) == oldChildrenSet.end()) {
-            item->AttachToRenderTree(isOnMainTree);
+            item->AttachToRenderTree(isPendingState_);
         } else {
             oldChildrenSet.erase(childPtr);
         }
     }
 
     for (auto* item : oldChildrenSet) {
-        item->DetachFromRenderTree(isOnMainTree);
+        item->DetachFromRenderTree(isPendingState_);
     }
 }
 
@@ -3729,9 +3761,11 @@ void FrameNode::ParseRegionAndAdd(const CalcDimensionRect& region, const ScalePr
     auto y = ParseDimensionToPx(region.GetY(), scaleProperty, rect.Height());
     auto width = ParseDimensionToPx(region.GetWidth(), scaleProperty, rect.Width());
     auto height = ParseDimensionToPx(region.GetHeight(), scaleProperty, rect.Height());
-    if (!x.has_value() || !y.has_value()) {
-        responseRegionResult.emplace_back(rect);
-        return;
+    if (!x.has_value()) {
+        x = 0.0;
+    }
+    if (!y.has_value()) {
+        y = 0.0;
     }
     if (!width.has_value() || LessOrEqual(width.value(), 0.0)) {
         width = rect.Width();
@@ -3772,7 +3806,7 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         responseRegionResult.emplace_back(rect);
         return responseRegionResult;
     }
-    
+
     auto toolType = it->second;
     if (responseRegionMap.find(toolType) != responseRegionMap.end()) {
         for (const auto& region : responseRegionMap[toolType]) {
@@ -4494,6 +4528,31 @@ RectF FrameNode::GetTransformRectRelativeToWindow(bool checkBoundary) const
     return rect;
 }
 
+// same as GetTransformRectRelativeToWindow only when the node is active and under visible parents
+// otherwise returns an invalid rect
+RectF FrameNode::GetTransformRectRelativeToWindowOnlyVisible(bool checkBoundary) const
+{
+    auto invalidRect = RectF(static_cast<float>(INT32_MAX), static_cast<float>(INT32_MAX), 0.0, 0.0);
+    if (!IsActive()) {
+        return invalidRect;
+    }
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, invalidRect);
+    RectF rect = context->GetPaintRectWithTransform();
+    auto parent = GetAncestorNodeOfFrame(true);
+    while (parent) {
+        if (!parent->IsVisibleAndActive()) {
+            return invalidRect;
+        }
+        if (checkBoundary && parent->IsWindowBoundary()) {
+            break;
+        }
+        rect = ApplyFrameNodeTranformToRect(rect, parent);
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return rect;
+}
+
 // returns a node's offset relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
@@ -5061,6 +5120,33 @@ RefPtr<FrameNode> FrameNode::FindChildByName(const RefPtr<FrameNode>& parentNode
     return nullptr;
 }
 
+void FrameNode::SetSamplerManager(const RefPtr<SamplerManager>& manager)
+{
+    samplerManager_ = manager;
+}
+
+RefPtr<SamplerManager> FrameNode::GetSamplerManager()
+{
+    return samplerManager_;
+}
+
+RefPtr<FrameNode> FrameNode::FindChildByNameUINode(const RefPtr<UINode>& parentNode, const std::string& nodeName)
+{
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
+    if (parentFrameNode && parentFrameNode->GetInspectorId().value_or("") == nodeName) {
+        return parentFrameNode;
+    }
+    const auto& children = parentNode->GetChildren();
+    for (const auto& child : children) {
+        auto childFindResult = FindChildByNameUINode(child, nodeName);
+        if (childFindResult) {
+            return childFindResult;
+        }
+    }
+    return nullptr;
+}
+
 void FrameNode::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
     const std::function<void(float)>& onCallbackEvent, const PropertyUnit& propertyType)
 {
@@ -5540,9 +5626,10 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     if (PreMeasure(parentConstraint)) {
         return;
     }
-
-    auto parent = GetAncestorNodeOfFrame(true);
-    isAncestorScrollable_ = (parent ? parent->IsAncestorScrollable() : false) || IsVerticalScrollable();
+    if (FeatureParam::IsPageOverflowEnabled() || FeatureParam::IsRnOverflowEnable()) {
+        auto parent = GetAncestorNodeOfFrame(true);
+        isAncestorScrollable_ = (parent ? parent->IsAncestorScrollable() : false) || IsVerticalScrollable();
+    }
     layoutProperty_->UpdateContentConstraint();
     geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
     geometryNode_->UpdatePaddingWithBorder(layoutProperty_->CreatePaddingAndBorder());
@@ -5670,6 +5757,7 @@ void FrameNode::Layout()
                 [this](int32_t, int32_t, int32_t, int32_t) { GetLayoutAlgorithm()->Layout(this); });
             const auto& rect = geometryNode_->GetFrameRect();
             extensionHandler_->Layout(rect.Width(), rect.Height(), rect.GetX(), rect.GetY());
+            GetLayoutAlgorithm()->HandleStackContentOverflow(this);
         } else {
             GetLayoutAlgorithm()->Layout(this);
         }
@@ -5960,6 +6048,11 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
     }
 
     UpdateBackground();
+
+    // update corner mark position on size change.
+    if (config.frameSizeChange && cornerMarkNode_) {
+        CornerMark::UpdateCornerMarkNodePosition(Claim(this));
+    }
 
     // update focus state
     UpdateFocusState();
@@ -7920,6 +8013,7 @@ bool FrameNode::IsDrawFocusOnTop() const
 
 int32_t FrameNode::OnRecvCommand(const std::string& command)
 {
+    ContainerScope scope(GetInstanceId());
     auto pattern = GetPattern();
     CHECK_NULL_RETURN(pattern, RET_FAILED);
     return pattern->OnRecvCommand(command);
@@ -7968,6 +8062,10 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveChangedFrameNode(nodeId_);
         pipeline->RemoveFrameNodeChangeListener(nodeId_);
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
+        auto eventManager = pipeline->GetEventManager();
+        if (eventManager) {
+            eventManager->UnregisterTouchpadInteractionListenerInner(GetId());
+        }
     }
 }
 
@@ -8113,5 +8211,21 @@ void FrameNode::ReportSelectedText(bool isRegister)
     auto pattern = GetPattern();
     CHECK_NULL_VOID(pattern);
     pattern->ReportSelectedText(isRegister);
+}
+
+void FrameNode::ReplacePattern(const RefPtr<Pattern>& newPattern)
+{
+    CHECK_NULL_VOID(newPattern);
+    pattern_ = newPattern;
+    layoutProperty_ = pattern_->CreateLayoutProperty();
+    if (layoutProperty_) {
+        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        layoutProperty_->SetHost(WeakClaim(this));
+    }
+    paintProperty_ = pattern_->CreatePaintProperty();
+    if (paintProperty_) {
+        paintProperty_->SetHost(WeakClaim(this));
+    }
+    InitializePatternAndContext();
 }
 } // namespace OHOS::Ace::NG

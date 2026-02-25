@@ -28,7 +28,8 @@ public:
     TaskRunnerAdapterImpl() : TaskRunnerAdapter() {};
     ~TaskRunnerAdapterImpl() = default;
     void PostTask(std::function<void()> task, const std::string& caller,
-        PriorityType priorityType = PriorityType::LOW) override;
+        PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) override;
     void PostTaskForTime(std::function<void()> task, uint32_t targetTime, const std::string& caller) override;
     void PostDelayedTask(std::function<void()> task, uint32_t delay, const std::string& caller,
         PriorityType priorityType = PriorityType::LOW) override;

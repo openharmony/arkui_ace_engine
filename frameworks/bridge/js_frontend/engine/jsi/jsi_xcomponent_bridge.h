@@ -23,7 +23,11 @@
 #include "frameworks/bridge/js_frontend/engine/common/base_xcomponent_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
 #include "frameworks/core/components/common/properties/decoration.h"
-#include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
+
+struct OH_NativeXComponent;
+namespace OHOS::Ace {
+class NativeXComponentImpl;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 class JsiXComponentBridge : public BaseXComponentBridge {

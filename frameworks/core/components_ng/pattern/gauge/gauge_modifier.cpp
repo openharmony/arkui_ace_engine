@@ -50,6 +50,8 @@ void GaugeModifier::UpdateValue()
     CHECK_NULL_VOID(pattern);
     auto paintProperty = pattern->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    auto host = pattern->GetHost();
+    ACE_UINODE_TRACE(host);
     UpdateProperty(paintProperty);
     float value = paintProperty->GetValueValue();
     if (paintProperty->GetIsSensitiveValue(false)) {
@@ -75,7 +77,6 @@ void GaugeModifier::UpdateValue()
     option.SetDelay(ANIMATION_DELAY);
     option.SetCurve(curve);
     option.SetIteration(ANIMATION_TIMES);
-    auto host = pattern->GetHost();
     auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [&]() { value_->Set(end_); }, nullptr, nullptr, context);
 }
@@ -1012,7 +1013,6 @@ void GaugeModifier::CreateDefaultTrianglePath(
     float width = radius * RADIUS_TO_DIAMETER * theme->GetIndicatorWidthRatio();
     float height = radius * RADIUS_TO_DIAMETER * theme->GetIndicatorHeightRatio();
     auto hypotenuse = std::sqrt(((width * PERCENT_HALF) * (width * PERCENT_HALF)) + (height * height));
-    
     float cornerRadius = radius * RADIUS_TO_DIAMETER * theme->GetIndicatorRadiusRatio();
     auto bottomAngle = std::atan(height / (width * PERCENT_HALF));
 

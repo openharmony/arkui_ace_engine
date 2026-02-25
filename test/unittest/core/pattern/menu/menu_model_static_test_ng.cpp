@@ -429,4 +429,33 @@ HWTEST_F(MenuModelStaticTestNg, SetWidth001, TestSize.Level1)
      */
     EXPECT_EQ(menuProperty->GetMenuWidth(), 16.0_fp);
 }
+
+/**
+ * @tc.name: ResetBorderRadius001
+ * @tc.desc: Test ResetBorderRadius001
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuModelStaticTestNg, ResetBorderRadius001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init MenuItem node.
+     * @tc.expected: step1. All pointers non-null.
+     */
+    auto frameNode = MenuModelStatic::CreateFrameNode(1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    /**
+    * @tc.steps: step2. After SetBorderRadius, ResetBorderRadius
+    */
+    MenuModelStatic::SetBorderRadius(node, std::optional<Dimension>(16.0_fp));
+    MenuModelStatic::ResetBorderRadius(node);
+    /**
+     * @tc.steps: step3. do assert
+     * @tc.expected: step3. BorderRadius is nullopt
+     */
+    EXPECT_EQ(menuProperty->GetBorderRadius(), std::nullopt);
+}
 }

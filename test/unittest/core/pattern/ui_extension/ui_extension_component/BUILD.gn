@@ -16,11 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 group("ui_extension_component_test_group") {
   testonly = true
-  deps = [
-    ":ui_extension_accessibility_child_tree_callback_test",
-    ":ui_extension_component_testtwo_ng",
-    ":ui_extension_pattern_test_ng",
-  ]
+  deps = []
 }
 
 ace_unittest("ui_extension_accessibility_child_tree_callback_test") {
@@ -49,6 +45,7 @@ ace_unittest("ui_extension_accessibility_child_tree_callback_test") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/surface_proxy_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_avoid_listener.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
@@ -127,6 +124,7 @@ ace_unittest("ui_extension_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/surface_proxy_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_avoid_listener.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
@@ -203,6 +201,7 @@ ace_unittest("ui_extension_component_testtwo_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/surface_proxy_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_avoid_listener.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",

@@ -107,7 +107,22 @@ typedef enum {
     ARKUI_UIINPUTEVENT_TYPE_AXIS = 2,
     ARKUI_UIINPUTEVENT_TYPE_MOUSE = 3,
     ARKUI_UIINPUTEVENT_TYPE_KEY = 4,
+    ARKUI_UIINPUTEVENT_TYPE_DIGITAL_CROWN = 5,
 } ArkUI_UIInputEvent_Type;
+
+/**
+ * @brief Defines the stage of the crown event.
+ *
+ * @since 24
+ */
+typedef enum {
+    /** Unknown phase of the crown event. */
+    ARKUI_CROWNEVENT_ACTION_UNKNOWN = 0,
+    /** The crown event is updated. */
+    ARKUI_CROWNEVENT_ACTION_UPDATE = 1,
+    /** The crown event ends. */
+    ARKUI_CROWNEVENT_ACTION_END = 2,
+} ArkUI_CrownEvent_Action;
 
 /**
  * @brief Defines the action code of the input event.
@@ -1593,6 +1608,57 @@ ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_SetTouchResultStrategy(ArkUI_TouchTestInf
  * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_SetTouchResultId(ArkUI_TouchTestInfo* info, const char* id);
+
+/**
+ * @brief Obtains the time when a crown event occurs. The unit is ns.
+ *
+ * @param event Pointer to the current UI input event.
+ * @return Returns the time when the UI input event occurs, or <b>0</b> if a parameter error occurs.
+ * @since 24
+ */
+int64_t OH_ArkUI_DigitalCrownEvent_GetEventTime(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Obtains the angular velocity at which a crown event occurs. The unit is °/s.
+ *
+ * @param event Pointer to the current UI input event.
+ * @return Returns the angular velocity at which the UI input event occurs, or <b>0.0</b> if a parameter error occurs.
+ * @since 24
+ */
+double OH_ArkUI_DigitalCrownEvent_GetAngularVelocity(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Obtains the rotation angle at which a crown event occurs. The unit is °.
+ *
+ * @param event Pointer to the current UI input event.
+ * @return Returns the rotation angle at which the UI input event occurs, or <b>0.0</b> if a parameter error occurs.
+ * @since 24
+ */
+double OH_ArkUI_DigitalCrownEvent_GetDegree(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Obtains the phase at which a crown event occurs.
+ *
+ * @param event Pointer to the current UI input event.
+ * @return Returns the action of rotating the crown when the UI input event occurs. \n
+ *         Returns {@link ARKUI_CROWNEVENT_ACTION_UNKNOWN} if a parameter error occurs.
+ * @since 24
+ */
+ArkUI_CrownEvent_Action OH_ArkUI_DigitalCrownEvent_GetAction(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Sets whether to stop event propagation. This applies only when the input parameter UIInputEvent contains a
+ * crown event object.
+ *
+ * @param event Pointer to the current UI input event.
+ * @param stopPropagation Whether to stop event propagation. The value true means to stop event propagation, and false
+ * means the opposite.
+ * @return Result code. \n
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful. \n
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_DigitalCrownEvent_SetStopPropagation(const ArkUI_UIInputEvent* event, bool stopPropagation);
 
 #ifdef __cplusplus
 };

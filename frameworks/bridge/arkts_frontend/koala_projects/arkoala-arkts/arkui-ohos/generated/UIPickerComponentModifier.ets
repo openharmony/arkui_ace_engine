@@ -16,19 +16,19 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkUIPickerComponentPeer, OnUIPickerComponentCallback, PickerIndicatorStyle, UIPickerComponentAttribute } from "./component/uiPickerComponent"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkUIPickerComponentPeer, OnUIPickerComponentCallback, PickerIndicatorStyle, UIPickerComponentAttribute } from './component/uiPickerComponent'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
 export class UIPickerComponentModifier extends CommonMethodModifier implements UIPickerComponentAttribute,AttributeModifier<UIPickerComponentAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState;
     _addr: ArrayBuffer = new ArrayBuffer(4096);
-    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    private _flagArray: Uint8Array = new Uint8Array(this._addr);
     constructor() {
         super();
         this._flagArray.fill(0);
@@ -42,12 +42,12 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
     applyFocusedAttribute(instance: UIPickerComponentAttribute): void { }
     applyDisabledAttribute(instance: UIPickerComponentAttribute): void { }
     applySelectedAttribute(instance: UIPickerComponentAttribute): void { }
-    _onChange_0_0value?: OnUIPickerComponentCallback | undefined
-    _onScrollStop_0_0value?: OnUIPickerComponentCallback | undefined
-    _canLoop_0_0value?: boolean | undefined
-    _enableHapticFeedback_0_0value?: boolean | undefined
-    _selectionIndicator_0_0value?: PickerIndicatorStyle | undefined
-    applyModifierPatch(node: PeerNode): void {
+    public _onChange_0_0value?: OnUIPickerComponentCallback | undefined
+    public _onScrollStop_0_0value?: OnUIPickerComponentCallback | undefined
+    public _canLoop_0_0value?: boolean | undefined
+    public _enableHapticFeedback_0_0value?: boolean | undefined
+    public _selectionIndicator_0_0value?: PickerIndicatorStyle | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
         const peer = node as ArkUIPickerComponentPeer;
@@ -55,8 +55,7 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
         this.applyModifierPatch0(peer, flagArray);
     }
     applyModifierPatch0(peer: ArkUIPickerComponentPeer, flagArray: Uint8Array): void {
-        if (flagArray[0] != 0)
-        {
+        if (flagArray[0] != 0) {
             switch (flagArray[0]) {
                 case 1: {
                     peer.setOnChangeAttribute((this._onChange_0_0value as OnUIPickerComponentCallback | undefined));
@@ -73,8 +72,7 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[1] != 0)
-        {
+        if (flagArray[1] != 0) {
             switch (flagArray[1]) {
                 case 1: {
                     peer.setOnScrollStopAttribute((this._onScrollStop_0_0value as OnUIPickerComponentCallback | undefined));
@@ -91,8 +89,7 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[2] != 0)
-        {
+        if (flagArray[2] != 0) {
             switch (flagArray[2]) {
                 case 1: {
                     peer.setCanLoopAttribute((this._canLoop_0_0value as boolean | undefined));
@@ -109,8 +106,7 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[3] != 0)
-        {
+        if (flagArray[3] != 0) {
             switch (flagArray[3]) {
                 case 1: {
                     peer.setEnableHapticFeedbackAttribute((this._enableHapticFeedback_0_0value as boolean | undefined));
@@ -127,8 +123,7 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[4] != 0)
-        {
+        if (flagArray[4] != 0) {
             switch (flagArray[4]) {
                 case 1: {
                     peer.setSelectionIndicatorAttribute((this._selectionIndicator_0_0value as PickerIndicatorStyle | undefined));
@@ -153,12 +148,11 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
         this.mergeModifier0(modifier, flagArray);
     }
     mergeModifier0(modifier: UIPickerComponentModifier, flagArray: Uint8Array): void {
-        if (flagArray[0] != 0)
-        {
+        if (flagArray[0] != 0) {
             switch (flagArray[0]) {
                 case 1:
                 case 3: {
-                    this.onChange(modifier._onChange_0_0value);
+                    this.onChange((modifier._onChange_0_0value as OnUIPickerComponentCallback | undefined));
                     break;
                 }
                 default: {
@@ -166,12 +160,11 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[1] != 0)
-        {
+        if (flagArray[1] != 0) {
             switch (flagArray[1]) {
                 case 1:
                 case 3: {
-                    this.onScrollStop(modifier._onScrollStop_0_0value);
+                    this.onScrollStop((modifier._onScrollStop_0_0value as OnUIPickerComponentCallback | undefined));
                     break;
                 }
                 default: {
@@ -179,12 +172,11 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[2] != 0)
-        {
+        if (flagArray[2] != 0) {
             switch (flagArray[2]) {
                 case 1:
                 case 3: {
-                    this.canLoop(modifier._canLoop_0_0value);
+                    this.canLoop((modifier._canLoop_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -192,12 +184,11 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[3] != 0)
-        {
+        if (flagArray[3] != 0) {
             switch (flagArray[3]) {
                 case 1:
                 case 3: {
-                    this.enableHapticFeedback(modifier._enableHapticFeedback_0_0value);
+                    this.enableHapticFeedback((modifier._enableHapticFeedback_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -205,12 +196,11 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
                 }
             }
         }
-        if (flagArray[4] != 0)
-        {
+        if (flagArray[4] != 0) {
             switch (flagArray[4]) {
                 case 1:
                 case 3: {
-                    this.selectionIndicator(modifier._selectionIndicator_0_0value);
+                    this.selectionIndicator((modifier._selectionIndicator_0_0value as PickerIndicatorStyle | undefined));
                     break;
                 }
                 default: {
@@ -220,66 +210,56 @@ export class UIPickerComponentModifier extends CommonMethodModifier implements U
         }
     }
     onChange(value: OnUIPickerComponentCallback | undefined): this {
-        if (((this._flagArray[0]) == (0)) || (true))
-        {
+        if (((this._flagArray[0]) == (0)) || (true)) {
             this._flagArray[0] = 1
             this._onChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[0] = 3
         }
         return this
     }
     onScrollStop(value: OnUIPickerComponentCallback | undefined): this {
-        if (((this._flagArray[1]) == (0)) || (true))
-        {
+        if (((this._flagArray[1]) == (0)) || (true)) {
             this._flagArray[1] = 1
             this._onScrollStop_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[1] = 3
         }
         return this
     }
     canLoop(value: boolean | undefined): this {
-        if (((this._flagArray[2]) == (0)) || ((this._canLoop_0_0value) !== (value)))
-        {
+        if (((this._flagArray[2]) == (0)) || ((this._canLoop_0_0value) !== (value))) {
             this._flagArray[2] = 1
             this._canLoop_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[2] = 3
         }
         return this
     }
     enableHapticFeedback(value: boolean | undefined): this {
-        if (((this._flagArray[3]) == (0)) || ((this._enableHapticFeedback_0_0value) !== (value)))
-        {
+        if (((this._flagArray[3]) == (0)) || ((this._enableHapticFeedback_0_0value) !== (value))) {
             this._flagArray[3] = 1
             this._enableHapticFeedback_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[3] = 3
         }
         return this
     }
     selectionIndicator(value: PickerIndicatorStyle | undefined): this {
-        if (((this._flagArray[4]) == (0)) || (true))
-        {
+        if (((this._flagArray[4]) == (0)) || (true)) {
             this._flagArray[4] = 1
             this._selectionIndicator_0_0value = value
             this._state.fireChange()
-        } else
-        {
+        } else {
             this._flagArray[4] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<UIPickerComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

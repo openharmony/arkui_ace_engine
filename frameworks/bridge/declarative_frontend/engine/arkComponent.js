@@ -36,13 +36,6 @@ class ArkLogConsole {
       aceConsole.error(LogTag.ARK_COMPONENT, ...args);
   }
 }
-const arkUINativeModule = globalThis.getArkUINativeModule();
-function getUINativeModule() {
-  if (arkUINativeModule) {
-    return arkUINativeModule;
-  }
-  return arkUINativeModule;
-}
 let ModifierType;
 (function (ModifierType) {
     ModifierType[ModifierType['ORIGIN'] = 0] = 'ORIGIN';
@@ -2104,6 +2097,19 @@ class OnFocusModifier extends ModifierWithKey {
   }
 }
 OnFocusModifier.identity = Symbol('onFocus');
+class OnNeedSoftkeyboardModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnNeedSoftkeyboard(node);
+    } else {
+      getUINativeModule().common.setOnNeedSoftkeyboard(node, this.value);
+    }
+  }
+}
+OnNeedSoftkeyboardModifier.identity = Symbol('onNeedSoftkeyboard');
 class OnBlurModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4702,6 +4708,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
     return this;
   }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
+    modifierWithKey(this._modifiersWithKeys, OnNeedSoftkeyboardModifier.identity, OnNeedSoftkeyboardModifier, onNeedSoftkeyboardCallback);
+    return this;
+  }
   onBlur(event) {
     modifierWithKey(this._modifiersWithKeys, OnBlurModifier.identity, OnBlurModifier, event);
     return this;
@@ -5658,6 +5668,7 @@ class ArkComponent {
     return this;
   }
 }
+globalThis.__ArkComponent__ = ArkComponent;
 const isNull = (val) => typeof val === 'object' && val === null;
 const isArray = (val) => Array.isArray(val);
 const isDate = (val) => val instanceof Date;
@@ -6620,7 +6631,9 @@ if (globalThis.Blank !== undefined) {
 }
 
 globalThis.applySymbolGlyphModifierToNode = function (modifier, nodePtr) {
-  let component = new ArkSymbolGlyphComponent(nodePtr);
+  getUINativeModule().loadNativeModule('SymbolGlyph');
+  let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+  let component = module.createComponent(nodePtr);
   applyUIAttributes(modifier, nodePtr, component);
   component.applyModifierPatch();
 };
@@ -7703,20 +7716,22 @@ class GridLayoutOptionsModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b, _c, _d;
+    let _a, _b, _c, _d, _e, _f;
     if (reset) {
-      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined);
+      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
     }
     else {
       getUINativeModule().grid.setGridLayoutOptions(node, isArray(this.value.regularSize) ? this.value.regularSize : undefined,
         isArray((_a = this.value) === null || _a === void 0 ? void 0 : _a.irregularIndexes) ? this.value.irregularIndexes : undefined,
         isArray((_b = this.value) === null || _b === void 0 ? void 0 : _b.irregularIndexes) ? this.value.irregularIndexes.length : undefined,
         isFunction((_c = this.value) === null || _c === void 0 ? void 0 : _c.onGetIrregularSizeByIndex) ? this.value.onGetIrregularSizeByIndex : undefined,
-        isFunction((_d = this.value) === null || _d === void 0 ? void 0 : _d.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined);
+        isFunction((_d = this.value) === null || _d === void 0 ? void 0 : _d.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined,
+        isFunction((_e = this.value) === null || _e === void 0 ? void 0 : _e.onGetStartIndexByOffset) ? this.value.onGetStartIndexByOffset : undefined,
+        isFunction((_f = this.value) === null || _f === void 0 ? void 0 : _f.onGetStartIndexByIndex) ? this.value.onGetStartIndexByIndex : undefined);
     }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f, _g, _h;
+    let _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l;
     return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.regularSize,
       (_b = this.value) === null || _b === void 0 ? void 0 : _b.regularSize) ||
       !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.irregularIndexes,
@@ -7724,7 +7739,11 @@ class GridLayoutOptionsModifier extends ModifierWithKey {
       !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.onGetIrregularSizeByIndex,
         (_f = this.value) === null || _f === void 0 ? void 0 : _f.onGetIrregularSizeByIndex) ||
       !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.onGetRectByIndex,
-        (_h = this.value) === null || _h === void 0 ? void 0 : _h.onGetRectByIndex);
+        (_h = this.value) === null || _h === void 0 ? void 0 : _h.onGetRectByIndex) ||
+      !isBaseOrResourceEqual((_i = this.stageValue) === null || _i === void 0 ? void 0 : _i.onGetStartIndexByOffset,
+        (_j = this.value) === null || _j === void 0 ? void 0 : _j.onGetStartIndexByOffset) ||
+      !isBaseOrResourceEqual((_k = this.stageValue) === null || _k === void 0 ? void 0 : _k.onGetStartIndexByIndex,
+        (_l = this.value) === null || _l === void 0 ? void 0 : _l.onGetStartIndexByIndex);
   }
 }
 GridLayoutOptionsModifier.identity = Symbol('gridLayoutOptions');
@@ -9959,1143 +9978,6 @@ if (globalThis.ImageSpan !== undefined) {
 }
 
 /// <reference path='./import.ts' />
-class PatternLockActiveColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetActiveColor(node);
-    }
-    else {
-      getUINativeModule().patternLock.setActiveColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-PatternLockActiveColorModifier.identity = Symbol('patternLockActiveColor');
-class PatternLockSelectedColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetSelectedColor(node);
-    }
-    else {
-      getUINativeModule().patternLock.setSelectedColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-PatternLockSelectedColorModifier.identity = Symbol('patternLockSelectedColor');
-class PatternLockPathColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetPathColor(node);
-    }
-    else {
-      getUINativeModule().patternLock.setPathColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-PatternLockPathColorModifier.identity = Symbol('patternLockPathColor');
-class PatternLockRegularColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetRegularColor(node);
-    }
-    else {
-      getUINativeModule().patternLock.setRegularColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-PatternLockRegularColorModifier.identity = Symbol('patternLockRegularColor');
-class PatternLockSideLengthModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetSideLength(node);
-    }
-    else {
-      getUINativeModule().patternLock.setSideLength(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-PatternLockSideLengthModifier.identity = Symbol('patternLockSideLength');
-class PatternLockPathStrokeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetPathStrokeWidth(node);
-    }
-    else {
-      getUINativeModule().patternLock.setPathStrokeWidth(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-PatternLockPathStrokeModifier.identity = Symbol('patternLockPathStroke');
-class PatternLockCircleRadiusModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetCircleRadius(node);
-    }
-    else {
-      getUINativeModule().patternLock.setCircleRadius(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-PatternLockCircleRadiusModifier.identity = Symbol('patternLockCircleRadius');
-class PatternLockAutoResetModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetAutoReset(node);
-    }
-    else {
-      getUINativeModule().patternLock.setAutoReset(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-PatternLockAutoResetModifier.identity = Symbol('patternlockautoreset');
-class PatternLockActivateCircleStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetActivateCircleStyle(node);
-    }
-    else {
-      getUINativeModule().patternLock.setActivateCircleStyle(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-PatternLockActivateCircleStyleModifier.identity = Symbol('patternLockActivateCircleStyle');
-class PatternLockSkipUnselectedPointModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetSkipUnselectedPoint(node);
-    }
-    else {
-      getUINativeModule().patternLock.setSkipUnselectedPoint(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-PatternLockSkipUnselectedPointModifier.identity = Symbol('patternlockSkipUnselectedPoint');
-class PatternLockBackgroundColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().common.resetBackgroundColor(node);
-    }
-    else {
-      getUINativeModule().common.setBackgroundColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-PatternLockBackgroundColorModifier.identity = Symbol('patternLockBackgroundColor');
-
-class PatternLockOnPatternCompleteModifer extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetPatternLockOnPatternComplete(node);
-    } else {
-      getUINativeModule().patternLock.setPatternLockOnPatternComplete(node, this.value);
-    }
-  }
-}
-PatternLockOnPatternCompleteModifer.identity = Symbol('patternLockOnPatternComplete');
-
-class PatternLockOnDotConnectModifer extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().patternLock.resetPatternLockOnDotConnect(node);
-    } else {
-      getUINativeModule().patternLock.setPatternLockOnDotConnect(node, this.value);
-    }
-  }
-}
-PatternLockOnDotConnectModifer.identityl = Symbol('patternLockOnDotConnect');
-
-class ArkPatternLockComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  sideLength(value) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockSideLengthModifier.identity, PatternLockSideLengthModifier, value);
-    return this;
-  }
-  circleRadius(value) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockCircleRadiusModifier.identity, PatternLockCircleRadiusModifier, value);
-    return this;
-  }
-  regularColor(value) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockRegularColorModifier.identity, PatternLockRegularColorModifier, value);
-    return this;
-  }
-  selectedColor(value) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockSelectedColorModifier.identity, PatternLockSelectedColorModifier, value);
-    return this;
-  }
-  activeColor(value) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockActiveColorModifier.identity, PatternLockActiveColorModifier, value);
-    return this;
-  }
-  pathColor(value) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockPathColorModifier.identity, PatternLockPathColorModifier, value);
-    return this;
-  }
-  pathStrokeWidth(value) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockPathStrokeModifier.identity, PatternLockPathStrokeModifier, value);
-    return this;
-  }
-  autoReset(value) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockAutoResetModifier.identity, PatternLockAutoResetModifier, value);
-    return this;
-  }
-  activateCircleStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockActivateCircleStyleModifier.identity, PatternLockActivateCircleStyleModifier, value);
-    return this;
-  }
-  skipUnselectedPoint(value) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockSkipUnselectedPointModifier.identity, PatternLockSkipUnselectedPointModifier, value);
-    return this;
-  }
-  backgroundColor(value) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockBackgroundColorModifier.identity,
-        PatternLockBackgroundColorModifier, value);
-    return this;
-  }
-  onPatternComplete(callback) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockOnPatternCompleteModifer.identity, PatternLockOnPatternCompleteModifer, callback);
-    return this;
-  }
-  onDotConnect(callback) {
-    modifierWithKey(this._modifiersWithKeys, PatternLockOnDotConnectModifer.identity, PatternLockOnDotConnectModifer, callback);
-    return this;
-  }
-}
-// @ts-ignore
-if (globalThis.PatternLock !== undefined) {
-  globalThis.PatternLock.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkPatternLockComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.PatternLockModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
-class RichEditorEnableDataDetectorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetEnableDataDetector(node);
-    }
-    else {
-      getUINativeModule().richEditor.setEnableDataDetector(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-RichEditorEnableDataDetectorModifier.identity = Symbol('richEditorEnableDataDetector');
-
-class RichEditorDataDetectorConfigModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetDataDetectorConfig(node);
-    } else {
-      getUINativeModule().richEditor.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate,
-        this.value.color, this.value.decorationType, this.value.decorationColor, this.value.decorationStyle);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types) ||
-    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate) ||
-    !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
-    !isBaseOrResourceEqual(this.stageValue.decorationType, this.value.decorationType) ||
-    !isBaseOrResourceEqual(this.stageValue.decorationColor, this.value.decorationColor) ||
-    !isBaseOrResourceEqual(this.stageValue.decorationStyle, this.value.decorationStyle);
-  }
-}
-RichEditorDataDetectorConfigModifier.identity = Symbol('richEditorDataDetectorConfig');
-
-class RichEditorOnIMEInputCompleteModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnIMEInputComplete(node);
-    } else {
-      getUINativeModule().richEditor.setOnIMEInputComplete(node, this.value);
-    }
-  }
-}
-RichEditorOnIMEInputCompleteModifier.identity = Symbol('richEditorOnIMEInputComplete');
-
-class RichEditorCopyOptionsModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetCopyOptions(node);
-    }
-    else {
-      getUINativeModule().richEditor.setCopyOptions(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-RichEditorCopyOptionsModifier.identity = Symbol('richEditorCopyOptions');
-
-class RichEditorCaretColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetCaretColor(node);
-    }
-    else {
-      getUINativeModule().richEditor.setCaretColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-RichEditorCaretColorModifier.identity = Symbol('richEditorCaretColor');
-
-class RichEditorOnSelectionChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnSelectionChange(node);
-    } else {
-      getUINativeModule().richEditor.setOnSelectionChange(node, this.value);
-    }
-  }
-}
-RichEditorOnSelectionChangeModifier.identity = Symbol('richEditorOnSelectionChange');
-
-class RichEditorOnSubmitModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnSubmit(node);
-    } else {
-      getUINativeModule().richEditor.setOnSubmit(node, this.value);
-    }
-  }
-}
-RichEditorOnSubmitModifier.identity = Symbol('richEditorOnSubmit');
-
-class RichEditorAboutToIMEInputModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetAboutToIMEInput(node);
-    } else {
-      getUINativeModule().richEditor.setAboutToIMEInput(node, this.value);
-    }
-  }
-}
-RichEditorAboutToIMEInputModifier.identity = Symbol('richEditorAboutToIMEInput');
-
-class RichEditorSelectedBackgroundColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetSelectedBackgroundColor(node);
-    }
-    else {
-      getUINativeModule().richEditor.setSelectedBackgroundColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-RichEditorSelectedBackgroundColorModifier.identity = Symbol('richEditorSelectedBackgroundColor');
-
-class RichEditorOnSelectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnSelect(node);
-    } else {
-      getUINativeModule().richEditor.setOnSelect(node, this.value);
-    }
-  }
-}
-RichEditorOnSelectModifier.identity = Symbol('richEditorOnSelect');
-
-class RichEditorOnWillChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnWillChange(node);
-    } else {
-      getUINativeModule().richEditor.setOnWillChange(node, this.value);
-    }
-  }
-}
-RichEditorOnWillChangeModifier.identity = Symbol('richEditorOnWillChange');
-
-class RichEditorSelectedDragPreviewStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetSelectedDragPreviewStyle(node);
-    }
-    else {
-      getUINativeModule().richEditor.setSelectedDragPreviewStyle(node, this.value.color);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value) ||
-    !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
-  }
-}
-RichEditorSelectedDragPreviewStyleModifier.identity = Symbol('richEditorSelectedDragPreviewStyle');
-
-class RichEditorOnDidChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnDidChange(node);
-    } else {
-      getUINativeModule().richEditor.setOnDidChange(node, this.value);
-    }
-  }
-}
-RichEditorOnDidChangeModifier.identity = Symbol('richEditorOnDidChange');
-
-class RichEditorPlaceholderModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetPlaceholder(node);
-    } else {
-      getUINativeModule().richEditor.setPlaceholder(node, this.value.value, this.value.style);
-    }
-  }
-  checkObjectDiff() {
-    return !(this.stageValue).isEqual(this.value);
-  }
-}
-RichEditorPlaceholderModifier.identity = Symbol('richEditorPlaceholder');
-
-class RichEditorAboutToDeleteModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetAboutToDelete(node);
-    } else {
-      getUINativeModule().richEditor.setAboutToDelete(node, this.value);
-    }
-  }
-}
-RichEditorAboutToDeleteModifier.identity = Symbol('richEditorAboutToDelete');
-
-class RichEditorOnReadyModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnReady(node);
-    } else {
-      getUINativeModule().richEditor.setOnReady(node, this.value);
-    }
-  }
-}
-RichEditorOnReadyModifier.identity = Symbol('richEditorOnReady');
-
-class RichEditorOnDeleteCompleteModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnDeleteComplete(node);
-    } else {
-      getUINativeModule().richEditor.setOnDeleteComplete(node, this.value);
-    }
-  }
-}
-RichEditorOnDeleteCompleteModifier.identity = Symbol('richEditorOnDeleteComplete');
-
-class RichEditorOnEditingChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnEditingChange(node);
-    } else {
-      getUINativeModule().richEditor.setOnEditingChange(node, this.value);
-    }
-  }
-}
-RichEditorOnEditingChangeModifier.identity = Symbol('richEditorOnEditingChange');
-
-class RichEditorOnPasteModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnPaste(node);
-    } else {
-      getUINativeModule().richEditor.setOnPaste(node, this.value);
-    }
-  }
-}
-RichEditorOnPasteModifier.identity = Symbol('richEditorOnPaste');
-
-class RichEditorOnCutModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnCut(node);
-    } else {
-      getUINativeModule().richEditor.setOnCut(node, this.value);
-    }
-  }
-}
-RichEditorOnCutModifier.identity = Symbol('richEditorOnCut');
-
-class RichEditorOnCopyModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnCopy(node);
-    } else {
-      getUINativeModule().richEditor.setOnCopy(node, this.value);
-    }
-  }
-}
-RichEditorOnCopyModifier.identity = Symbol('richEditorOnCopy');
-
-class RichEditorEnableKeyboardOnFocusModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetEnableKeyboardOnFocus(node);
-    } else {
-      getUINativeModule().richEditor.setEnableKeyboardOnFocus(node, this.value);
-    }
-  }
-}
-RichEditorEnableKeyboardOnFocusModifier.identity = Symbol('richEditorEnableKeyboardOnFocus');
-
-class RichEditorEnablePreviewTextModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetEnablePreviewText(node);
-    } else {
-      getUINativeModule().richEditor.setEnablePreviewText(node, this.value);
-    }
-  }
-}
-RichEditorEnablePreviewTextModifier.identity = Symbol('richEditorEnablePreviewText');
-
-class RichEditorEditMenuOptionsModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetEditMenuOptions(node);
-    } else {
-      getUINativeModule().richEditor.setEditMenuOptions(node, this.value);
-    }
-  }
-}
-RichEditorEditMenuOptionsModifier.identity = Symbol('richEditorEditMenuOptions');
-
-class RichEditorEnterKeyTypeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetEnterKeyType(node);
-    }
-    else {
-      getUINativeModule().richEditor.setEnterKeyType(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-RichEditorEnterKeyTypeModifier.identity = Symbol('richEditorEnterKeyType');
-
-class RichEditorBarStateModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetBarState(node);
-    }
-    else {
-      getUINativeModule().richEditor.setBarState(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-RichEditorBarStateModifier.identity = Symbol('richEditorBarState');
-
-class RichEditorMaxLengthModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetMaxLength(node);
-    }
-    else {
-      getUINativeModule().richEditor.setMaxLength(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-RichEditorMaxLengthModifier.identity = Symbol('richEditorMaxLength');
-
-class RichEditorMaxLinesModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetMaxLines(node);
-    }
-    else {
-      getUINativeModule().richEditor.setMaxLines(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-RichEditorMaxLinesModifier.identity = Symbol('richEditorMaxLines');
-
-class RichEditorStopBackPressModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetStopBackPress(node);
-    }
-    else {
-      getUINativeModule().richEditor.setStopBackPress(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-RichEditorStopBackPressModifier.identity = Symbol('richEditorStopBackPress');
-
-class RichEditorKeyboardAppearanceModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetKeyboardAppearance(node);
-    }
-    else {
-      getUINativeModule().richEditor.setKeyboardAppearance(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-RichEditorKeyboardAppearanceModifier.identity = Symbol('richEditorKeyboardAppearance');
-class RichEditorCustomKeyboardModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetCustomKeyboard(node);
-    } else {
-      getUINativeModule().richEditor.setCustomKeyboard(node, this.value.value, this.value.supportAvoidance);
-    }
-  }
-}
-RichEditorCustomKeyboardModifier.identity = Symbol('richEditorCustomKeyboard');
-class RichEditorOnDidIMEInputModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnDidIMEInput(node);
-    } else {
-      getUINativeModule().richEditor.setOnDidIMEInput(node, this.value);
-    }
-  }
-}
-RichEditorOnDidIMEInputModifier.identity = Symbol('richEditorOnDidIMEInput');
-
-class RichEditorOnWillAttachIMEModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetOnWillAttachIME(node);
-    } else {
-      getUINativeModule().richEditor.setOnWillAttachIME(node, this.value);
-    }
-  }
-}
-RichEditorOnWillAttachIMEModifier.identity = Symbol('richEditorOnWillAttachIME');
-
-class RichEditorEnableHapticFeedbackModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetEnableHapticFeedback(node);
-    }
-    else {
-      getUINativeModule().richEditor.setEnableHapticFeedback(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-RichEditorEnableHapticFeedbackModifier.identity = Symbol('richEditorEnableHapticFeedback');
-
-class RichEditorEnableAutoSpacingModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetEnableAutoSpacing(node);
-    } else {
-      getUINativeModule().richEditor.setEnableAutoSpacing(node, this.value);
-    }
-  }
-}
-RichEditorEnableAutoSpacingModifier.identity = Symbol('richEditorEnableAutoSpacing');
-
-class RichEditorCompressLeadingPunctuationModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetCompressLeadingPunctuation(node);
-    } else {
-      getUINativeModule().richEditor.setCompressLeadingPunctuation(node, this.value);
-    }
-  }
-}
-RichEditorCompressLeadingPunctuationModifier.identity = Symbol('richEditorCompressLeadingPunctuation');
-
-class RichEditorUndoStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetUndoStyle(node);
-    } else {
-      getUINativeModule().richEditor.setUndoStyle(node, this.value);
-    }
-  }
-}
-RichEditorUndoStyleModifier.identity= Symbol('richEditorUndoStyle');
-
-class RichEditorScrollBarColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetScrollBarColor(node);
-    } else {
-      getUINativeModule().richEditor.setScrollBarColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-RichEditorScrollBarColorModifier.identity= Symbol('richEditorScrollBarColor');
-
-class RichEditorIncludeFontPaddingModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetIncludeFontPadding(node);
-    } else {
-      getUINativeModule().richEditor.setIncludeFontPadding(node, this.value);
-    }
-  }
-}
-RichEditorIncludeFontPaddingModifier.identity = Symbol('richEditorIncludeFontPadding');
-
-class RichEditorFallbackLineSpacingModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetFallbackLineSpacing(node);
-    } else {
-      getUINativeModule().richEditor.setFallbackLineSpacing(node, this.value);
-    }
-  }
-}
-RichEditorFallbackLineSpacingModifier.identity = Symbol('richEditorFallbackLineSpacing');
-
-class RichEditorSingleLineModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().richEditor.resetSingleLine(node);
-    }
-    else {
-      getUINativeModule().richEditor.setSingleLine(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-RichEditorSingleLineModifier.identity = Symbol('richEditorSingleLine');
-
-class ArkRichEditorComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  enableDataDetector(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorEnableDataDetectorModifier.identity, RichEditorEnableDataDetectorModifier, value);
-    return this;
-  }
-  dataDetectorConfig(config) {
-    if (config === undefined || config === null) {
-      return this;
-    }
-    let detectorConfig = new TextDataDetectorConfig();
-    detectorConfig.types = config.types;
-    detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
-    detectorConfig.color = config.color;
-    if (config.decoration) {
-      detectorConfig.decorationType = config.decoration.type;
-      detectorConfig.decorationColor = config.decoration.color;
-      detectorConfig.decorationStyle = config.decoration.style;
-    }
-    modifierWithKey(this._modifiersWithKeys, RichEditorDataDetectorConfigModifier.identity, RichEditorDataDetectorConfigModifier, detectorConfig);
-    return this;
-  }
-  copyOptions(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorCopyOptionsModifier.identity, RichEditorCopyOptionsModifier, value);
-    return this;
-  }
-
-  caretColor(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorCaretColorModifier.identity, RichEditorCaretColorModifier, value);
-    return this;
-  }
-
-  onSelectionChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnSelectionChangeModifier.identity, RichEditorOnSelectionChangeModifier, callback);
-    return this;
-  }
-
-  selectedBackgroundColor(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorSelectedBackgroundColorModifier.identity, RichEditorSelectedBackgroundColorModifier, value);
-    return this;
-  }
-
-  enterKeyType(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorEnterKeyTypeModifier.identity, RichEditorEnterKeyTypeModifier, value);
-    return this;
-  }
-
-  onPaste(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnPasteModifier.identity, RichEditorOnPasteModifier, callback);
-    return this;
-  }
-  onReady(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnReadyModifier.identity, RichEditorOnReadyModifier, callback);
-    return this;
-  }
-  onSelect(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnSelectModifier.identity, RichEditorOnSelectModifier, callback);
-    return this;
-  }
-  onSubmit(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnSubmitModifier.identity, RichEditorOnSubmitModifier, callback);
-    return this;
-  }
-  aboutToIMEInput(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorAboutToIMEInputModifier.identity, RichEditorAboutToIMEInputModifier, callback);
-    return this;
-  }
-  onIMEInputComplete(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnIMEInputCompleteModifier.identity, RichEditorOnIMEInputCompleteModifier, callback);
-    return this;
-  }
-  onWillChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnWillChangeModifier.identity, RichEditorOnWillChangeModifier, callback);
-    return this;
-  }
-  onDidChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnDidChangeModifier.identity, RichEditorOnDidChangeModifier, callback);
-    return this;
-  }
-  placeholder(value, style) {
-    let placeholder = new ArkPlaceholder();
-    placeholder.value = value;
-    placeholder.style = style;
-    modifierWithKey(this._modifiersWithKeys, RichEditorPlaceholderModifier.identity, RichEditorPlaceholderModifier, placeholder);
-    return this;
-  }
-  aboutToDelete(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorAboutToDeleteModifier.identity, RichEditorAboutToDeleteModifier, callback);
-    return this;
-  }
-  onDeleteComplete(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnDeleteCompleteModifier.identity, RichEditorOnDeleteCompleteModifier, callback);
-    return this;
-  }
-  bindSelectionMenu(spanType, content, responseType, options) {
-    throw new Error('Method not implemented.');
-  }
-  customKeyboard(value, options) {
-    let arkValue = new ArkCustomKeyboard();
-    arkValue.value = value;
-    arkValue.supportAvoidance = options?.supportAvoidance;
-    modifierWithKey(this._modifiersWithKeys, RichEditorCustomKeyboardModifier.identity,
-      RichEditorCustomKeyboardModifier, arkValue);
-    return this;
-  }
-  onEditingChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnEditingChangeModifier.identity, RichEditorOnEditingChangeModifier, callback);
-    return this;
-  }
-  onCut(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnCutModifier.identity, RichEditorOnCutModifier, callback);
-    return this;
-  }
-  onCopy(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnCopyModifier.identity, RichEditorOnCopyModifier, callback);
-    return this;
-  }
-  enableKeyboardOnFocus(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorEnableKeyboardOnFocusModifier.identity, RichEditorEnableKeyboardOnFocusModifier, value);
-    return this;
-  }
-  enablePreviewText(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorEnablePreviewTextModifier.identity, RichEditorEnablePreviewTextModifier, value);
-    return this;
-  }
-  editMenuOptions(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorEditMenuOptionsModifier.identity, RichEditorEditMenuOptionsModifier, value);
-    return this;
-  }
-  barState(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorBarStateModifier.identity, RichEditorBarStateModifier, value);
-    return this;
-  }
-  maxLength(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorMaxLengthModifier.identity, RichEditorMaxLengthModifier, value);
-    return this;
-  }
-  maxLines(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorMaxLinesModifier.identity, RichEditorMaxLinesModifier, value);
-    return this;
-  }
-  stopBackPress(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorStopBackPressModifier.identity, RichEditorStopBackPressModifier, value);
-    return this;
-  }
-  keyboardAppearance(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorKeyboardAppearanceModifier.identity, RichEditorKeyboardAppearanceModifier, value);
-    return this;
-  }
-  onDidIMEInput(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnDidIMEInputModifier.identity, RichEditorOnDidIMEInputModifier, callback);
-    return this;
-  }
-  onWillAttachIME(callback) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorOnWillAttachIMEModifier.identity, RichEditorOnWillAttachIMEModifier, callback);
-    return this;
-  }
-  enableHapticFeedback(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorEnableHapticFeedbackModifier.identity, RichEditorEnableHapticFeedbackModifier, value);
-    return this;
-  }
-  enableAutoSpacing(enable) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorEnableAutoSpacingModifier.identity, RichEditorEnableAutoSpacingModifier, enable);
-    return this;
-  }
-  compressLeadingPunctuation(enable) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorCompressLeadingPunctuationModifier.identity, RichEditorCompressLeadingPunctuationModifier, enable);
-    return this;
-  }
-  undoStyle(style) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorUndoStyleModifier.identity, RichEditorUndoStyleModifier, style);
-    return this;
-  }
-  scrollBarColor(style) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorScrollBarColorModifier.identity, RichEditorScrollBarColorModifier, style);
-    return this;
-  }
-  selectedDragPreviewStyle(value) {
-    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
-    arkSelectedDragPreviewStyle.color = value?.color;
-    modifierWithKey(this._modifiersWithKeys, RichEditorSelectedDragPreviewStyleModifier.identity,
-      RichEditorSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
-    return this;
-  }
-  includeFontPadding(enable) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorIncludeFontPaddingModifier.identity, RichEditorIncludeFontPaddingModifier, enable);
-    return this;
-  }
-  fallbackLineSpacing(enable) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorFallbackLineSpacingModifier.identity, RichEditorFallbackLineSpacingModifier, enable);
-    return this;
-  }
-  singleLine(value) {
-    modifierWithKey(this._modifiersWithKeys, RichEditorSingleLineModifier.identity, RichEditorSingleLineModifier, value);
-    return this;
-  }
-}
-// @ts-ignore
-if (globalThis.RichEditor !== undefined) {
-  globalThis.RichEditor.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkRichEditorComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.RichEditorModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
 class RowAlignItemsModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11321,1388 +10203,6 @@ if (globalThis.Row !== undefined) {
       return new ArkRowComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.RowModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
-class SearchSelectionMenuHiddenModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSelectionMenuHidden(node);
-    }
-    else {
-      getUINativeModule().search.setSelectionMenuHidden(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-SearchSelectionMenuHiddenModifier.identity = Symbol('searchSelectionMenuHidden');
-class SearchAutoCapitalizationModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetAutoCapitalizationMode(node);
-    }
-    else {
-      getUINativeModule().search.setAutoCapitalizationMode(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchAutoCapitalizationModifier.identity = Symbol('SearchAutoCapitalization');
-class SearchCaretStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetCaretStyle(node);
-    }
-    else {
-      getUINativeModule().search.setCaretStyle(node, this.value.width, this.value.color);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
-      !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
-  }
-}
-SearchCaretStyleModifier.identity = Symbol('searchCaretStyle');
-class SearchEnableKeyboardOnFocusModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetEnableKeyboardOnFocus(node);
-    }
-    else {
-      getUINativeModule().search.setEnableKeyboardOnFocus(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-SearchEnableKeyboardOnFocusModifier.identity = Symbol('searchEnableKeyboardOnFocus');
-class SearchSearchIconModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSearchIcon(node);
-    }
-    else {
-      getUINativeModule().search.setSearchIcon(node, this.value.size, this.value.color, this.value.src);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
-      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
-      !isBaseOrResourceEqual(this.stageValue.src, this.value.src);
-  }
-}
-SearchSearchIconModifier.identity = Symbol('searchSearchIcon');
-class SearchPlaceholderFontModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetPlaceholderFont(node);
-    }
-    else {
-      getUINativeModule().search.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue.weight !== this.value.weight ||
-      this.stageValue.style !== this.value.style ||
-      !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
-      !isBaseOrResourceEqual(this.stageValue.family, this.value.family);
-  }
-}
-SearchPlaceholderFontModifier.identity = Symbol('searchPlaceholderFont');
-class SearchSearchButtonModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSearchButton(node);
-    }
-    else {
-      getUINativeModule().search.setSearchButton(node, this.value.value, this.value.fontSize, this.value.fontColor,
-  this.value.autoDisable);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue.value !== this.value.value ||
-      !isBaseOrResourceEqual(this.stageValue.fontSize, this.value.fontSize) ||
-      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor) ||
-      !isBaseOrResourceEqual(this.stageValue.autoDisable, this.value.autoDisable);
-  }
-}
-SearchSearchButtonModifier.identity = Symbol('searchSearchButton');
-class SearchDividerColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSearchDividerColor(node);
-    } else {
-      getUINativeModule().search.setSearchDividerColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchDividerColorModifier.identity = Symbol('dividerColor');
-class SearchFontColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetFontColor(node);
-    }
-    else {
-      getUINativeModule().search.setFontColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchFontColorModifier.identity = Symbol('searchFontColor');
-class SearchFontFeatureModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetFontFeature(node);
-    } else {
-      getUINativeModule().search.setFontFeature(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchFontFeatureModifier.identity = Symbol('searchFontFeature');
-class SearchCopyOptionModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetCopyOption(node);
-    }
-    else {
-      getUINativeModule().search.setCopyOption(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-SearchCopyOptionModifier.identity = Symbol('searchCopyOption');
-class SearchTextFontModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetTextFont(node);
-    }
-    else {
-      getUINativeModule().search.setTextFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue.weight !== this.value.weight ||
-      this.stageValue.style !== this.value.style ||
-      !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
-      !isBaseOrResourceEqual(this.stageValue.family, this.value.family);
-  }
-}
-SearchTextFontModifier.identity = Symbol('searchTextFont');
-class SearchPlaceholderColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetPlaceholderColor(node);
-    }
-    else {
-      getUINativeModule().search.setPlaceholderColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchPlaceholderColorModifier.identity = Symbol('searchPlaceholderColor');
-class SearchCancelButtonModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b, _c;
-    if (reset) {
-      getUINativeModule().search.resetCancelButton(node);
-    }
-    else {
-      getUINativeModule().search.setCancelButton(node, this.value.style,
-        (_a = this.value.icon) === null || _a === void 0 ? void 0 : _a.size,
-        (_b = this.value.icon) === null || _b === void 0 ? void 0 : _b.color,
-        (_c = this.value.icon) === null || _c === void 0 ? void 0 : _c.src);
-    }
-  }
-  checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f;
-    return this.stageValue.style !== this.value.style ||
-      !isBaseOrResourceEqual((_a = this.stageValue.icon) === null || _a === void 0 ? void 0 : _a.size, (_b = this.value.icon) === null || _b === void 0 ? void 0 : _b.size) ||
-      !isBaseOrResourceEqual((_c = this.stageValue.icon) === null || _c === void 0 ? void 0 : _c.color, (_d = this.value.icon) === null || _d === void 0 ? void 0 : _d.color) ||
-      !isBaseOrResourceEqual((_e = this.stageValue.icon) === null || _e === void 0 ? void 0 : _e.src, (_f = this.value.icon) === null || _f === void 0 ? void 0 : _f.src);
-  }
-}
-SearchCancelButtonModifier.identity = Symbol('searchCancelButton');
-class SearchTextAlignModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetTextAlign(node);
-    }
-    else {
-      getUINativeModule().search.setTextAlign(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-SearchTextAlignModifier.identity = Symbol('searchTextAlign');
-class SearchEnterKeyTypeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSearchEnterKeyType(node);
-    } else {
-      getUINativeModule().search.setSearchEnterKeyType(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchEnterKeyTypeModifier.identity = Symbol('searchEnterKeyType');
-class SearchHeightModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSearchHeight(node);
-    } else {
-      getUINativeModule().search.setSearchHeight(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchHeightModifier.identity = Symbol('searchHeight');
-
-class SearchIdModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSearchInspectorId(node);
-    } else {
-      getUINativeModule().search.setSearchInspectorId(node, this.value);
-    }
-  }
-
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchIdModifier.identity = Symbol('searchId');
-class SearchDecorationModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetDecoration(node);
-    }
-    else {
-      getUINativeModule().search.setDecoration(node, this.value.type, this.value.color, this.value.style);
-    }
-  }
-  checkObjectDiff() {
-    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
-      return true;
-    }
-    if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
-      return !(this.stageValue.color === this.value.color);
-    }
-    else {
-      return true;
-    }
-  }
-}
-SearchDecorationModifier.identity = Symbol('searchDecoration');
-class SearchLetterSpacingModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
-    }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().search.resetLetterSpacing(node);
-        }
-        else {
-            getUINativeModule().search.setLetterSpacing(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
-}
-SearchLetterSpacingModifier.identity = Symbol('searchLetterSpacing');
-class SearchLineHeightModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
-    }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().search.resetLineHeight(node);
-        }
-        else {
-            getUINativeModule().search.setLineHeight(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
-}
-SearchLineHeightModifier.identity = Symbol('searchLineHeight');
-class SearchHalfLeadingModifier extends ModifierWithKey {
-  constructor(value) {
-      super(value);
-  }
-  applyPeer(node, reset) {
-      if (reset) {
-          getUINativeModule().search.resetHalfLeading(node);
-      }
-      else {
-          getUINativeModule().search.setHalfLeading(node, this.value);
-      }
-  }
-  checkObjectDiff() {
-      return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchHalfLeadingModifier.identity = Symbol('searchHalfLeading');
-class SearchMinFontSizeModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
-    }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().search.resetSearchMinFontSize(node);
-        }
-        else {
-            getUINativeModule().search.setSearchMinFontSize(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
-}
-
-SearchMinFontSizeModifier.identity = Symbol('searchMinFontSize');
-class SearchMaxFontSizeModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
-    }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().search.resetSearchMaxFontSize(node);
-        }
-        else {
-            getUINativeModule().search.setSearchMaxFontSize(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
-}
-SearchMaxFontSizeModifier.identity = Symbol('searchMaxFontSize');
-class SearchMinFontScaleModifier extends ModifierWithKey {
-  constructor(value) {
-      super(value);
-  }
-  applyPeer(node, reset) {
-      if (reset) {
-          getUINativeModule().search.resetMinFontScale(node);
-      }
-      else {
-          getUINativeModule().search.setMinFontScale(node, this.value);
-      }
-  }
-  checkObjectDiff() {
-      return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchMinFontScaleModifier.identity = Symbol('searchMinFontScale');
-class SearchMaxFontScaleModifier extends ModifierWithKey {
-  constructor(value) {
-      super(value);
-  }
-  applyPeer(node, reset) {
-      if (reset) {
-          getUINativeModule().search.resetMaxFontScale(node);
-      }
-      else {
-          getUINativeModule().search.setMaxFontScale(node, this.value);
-      }
-  }
-  checkObjectDiff() {
-      return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchMaxFontScaleModifier.identity = Symbol('searchMaxFontScale');
-class SearchSelectedBackgroundColorModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
-    }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().search.resetSelectedBackgroundColor(node);
-        } else {
-            getUINativeModule().search.setSelectedBackgroundColor(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
-}
-SearchSelectedBackgroundColorModifier.identity = Symbol('searchSelectedBackgroundColor');
-class SearchTextIndentModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
-    }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().search.resetTextIndent(node);
-        } else {
-            getUINativeModule().search.setTextIndent(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
-}
-SearchTextIndentModifier.identity = Symbol('searchTextIndent');
-class SearchInputFilterModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
-    }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().search.resetInputFilter(node);
-        } else {
-            getUINativeModule().search.setInputFilter(node, this.value.value, this.value.error);
-        }
-    }
-}
-SearchInputFilterModifier.identity = Symbol('searchInputFilter');
-class SearchMaxLengthModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetMaxLength(node);
-    } else {
-      getUINativeModule().search.setMaxLength(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchMaxLengthModifier.identity = Symbol('searchMaxLength');
-class SearchTypeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetType(node);
-    } else {
-      getUINativeModule().search.setType(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchTypeModifier.identity = Symbol('searchType');
-class SearchCustomKeyboardModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetCustomKeyboard(node);
-    } else {
-      getUINativeModule().search.setCustomKeyboard(node, this.value.value, this.value.supportAvoidance);
-    }
-  }
-}
-SearchCustomKeyboardModifier.identity = Symbol('searchCustomKeyboard');
-class SearchOnEditChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnEditChange(node);
-    } else {
-      getUINativeModule().search.setOnEditChange(node, this.value);
-    }
-  }
-}
-SearchOnEditChangeModifier.identity = Symbol('searchOnEditChange');
-class SearchOnSubmitModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnSubmit(node);
-    } else {
-      getUINativeModule().search.setOnSubmit(node, this.value);
-    }
-  }
-}
-SearchOnSubmitModifier.identity = Symbol('searchOnSubmit');
-class SearchOnCopyModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnCopy(node);
-    } else {
-      getUINativeModule().search.setOnCopy(node, this.value);
-    }
-  }
-}
-SearchOnCopyModifier.identity = Symbol('searchOnCopy');
-class SearchOnCutModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnCut(node);
-    } else {
-      getUINativeModule().search.setOnCut(node, this.value);
-    }
-  }
-}
-SearchOnCutModifier.identity = Symbol('searchOnCut');
-class SearchOnPasteModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  static identity = Symbol('searchOnPaste');
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnPaste(node);
-    } else {
-      getUINativeModule().search.setOnPaste(node, this.value);
-    }
-  }
-}
-SearchOnPasteModifier.identity = Symbol('searchOnPaste');
-class SearchOnChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnChange(node);
-    } else {
-      getUINativeModule().search.setOnChange(node, this.value);
-    }
-  }
-}
-SearchOnChangeModifier.identity = Symbol('searchOnChange');
-class SearchOnTextSelectionChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnTextSelectionChange(node);
-    } else {
-      getUINativeModule().search.setOnTextSelectionChange(node, this.value);
-    }
-  }
-}
-SearchOnTextSelectionChangeModifier.identity = Symbol('searchOnTextSelectionChange');
-class SearchOnContentScrollModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnContentScroll(node);
-    } else {
-      getUINativeModule().search.setOnContentScroll(node, this.value);
-    }
-  }
-}
-SearchOnContentScrollModifier.identity = Symbol('searchOnContentScroll');
-class SearchShowCounterModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetShowCounter(node);
-    }
-    else {
-      getUINativeModule().search.setShowCounter(node, this.value.value, this.value.highlightBorder, this.value.thresholdPercentage);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
-      !isBaseOrResourceEqual(this.stageValue.highlightBorder, this.value.highlightBorder) ||
-      !isBaseOrResourceEqual(this.stageValue.thresholdPercentage, this.value.thresholdPercentage);
-  }
-}
-SearchShowCounterModifier.identity = Symbol('searchShowCounter');
-class SearchInitializeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSearchInitialize(node);
-    } else {
-      getUINativeModule().search.setSearchInitialize(node, this.value.value,
-        this.value.placeholder, this.value.icon, this.value.controller);
-    }
-  }
-}
-SearchInitializeModifier.identity = Symbol('searchInitialize');
-class SearchOnWillChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnWillChange(node);
-    } else {
-      getUINativeModule().search.setOnWillChange(node, this.value);
-    }
-  }
-}
-SearchOnWillChangeModifier.identity = Symbol('searchOnWillChange');
-class SearchOnWillInsertModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnWillInsert(node);
-    } else {
-      getUINativeModule().search.setOnWillInsert(node, this.value);
-    }
-  }
-}
-SearchOnWillInsertModifier.identity = Symbol('searchOnWillInsert');
-class SearchOnDidInsertModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnDidInsert(node);
-    } else {
-      getUINativeModule().search.setOnDidInsert(node, this.value);
-    }
-  }
-}
-SearchOnDidInsertModifier.identity = Symbol('searchOnDidInsert');
-class SearchOnWillDeleteModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnWillDelete(node);
-    } else {
-      getUINativeModule().search.setOnWillDelete(node, this.value);
-    }
-  }
-}
-SearchOnWillDeleteModifier.identity = Symbol('searchOnWillDelete');
-class SearchOnDidDeleteModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnDidDelete(node);
-    } else {
-      getUINativeModule().search.setOnDidDelete(node, this.value);
-    }
-  }
-}
-SearchOnDidDeleteModifier.identity = Symbol('searchOnDidDelete');
-class SearchEnablePreviewTextModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetEnablePreviewText(node);
-    }
-    else {
-      getUINativeModule().search.setEnablePreviewText(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchEnablePreviewTextModifier.identity = Symbol('searchEnablePreviewText');
-class SearchEditMenuOptionsModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSelectionMenuOptions(node);
-    } else {
-      getUINativeModule().search.setSelectionMenuOptions(node, this.value);
-    }
-  }
-}
-SearchEditMenuOptionsModifier.identity = Symbol('searchEditMenuOptions');
-class SearchEnableHapticFeedbackModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetEnableHapticFeedback(node);
-    }
-    else {
-      getUINativeModule().search.setEnableHapticFeedback(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchEnableHapticFeedbackModifier.identity = Symbol('searchEnableHapticFeedback');
-
-class SearchStopBackPressModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetStopBackPress(node);
-    }
-    else {
-      getUINativeModule().search.setStopBackPress(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchStopBackPressModifier.identity = Symbol('searchStopBackPress');
-
-class SearchKeyboardAppearanceModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetKeyboardAppearance(node);
-    }
-    else {
-      getUINativeModule().search.setKeyboardAppearance(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchKeyboardAppearanceModifier.identity = Symbol('searchKeyboardAppearance');
-
-class SearchStrokeWidthModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetStrokeWidth(node);
-    }
-    else if (!isObject(this.value)) {
-      getUINativeModule().search.resetStrokeWidth(node);
-    }
-    else {
-      getUINativeModule().search.setStrokeWidth(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchStrokeWidthModifier.identity = Symbol('searchStrokeWidth');
-
-class SearchStrokeColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetStrokeColor(node);
-    }
-    else {
-      getUINativeModule().search.setStrokeColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchStrokeColorModifier.identity = Symbol('searchStrokeColor');
-
-class SearchEnableAutoSpacingModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetEnableAutoSpacing(node);
-    }
-    else {
-      getUINativeModule().search.setEnableAutoSpacing(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchEnableAutoSpacingModifier.identity = Symbol('searchEnableAutoSpacing');
-
-class SearchCompressLeadingPunctuationModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetCompressLeadingPunctuation(node);
-    }
-    else {
-      getUINativeModule().search.setCompressLeadingPunctuation(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchCompressLeadingPunctuationModifier.identity = Symbol('searchCompressLeadingPunctuation');
-
-class SearchIncludeFontPaddingModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetIncludeFontPadding(node);
-    }
-    else {
-      getUINativeModule().search.setIncludeFontPadding(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchIncludeFontPaddingModifier.identity = Symbol('searchIncludeFontPadding');
-
-class SearchFallbackLineSpacingModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetFallbackLineSpacing(node);
-    }
-    else {
-      getUINativeModule().search.setFallbackLineSpacing(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchFallbackLineSpacingModifier.identity = Symbol('searchIncludeFontPadding');
-
-class SearchMarginModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetMargin(node);
-    }
-    else {
-      getUINativeModule().search.setMargin(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
-      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
-      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
-      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
-  }
-}
-SearchMarginModifier.identity = Symbol('searchMargin');
-
-class SearchSelectDetectorEnableModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSelectDetectorEnable(node);
-    } else {
-      getUINativeModule().search.setSelectDetectorEnable(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchSelectDetectorEnableModifier.identity = Symbol('searchSelectDetectorEnable');
-class SearchOnWillAttachIMEModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetOnWillAttachIME(node);
-    } else {
-      getUINativeModule().search.setOnWillAttachIME(node, this.value);
-    }
-  }
-}
-SearchOnWillAttachIMEModifier.identity = Symbol('searchOnWillAttachIME');
-
-class SearchTextDirectionModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetTextDirection(node);
-    }
-    else {
-      getUINativeModule().search.setTextDirection(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-SearchTextDirectionModifier.identity = Symbol('searchTextDirection');
-
-class SearchSelectedDragPreviewStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSelectedDragPreviewStyle(node);
-    }
-    else {
-      getUINativeModule().search.setSelectedDragPreviewStyle(node, this.value.color);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value) ||
-    !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
-  }
-}
-SearchSelectedDragPreviewStyleModifier.identity = Symbol('searchSelectedDragPreviewStyle');
-
-class ArkSearchComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  initialize(value) {
-    if (value[0] !== undefined) {
-      modifierWithKey(this._modifiersWithKeys, SearchInitializeModifier.identity, SearchInitializeModifier, value[0]);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, SearchInitializeModifier.identity, SearchInitializeModifier, null);
-    }
-    return this;
-  }
-  onEditChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnEditChangeModifier.identity, SearchOnEditChangeModifier, callback);
-    return this;
-  }
-  type(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchTypeModifier.identity, SearchTypeModifier, value);
-    return this;
-  }
-  maxLength(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchMaxLengthModifier.identity, SearchMaxLengthModifier, value);
-    return this;
-  }
-  onEditChanged(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnEditChangeModifier.identity, SearchOnEditChangeModifier, callback);
-    return this;
-  }
-  customKeyboard(value, options) {
-    let arkValue = new ArkCustomKeyboard();
-    arkValue.value = value;
-    arkValue.supportAvoidance = options?.supportAvoidance;
-    modifierWithKey(this._modifiersWithKeys, SearchCustomKeyboardModifier.identity,
-      SearchCustomKeyboardModifier, arkValue);
-    return this;
-  }
-  showUnit(event) {
-    throw new Error('Method not implemented.');
-  }
-  onContentScroll(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnContentScrollModifier.identity,
-      SearchOnContentScrollModifier, callback);
-    return this;
-  }
-  onChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnChangeModifier.identity, SearchOnChangeModifier, callback);
-    return this;
-  }
-  onTextSelectionChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnTextSelectionChangeModifier.identity,
-      SearchOnTextSelectionChangeModifier, callback);
-    return this;
-  }
-  onCopy(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnCopyModifier.identity, SearchOnCopyModifier, callback);
-    return this;
-  }
-  onCut(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnCutModifier.identity, SearchOnCutModifier, callback);
-    return this;
-  }
-  onSubmit(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnSubmitModifier.identity, SearchOnSubmitModifier, callback);
-    return this;
-  }
-  onPaste(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnPasteModifier.identity, SearchOnPasteModifier, callback);
-    return this;
-  }
-  enableSelectedDataDetector(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorEnableModifier.identity, SearchSelectDetectorEnableModifier, value);
-    return this;
-  }
-  showCounter(value) {
-    let arkValue = new ArkTextFieldShowCounter();
-    arkValue.value = value;
-    arkValue.highlightBorder = options?.highlightBorder;
-    arkValue.thresholdPercentage = options?.thresholdPercentage;
-    modifierWithKey(this._modifiersWithKeys, SearchShowCounterModifier.identity,
-      SearchShowCounterModifier, arkValue);
-    return this;
-  }
-  searchButton(value, option) {
-    let searchButton = new ArkSearchButton();
-    searchButton.value = value;
-    searchButton.fontColor = option === null || option === void 0 ? void 0 : option.fontColor;
-    searchButton.fontSize = option === null || option === void 0 ? void 0 : option.fontSize;
-    searchButton.autoDisable = option === null || option === void 0 ? void 0 : option.autoDisable;
-    modifierWithKey(this._modifiersWithKeys, SearchSearchButtonModifier.identity, SearchSearchButtonModifier, searchButton);
-    return this;
-  }
-  dividerColor(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchDividerColorModifier.identity, SearchDividerColorModifier, value);
-    return this;
-  }
-  selectionMenuHidden(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchSelectionMenuHiddenModifier.identity, SearchSelectionMenuHiddenModifier, value);
-    return this;
-  }
-  enableKeyboardOnFocus(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchEnableKeyboardOnFocusModifier.identity, SearchEnableKeyboardOnFocusModifier, value);
-    return this;
-  }
-  caretStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchCaretStyleModifier.identity, SearchCaretStyleModifier, value);
-    return this;
-  }
-  cancelButton(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchCancelButtonModifier.identity, SearchCancelButtonModifier, value);
-    return this;
-  }
-  searchIcon(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchSearchIconModifier.identity, SearchSearchIconModifier, value);
-    return this;
-  }
-  fontColor(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchFontColorModifier.identity, SearchFontColorModifier, value);
-    return this;
-  }
-  fontFeature(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchFontFeatureModifier.identity, SearchFontFeatureModifier, value);
-    return this;
-  }
-  placeholderColor(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchPlaceholderColorModifier.identity, SearchPlaceholderColorModifier, value);
-    return this;
-  }
-  placeholderFont(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchPlaceholderFontModifier.identity, SearchPlaceholderFontModifier, value);
-    return this;
-  }
-  textFont(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchTextFontModifier.identity, SearchTextFontModifier, value);
-    return this;
-  }
-  copyOption(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchCopyOptionModifier.identity, SearchCopyOptionModifier, value);
-    return this;
-  }
-  textAlign(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchTextAlignModifier.identity, SearchTextAlignModifier, value);
-    return this;
-  }
-  enterKeyType(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchEnterKeyTypeModifier.identity, SearchEnterKeyTypeModifier, value);
-    return this;
-  }
-  height(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchHeightModifier.identity, SearchHeightModifier, value);
-    return this;
-  }
-  id(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
-    return this;
-  }
-  key(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
-    return this;
-  }
-  decoration(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchDecorationModifier.identity, SearchDecorationModifier, value);
-    return this;
-  }
-  letterSpacing(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchLetterSpacingModifier.identity, SearchLetterSpacingModifier, value);
-    return this;
-  }
-  lineHeight(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchLineHeightModifier.identity, SearchLineHeightModifier, value);
-    return this;
-  }
-  halfLeading(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchHalfLeadingModifier.identity, SearchHalfLeadingModifier, value);
-    return this;
-  }
-  minFontSize(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchMinFontSizeModifier.identity, SearchMinFontSizeModifier, value);
-    return this;
-  }
-  maxFontSize(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchMaxFontSizeModifier.identity, SearchMaxFontSizeModifier, value);
-    return this;
-  }
-  minFontScale(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchMinFontScaleModifier.identity, SearchMinFontScaleModifier, value);
-    return this;
-  }
-  maxFontScale(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchMaxFontScaleModifier.identity, SearchMaxFontScaleModifier, value);
-    return this;
-  }
-  selectedBackgroundColor(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchSelectedBackgroundColorModifier.identity, SearchSelectedBackgroundColorModifier, value);
-    return this;
-  }
-  textIndent(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchTextIndentModifier.identity, SearchTextIndentModifier, value);
-    return this;
-  }
-  inputFilter(value, error) {
-    let searchInputFilter = new ArkSearchInputFilter();
-    searchInputFilter.value = value;
-    searchInputFilter.error = error;
-
-    modifierWithKey(this._modifiersWithKeys, SearchInputFilterModifier.identity, SearchInputFilterModifier, searchInputFilter);
-    return this;
-  }
-  onWillChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnWillChangeModifier.identity, SearchOnWillChangeModifier, callback);
-    return this;
-  }
-  onWillInsert(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnWillInsertModifier.identity, SearchOnWillInsertModifier, callback);
-    return this;
-  }
-  onDidInsert(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnDidInsertModifier.identity, SearchOnDidInsertModifier, callback);
-    return this;
-  }
-  onWillDelete(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnWillDeleteModifier.identity, SearchOnWillDeleteModifier, callback);
-    return this;
-  }
-  onDidDelete(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnDidDeleteModifier.identity, SearchOnDidDeleteModifier, callback);
-    return this;
-  }
-  enablePreviewText(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchEnablePreviewTextModifier.identity, SearchEnablePreviewTextModifier, value);
-    return this;
-  }
-  autoCapitalizationMode(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchAutoCapitalizationModifier.identity, SearchAutoCapitalizationModifier, value);
-    return this;
-  }
-  editMenuOptions(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchEditMenuOptionsModifier.identity,
-      SearchEditMenuOptionsModifier, value);
-    return this;
-  }
-  enableHapticFeedback(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchEnableHapticFeedbackModifier.identity, SearchEnableHapticFeedbackModifier, value);
-    return this;
-  }
-  stopBackPress(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchStopBackPressModifier.identity, SearchStopBackPressModifier, value);
-    return this;
-  }
-  keyboardAppearance(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchKeyboardAppearanceModifier.identity, SearchKeyboardAppearanceModifier, value);
-    return this;
-  }
-  strokeWidth(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchStrokeWidthModifier.identity, SearchStrokeWidthModifier, value);
-    return this;
-  }
-  strokeColor(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchStrokeColorModifier.identity, SearchStrokeColorModifier, value);
-    return this;
-  }
-  enableAutoSpacing(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchEnableAutoSpacingModifier.identity, SearchEnableAutoSpacingModifier, value);
-    return this;
-  }
-  compressLeadingPunctuation(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchCompressLeadingPunctuationModifier.identity, SearchCompressLeadingPunctuationModifier, value);
-    return this;
-  }
-  includeFontPadding(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchIncludeFontPaddingModifier.identity, SearchIncludeFontPaddingModifier, value);
-    return this;
-  }
-  fallbackLineSpacing(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchFallbackLineSpacingModifier.identity, SearchFallbackLineSpacingModifier, value);
-    return this;
-  }
-  margin(value) {
-    let arkValue = new ArkPadding();
-    if (value !== null && value !== undefined) {
-      if (isLengthType(value) || isResource(value)) {
-        arkValue.top = value;
-        arkValue.right = value;
-        arkValue.bottom = value;
-        arkValue.left = value;
-      }
-      else {
-        arkValue.top = value.top;
-        arkValue.bottom = value.bottom;
-        if (Object.keys(value).indexOf('right') >= 0) {
-          arkValue.right = value.right;
-        }
-        if (Object.keys(value).indexOf('end') >= 0) {
-          arkValue.right = value.end;
-        }
-        if (Object.keys(value).indexOf('left') >= 0) {
-          arkValue.left = value.left;
-        }
-        if (Object.keys(value).indexOf('start') >= 0) {
-          arkValue.left = value.start;
-        }
-      }
-      modifierWithKey(this._modifiersWithKeys, SearchMarginModifier.identity, SearchMarginModifier, arkValue);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, SearchMarginModifier.identity, SearchMarginModifier, undefined);
-    }
-    return this;
-  }
-  onWillAttachIME(callback) {
-    modifierWithKey(this._modifiersWithKeys, SearchOnWillAttachIMEModifier.identity,
-      SearchOnWillAttachIMEModifier, callback);
-    return this;
-  }
-  textDirection(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchTextDirectionModifier.identity, SearchTextDirectionModifier, value);
-    return this;
-  }
-  selectedDragPreviewStyle(value) {
-    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
-    arkSelectedDragPreviewStyle.color = value?.color;
-    modifierWithKey(this._modifiersWithKeys, SearchSelectedDragPreviewStyleModifier.identity,
-      SearchSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
-    return this;
-  }
-}
-// @ts-ignore
-if (globalThis.Search !== undefined) {
-  globalThis.Search.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkSearchComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.SearchModifier(nativePtr, classType);
     });
   };
 }
@@ -12975,9 +10475,11 @@ class SpanFontWeightModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().span.resetFontWeight(node);
-    }
-    else {
-      getUINativeModule().span.setFontWeight(node, this.value);
+    } else {
+      getUINativeModule().span.setFontWeight(node, this.value.value,
+        this.value?.enableVariableFontWeight,
+        this.value?.enableDeviceFontWeightCategory
+      );
     }
   }
 }
@@ -13092,106 +10594,106 @@ class ArkSpanComponent {
     }
   }
   onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onGestureJudgeBegin function not supported in attributeModifier scenario.');
   }
   outline(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'outline function not supported in attributeModifier scenario.');
   }
   outlineColor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'outlineColor function not supported in attributeModifier scenario.');
   }
   outlineRadius(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'outlineRadius function not supported in attributeModifier scenario.');
   }
   outlineStyle(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'outlineStyle function not supported in attributeModifier scenario.');
   }
   outlineWidth(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'outlineWidth function not supported in attributeModifier scenario.');
   }
   width(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'width function not supported in attributeModifier scenario.');
   }
   height(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'height function not supported in attributeModifier scenario.');
   }
   expandSafeArea(types, edges) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'expandSafeArea function not supported in attributeModifier scenario.');
   }
   responseRegionList(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'responseRegionList function not supported in attributeModifier scenario.');
   }
   responseRegion(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'responseRegion function not supported in attributeModifier scenario.');
   }
   mouseResponseRegion(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'mouseResponseRegion function not supported in attributeModifier scenario.');
   }
   size(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'size function not supported in attributeModifier scenario.');
   }
   constraintSize(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'constraintSize function not supported in attributeModifier scenario.');
   }
   touchable(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'touchable function not supported in attributeModifier scenario.');
   }
   hitTestBehavior(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'hitTestBehavior function not supported in attributeModifier scenario.');
   }
   layoutWeight(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'layoutWeight function not supported in attributeModifier scenario.');
   }
   padding(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'padding function not supported in attributeModifier scenario.');
   }
   margin(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'margin function not supported in attributeModifier scenario.');
   }
   background(builder, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'background function not supported in attributeModifier scenario.');
   }
   backgroundColor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backgroundColor function not supported in attributeModifier scenario.');
   }
   backgroundImage(src, repeat) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backgroundImage function not supported in attributeModifier scenario.');
   }
   backgroundImageSize(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backgroundImageSize function not supported in attributeModifier scenario.');
   }
   backgroundImagePosition(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backgroundImagePosition function not supported in attributeModifier scenario.');
   }
   backgroundBlurStyle(value, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backgroundBlurStyle function not supported in attributeModifier scenario.');
   }
   foregroundBlurStyle(value, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'foregroundBlurStyle function not supported in attributeModifier scenario.');
   }
   opacity(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'opacity function not supported in attributeModifier scenario.');
   }
   border(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'border function not supported in attributeModifier scenario.');
   }
   borderStyle(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'borderStyle function not supported in attributeModifier scenario.');
   }
   borderWidth(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'borderWidth function not supported in attributeModifier scenario.');
   }
   borderColor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'borderColor function not supported in attributeModifier scenario.');
   }
   borderRadius(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'borderRadius function not supported in attributeModifier scenario.');
   }
   borderImage(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'borderImage function not supported in attributeModifier scenario.');
   }
   foregroundColor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'foregroundColor function not supported in attributeModifier scenario.');
   }
   onClick(event) {
     modifierWithKey(this._modifiersWithKeys, ClickModifier.identity, ClickModifier, event);
@@ -13202,289 +10704,292 @@ class ArkSpanComponent {
     return this;
   }
   hoverEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'hoverEffect function not supported in attributeModifier scenario.');
   }
   onMouse(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onMouse function not supported in attributeModifier scenario.');
   }
   onTouch(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onTouch function not supported in attributeModifier scenario.');
   }
   onKeyEvent(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onKeyEvent function not supported in attributeModifier scenario.');
   }
   focusable(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'focusable function not supported in attributeModifier scenario.');
   }
   onFocus(event) {
+    throw new BusinessError(100201, 'onFocus function not supported in attributeModifier scenario.');
+  }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
     throw new Error('Method not implemented.');
   }
   onBlur(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onBlur function not supported in attributeModifier scenario.');
   }
   tabIndex(index) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'tabIndex function not supported in attributeModifier scenario.');
   }
   defaultFocus(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'defaultFocus function not supported in attributeModifier scenario.');
   }
   groupDefaultFocus(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'groupDefaultFocus function not supported in attributeModifier scenario.');
   }
   focusOnTouch(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'focusOnTouch function not supported in attributeModifier scenario.');
   }
   animation(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'animation function not supported in attributeModifier scenario.');
   }
   transition(value, callback) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'transition function not supported in attributeModifier scenario.');
   }
   gesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gesture function not supported in attributeModifier scenario.');
   }
   priorityGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'priorityGesture function not supported in attributeModifier scenario.');
   }
   parallelGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'parallelGesture function not supported in attributeModifier scenario.');
   }
   blur(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'blur function not supported in attributeModifier scenario.');
   }
   linearGradientBlur(value, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'linearGradientBlur function not supported in attributeModifier scenario.');
   }
   brightness(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'brightness function not supported in attributeModifier scenario.');
   }
   contrast(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'contrast function not supported in attributeModifier scenario.');
   }
   grayscale(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'grayscale function not supported in attributeModifier scenario.');
   }
   colorBlend(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'colorBlend function not supported in attributeModifier scenario.');
   }
   saturate(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'saturate function not supported in attributeModifier scenario.');
   }
   sepia(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'sepia function not supported in attributeModifier scenario.');
   }
   invert(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'invert function not supported in attributeModifier scenario.');
   }
   hueRotate(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'hueRotate function not supported in attributeModifier scenario.');
   }
   useEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'useEffect function not supported in attributeModifier scenario.');
   }
   backdropBlur(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'backdropBlur function not supported in attributeModifier scenario.');
   }
   renderGroup(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'renderGroup function not supported in attributeModifier scenario.');
   }
   translate(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'translate function not supported in attributeModifier scenario.');
   }
   scale(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'scale function not supported in attributeModifier scenario.');
   }
   gridSpan(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gridSpan function not supported in attributeModifier scenario.');
   }
   gridOffset(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gridOffset function not supported in attributeModifier scenario.');
   }
   rotate(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'rotate function not supported in attributeModifier scenario.');
   }
   transform(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'transform function not supported in attributeModifier scenario.');
   }
   transform3D(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'transform3D function not supported in attributeModifier scenario.');
   }
   onAppear(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onAppear function not supported in attributeModifier scenario.');
   }
   onDisAppear(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDisAppear function not supported in attributeModifier scenario.');
   }
   onAttach(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onAttach function not supported in attributeModifier scenario.');
   }
   onDetach(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDetach function not supported in attributeModifier scenario.');
   }
   onAreaChange(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onAreaChange function not supported in attributeModifier scenario.');
   }
   visibility(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'visibility function not supported in attributeModifier scenario.');
   }
   flexGrow(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'flexGrow function not supported in attributeModifier scenario.');
   }
   flexShrink(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'flexShrink function not supported in attributeModifier scenario.');
   }
   flexBasis(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'flexBasis function not supported in attributeModifier scenario.');
   }
   alignSelf(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'alignSelf function not supported in attributeModifier scenario.');
   }
   displayPriority(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'displayPriority function not supported in attributeModifier scenario.');
   }
   zIndex(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'zIndex function not supported in attributeModifier scenario.');
   }
   sharedTransition(id, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'sharedTransition function not supported in attributeModifier scenario.');
   }
   direction(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'direction function not supported in attributeModifier scenario.');
   }
   align(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'align function not supported in attributeModifier scenario.');
   }
   position(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'position function not supported in attributeModifier scenario.');
   }
   markAnchor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'markAnchor function not supported in attributeModifier scenario.');
   }
   offset(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'offset function not supported in attributeModifier scenario.');
   }
   enabled(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'enabled function not supported in attributeModifier scenario.');
   }
   useSizeType(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'useSizeType function not supported in attributeModifier scenario.');
   }
   alignRules(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'alignRules function not supported in attributeModifier scenario.');
   }
   aspectRatio(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'aspectRatio function not supported in attributeModifier scenario.');
   }
   clickEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'clickEffect function not supported in attributeModifier scenario.');
   }
   enableClickSoundEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'enableClickSoundEffect function not supported in attributeModifier scenario.');
   }
   onDragStart(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragStart function not supported in attributeModifier scenario.');
   }
   onDragEnter(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragEnter function not supported in attributeModifier scenario.');
   }
   onDragSpringLoading(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragSpringLoading function not supported in attributeModifier scenario.');
   }
   onDragMove(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragMove function not supported in attributeModifier scenario.');
   }
   onDragLeave(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragLeave function not supported in attributeModifier scenario.');
   }
   onDrop(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDrop function not supported in attributeModifier scenario.');
   }
   onDragEnd(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onDragEnd function not supported in attributeModifier scenario.');
   }
   allowDrop(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'allowDrop function not supported in attributeModifier scenario.');
   }
   draggable(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'draggable function not supported in attributeModifier scenario.');
   }
   overlay(value, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'overlay function not supported in attributeModifier scenario.');
   }
   linearGradient(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'linearGradient function not supported in attributeModifier scenario.');
   }
   sweepGradient(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'sweepGradient function not supported in attributeModifier scenario.');
   }
   radialGradient(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'radialGradient function not supported in attributeModifier scenario.');
   }
   motionPath(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'motionPath function not supported in attributeModifier scenario.');
   }
   motionBlur(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'motionBlur function not supported in attributeModifier scenario.');
   }
   shadow(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'shadow function not supported in attributeModifier scenario.');
   }
   mask(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'mask function not supported in attributeModifier scenario.');
   }
   key(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'key function not supported in attributeModifier scenario.');
   }
   id(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'id function not supported in attributeModifier scenario.');
   }
   geometryTransition(id) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'geometryTransition function not supported in attributeModifier scenario.');
   }
   bindPopup(show, popup) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindPopup function not supported in attributeModifier scenario.');
   }
   bindMenu(content, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindMenu function not supported in attributeModifier scenario.');
   }
   bindContextMenu(content, responseType, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContextMenu function not supported in attributeModifier scenario.');
   }
   bindContentCover(isShow, builder, type) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContentCover function not supported in attributeModifier scenario.');
   }
   blendMode(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'blendMode function not supported in attributeModifier scenario.');
   }
   clip(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'clip function not supported in attributeModifier scenario.');
   }
   bindSheet(isShow, builder, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindSheet function not supported in attributeModifier scenario.');
   }
   stateStyles(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'stateStyles function not supported in attributeModifier scenario.');
   }
   restoreId(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'restoreId function not supported in attributeModifier scenario.');
   }
   onVisibleAreaChange(ratios, event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onVisibleAreaChange function not supported in attributeModifier scenario.');
   }
   sphericalEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'sphericalEffect function not supported in attributeModifier scenario.');
   }
   lightUpEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'lightUpEffect function not supported in attributeModifier scenario.');
   }
   pixelStretchEffect(options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'pixelStretchEffect function not supported in attributeModifier scenario.');
   }
   keyboardShortcut(value, keys, action) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'keyboardShortcut function not supported in attributeModifier scenario.');
   }
   accessibilityGroup(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'accessibilityGroup function not supported in attributeModifier scenario.');
   }
   accessibilityText(value) {
     if (typeof value === 'string') {
@@ -13514,22 +11019,22 @@ class ArkSpanComponent {
     return this;
   }
   obscured(reasons) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'obscured function not supported in attributeModifier scenario.');
   }
   reuseId(id) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'reuseId function not supported in attributeModifier scenario.');
   }
   renderFit(fitMode) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'renderFit function not supported in attributeModifier scenario.');
   }
   systemMaterial(material) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'systemMaterial function not supported in attributeModifier scenario.');
   }
   materialFilter(filter) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'materialFilter function not supported in attributeModifier scenario.');
   }
   useUnionEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'useUnionEffect function not supported in attributeModifier scenario.');
   }
   attributeModifier(modifier) {
     return this;
@@ -13538,11 +11043,15 @@ class ArkSpanComponent {
     modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, value);
     return this;
   }
-  font(value) {
+  font(value, fontConfigs) {
+    let arkFontWeight = new ArkFontWeight();
+    arkFontWeight.value = (value === null || value === void 0 ? void 0 : value.weight);
+    arkFontWeight.enableVariableFontWeight = fontConfigs?.fontWeightConfigs?.enableVariableFontWeight;
+    arkFontWeight.enableDeviceFontWeightCategory = fontConfigs?.fontWeightConfigs?.enableDeviceFontWeightCategory;
     modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier,
       value === null || value === void 0 ? void 0 : value.size);
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier,
-      value === null || value === void 0 ? void 0 : value.weight);
+      arkFontWeight);
     modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier,
       value === null || value === void 0 ? void 0 : value.family);
     modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier,
@@ -13565,8 +11074,12 @@ class ArkSpanComponent {
     modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value);
     return this;
   }
-  fontWeight(value) {
-    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, value);
+  fontWeight(value, fontWeightConfigs) {
+    let arkFontWeight = new ArkFontWeight();
+    arkFontWeight.value = value;
+    arkFontWeight.enableVariableFontWeight = fontWeightConfigs?.enableVariableFontWeight;
+    arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs?.enableDeviceFontWeightCategory;
+    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkFontWeight);
     return this;
   }
   fontFamily(value) {
@@ -19031,7 +16544,7 @@ class ArkTextInputComponent extends ArkComponent {
     return this;
   }
   showUnit(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'showUnit function not supported in attributeModifier scenario.');
   }
   showUnderline(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputShowUnderlineModifier.identity, TextInputShowUnderlineModifier, value);
@@ -21131,12 +18644,14 @@ class ArkFontWeight {
   constructor() {
     this.value = undefined;
     this.enableVariableFontWeight = undefined;
+    this.enableDeviceFontWeightCategory = undefined;
   }
 
   isEqual(another) {
     return (
       this.value === another.value &&
-      this.enableVariableFontWeight === another.enableVariableFontWeight
+      this.enableVariableFontWeight === another.enableVariableFontWeight &&
+      this.enableDeviceFontWeightCategory === another.enableDeviceFontWeightCategory
     );
   }
 
@@ -23409,6 +20924,11 @@ class ArkSelectComponent extends ArkComponent {
       this._modifiersWithKeys, MinKeyboardAvoidDistanceModifier.identity, MinKeyboardAvoidDistanceModifier, distance);
     return this;
   }
+  menuSystemMaterial(menuSystemMaterial) {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuSystemMaterialModifier.identity, MenuSystemMaterialModifier, menuSystemMaterial);
+    return this;
+  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey {
@@ -24031,6 +21551,23 @@ class MinKeyboardAvoidDistanceModifier extends ModifierWithKey {
   }
 }
 MinKeyboardAvoidDistanceModifier.identity = Symbol('minKeyboardAvoidDistance');
+class MenuSystemMaterialModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().select.resetMenuSystemMaterial(node);
+    } else {
+      getUINativeModule().select.setMenuSystemMaterial(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MenuSystemMaterialModifier.identity = Symbol('menuSystemMaterial');
 class SelectOnSelectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -25187,17 +22724,7 @@ if (globalThis.NavDestination !== undefined) {
     });
   };
 }
-// @ts-ignore
-if (globalThis.Counter === undefined) {
-  globalThis.Counter = {
-    create: function() {
-      getUINativeModule().loadNativeModule("Counter");
-      let module = globalThis.requireNapi('arkui.components.arkcounter');
-      module.exportView();
-      getUINativeModule().counter.create();
-    }
-  }
-}
+
 /// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -26301,154 +23828,6 @@ if (globalThis.Navigator !== undefined) {
 }
 
 /// <reference path='./import.ts' />
-class ArkDataPanelComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  closeEffect(value) {
-    modifierWithKey(this._modifiersWithKeys, DataPanelCloseEffectModifier.identity, DataPanelCloseEffectModifier, value);
-    return this;
-  }
-  valueColors(value) {
-    modifierWithKey(this._modifiersWithKeys, DataPanelValueColorsModifier.identity, DataPanelValueColorsModifier, value);
-    return this;
-  }
-  trackBackgroundColor(value) {
-    modifierWithKey(this._modifiersWithKeys, DataPanelTrackBackgroundColorModifier.identity, DataPanelTrackBackgroundColorModifier, value);
-    return this;
-  }
-  strokeWidth(value) {
-    modifierWithKey(this._modifiersWithKeys, DataPanelStrokeWidthModifier.identity, DataPanelStrokeWidthModifier, value);
-    return this;
-  }
-  trackShadow(value) {
-    modifierWithKey(this._modifiersWithKeys, DataPanelTrackShadowModifier.identity, DataPanelTrackShadowModifier, value);
-    return this;
-  }
-  contentModifier(value) {
-    modifierWithKey(this._modifiersWithKeys, DataPanelContentModifier.identity, DataPanelContentModifier, value);
-    return this;
-  }
-  setContentModifier(modifier) {
-    if (modifier === undefined || modifier === null) {
-      getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, false);
-      return;
-    }
-    if (this.builder !== modifier.applyContent()) {
-      this.needRebuild = true;
-    }
-    this.builder = modifier.applyContent();
-    this.modifier = modifier;
-    getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, this);
-  }
-  makeContentModifierNode(context, dataPanelConfig) {
-    dataPanelConfig.contentModifier = this.modifier;
-    if (isUndefined(this.dataPanelNode) || this.needRebuild) {
-      let xNode = globalThis.requireNapi('arkui.node');
-      this.dataPanelNode = new xNode.BuilderNode(context);
-      this.dataPanelNode.build(this.builder, dataPanelConfig);
-      this.needRebuild = false;
-    } else {
-      this.dataPanelNode.update(dataPanelConfig);
-    }
-    return this.dataPanelNode.getFrameNode();
-  }
-}
-class DataPanelStrokeWidthModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().dataPanel.resetDataPanelStrokeWidth(node);
-    }
-    else {
-      getUINativeModule().dataPanel.setDataPanelStrokeWidth(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-DataPanelStrokeWidthModifier.identity = Symbol('dataPanelStrokeWidth');
-class DataPanelCloseEffectModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().dataPanel.resetCloseEffect(node);
-    }
-    else {
-      getUINativeModule().dataPanel.setCloseEffect(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-DataPanelCloseEffectModifier.identity = Symbol('dataPanelCloseEffect');
-class DataPanelTrackBackgroundColorModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().dataPanel.resetDataPanelTrackBackgroundColor(node);
-    }
-    else {
-      getUINativeModule().dataPanel.setDataPanelTrackBackgroundColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-DataPanelTrackBackgroundColorModifier.identity = Symbol('dataPanelTrackBackgroundColorModifier');
-class DataPanelTrackShadowModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      if (this.value === null) {
-        getUINativeModule().dataPanel.setDataPanelTrackShadow(node, null);
-      }
-      getUINativeModule().dataPanel.resetDataPanelTrackShadow(node);
-    }
-    else {
-      getUINativeModule().dataPanel.setDataPanelTrackShadow(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-DataPanelTrackShadowModifier.identity = Symbol('dataPanelTrackShadow');
-class DataPanelContentModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset, component) {
-    let dataPanelComponent = component;
-    dataPanelComponent.setContentModifier(this.value);
-  }
-}
-DataPanelContentModifier.identity = Symbol('dataPanelContentModifier');
-class DataPanelValueColorsModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().dataPanel.resetDataPanelValueColors(node);
-      return;
-    }
-    else {
-      getUINativeModule().dataPanel.setDataPanelValueColors(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-DataPanelValueColorsModifier.identity = Symbol('dataPanelValueColors');
-// @ts-ignore
-if (globalThis.DataPanel !== undefined) {
-  globalThis.DataPanel.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkDataPanelComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.DataPanelModifier(nativePtr, classType);
-    });
-  };
-}
-/// <reference path='./import.ts' />
 class ArkDatePickerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -26942,40 +24321,6 @@ if (globalThis.IsolatedComponent !== undefined) {
   };
 }
 
-// @ts-ignore
-if (globalThis.Menu === undefined) {
-  globalThis.Menu = {
-    create: function (params) {
-      let module = globalThis.requireNapi('arkui.components.arkmenu');
-      module.exportView();
-      getUINativeModule().menu.create();
-    }
-  }
-}
-
-
-// @ts-ignore
-if (globalThis.MenuItem === undefined) {
-  globalThis.MenuItem = {
-    create: function (params) {
-      let module = globalThis.requireNapi('arkui.components.arkmenuitem');
-      module.exportView();
-      getUINativeModule().menuitem.create(params);
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.MenuItemGroup === undefined) {
-  globalThis.MenuItemGroup = {
-    create: function (params) {
-      let module = globalThis.requireNapi('arkui.components.arkmenuitemgroup');
-      module.exportView();
-      getUINativeModule().menuitemgroup.createMenuItemGroup(params);
-    }
-  }
-}
-
 /// <reference path='./import.ts' />
 class ArkPluginComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -27340,351 +24685,6 @@ if (globalThis.ScrollBar !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.CommonModifier(nativePtr, classType);
     });
-  };
-}
-
-/// <reference path='./import.ts' />
-class ArkTextClockComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  allowChildCount() {
-    return 0;
-  }
-  initialize(value) {
-    let _a, _b;
-    if (value.length === 1 && isObject(value[0])) {
-      if (((_a = value[0]) === null || _a === void 0 ? void 0 : _a.timeZoneOffset) !== undefined) {
-        modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, value[0].timeZoneOffset);
-      } else {
-        modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, undefined);
-      }
-      if (((_b = value[0]) === null || _b === void 0 ? void 0 : _b.controller) !== undefined) {
-        modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, value[0].controller);
-      } else {
-        modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, undefined);
-      }
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, undefined);
-      modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, undefined);
-    }
-    return this;
-  }
-  format(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFormatModifier.identity, TextClockFormatModifier, value);
-    return this;
-  }
-  onDateChange(event) {
-    modifierWithKey(this._modifiersWithKeys, TextClockOnDateChangeModifier.identity, TextClockOnDateChangeModifier, event);
-    return this;
-  }
-  fontColor(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontColorModifier.identity, TextClockFontColorModifier, value);
-    return this;
-  }
-  fontSize(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontSizeModifier.identity, TextClockFontSizeModifier, value);
-    return this;
-  }
-  fontStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontStyleModifier.identity, TextClockFontStyleModifier, value);
-    return this;
-  }
-  fontWeight(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontWeightModifier.identity, TextClockFontWeightModifier, value);
-    return this;
-  }
-  fontFamily(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontFamilyModifier.identity, TextClockFontFamilyModifier, value);
-    return this;
-  }
-  textShadow(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockTextShadowModifier.identity, TextClockTextShadowModifier, value);
-    return this;
-  }
-  fontFeature(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontFeatureModifier.identity, TextClockFontFeatureModifier, value);
-    return this;
-  }
-  contentModifier(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockContentModifier.identity, TextClockContentModifier, value);
-    return this;
-  }
-  setContentModifier(modifier) {
-    if (modifier === undefined || modifier === null) {
-      getUINativeModule().textClock.setContentModifierBuilder(this.nativePtr, false);
-      return;
-    }
-    this.needRebuild = false;
-    if (this.builder !== modifier.applyContent()) {
-      this.needRebuild = true;
-    }
-    this.builder = modifier.applyContent();
-    this.modifier = modifier;
-    getUINativeModule().textClock.setContentModifierBuilder(this.nativePtr, this);
-  }
-  makeContentModifierNode(context, textClockConfiguration) {
-    textClockConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.textClockNode) || this.needRebuild) {
-      const xNode = globalThis.requireNapi('arkui.node');
-      this.textClockNode = new xNode.BuilderNode(context);
-      this.textClockNode.build(this.builder, textClockConfiguration);
-      this.needRebuild = false;
-    } else {
-      this.textClockNode.update(textClockConfiguration);
-    }
-    return this.textClockNode.getFrameNode();
-  }
-  dateTimeOptions(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockDateTimeOptionsModifier.identity, TextClockDateTimeOptionsModifier, value);
-    return this;
-  }
-}
-class TextClockOnDateChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetTextClockOnDateChange(node);
-    } else {
-      getUINativeModule().textClock.setTextClockOnDateChange(node, this.value);
-    }
-  }
-}
-TextClockOnDateChangeModifier.identity = Symbol('textClockOnDateChange');
-class TextClockTimeZoneOffsetModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.setTextClockTimeZoneOffset(node, undefined);
-    } else {
-      getUINativeModule().textClock.setTextClockTimeZoneOffset(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockTimeZoneOffsetModifier.identity = Symbol('textClockTimeZoneOffset');
-class TextClockControllerModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.setTextClockController(node, undefined);
-    } else {
-      getUINativeModule().textClock.setTextClockController(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockControllerModifier.identity = Symbol('textClockController');
-class TextClockFormatModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFormat(node);
-    }
-    else {
-      getUINativeModule().textClock.setFormat(node, this.value);
-    }
-  }
-}
-TextClockFormatModifier.identity = Symbol('textClockFormat');
-class TextClockFontColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontColor(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockFontColorModifier.identity = Symbol('textClockFontColor');
-class TextClockFontSizeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontSize(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontSize(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockFontSizeModifier.identity = Symbol('textClockFontSize');
-class TextClockFontStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontStyle(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontStyle(node, this.value);
-    }
-  }
-}
-TextClockFontStyleModifier.identity = Symbol('textClockFontStyle');
-class TextClockFontWeightModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontWeight(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontWeight(node, this.value);
-    }
-  }
-}
-TextClockFontWeightModifier.identity = Symbol('textClockFontWeight');
-class TextClockFontFamilyModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontFamily(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontFamily(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockFontFamilyModifier.identity = Symbol('textClockFontFamily');
-class TextClockFontFeatureModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontFeature(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontFeature(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockFontFeatureModifier.identity = Symbol('textClockFontFeature');
-class TextClockContentModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset, component) {
-    let textClockComponent = component;
-    textClockComponent.setContentModifier(this.value);
-  }
-}
-TextClockContentModifier.identity = Symbol('textClockContentModifier');
-class TextClockTextShadowModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetTextShadow(node);
-    }
-    else {
-      let shadow = new ArkShadowInfoToArray();
-      if (!shadow.convertShadowOptions(this.value)) {
-        getUINativeModule().textClock.resetTextShadow(node);
-      }
-      else {
-        getUINativeModule().textClock.setTextShadow(node, shadow.radius, shadow.type, shadow.color,
-          shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
-      }
-    }
-  }
-  checkObjectDiff() {
-    let checkDiff = true;
-    let arkShadow = new ArkShadowInfoToArray();
-    if (Object.getPrototypeOf(this.stageValue).constructor === Object &&
-      Object.getPrototypeOf(this.value).constructor === Object) {
-      checkDiff = arkShadow.checkDiff(this.stageValue, this.value);
-    }
-    else if (Object.getPrototypeOf(this.stageValue).constructor === Array &&
-      Object.getPrototypeOf(this.value).constructor === Array &&
-      this.stageValue.length === this.value.length) {
-      let isDiffItem = false;
-      for (let i = 0; i < this.value.length; i++) {
-        if (arkShadow.checkDiff(this.stageValue[i], this.value[1])) {
-          isDiffItem = true;
-          break;
-        }
-      }
-      if (!isDiffItem) {
-        checkDiff = false;
-      }
-    }
-    return checkDiff;
-  }
-}
-TextClockTextShadowModifier.identity = Symbol('textClockTextShadow');
-
-class TextClockDateTimeOptionsModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetDateTimeOptions(node);
-    }
-    else {
-      getUINativeModule().textClock.setDateTimeOptions(node, this.value.hour);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockDateTimeOptionsModifier.identity = Symbol('textClockDateTimeOptions');
-
-// @ts-ignore
-if (globalThis.TextClock !== undefined) {
-  globalThis.TextClock.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkTextClockComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.TextClockModifier(nativePtr, classType);
-    });
-  };
-  globalThis.TextClock.contentModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkTextClockComponent(nativeNode);
-    });
-    component.setContentModifier(modifier);
   };
 }
 
@@ -30365,6 +27365,12 @@ class ArkXComponentComponent extends ArkComponent {
     }
     return this;
   }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnNeedSoftkeyboardModifier.identity, OnNeedSoftkeyboardModifier, onNeedSoftkeyboardCallback);
+    }
+    return this;
+  }
   onBlur(event) {
     if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
       modifierWithKey(this._modifiersWithKeys, OnBlurModifier.identity, OnBlurModifier, event);
@@ -30549,9 +27555,6 @@ class ArkXComponentComponent extends ArkComponent {
   useSizeType(value) {
     throw new BusinessError(100201, 'useSizeType Method not supportted in ArkXComponentComponent class.');
   }
-  privacySensitive(value) {
-    throw new BusinessError(100201, 'privacySensitive Method not supportted in ArkXComponentComponent class.');
-  }
   clip(value) {
     throw new BusinessError(100201, 'clip Method not supportted in ArkXComponentComponent class.');
   }
@@ -30654,14 +27657,6 @@ if (globalThis.XComponent !== undefined) {
     });
     applyUIAttributes(modifier, nativeNode, component);
     component.applyModifierPatch();
-  };
-  globalThis.DataPanel.contentModifier = function (style) {
-      const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-      let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-      let component = this.createOrGetNode(elmtId, () => {
-        return new ArkDataPanelComponent(nativeNode);
-      });
-    component.setContentModifier(style);
   };
 }
 
@@ -31106,18 +28101,6 @@ if (globalThis.Badge !== undefined) {
   };
 }
 
-// @ts-ignore
-if (globalThis.FlowItem === undefined) {
-  globalThis.FlowItem = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('FlowItem');
-      let module = globalThis.requireNapi('arkui.components.arkflowitem');
-      module.exportView();
-      getUINativeModule().flowItem.create();
-    }
-  }
-}
-
 /// <reference path='./import.ts' />
 class ArkFormLinkComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -31289,99 +28272,6 @@ if (globalThis.GridItem !== undefined) {
       return new ArkGridItemComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.GridItemModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
-class ArkHyperlinkComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  color(value) {
-    modifierWithKey(this._modifiersWithKeys, HyperlinkColorModifier.identity, HyperlinkColorModifier, value);
-    return this;
-  }
-  draggable(value) {
-    modifierWithKey(this._modifiersWithKeys, HyperlinkDraggableModifier.identity, HyperlinkDraggableModifier, value);
-    return this;
-  }
-  responseRegion(value) {
-    modifierWithKey(this._modifiersWithKeys, HyperlinkResponseRegionModifier.identity, HyperlinkResponseRegionModifier, value);
-    return this;
-  }
-}
-class HyperlinkColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().hyperlink.resetColor(node);
-    }
-    else {
-      getUINativeModule().hyperlink.setColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-HyperlinkColorModifier.identity = Symbol('hyperlinkColor');
-class HyperlinkDraggableModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().hyperlink.resetDraggable(node);
-    }
-    else {
-      getUINativeModule().hyperlink.setDraggable(node, this.value);
-    }
-  }
-}
-HyperlinkDraggableModifier.identity = Symbol('hyperlinkDraggable');
-class HyperlinkResponseRegionModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h;
-    if (reset) {
-      getUINativeModule().hyperlink.resetResponseRegion(node);
-    }
-    else {
-      let responseRegion = [];
-      if (Array.isArray(this.value)) {
-        for (let i = 0; i < this.value.length; i++) {
-          responseRegion.push((_a = this.value[i].x) !== null && _a !== void 0 ? _a : 'PLACEHOLDER');
-          responseRegion.push((_b = this.value[i].y) !== null && _b !== void 0 ? _b : 'PLACEHOLDER');
-          responseRegion.push((_c = this.value[i].width) !== null && _c !== void 0 ? _c : 'PLACEHOLDER');
-          responseRegion.push((_d = this.value[i].height) !== null && _d !== void 0 ? _d : 'PLACEHOLDER');
-        }
-      }
-      else {
-        responseRegion.push((_e = this.value.x) !== null && _e !== void 0 ? _e : 'PLACEHOLDER');
-        responseRegion.push((_f = this.value.y) !== null && _f !== void 0 ? _f : 'PLACEHOLDER');
-        responseRegion.push((_g = this.value.width) !== null && _g !== void 0 ? _g : 'PLACEHOLDER');
-        responseRegion.push((_h = this.value.height) !== null && _h !== void 0 ? _h : 'PLACEHOLDER');
-      }
-      getUINativeModule().hyperlink.setResponseRegion(node, responseRegion, responseRegion.length);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-HyperlinkResponseRegionModifier.identity = Symbol('hyperlinkResponseRegion');
-// @ts-ignore
-if (globalThis.Hyperlink !== undefined) {
-  globalThis.Hyperlink.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkHyperlinkComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.HyperlinkModifier(nativePtr, classType);
     });
   };
 }
@@ -34752,25 +31642,6 @@ if (globalThis.UIExtensionComponent !== undefined) {
   };
 }
 
-// @ts-ignore
-if (globalThis.WaterFlow === undefined) {
-  globalThis.WaterFlow = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('WaterFlow');
-      let module = globalThis.requireNapi('arkui.components.arkwaterflow');
-      module.exportView();
-      getUINativeModule().waterFlow.create();
-      getUINativeModule().waterFlow.setWaterFlowInitialize(true,
-        params === null || params === void 0 ? void 0 : params.scroller,
-        params === null || params === void 0 ? void 0 : params.sections,
-        params === null || params === void 0 ? void 0 : params.layoutMode,
-        params === null || params === void 0 ? void 0 : params.footerContent,
-        params === null || params === void 0 ? void 0 : params.footer,
-        (params !== null && typeof params === 'object') ? 'footerContent' in params : false);
-    }
-  }
-}
-
 /// <reference path='./import.ts' />
 class ArkCommonShapeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -36160,237 +33031,6 @@ if (globalThis.MediaCachedImage !== undefined) {
     });
   };
 }
-
-class SymbolFontColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetFontColor(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setFontColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SymbolFontColorModifier.identity = Symbol('symbolGlyphFontColor');
-
-class SymbolFontSizeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetFontSize(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setFontSize(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SymbolFontSizeModifier.identity = Symbol('symbolGlyphFontSize');
-
-class SymbolFontWeightModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetFontWeight(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setFontWeight(node, this.value);
-    }
-  }
-}
-SymbolFontWeightModifier.identity = Symbol('symbolGlyphFontWeight');
-
-class RenderingStrategyModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetRenderingStrategy(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setRenderingStrategy(node, this.value);
-    }
-  }
-}
-RenderingStrategyModifier.identity = Symbol('symbolGlyphRenderingStrategy');
-
-class EffectStrategyModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetEffectStrategy(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setEffectStrategy(node, this.value);
-    }
-  }
-}
-EffectStrategyModifier.identity = Symbol('symbolGlyphEffectStrategy');
-
-class SymbolContentModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetSymbolGlyphInitialize(node);
-    } else {
-      getUINativeModule().symbolGlyph.setSymbolGlyphInitialize(node, this.value);
-    }
-  }
-}
-SymbolContentModifier.identity = Symbol('symbolContent');
-
-class SymbolEffectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetSymbolEffectOptions(node);
-    } else {
-      getUINativeModule().symbolGlyph.setSymbolEffectOptions(node, this.value.symbolEffect, this.value.action);
-    }
-  }
-}
-SymbolEffectModifier.identity = Symbol('symbolEffect');
-
-class SymbolShadowModifier extends ModifierWithKey {
-    constructor(value) {
-      super(value);
-    }
-    applyPeer(node, reset) {
-      if (reset) {
-        getUINativeModule().symbolGlyph.resetSymbolShadow(node);
-      } else {
-        getUINativeModule().symbolGlyph.setSymbolShadow(node, this.value);
-      }
-    }
-  }
-  SymbolShadowModifier.identity = Symbol('symbolShadow');
-
-  class ShaderStyleModifier extends ModifierWithKey {
-    constructor(value) {
-      super(value);
-    }
-    applyPeer(node, reset) {
-      if (reset) {
-        getUINativeModule().symbolGlyph.resetShaderStyle(node);
-      } else {
-        getUINativeModule().symbolGlyph.setShaderStyle(node, this.value);
-      }
-    }
-  }
-  ShaderStyleModifier.identity = Symbol('shaderStyle');
-
-class SymbolMinFontScaleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetMinFontScale(node);
-    } else {
-      getUINativeModule().symbolGlyph.setMinFontScale(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SymbolMinFontScaleModifier.identity = Symbol('symbolGlyphMinFontScale');
-
-class SymbolMaxFontScaleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetMaxFontScale(node);
-    } else {
-      getUINativeModule().symbolGlyph.setMaxFontScale(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SymbolMaxFontScaleModifier.identity = Symbol('symbolGlyphMaxFontScale');
-
-/// <reference path='./import.ts' />
-class ArkSymbolGlyphComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  initialize(value) {
-    if (value[0] !== undefined) {
-      modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value[0]);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, undefined);
-    }
-    return this;
-  }
-  fontColor(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolFontColorModifier.identity, SymbolFontColorModifier, value);
-    return this;
-  }
-  fontSize(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolFontSizeModifier.identity, SymbolFontSizeModifier, value);
-    return this;
-  }
-  fontWeight(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolFontWeightModifier.identity, SymbolFontWeightModifier, value);
-    return this;
-  }
-  renderingStrategy(value) {
-    modifierWithKey(this._modifiersWithKeys, RenderingStrategyModifier.identity, RenderingStrategyModifier, value);
-    return this;
-  }
-  effectStrategy(value) {
-    modifierWithKey(this._modifiersWithKeys, EffectStrategyModifier.identity, EffectStrategyModifier, value);
-    return this;
-  }
-  symbolEffect(effect, action) {
-    let symbolEffect = new ArkSymbolEffect();
-    symbolEffect.symbolEffect = effect;
-    symbolEffect.action = action;
-    modifierWithKey(this._modifiersWithKeys, SymbolEffectModifier.identity, SymbolEffectModifier, symbolEffect);
-    return this;
-  }
-  shaderStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, ShaderStyleModifier.identity, ShaderStyleModifier, value);
-    return this;
-  }
-  symbolShadow(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolShadowModifier.identity, SymbolShadowModifier, value);
-    return this;
-  }
-  minFontScale(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolMinFontScaleModifier.identity, SymbolMinFontScaleModifier, value);
-    return this;
-  }
-  maxFontScale(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolMaxFontScaleModifier.identity, SymbolMaxFontScaleModifier, value);
-    return this;
-  }
-}
-
 class SystemBarEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -36400,17 +33040,6 @@ class SystemBarEffectModifier extends ModifierWithKey {
   }
 }
 SystemBarEffectModifier.identity = Symbol('systemBarEffect');
-
-// @ts-ignore
-if (globalThis.SymbolGlyph !== undefined) {
-  globalThis.SymbolGlyph.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkSymbolGlyphComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.SymbolGlyphModifier(undefined, nativePtr, classType);
-    });
-  };
-}
 
 class SymbolSpanFontColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -36876,257 +33505,6 @@ if (globalThis.UIPickerComponent !== undefined) {
   };
 }
 
-// @ts-ignore
-if (globalThis.CalendarPicker === undefined) {
-  globalThis.CalendarPicker = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('CalendarPicker');
-      let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
-      module.exportView();
-      getUINativeModule().calendarPicker.create(params);
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.CalendarPickerDialog === undefined) {
-  globalThis.CalendarPickerDialog = {
-    show: function(params) {
-      getUINativeModule().loadNativeModule('CalendarPickerDialog');
-      let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
-      module.exportDialogView();
-      getUINativeModule().calendarPickerDialog.show(params);
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.Gauge === undefined) {
-  globalThis.Gauge = {
-    create: function(params) {
-      console.log('first create gauge nativeModule');
-      getUINativeModule().loadNativeModule('Gauge');
-      let module = globalThis.requireNapi('arkui.components.arkgauge');
-      module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().gauge.create(params.value ?? 0, params.min ?? 0, params.max ?? 100);
-      } else {
-        getUINativeModule().gauge.create(0, 0, 100);
-      }
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.AlphabetIndexer === undefined) {
-  globalThis.AlphabetIndexer = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule('Indexer');
-      let module = globalThis.requireNapi('arkui.components.arkalphabetindexer');
-      module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().alphabetIndexer.create(params, false);
-      } else {
-        getUINativeModule().alphabetIndexer.create(undefined, false);
-      }
-      return this;
-    },
-    createArc: function (params) {
-      getUINativeModule().loadNativeModule('Indexer');
-      let module = globalThis.requireNapi('arkui.components.arkalphabetindexer');
-      module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().alphabetIndexer.create(params, true);
-      } else {
-        getUINativeModule().alphabetIndexer.create(undefined, true);
-      }
-      return this;
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.Checkbox === undefined) {
-  globalThis.Checkbox = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Checkbox');
-      let module = globalThis.requireNapi('arkui.components.arkcheckbox');
-      module.exportView();
-      getUINativeModule().checkbox.create(params);
-    }
-  };
-}
-
-// @ts-ignore
-if (globalThis.CheckboxGroup === undefined) {
-  globalThis.CheckboxGroup = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('CheckboxGroup');
-      let module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
-      module.exportView();
-      getUINativeModule().checkboxgroup.create(params);
-    }
-  };
-}
-
-// @ts-ignore
-if (globalThis.Rating === undefined) {
-  globalThis.Rating = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Rating');
-      const module = globalThis.requireNapi('arkui.components.arkrating');
-      module.exportView();
-      if (params !== undefined && params !== null) {
-        getUINativeModule().rating.create(true, params);
-      } else {
-        getUINativeModule().rating.create(0, false);
-      }
-    }
-  };
-}
-
-// @ts-ignore
-if (globalThis.SideBarContainer === undefined) {
-  globalThis.SideBarContainer = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Sidebar');
-      let module = globalThis.requireNapi('arkui.components.arksidebarcontainer');
-      module.exportView();
-      getUINativeModule().sideBarContainer.create(params);
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.RowSplit === undefined) {
-  globalThis.RowSplit = {
-    create: function() {
-      getUINativeModule().loadNativeModule('RowSplit');
-      let module = globalThis.requireNapi('arkui.components.arkrowsplit');
-      module.exportView();
-      getUINativeModule().rowSplit.create();
-    }
-  };
-}
-
-// @ts-ignore
-if (globalThis.ColumnSplit === undefined) {
-  globalThis.ColumnSplit = {
-    create: function() {
-      getUINativeModule().loadNativeModule('ColumnSplit');
-      let module = globalThis.requireNapi('arkui.components.arkcolumnsplit');
-      module.exportView();
-      getUINativeModule().columnSplit.create();
-    }
-  };
-}
-// @ts-ignore
-if (globalThis.Stepper === undefined) {
-  globalThis.Stepper = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Stepper');
-      let module = globalThis.requireNapi('arkui.components.arkstepper');
-      module.exportView();
-      getUINativeModule().stepper.create(params);
-    }
-  };
-}
-
-// @ts-ignore
-if (globalThis.StepperItem === undefined) {
-  globalThis.StepperItem = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('StepperItem');
-      let module = globalThis.requireNapi('arkui.components.arkstepperitem');
-      module.exportView();
-      getUINativeModule().stepperItem.create(params);
-    }
-  };
-}
-
-// @ts-ignore
-if (globalThis.Marquee === undefined) {
-  globalThis.Marquee = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Marquee');
-      let module = globalThis.requireNapi('arkui.components.arkmarquee');
-      module.exportView();
-      getUINativeModule().marquee.create(params);
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.Radio === undefined) {
-  globalThis.Radio = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Radio');
-      let module = globalThis.requireNapi('arkui.components.arkradio');
-      module.exportView();
-      getUINativeModule().radio.create(params);
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.Slider === undefined) {
-  globalThis.Slider = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule("Slider");
-      let module = globalThis.requireNapi('arkui.components.arkslider');
-      module.exportView();
-      getUINativeModule().slider.create(params);
-    }
-  }
-}
-
-if (globalThis.QRCode === undefined) {
-  globalThis.QRCode = {
-    create: function(value) {
-      getUINativeModule().loadNativeModule("QRCode");
-      let module = globalThis.requireNapi('arkui.components.arkqrcode');
-      module.exportView();
-      getUINativeModule().qrcode.create(value);
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.FolderStack === undefined) {
-  globalThis.FolderStack = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('FolderStack');
-      let module = globalThis.requireNapi('arkui.components.arkfolderstack');
-      module.exportView();
-      getUINativeModule().folderStack.create(params);
-    }
-  };
-}
-
-// @ts-ignore
-if (globalThis.TimePicker === undefined) {
-  globalThis.TimePicker = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule("TimePicker");
-      const module = globalThis.requireNapi('arkui.components.arktimepicker');
-      module.exportView();
-      getUINativeModule().timePicker.create(params);
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.TimePickerDialog === undefined) {
-  globalThis.TimePickerDialog = {
-    show: function(params) {
-      getUINativeModule().loadNativeModule("TimePickerDialog");
-      const module = globalThis.requireNapi('arkui.components.arktimepicker');
-      module.exportViewDialog();
-      getUINativeModule().timePickerDialog.show(params);
-    }
-  }
-}
-
 function getArkUINodeFromNapi() {
   if(globalThis.__XNode__ === undefined) {
       globalThis.__XNode__ = globalThis.requireNapi('arkui.node');
@@ -37135,7 +33513,3 @@ function getArkUINodeFromNapi() {
 }
 
 globalThis.__getArkUINode__ = getArkUINodeFromNapi;
-
-function __getArkUINativeModuleForm__() {
-  return arkUINativeModule;
-}

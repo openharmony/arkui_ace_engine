@@ -249,29 +249,15 @@ public:
         return frameNode->GetOrCreateInputEventHub();
     }
 
-    RefPtr<FocusHub> GetOrCreateMainFrameNodeFocusHub() const
-    {
-        auto frameNode = GetMainFrameNode();
-        if (!frameNode) {
-            return nullptr;
-        }
-        return frameNode->GetOrCreateFocusHub();
-    }
+    RefPtr<FocusHub> GetOrCreateMainFrameNodeFocusHub() const;
 
-    RefPtr<FocusHub> GetMainFrameNodeFocusHub() const
-    {
-        auto frameNode = GetMainFrameNode();
-        if (!frameNode) {
-            return nullptr;
-        }
-        return frameNode->GetFocusHub();
-    }
+    RefPtr<FocusHub> GetMainFrameNodeFocusHub() const;
     
     ACE_FORCE_EXPORT FrameNode* GetMainFrameNode() const;
 
    // Get main component include composed component created by js view.
     ACE_FORCE_EXPORT const RefPtr<UINode>& GetMainElementNode() const;
-    void ApplyParentThemeScopeId(const RefPtr<UINode>& element);
+    ACE_FORCE_EXPORT void ApplyParentThemeScopeId(const RefPtr<UINode>& element);
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
     ACE_FORCE_EXPORT void Push(const RefPtr<UINode>& element, bool isCustomView = false);

@@ -200,6 +200,7 @@ public:
 
     void UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType);
     void OnColorConfigurationUpdate() override;
+    void OnColorModeChange(uint32_t colorMode) override;
     void SetUncheckedBorderColorByJSRadioTheme(bool flag)
     {
         borderColorByJSRadioTheme_ = flag;

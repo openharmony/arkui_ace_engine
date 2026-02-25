@@ -17,10 +17,9 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_GEOMETRY_POINT_H
 
 #include "ui/base/geometry/offset.h"
+#include "ui/base/event_source.h"
 #include "ui/base/macros.h"
 #include "ui/base/utils/utils.h"
-
-#include "ui/event/ace_events.h"
 
 namespace OHOS::Ace {
 

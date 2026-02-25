@@ -130,6 +130,10 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest001, TestSize.Level1)
  */
 HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
 {
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -146,7 +150,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     bool needReset;
 
     /**
-     * @tc.steps: step1. needReset = false; dirtyPixelGridRoundSize_ = { 0, 0 }
+     * @tc.steps: step2. needReset = false; dirtyPixelGridRoundSize_ = { 0, 0 }
      */
     needReset = false;
     pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
@@ -157,7 +161,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     EXPECT_FALSE(contentModifier1->needResetSurface_);
 
     /**
-     * @tc.steps: step2. needReset = false; dirtyPixelGridRoundSize_ = { 1, 1 };
+     * @tc.steps: step3. needReset = false; dirtyPixelGridRoundSize_ = { 1, 1 };
      */
     needReset = false;
     config.frameSizeChange = false;
@@ -170,7 +174,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     EXPECT_FALSE(contentModifier2->needResetSurface_);
 
     /**
-     * @tc.steps: step3. needReset = true; dirtyPixelGridRoundSize_ = { 1, 1 };
+     * @tc.steps: step4. needReset = true; dirtyPixelGridRoundSize_ = { 1, 1 };
      */
     needReset = false;
     config.frameSizeChange = true;
@@ -183,7 +187,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     EXPECT_FALSE(contentModifier3->needResetSurface_);
 
     /**
-     * @tc.steps: step4. needReset = true; config.frameSizeChange = false; config.contentSizeChange = false;
+     * @tc.steps: step5. needReset = true; config.frameSizeChange = false; config.contentSizeChange = false;
      */
     needReset = true;
     config.frameSizeChange = false;
@@ -196,7 +200,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     EXPECT_FALSE(contentModifier4->needResetSurface_);
 
     /**
-     * @tc.steps: step5. needReset = true; config.frameSizeChange = true; config.contentSizeChange = false;
+     * @tc.steps: step6. needReset = true; config.frameSizeChange = true; config.contentSizeChange = false;
      */
     needReset = true;
     config.frameSizeChange = true;
@@ -209,7 +213,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     EXPECT_TRUE(contentModifier5->needResetSurface_);
 
     /**
-     * @tc.steps: step6. needReset = true; config.frameSizeChange = false; config.contentSizeChange = true;
+     * @tc.steps: step7. needReset = true; config.frameSizeChange = false; config.contentSizeChange = true;
      */
     needReset = true;
     config.frameSizeChange = false;
@@ -807,5 +811,115 @@ HWTEST_F(CanvasTestNg, CanvasPatternCacheTest, TestSize.Level1)
     pattern->FireReadyEvent();
     EXPECT_TRUE(onReadyHasTriggered);
     EXPECT_FALSE(isNeedDrawingContext);
+}
+
+/**
+ * @tc.name: RegisterVisibleAreaChangeTest001
+ * @tc.desc: CanvasPattern::RegisterVisibleAreaChange - First registration success
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, RegisterVisibleAreaChangeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create Canvas node and setup pipeline context.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Setup mock pipeline context.
+     * @tc.expected: Pipeline context is set.
+     */
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_TRUE(pipelineContext);
+
+    /**
+     * @tc.steps3: Call RegisterVisibleAreaChange for the first time.
+     * @tc.expected: Registration flag is set to true.
+     */
+    pattern->hasRegisteredVisibleAreaChange_ = false;
+    pattern->RegisterVisibleAreaChange();
+    EXPECT_TRUE(pattern->hasRegisteredVisibleAreaChange_);
+
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: RegisterVisibleAreaChangeTest002
+ * @tc.desc: CanvasPattern::RegisterVisibleAreaChange - Duplicate registration ignored
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, RegisterVisibleAreaChangeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create Canvas node and setup pipeline context.
+     * @tc.expected: FrameNode and pattern are created successfully.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Setup mock pipeline context and mark as already registered.
+     * @tc.expected: hasRegisteredVisibleAreaChange_ is true.
+     */
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_TRUE(pipelineContext);
+    pattern->hasRegisteredVisibleAreaChange_ = true;
+
+    /**
+     * @tc.steps3: Call RegisterVisibleAreaChange when already registered.
+     * @tc.expected: Registration remains true (no duplicate registration).
+     */
+    pattern->RegisterVisibleAreaChange();
+    EXPECT_TRUE(pattern->hasRegisteredVisibleAreaChange_);
+
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: CanvasUINodeTraceTest001
+ * @tc.desc: Verify ACE_UINODE_TRACE is called in CanvasPaintMethod::UpdateRecordingCanvas
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, CanvasUINodeTraceTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Canvas node.
+     * @tc.expected: Canvas node created successfully.
+     */
+    g_canvasTestProperty.immediateRender = true;
+    g_canvasTestProperty.unit = CanvasUnit::PX;
+    uint64_t nodeId = 12345;
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    ASSERT_TRUE(paintMethod);
+
+    /**
+     * @tc.steps: step2. Reset trace and call UpdateRecordingCanvas which should trigger ACE_UINODE_TRACE.
+     * @tc.expected: Trace ID is updated.
+     */
+    ResetLastTraceId();
+    paintMethod->UpdateRecordingCanvas(300.0f, 300.0f);
+    uint64_t traceId = GetLastTraceId();
+    EXPECT_EQ(traceId, nodeId);
 }
 } // namespace OHOS::Ace::NG

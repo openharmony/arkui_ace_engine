@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,61 +16,50 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { Visibility } from "./enums"
-import { VoidCallback } from "./units"
-import { AttributeModifier, extractors, hookFormComponentAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { default as Want } from "@ohos.app.ability.Want"
-import { FormComponentModifier } from "./../FormComponentModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Want_serializer } from "./../framework/ohos.app.ability.Want"
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, ArkCommonMethodComponent } from './common'
+import { Visibility } from './enums'
+import { VoidCallback } from './units'
+import { AttributeModifier, extractors, hookFormComponentAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CustomBuilder } from './builder'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { default as Want } from '@ohos.app.ability.Want'
+import { FormComponentModifier } from './../FormComponentModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { Want_serializer } from './../framework/ohos.app.ability.Want'
 export class ArkFormComponentPeer extends ArkCommonMethodPeer {
     attributeSet?: FormComponentModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkFormComponentPeer {
-        const peerId  = PeerNode.nextId()
-        const _peerPtr  = ArkUIGeneratedNativeModule._FormComponent_construct(peerId, flags)
-        const _peer  = new ArkFormComponentPeer(_peerPtr, peerId, 'FormComponent', flags)
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._FormComponent_construct(peerId, flags)
+        const _peer = new ArkFormComponentPeer(_peerPtr, peerId, 'FormComponent', flags)
         component?.setPeer(_peer)
         return _peer
     }
-    setFormComponentOptionsAttribute(value: FormInfo): void {
+    setFormComponentOptionsAttribute(formInfo: FormInfo): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        FormInfo_serializer.write(thisSerializer, value)
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        FormInfo_serializer.write(thisSerializer, formInfo)
         ArkUIGeneratedNativeModule._FormComponentInterface_setFormComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSizeAttribute(value: FormSize | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            FormSize_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._FormComponentAttribute_setSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setModuleNameAttribute(value: string | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeString(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -79,10 +68,10 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setDimensionAttribute(value: FormDimension | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = (value as FormDimension)
+            const valueTmpValue = (value as FormDimension)
             thisSerializer.writeInt32(valueTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -91,10 +80,10 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setAllowUpdateAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeBoolean(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -103,10 +92,10 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setVisibilityAttribute(value: Visibility | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = (value as Visibility)
+            const valueTmpValue = (value as Visibility)
             thisSerializer.writeInt32(valueTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -114,11 +103,23 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._FormComponentAttribute_setVisibility(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnAcquiredAttribute(value: ((value0: FormCallbackInfo) => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setColorModeAttribute(value: FormColorMode | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = (value as FormColorMode)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._FormComponentAttribute_setColorMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnAcquiredAttribute(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -126,11 +127,11 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._FormComponentAttribute_setOnAcquired(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnErrorAttribute(value: ((value0: ErrorInformation) => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setOnErrorAttribute(value: arkui_component_common_Callback<ErrorInformation, void> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -138,11 +139,11 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._FormComponentAttribute_setOnError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnRouterAttribute(value: ((value0: RouterCallbackInfo) => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setOnRouterAttribute(value: arkui_component_common_Callback<RouterCallbackInfo, void> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -150,11 +151,11 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._FormComponentAttribute_setOnRouter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnUninstallAttribute(value: ((value0: FormCallbackInfo) => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setOnUninstallAttribute(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -163,10 +164,10 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setOnLoadAttribute(value: VoidCallback | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -174,11 +175,11 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._FormComponentAttribute_setOnLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnUpdateAttribute(value: ((value0: FormCallbackInfo) => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+    setOnUpdateAttribute(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.holdAndWriteCallback(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -188,13 +189,9 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
     }
 }
 export enum FormDimension {
-    DIMENSION_1_2 = 0,
     Dimension_1_2 = 0,
-    DIMENSION_2_2 = 1,
     Dimension_2_2 = 1,
-    DIMENSION_2_4 = 2,
     Dimension_2_4 = 2,
-    DIMENSION_4_4 = 3,
     Dimension_4_4 = 3,
     DIMENSION_1_1 = 6,
     DIMENSION_6_4 = 7,
@@ -208,6 +205,11 @@ export enum FormRenderingMode {
 export enum FormShape {
     RECT = 1,
     CIRCLE = 2
+}
+export enum FormColorMode {
+    MODE_AUTO = -1,
+    MODE_DARK = 0,
+    MODE_LIGHT = 1
 }
 export interface FormInfo {
     id: int64 | string;
@@ -225,11 +227,7 @@ export interface FormInfo {
 export interface FormCallbackInfo {
     id: int64;
     idString: string;
-    isLocked?: boolean;
-}
-export interface FormSize {
-    width: double;
-    height: double;
+    isLocked: boolean;
 }
 export interface ErrorInformation {
     errcode: int32;
@@ -243,203 +241,113 @@ export interface RouterCallbackInfo {
     params: string;
 }
 export interface FormComponentAttribute extends CommonMethod {
-    setFormComponentOptions(value: FormInfo): this {
-        throw new Error("Unimplemented method setFormComponentOptions")
+    setFormComponentOptions(formInfo: FormInfo): this {
+        throw new Error('Unimplemented method setFormComponentOptions')
     }
-    size(value: FormSize | undefined): this
     moduleName(value: string | undefined): this {
-        throw new Error("Unimplemented method moduleName")
+        throw new Error('Unimplemented method moduleName')
     }
     dimension(value: FormDimension | undefined): this {
-        throw new Error("Unimplemented method dimension")
+        throw new Error('Unimplemented method dimension')
     }
     allowUpdate(value: boolean | undefined): this {
-        throw new Error("Unimplemented method allowUpdate")
+        throw new Error('Unimplemented method allowUpdate')
     }
     visibility(value: Visibility | undefined): this
-    onAcquired(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onAcquired")
+    colorMode(value: FormColorMode | undefined): this {
+        throw new Error('Unimplemented method colorMode')
     }
-    onError(value: ((value0: ErrorInformation) => void) | undefined): this {
-        throw new Error("Unimplemented method onError")
+    onAcquired(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): this {
+        throw new Error('Unimplemented method onAcquired')
     }
-    onRouter(value: ((value0: RouterCallbackInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onRouter")
+    onError(value: arkui_component_common_Callback<ErrorInformation, void> | undefined): this {
+        throw new Error('Unimplemented method onError')
     }
-    onUninstall(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onUninstall")
+    onRouter(value: arkui_component_common_Callback<RouterCallbackInfo, void> | undefined): this {
+        throw new Error('Unimplemented method onRouter')
+    }
+    onUninstall(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): this {
+        throw new Error('Unimplemented method onUninstall')
     }
     onLoad(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onLoad")
+        throw new Error('Unimplemented method onLoad')
     }
-    onUpdate(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onUpdate")
+    onUpdate(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): this {
+        throw new Error('Unimplemented method onUpdate')
     }
     attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormComponentAttribute {
-    size_value?: FormSize | undefined
-    moduleName_value?: string | undefined
-    dimension_value?: FormDimension | undefined
-    allowUpdate_value?: boolean | undefined
-    visibility_value?: Visibility | undefined
-    onAcquired_value?: ((value0: FormCallbackInfo) => void) | undefined
-    onError_value?: ((value0: ErrorInformation) => void) | undefined
-    onRouter_value?: ((value0: RouterCallbackInfo) => void) | undefined
-    onUninstall_value?: ((value0: FormCallbackInfo) => void) | undefined
-    onLoad_value?: VoidCallback | undefined
-    onUpdate_value?: ((value0: FormCallbackInfo) => void) | undefined
-    attributeModifier_value?: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    setFormComponentOptions(value: FormInfo): this {
-        return this
-    }
-    size(value: FormSize | undefined): this {
-        return this
-    }
-    moduleName(value: string | undefined): this {
-        return this
-    }
-    dimension(value: FormDimension | undefined): this {
-        return this
-    }
-    allowUpdate(value: boolean | undefined): this {
-        return this
-    }
-    visibility(value: Visibility | undefined): this {
-        return this
-    }
-    onAcquired(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        return this
-    }
-    onError(value: ((value0: ErrorInformation) => void) | undefined): this {
-        return this
-    }
-    onRouter(value: ((value0: RouterCallbackInfo) => void) | undefined): this {
-        return this
-    }
-    onUninstall(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        return this
-    }
-    onLoad(value: VoidCallback | undefined): this {
-        return this
-    }
-    onUpdate(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkFormComponentComponent extends ArkCommonMethodComponent implements FormComponentAttribute {
     getPeer(): ArkFormComponentPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkFormComponentPeer)
     }
-    public setFormComponentOptions(value: FormInfo): this {
-        if (this.checkPriority("setFormComponentOptions")) {
-            const value_casted = value as (FormInfo)
-            this.getPeer()?.setFormComponentOptionsAttribute(value_casted)
-            this.applyOptionsFinish('FormComponentAttribute');
-            return this
-        }
-        return this
-    }
-    public size(value: FormSize | undefined): this {
-        if (this.checkPriority("size")) {
-            const value_casted = value as (FormSize | undefined)
-            this.getPeer()?.setSizeAttribute(value_casted)
-            return this
-        }
+    public setFormComponentOptions(formInfo: FormInfo): this {
+        const formInfo_casted = formInfo as (FormInfo)
+        this.getPeer()?.setFormComponentOptionsAttribute(formInfo_casted)
+        this.applyOptionsFinish('FormComponentAttribute');
         return this
     }
     public moduleName(value: string | undefined): this {
-        if (this.checkPriority("moduleName")) {
-            const value_casted = value as (string | undefined)
-            this.getPeer()?.setModuleNameAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (string | undefined)
+        this.getPeer()?.setModuleNameAttribute(value_casted)
         return this
     }
     public dimension(value: FormDimension | undefined): this {
-        if (this.checkPriority("dimension")) {
-            const value_casted = value as (FormDimension | undefined)
-            this.getPeer()?.setDimensionAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (FormDimension | undefined)
+        this.getPeer()?.setDimensionAttribute(value_casted)
         return this
     }
     public allowUpdate(value: boolean | undefined): this {
-        if (this.checkPriority("allowUpdate")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setAllowUpdateAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setAllowUpdateAttribute(value_casted)
         return this
     }
     public visibility(value: Visibility | undefined): this {
-        if (this.checkPriority("visibility")) {
-            const value_casted = value as (Visibility | undefined)
-            this.getPeer()?.setVisibilityAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (Visibility | undefined)
+        this.getPeer()?.setVisibilityAttribute(value_casted)
         return this
     }
-    public onAcquired(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        if (this.checkPriority("onAcquired")) {
-            const value_casted = value as (((value0: FormCallbackInfo) => void) | undefined)
-            this.getPeer()?.setOnAcquiredAttribute(value_casted)
-            return this
-        }
+    public colorMode(value: FormColorMode | undefined): this {
+        const value_casted = value as (FormColorMode | undefined)
+        this.getPeer()?.setColorModeAttribute(value_casted)
         return this
     }
-    public onError(value: ((value0: ErrorInformation) => void) | undefined): this {
-        if (this.checkPriority("onError")) {
-            const value_casted = value as (((value0: ErrorInformation) => void) | undefined)
-            this.getPeer()?.setOnErrorAttribute(value_casted)
-            return this
-        }
+    public onAcquired(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<FormCallbackInfo, void> | undefined)
+        this.getPeer()?.setOnAcquiredAttribute(value_casted)
         return this
     }
-    public onRouter(value: ((value0: RouterCallbackInfo) => void) | undefined): this {
-        if (this.checkPriority("onRouter")) {
-            const value_casted = value as (((value0: RouterCallbackInfo) => void) | undefined)
-            this.getPeer()?.setOnRouterAttribute(value_casted)
-            return this
-        }
+    public onError(value: arkui_component_common_Callback<ErrorInformation, void> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<ErrorInformation, void> | undefined)
+        this.getPeer()?.setOnErrorAttribute(value_casted)
         return this
     }
-    public onUninstall(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        if (this.checkPriority("onUninstall")) {
-            const value_casted = value as (((value0: FormCallbackInfo) => void) | undefined)
-            this.getPeer()?.setOnUninstallAttribute(value_casted)
-            return this
-        }
+    public onRouter(value: arkui_component_common_Callback<RouterCallbackInfo, void> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<RouterCallbackInfo, void> | undefined)
+        this.getPeer()?.setOnRouterAttribute(value_casted)
+        return this
+    }
+    public onUninstall(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<FormCallbackInfo, void> | undefined)
+        this.getPeer()?.setOnUninstallAttribute(value_casted)
         return this
     }
     public onLoad(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onLoad")) {
-            const value_casted = value as (VoidCallback | undefined)
-            this.getPeer()?.setOnLoadAttribute(value_casted)
-            return this
-        }
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnLoadAttribute(value_casted)
         return this
     }
-    public onUpdate(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        if (this.checkPriority("onUpdate")) {
-            const value_casted = value as (((value0: FormCallbackInfo) => void) | undefined)
-            this.getPeer()?.setOnUpdateAttribute(value_casted)
-            return this
-        }
+    public onUpdate(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): this {
+        const value_casted = value as (arkui_component_common_Callback<FormCallbackInfo, void> | undefined)
+        this.getPeer()?.setOnUpdateAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookFormComponentAttributeModifier(this, value);
+            hookFormComponentAttributeModifier(this, value);
         })
         return this
     }
@@ -454,221 +362,203 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
 
 @memo
 export function FormComponentImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: FormComponentAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkFormComponentComponent>((): ArkFormComponentComponent => {
         return new ArkFormComponentComponent()
     })
-    NodeAttach<ArkFormComponentPeer>((): ArkFormComponentPeer => ArkFormComponentPeer.create(receiver), (peer: ArkFormComponentPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkFormComponentPeer>((): ArkFormComponentPeer => ArkFormComponentPeer.create(receiver), (_: ArkFormComponentPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
-export class FormSize_serializer {
-    public static write(buffer: SerializerBase, value: FormSize): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForWidth  = value.width
-        valueSerializer.writeFloat64(valueHolderForWidth)
-        const valueHolderForHeight  = value.height
-        valueSerializer.writeFloat64(valueHolderForHeight)
-    }
-    public static read(buffer: DeserializerBase): FormSize {
-        let valueDeserializer : DeserializerBase = buffer
-        const widthTmpResult : double = valueDeserializer.readFloat64()
-        const heightTmpResult : double = valueDeserializer.readFloat64()
-        let value : FormSize = ({width: widthTmpResult, height: heightTmpResult} as FormSize)
-        return value
-    }
-}
 export class ErrorInformation_serializer {
     public static write(buffer: SerializerBase, value: ErrorInformation): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForErrcode  = value.errcode
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForErrcode = value.errcode
         valueSerializer.writeInt32(valueHolderForErrcode)
-        const valueHolderForMsg  = value.msg
+        const valueHolderForMsg = value.msg
         valueSerializer.writeString(valueHolderForMsg)
     }
     public static read(buffer: DeserializerBase): ErrorInformation {
-        let valueDeserializer : DeserializerBase = buffer
-        const errcodeTmpResult : int32 = valueDeserializer.readInt32()
-        const msgTmpResult : string = (valueDeserializer.readString() as string)
-        let value : ErrorInformation = ({errcode: errcodeTmpResult, msg: msgTmpResult} as ErrorInformation)
-        return value
-    }
-}
-export class RouterCallbackInfo_serializer {
-    public static write(buffer: SerializerBase, value: RouterCallbackInfo): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForAction = value.action;
-        valueSerializer.writeString(valueHolderForAction);
-        const valueHolderForBundleName = value.bundleName;
-        valueSerializer.writeString(valueHolderForBundleName);
-        const valueHolderForModuleName = value.moduleName;
-        valueSerializer.writeString(valueHolderForModuleName);
-        const valueHolderForAbilityName = value.abilityName;
-        valueSerializer.writeString(valueHolderForAbilityName);
-        const valueHolderForParams = value.params;
-        valueSerializer.writeString(valueHolderForParams);
-    }
-    public static read(buffer: DeserializerBase): RouterCallbackInfo {
-        let valueDeserializer : DeserializerBase = buffer
-        const actionTmpResult = (valueDeserializer.readString() as string)
-        const bundleNameTmpResult = (valueDeserializer.readString() as string)
-        const moduleNameTmpResult = (valueDeserializer.readString() as string)
-        const abilityNameTmpResult = (valueDeserializer.readString() as string)
-        const paramsTmpResult = (valueDeserializer.readString() as string)
-        let value : RouterCallbackInfo = ({action: actionTmpResult, bundleName: bundleNameTmpResult, moduleName: moduleNameTmpResult, abilityName: abilityNameTmpResult, params: paramsTmpResult} as RouterCallbackInfo)
+        let valueDeserializer: DeserializerBase = buffer
+        const errcodeTmpResult: int32 = valueDeserializer.readInt32()
+        const msgTmpResult: string = (valueDeserializer.readString() as string)
+        let value: ErrorInformation = ({errcode: errcodeTmpResult, msg: msgTmpResult} as ErrorInformation)
         return value
     }
 }
 export class FormCallbackInfo_serializer {
     public static write(buffer: SerializerBase, value: FormCallbackInfo): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForId  = value.id
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForId = value.id
         valueSerializer.writeInt64(valueHolderForId)
-        const valueHolderForIdString  = value.idString
+        const valueHolderForIdString = value.idString
         valueSerializer.writeString(valueHolderForIdString)
-        const valueHolderIsLocked  = value.isLocked
-        valueSerializer.writeBoolean(valueHolderIsLocked)
+        const valueHolderForIsLocked = value.isLocked
+        valueSerializer.writeBoolean(valueHolderForIsLocked)
     }
     public static read(buffer: DeserializerBase): FormCallbackInfo {
-        let valueDeserializer : DeserializerBase = buffer
-        const idTmpResult : int64 = valueDeserializer.readInt64()
-        const idStringTmpResult : string = (valueDeserializer.readString() as string)
-        const isLockedTmpResult : boolean = valueDeserializer.readBoolean()
-        let value : FormCallbackInfo = ({id: idTmpResult, idString: idStringTmpResult, isLocked: isLockedTmpResult} as FormCallbackInfo)
+        let valueDeserializer: DeserializerBase = buffer
+        const idTmpResult: int64 = valueDeserializer.readInt64()
+        const idStringTmpResult: string = (valueDeserializer.readString() as string)
+        const isLockedTmpResult: boolean = valueDeserializer.readBoolean()
+        let value: FormCallbackInfo = ({id: idTmpResult, idString: idStringTmpResult, isLocked: isLockedTmpResult} as FormCallbackInfo)
         return value
     }
 }
 export class FormInfo_serializer {
     public static write(buffer: SerializerBase, value: FormInfo): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForId  = value.id
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForId = value.id
         if (valueHolderForId instanceof int64) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForIdForIdx0  = valueHolderForId as int64
+            const valueHolderForIdForIdx0 = valueHolderForId as int64
             valueSerializer.writeInt64(valueHolderForIdForIdx0)
         } else if (valueHolderForId instanceof string) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForIdForIdx1  = valueHolderForId as string
+            const valueHolderForIdForIdx1 = valueHolderForId as string
             valueSerializer.writeString(valueHolderForIdForIdx1)
         }
-        const valueHolderForName  = value.name
+        const valueHolderForName = value.name
         valueSerializer.writeString(valueHolderForName)
-        const valueHolderForBundle  = value.bundle
+        const valueHolderForBundle = value.bundle
         valueSerializer.writeString(valueHolderForBundle)
-        const valueHolderForAbility  = value.ability
+        const valueHolderForAbility = value.ability
         valueSerializer.writeString(valueHolderForAbility)
-        const valueHolderForModule  = value.module
+        const valueHolderForModule = value.module
         valueSerializer.writeString(valueHolderForModule)
-        const valueHolderForDimension  = value.dimension
+        const valueHolderForDimension = value.dimension
         if (valueHolderForDimension !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForDimensionTmpValue  = (valueHolderForDimension as FormDimension)
+            const valueHolderForDimensionTmpValue = (valueHolderForDimension as FormDimension)
             valueSerializer.writeInt32(valueHolderForDimensionTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForTemporary  = value.temporary
+        const valueHolderForTemporary = value.temporary
         if (valueHolderForTemporary !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForTemporaryTmpValue  = valueHolderForTemporary!
+            const valueHolderForTemporaryTmpValue = valueHolderForTemporary!
             valueSerializer.writeBoolean(valueHolderForTemporaryTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForWant  = value.want
+        const valueHolderForWant = value.want
         if (valueHolderForWant !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForWantTmpValue  = valueHolderForWant!
+            const valueHolderForWantTmpValue = valueHolderForWant!
             Want_serializer.write(valueSerializer, valueHolderForWantTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForRenderingMode  = value.renderingMode
+        const valueHolderForRenderingMode = value.renderingMode
         if (valueHolderForRenderingMode !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForRenderingModeTmpValue  = (valueHolderForRenderingMode as FormRenderingMode)
+            const valueHolderForRenderingModeTmpValue = (valueHolderForRenderingMode as FormRenderingMode)
             valueSerializer.writeInt32(valueHolderForRenderingModeTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForShape  = value.shape
+        const valueHolderForShape = value.shape
         if (valueHolderForShape !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForShapeTmpValue  = (valueHolderForShape as FormShape)
+            const valueHolderForShapeTmpValue = (valueHolderForShape as FormShape)
             valueSerializer.writeInt32(valueHolderForShapeTmpValue.valueOf())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const valueHolderForExemptAppLock  = value.exemptAppLock
+        const valueHolderForExemptAppLock = value.exemptAppLock
         if (valueHolderForExemptAppLock !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForExemptAppLockTmpValue  = valueHolderForExemptAppLock!
+            const valueHolderForExemptAppLockTmpValue = valueHolderForExemptAppLock!
             valueSerializer.writeBoolean(valueHolderForExemptAppLockTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): FormInfo {
-        let valueDeserializer : DeserializerBase = buffer
-        const idTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let idTmpBuf : int64 | string | undefined
-        if (idTmpBufUnionSelector == (0).toChar()) {
+        let valueDeserializer: DeserializerBase = buffer
+        const idTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
+        let idTmpBuf: int64 | string | undefined
+        if (idTmpBufUnionSelector == (0).toByte()) {
             idTmpBuf = valueDeserializer.readInt64()
-        } else if (idTmpBufUnionSelector == (1).toChar()) {
+        } else if (idTmpBufUnionSelector == (1).toByte()) {
             idTmpBuf = (valueDeserializer.readString() as string)
         } else {
-            throw new Error("One of the branches for idTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for idTmpBuf has to be chosen through deserialisation.')
         }
-        const idTmpResult : int64 | string = (idTmpBuf as int64 | string)
-        const nameTmpResult : string = (valueDeserializer.readString() as string)
-        const bundleTmpResult : string = (valueDeserializer.readString() as string)
-        const abilityTmpResult : string = (valueDeserializer.readString() as string)
-        const moduleTmpResult : string = (valueDeserializer.readString() as string)
-        const dimensionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let dimensionTmpBuf : FormDimension | undefined = undefined
+        const idTmpResult: int64 | string = (idTmpBuf as int64 | string)
+        const nameTmpResult: string = (valueDeserializer.readString() as string)
+        const bundleTmpResult: string = (valueDeserializer.readString() as string)
+        const abilityTmpResult: string = (valueDeserializer.readString() as string)
+        const moduleTmpResult: string = (valueDeserializer.readString() as string)
+        const dimensionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let dimensionTmpBuf: FormDimension | undefined = undefined
         if ((dimensionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             dimensionTmpBuf = FormDimension.fromValue(valueDeserializer.readInt32())
         }
-        const dimensionTmpResult : FormDimension | undefined = dimensionTmpBuf
-        const temporaryTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let temporaryTmpBuf : boolean | undefined = undefined
+        const dimensionTmpResult: FormDimension | undefined = dimensionTmpBuf
+        const temporaryTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let temporaryTmpBuf: boolean | undefined = undefined
         if ((temporaryTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             temporaryTmpBuf = valueDeserializer.readBoolean()
         }
-        const temporaryTmpResult : boolean | undefined = temporaryTmpBuf
-        const wantTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let wantTmpBuf : Want | undefined = undefined
+        const temporaryTmpResult: boolean | undefined = temporaryTmpBuf
+        const wantTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let wantTmpBuf: Want | undefined = undefined
         if ((wantTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             wantTmpBuf = (Want_serializer.read(valueDeserializer) as Want)
         }
-        const wantTmpResult : Want | undefined = wantTmpBuf
-        const renderingModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let renderingModeTmpBuf : FormRenderingMode | undefined = undefined
+        const wantTmpResult: Want | undefined = wantTmpBuf
+        const renderingModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let renderingModeTmpBuf: FormRenderingMode | undefined = undefined
         if ((renderingModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             renderingModeTmpBuf = FormRenderingMode.fromValue(valueDeserializer.readInt32())
         }
-        const renderingModeTmpResult : FormRenderingMode | undefined = renderingModeTmpBuf
-        const shapeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let shapeTmpBuf : FormShape | undefined = undefined
+        const renderingModeTmpResult: FormRenderingMode | undefined = renderingModeTmpBuf
+        const shapeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let shapeTmpBuf: FormShape | undefined = undefined
         if ((shapeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             shapeTmpBuf = FormShape.fromValue(valueDeserializer.readInt32())
         }
-        const shapeTmpResult : FormShape | undefined = shapeTmpBuf
-        const exemptAppLockTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let exemptAppLockTmpBuf : boolean | undefined = undefined
+        const shapeTmpResult: FormShape | undefined = shapeTmpBuf
+        const exemptAppLockTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let exemptAppLockTmpBuf: boolean | undefined = undefined
         if ((exemptAppLockTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             exemptAppLockTmpBuf = valueDeserializer.readBoolean()
         }
-        const exemptAppLockTmpResult : boolean | undefined = exemptAppLockTmpBuf
-        let value : FormInfo = ({id: idTmpResult, name: nameTmpResult, bundle: bundleTmpResult, ability: abilityTmpResult, module: moduleTmpResult, dimension: dimensionTmpResult, temporary: temporaryTmpResult, want: wantTmpResult, renderingMode: renderingModeTmpResult, shape: shapeTmpResult, exemptAppLock: exemptAppLockTmpResult} as FormInfo)
+        const exemptAppLockTmpResult: boolean | undefined = exemptAppLockTmpBuf
+        let value: FormInfo = ({id: idTmpResult, name: nameTmpResult, bundle: bundleTmpResult, ability: abilityTmpResult, module: moduleTmpResult, dimension: dimensionTmpResult, temporary: temporaryTmpResult, want: wantTmpResult, renderingMode: renderingModeTmpResult, shape: shapeTmpResult, exemptAppLock: exemptAppLockTmpResult} as FormInfo)
+        return value
+    }
+}
+export class RouterCallbackInfo_serializer {
+    public static write(buffer: SerializerBase, value: RouterCallbackInfo): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForAction = value.action
+        valueSerializer.writeString(valueHolderForAction)
+        const valueHolderForBundleName = value.bundleName
+        valueSerializer.writeString(valueHolderForBundleName)
+        const valueHolderForModuleName = value.moduleName
+        valueSerializer.writeString(valueHolderForModuleName)
+        const valueHolderForAbilityName = value.abilityName
+        valueSerializer.writeString(valueHolderForAbilityName)
+        const valueHolderForParams = value.params
+        valueSerializer.writeString(valueHolderForParams)
+    }
+    public static read(buffer: DeserializerBase): RouterCallbackInfo {
+        let valueDeserializer: DeserializerBase = buffer
+        const actionTmpResult: string = (valueDeserializer.readString() as string)
+        const bundleNameTmpResult: string = (valueDeserializer.readString() as string)
+        const moduleNameTmpResult: string = (valueDeserializer.readString() as string)
+        const abilityNameTmpResult: string = (valueDeserializer.readString() as string)
+        const paramsTmpResult: string = (valueDeserializer.readString() as string)
+        let value: RouterCallbackInfo = ({action: actionTmpResult, bundleName: bundleNameTmpResult, moduleName: moduleNameTmpResult, abilityName: abilityNameTmpResult, params: paramsTmpResult} as RouterCallbackInfo)
         return value
     }
 }

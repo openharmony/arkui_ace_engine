@@ -34,11 +34,11 @@ class NavDestinationContextAccessorTest : public AccessorTestBase<
 };
 
 /**
- * @tc.name: initialStateTest
+ * @tc.name: getConfigInRouteMapTestInitialState
  * @tc.desc: Check the functionality of NavDestinationContextAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationContextAccessorTest, initialStateTest, TestSize.Level1)
+HWTEST_F(NavDestinationContextAccessorTest, getConfigInRouteMapTestInitialState, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getConfigInRouteMap, nullptr);
     accessor_->getConfigInRouteMap(peer_);

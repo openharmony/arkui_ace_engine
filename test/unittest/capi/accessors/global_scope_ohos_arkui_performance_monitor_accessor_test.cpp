@@ -83,11 +83,11 @@ public:
 };
 
 /**
- * @tc.name: beginSceneValidValuesTest
+ * @tc.name: beginTestSceneValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, beginSceneValidValuesTest, TestSize.Level1)
+HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, beginTestSceneValidValues, TestSize.Level1)
 {
     Ark_String initScene;
     Opt_String initNote;
@@ -114,11 +114,11 @@ HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, beginSceneValidV
 }
 
 /**
- * @tc.name: beginActionTypeValuesTest
+ * @tc.name: beginTestActionTypeValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, beginActionTypeValuesTest, TestSize.Level1)
+HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, beginTestActionTypeValues, TestSize.Level1)
 {
     Ark_String initScene;
     Opt_String initNote;
@@ -145,11 +145,11 @@ HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, beginActionTypeV
 }
 
 /**
- * @tc.name: beginNoteValuesTest
+ * @tc.name: beginTestNoteValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, beginNoteValuesTest, TestSize.Level1)
+HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, beginTestNoteValues, TestSize.Level1)
 {
     Ark_String initScene;
     Opt_String initNote;
@@ -202,11 +202,11 @@ HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, endTest, TestSiz
 }
 
 /**
- * @tc.name: recordInputEventTimeTest
+ * @tc.name: recordInputEventTimeTestActionValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, recordInputEventTimeActionValuesTest, TestSize.Level1)
+HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, recordInputEventTimeTestActionValues, TestSize.Level1)
 {
     Ark_PerfMonitorActionType initAction;
     Ark_PerfMonitorSourceType initSource;
@@ -233,11 +233,11 @@ HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, recordInputEvent
 }
 
 /**
- * @tc.name: recordInputEventTimeTest
+ * @tc.name: recordInputEventTimeTestSourceValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, recordInputEventTimeSourceValuesTest, TestSize.Level1)
+HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, recordInputEventTimeTestSourceValues, TestSize.Level1)
 {
     Ark_PerfMonitorActionType initAction;
     Ark_PerfMonitorSourceType initSource;
@@ -264,11 +264,11 @@ HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, recordInputEvent
 }
 
 /**
- * @tc.name: recordInputEventTimeTest
+ * @tc.name: recordInputEventTimeTestValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, recordInputEventTimeValuesTest, TestSize.Level1)
+HWTEST_F(GlobalScope_ohos_arkui_performanceMonitorAccessorTest, recordInputEventTimeTestValues, TestSize.Level1)
 {
     Ark_PerfMonitorActionType initAction;
     Ark_PerfMonitorSourceType initSource;

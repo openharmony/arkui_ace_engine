@@ -36,6 +36,7 @@
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "adapter/ohos/entrance/ace_viewport_config.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/delay_task.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/update_config_manager.h"
@@ -382,7 +383,7 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit) override;
+    void SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport = false) override;
     void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
                              const std::optional<AppForceSplitConfig>& appConfig) override;
 
@@ -483,6 +484,10 @@ public:
     void SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void SetXComponentDisplayConstraintEnabled(bool isEnable) override;
 
+    // get PointerEvent ptr from ts
+    const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromAxisEvent(napi_value event) override;
+    const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromTouchEvent(napi_value event) override;
+
 protected:
     void RunIntentPageIfNeeded();
     void RestoreNavDestinationInfoInner(const std::string& navDestinationInfo, bool isColdStart);
@@ -526,6 +531,7 @@ protected:
         const RefPtr<NG::PipelineContext>& context);
     void CloseSyncTransaction(OHOS::Rosen::RSSyncTransactionController* transactionController,
         std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler);
+    const EcmaVM* GetEcmaVMOnJsThread() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
@@ -576,7 +582,8 @@ protected:
     RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
         Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
     std::unordered_map<void*, std::function<void()>> destructCallbacks_;
-
+    TaskTimeRecord taskTimeForComeIn_;
+    TaskTimeRecord taskTimeForExit_;
     SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
     std::mutex updateDecorVisibleMutex_;
     SingleTaskExecutor::CancelableTask setAppWindowIconTask_;

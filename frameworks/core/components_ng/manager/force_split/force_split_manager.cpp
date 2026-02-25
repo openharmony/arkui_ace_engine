@@ -21,18 +21,66 @@
 #include "core/common/force_split/force_split_utils.h"
 
 namespace OHOS::Ace::NG {
-void ForceSplitManager::SetForceSplitEnable(bool isForceSplit)
+void ForceSplitManager::RegisterSurfaceChangeCallbackIfNeeded()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s forceSplit", (isForceSplit ? "enable" : "disable"));
+    if (surfaceChangeCallbackId_.has_value()) {
+        return;
+    }
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto callback = [weakMgr = WeakClaim(this)](int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason type) {
+        if (type != WindowSizeChangeReason::ROTATION) {
+            return;
+        }
+        auto mgr = weakMgr.Upgrade();
+        CHECK_NULL_VOID(mgr);
+        mgr->ChangeForceSplitModeIfNeeded();
+    };
+    surfaceChangeCallbackId_ = context->RegisterSurfaceChangedCallback(std::move(callback));
+}
+
+void ForceSplitManager::ChangeForceSplitModeIfNeeded()
+{
+    if (!delayedIsForceSplitEnable_.has_value()) {
+        return;
+    }
+    bool isEnable = delayedIsForceSplitEnable_.value();
+    delayedIsForceSplitEnable_ = std::nullopt;
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "delayed %{public}s forceSplit", (isEnable ? "enable" : "disable"));
+    SetForceSplitEnable(isEnable, false);
+}
+
+bool ForceSplitManager::IsForceSplitEnable(bool isRouter) const
+{
+    if (isRouter) {
+        return isForceSplitEnable_ && isRouter_;
+    }
+    return isForceSplitEnable_ && !isRouter_ && !disableNavForceSplitInternal_;
+}
+
+void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s forceSplit, needUpdateViewport:%{public}d",
+        (isForceSplit ? "enable" : "disable"), needUpdateViewport);
     /**
      * As long as the application supports force split, regardless of whether it is enabled or not,
      * the SetForceSplitEnable interface will be called.
      */
     isForceSplitSupported_ = true;
+    if (needUpdateViewport) {
+        delayedIsForceSplitEnable_ = isForceSplit;
+        RegisterSurfaceChangeCallbackIfNeeded();
+        return;
+    }
     if (isForceSplitEnable_ == isForceSplit) {
         return;
     }
     isForceSplitEnable_ = isForceSplit;
+    OnForceSplitEnableChange();
+}
+
+void ForceSplitManager::OnForceSplitEnableChange()
+{
     auto context = pipeline_.Upgrade();
     CHECK_NULL_VOID(context);
     UpdateIsInForceSplitMode();
@@ -48,7 +96,24 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit)
     }
     NotifyForceSplitStateChange();
 }
- 
+
+void ForceSplitManager::SetNavigationForceSplitEnableInternal(bool enableSplit)
+{
+    if (!isForceSplitSupported_ || isRouter_) {
+        return;
+    }
+    if (disableNavForceSplitInternal_ != enableSplit) {
+        return;
+    }
+    disableNavForceSplitInternal_ = !enableSplit;
+    OnForceSplitEnableChange();
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto windowManager = context->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    windowManager->NotifyForceFullScreenChange(!enableSplit);
+}
+
 void ForceSplitManager::NotifyForceFullScreenChange(bool isForceFullScreen)
 {
     auto context = pipeline_.Upgrade();
@@ -71,7 +136,7 @@ void ForceSplitManager::UpdateIsInForceSplitMode()
     auto windowManager = context->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     bool forceSplitSuccess = false;
-    if (isForceSplitEnable_) {
+    if (isForceSplitEnable_ && (isRouter_ || !disableNavForceSplitInternal_)) {
         /**
          * The force split mode must meet the following conditions to take effect:
          *   1. Belonging to the main window of the application

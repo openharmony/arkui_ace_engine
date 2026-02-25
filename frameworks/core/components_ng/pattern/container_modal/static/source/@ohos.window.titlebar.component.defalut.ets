@@ -662,7 +662,7 @@ struct System__Reserved_$$$__UI__ButtonBar__Component {
             this.onCancelMenuTimer()
             this.menuDisappearTimer(MENU_MOUSEOUT_DISAPPEAR_TIME)
           }
-          let context = UIContext.getFocusedUIContext()
+          let context = UIContext.resolveUIContext()
           if (context) {
             context.animateTo({ duration: 0 } as AnimateParam, () => {
               if (isHover) {
@@ -703,7 +703,7 @@ struct System__Reserved_$$$__UI__ButtonBar__Component {
           this.onHoverMinimizeButton(isHover)
           if (isHover) {
           }
-          let context = UIContext.getFocusedUIContext()
+          let context = UIContext.resolveUIContext()
           if (context) {
             context.animateTo({ duration: 0 } as AnimateParam, () => {
               if (isHover) {
@@ -744,7 +744,7 @@ struct System__Reserved_$$$__UI__ButtonBar__Component {
           this.onHoverCloseButton(isHover)
           if (isHover) {
           }
-          let context = UIContext.getFocusedUIContext()
+          let context = UIContext.resolveUIContext()
           if (context) {
             context.animateTo({ duration: 0 } as AnimateParam, () => {
               if (isHover) {

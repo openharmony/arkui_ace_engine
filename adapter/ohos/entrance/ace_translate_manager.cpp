@@ -215,8 +215,8 @@ void UiTranslateManagerImpl::TraverseAddArkWebImages(const std::vector<int32_t>&
     int32_t webComponentId, const std::function<void(int32_t, const std::map<int32_t,
     std::shared_ptr<Media::PixelMap>>&, MultiImageQueryErrorCode)>& webQueryCallback)
 {
-    auto frameNode =
-        AceType::DynamicCast<NG::FrameNode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(webComponentId));
+    auto iter = listenerMap_.find(webComponentId);
+    auto frameNode = iter == listenerMap_.end() ? nullptr : iter->second.Upgrade();
     if (frameNode == nullptr || frameNode->GetPattern<NG::WebPattern>() == nullptr) {
         std::map<int32_t, std::shared_ptr<Media::PixelMap>> emptyMap;
         for (auto webImageId : webImageIds) {
@@ -463,13 +463,18 @@ void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelM
 
 void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
 {
-    RefPtr<NG::FrameNode> result;
+    std::list<RefPtr<NG::FrameNode>> result;
     pageNode->FindTopNavDestination(result);
-    if (result != nullptr) {
-        TravelFindPixelMap(result);
-    } else {
+    if (result.empty()) {
         TravelFindPixelMap(pageNode);
+    } else {
+        for (auto frameNode : result) {
+            if (frameNode) {
+                TravelFindPixelMap(frameNode);
+            }
+        }
     }
+    
     SendPixelMap();
 }
 
@@ -478,7 +483,7 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
     for (const auto& item : currentNode->GetChildren(true)) {
         auto node = AceType::DynamicCast<NG::FrameNode>(item);
         if (node) {
-            if (!node->CheckVisibleAndActive()) {
+            if (!node->IsVisibleAndActive()) {
                 continue;
             }
             if (node->GetTag() == V2::IMAGE_ETS_TAG) {
@@ -493,7 +498,7 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
 
 void UiTranslateManagerImpl::PostToUI(const std::function<void()>& task)
 {
-    if (taskExecutor_) {
+    if (taskExecutor_ && task) {
         taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIHandleUiTranslateManager");
     }
 }

@@ -42,7 +42,7 @@ class MonitorPathHelper {
 
   public static isValidForSyncMonitor(path: string): boolean {
     let count = path.split('*').length - 1;
-    return ((count <= 0) || (count == 1 && path.endsWith('.*')));
+    return ((count <= 0) || (count === 1 && path.endsWith('.*')));
   }
 
   public static isValidForMonitor(path: string): boolean {

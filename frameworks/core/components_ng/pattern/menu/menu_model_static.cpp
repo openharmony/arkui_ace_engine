@@ -14,17 +14,17 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_model_static.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 
 #include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
-
 RefPtr<FrameNode> MenuModelStatic::CreateFrameNode(int32_t nodeId)
 {
     ACE_LAYOUT_SCOPED_TRACE("MenuModelStatic::CreateFrameNode [nodeId = %d]", nodeId);
     const std::function<RefPtr<Pattern>(void)>& patternCreator =
-        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); };
-    return FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId, patternCreator);
+        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, MENU_ETS_TAG, MenuType::MULTI_MENU); };
+    return FrameNode::GetOrCreateFrameNode(MENU_ETS_TAG, nodeId, patternCreator);
 }
 
 void MenuModelStatic::SetExpandingMode(FrameNode* frameNode, const std::optional<SubMenuExpandingMode>& expandingMode)
@@ -86,6 +86,7 @@ void MenuModelStatic::SetFontColor(FrameNode* frameNode, const std::optional<Col
     } else {
         auto menuNode = reinterpret_cast<FrameNode*>(frameNode);
         CHECK_NULL_VOID(menuNode);
+        ACE_UINODE_TRACE(menuNode);
         auto pipeline = menuNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
@@ -155,6 +156,11 @@ void MenuModelStatic::ResetBorderRadius(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MenuLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE, frameNode);
+    auto menuNode = reinterpret_cast<FrameNode*>(frameNode);
+    CHECK_NULL_VOID(menuNode);
+    auto menuRenderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(menuRenderContext);
+    menuRenderContext->SetClipToBounds(false);
 }
 
 void MenuModelStatic::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,

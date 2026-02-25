@@ -70,11 +70,11 @@ public:
 };
 
 /**
- * @tc.name: setFingerListTest
+ * @tc.name: setFingerListTestId
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseGestureEventAccessorTest, setFingerListIdTest, TestSize.Level1)
+HWTEST_F(BaseGestureEventAccessorTest, setFingerListTestId, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFingerList, nullptr);
     std::vector<Ark_FingerInfo> vectorData;
@@ -111,11 +111,11 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListIdTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setFingerListGlobalXYTest
+ * @tc.name: setFingerListTestGlobalXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseGestureEventAccessorTest, setFingerListGlobalXYTest, TestSize.Level1)
+HWTEST_F(BaseGestureEventAccessorTest, setFingerListTestGlobalXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFingerList, nullptr);
     std::vector<Ark_FingerInfo> vectorData;
@@ -156,11 +156,11 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListGlobalXYTest, TestSize.Level
 }
 
 /**
- * @tc.name: setFingerListLocalXYTest
+ * @tc.name: setFingerListTestLocalXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseGestureEventAccessorTest, setFingerListLocalXYTest, TestSize.Level1)
+HWTEST_F(BaseGestureEventAccessorTest, setFingerListTestLocalXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFingerList, nullptr);
     std::vector<Ark_FingerInfo> vectorData;
@@ -201,11 +201,11 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListLocalXYTest, TestSize.Level1
 }
 
 /**
- * @tc.name: setFingerListDisplayXYTest
+ * @tc.name: setFingerListTestDisplayXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseGestureEventAccessorTest, setFingerListDisplayXYTest, TestSize.Level1)
+HWTEST_F(BaseGestureEventAccessorTest, setFingerListTestDisplayXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFingerList, nullptr);
     std::vector<Ark_FingerInfo> vectorData;
@@ -246,11 +246,11 @@ HWTEST_F(BaseGestureEventAccessorTest, setFingerListDisplayXYTest, TestSize.Leve
 }
 
 /**
- * @tc.name: GetFingerListTest
+ * @tc.name: getFingerListTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseGestureEventAccessorTest, GetFingerListTest, TestSize.Level1)
+HWTEST_F(BaseGestureEventAccessorTest, getFingerListTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFingerList, nullptr);
     auto eventInfo = peer_->GetEventInfo();

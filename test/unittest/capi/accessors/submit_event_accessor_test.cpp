@@ -38,11 +38,11 @@ public:
 };
 
 /**
- * @tc.name: SetTextTest
+ * @tc.name: setTextTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SubmitEventAccessorTest, SetTextTest, TestSize.Level1)
+HWTEST_F(SubmitEventAccessorTest, setTextTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -58,11 +58,11 @@ HWTEST_F(SubmitEventAccessorTest, SetTextTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTextTest
+ * @tc.name: getTextTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SubmitEventAccessorTest, GetTextTest, TestSize.Level1)
+HWTEST_F(SubmitEventAccessorTest, getTextTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -75,11 +75,11 @@ HWTEST_F(SubmitEventAccessorTest, GetTextTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: KeepEditableStateTest
+ * @tc.name: keepEditableStateTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SubmitEventAccessorTest, KeepEditableStateTest, TestSize.Level1)
+HWTEST_F(SubmitEventAccessorTest, keepEditableStateTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);

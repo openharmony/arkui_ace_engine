@@ -101,7 +101,7 @@ public:
     void GetCurrentPageName() override;
     void SendCurrentPageName(const std::string& result) override;
     void SaveProcessId(std::string key, int32_t id) override;
-    void EraseProcessId(const std::string& key) override;
+    void EraseProcessId(const std::string& key, int32_t targetPid) override;
     void SendCurrentLanguage(std::string result) override;
     void GetWebTranslateText(std::string extraData, bool isContinued) override;
     void SendWebTextToAI(int32_t nodeId, std::string res) override;
@@ -129,8 +129,8 @@ public:
     void ReportContentChangeEvent(ChangeType type, const std::string& simpleTree) override;
     void SetStartContentChangeDetectCallback(std::function<void(ContentChangeConfig)>&&) override;
     void SetStopContentChangeDetectCallback(std::function<void()>&&) override;
-    void GetStateMgmtInfo(
-        const std::string& ComponentName, const std::string& propertyName, const std::string& jsonPath) override;
+    void GetStateMgmtInfo(const std::string& ComponentName, const std::string& propertyName,
+        const std::string& jsonPath, bool onlyVisible) override;
     void SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback) override;
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
     void SaveGetWebInfoByRequestFunction(GetWebInfoByRequestFunction&& callback) override;
@@ -143,6 +143,7 @@ public:
 private:
     std::mutex mutex_;
     std::shared_mutex reportObjectMutex_;
+    std::shared_mutex processMapMutex_;
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
 };
 

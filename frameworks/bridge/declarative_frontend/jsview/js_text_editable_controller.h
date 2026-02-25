@@ -16,51 +16,32 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXT_EDITABLE_CONTROLLER_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXT_EDITABLE_CONTROLLER_H
 
-#include "bridge/declarative_frontend/style_string/js_span_string.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::Framework {
-class JSTextEditableController final : public Referenced {
+class JSTextEditableController : public Referenced {
 public:
     JSTextEditableController() = default;
     ~JSTextEditableController() override = default;
 
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSTextEditableController* scroller);
     void CaretPosition(int32_t caretPosition);
-    void SetTextSelection(const JSCallbackInfo& info);
-    void ShowPassword(const JSCallbackInfo& info);
-    void HidePassword(const JSCallbackInfo& info);
-    void ScrollToVisible(const JSCallbackInfo& info);
     void StopEditing();
-    void GetTextContentRect(const JSCallbackInfo& info);
-    void GetTextContentLinesNum(const JSCallbackInfo& info);
-    void GetCaretOffset(const JSCallbackInfo& info);
 
     void SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
         controllerWeak_ = controller;
     }
 
-    void AddText(const JSCallbackInfo& info);
-    void DeleteText(const JSCallbackInfo& info);
-    void GetSelection(const JSCallbackInfo& info);
-    void ClearPreviewText(const JSCallbackInfo& info);
-    void GetText(const JSCallbackInfo& info);
-
-    void SetPlaceholderStyledString(const JSCallbackInfo& info);
-    RefPtr<SpanString> GetPlaceholderStyledString() const;
-    void ClearPlaceholderStyledString();
+    ACE_FORCE_EXPORT RefPtr<SpanString> GetPlaceholderStyledString() const;
+    ACE_FORCE_EXPORT void ClearPlaceholderStyledString();
     void DeleteBackward();
 
 private:
+    friend class JSTextEditableControllerBinding;
     WeakPtr<TextFieldControllerBase> controllerWeak_;
     WeakPtr<SpanString> placeholderStyledString_;
-    JSRef<JSObject> CreateRectangle(const Rect& info);
     ACE_DISALLOW_COPY_AND_MOVE(JSTextEditableController);
 };
 } // namespace OHOS::Ace::Framework

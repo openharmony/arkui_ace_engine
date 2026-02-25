@@ -26,6 +26,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/render/drawing.h"
 #ifndef ACE_UNITTEST
 #include "core/components/common/painter/rosen_decoration_painter.h"
@@ -51,6 +52,7 @@ constexpr double MAX_GRAYSCALE = 255.0;
 constexpr double HANGING_PERCENT = 0.8;
 constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 const int32_t PX2REM_NUM = 15;
+const double MINUS_ONE = -1;
 
 #ifndef ACE_UNITTEST
 constexpr int32_t IMAGE_CACHE_COUNT = 50;
@@ -123,6 +125,14 @@ const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShader
 CustomPaintPaintMethod::CustomPaintPaintMethod()
 {
     apiVersion_ = Container::GetCurrentApiTargetVersion();
+}
+
+void CustomPaintPaintMethod::SetAlpha(double alpha)
+{
+    state_.globalState.SetAlpha(alpha);
+    if (NearEqual(alpha, MINUS_ONE)) {
+        SendStatisticEvent(StatisticEventType::CANVAS_GLOBAL_ALPHA_MINUS_ONE);
+    }
 }
 
 bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const std::string& filterParam)
@@ -2239,5 +2249,17 @@ void CustomPaintPaintMethod::SetTransform(std::shared_ptr<Ace::Pattern> pattern,
     pattern->SetSkewY(transform.skewY);
     pattern->SetTranslateX(transform.translateX);
     pattern->SetTranslateY(transform.translateY);
+}
+
+void CustomPaintPaintMethod::SendStatisticEvent(StatisticEventType type)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        context = PipelineBase::GetCurrentContextSafely();
+    }
+    CHECK_NULL_VOID(context);
+    auto statisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    statisticEventReporter->SendEvent(type);
 }
 } // namespace OHOS::Ace::NG

@@ -1478,6 +1478,21 @@ bool ListItemPattern::RenderCustomChild(int64_t deadline)
     return true;
 }
 
+FocusPattern ListItemPattern::GetFocusPattern() const
+{
+    if (listItemStyle_ == V2::ListItemStyle::CARD) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, FocusPattern());
+        auto listItemTheme = pipelineContext->GetTheme<ListItemTheme>();
+        CHECK_NULL_RETURN(listItemTheme, FocusPattern());
+        FocusPaintParam paintParam;
+        paintParam.SetPaintColor(listItemTheme->GetItemFocusBorderColor());
+        paintParam.SetPaintWidth(listItemTheme->GetItemFocusBorderWidth());
+        return { FocusType::SCOPE, true, FocusStyleType::INNER_BORDER, paintParam };
+    }
+    return { FocusType::SCOPE, true };
+}
+
 void ListItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("indexInList", indexInList_);

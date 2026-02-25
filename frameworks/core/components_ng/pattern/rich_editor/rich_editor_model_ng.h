@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,18 @@ public:
     void SetSingleLine(bool enabled) override;
     void ResetSingleLine() override;
 
+    static void SetCaretOffset(FrameNode* frameNode, int32_t caretPosition);
+    static int32_t GetCaretOffset(FrameNode* frameNode);
+    static void SetSelection(FrameNode* frameNode, int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options);
+    static void StopEditing(FrameNode* frameNode);
+    static bool IsEditing(FrameNode* frameNode);
+    static RectF GetCaretRect(FrameNode* frameNode);
+    static void DeleteBackward(FrameNode* frameNode);
+    static void CloseSelectionMenu(FrameNode* frameNode);
+    static PreviewTextInfo GetPreviewTextInfo(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateRichEditorStyledStringNode(int32_t nodeId);
+    static void CreateModel(bool isStyledStringMode = false);
     static void SetSelectDetectEnable(FrameNode* frameNode, const bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
     static void ResetSelectDetectEnable(FrameNode* frameNode);
@@ -90,37 +101,60 @@ public:
     static bool GetTextDetectEnable(FrameNode* frameNode);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnIMEInputComplete(FrameNode* frameNode,
-        std::function<void(const RichEditorAbstractSpanResult&)>&& callback);
-    static void SetOnWillChange(FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func);
-    static void SetOnDidChange(FrameNode* frameNode, std::function<void(const RichEditorChangeValue&)>&& func);
+        std::function<void(const RichEditorAbstractSpanResult&)>&& callback, bool isJsView = false);
+    static void SetOnWillChange(
+        FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func, bool isJsView = false);
+    static void SetOnDidChange(
+        FrameNode* frameNode, std::function<void(const RichEditorChangeValue&)>&& func, bool isJsView = false);
     static void SetPlaceholder(FrameNode* frameNode, PlaceholderOptions& options);
-    static void SetAboutToDelete(FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func);
-    static void SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback);
+    static void SetAboutToDelete(
+        FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func, bool isJsView = false);
+    static void SetOnDidIMEInput(
+        FrameNode* frameNode, std::function<void(const TextRange&)>&& callback, bool isJsView = false);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
+    static CopyOptions GetCopyOption(FrameNode* frameNode);
     static void SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
     static Color GetCaretColor(FrameNode* frameNode);
-    static void SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
+    static void SetOnSelect(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback, bool isJsView = false);
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& callback);
-    static void SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback, bool isJsView = false);
     static void SetCustomKeyboard(
         FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance = false);
     static void SetCustomKeyboardWithNode(
         FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance = false);
+    static RefPtr<UINode> GetCustomKeyboardNode(FrameNode* frameNode);
+    static bool GetCustomKeyboardOption(FrameNode* frameNode);
     static void SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor);
+    static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static void SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
+    static void SetOnShare(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
     void SetEnterKeyType(TextInputAction value) override;
     static void SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action);
     static TextInputAction GetEnterKeyType(FrameNode* frameNode);
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback);
-    static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
+    static size_t GetLineCount(FrameNode* frameNode);
+    static TextLineMetrics GetLineMetrics(FrameNode* frameNode, int32_t lineNumber);
+    static std::vector<ParagraphManager::TextBox> GetRectsForRange(FrameNode* frameNode, int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle);
+    static PositionWithAffinity GetGlyphPositionAtCoordinate(FrameNode* frameNode, int32_t x, int32_t y);
+    static void SetTypingParagraphStyle(FrameNode* frameNode,
+        std::optional<struct UpdateParagraphStyle> typingParagraphStyle);
+    static void SetTypingStyle(FrameNode* frameNode, std::optional<struct UpdateSpanStyle> typingStyle,
+            std::optional<TextStyle> textStyle);
+    static std::optional<struct UpdateSpanStyle> GetTypingStyle(FrameNode* frameNode);
+    static void SetAboutToIMEInput(
+        FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback, bool isJsView = false);
     static void SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
+    static bool GetRequestKeyboardOnFocus(FrameNode* frameNode);
     static void SetSupportPreviewText(FrameNode* frameNode, bool value);
+    static bool IsSupportPreviewText(FrameNode* frameNode);
     static void SetSelectionMenuOptions(FrameNode* frameNode,
         const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick,
         const OnPrepareMenuCallback&& onPrepareMenuCallback);
@@ -129,15 +163,25 @@ public:
     static void SetBarState(FrameNode* frameNode, DisplayMode mode);
     static OHOS::Ace::DisplayMode GetBarState(FrameNode* frameNode);
     static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
+    static int32_t GetMaxLength(FrameNode* frameNode);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
+    static int32_t GetMaxLines(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
+    static bool IsEnableAutoSpacing(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
+    static bool IsCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
+    static bool IsIncludeFontPadding(FrameNode* frameNode);
     static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
+    static bool IsFallbackLineSpacing(FrameNode* frameNode);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
+    static bool IsStopBackPress(FrameNode* frameNode);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
+    static KeyboardAppearance GetKeyboardAppearance(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
+    static bool GetEnableHapticFeedback(FrameNode* frameNode);
     static void SetSupportStyledUndo(FrameNode* frameNode, bool enabled);
+    static bool IsSupportStyledUndo(FrameNode* frameNode);
     static void SetScrollBarColor(FrameNode* frameNode, std::optional<Color> value);
     static Color GetScrollBarColor(FrameNode* frameNode);
     static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
@@ -146,6 +190,9 @@ public:
     static void SetSingleLine(FrameNode* frameNode, bool enabled);
     static void ResetSingleLine(FrameNode* frameNode);
     static bool GetSingleLine(FrameNode* frameNode);
+    static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType,
+        TextResponseType& responseType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
+    static void ResetBindSelectionMenu(FrameNode* frameNode);
 
 private:
     void SetDraggable(bool draggable);

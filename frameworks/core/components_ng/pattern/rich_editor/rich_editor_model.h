@@ -346,6 +346,7 @@ public:
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;
     virtual void SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle) = 0;
+    virtual void SetPlaceholderStyledString(const RefPtr<SpanStringBase>& value) = 0;
     virtual std::optional<struct UpdateSpanStyle> GetTypingStyle() = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;

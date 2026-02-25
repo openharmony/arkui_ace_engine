@@ -1097,6 +1097,37 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg011, TestSize.Level1)
     TextFieldModelNG::SetShowCounter(frameNode, true);
     TextFieldModelNG::SetShowCounter(frameNode, false);
 }
+
+/**
+ * @tc.name: SetMaxLength010
+ * @tc.desc: test SetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetMaxLength010, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.step: step2. Set MaxLength
+     */
+    uint32_t maxLines = { 3 };
+    textFieldModelNG.SetMaxLength(frameNode, maxLines);
+
+    /**
+     * @tc.steps: step3. Check MaxLength.
+     */
+    EXPECT_EQ(pattern->GetMaxLength(), 3);
+}
+
 HWTEST_F(TextInputAreaTest, testSetCounterTextColor02, TestSize.Level1)
 {
     /**
@@ -2199,5 +2230,105 @@ HWTEST_F(TextInputAreaTest, SetCompressLeadingPunctuation002, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetCompressLeadingPunctuation(), true);
     layoutProperty->UpdateCompressLeadingPunctuation(false);
     EXPECT_EQ(layoutProperty->GetCompressLeadingPunctuation(), false);
+}
+
+/**
+ * @tc.name: GetTextOverflow001
+ * @tc.desc: Test GetTextOverflow by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetTextOverflow001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetTextOverflow(frameNode, TextOverflow::MARQUEE);
+    TextOverflow result = textFieldModelNG.GetTextOverflow(frameNode);
+    EXPECT_EQ(result, TextOverflow::MARQUEE);
+}
+
+/**
+ * @tc.name: GetTextOverflow002
+ * @tc.desc: Test GetTextOverflow by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetTextOverflow002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetTextOverflow(frameNode, TextOverflow::MARQUEE);
+    TextOverflow result = textFieldModelNG.GetTextOverflow(frameNode);
+    EXPECT_EQ(result, TextOverflow::MARQUEE);
+}
+
+/**
+ * @tc.name: GetTextOverflow003
+ * @tc.desc: Test GetTextOverflow by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetTextOverflow003, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    TextOverflow result = textFieldModelNG.GetTextOverflow(frameNode);
+    EXPECT_EQ(result, TextOverflow::NONE);
+}
+
+/**
+ * @tc.name: GetTextOverflow004
+ * @tc.desc: Test GetTextOverflow by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetTextOverflow004, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    TextOverflow result = textFieldModelNG.GetTextOverflow(frameNode);
+    EXPECT_EQ(result, TextOverflow::CLIP);
+}
+
+/**
+ * @tc.name: GetEllipsisMode001
+ * @tc.desc: Test GetEllipsisMode by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetEllipsisMode001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetEllipsisMode(frameNode, EllipsisMode::HEAD);
+    EllipsisMode result = textFieldModelNG.GetEllipsisMode(frameNode);
+    EXPECT_EQ(result, EllipsisMode::HEAD);
+}
+
+/**
+ * @tc.name: GetEllipsisMode002
+ * @tc.desc: Test GetEllipsisMode by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetEllipsisMode002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetEllipsisMode(frameNode, EllipsisMode::HEAD);
+    EllipsisMode result = textFieldModelNG.GetEllipsisMode(frameNode);
+    EXPECT_EQ(result, EllipsisMode::HEAD);
 }
 } // namespace OHOS::Ace::NG

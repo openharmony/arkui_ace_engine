@@ -30,8 +30,6 @@
 namespace {
 constexpr int32_t TIMEOUT_VALUE = 3000;
 constexpr float NANOSECOND_CONVERSION = 1000 * 1000; // Millisecond and nanosecond conversion.
-constexpr float STOP_COLLECT_TIME_WAIT = 100; // Stop collecting asynchronous task waiting time.
-constexpr float COMPONENT_LOAD_NUMBER = 100; // Number of components loaded in 100 milliseconds.
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -54,6 +52,7 @@ void LoadCompleteManager::ResetManagerStatus()
 {
     collectStatus_ = CollectStatus::INIT;
     nodeNum_ = 0;
+    lastLoadComponent = 0;
     nodeSet_.clear();
 }
 
@@ -72,7 +71,7 @@ void LoadCompleteManager::StartCollect(const std::string& pageUrl)
 
 void LoadCompleteManager::TryStopCollect()
 {
-    if (nodeNum_ > COMPONENT_LOAD_NUMBER) {
+    if (nodeNum_ > SystemProperties::GetComponentLoadNumber()) {
         nodeNum_ = 0;
         auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -84,7 +83,7 @@ void LoadCompleteManager::TryStopCollect()
                 CHECK_NULL_VOID(loadCompleteMgr);
                 loadCompleteMgr->TryStopCollect();
             },
-            TaskExecutor::TaskType::UI, STOP_COLLECT_TIME_WAIT, "TryStopCollectTask");
+            TaskExecutor::TaskType::UI, SystemProperties::GetStopCollectTimeWait(), "TryStopCollectTask");
     } else {
         collectStatus_ = CollectStatus::ANALYSIS;
         TryFinishCollectTask();
@@ -107,7 +106,7 @@ void LoadCompleteManager::StopCollect()
             CHECK_NULL_VOID(loadCompleteMgr);
             loadCompleteMgr->TryStopCollect();
         },
-        TaskExecutor::TaskType::UI, STOP_COLLECT_TIME_WAIT, "TryStopCollectTask");
+        TaskExecutor::TaskType::UI, SystemProperties::GetStopCollectTimeWait(), "TryStopCollectTask");
 }
 
 void LoadCompleteManager::ForceFinishCollectTask()
@@ -132,7 +131,8 @@ void LoadCompleteManager::FinishCollectTask()
     if (loadCost > (SystemProperties::GetPageLoadTimethreshold() * NANOSECOND_CONVERSION)) {
         std::vector<std::string> array;
         std::stringstream pageLoadCost;
-        pageLoadCost << pageUrl_ << ":" << loadCost << ";";
+        int64_t lastComponent = (nodeSet_.size() == 0) ? lastLoadComponent : -1;
+        pageLoadCost << pageUrl_ << ",loadCost:" << loadCost << ",lastComponent:" << lastComponent << ";";
         array.push_back(pageLoadCost.str());
         EventInfo eventInfo = {
             .errorType = static_cast<int32_t>(OHOS::Ace::PageRouterExcepType::PAGE_LOAD_TIMEOUT),
@@ -164,6 +164,7 @@ void LoadCompleteManager::DeleteLoadComponent(int32_t nodeId)
         return;
     }
     nodeSet_.erase(nodeId);
+    lastLoadComponent = GetCurrentTimestamp();
     TryFinishCollectTask();
 }
 
@@ -173,6 +174,7 @@ void LoadCompleteManager::CompleteLoadComponent(int32_t nodeId)
         return;
     }
     nodeSet_.erase(nodeId);
+    lastLoadComponent = GetCurrentTimestamp();
     TryFinishCollectTask();
 }
 } // namespace OHOS::Ace::NG

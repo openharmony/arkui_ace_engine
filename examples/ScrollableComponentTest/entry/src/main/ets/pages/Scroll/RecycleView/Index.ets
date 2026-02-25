@@ -20,7 +20,7 @@
 import {
   RecycleAdapter,
   LayoutManager,
-  FixedHeightLayoutManager,
+  ColumnLayoutManager,
   RecycleViewController,
   RecycleView
 } from './RecycleView'
@@ -68,9 +68,7 @@ struct ListNodeTest {
 
   aboutToAppear(): void {
     let builderVar: WrappedBuilder<[Object]> = wrapBuilder(itemBuilder)
-    let layoutManager = new FixedHeightLayoutManager()
-    layoutManager.SetItemHeight(vp2px(72))
-    this.adapterController.layoutManager = layoutManager;
+    this.adapterController.layoutManager = new ColumnLayoutManager();
     this.adapterController.adapter = new MyAdapter(this.getUIContext(), builderVar)
   }
 

@@ -22,7 +22,7 @@ class ArkMenuItemGroupComponent extends ArkComponent {
 
 class JSMenuItemGroup extends JSViewAbstract {
   static create(params) {
-    getUINativeModule().menuitemgroup.createMenuItemGroup(params);
+    getUINativeModule().menuitemgroup.create(params);
   }
   static attributeModifier(modifier) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {
@@ -59,5 +59,5 @@ function exportComponent() {
 function exportView() {
   globalThis.MenuItemGroup = JSMenuItemGroup;
 }
-
-export default { ArkMenuItemGroupComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkMenuItemGroupComponent, createComponent, exportComponent, exportView, loadComponent };

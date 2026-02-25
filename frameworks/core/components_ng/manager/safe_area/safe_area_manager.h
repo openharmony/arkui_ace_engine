@@ -35,7 +35,7 @@ struct WindowTypeConfig {
     bool isSceneBoardWindow = false;
 };
 
-class SafeAreaManager : public virtual AceType {
+class ACE_FORCE_EXPORT SafeAreaManager : public virtual AceType {
     DECLARE_ACE_TYPE(SafeAreaManager, AceType);
 
 public:
@@ -126,7 +126,7 @@ public:
     /**
      * @brief Retrieves the safe area insets that account for any cutout areas on the screen.
      *
-     * @return The safe area insets that account for cutout areas on the screen without any judgement.
+     * @return The safe area insets that account for cutout areas without any judgement.
      */
     SafeAreaInsets GetCutoutSafeAreaWithoutProcess() const;
 
@@ -200,7 +200,7 @@ public:
         keyboardOffset_ = offset;
     }
 
-    float GetKeyboardOffset(bool withoutProcess = false) const;
+    ACE_FORCE_EXPORT float GetKeyboardOffset(bool withoutProcess = false) const;
 
     void SetKeyboardInfo(float height);
 

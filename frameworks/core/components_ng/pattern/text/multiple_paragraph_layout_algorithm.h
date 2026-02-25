@@ -41,14 +41,14 @@ public:
     MultipleParagraphLayoutAlgorithm() = default;
     ~MultipleParagraphLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    ACE_FORCE_EXPORT void Measure(LayoutWrapper* layoutWrapper) override;
+    ACE_FORCE_EXPORT void Layout(LayoutWrapper* layoutWrapper) override;
     virtual float GetBaselineOffset() const
     {
         return 0.0f;
     }
 
-    static SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint);
+    ACE_FORCE_EXPORT static SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint);
     RefPtr<Paragraph> GetSingleParagraph() const;
 
     void SetContentHeight(float height)
@@ -65,13 +65,13 @@ protected:
         CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
         return spanGroup.front();
     }
-    void ConstructTextStyles(
+    ACE_FORCE_EXPORT void ConstructTextStyles(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle);
-    bool ParagraphReLayout(const LayoutConstraintF& contentConstraint);
-    bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth,
+    ACE_FORCE_EXPORT bool ParagraphReLayout(const LayoutConstraintF& contentConstraint);
+    ACE_FORCE_EXPORT bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth,
         const TextStyle& textStyle);
-    OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
-    virtual void SetAdaptFontSizeStepToTextStyle(
+    ACE_FORCE_EXPORT OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
+    ACE_FORCE_EXPORT virtual void SetAdaptFontSizeStepToTextStyle(
         TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep);
     std::string SpansToString()
     {
@@ -102,24 +102,24 @@ protected:
         return paragraphInfo;
     }
 
-    virtual void AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem, const RefPtr<LayoutWrapper>& iterItem,
-        const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength);
-    virtual void AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
+    ACE_FORCE_EXPORT virtual void AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem,
+        const RefPtr<LayoutWrapper>& iterItem, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength);
+    ACE_FORCE_EXPORT virtual void AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
         const RefPtr<LayoutWrapper>& layoutWrapper, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength);
-    virtual void UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem, const RefPtr<Paragraph>& paragraph,
-        int32_t& spanTextLength, CustomSpanPlaceholderInfo& customSpanPlaceholder);
+    ACE_FORCE_EXPORT virtual void UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem,
+        const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength, CustomSpanPlaceholderInfo& customSpanPlaceholder);
 
-    virtual void AddSymbolSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
+    ACE_FORCE_EXPORT virtual void AddSymbolSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
-    virtual void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
+    ACE_FORCE_EXPORT virtual void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
-    void MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
+    ACE_FORCE_EXPORT void MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
     void CalcHeightWithMinLines(TextStyle& textStyle, LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& contentConstraint);
     bool ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle& paraStyle, const TextStyle& textStyle,
         std::vector<TextStyle>& textStyles);
     void UpdateShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty, TextStyle& textStyle);
-    virtual ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper);
+    ACE_FORCE_EXPORT virtual ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper);
     virtual bool IsNeedParagraphReLayout() const
     {
         return false;

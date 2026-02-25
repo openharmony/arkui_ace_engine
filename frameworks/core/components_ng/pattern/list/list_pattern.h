@@ -183,6 +183,8 @@ public:
         return itemPosition_;
     }
 
+    bool GetDummyItemRect(int32_t index, RectF& rect) const;
+
     double GetTotalOffset() const override
     {
         return currentOffset_;
@@ -352,6 +354,7 @@ public:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void GetEventDumpInfo() override;
     void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
     void SetNeedToUpdateListDirectionInCardStyle(bool isNeedToUpdateListDirection)
     {
@@ -563,6 +566,11 @@ protected:
     bool isStackFromEnd_ = true;
     FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
+    float GetListCrossAxisSize() const;
+    int32_t CalculateLaneNumber(int32_t index, const ListLayoutAlgorithm::PositionMap& itemPosition) const;
+    void CalculateCrossAxisPosition(int32_t lane, float listCrossSize, float& crossPos, float& crossSize) const;
+    void ApplyRtlTransform(float& mainPos) const;
+    RectF GetItemRectWithItemPosition(int32_t index, const std::map<int32_t, ListItemInfo>& itemPosition) const;
     void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
     void ResetScrollToIndexParams();
     void OnScrollEndCallback() override;

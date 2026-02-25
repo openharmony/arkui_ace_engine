@@ -53,7 +53,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
-    statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
+    statisticEventReporter_ = std::make_shared<StatisticEventReporter>(instanceId);
     auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
                                uint64_t nanoTimestamp, uint64_t frameCount) {
         ContainerScope scope(instanceId);
@@ -80,7 +80,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
-    statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
+    statisticEventReporter_ = std::make_shared<StatisticEventReporter>(instanceId);
     auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
                                uint64_t nanoTimestamp, uint64_t frameCount) {
         ContainerScope scope(instanceId);

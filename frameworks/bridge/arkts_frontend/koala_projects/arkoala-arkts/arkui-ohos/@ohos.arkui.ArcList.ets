@@ -17,8 +17,8 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { DeserializerBase, KPointer, RuntimeType, SerializerBase } from "@koalaui/interop"
-import { ColorMetrics, ColorMetrics_serializer, LengthMetrics, LengthMetrics_serializer } from "arkui/Graphics"
-import { ArkCommonMethodPeer, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier, ChildrenMainSize, ChildrenMainSize_serializer, CommonMethod, OnScrollCallback, OnWillScrollCallback } from "arkui/component/common"
+import { ColorMetrics, LengthMetrics } from "arkui/Graphics"
+import { ArkCommonMethodPeer, ArkCommonMethodComponent, AttributeModifier, ChildrenMainSize, CommonMethod, OnScrollCallback, OnWillScrollCallback } from "arkui/component/common"
 import { int32 } from "@koalaui/common"
 import { ComponentBase } from "arkui/ComponentBase"
 import { PeerNode } from "arkui/PeerNode"
@@ -31,6 +31,7 @@ import { Scroller, Scroller_serializer } from "arkui/component/scroll"
 import { ComponentContentBase } from "arkui/ComponentContent"
 import { SwipeActionOptions, SwipeActionOptions_serializer } from "arkui/component/listItem"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ListHandWritten } from "arkui/hooks/ListHandWritten"
 export class ArkArcListPeer extends ArkCommonMethodPeer {
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -67,7 +68,7 @@ export class ArkArcListPeer extends ArkCommonMethodPeer {
         ArcListExtender.chainAnimation(this.peer.ptr, enable);
     }
     setChildrenMainSizeAttribute(size: ChildrenMainSize | undefined): void {
-        ArcListExtender.childrenMainSize(this.peer.ptr, size);
+        ListHandWritten.hookArkListChildrenMainSizeImpl(this, size)
     }
     setEnableScrollInteractionAttribute(enable: boolean | undefined): void {
         ArcListExtender.enableScrollInteraction(this.peer.ptr, enable);
@@ -174,91 +175,6 @@ export interface ArcListAttribute extends CommonMethod {
     }
     attributeModifier(value: AttributeModifier<ArcListAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         return this;
-    }
-}
-export class ArkArcListStyle extends ArkCommonMethodStyle implements ArcListAttribute {
-    digitalCrownSensitivity_value?: CrownSensitivity | undefined
-    space_value?: LengthMetrics | undefined
-    scrollBar_value?: BarState | undefined
-    scrollBarColor_value?: ColorMetrics | undefined
-    scrollBarWidth_value?: LengthMetrics | undefined
-    cachedCount_value?: int | undefined
-    chainAnimation_value?: boolean | undefined
-    childrenMainSize_value?: ChildrenMainSize | undefined
-    enableScrollInteraction_value?: boolean | undefined
-    fadingEdge_value?: boolean | undefined
-    friction_value?: double | undefined
-    flingSpeedLimit_value?: double | undefined
-    onScrollIndex_value?: ArcScrollIndexHandler | undefined
-    onReachStart_value?: VoidCallback | undefined
-    onReachEnd_value?: VoidCallback | undefined
-    onScrollStart_value?: VoidCallback | undefined
-    onScrollStop_value?: VoidCallback | undefined
-    onWillScroll_value?: OnWillScrollCallback | undefined
-    onDidScroll_value?: OnScrollCallback | undefined
-    attributeModifier_value?: AttributeModifier<ArcListAttribute> | AttributeModifier<CommonMethod> | undefined
-    setArcListOptions(options?: ArkListOptions): this {
-        return this;
-    }
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
-        return this
-    }
-    space(value: LengthMetrics | undefined): this {
-        return this
-    }
-    scrollBar(value: BarState | undefined): this {
-        return this
-    }
-    scrollBarColor(value: ColorMetrics | undefined): this {
-        return this
-    }
-    scrollBarWidth(value: LengthMetrics | undefined): this {
-        return this
-    }
-    cachedCount(value: int | undefined): this {
-        return this
-    }
-    chainAnimation(value: boolean | undefined): this {
-        return this
-    }
-    childrenMainSize(value: ChildrenMainSize | undefined): this {
-        return this
-    }
-    enableScrollInteraction(value: boolean | undefined): this {
-        return this
-    }
-    fadingEdge(value: boolean | undefined): this {
-        return this
-    }
-    friction(value: double | undefined): this {
-        return this
-    }
-    flingSpeedLimit(value: double | undefined): this {
-        return this
-    }
-    onScrollIndex(value: ArcScrollIndexHandler | undefined): this {
-        return this
-    }
-    onReachStart(value: VoidCallback | undefined): this {
-        return this
-    }
-    onReachEnd(value: VoidCallback | undefined): this {
-        return this
-    }
-    onScrollStart(value: VoidCallback | undefined): this {
-        return this
-    }
-    onScrollStop(value: VoidCallback | undefined): this {
-        return this
-    }
-    onWillScroll(value: OnWillScrollCallback | undefined): this {
-        return this
-    }
-    onDidScroll(value: OnScrollCallback | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<ArcListAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 
@@ -488,20 +404,6 @@ export interface ArcListItemAttribute extends CommonMethod {
     }
     attributeModifier(value: AttributeModifier<ArcListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkArcListItemStyle extends ArkCommonMethodStyle implements ArcListItemAttribute {
-    autoScale_value?: boolean | undefined
-    swipeAction_value?: SwipeActionOptions | undefined
-    attributeModifier_value?: AttributeModifier<ArcListItemAttribute> | AttributeModifier<CommonMethod> | undefined
-    autoScale(value: boolean | undefined): this {
-        return this;
-    }
-    swipeAction(value: SwipeActionOptions | undefined): this {
-        return this;
-    }
-    public attributeModifier(value: AttributeModifier<ArcListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 

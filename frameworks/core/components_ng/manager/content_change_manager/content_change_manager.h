@@ -56,13 +56,13 @@ public:
     void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow);
     void OnScrollRemoved(int32_t nodeId);
     bool IsScrolling() const;
-    void OnTextChangeEnd(const RectF& rect);
+    void OnTextChangeEnd(const RectF& rect, const RectF& rootRect);
     void OnVsyncStart();
     void OnVsyncEnd(const RectF& rootRect);
     bool IsTextAABBCollecting() const;
 
-    uint32_t ConvertEventStringToEnum(std::string type) const;
-    uint32_t GetIgnoreEventMask(std::string ignoreEventType) const;
+    uint32_t ConvertEventStringToEnum(const std::string& type) const;
+    uint32_t GetIgnoreEventMask(const std::string& ignoreEventType) const;
     bool IsIgnoringEventType(uint32_t type) const;
 
 #ifndef IS_RELEASE_VERSION
@@ -83,7 +83,7 @@ private:
     static constexpr int32_t DEFAULT_TEXT_MIN_REPORT_TIME = 100;
     float textContentRatio_ = 0.15f; // default text content ratio is 0.15
     uint64_t textContentInterval_ = 100 * NS_PER_MS; // minimum text content change interval is 100 ms.
-    uint32_t ignoreEventMask_;
+    uint32_t ignoreEventMask_ = NONE; // default ignore event mask is no event
     uint64_t lastTextReportTime_ = 0;
     bool textCollecting_ = false;
     std::set<std::pair<WeakPtr<FrameNode>, bool>> changedSwiperNodes_;

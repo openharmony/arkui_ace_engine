@@ -41,9 +41,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 ExpandImpl(Ark_FrameNode node,
-                     Ark_ListItemSwipeActionDirection direction)
+void ExpandImpl(Ark_FrameNode node,
+                Ark_ListItemSwipeActionDirection direction)
 {
+#ifdef WRONG_GEN_v140
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
@@ -60,9 +61,27 @@ Ark_Int32 ExpandImpl(Ark_FrameNode node,
     }
     ListItemModelStatic::ExpandSwipeAction(frameNode.GetRawPtr(), convValue);
     return ERROR_CODE_NO_ERROR;
+#else // WRONG_GEN_v140
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
+        return;
+    }
+    ListItemSwipeActionDirection convValue =
+        Converter::OptConvert<ListItemSwipeActionDirection>(direction).value_or(ListItemSwipeActionDirection::START);
+    if (static_cast<int32_t>(ListItemSwipeActionDirection::START) > static_cast<int32_t>(convValue) ||
+        static_cast<int32_t>(ListItemSwipeActionDirection::END) < static_cast<int32_t>(convValue)) {
+        return;
+    }
+    if (!frameNode->IsOnMainTree()) {
+        return;
+    }
+    ListItemModelStatic::ExpandSwipeAction(frameNode.GetRawPtr(), convValue);
+#endif // WRONG_GEN_v140
 }
-Ark_Int32 CollapseImpl(Ark_FrameNode node)
+void CollapseImpl(Ark_FrameNode node)
 {
+#ifdef WRONG_GEN_v140
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
@@ -73,6 +92,17 @@ Ark_Int32 CollapseImpl(Ark_FrameNode node)
     }
     ListItemModelStatic::CollapseSwipeAction(frameNode.GetRawPtr());
     return ERROR_CODE_NO_ERROR;
+#else // WRONG_GEN_v140
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
+        return;
+    }
+    if (!frameNode->IsOnMainTree()) {
+        return;
+    }
+    ListItemModelStatic::CollapseSwipeAction(frameNode.GetRawPtr());
+#endif // WRONG_GEN_v140
 }
 } // ListItemSwipeActionManagerAccessor
 const GENERATED_ArkUIListItemSwipeActionManagerAccessor* GetListItemSwipeActionManagerAccessor()

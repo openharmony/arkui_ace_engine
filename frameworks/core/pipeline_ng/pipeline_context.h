@@ -69,6 +69,7 @@
 namespace OHOS::Ace::Kit {
 class UIContext;
 class UIContextImpl;
+using ArkUIObjectLifecycleCallback = std::function<void(void*)>;
 }
 
 namespace OHOS::Rosen {
@@ -528,6 +529,10 @@ public:
     {
         return sharedTransitionManager_;
     }
+
+    RefPtr<FrameNode> GetPageRootNode();
+    // Helper functions for in-order traversal of UINode children
+    RefPtr<FrameNode> FindPageRootNodeInOrder(const RefPtr<UINode>& node);
 
 #ifdef WINDOW_SCENE_SUPPORTED
     const RefPtr<UIExtensionManager>& GetUIExtensionManager()
@@ -1151,9 +1156,8 @@ public:
     bool IsTagInOverlay(const std::string& tag) const;
 
     void GetComponentOverlayInspector(
-        std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const override;
-
-    void GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const override;
+        std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode,
+        ParamConfig config, bool isInSubWindow) const;
 
     void GetInspectorTree(bool onlyNeedVisible, ParamConfig config = ParamConfig());
 
@@ -1351,8 +1355,8 @@ public:
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
-    void GetStateMgmtInfo(
-        const std::string& componentName, const std::string& propertyName, const std::string& jsonPath);
+    void GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+        const std::string& jsonPath, bool onlyVisible = false);
     bool IsCustomNodeDeleteInTransition() const
     {
         return isCustomNodeDeleteInTransition_;
@@ -1447,8 +1451,18 @@ private:
 
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
-    void DumpSimplifyTreeJsonFromTopNavNode(
-        std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> topNavNode, const ParamConfig& config) const;
+    void DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> startNode, std::shared_ptr<JsonValue>& root,
+        std::list<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const;
+
+    bool ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& rootNode,
+        std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& subWindowOverlayArray,
+        bool isInSubWindow, ParamConfig config) const;
+
+    void GetOverlayInspector(
+        std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const;
+
+    void DumpSimplifyTreeJsonEntrance(
+        std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const;
 
     uint64_t GetResampleStamp() const;
     void ConsumeTouchEvents(std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
@@ -1553,6 +1567,8 @@ private:
     void UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string& abilityName, uint64_t vsyncPeriod);
     void NotifyCoastingAxisEventOnHide();
     void ResSchedReportAxisEvent(const AxisEvent& event) const;
+
+    void OnShowHideForAccessibility(bool isOnShow);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 

@@ -121,6 +121,7 @@ struct PreparedInfoForDrag {
     SourceType deviceType = SourceType::NONE;
     bool isMenuNotShow = false;
     bool isSceneBoardTouchDrag = false;
+    PointF displayPoint = { 0.0f, 0.0f };
 };
 
 struct PreparedAsyncCtxForAnimate {
@@ -139,7 +140,6 @@ struct DragframeNodeInfo {
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
-using OnDragDropSpringLoadingFunc = std::function<void(const RefPtr<DragSpringLoadingContext>& info)>;
 using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
 using OnReponseRegionFunc = std::function<void(const std::vector<DimensionRect>&)>;
 struct DragDropInfo {
@@ -325,9 +325,9 @@ public:
     RefPtr<LongPressRecognizer> GetLongPressRecognizer() const;
     void SetIsAllowMouse(bool isAllowMouse) const;
     const RefPtr<ClickEventActuator>& GetUserClickEventActuator();
-    OnDragCallbackCore GetDragCallback();
+    OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void GenerateMousePixelMap(const GestureEvent& info);
-    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const PreparedInfoForDrag& dragInfoData,
+    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, PreparedInfoForDrag& dragInfoData,
         const float scale = 1.0f, const RectF& innerRect = RectF()) const;
     void CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNode, bool isMenuShow);
     OffsetF GetDragPreviewInitPositionToScreen(const RefPtr<PipelineBase>& context, PreparedInfoForDrag& data);
@@ -350,7 +350,6 @@ public:
     void HandleDragEndAction(const DragframeNodeInfo& info);
     void HandleOnDragUpdate(const GestureEvent& info);
     void HandleOnDragEnd(const GestureEvent& info);
-    void HandleDragEnd(int32_t containerId, const DragNotifyMsgCore& notifyMessage);
     void HandleOnDragCancel();
     void StartLongPressActionForWeb();
     void CancelDragForWeb();

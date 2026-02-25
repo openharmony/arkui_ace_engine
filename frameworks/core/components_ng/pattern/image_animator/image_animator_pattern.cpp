@@ -43,9 +43,7 @@ ImageAnimatorPattern::ImageAnimatorPattern()
 std::vector<PictureInfo> ImageAnimatorPattern::CreatePictureAnimation(int32_t size)
 {
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     auto pictureAnimation = std::vector<PictureInfo>();
 
     if (durationTotal_ > 0) {

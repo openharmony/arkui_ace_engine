@@ -859,6 +859,32 @@ int32_t OH_ArkUI_NativeModule_ConvertPositionFromWindow(
     return result;
 }
 
+int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle uiContext, ArkUI_NodeHandle* rootNode)
+{
+    CHECK_NULL_RETURN(rootNode, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    int32_t instanceId = OHOS::Ace::INSTANCE_ID_UNDEFINED;
+    if (uiContext) {
+        auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
+        instanceId = context->id;
+    }
+    auto basicAPI = impl->getBasicAPI();
+    CHECK_NULL_RETURN(basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto invalid = basicAPI->checkUIContextInvalid(instanceId);
+    if (invalid == ARKUI_ERROR_CODE_UI_CONTEXT_INVALID) {
+        return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
+    }
+    auto nodeModifier = impl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto framenodeModifier = nodeModifier->getFrameNodeModifier();
+    CHECK_NULL_RETURN(framenodeModifier, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto nodePtr = framenodeModifier->getPageRootNode(instanceId);
+    *rootNode = OHOS::Ace::NodeModel::GetArkUINode(nodePtr);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 #ifdef __cplusplus
 };
 #endif

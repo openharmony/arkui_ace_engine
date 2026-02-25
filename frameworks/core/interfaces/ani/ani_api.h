@@ -176,7 +176,7 @@ struct ArkUIDragInfo {
 
 struct ArkUINavigationInfo {
     std::string navigationId;
-    ani_ref navPathStack;
+    ani_long navPathStack;
     std::optional<ani_int> uniqueId;
 };
 
@@ -191,7 +191,7 @@ struct ArkUINavDestinationInfo {
     std::optional<std::string> param;
     std::optional<ani_double> width;
     std::optional<ani_double> height;
-    ani_ref navPathStack;
+    ani_long navPathStack;
 };
 
 struct ArkUIRouterPageInfo {
@@ -264,6 +264,7 @@ struct ArkUIDragControllerAsync {
     bool hasHandle = false;
     SharedPointerWrapper touchPoint;
     SharedPointerWrapper unifiedData;
+    SharedPointerWrapper dataLoadParams;
     SharedPointerWrapper pixelMap;
     std::vector<SharedPointerWrapper> pixelMapList;
     ArkUINodeHandle customBuilderNode = nullptr;
@@ -274,6 +275,7 @@ struct ArkUIDragControllerAsync {
     ArkUIDragPreviewOption dragPreviewOption;
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
         const ArkUIDragStatus)> callBackJsFunction;
+    std::function<void()> destroyJsFunction;
     std::shared_ptr<OHOS::Ace::Ani::DragAction> dragAction = nullptr;
 };
 
@@ -354,6 +356,15 @@ struct ArkUIComponentSnapshotAsync {
     std::function<void(std::shared_ptr<ArkUIComponentSnapshotAsync>)> callBackJsFunction;
 };
 
+struct ArkUIDrawableAsync {
+    int32_t imageWidth_ = 0;
+    int32_t imageHeight_ = 0;
+    int32_t errorCode = -1;
+    ani_env* env = nullptr;
+    ani_resolver deferred = nullptr;
+    std::function<void(std::shared_ptr<ArkUIDrawableAsync>)> callBackJsFunction;
+};
+
 typedef struct ArkUIAniTranslateOptions {
     ArkUIAniNumberString x;
     ArkUIAniNumberString y;
@@ -429,6 +440,13 @@ struct ArkUIAniImageModifier {
 struct ArkUIWaterFlowSectionGap {
     int32_t unit = 1;
     float value = 0.0f;
+};
+
+struct ArkUIWaterFlowResourceParam {
+    int32_t resId = 0;
+    int32_t resType = 0;
+    const char* bundleName = nullptr;
+    const char* moduleName = nullptr;
 };
 
 struct ArkUIWaterFlowSectionPadding {
@@ -551,6 +569,7 @@ struct ArkUIAniCommonModifier {
     void (*onMeasureInnerMeasure)(ani_long ptr);
     void (*onLayoutInnerLayout)(ani_long ptr);
     void (*setParallelScoped)(ani_boolean parallel);
+    void (*checkThreadValid)(ani_boolean checkUIThread, ani_long node);
     void (*setCustomPropertyCallBack)(
         ArkUINodeHandle node, std::function<void()>&& func,
         std::function<std::string(const std::string&)>&& getFunc,
@@ -613,6 +632,7 @@ struct ArkUIAniCommonModifier {
     void(*getLastForegroundUIContext)(int32_t& instance);
     void(*getAllInstanceIds)(std::vector<int32_t>& instance);
     void(*resolveUIContext)(std::vector<int32_t>& instance);
+    ani_long (*getPageRootNode)();
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
@@ -660,6 +680,7 @@ struct ArkUIAniWaterFlowModifier {
     void (*resetWaterFlowFooter)(ArkUINodeHandle node);
     void (*setWaterFlowScroller)(ArkUINodeHandle node, void* scroller);
     void (*setWaterFlowLayoutMode)(ArkUINodeHandle node, int32_t mode);
+    bool (*parseWaterFlowSectionResourceGap)(const ArkUIWaterFlowResourceParam* param, ArkUIWaterFlowSectionGap* out);
 };
 struct ArkUIAniListModifier {
     bool (*updateDefaultSizeAndGetNeedSync)(ArkUINodeHandle node, double defaultSize);
@@ -739,6 +760,7 @@ struct ArkUIAniTextBasedModifier {
     void* (*fromTextModifierPeer)(void* ptr);
     void* (*toTextModifierPeer)(std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>& textApply,
         void* textModifierAni);
+    void* (*toIMEExtraCfgPeer)(void* extraConfigPtr);
 };
 struct ArkUIAniStyledStringModifier {
     void (*setPixelMap)(ArkUIStyledString peer, void* nativePixelMap);
@@ -874,6 +896,8 @@ struct ArkUIAniGestureEventUIObserverModifier {
         const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
     void (*removeTapListenerCallback)(
         const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+    void (*removeGlobalGestureListenerCallback)(
+        ani_int type, ani_int resourceId, bool isRemoveAll);
 };
 
 struct ArkUIAniModifiers {

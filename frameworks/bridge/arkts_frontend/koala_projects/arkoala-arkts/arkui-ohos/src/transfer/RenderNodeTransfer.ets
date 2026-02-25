@@ -19,7 +19,7 @@ import { RenderNode } from "../RenderNode"
 import { ArkUIAniModule } from "arkui.ani"
 import hilog from '@ohos.hilog'
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, InteropNativeModule } from "@koalaui/interop"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { ArkUIGeneratedNativeModule } from "#components"
 import { int16, uint32 } from "@koalaui/compat"
 import { ShapeClipTransfer } from "../handwritten/transfer/ShapeClipTransfer"
 import { ShapeMaskTransfer } from "../handwritten/transfer/ShapeMaskTransfer"
@@ -152,7 +152,7 @@ export class RenderNodeTransfer {
         if (module.isUndefined() || module.isNull()) {
             throw Error("The arkui.node is not defined, convert fail.");
         }
-        let clsName = module.getProperty('RenderNode');
+        let clsName = module.getProperty('default').getProperty('RenderNode');
         if (clsName.isUndefined() || clsName.isNull()) {
             throw Error("RenderNode is not a class, convert fail.");
         }

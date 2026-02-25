@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,90 @@ int32_t OH_ArkUI_Swiper_FinishAnimation(ArkUI_NodeHandle node)
     auto swiperModifier = nodeModifiers->getSwiperModifier();
     CHECK_NULL_RETURN(swiperModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     swiperModifier->setSwiperFinishAnimation(node->uiNodeHandle);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_Swiper_StartFakeDrag(ArkUI_NodeHandle node, bool* isSuccessful)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NE_RETURN(node->type, ARKUI_NODE_SWIPER, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto swiperModifier = nodeModifiers->getSwiperModifier();
+    CHECK_NULL_RETURN(swiperModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    swiperModifier->callSwiperStartFakeDrag(node->uiNodeHandle, isSuccessful);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_Swiper_FakeDragBy(ArkUI_NodeHandle node, float offset, bool* isConsumedOffset)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NE_RETURN(node->type, ARKUI_NODE_SWIPER, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto swiperModifier = nodeModifiers->getSwiperModifier();
+    CHECK_NULL_RETURN(swiperModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    swiperModifier->callSwiperFakeDragBy(node->uiNodeHandle, offset, isConsumedOffset);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_Swiper_StopFakeDrag(ArkUI_NodeHandle node, bool* isSuccessful)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NE_RETURN(node->type, ARKUI_NODE_SWIPER, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto swiperModifier = nodeModifiers->getSwiperModifier();
+    CHECK_NULL_RETURN(swiperModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    swiperModifier->callSwiperStopFakeDrag(node->uiNodeHandle, isSuccessful);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_Swiper_IsFakeDragging(ArkUI_NodeHandle node, bool* isFakeDragging)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NE_RETURN(node->type, ARKUI_NODE_SWIPER, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto swiperModifier = nodeModifiers->getSwiperModifier();
+    CHECK_NULL_RETURN(swiperModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    swiperModifier->callSwiperIsFakeDragging(node->uiNodeHandle, isFakeDragging);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_Swiper_ShowPrevious(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NE_RETURN(node->type, ARKUI_NODE_SWIPER, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto swiperModifier = nodeModifiers->getSwiperModifier();
+    CHECK_NULL_RETURN(swiperModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    swiperModifier->callSwiperShowPrevious(node->uiNodeHandle);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_Swiper_ShowNext(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NE_RETURN(node->type, ARKUI_NODE_SWIPER, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    auto swiperModifier = nodeModifiers->getSwiperModifier();
+    CHECK_NULL_RETURN(swiperModifier, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    swiperModifier->callSwiperShowNext(node->uiNodeHandle);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 

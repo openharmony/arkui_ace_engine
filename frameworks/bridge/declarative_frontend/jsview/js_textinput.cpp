@@ -25,6 +25,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -115,6 +116,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("enableSelectedDataDetector", &JSTextField::SetSelectDetectEnable);
     JSClass<JSTextInput>::StaticMethod("enableAutoFillAnimation", &JSTextField::SetEnableAutoFillAnimation);
     JSClass<JSTextInput>::StaticMethod("cancelButton", &JSTextField::SetCancelButton);
+    JSClass<JSTextInput>::StaticMethod("voiceButton", &JSTextField::SetVoiceButton);
     JSClass<JSTextInput>::StaticMethod("selectAll", &JSTextField::SetSelectAllValue);
     JSClass<JSTextInput>::StaticMethod("lineBreakStrategy", &JSTextField::SetLineBreakStrategy);
     JSClass<JSTextInput>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
@@ -148,6 +150,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("includeFontPadding", &JSTextField::SetIncludeFontPadding);
     JSClass<JSTextInput>::StaticMethod("fallbackLineSpacing", &JSTextField::SetFallbackLineSpacing);
     JSClass<JSTextInput>::StaticMethod("selectedDragPreviewStyle", &JSTextField::SetSelectedDragPreviewStyle);
+    JSClass<JSTextInput>::StaticMethod("accessibilityText", &JSTextField::SetAccessibilityText);
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -159,6 +162,6 @@ void JSTextInput::Create(const JSCallbackInfo& info)
 void JSTextInputController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextEditableController>::Declare("TextInputController");
-    JSTextEditableController::JSBind(globalObj);
+    JSTextEditableControllerBinding::JSBind(globalObj);
 }
 } // namespace OHOS::Ace::Framework

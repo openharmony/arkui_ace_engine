@@ -14,22 +14,23 @@
  */
 #include "mock_pixel_map.h"
 
+#include "gmock/gmock.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
 RefPtr<PixelMap> PixelMap::CreatePixelMap(void* /*rawPtr*/)
 {
-    return AceType::MakeRefPtr<MockPixelMap>();
+    return AceType::MakeRefPtr<::testing::NiceMock<MockPixelMap>>();
 }
 
 RefPtr<PixelMap> PixelMap::DecodeTlv(std::vector<uint8_t>& buff)
 {
-    return AceType::MakeRefPtr<MockPixelMap>();
+    return AceType::MakeRefPtr<::testing::NiceMock<MockPixelMap>>();
 }
 
 RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* /*rawPtr*/)
 {
-    return AceType::MakeRefPtr<MockPixelMap>();
+    return AceType::MakeRefPtr<::testing::NiceMock<MockPixelMap>>();
 }
 
 void* PixelMap::GetReleaseContext(const RefPtr<PixelMap>& pixelMap)
@@ -41,11 +42,11 @@ void PixelMap::ReleaseProc(const void* /* pixels */, void* context) {}
 
 RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
 {
-    return AceType::MakeRefPtr<MockPixelMap>();
+    return AceType::MakeRefPtr<::testing::NiceMock<MockPixelMap>>();
 }
 
 RefPtr<PixelMap> PixelMap::Create(const std::shared_ptr<Media::PixelMap>& pixmap)
 {
-    return AceType::MakeRefPtr<MockPixelMap>(); 
+    return AceType::MakeRefPtr<::testing::NiceMock<MockPixelMap>>();
 }
 } // namespace OHOS::Ace

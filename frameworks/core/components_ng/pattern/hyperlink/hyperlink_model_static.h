@@ -16,12 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HYPERLINK_HYPERLINK_MODEL_STATIC_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HYPERLINK_HYPERLINK_MODEL_STATIC_H
 
+#include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT HyperlinkModelStatic {
+class ACE_FORCE_EXPORT HyperlinkModelStatic {
 public:
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    ACE_FORCE_EXPORT static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetTextStyle(FrameNode* frameNode, const std::string& address,
         const std::optional<std::string>& content);

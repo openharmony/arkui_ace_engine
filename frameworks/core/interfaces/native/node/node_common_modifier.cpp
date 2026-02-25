@@ -17,6 +17,7 @@
 #include "interfaces/native/node/node_model.h"
 
 #include "base/utils/system_properties.h"
+#include "base/utils/feature_param.h"
 #include "base/utils/utils.h"
 #include "base/geometry/calc_dimension_rect.h"
 #include "bridge/common/utils/utils.h"
@@ -39,7 +40,9 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/event/overflow_scroll_event_hub.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
@@ -8560,7 +8563,7 @@ void GetFocusPriority(ArkUINodeHandle node, ArkUI_Int32 (*values)[1], ArkUI_Char
     CHECK_NULL_VOID(frameNode);
     auto scopePriority = ViewAbstract::GetFocusScopePriority(frameNode);
     g_strValue = ViewAbstract::GetFocusScopeId(frameNode);
-    (*values)[NUM_0] = scopePriority;
+    (*values)[NUM_0] = static_cast<int>(scopePriority);
     *id = g_strValue.c_str();
 }
 
@@ -9388,7 +9391,7 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node = AceType::WeakClaim(frameNode), eventReceiver](const bool isOn) {
+    std::function<void(const bool)> onChange = [node = AceType::WeakClaim(frameNode), eventReceiver](const bool isOn) {
         auto frameNode = node.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
@@ -9401,9 +9404,9 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
         CHECK_NULL_VOID(checkboxModifier);
         return checkboxModifier->setCheckboxOnChange(node, reinterpret_cast<void*>(&onChange));
     } else {
-        auto* radioModifier = GetArkUINodeModifiers()->getRadioModifier();
+        auto radioModifier = GetArkUINodeModifiers()->getRadioModifier();
         CHECK_NULL_VOID(radioModifier);
-        radioModifier->setRadioOnChange(reinterpret_cast<ArkUINodeHandle>(node), reinterpret_cast<void*>(&onChange));
+        radioModifier->setRadioOnChange(node, reinterpret_cast<void*>(&onChange));
     }
 }
 
@@ -12028,6 +12031,44 @@ void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnTouchTestFunc(frameNode, std::move(onChildTouchTest));
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+ArkUI_CrownAction ToArkUICrownAction(CrownAction action)
+{
+    switch (action) {
+        case CrownAction::UPDATE:
+            return ArkUI_CrownAction::UPDATE;
+        case CrownAction::END:
+            return ArkUI_CrownAction::END;
+        case CrownAction::UNKNOWN:
+        default:
+            return ArkUI_CrownAction::UNKNOWN;
+    }
+}
+
+void SetOnDigitalCrownEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onCrownEvent = [node = AceType::WeakClaim(frameNode), nodeId, extraParam](CrownEventInfo& info) {
+        CHECK_EQUAL_VOID(info.GetAction(), CrownAction::BEGIN);
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::DIGITAL_CROWN_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.crownEvent.subKind = ArkUIEventSubKind::ON_DIGITAL_CROWN;
+        event.crownEvent.action = ToArkUICrownAction(info.GetAction());
+        event.crownEvent.timeStamp = static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count());
+        event.crownEvent.degree = info.GetDegree();
+        event.crownEvent.angularVelocity = info.GetAngularVelocity();
+        PipelineContext::SetCallBackNode(node);
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.crownEvent.stopPropagation);
+    };
+    ViewAbstract::SetOnCrownEvent(frameNode, std::move(onCrownEvent));
+}
+#endif
+
 void ResetOnKeyEvent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -12610,6 +12651,52 @@ void SetOnCoastingAxisEvent(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnCoastingAxisEvent(frameNode, onEvent);
 }
 
+void SetOnCustomOverflowScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!FeatureParam::IsRnOverflowEnable() || frameNode->GetTag() != V2::CUSTOM_ETS_TAG) {
+        return;
+    }
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](int32_t scrollId, float offset) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_CUSTOM_OVERFLOW_SCROLL;
+        event.componentAsyncEvent.data[0].i32 = scrollId;
+        event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(offset);
+        SendArkUISyncEvent(&event);
+    };
+    auto hub = frameNode->GetEventHub<OverflowScrollEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetOverflowScrollEvent(std::move(onEvent));
+}
+
+void SetOnStackOverflowScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!FeatureParam::IsRnOverflowEnable() || frameNode->GetTag() != V2::STACK_ETS_TAG) {
+        return;
+    }
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](int32_t scrollId, float offset) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_STACK_OVERFLOW_SCROLL;
+        event.componentAsyncEvent.data[0].i32 = scrollId;
+        event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(offset);
+        SendArkUISyncEvent(&event);
+    };
+    auto hub = frameNode->GetEventHub<OverflowScrollEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetOverflowScrollEvent(std::move(onEvent));
+}
+
 void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -12626,6 +12713,23 @@ void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
     };
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SetActions(onEvent);
+}
+
+void SetOnNeedSoftkeyboard(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onNeedSoftkeyboardCallback = [nodeId, extraParam]() -> bool {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_NEED_SOFTKEYBOARD;
+        SendArkUISyncEvent(&event);
+        return event.componentAsyncEvent.data[0].i32;
+    };
+    ViewAbstract::SetOnNeedSoftkeyboard(frameNode, std::move(onNeedSoftkeyboardCallback));
 }
 
 void ResetOnAppear(ArkUINodeHandle node)
@@ -12770,6 +12874,44 @@ void ResetOnChildTouchTest(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetOnTouchTestFunc(frameNode, nullptr);
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ResetOnDigitalCrownEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnCrownEvent(frameNode);
+}
+#endif
+
+void ResetOnCustomOverflowScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == "Custom") {
+        auto hub = frameNode->GetEventHub<OverflowScrollEventHub>();
+        CHECK_NULL_VOID(hub);
+        hub->ClearOverflowScrollEvent();
+    }
+}
+
+void ResetOnStackOverflowScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::STACK_ETS_TAG) {
+        auto hub = frameNode->GetEventHub<OverflowScrollEventHub>();
+        CHECK_NULL_VOID(hub);
+        hub->ClearOverflowScrollEvent();
+    }
+}
+
+void ResetOnNeedSoftkeyboard(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetOnNeedSoftkeyboard(frameNode);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

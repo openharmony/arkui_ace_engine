@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -31,6 +32,7 @@ void RecordItemsAndGroups(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(pattern);
     auto menu = pattern->GetMenu();
     CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
     auto menuPattern = menu->GetPattern<InnerMenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->RecordItemsAndGroups();
@@ -296,7 +298,7 @@ bool MenuItemGroupLayoutAlgorithm::NeedHeaderPadding(const RefPtr<FrameNode>& ho
 {
     auto brotherNode = GetBrotherNode(host);
     CHECK_NULL_RETURN(brotherNode, false);
-    return brotherNode->GetTag() != V2::MENU_ITEM_GROUP_ETS_TAG;
+    return brotherNode->GetTag() != MENU_ITEM_GROUP_ETS_TAG;
 }
 
 bool MenuItemGroupLayoutAlgorithm::NeedFooterPadding(const RefPtr<FrameNode>& host)
@@ -325,6 +327,7 @@ std::list<WeakPtr<UINode>> MenuItemGroupLayoutAlgorithm::GetItemsAndGroups(const
     CHECK_NULL_RETURN(pattern, itemsAndGroups);
     auto menu = pattern->GetMenu();
     CHECK_NULL_RETURN(menu, itemsAndGroups);
+    ACE_UINODE_TRACE(menu);
     auto menuPattern = menu->GetPattern<InnerMenuPattern>();
     CHECK_NULL_RETURN(menuPattern, itemsAndGroups);
     return menuPattern->GetItemsAndGroups();

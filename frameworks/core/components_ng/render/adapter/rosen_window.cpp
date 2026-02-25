@@ -19,6 +19,7 @@
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -39,6 +40,19 @@ constexpr char VSYNC_RECOVER_TASKNAME[] = "ArkUIVsyncRecover";
 #ifdef PREVIEW
 constexpr float PREVIEW_REFRESH_RATE = 30.0f;
 #endif
+
+std::shared_ptr<OHOS::Rosen::RSUIContext> GetRSUIContextByContainerId(int32_t instanceId)
+{
+    auto container = OHOS::Ace::Container::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto pipelineWindow = pipeline->GetWindow();
+    CHECK_NULL_RETURN(pipelineWindow, nullptr);
+    auto rsUIDirector = pipelineWindow->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    return rsUIDirector->GetRSUIContext();
+}
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -148,10 +162,37 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
 void RosenWindow::Init()
 {
     CHECK_NULL_VOID(rsUIDirector_);
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto container = Container::GetContainer(id_);
+        CHECK_NULL_VOID(container);
+        if (container->IsSubContainer()) {
+            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(id_);
+            auto parentRsUIContext = GetRSUIContextByContainerId(parentContainerId);
+            auto parentContainer = Container::GetContainer(parentContainerId);
+            CHECK_NULL_VOID(parentContainer);
+            auto parentPipeline = parentContainer->GetPipelineContext();
+            CHECK_NULL_VOID(parentPipeline);
+            auto pipelineWindow = parentPipeline->GetWindow();
+            if (pipelineWindow && parentRsUIContext && parentRsUIContext == rsUIDirector_->GetRSUIContext()) {
+                pipelineWindow->RegisterSubWindow(id_);
+                return;
+            }
+        }
+    }
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
         CHECK_NULL_VOID(self);
         self->RequestFrame();
+        if (SystemProperties::GetMultiInstanceEnabled()) {
+            auto subWindowIds = self->GetSubWindowIds();
+            for (auto subWindowId : subWindowIds) {
+                auto container = Container::GetContainer(subWindowId);
+                CHECK_NULL_VOID(container);
+                auto pipeline = container->GetPipelineContext();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->RequestFrame();
+            }
+        }
     });
 }
 
@@ -301,6 +342,23 @@ void RosenWindow::Destroy()
     vsyncCallback_.reset();
     rsUIDirector_->SendMessages();
     auto rsUIContext = rsUIDirector_->GetRSUIContext();
+    // Unregister from parent window before detaching from UI
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto container = Container::GetContainer(id_);
+        CHECK_NULL_VOID(container);
+        if (container->IsSubContainer()) {
+            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(id_);
+            auto parentRsUIContext = GetRSUIContextByContainerId(parentContainerId);
+            auto parentContainer = Container::GetContainer(parentContainerId);
+            CHECK_NULL_VOID(parentContainer);
+            auto parentPipeline = parentContainer->GetPipelineContext();
+            CHECK_NULL_VOID(parentPipeline);
+            auto pipelineWindow = parentPipeline->GetWindow();
+            if (pipelineWindow && parentRsUIContext && parentRsUIContext == rsUIContext) {
+                pipelineWindow->UnregisterSubWindow(id_);
+            }
+        }
+    }
     if (rsUIContext) {
         rsUIContext->DetachFromUI();
     }

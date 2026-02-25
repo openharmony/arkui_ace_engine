@@ -64,10 +64,12 @@ private:
         TaskExecutor::Task&& task, int32_t id, uint32_t delayTime,
         std::function<void()>&& traceIdFunc = nullptr) const;
     bool PostTaskToTaskRunner(const RefPtr<TaskRunnerAdapter>& taskRunner, TaskExecutor::Task&& task,
-        uint32_t delayTime, const std::string& name, PriorityType priorityType = PriorityType::LOW) const;
+        uint32_t delayTime, const std::string& name, PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const;
     void SetThreadPriority(int32_t priority) const;
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
-        PriorityType priorityType = PriorityType::LOW) const final;
+        PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const final;
     Task WrapTaskWithTraceId(Task&& task, int32_t id) const final;
     void RemoveTaskFromTaskRunner(const RefPtr<TaskRunnerAdapter>& taskRunner, const std::string& name);
     bool OnPostTaskWithoutTraceId(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,

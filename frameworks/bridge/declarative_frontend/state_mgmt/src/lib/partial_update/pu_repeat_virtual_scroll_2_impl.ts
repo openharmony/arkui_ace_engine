@@ -954,9 +954,11 @@ class __RepeatVirtualScroll2Impl<T> {
      */
     private onGetRid4Index(forIndex: number): [number, number] {
         if (forIndex < 0 || forIndex >= this.totalCount()) {
-            throw new BusinessError(103803,`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex}` +
+            stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_}) onGetRid4Index index ${forIndex}` +
                 `\ndata array length: ${this.arr_.length}, totalCount: ${this.totalCount()}: ` +
                 `Out of range, application error.`);
+            this.activeDataItems_[forIndex] = ActiveDataItem.createMissingDataItem();
+ 	        return [0, /* failed to create or update */ 0];
         }
         const [dataItemExists, dataItem] = this.getItemUnmonitored(forIndex);
         if (!dataItemExists) {

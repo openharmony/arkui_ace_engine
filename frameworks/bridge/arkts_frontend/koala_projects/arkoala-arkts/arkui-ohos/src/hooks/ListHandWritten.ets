@@ -14,15 +14,21 @@
 */
 
 import { ArkUIAniModule } from "arkui.ani"
-import { ArkListComponent, ArkListItemGroupComponent, ChildrenMainSize } from "#generated";
+import { ArkListPeer, ArkListItemGroupPeer, ChildrenMainSize } from "#generated";
+import { ArkArcListPeer } from "../../@ohos.arkui.ArcList.ets";
 
 export class ListHandWritten {
-    static hookListChildrenMainSizeImpl(node: ArkListComponent, value: ChildrenMainSize | undefined): void {
-        ArkUIAniModule._SetListChildrenMainSize(node.getPeer().peer.ptr, value)
+    static hookListChildrenMainSizeImpl(peer: ArkListPeer, value: ChildrenMainSize | undefined): void {
+        ArkUIAniModule._SetListChildrenMainSize(peer.peer.ptr, value)
     }
 
     static hookListItemGroupChildrenMainSizeImpl(
-        node: ArkListItemGroupComponent, value: ChildrenMainSize | undefined): void {
-        ArkUIAniModule._SetListChildrenMainSize(node.getPeer().peer.ptr, value)
+        peer: ArkListItemGroupPeer, value: ChildrenMainSize | undefined): void {
+        ArkUIAniModule._SetListChildrenMainSize(peer.peer.ptr, value)
+    }
+
+    static hookArkListChildrenMainSizeImpl(
+        peer: ArkArcListPeer, value: ChildrenMainSize | undefined): void {
+        ArkUIAniModule._SetListChildrenMainSize(peer.peer.ptr, value)
     }
 }

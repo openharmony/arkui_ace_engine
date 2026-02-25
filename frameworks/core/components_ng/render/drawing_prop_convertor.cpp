@@ -21,15 +21,17 @@ constexpr uint8_t UINT32_LEFT_SHIFT_24 = 24;
 constexpr uint8_t UINT32_LEFT_SHIFT_16 = 16;
 constexpr uint8_t UINT32_LEFT_SHIFT_8 = 8;
 } // namespace
-RSColor ToRSColor(const Color& color)
+ACE_FORCE_EXPORT RSColor ToRSColor(const Color& color)
 {
     if (ACE_UNLIKELY(color.IsPlaceholder())) {
-        return RSColor(static_cast<RSColorPlaceholder>(color.GetPlaceholder()));
+        RSColor rsColor { color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha() };
+        rsColor.SetPlaceholder(static_cast<RSColorPlaceholder>(color.GetPlaceholder()));
+        return rsColor;
     }
     return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
 }
 
-RSColor ToRSColor(const LinearColor& color)
+ACE_FORCE_EXPORT RSColor ToRSColor(const LinearColor& color)
 {
     return RSColor(
         (static_cast<uint32_t>(std::clamp<int16_t>(color.GetAlpha(), 0, UINT8_MAX)) << UINT32_LEFT_SHIFT_24) |

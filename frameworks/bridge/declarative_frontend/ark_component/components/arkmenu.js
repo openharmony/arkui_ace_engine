@@ -309,5 +309,5 @@ function exportComponent() {
 function exportView() {
   globalThis.Menu = JSMenu;
 }
-
-export default { ArkMenuComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkMenuComponent, createComponent, exportComponent, exportView, loadComponent };

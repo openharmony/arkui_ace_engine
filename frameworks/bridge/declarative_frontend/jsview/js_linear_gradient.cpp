@@ -49,14 +49,16 @@ void JSLinearGradientBinding::Constructor(const JSCallbackInfo& args)
             return;
         }
         auto itemObject = JSRef<JSObject>::Cast(item);
+        RefPtr<ResourceObject> colorResObj;
         JSRef<JSVal> jsColor = itemObject->GetProperty("color");
         Color color;
-        if (!JSViewAbstract::ParseJsColor(jsColor, color)) {
+        if (!JSViewAbstract::ParseJsColor(jsColor, color, colorResObj)) {
             return;
         }
+        RefPtr<ResourceObject> offsetResObj;
         JSRef<JSVal> jsOffset = itemObject->GetProperty("offset");
         CalcDimension offset;
-        if (!JSViewAbstract::ParseJsDimensionVp(jsOffset, offset)) {
+        if (!JSViewAbstract::ParseJsDimensionVp(jsOffset, offset, offsetResObj)) {
             return;
         }
 
@@ -68,6 +70,9 @@ void JSLinearGradientBinding::Constructor(const JSCallbackInfo& args)
             offset = Dimension(1.0, DimensionUnit::VP);
         }
         jsLinearGradientPtr->gradient_.push_back(std::make_pair(color, offset));
+        if (SystemProperties::ConfigChangePerform()) {
+            jsLinearGradientPtr->gradientResObj_.push_back(std::make_pair(colorResObj, offsetResObj));
+        }
     }
 }
 

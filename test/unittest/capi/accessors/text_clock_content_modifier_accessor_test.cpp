@@ -42,11 +42,11 @@ static constexpr bool TEST_DEFAULT_STARTED = true;
 static constexpr float TEST_DEFAULT_TIMEZONE_OFFSET = NAN;
 
 /**
- * @tc.name: textClockContentModifierHelperAccessorTest
+ * @tc.name: contentModifierTextClockTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockContentModifierHelperAccessor, textClockContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(TextClockContentModifierHelperAccessor, contentModifierTextClockTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierTextClock, nullptr);
 

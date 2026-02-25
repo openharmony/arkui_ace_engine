@@ -49,7 +49,8 @@ void SetSpanOptionsImpl(Ark_NativePointer node,
 } // SpanInterfaceModifier
 namespace SpanAttributeModifier {
 void SetFontImpl(Ark_NativePointer node,
-                 const Opt_Font* value)
+                 const Opt_arkui_component_units_Font* value,
+                 const Opt_FontConfigs* fontConfigs)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -103,11 +104,12 @@ void SetFontStyleImpl(Ark_NativePointer node,
     SpanModelStatic::SetItalicFontStyle(frameNode, convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_I32_FontWeight_ResourceStr* value)
+                       const Opt_Union_I32_FontWeight_ResourceStr* weight,
+                       const Opt_FontWeightConfigs* fontWeightConfigs)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<FontWeight>(value);
+    auto convValue = Converter::OptConvertPtr<FontWeight>(weight);
     SpanModelStatic::SetFontWeight(frameNode, convValue);
 }
 void SetFontFamilyImpl(Ark_NativePointer node,
@@ -270,11 +272,9 @@ const GENERATED_ArkUISpanModifier* GetSpanModifier()
     static const GENERATED_ArkUISpanModifier ArkUISpanModifierImpl {
         SpanModifier::ConstructImpl,
         SpanInterfaceModifier::SetSpanOptionsImpl,
-        SpanAttributeModifier::SetFontImpl,
         SpanAttributeModifier::SetFontColorImpl,
         SpanAttributeModifier::SetFontSizeImpl,
         SpanAttributeModifier::SetFontStyleImpl,
-        SpanAttributeModifier::SetFontWeightImpl,
         SpanAttributeModifier::SetFontFamilyImpl,
         SpanAttributeModifier::SetDecorationImpl,
         SpanAttributeModifier::SetLetterSpacingImpl,
@@ -287,6 +287,8 @@ const GENERATED_ArkUISpanModifier* GetSpanModifier()
         SpanAttributeModifier::SetIdImpl,
         SpanAttributeModifier::SetOnClick0Impl,
         SpanAttributeModifier::SetOnHoverImpl,
+        SpanAttributeModifier::SetFontImpl,
+        SpanAttributeModifier::SetFontWeightImpl,
         SpanAttributeModifier::SetOnClick1Impl,
     };
     return &ArkUISpanModifierImpl;

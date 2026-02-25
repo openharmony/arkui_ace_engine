@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/gauge/bridge/content_modifier_helper.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/gauge/gauge_model_static.h"
+#include "core/interfaces/native/common/api_impl.h"
 #include "core/interfaces/native/implementation/linear_gradient_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -263,14 +264,20 @@ void ContentModifierGaugeImpl(
         arkConfig.max = Converter::ArkValue<Ark_Float64>(config.max_);
         arkConfig.min = Converter::ArkValue<Ark_Float64>(config.min_);
         arkConfig.value = Converter::ArkValue<Ark_Float64>(config.value_);
-        auto gaugeNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-        arkBuilder.BuildAsync(
-            [gaugeNode](const RefPtr<UINode>& uiNode) mutable {
-                gaugeNode->AddChild(uiNode);
-                gaugeNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
-            },
-            node, arkConfig);
-        return gaugeNode;
+        auto boxNode = GeneratedApiImpl::GetContentNode(node);
+        if (boxNode == nullptr) {
+            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+            GeneratedApiImpl::SetContentNode(node, boxNode);
+        }
+        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
+            auto old = boxNode->GetChildAtIndex(0);
+            if (old != nullptr) {
+                boxNode->RemoveChildSilently(old);
+            }
+            boxNode->AddChild(uiNode);
+            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            }, node, arkConfig);
+        return boxNode;
     };
     GaugeModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
 }
@@ -281,11 +288,13 @@ void ResetContentModifierGaugeImpl(Ark_NativePointer node)
     GaugeModelNG::SetBuilderFunc(frameNode, nullptr);
 }
 
-void SetIndicatorImpl(Ark_NativePointer node, const Opt_GaugeIndicatorOptions* value)
+namespace GaugeExtenderAccessor {
+void SetIndicatorImpl(Ark_NativePointer node,
+                      const Opt_GaugeIndicatorOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto indicator = Converter::OptConvertPtr<Converter::GaugeIndicatorOptions>(value);
+    auto indicator = Converter::OptConvertPtr<Converter::GaugeIndicatorOptions>(options);
     if (indicator) {
         if (indicator->icon) {
             GaugeModelNG::SetIndicatorIconPath(frameNode, indicator->icon->GetSrc(), indicator->icon->GetBundleName(),
@@ -354,6 +363,7 @@ void NullTrackShadowImpl(Ark_NativePointer node)
     shadow.isShadowVisible = false;
     GaugeModelNG::SetShadowOptions(frameNode, shadow);
 }
+} // GaugeExtenderAccessor
 
 const GENERATED_ArkUIGaugeModifier* GetGaugeStaticModifier()
 {
@@ -380,12 +390,12 @@ const GENERATED_ArkUIGaugeContentModifier* GetGaugeStaticContentModifier()
 const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeStaticExtenderAccessor()
 {
     static const GENERATED_ArkUIGaugeExtenderAccessor GaugeExtenderAccessorImpl {
-        SetIndicatorImpl,
-        NullIndicatorImpl,
-        SetTrackShadowImpl,
-        NullTrackShadowImpl,
-        SetDescriptionImpl,
-        NullDescriptionImpl
+        GaugeExtenderAccessor::SetIndicatorImpl,
+        GaugeExtenderAccessor::NullIndicatorImpl,
+        GaugeExtenderAccessor::SetTrackShadowImpl,
+        GaugeExtenderAccessor::NullTrackShadowImpl,
+        GaugeExtenderAccessor::SetDescriptionImpl,
+        GaugeExtenderAccessor::NullDescriptionImpl
     };
     return &GaugeExtenderAccessorImpl;
 }

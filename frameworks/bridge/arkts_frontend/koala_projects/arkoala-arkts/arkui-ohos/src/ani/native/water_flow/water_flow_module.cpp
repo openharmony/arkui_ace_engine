@@ -15,13 +15,12 @@
 
 #include "water_flow_module.h"
 
-#include <memory>
+#include <optional>
+#include <vector>
 
 #include "load.h"
 #include "utils/ani_utils.h"
-#include "water_flow_module.h"
 
-#include "base/log/log.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::Ani {
@@ -57,6 +56,38 @@ void ParseStringToDimension(const std::string& str, ArkUIWaterFlowSectionGap* re
     }
 }
 
+bool ParseResourceDimension(ani_env* env, ani_ref dimensionRef, ArkUIWaterFlowSectionGap* res)
+{
+    auto* object = static_cast<ani_object>(dimensionRef);
+    if (!AniUtils::IsClassObject(env, object, "global.resource.Resource")) {
+        return false;
+    }
+
+    ArkUIWaterFlowResourceParam param;
+    ani_long aniId = 0;
+    if (env->Object_GetPropertyByName_Long(object, "id", &aniId) == ANI_OK) {
+        param.resId = static_cast<int32_t>(aniId);
+    }
+    ani_ref typeRef;
+    if (env->Object_GetPropertyByName_Ref(object, "type", &typeRef) == ANI_OK) {
+        AniUtils::GetOptionalInt(env, typeRef, param.resType);
+    }
+
+    std::string bundleName;
+    std::string moduleName;
+    AniUtils::GetStringByName(env, object, "bundleName", bundleName);
+    AniUtils::GetStringByName(env, object, "moduleName", moduleName);
+    param.bundleName = bundleName.empty() ? nullptr : bundleName.c_str();
+    param.moduleName = moduleName.empty() ? nullptr : moduleName.c_str();
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getArkUIAniWaterFlowModifier() ||
+        !modifier->getArkUIAniWaterFlowModifier()->parseWaterFlowSectionResourceGap) {
+        return false;
+    }
+    return modifier->getArkUIAniWaterFlowModifier()->parseWaterFlowSectionResourceGap(&param, res);
+}
+
 ArkUIWaterFlowSectionGap ParseDimension(ani_env *env, ani_ref dimensionRef)
 {
     ArkUIWaterFlowSectionGap res;
@@ -69,18 +100,17 @@ ArkUIWaterFlowSectionGap ParseDimension(ani_env *env, ani_ref dimensionRef)
         return res;
     }
 
+    // Check if Double
     ani_boolean isDouble;
     env->Object_InstanceOf(static_cast<ani_object>(dimensionRef), doubleClass, &isDouble);
     if (isDouble) {
         ani_double dimension;
         env->Object_CallMethodByName_Double(static_cast<ani_object>(dimensionRef), "toDouble", ":d", &dimension);
-        if (dimension < 0) {
-            dimension = 0;
-        }
-        res.value = dimension;
+        res.value = dimension < 0 ? 0 : dimension;
         return res;
     }
 
+    // Check if String
     ani_boolean isString;
     env->Object_InstanceOf(static_cast<ani_object>(dimensionRef), stringClass, &isString);
     if (isString) {
@@ -89,6 +119,12 @@ ArkUIWaterFlowSectionGap ParseDimension(ani_env *env, ani_ref dimensionRef)
         if (res.value < 0) {
             res.value = 0.0f;
         }
+        return res;
+    }
+
+    // Check if Resource
+    if (ParseResourceDimension(env, dimensionRef, &res) && res.value < 0) {
+        res.value = 0.0f;
     }
     return res;
 }
@@ -296,7 +332,7 @@ void SetWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
             if (env->Array_Get(static_cast<ani_array>(sectionOptionsArray), j, &section) != ANI_OK) {
                 continue;
             }
-            ani_boolean isSectionOptions;
+            ani_boolean isSectionOptions = ANI_FALSE;
             env->Object_InstanceOf(static_cast<ani_object>(section), sectionOptions, &isSectionOptions);
             if (!isSectionOptions) {
                 continue;
@@ -383,7 +419,7 @@ void UpdateWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, 
         return;
     }
 
-    ani_size sectionsLength;
+    ani_size sectionsLength = 0;
     if (env->Array_GetLength(static_cast<ani_array>(sections), &sectionsLength) != ANI_OK) {
         return;
     }
@@ -400,7 +436,7 @@ void UpdateWaterFlowSection(ani_env* env, [[maybe_unused]] ani_object aniClass, 
         if (env->Array_Get(static_cast<ani_array>(sections), j, &section) != ANI_OK) {
             continue;
         }
-        ani_boolean isSectionOptions;
+        ani_boolean isSectionOptions = ANI_FALSE;
         env->Object_InstanceOf(static_cast<ani_object>(section), sectionOptions, &isSectionOptions);
         if (!isSectionOptions) {
             continue;

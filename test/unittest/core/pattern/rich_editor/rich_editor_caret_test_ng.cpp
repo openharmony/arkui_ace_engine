@@ -186,9 +186,17 @@ HWTEST_F(RichEditorCaretTestNg, CaretColorTest002, TestSize.Level0)
     model.Create();
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(host, nullptr);
+
+    /**
+     * @tc.steps: step1. get system caret color.
+     */
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     Color patternCaretColor = richEditorPattern->GetCaretColor();
     EXPECT_EQ(patternCaretColor, SYSTEM_CARET_COLOR);
+
+    /**
+     * @tc.steps: step2. set blue color.
+     */
     model.SetCaretColor(host, Color::BLUE);
     patternCaretColor = richEditorPattern->GetCaretColor();
     EXPECT_EQ(patternCaretColor, Color::BLUE);
@@ -204,9 +212,15 @@ HWTEST_F(RichEditorCaretTestNg, SetCaretPosition001, TestSize.Level0)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. set ss mode false
+     */
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"SetCaretPosition");
     richEditorPattern->caretChangeListener_ = [](int32_t x) {};
+    /**
+     * @tc.steps: step2. test SetCaretPosition
+     */
     EXPECT_TRUE(richEditorPattern->SetCaretPosition(2, false));
 }
 
@@ -998,6 +1012,82 @@ HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange002, TestSize.Level0)
     pattern_->TriggerAvoidOnCaretChange();
     EXPECT_NE(textFieldManager->GetHeight(), richEditorTheme->GetDefaultCaretHeight().ConvertToPx());
 }
+
+/**
+ * @tc.name: TriggerAvoidOnCaretChange003
+ * @tc.desc: test TriggerAvoidOnCaretChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern_, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    auto focusHub = pattern_->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->currentFocus_ = true;
+    pattern_->HandleFocusEvent();
+    auto host = pattern_->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    context->safeAreaManager_->keyboardInset_ = { .start = 0, .end = 0 };
+    context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    PipelineBase::GetCurrentContext()->textFieldManager_ = textFieldManager;
+    textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    ASSERT_NE(textFieldManager, nullptr);
+    auto initialLastCaretPos = pattern_->GetLastCaretPos();
+    pattern_->TriggerAvoidOnCaretChange();
+    EXPECT_EQ(pattern_->GetLastCaretPos(), initialLastCaretPos);
+}
+
+/**
+ * @tc.name: TriggerAvoidOnCaretChange004
+ * @tc.desc: testTriggerAvoidOnCaretChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern_, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    auto focusHub = pattern_->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->currentFocus_ = true;
+    pattern_->HandleFocusEvent();
+    auto host = pattern_->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pipeline = pattern_->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    ASSERT_NE(mockTaskExecutor, nullptr);
+    context->taskExecutor_ = mockTaskExecutor;
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    context->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    context->safeAreaManager_->keyboardInset_ = { .start = 0, .end = 1000 };
+    context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    PipelineBase::GetCurrentContext()->textFieldManager_ = textFieldManager;
+    textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    ASSERT_NE(textFieldManager, nullptr);
+    pattern_->TriggerAvoidOnCaretChange();
+    EXPECT_NE(textFieldManager->GetHeight(), richEditorTheme->GetDefaultCaretHeight().ConvertToPx());
+}
+
 
 /**
  * @tc.name: CheckIfNeedAvoidOnCaretChange001

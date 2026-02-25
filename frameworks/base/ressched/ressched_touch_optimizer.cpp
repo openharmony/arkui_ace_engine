@@ -94,9 +94,9 @@ ResSchedTouchOptimizer::~ResSchedTouchOptimizer()
  * Parameters:
  *     accept [in] Whether the slide is accepted.
  */
-void ResSchedTouchOptimizer::SetSlideAccepted(bool accept)
+void ResSchedTouchOptimizer::SetSlideAccept(bool accept)
 {
-    slideAccepted_ = accept;
+    slideAccept_ = accept;
 }
 
 /*
@@ -130,7 +130,7 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsync(const TouchEvent& touchEvent)
     isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     bool result = NeedTpFlushVsyncInner(touchEvent);
     if (isTpFlushFrameDisplayPeriod_ && !result) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush end");
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush end");
         ACE_SCOPED_TRACE("TpFlush end");
         isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
     }
@@ -155,23 +155,24 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsyncInner(const TouchEvent& touchEvent)
     if (touchEvent.sourceTool != SourceTool::FINGER) {
         return false;
     }
-    // If slide is not accepted, trigger TP flush for the first frame
-    if (!slideAccepted_) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush first frame");
+    // If slide is accepted, TPflush first frame
+    if (slideAccept_) {
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush first frame");
         ACE_SCOPED_TRACE("TpFlush first frame");
+        slideAccept_ = false;
         return true;
     }
     // If last frame was TP triggered and current Vsync count differs,
     // trigger TP flush to avoid frame drop
     if (lastTpFlush_ && vsyncFlushed_) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush continue");
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush continue");
         ACE_SCOPED_TRACE("TpFlush continue");
         return true;
     }
     // If current direction is reversed and last frame wasn't TP triggered,
     // trigger TP flush to avoid frame drop
     if (!lastTpFlush_ && (RVSDirectionStateCheck(touchEvent.xReverse) || RVSDirectionStateCheck(touchEvent.yReverse))) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush reversed");
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush reversed");
         ACE_SCOPED_TRACE("TpFlush reversed");
         return true;
     }
@@ -767,7 +768,7 @@ TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& point
 
 void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
 {
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush end by up event");
+    TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush end by up event");
     ACE_SCOPED_TRACE("TpFlush end by up event");
     lastTpFlush_ = false;
     vsyncPeriod_ = 0;

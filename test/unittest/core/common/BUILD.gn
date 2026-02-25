@@ -27,8 +27,10 @@ ace_unittest("common_test") {
     "$ace_root/frameworks/core/common/sharedata/share_data.cpp",
     "$ace_root/frameworks/core/common/storage/storage_proxy.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
+    "$ace_root/frameworks/core/common/task_runner_adapter_impl.cpp",
     "asset/asset_test.cpp",
     "builder_util/builder_util_test.cpp",
+    "click_effect/click_sound_effect_manager_test.cpp",
     "clipboard/clipboard_test.cpp",
     "environment/environment_test.cpp",
     "multi_thread_build_manager/multi_thread_build_manager_test.cpp",
@@ -39,6 +41,10 @@ ace_unittest("common_test") {
     "storage/storage_test.cpp",
     "transform/input_compatible_manager_test_ng.cpp",
     "vibrator/vibrator_test.cpp",
+    "task_runner_adapter_impl/task_runner_adapter_test.cpp",
+  ]
+  external_deps = [
+    "eventhandler:libeventhandler",
   ]
 }
 

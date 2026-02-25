@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
@@ -37,6 +38,7 @@
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 #include "frameworks/core/components_ng/event/event_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -216,6 +218,7 @@ bool ViewAbstractModelNG::CheckMenuIsShow(
     CHECK_NULL_RETURN(overlayManager, false);
     auto menuNode = overlayManager->GetMenuNode(targetId);
     CHECK_NULL_RETURN(menuNode, false);
+    ACE_UINODE_TRACE(menuNode);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(wrapperPattern, false);
     if (menuParam.hasTransitionEffect) {
@@ -293,6 +296,7 @@ void UpdateIsShowStatusForMenu(int32_t targetId, bool isShow)
     CHECK_NULL_VOID(overlayManager);
     auto menuNode = overlayManager->GetMenuNode(targetId);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->SetIsShowFromUser(isShow);
@@ -317,6 +321,7 @@ void BindContextMenuSingle(
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         auto menuNode = overlayManager->GetMenuNode(targetId);
+        ACE_UINODE_TRACE(menuNode);
         if (menuNode) {
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
@@ -355,7 +360,8 @@ static void BindGestureJudgeForMenuHoverScale(const RefPtr<FrameNode>& targetNod
     CHECK_NULL_VOID(gestureHub);
 
     auto targetId = targetNode->GetId();
-    if (MenuView::GetMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    if (menuViewModifier && menuViewModifier->getMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
         gestureHub->SetOnGestureJudgeNativeBeginForMenu(
             [](const RefPtr<NG::GestureInfo>& gestureInfo,
                 const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
@@ -376,9 +382,11 @@ static void BindGestureJudgeForMenuHoverScale(const RefPtr<FrameNode>& targetNod
             const RefPtr<NG::GestureInfo>& gestureInfo,
             const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
             CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
+            const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+            CHECK_NULL_RETURN(menuViewModifier, GestureJudgeResult::CONTINUE);
             if (gestureInfo->GetType() == GestureTypeName::CONTEXT_MENU_HOVER) {
                 TAG_LOGI(AceLogTag::ACE_OVERLAY, "Trigger longPress event for menu hoverScaleInterruption");
-                MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::HOVER);
+                menuViewModifier->setMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::HOVER);
                 NG::OffsetF position;
                 if (info && !info->GetFingerList().empty()) {
                     auto finger = info->GetFingerList().front();
@@ -392,13 +400,13 @@ static void BindGestureJudgeForMenuHoverScale(const RefPtr<FrameNode>& targetNod
             auto isDragGesture = gestureInfo->GetType() == GestureTypeName::DRAG;
             auto isContextMenuGesture = gestureInfo->GetTag() == KEY_CONTEXT_MENU_HOVER;
             if (isDragGesture || isContextMenuGesture) {
-                auto hoverStatus = MenuView::GetMenuHoverScaleStatus(targetId);
+                auto hoverStatus = menuViewModifier->getMenuHoverScaleStatus(targetId);
                 TAG_LOGI(AceLogTag::ACE_MENU,
                     "isDragGesture: %{public}d isContextMenuGesture: %{public}d hoverStatus: %{public}d", isDragGesture,
                     isContextMenuGesture, hoverStatus);
                 if (hoverStatus == MenuHoverScaleStatus::HOVER) {
                     callVibrator();
-                    MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::MENU_SHOW);
+                    menuViewModifier->setMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::MENU_SHOW);
                 }
             }
             return GestureJudgeResult::CONTINUE;
@@ -415,7 +423,9 @@ static void BindGestureForMenuHoverScale(
     // bind touch evnet for hoverScaleInterruption
     auto targetId = targetNode->GetId();
     gestureHub->RegisterMenuOnTouch([targetId](const TouchEventInfo& info) {
-        if (MenuView::GetMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
+        const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+        CHECK_NULL_VOID(menuViewModifier);
+        if (menuViewModifier->getMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
             return;
         }
 
@@ -423,10 +433,10 @@ static void BindGestureForMenuHoverScale(
         CHECK_EQUAL_VOID(touches.empty(), true);
         auto touchType = touches.front().GetTouchType();
         if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            auto hoverStatus = MenuView::GetMenuHoverScaleStatus(targetId);
+            auto hoverStatus = menuViewModifier->getMenuHoverScaleStatus(targetId);
             TAG_LOGI(AceLogTag::ACE_MENU, "target touch up or cancel, hoverStatus: %{public}d", hoverStatus);
             if (hoverStatus == MenuHoverScaleStatus::HOVER) {
-                MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::INTERRUPT);
+                menuViewModifier->setMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::INTERRUPT);
                 SubwindowManager::GetInstance()->HideMenuNG();
             }
         }
@@ -438,7 +448,9 @@ static void BindGestureForMenuHoverScale(
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     gesture->SetOnActionId([targetId](GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_MENU, "long press 500ms for menu hoverScale");
-        MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::MENU_SHOW);
+        const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+        CHECK_NULL_VOID(menuViewModifier);
+        menuViewModifier->setMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::MENU_SHOW);
     });
     gestureHub->AddGesture(gesture);
     if (needDirty) {
@@ -452,11 +464,13 @@ void BindGestureForContextMenu(const RefPtr<FrameNode>& targetNode, const MenuPa
 {
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
     auto isHoverInterrupt = menuParam.isShowHoverImage && menuParam.hoverScaleInterruption;
     if (!isHoverInterrupt) {
-        MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::DISABLE);
+        menuViewModifier->setMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::DISABLE);
     } else {
-        MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::READY);
+        menuViewModifier->setMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::READY);
         BindGestureForMenuHoverScale(targetNode, menuParam, needDirty);
     }
 
@@ -594,6 +608,7 @@ static bool SetMenuTransitionEffect(const RefPtr<FrameNode>& targetNode, const M
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_RETURN(overlayManager, false);
         auto menuNode = overlayManager->GetMenuNode(targetId);
+        ACE_UINODE_TRACE(menuNode);
         if (menuNode) {
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();

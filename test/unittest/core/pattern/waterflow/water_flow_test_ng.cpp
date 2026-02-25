@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,7 @@
 #include "test/mock/base/mock_system_properties.h"
 #undef private
 #undef protected
+#include "test/mock/adapter/mock_ui_session_manager.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -2763,5 +2764,156 @@ HWTEST_F(WaterFlowTestNg, WaterFlowResetItemFillPolicy, TestSize.Level1)
     model.ResetItemFillPolicy(AceType::RawPtr(frameNode_));
     FlushUITasks();
     EXPECT_EQ(model.GetItemFillPolicy(AceType::RawPtr(frameNode_)), -1);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: Test water flow pattern func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 30; ++i) {
+        CreateItemWithHeight(60.0f);
+    }
+    CreateDone();
+
+    EXPECT_TRUE(pattern_->IsScrollable());
+    EXPECT_TRUE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsAtBottom());
+
+    std::string command = R"()";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
+
+    command = R"({"cmd":"scrollForward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
+
+    command = R"({"cmd":"scrollBackward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 2);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 21);
+
+    command = R"({"cmd":"scrollForward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
+
+    UpdateCurrentOffset(-600);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_FALSE(pattern_->IsAtTop());
+
+    command = R"({"cmd":"scrollBackward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 29);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest002
+ * @tc.desc: Test water flow pattern func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnInjectionEventTest002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 4; ++i) {
+        CreateItemWithHeight(60.0f);
+    }
+    CreateDone();
+    EXPECT_FALSE(pattern_->IsScrollable());
+
+    std::string command = R"({"cmd":"scrollBackward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 3);
+
+    command = R"({"cmd":"scrollward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 3);
+
+    command = R"({"cmd":"scrollForward","eventId":123123,"ratio":1.1})";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 3);
+}
+
+/**
+ * @tc.name: ReportComponentChangeEventTest001
+ * @tc.desc: ReportComponentChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ReportComponentChangeEventTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 4; ++i) {
+        CreateItemWithHeight(60.0f);
+    }
+    CreateDone();
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetComponentChangeEventRegistered()).WillRepeatedly(Return(true));
+
+    pattern_->ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, 123);
+    pattern_->ReportScroll(true, ScrollError::SCROLL_NO_ERROR, 123);
+    pattern_->ReportOnItemWaterFlowEvent("onReachStart");
+    pattern_->ReportOnItemWaterFlowScrollEvent("onScrollIndex", 0, 0);
+
+    std::string command = R"()";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 3);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest003
+ * @tc.desc: Test water flow pattern func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OnInjectionEventTest003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 30; ++i) {
+        CreateItemWithHeight(60.0f);
+    }
+    CreateDone();
+
+    std::string command = R"({"cmd":"scrollBackward"})";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 29);
+
+    command = R"({"cmd":"scrollForward"})";
+    pattern_->OnInjectionEvent(command);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
 }
 } // namespace OHOS::Ace::NG

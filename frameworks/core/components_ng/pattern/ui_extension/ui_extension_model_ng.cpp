@@ -60,6 +60,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     pattern->SetModalRequestFocus(config.isModalRequestFocus);
     pattern->SetDensityDpi(config.isDensityFollowHost);
     pattern->SetIsWindowModeFollowHost(config.isWindowModeFollowHost);
+    pattern->SetIsModalFixFocus(config.isModalFixFocus);
     pattern->UpdateWant(want);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, frameNode);

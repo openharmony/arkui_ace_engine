@@ -227,7 +227,6 @@ void ClickRecognizer::OnAccepted()
         remoteMessage_(info);
     }
     UpdateFingerListInfo();
-    PlayClickSoundEffect(localOffset);
     SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
 
     int64_t overTime = GetSysTimestamp();
@@ -243,27 +242,6 @@ void ClickRecognizer::OnAccepted()
     }
     if (lastRefereeState != RefereeState::SUCCEED_BLOCKED) {
         ResetStateVoluntarily();
-    }
-}
-
-void ClickRecognizer::PlayClickSoundEffect(Offset clickPoint)
-{
-    auto frameNode = GetAttachedNode().Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetEnableClickSoundEffect()) {
-        if (!ClickSoundEffectManager::GetInstance().LoadProductPolicy()) {
-            return;
-        }
-        auto container = Container::GetContainer(Container::CurrentId());
-        CHECK_NULL_VOID(container);
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [clickPoint]() {
-                ClickSoundEffectManager::GetInstance().PlayClickSoundEffect(
-                    static_cast<int32_t>(clickPoint.GetX()), static_cast<int32_t>(clickPoint.GetY()));
-            },
-            TaskExecutor::TaskType::BACKGROUND, "ArkUIPlayClickSoundEffect");
     }
 }
 
@@ -606,6 +584,10 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         HandleGestureAccept(info, type, GestureListenerType::TAP);
         ACE_BENCH_MARK_TRACE("TapGesture_end");
         HandleReportClick(info);
+        auto node = GetAttachedNode().Upgrade();
+        ClickSoundEffectManager::GetInstance().PlayClickSoundEffect(node,
+            static_cast<int32_t>(info.GetScreenLocation().GetX()),
+            static_cast<int32_t>(info.GetScreenLocation().GetY()));
         onActionFunction(info);
         HandleReports(info, type);
         RecordClickEventIfNeed(info);

@@ -19,6 +19,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_canvas_image.h"
 #include "ui/properties/ui_material.h"
@@ -211,56 +212,48 @@ HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure001, TestSize.L
  * @tc.desc: Test the Measure function of NodeContainerLayoutAlgorithm.
  * @tc.type: FUNC
  */
- HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure002, TestSize.Level1)
- {
-     /**
-      * @tc.steps: step1. create frameNode.
-      */
-     RefPtr<FrameNode> nodeContainerNode = CreateNode();
-     ASSERT_NE(nodeContainerNode, nullptr);
-     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-     ASSERT_NE(geometryNode, nullptr);
-     RefPtr<FrameNode> childHostNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
-     ASSERT_NE(childHostNode, nullptr);
-     auto layoutWrapper = LayoutWrapperNode(nodeContainerNode, geometryNode, nodeContainerNode->GetLayoutProperty());
-     auto layoutWrapperTwo = LayoutWrapperNode(childHostNode, geometryNode, childHostNode->GetLayoutProperty());
+HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<FrameNode> nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = LayoutWrapperNode(nodeContainerNode, geometryNode, nodeContainerNode->GetLayoutProperty());
 
-     auto contentChanges = layoutWrapper.GetContentChanges();
-     contentChanges.UpdateFlags(std::nullopt, std::nullopt);
-     layoutWrapper.GetContentChanges().ToString();
-     auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
-     ASSERT_NE(layoutAlgorithm, nullptr);
-     RefPtr<FrameNode> childNodeOne = FrameNode::CreateFrameNode("RenderNode", 0, AceType::MakeRefPtr<Pattern>());
-     RefPtr<FrameNode> childNodeTwo = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+    auto contentChanges = layoutWrapper.GetContentChanges();
+    contentChanges.UpdateFlags(std::nullopt, std::nullopt);
+    layoutWrapper.GetContentChanges().ToString();
+    auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<FrameNode> childNodeOne = FrameNode::CreateFrameNode("RenderNode", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> childNodeTwo = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
      
-     auto childLayoutProperty=childNodeTwo->GetLayoutProperty();
-     ASSERT_NE(childLayoutProperty, nullptr);
-     childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
-     auto childLayoutPropertyOne=childNodeOne->GetLayoutProperty();
-     ASSERT_NE(childLayoutPropertyOne, nullptr);
-     childLayoutPropertyOne->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
-     /**
-      * @tc.steps: step2. update layoutWrapper.
-      */
-     auto childLayoutWrapperOne = childNodeOne->CreateLayoutWrapper();
-     ASSERT_NE(childLayoutWrapperOne, nullptr);
-     auto childLayoutWrapperTwo = childNodeTwo->CreateLayoutWrapper();
-     ASSERT_NE(childLayoutWrapperTwo, nullptr);
-     layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
-     layoutWrapper.cachedList_.push_back(childLayoutWrapperOne);
-     layoutWrapper.cachedList_.push_back(childLayoutWrapperTwo);
-     layoutWrapperTwo.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
-     layoutWrapperTwo.cachedList_.push_back(childLayoutWrapperOne);
-     layoutWrapperTwo.cachedList_.push_back(childLayoutWrapperTwo);
-     /**
-      * @tc.steps: step3. call the function Measure.
-      */
-     layoutAlgorithm->Measure(&layoutWrapper);
-     layoutAlgorithm->Measure(&layoutWrapperTwo);
+    auto childLayoutProperty=childNodeTwo->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    auto childLayoutPropertyOne=childNodeOne->GetLayoutProperty();
+    ASSERT_NE(childLayoutPropertyOne, nullptr);
+    childLayoutPropertyOne->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    /**
+     * @tc.steps: step2. update layoutWrapper.
+     */
+    auto childLayoutWrapperOne = childNodeOne->CreateLayoutWrapper();
+    ASSERT_NE(childLayoutWrapperOne, nullptr);
+    auto childLayoutWrapperTwo = childNodeTwo->CreateLayoutWrapper();
+    ASSERT_NE(childLayoutWrapperTwo, nullptr);
+    layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
+    layoutWrapper.cachedList_.push_back(childLayoutWrapperOne);
+    layoutWrapper.cachedList_.push_back(childLayoutWrapperTwo);
+    /**
+     * @tc.steps: step3. call the function Measure.
+     */
+    layoutAlgorithm->Measure(&layoutWrapper);
 
-     EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
-     EXPECT_EQ(layoutWrapperTwo.GetGeometryNode()->GetFrameSize().Width(), 0.0);
- }
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
+}
 
 /**
  * @tc.name: NodeContainerModelNGSetMakeFunction001
@@ -1241,5 +1234,92 @@ HWTEST_F(NodeContainerTestNg, NodeContainerAlignmentTest, TestSize.Level1)
     ASSERT_TRUE(layoutProperty->GetPositionProperty());
     auto alignment = layoutProperty->GetPositionProperty()->GetAlignment();
     EXPECT_EQ(alignment, Alignment::TOP_LEFT);
+}
+
+/**
+ * @tc.name: NodeContainerEventHubFireOnAppear001
+ * @tc.desc: Test the FireOnAppear function of NodeContainerEventHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnAppear001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node and get eventHub.
+     */
+    RefPtr<FrameNode> node = CreateNode();
+    ASSERT_NE(node, nullptr);
+    node->context_ = AceType::RawPtr(MockPipelineContext::pipeline_);
+    if (node->context_) {
+        node->context_->taskExecutor_ = AceType::MakeRefPtr<::testing::NiceMock<MockTaskExecutor>>();
+    }
+    auto eventHub = node->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    int32_t flag = 0;
+    auto onAppearCallback = [&flag]() { flag = 1; };
+
+    /**
+     * @tc.steps: step2. set callback and call FireOnAppear.
+     * @tc.expected: callback is triggered.
+     */
+    eventHub->SetControllerAboutToAppear(std::move(onAppearCallback));
+    eventHub->FireOnAppear();
+    EXPECT_EQ(flag, 1);
+    if (node->context_) {
+        node->context_->taskExecutor_ = nullptr;
+        node->context_ = nullptr;
+    }
+}
+
+/**
+ * @tc.name: NodeContainerEventHubFireOnDisappear001
+ * @tc.desc: Test the FireOnDisappear function of NodeContainerEventHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnDisappear001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node and get eventHub.
+     */
+    RefPtr<FrameNode> node = CreateNode();
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    int32_t flag = 0;
+    auto onDisappearCallback = [&flag]() { flag = 1; };
+
+    /**
+     * @tc.steps: step2. set callback and call FireOnDisappear.
+     * @tc.expected: callback is triggered.
+     */
+    eventHub->SetControllerAboutToDisappear(std::move(onDisappearCallback));
+    eventHub->FireOnDisappear();
+    EXPECT_EQ(flag, 1);
+}
+
+/**
+ * @tc.name: NodeContainerFireOnBind001
+ * @tc.desc: Test the FireOnBind function of NodeContainerEventHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerFireOnBind001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node and get eventHub.
+     */
+    RefPtr<FrameNode> node = CreateNode();
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    int32_t flag = 0;
+    auto onBindCallback = [&flag](int32_t containerId) { flag = 1; };
+
+    /**
+     * @tc.steps: step2. call FireOnBind when onBindCallback_ is nullptr.
+     * @tc.expected: callback is not triggered.
+     */
+    eventHub->SetControllerOnBind(onBindCallback);
+    eventHub->SetControllerOnBind(nullptr);
+    eventHub->FireOnBind(1);
+    EXPECT_EQ(flag, 0);
 }
 } // namespace OHOS::Ace::NG

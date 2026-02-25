@@ -103,7 +103,8 @@ void ButtonModelNG::SetButtonStyleOnly(const std::optional<ButtonStyleMode>& but
 void ButtonModelNG::ParseButtonResColor(
     const RefPtr<ResourceObject>& resObj, Color& result, const ButtonColorType buttonColorType)
 {
-    auto parseFlag = ResourceParseUtils::ParseResColor(resObj, result);
+    bool adaptMaterial = buttonColorType == ButtonColorType::FONT_COLOR;
+    auto parseFlag = ResourceParseUtils::ParseResColor(resObj, result, adaptMaterial);
     CHECK_EQUAL_VOID(parseFlag, true);
     auto context = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
@@ -206,7 +207,7 @@ void ButtonModelNG::UpdateDefaultFamilies(
     CHECK_NULL_VOID(buttonTheme);
     value = buttonTheme->GetTextStyle().GetFontFamilies();
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (buttonStringType) {
             case ButtonStringType::FONT_FAMILY:
                 SetFontFamily(frameNode, value);
@@ -227,7 +228,7 @@ void ButtonModelNG::UpdateComponentFamilies(
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         switch (buttonStringType) {
             case ButtonStringType::FONT_FAMILY:
                 SetFontFamily(frameNode, value);
@@ -542,6 +543,7 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);
+    ACE_UINODE_TRACE(buttonNode);
     if (buttonNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -573,6 +575,7 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
 void ButtonModelNG::SetLabel(FrameNode* frameNode, const char* label)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     if (frameNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -634,6 +637,7 @@ RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
+    ACE_UINODE_TRACE(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     if (layoutProperty->GetPaddingProperty()) {
@@ -663,6 +667,7 @@ void ButtonModelNG::Padding(const PaddingProperty& paddingNew, const Edge& paddi
     NG::ViewAbstract::SetPadding(paddingNew);
     auto button = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(button);
+    ACE_UINODE_TRACE(button);
     auto pattern = button->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetHasCustomPadding(true);

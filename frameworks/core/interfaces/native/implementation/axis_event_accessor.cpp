@@ -73,6 +73,10 @@ Ark_Float64 GetVerticalAxisValueImpl(Ark_AxisEvent peer)
     double value = event->GetVerticalAxis();
     return Converter::ArkValue<Ark_Float64>(value);
 }
+Ark_Float64 GetPinchAxisScaleValueImpl(Ark_AxisEvent peer)
+{
+    return {};
+}
 Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
                         Ark_AxisType axisType)
 {
@@ -248,7 +252,10 @@ void SetScrollStepImpl(Ark_AxisEvent peer,
     CHECK_NULL_VOID(scrollStep);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    LOGE("Arkoala method AxisEventAccessor.SetScrollStep doesn't have sense. Not implemented...");
+    auto value = Converter::OptConvertPtr<int32_t>(scrollStep);
+    if (value) {
+        info->SetScrollStep(value.value());
+    }
 }
 void PropagationImpl(Ark_AxisEvent peer)
 {
@@ -308,8 +315,10 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::DestroyPeerImpl,
         AxisEventAccessor::ConstructImpl,
         AxisEventAccessor::GetFinalizerImpl,
+        AxisEventAccessor::PropagationImpl,
         AxisEventAccessor::GetHorizontalAxisValueImpl,
         AxisEventAccessor::GetVerticalAxisValueImpl,
+        AxisEventAccessor::GetPinchAxisScaleValueImpl,
         AxisEventAccessor::HasAxisImpl,
         AxisEventAccessor::GetActionImpl,
         AxisEventAccessor::SetActionImpl,
@@ -327,7 +336,6 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::SetYImpl,
         AxisEventAccessor::GetScrollStepImpl,
         AxisEventAccessor::SetScrollStepImpl,
-        AxisEventAccessor::PropagationImpl,
         AxisEventAccessor::GetGlobalDisplayXImpl,
         AxisEventAccessor::SetGlobalDisplayXImpl,
         AxisEventAccessor::GetGlobalDisplayYImpl,

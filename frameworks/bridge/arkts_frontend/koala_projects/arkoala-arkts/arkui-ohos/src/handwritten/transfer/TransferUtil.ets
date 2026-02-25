@@ -64,7 +64,7 @@ export class TransferUtil {
 
     // 通用工具函数
     private static invokeModuleFunction(moduleId: string, functionName: string, input: Object): ESValue | undefined {
-        const module = ESValue.load(moduleId);
+        const module = ESValue.load(moduleId).getProperty('default');
         const func = module.getProperty(functionName);
         const result = func.invoke(input);
         return result.isUndefined() || result.isNull() ? undefined : result;

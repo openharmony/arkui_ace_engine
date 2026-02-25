@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +16,15 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from "@koalaui/interop"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { extractors } from "#handwritten"
-import { Content } from "arkui.Content"
+import { int32, int64, float32 } from '@koalaui/common'
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr } from '@koalaui/interop'
+import { memo, memo_stable } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { extractors } from '#handwritten'
+import { Content } from 'arkui.Content'
 export interface ContentSlotAttribute {
-     setContentSlotOptions(content?: Content): this  {  throw new Error("Unimplemented method setContentSlotOptions") }
+    // instructive change start
+    setContentSlotOptions(content?: Content): this  {  throw new Error("Unimplemented method setContentSlotOptions") }
+    // instructive change end
 }
 export type ContentSlotInterface = (content: Content) => ContentSlotAttribute;

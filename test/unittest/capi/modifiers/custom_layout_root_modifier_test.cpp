@@ -94,11 +94,11 @@ public:
 };
 
 /*
- * @tc.name: SubscribeOnMeasureSizeTest
+ * @tc.name: setSubscribeOnMeasureSizeTestSubscribeOnMeasureSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomLayoutRootModifierTest, SubscribeOnMeasureSizeTest, TestSize.Level1)
+HWTEST_F(CustomLayoutRootModifierTest, setSubscribeOnMeasureSizeTestSubscribeOnMeasureSize, TestSize.Level1)
 {
     static const int32_t resourceIdTest = 123;
     LayoutConstraintF layoutConstraintTest = {
@@ -120,8 +120,8 @@ HWTEST_F(CustomLayoutRootModifierTest, SubscribeOnMeasureSizeTest, TestSize.Leve
         EXPECT_TRUE(convChildren.empty());
 
         Ark_SizeResult result = {
-            .width = Converter::ArkValue<Ark_Number>(35.0f),
-            .height = Converter::ArkValue<Ark_Number>(40.0f),
+            .width = Converter::ArkValue<Ark_Float64>(35.0f),
+            .height = Converter::ArkValue<Ark_Float64>(40.0f),
         };
         CallbackHelper(continuation).InvokeSync(result);
     };
@@ -144,11 +144,11 @@ HWTEST_F(CustomLayoutRootModifierTest, SubscribeOnMeasureSizeTest, TestSize.Leve
 }
 
 /*
- * @tc.name: SubscribeOnPlaceChildrenTest
+ * @tc.name: setSubscribeOnPlaceChildrenTestSubscribeOnPlaceChildren
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomLayoutRootModifierTest, SubscribeOnPlaceChildrenTest, TestSize.Level1)
+HWTEST_F(CustomLayoutRootModifierTest, setSubscribeOnPlaceChildrenTestSubscribeOnPlaceChildren, TestSize.Level1)
 {
     static const int32_t resourceIdTest = 123;
     LayoutConstraintF layoutConstraintTest = {

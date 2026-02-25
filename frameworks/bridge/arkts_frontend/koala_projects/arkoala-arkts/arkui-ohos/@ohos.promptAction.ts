@@ -14,7 +14,7 @@
  */
 
 import { ArkUIGeneratedNativeModule } from '#components'
-import { Finalizable, SerializerBase, toPeerPtr, KPointer, MaterializedBase, DeserializerBase } from "@koalaui/interop"
+import { Finalizable, SerializerBase, toPeerPtr, KPointer, MaterializedBase, DeserializerBase, MaterializedBaseTag } from "@koalaui/interop"
 import { ResourceColor, Offset, Dimension, EdgeStyles, EdgeColors, EdgeWidths,
     BorderRadiuses } from 'arkui/framework'
 import { Callback } from '@ohos.base';
@@ -41,7 +41,7 @@ export enum ImmersiveMode {
 
 export class LevelOrder extends LevelOrderExtender {
     constructor(peerPtr: KPointer) {
-        super(peerPtr)
+        super(MaterializedBaseTag.NOP, peerPtr)
     }
     public static clamp(order: number): LevelOrder {
         const order_casted = order as (number)

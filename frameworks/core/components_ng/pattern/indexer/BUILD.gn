@@ -43,6 +43,8 @@ build_component_ng("indexer_pattern_ng") {
   }
 
   if (!build_ohos_sdk) {
-    deps = [ "$ace_root/interfaces/inner_api/ui_session:ui_session" ]
+    if (!is_arkui_x) {
+      deps = [ "${ace_root}/interfaces/inner_api/ui_session:ui_session" ]
+    }
   }
 }

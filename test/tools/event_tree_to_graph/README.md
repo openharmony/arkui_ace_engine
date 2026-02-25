@@ -9,3 +9,5 @@
 【Note】：如果遇到提示 dot 可执行文件无法找到，则需要本地安装 [Graphviz](https://graphviz.org/download/)，
 并将其bin目录路径添加到环境变量中。
 
+#### 单脚本版本构建
+参考 ./STANDALONE_BUILD.md

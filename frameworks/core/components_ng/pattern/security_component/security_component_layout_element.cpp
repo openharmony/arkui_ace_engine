@@ -75,6 +75,9 @@ void IconLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& prop
 
 void IconLayoutElement::UpdateUserSetSize(const RefPtr<SecurityComponentLayoutProperty>& property)
 {
+    if ((!property->GetIconCalcSize().has_value()) && (!property->GetIconSize().has_value())) {
+        return;
+    }
     if (property->GetIconCalcSize()->Width().has_value() && property->GetIconCalcSize()->Height().has_value()) {
         isSetSize_ = true;
         width_ = property->GetIconCalcSize()->Width()->GetDimension().ConvertToPx();

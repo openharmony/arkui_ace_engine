@@ -145,7 +145,8 @@
             "hjoksky",
             "zhang-yinglie",
             "whuqincheng",
-            "chenjiadong"
+            "chenjiadong",
+            "zhangkai228"
         ],
         "arkui_cj": [
             "persisting",
@@ -500,6 +501,9 @@
         },
         "cloud_nine": {
             "info": "[web-基础框架 chenyunjiu]"
+        },
+        "zhangkai228": {
+            "info": "[web-基础框架 zhangkai]"
         },
         "hjoksky": {
             "info": "[web-稳定性&DFX chenshijun]"

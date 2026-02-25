@@ -57,190 +57,190 @@ const std::vector<OneColorStep> COLOR_TEST_PLAN = {
 };
 
 /**
- * @tc.name: DividerModifierTest001
+ * @tc.name: setColorTestVariant001
  * @tc.desc: Check the functionality of DividerModifier.setColor
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DISABLED_DividerModifierTest001, TestSize.Level1)
+HWTEST_F(DividerModifierTest, DISABLED_setColorTestVariant001, TestSize.Level1)
 {
     constexpr auto propName = "color";
     ASSERT_NE(modifier_->setColor, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, "#FF000000");
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq("#FF000000"));
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
         auto color = Converter::ArkValue<Opt_ResourceColor>(value);
         modifier_->setColor(node_, &color);
         auto fullJson = GetJsonValue(node_);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 
     Ark_ResourceColor strNumber = { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("incorrect_color") };
     auto optValue = Converter::ArkValue<Opt_ResourceColor>(strNumber);
     modifier_->setColor(node_, &optValue);
-    auto checkVal10 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal10, "#FF000000");
+    auto checkVal10 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal10, Eq("#FF000000"));
 
     strNumber = { .selector = 2, .value2 = Converter::ArkValue<Ark_String>("") };
     optValue = Converter::ArkValue<Opt_ResourceColor>(strNumber);
     modifier_->setColor(node_, &optValue);
-    auto checkVal11 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal11, "#FF000000");
+    auto checkVal11 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal11, Eq("#FF000000"));
 }
 
 /**
- * @tc.name: DividerModifierTest002
+ * @tc.name: setVerticalTestVariant002
  * @tc.desc: Check the functionality of DividerModifier.setVertical
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DividerModifierTest002, TestSize.Level1)
+HWTEST_F(DividerModifierTest, setVerticalTestVariant002, TestSize.Level1)
 {
     constexpr auto propName = "vertical";
     ASSERT_NE(modifier_->setVertical, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, "true");
+    auto checkVal1 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal1, Eq("true"));
 
     auto optValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setVertical(node_, &optValue);
-    auto checkVal2 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal2, "false");
+    auto checkVal2 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal2, Eq("false"));
 
     optValue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setVertical(node_, &optValue);
-    auto checkVal3 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal3, "true");
+    auto checkVal3 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal3, Eq("true"));
 
     optValue = Converter::ArkValue<Opt_Boolean>(-25);
     modifier_->setVertical(node_, &optValue);
-    auto checkVal5 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal5, "true");
+    auto checkVal5 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal5, Eq("true"));
 
     optValue = Converter::ArkValue<Opt_Boolean>(0);
     modifier_->setVertical(node_, &optValue);
-    auto checkVal6 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal6, "false");
+    auto checkVal6 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal6, Eq("false"));
 
     optValue = Converter::ArkValue<Opt_Boolean>(25);
     modifier_->setVertical(node_, &optValue);
-    auto checkVal7 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal7, "true");
+    auto checkVal7 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal7, Eq("true"));
 }
 
 /**
- * @tc.name: DividerModifierTest003
+ * @tc.name: setLineCapTestVariant003
  * @tc.desc: Check the functionality of DividerModifier.setLineCap
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DividerModifierTest003, TestSize.Level1)
+HWTEST_F(DividerModifierTest, setLineCapTestVariant003, TestSize.Level1)
 {
     constexpr auto propName = "lineCap";
     ASSERT_NE(modifier_->setLineCap, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, LINE_CUP_SQUARE);
+    auto checkVal1 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal1, Eq(LINE_CUP_SQUARE));
 
     auto optValue = Converter::ArkValue<Opt_LineCapStyle>(ARK_LINE_CAP_STYLE_SQUARE);
     modifier_->setLineCap(node_, &optValue);
-    auto checkVal2 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal2, LINE_CUP_SQUARE);
+    auto checkVal2 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal2, Eq(LINE_CUP_SQUARE));
 
     optValue = Converter::ArkValue<Opt_LineCapStyle>(ARK_LINE_CAP_STYLE_BUTT);
     modifier_->setLineCap(node_, &optValue);
-    auto checkVal3 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal3, LINE_CUP_BUTT);
+    auto checkVal3 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal3, Eq(LINE_CUP_BUTT));
 
     optValue = Converter::ArkValue<Opt_LineCapStyle>(ARK_LINE_CAP_STYLE_ROUND);
     modifier_->setLineCap(node_, &optValue);
-    auto checkVal4 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal4, LINE_CUP_ROUND);
+    auto checkVal4 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal4, Eq(LINE_CUP_ROUND));
 
     optValue = Converter::ArkValue<Opt_LineCapStyle>(static_cast<Ark_LineCapStyle>(-25));
     modifier_->setLineCap(node_, &optValue);
-    auto checkVal5 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal5, LINE_CUP_BUTT);
+    auto checkVal5 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal5, Eq(LINE_CUP_BUTT));
 }
 
 /**
- * @tc.name: DividerModifierTest004
+ * @tc.name: setStrokeWidthTestVariant004
  * @tc.desc: Check the functionality of DividerModifier.setStrokeWidth
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DividerModifierTest004, TestSize.Level1)
+HWTEST_F(DividerModifierTest, setStrokeWidthTestVariant004, TestSize.Level1)
 {
     constexpr auto propName = "strokeWidth";
     ASSERT_NE(modifier_->setStrokeWidth, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, DEFAULT_STROKE_WIDTH);
+    auto checkVal1 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal1, Eq(DEFAULT_STROKE_WIDTH));
 
-    Ark_Union_Number_String intVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(123) };
-    auto optValue = Converter::ArkValue<Opt_Union_Number_String>(intVal);
+    Ark_Union_F64_String intVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Float64>(123) };
+    auto optValue = Converter::ArkValue<Opt_Union_F64_String>(intVal);
     modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal2 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal2, "123.00vp");
+    auto checkVal2 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal2, Eq("123.00vp"));
 
-    Ark_Union_Number_String floatVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(1.23f) };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(floatVal);
+    Ark_Union_F64_String floatVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Float64>(1.23f) };
+    optValue = Converter::ArkValue<Opt_Union_F64_String>(floatVal);
     modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal3 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal3, "1.23vp");
+    auto checkVal3 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal3, Eq("1.23vp"));
 
-    Ark_Union_Number_String pxVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("45px") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(pxVal);
+    Ark_Union_F64_String pxVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("45px") };
+    optValue = Converter::ArkValue<Opt_Union_F64_String>(pxVal);
     modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal4 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal4, "45.00px");
+    auto checkVal4 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal4, Eq("45.00px"));
 
-    Ark_Union_Number_String vpVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("5.6vp") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(vpVal);
+    Ark_Union_F64_String vpVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("5.6vp") };
+    optValue = Converter::ArkValue<Opt_Union_F64_String>(vpVal);
     modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal5 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal5, "5.60vp");
+    auto checkVal5 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal5, Eq("5.60vp"));
 
-    Ark_Union_Number_String percentVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("10%") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(percentVal);
+    Ark_Union_F64_String percentVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("10%") };
+    optValue = Converter::ArkValue<Opt_Union_F64_String>(percentVal);
     modifier_->setStrokeWidth(node_, &optValue);
-    auto checkVal6 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal6, DEFAULT_STROKE_WIDTH);
+    auto checkVal6 = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal6, Eq(DEFAULT_STROKE_WIDTH));
 }
 
-using OneWidthStep = std::tuple<Ark_Union_Number_String, std::string>;
+using OneWidthStep = std::tuple<Ark_Union_F64_String, std::string>;
 const std::vector<OneWidthStep> WIDTH_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(-123)), "-123.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(-1.23f)), "-1.23vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-4.5px")), "-4.50px" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-56vp")), "-56.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("undefVal")),
+    { Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(Converter::ArkValue<Ark_Float64>(-123)), "-123.00vp" },
+    { Converter::ArkUnion<Ark_Union_F64_String, Ark_Float64>(Converter::ArkValue<Ark_Float64>(-1.23f)), "-1.23vp" },
+    { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>(Converter::ArkValue<Ark_String>("-4.5px")), "-4.50px" },
+    { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>(Converter::ArkValue<Ark_String>("-56vp")), "-56.00vp" },
+    { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>(Converter::ArkValue<Ark_String>("undefVal")),
         "0.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-10%")),
+    { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>(Converter::ArkValue<Ark_String>("-10%")),
         DEFAULT_STROKE_WIDTH },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("")), "0.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111vp")), "0.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111")), "0.00vp" },
+    { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>(Converter::ArkValue<Ark_String>("")), "0.00vp" },
+    { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111vp")), "0.00vp" },
+    { Converter::ArkUnion<Ark_Union_F64_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111")), "0.00vp" },
 };
 
 /**
- * @tc.name: DividerModifierTest005
+ * @tc.name: setStrokeWidthTestVariant005
  * @tc.desc: Check the functionality of DividerModifier.setStrokeWidth for negative values
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DividerModifierTest005, TestSize.Level1)
+HWTEST_F(DividerModifierTest, setStrokeWidthTestVariant005, TestSize.Level1)
 {
     constexpr auto propName = "strokeWidth";
     ASSERT_NE(modifier_->setStrokeWidth, nullptr);
 
-    auto checkVal = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal, DEFAULT_STROKE_WIDTH);
+    auto checkVal = GetAttrValue<std::string>(node_, propName);
+    EXPECT_THAT(checkVal, Eq(DEFAULT_STROKE_WIDTH));
 
     for (const auto& [value, expectVal] : WIDTH_TEST_PLAN) {
-        auto width = Converter::ArkValue<Opt_Union_Number_String>(value);
+        auto width = Converter::ArkValue<Opt_Union_F64_String>(value);
         modifier_->setStrokeWidth(node_, &width);
         auto fullJson = GetJsonValue(node_);
-        checkVal = GetStringAttribute(node_, propName);
-        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, propName);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 } // namespace OHOS::Ace::NG

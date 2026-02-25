@@ -24,6 +24,7 @@
 
 #include "base/memory/referenced.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 class PeerUtils {

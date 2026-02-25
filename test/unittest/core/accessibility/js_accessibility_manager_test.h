@@ -70,6 +70,7 @@ public:
     {
         mockCursorPosition_ = cursorPosition;
         mockRequestId = requestId;
+        called_ = true;
     }
 
     void SetSearchElementInfoBySpecificPropertyResult(const std::list<Accessibility::AccessibilityElementInfo> &infos,
@@ -94,6 +95,17 @@ public:
     bool mockSucceeded_ = false;
     bool mockFocusable_ = false;
     int32_t mockCursorPosition_ = 0;
+    bool called_ = false;
+
+    void Reset()
+    {
+        mockInfos_.clear();
+        mockRequestId = 0;
+        mockSucceeded_ = false;
+        mockFocusable_ = false;
+        mockCursorPosition_ = 0;
+        called_ = false;
+    }
 };
 }  // namespace OHOS::Ace
 

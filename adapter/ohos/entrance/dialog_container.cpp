@@ -37,6 +37,7 @@ void DialogContainer::ShowToast(int32_t instanceId, const NG::ToastInfo& toastIn
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
+    ACE_CONTAINER_TRACE(container);
     auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
     CHECK_NULL_VOID(frontend);
     auto delegate = frontend->GetDelegate();
@@ -55,6 +56,7 @@ void DialogContainer::CloseToast(int32_t instanceId, int32_t toastId, std::funct
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
+    ACE_CONTAINER_TRACE(container);
 
     auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
     CHECK_NULL_VOID(frontend);
@@ -98,6 +100,7 @@ void DialogContainer::ShowDialog(int32_t instanceId, const PromptDialogAttr& dia
     TAG_LOGI(AceLogTag::ACE_DIALOG, "DialogContainer ShowDialog with attr begin");
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
+    ACE_CONTAINER_TRACE(container);
     auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
     CHECK_NULL_VOID(frontend);
     auto delegate = frontend->GetDelegate();
@@ -115,6 +118,7 @@ void DialogContainer::ShowActionMenu(int32_t instanceId, const std::string& titl
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
+    ACE_CONTAINER_TRACE(container);
     auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
     CHECK_NULL_VOID(frontend);
     auto delegate = frontend->GetDelegate();

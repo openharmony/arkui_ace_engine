@@ -15,12 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
-#include "ark_native_engine.h"
 #include "arkts_utils.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsnapi_expo.h"
-#include "native_engine.h"
-#include "ui/base/utils/utils.h"
 
 #include "base/utils/utils.h"
 #include "base/i18n/localization.h"
@@ -411,7 +408,7 @@ bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRe
     } else if (value->IsString(vm)) {
         Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
     } else if (value->IsObject(vm)) {
-        ParseJsColorFromResource(vm, value, result, resourceObject);
+        ParseJsColorFromResourceForMaterial(vm, value, result, resourceObject);
     }
     CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
     return true;
@@ -459,6 +456,32 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
             return true;
         }
         state = ParseJsColorFromResource(vm, value, result, resourceObject);
+        CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
+        return state;
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseJsColorAlphaForMaterial(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
+    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo)
+{
+    bool state = false;
+    if (value->IsNumber()) {
+        result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
+        CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
+        return true;
+    }
+    if (value->IsString(vm)) {
+        state = Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
+        CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
+        return state;
+    }
+    if (value->IsObject(vm)) {
+        if (ParseColorMetricsToColor(vm, value, result, resourceObject)) {
+            CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
+            return true;
+        }
+        state = ParseJsColorFromResourceForMaterial(vm, value, result, resourceObject);
         CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
         return state;
     }
@@ -872,6 +895,58 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
     if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber(vm)->Value());
         result.SetResourceId(resId->Int32Value(vm));
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseJsColorFromResourceForMaterial(
+    const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result, RefPtr<ResourceObject>& resourceObject)
+{
+    auto obj = jsObj->ToObject(vm);
+    auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    if (!resId->IsNumber()) {
+        return false;
+    }
+
+    CompleteResourceObject(vm, obj);
+    resourceObject = GetResourceObject(vm, jsObj);
+    auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+
+    auto resIdNum = resId->Int32Value(vm);
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(vm, jsObj)) {
+            return false;
+        }
+        auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+        if (!args->IsArray(vm)) {
+            return false;
+        }
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+        result = resourceWrapper->GetColorByName(param->ToString(vm)->ToString(vm));
+        return true;
+    }
+    auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+    if (type->IsNull() || !type->IsNumber()) {
+        return false;
+    }
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(resId->Int32Value(vm));
+        return Color::ParseColorString(value, result);
+    }
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto value = resourceWrapper->GetInt(resId->Int32Value(vm));
+        result = Color(ColorAlphaAdapt(value));
+        return true;
+    }
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::COLOR)) {
+        result = resourceWrapper->GetColor(resId->ToNumber(vm)->Value());
+        result.SetResourceId(resId->Int32Value(vm));
+        result.FillColorPlaceholderIfNeed(resIdNum);
         return true;
     }
     return false;
@@ -1556,10 +1631,10 @@ bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>&
     return true;
 }
 
-bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result)
+bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result, bool isJsView)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsMedia(vm, jsValue, result, resourceObject);
+    return ParseJsMedia(vm, jsValue, result, resourceObject, isJsView);
 }
 
 bool ArkTSUtils::ParseJsMedia(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
@@ -1626,6 +1701,9 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueR
             auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
             if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
                 result = resourceWrapper->GetMediaPathByName(param->ToString(vm)->ToString(vm));
+                return true;
+            } else if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING) && isJsView) {
+                result = resourceWrapper->GetString(resId->Uint32Value(vm));
                 return true;
             }
             return false;
@@ -2313,6 +2391,53 @@ bool ArkTSUtils::HandleCallbackJobs(
     return true;
 }
 
+bool ArkTSUtils::GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, const EcmaVM* vm)
+{
+    if (firstArg->IsNativePointer(vm)) {
+        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+        return true;
+    }
+    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
+        nativeNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::IsJsView(const Local<JSValueRef>& firstArg, const EcmaVM* vm)
+{
+    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+}
+
+void ArkTSUtils::SetSymbolOptionApply(
+    EcmaVM* vm, std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const Local<JSValueRef> modifierObj)
+{
+    auto globalObj = panda::JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
+    if (globalFunc->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> func = globalFunc->ToObject(vm);
+        if (!modifierObj->IsObject(vm)) {
+            symbolApply = nullptr;
+        } else {
+            auto onApply = [vm, func = panda::CopyableGlobal(vm, func),
+                               modifierParam = panda::CopyableGlobal(vm, modifierObj)](
+                               WeakPtr<NG::FrameNode> frameNode) {
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
+                auto node = frameNode.Upgrade();
+                CHECK_NULL_VOID(node);
+                Local<JSValueRef> params[NUM_2];
+                params[NUM_0] = modifierParam.ToLocal();
+                params[NUM_1] = panda::NativePointerRef::New(vm, AceType::RawPtr(node));
+                PipelineContext::SetCallBackNode(node);
+                auto result = func->Call(vm, func.ToLocal(), params, 2);
+                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+            };
+            symbolApply = onApply;
+        }
+    }
+}
+
 uint32_t ArkTSUtils::parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     RefPtr<ResourceObject> resObj;
@@ -2524,15 +2649,17 @@ bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsVa
     return true;
 }
 
-double ArkTSUtils::GetArrayLength(const EcmaVM* vm, Local<panda::ArrayRef> array)
+size_t ArkTSUtils::GetArrayLength(const EcmaVM* vm, Local<panda::ArrayRef> array)
 {
-    auto arrayLength = 0;
     if (array->IsProxy(vm)) {
-        arrayLength = array->Get(vm, "length")->IsNumber() ? array->Get(vm, "length")->ToNumber(vm)->Value() : 0;
-    } else {
-        arrayLength = array->Length(vm);
+        auto lengthValue = array->Get(vm, "length");
+        if (lengthValue->IsNumber()) {
+            double numValue = lengthValue->ToNumber(vm)->Value();
+            return static_cast<size_t>(std::max(numValue, 0.0));
+        }
+        return 0;
     }
-    return arrayLength;
+    return array->Length(vm);
 }
 
 BorderStyle ArkTSUtils::ConvertBorderStyle(int32_t value)
@@ -2617,6 +2744,43 @@ void ArkTSUtils::ParseOuterBorderColor(
     }
     Color bottom;
     if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom)) {
+        bottomColor = bottom;
+    }
+
+    PushOuterBorderColorVector(leftColor, values);
+    PushOuterBorderColorVector(rightColor, values);
+    PushOuterBorderColorVector(topColor, values);
+    PushOuterBorderColorVector(bottomColor, values);
+}
+
+void ArkTSUtils::ParseOuterBorderColor(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex,
+    std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo)
+{
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<Color> leftColor;
+    std::optional<Color> rightColor;
+    std::optional<Color> topColor;
+    std::optional<Color> bottomColor;
+
+    Color left;
+    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, leftArg, left, resObjs, nodeInfo)) {
+        leftColor = left;
+    }
+    Color right;
+    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, rightArg, right, resObjs, nodeInfo)) {
+        rightColor = right;
+    }
+    Color top;
+    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, topArg, top, resObjs, nodeInfo)) {
+        topColor = top;
+    }
+    Color bottom;
+    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom, resObjs, nodeInfo)) {
         bottomColor = bottom;
     }
 
@@ -3086,16 +3250,18 @@ bool ArkTSUtils::ParseSelectionMenuOptions(ArkUIRuntimeCallInfo* info, const Ecm
     if (!secondArg->IsObject(vm) || secondArg->IsUndefined()) {
         return false;
     }
+    auto isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
     auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    auto* frameNode =
+ 	    isJsView ? ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, false);
     auto menuOptionsObject = secondArg->ToObject(vm);
     auto jsValueOnCreateMenu = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onCreateMenu"));
-    ParseOnCreateMenu(vm, frameNode, jsValueOnCreateMenu, onCreateMenuCallback);
+    ParseOnCreateMenu(vm, frameNode, jsValueOnCreateMenu, onCreateMenuCallback, isJsView);
     auto jsValueOnMenuItemClick = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMenuItemClick"));
-    ParseOnMenuItemClick(vm, frameNode, jsValueOnMenuItemClick, onMenuItemClickCallback);
+    ParseOnMenuItemClick(vm, frameNode, jsValueOnMenuItemClick, onMenuItemClickCallback, isJsView);
     auto jsValueOnPrepareMenu = menuOptionsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "onPrepareMenu"));
-    ParseOnPrepareMenu(vm, frameNode, jsValueOnPrepareMenu, onPrepareMenuCallback);
+    ParseOnPrepareMenu(vm, frameNode, jsValueOnPrepareMenu, onPrepareMenuCallback, isJsView);
     return true;
 }
 
@@ -3169,14 +3335,15 @@ Local<panda::ObjectRef> ArkTSUtils::CreateJsTextMenuId(const EcmaVM* vm, const s
 }
 
 void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const Local<JSValueRef>& jsValueOnCreateMenu,
-    NG::OnCreateMenuCallback& onCreateMenuCallback)
+    NG::OnCreateMenuCallback& onCreateMenuCallback, bool isJsView)
 {
     if (jsValueOnCreateMenu.IsEmpty() || !jsValueOnCreateMenu->IsFunction(vm)) {
         return;
     }
     panda::Local<panda::FunctionRef> func = jsValueOnCreateMenu->ToObject(vm);
     auto containerId = Container::CurrentId();
-    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId,
+                          isJsView](
                           const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
         ContainerScope scope(containerId);
         panda::LocalScope pandaScope(vm);
@@ -3186,6 +3353,9 @@ void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const
         auto textMenuItemArrayObj = CreateJsSystemMenuItems(vm, systemMenuItems);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { textMenuItemArrayObj };
         auto menuItems = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, menuItems);
+        }
         if (!menuItems->IsArray(vm)) {
             return menuParams;
         }
@@ -3196,14 +3366,15 @@ void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const
 }
 
 void ArkTSUtils::ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
-    const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback)
+    const Local<JSValueRef>& jsValueOnPrepareMenu, NG::OnPrepareMenuCallback& onPrepareMenuCallback, bool isJsView)
 {
     if (jsValueOnPrepareMenu.IsEmpty() || !jsValueOnPrepareMenu->IsFunction(vm)) {
         return;
     }
     panda::Local<panda::FunctionRef> func = jsValueOnPrepareMenu->ToObject(vm);
     auto containerId = Container::CurrentId();
-    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId,
+                          isJsView](
                           const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
         ContainerScope scope(containerId);
         panda::LocalScope pandaScope(vm);
@@ -3213,6 +3384,9 @@ void ArkTSUtils::ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
         auto textMenuItemArrayObj = CreateJsSystemMenuItems(vm, systemMenuItems);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { textMenuItemArrayObj };
         auto menuItems = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, menuItems);
+        }
         if (!menuItems->IsArray(vm)) {
             return menuParams;
         }
@@ -3282,15 +3456,16 @@ void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsPar
 }
 
 void ArkTSUtils::ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
-    const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback)
+    const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback,
+    bool isJsView)
 {
     if (jsValueOnMenuItemClick.IsEmpty() || !jsValueOnMenuItemClick->IsFunction(vm)) {
         return;
     }
     panda::Local<panda::FunctionRef> func = jsValueOnMenuItemClick->ToObject(vm);
     auto containerId = Container::CurrentId();
-    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
-                          const NG::MenuItemParam& menuOptionsParam) -> bool {
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId,
+                          isJsView](const NG::MenuItemParam& menuOptionsParam) -> bool {
         ContainerScope scope(containerId);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -3303,6 +3478,9 @@ void ArkTSUtils::ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
             panda::ArrayRef::GetValueAt(vm, paramArrayObj, 0), panda::ArrayRef::GetValueAt(vm, paramArrayObj, 1)
         };
         auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
+        }
         if (ret->IsBoolean()) {
             return ret->ToBoolean(vm)->Value();
         }
@@ -3594,6 +3772,165 @@ bool ArkTSUtils::CheckJavaScriptScope(const EcmaVM* vm)
     return !(Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime() == nullptr || vm == nullptr);
 }
 
+void ParseDragPreviewMode(DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
+{
+    isAuto = false;
+    switch (modeValue) {
+        case static_cast<int32_t>(DragPreviewMode::AUTO):
+            previewOption.ResetDragPreviewMode();
+            isAuto = true;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::DISABLE_SCALE):
+            previewOption.isScaleEnabled = false;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::ENABLE_DEFAULT_SHADOW):
+            previewOption.isDefaultShadowEnabled = true;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::ENABLE_DEFAULT_RADIUS):
+            previewOption.isDefaultRadiusEnabled = true;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
+            previewOption.isDefaultDragItemGrayEffectEnabled = true;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
+            previewOption.isMultiTiled = true;
+            break;
+        case static_cast<int32_t>(DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW):
+            previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true;
+            break;
+        default:
+            break;
+    }
+}
+
+DragPreviewOption ArkTSUtils::ParseDragPreviewOptions(ArkUIRuntimeCallInfo* info, const EcmaVM* vm)
+{
+    DragPreviewOption previewOption;
+    Local<JSValueRef> secondArg = info->GetCallArgRef(1);
+    if (!secondArg->IsObject(vm)) {
+        return previewOption;
+    }
+    auto obj = secondArg->ToObject(vm);
+    auto mode = GetProperty(vm, obj, "mode");
+    bool isAuto = true;
+    if (mode->IsNumber()) {
+        ParseDragPreviewMode(previewOption, mode->ToNumber(vm)->Value(), isAuto);
+    } else if (mode->IsArray(vm)) {
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(mode);
+        for (size_t i = 0; i < params->Length(vm); i++) {
+            auto value = panda::ArrayRef::GetValueAt(vm, params, i);
+            if (value->IsNumber()) {
+                ParseDragPreviewMode(previewOption, value->ToNumber(vm)->Value(), isAuto);
+            }
+            if (isAuto) {
+                break;
+            }
+        }
+    }
+
+    auto sizeChangeEffect = GetProperty(vm, obj, "sizeChangeEffect");
+    if (sizeChangeEffect->IsNumber()) {
+        previewOption.sizeChangeEffect = static_cast<DraggingSizeChangeEffect>(sizeChangeEffect->ToNumber(vm)->Value());
+    }
+
+    ArkTSUtils::SetDragNumberBadge(info, vm, previewOption);
+
+    ParseDragInteractionOptions(info, vm, previewOption);
+
+    ArkTSUtils::SetDragPreviewOptionApply(info, vm, previewOption);
+
+    return previewOption;
+}
+
+void ArkTSUtils::ParseDragInteractionOptions(
+    ArkUIRuntimeCallInfo* info, const EcmaVM* vm, NG::DragPreviewOption& previewOption)
+{
+    Local<JSValueRef> thirdArg = info->GetCallArgRef(NUM_2);
+    if (!thirdArg->IsNull() && thirdArg->IsObject(vm)) {
+        auto interObj = thirdArg->ToObject(vm);
+        auto multiSelection = GetProperty(vm, interObj, "isMultiSelectionEnabled");
+        if (multiSelection->IsBoolean()) {
+            previewOption.isMultiSelectionEnabled = multiSelection->ToBoolean(vm)->Value();
+        }
+        auto defaultAnimation = GetProperty(vm, interObj, "defaultAnimationBeforeLifting");
+        if (defaultAnimation->IsBoolean()) {
+            previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean(vm)->Value();
+        }
+        auto hapicFeedback = GetProperty(vm, interObj, "enableHapticFeedback");
+        if (hapicFeedback->IsBoolean()) {
+            previewOption.enableHapticFeedback = hapicFeedback->ToBoolean(vm)->Value();
+        }
+        auto enableEdgeAutoScroll = GetProperty(vm, interObj, "enableEdgeAutoScroll");
+        if (enableEdgeAutoScroll->IsBoolean()) {
+            previewOption.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean(vm)->Value();
+        }
+        auto isLiftingDisabled = GetProperty(vm, interObj, "isLiftingDisabled");
+        if (isLiftingDisabled->IsBoolean()) {
+            previewOption.isLiftingDisabled = isLiftingDisabled->ToBoolean(vm)->Value();
+        }
+    }
+}
+
+void ArkTSUtils::SetDragNumberBadge(ArkUIRuntimeCallInfo* info, const EcmaVM* vm, DragPreviewOption& option)
+{
+    Local<JSValueRef> secondArg = info->GetCallArgRef(1);
+    if (!secondArg->IsObject(vm)) {
+        return;
+    }
+    auto obj = secondArg->ToObject(vm);
+    auto numberBadge = GetProperty(vm, obj, "numberBadge");
+    if (!numberBadge->IsNull()) {
+        if (numberBadge->IsNumber()) {
+            int64_t number = numberBadge->ToNumber(vm)->Value();
+            if (number < 0 || number > INT_MAX) {
+                option.isNumber = false;
+                option.isShowBadge = true;
+            } else {
+                option.isNumber = true;
+                option.badgeNumber = numberBadge->ToNumber(vm)->Value();
+            }
+        } else if (numberBadge->IsBoolean()) {
+            option.isNumber = false;
+            option.isShowBadge = numberBadge->ToBoolean(vm)->Value();
+        }
+    } else {
+        option.isNumber = false;
+        option.isShowBadge = true;
+    }
+}
+
+void ArkTSUtils::SetDragPreviewOptionApply(ArkUIRuntimeCallInfo* info, const EcmaVM* vm, NG::DragPreviewOption& option)
+{
+    Local<JSValueRef> secondArg = info->GetCallArgRef(1);
+    if (!secondArg->IsObject(vm)) {
+        return;
+    }
+    auto interObj = secondArg->ToObject(vm);
+    auto globalObj = panda::JSNApi::GetGlobalObject(vm);
+    auto globalFuncValue = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyImageModifierToNode"));
+    if (globalFuncValue->IsFunction(vm)) {
+        auto modifierObj = GetProperty(vm, interObj, "modifier");
+        if (modifierObj->IsUndefined()) {
+            option.onApply = nullptr;
+        } else {
+            panda::Local<panda::FunctionRef> globalFunc = globalFuncValue->ToObject(vm);
+            auto onApply = [vm, func = panda::CopyableGlobal(vm, globalFunc), modifier = std::move(modifierObj)](
+                               WeakPtr<NG::FrameNode> frameNode) {
+                auto node = frameNode.Upgrade();
+                CHECK_NULL_VOID(node);
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
+                PipelineContext::SetCallBackNode(node);
+                panda::Local<panda::JSValueRef> params[2];
+                params[0] = modifier;
+                params[1] = panda::NativePointerRef::New(vm, AceType::RawPtr(node));
+                func->Call(vm, func.ToLocal(), params, 2);
+            };
+            option.onApply = onApply;
+        }
+    }
+}
+
 template<class T>
 bool ArkTSUtils::ConvertFromJSValueNG(
     const EcmaVM* vm, const Local<JSValueRef>& jsValue, T& result, RefPtr<ResourceObject>& resObj)
@@ -3626,7 +3963,8 @@ bool ArkTSUtils::ConvertFromJSValueNG(
     } else if constexpr (std::is_same_v<T, NG::CalcLength>) {
         return ParseJsLengthVpNG(vm, jsValue, result, resObj);
     } else if constexpr (std::is_same_v<T, Color>) {
-        return ParseJsColor(vm, jsValue, result, resObj);
+        NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+        return ParseJsSymbolColorAlpha(vm, jsValue, result, resObj, nodeInfo);
     }
     return false;
 }
@@ -3662,7 +4000,7 @@ bool ArkTSUtils::ConvertFromJSValue(
         return ParseJsDimensionVp(vm, jsValue, result, resObj);
     } else if constexpr (std::is_same_v<T, Color>) {
         NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
-        return ParseJsColor(vm, jsValue, result, resObj, nodeInfo);
+        return ParseJsSymbolColorAlpha(vm, jsValue, result, resObj, nodeInfo);
     }
     return false;
 }
@@ -3672,10 +4010,14 @@ void ArkTSUtils::ParseStepOptionsMap(
 {
     Local<panda::MapRef> StepMapRef(optionsArg);
     int32_t StepMapSize = StepMapRef->GetSize(vm);
+    std::string src;
     for (int32_t i = 0; i < StepMapSize; i++) {
         auto number = StepMapRef->GetKey(vm, i)->ToNumber(vm)->Value();
-        auto itemAccessibility = StepMapRef->GetValue(vm, i)->ToString(vm)->ToString(vm);
-        optionsMap[static_cast<int32_t>(number)] = itemAccessibility;
+        auto itemAccessibility = StepMapRef->GetValue(vm, i);
+        auto itemAccessibilityText =
+            itemAccessibility->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "text"));
+        ArkTSUtils::ParseJsString(vm, itemAccessibilityText, src);
+        optionsMap[static_cast<int32_t>(number)] = src.c_str();
     }
 }
 
@@ -3761,9 +4103,13 @@ std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues(const EcmaVM* vm, A
 
 template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<double>(const EcmaVM* vm, double);
 template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<int32_t>(const EcmaVM* vm, int32_t);
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<std::u16string>(
+    const EcmaVM* vm, std::u16string);
 
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<Color>(
     const EcmaVM*, const Local<JSValueRef>&, Color&, RefPtr<ResourceObject>&);
+template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<CalcDimension>(
+    const EcmaVM*, const Local<JSValueRef>&, CalcDimension&, RefPtr<ResourceObject>&);
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValueNG<Dimension>(
     const EcmaVM*, const Local<JSValueRef>&, Dimension&, RefPtr<ResourceObject>&);
 
@@ -3950,12 +4296,18 @@ void ArkTSUtils::ParseBlurOption(const EcmaVM* vm, const Local<JSValueRef>& jsBl
 {
     auto blurOptionProperty = GetProperty(vm, jsBlurOption, "grayscale");
     if (blurOptionProperty->IsArray(vm)) {
-        Local<panda::ArrayRef> params = blurOptionProperty->ToObject(vm);
-        auto grey1 = panda::ArrayRef::GetValueAt(vm, params, 0)->ToNumber(vm)->Int32Value(vm);
-        auto grey2 = panda::ArrayRef::GetValueAt(vm, params, 1)->ToNumber(vm)->Int32Value(vm);
-        std::vector<float> greyVec(2); // 2 number
-        greyVec[0] = grey1;
-        greyVec[1] = grey2;
+        std::vector<float> greyVec(NUM_2);
+        Local<panda::ArrayRef> valueArray = static_cast<Local<panda::ArrayRef>>(blurOptionProperty);
+        Local<JSValueRef> valueGrey1 = valueArray->GetValueAt(vm, blurOptionProperty, 0);
+        if (valueGrey1->IsNumber()) {
+            auto grey1 = valueGrey1->Int32Value(vm);
+            greyVec[0] = grey1;
+        }
+        Local<JSValueRef> valueGrey2 = valueArray->GetValueAt(vm, blurOptionProperty, 1);
+        if (valueGrey2->IsNumber()) {
+            auto grey2 = valueGrey2->Int32Value(vm);
+            greyVec[1] = grey2;
+        }
         blurOption.grayscale = greyVec;
     }
 }
@@ -4023,7 +4375,7 @@ void ArkTSUtils::ParseBlurStyleOption(const EcmaVM* vm, const Local<JSValueRef>&
     }
 
     if (GetProperty(vm, jsOption, "blurOptions")->IsObject(vm)) {
-        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions")->ToObject(vm);
+        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions");
         BlurOption blurOption;
         ParseBlurOption(vm, jsBlurOption, blurOption);
         styleOption.blurOption = blurOption;
@@ -4156,7 +4508,7 @@ void ArkTSUtils::ParseEffectOption(const EcmaVM* vm, const Local<JSValueRef>& js
 
     BlurOption blurOption;
     if (GetProperty(vm, jsOption, "blurOptions")->IsObject(vm)) {
-        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions")->ToString(vm);
+        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions");
         ParseBlurOption(vm, jsBlurOption, blurOption);
         effectOption.blurOption = blurOption;
     }
@@ -4252,8 +4604,8 @@ void GetBorderRadiusByLengthMetrics(
     }
 }
 
-void GetBorderRadiusResObj(EcmaVM* vm, const char* key, panda::Local<panda::ObjectRef> object, CalcDimension& radius,
-    RefPtr<ResourceObject>& resObj)
+void ArkTSUtils::GetBorderRadiusResObj(EcmaVM* vm, const char* key, panda::Local<panda::ObjectRef> object,
+    CalcDimension& radius, RefPtr<ResourceObject>& resObj)
 {
     auto property = object->Get(vm, panda::StringRef::NewFromUtf8(vm, key));
     ArkTSUtils::ParseJsDimensionVp(vm, property, radius, resObj);
@@ -4396,9 +4748,9 @@ void RegisterRadiusesResObj(
     borderRadius.AddResource(key, resObj, std::move(updateFunc));
 }
 
-void ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& topLeftResObj,
-    const RefPtr<ResourceObject>& topRightResObj, const RefPtr<ResourceObject>& bottomLeftResObj,
-    const RefPtr<ResourceObject>& bottomRightResObj)
+void ArkTSUtils::ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius,
+    const RefPtr<ResourceObject>& topLeftResObj, const RefPtr<ResourceObject>& topRightResObj,
+    const RefPtr<ResourceObject>& bottomLeftResObj, const RefPtr<ResourceObject>& bottomRightResObj)
 {
     if (!SystemProperties::ConfigChangePerform()) {
         return;
@@ -4979,4 +5331,14 @@ bool ArkTSUtils::ParseCommonMarginOrPaddingCorner(
     }
     return false;
 }
+
+#ifdef PIXEL_MAP_SUPPORTED
+void ArkTSUtils::ConvertPixmap(const Local<panda::ObjectRef>& obj, const EcmaVM* vm, const RefPtr<PixelMap>& pixelMap)
+{
+    auto jsPixmap = Framework::ConvertPixmap(pixelMap);
+    if (!jsPixmap->IsUndefined()) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valuePixelMap"), jsPixmap.Get().GetLocalHandle());
+    }
+}
+#endif
 } // namespace OHOS::Ace::NG

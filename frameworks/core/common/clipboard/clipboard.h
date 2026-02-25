@@ -37,9 +37,9 @@ public:
     virtual void SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption = CopyOptions::InApp) = 0;
     virtual void GetPixelMapData(
         const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) = 0;
-    virtual void HasData(const std::function<void(bool hasData)>& callback) = 0;
-    virtual void HasDataType(
-        const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes) = 0;
+    virtual void HasData(const std::function<void(bool hasData, bool isAutoFill)>& callback) = 0;
+    virtual void HasDataType(const std::function<void(bool hasData, bool isAutoFill)>& callback,
+        const std::vector<std::string>& mimeTypes) = 0;
     virtual void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) = 0;
     virtual void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) = 0;
     virtual void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) = 0;

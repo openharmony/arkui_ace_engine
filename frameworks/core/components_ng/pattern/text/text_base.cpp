@@ -287,6 +287,31 @@ LayoutCalPolicy TextBase::GetLayoutCalPolicy(LayoutWrapper* layoutWrapper, bool 
     return layoutPolicyProperty->heightLayoutPolicy_.value();
 }
 
+VectorF TextBase::GetHostScale(const RefPtr<FrameNode>& host) const
+{
+    auto unitScale = VectorF(1, 1);
+    CHECK_NULL_RETURN(host, unitScale);
+    auto scaleX = 1.0f;
+    auto scaleY = 1.0f;
+    auto parent = host;
+    while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, unitScale);
+        auto scale = renderContext->GetTransformScaleValue(unitScale);
+        scaleX *= std::abs(scale.x);
+        scaleY *= std::abs(scale.y);
+        auto transformMatrix = renderContext->GetTransformMatrix();
+        if (transformMatrix.has_value()) {
+            DecomposedTransform transform;
+            TransformUtil::DecomposeTransform(transform, transformMatrix.value());
+            scaleX *= std::abs(transform.scale[0]);
+            scaleY *= std::abs(transform.scale[1]);
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return VectorF(scaleX, scaleY);
+}
+
 float TextBase::GetConstraintMaxLength(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint, bool isHorizontal)
 {

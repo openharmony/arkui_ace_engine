@@ -16,6 +16,7 @@
 #include "core/components_ng/svg/parse/svg_graphic.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/svg/parse/svg_linear_gradient.h"
 #include "core/components_ng/svg/parse/svg_pattern.h"
 #include "core/components_ng/svg/parse/svg_radial_gradient.h"
@@ -286,7 +287,9 @@ void SvgGraphic::SetBrushColor(RSBrush& brush, bool useFillColor)
         return;
     }
     if (imageComponentColor->IsPlaceholder()) {
-        brush.SetColor(RSColor(static_cast<RSColorPlaceholder>(imageComponentColor->GetPlaceholder())));
+        auto opacityFillColor = imageComponentColor->BlendOpacity(curOpacity);
+        opacityFillColor.SetPlaceholder(imageComponentColor->GetPlaceholder());
+        brush.SetColor(ToRSColor(opacityFillColor));
     } else if (imageComponentColor->GetColorSpace() == ColorSpace::DISPLAY_P3) {
         auto p3Color = imageComponentColor->BlendOpacity(curOpacity);
         brush.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
@@ -345,7 +348,9 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
     } else {
         auto fillColor = (color) ? *color : fillState_.GetColor();
         if (fillColor.IsPlaceholder()) {
-            fillBrush_.SetColor(RSColor(static_cast<RSColorPlaceholder>(fillColor.GetPlaceholder())));
+            auto opacityFillColor = fillColor.BlendOpacity(curOpacity);
+            opacityFillColor.SetPlaceholder(fillColor.GetPlaceholder());
+            fillBrush_.SetColor(ToRSColor(opacityFillColor));
         } else if (fillColor.GetColorSpace() == ColorSpace::DISPLAY_P3) {
             auto p3Color = fillColor.BlendOpacity(curOpacity);
             fillBrush_.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,

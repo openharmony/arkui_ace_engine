@@ -25,6 +25,8 @@ abcpreload_obj_path = base_output_path + "/abc_preload.o"
 jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
 arkTheme_obj_path = base_output_path + "/abc_ark_theme.o"
 arkcomponent_obj_path = base_output_path + "/abc_ark_component.o"
+arkcommon_obj_path = base_output_path + "/abc_ark_common.o"
+arkdynamiccomponent_obj_path = base_output_path + "/abc_ark_dynamiccomponent.o"
 
 es2abc_gen_abc("gen_stateMgmt_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
@@ -76,6 +78,26 @@ es2abc_gen_abc("gen_jsPreload_abc") {
 
   in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsPreload.js" ]
   out_puts = [ base_output_path + "/jsPreload.abc" ]
+}
+
+es2abc_gen_abc("gen_arkCommon_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkCommon.js")
+  dst_file = rebase_path(base_output_path + "/arkCommon.abc")
+
+  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkCommon.js" ]
+  out_puts = [ base_output_path + "/arkCommon.abc" ]
+}
+
+es2abc_gen_abc("gen_arkDynamicComponent_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkDynamicComponent.js")
+  dst_file = rebase_path(base_output_path + "/arkDynamicComponent.abc")
+
+  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkDynamicComponent.js" ]
+  out_puts = [ base_output_path + "/arkDynamicComponent.abc" ]
 }
 
 es2abc_gen_abc("gen_arkComponent_abc") {
@@ -146,6 +168,24 @@ gen_obj("abc_preload") {
   }
   output = abcpreload_obj_path
   snapshot_dep = [ ":gen_jsPreload_abc" ]
+}
+
+gen_obj("abc_ark_common") {
+  input = base_output_path + "/arkCommon.abc"
+  if (use_mac || use_mingw_win || use_linux || use_ios) {
+    arkcommon_obj_path = base_output_path + "/arkCommon.c"
+  }
+  output = arkcommon_obj_path
+  snapshot_dep = [ ":gen_arkCommon_abc" ]
+}
+
+gen_obj("abc_ark_dynamiccomponent") {
+  input = base_output_path + "/arkDynamicComponent.abc"
+  if (use_mac || use_mingw_win || use_linux || use_ios) {
+    arkdynamiccomponent_obj_path = base_output_path + "/arkDynamicComponent.c"
+  }
+  output = arkdynamiccomponent_obj_path
+  snapshot_dep = [ ":gen_arkDynamicComponent_abc" ]
 }
 
 gen_obj("abc_ark_component") {
@@ -233,7 +273,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_common_shape_bridge.cpp",
       "nativeModule/arkts_native_container_picker_bridge.cpp",
       "nativeModule/arkts_native_container_span_bridge.cpp",
-      "nativeModule/arkts_native_data_panel_bridge.cpp",
       "nativeModule/arkts_native_date_picker_bridge.cpp",
       "nativeModule/arkts_native_divider_bridge.cpp",
       "nativeModule/arkts_native_flex_bridge.cpp",
@@ -242,7 +281,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_grid_col_bridge.cpp",
       "nativeModule/arkts_native_grid_item_bridge.cpp",
       "nativeModule/arkts_native_grid_row_bridge.cpp",
-      "nativeModule/arkts_native_hyperlink_bridge.cpp",
       "nativeModule/arkts_native_image_animator_bridge.cpp",
       "nativeModule/arkts_native_image_bridge.cpp",
       "nativeModule/arkts_native_image_span_bridge.cpp",
@@ -254,9 +292,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_list_item_bridge.cpp",
       "nativeModule/arkts_native_list_item_group_bridge.cpp",
       "nativeModule/arkts_native_loading_progress_bridge.cpp",
-      "nativeModule/arkts_native_menu_bridge.cpp",
-      "nativeModule/arkts_native_menu_item_bridge.cpp",
-      "nativeModule/arkts_native_menu_item_group_bridge.cpp",
       "nativeModule/arkts_native_nav_destination_bridge.cpp",
       "nativeModule/arkts_native_nav_router_bridge.cpp",
       "nativeModule/arkts_native_navigation_bridge.cpp",
@@ -267,7 +302,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_panel_bridge.cpp",
       "nativeModule/arkts_native_particle_bridge.cpp",
       "nativeModule/arkts_native_path_bridge.cpp",
-      "nativeModule/arkts_native_pattern_lock_bridge.cpp",
       "nativeModule/arkts_native_polygon_bridge.cpp",
       "nativeModule/arkts_native_polyline_bridge.cpp",
       "nativeModule/arkts_native_progress_bridge.cpp",
@@ -276,24 +310,20 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_relative_container_bridge.cpp",
       "nativeModule/arkts_native_render_node_bridge.cpp",
       "nativeModule/arkts_native_resource_bridge.cpp",
-      "nativeModule/arkts_native_rich_editor_bridge.cpp",
       "nativeModule/arkts_native_row_bridge.cpp",
       "nativeModule/arkts_native_scroll_bridge.cpp",
       "nativeModule/arkts_native_scrollable_bridge.cpp",
       "nativeModule/arkts_native_scrollbar_bridge.cpp",
-      "nativeModule/arkts_native_search_bridge.cpp",
       "nativeModule/arkts_native_select_bridge.cpp",
       "nativeModule/arkts_native_shape_bridge.cpp",
       "nativeModule/arkts_native_span_bridge.cpp",
       "nativeModule/arkts_native_stack_bridge.cpp",
       "nativeModule/arkts_native_swiper_bridge.cpp",
-      "nativeModule/arkts_native_symbol_glyph_bridge.cpp",
       "nativeModule/arkts_native_symbol_span_bridge.cpp",
       "nativeModule/arkts_native_tabcontent_bridge.cpp",
       "nativeModule/arkts_native_tabs_bridge.cpp",
       "nativeModule/arkts_native_text_area_bridge.cpp",
       "nativeModule/arkts_native_text_bridge.cpp",
-      "nativeModule/arkts_native_text_clock_bridge.cpp",
       "nativeModule/arkts_native_text_input_bridge.cpp",
       "nativeModule/arkts_native_text_timer_bridge.cpp",
       "nativeModule/arkts_native_textpicker_bridge.cpp",
@@ -313,9 +343,13 @@ template("declarative_js_engine_ark") {
 
     deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
     if (is_arkui_x) {
-      deps += [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl" ]
+      deps += [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl",
+                "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics" ]
     }
-    external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    external_deps = [ 
+      "graphic_2d:drawing_napi_impl",
+      "graphic_2d:librender_service_client"
+    ]
     if (!build_ohos_sdk && !is_arkui_x) {
       external_deps += [
         "ets_utils:console",
@@ -336,7 +370,6 @@ template("declarative_js_engine_ark") {
         deps += [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
         external_deps += [
           "c_utils:utils",
-          "graphic_2d:librender_service_client",
         ]
       }
     }
@@ -458,6 +491,8 @@ template("declarative_js_engine_ark") {
     }
 
     deps += [
+      ":gen_obj_src_abc_ark_common",
+      ":gen_obj_src_abc_ark_dynamiccomponent",
       ":gen_obj_src_abc_ark_component",
       ":gen_obj_src_abc_ark_theme",
       ":gen_obj_src_abc_enum_style",

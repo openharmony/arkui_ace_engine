@@ -37,6 +37,14 @@
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
 
+#define CHECK_NULL_VOID_WITH_ACTION(ptr, ...) \
+    do {                                        \
+        if (!(ptr)) {                           \
+            __VA_ARGS__;                        \
+            return;                             \
+        }                                       \
+    } while (0)
+
 namespace OHOS::Ace::Framework {
 namespace {
 const char DUMP_ORDER[] = "-accessibility";
@@ -159,6 +167,14 @@ bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node)
     return manager->IsShowPlaceholder(node->GetId());
 #endif
     return true;
+}
+
+void SetCursorPositionResult(
+    Accessibility::AccessibilityElementOperatorCallback& callback, int32_t cursorPosition, int32_t requestId)
+{
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "cursorPosition: %{public}d, requestId: %{public}d",
+        cursorPosition, requestId);
+    callback.SetCursorPositionResult(cursorPosition, requestId);
 }
 
 bool NeedUpdateChildrenOfAccessibilityElementInfo(const RefPtr<NG::UINode>& node)
@@ -1283,7 +1299,15 @@ void UpdateFocusRectToRenderContext(
     CHECK_NULL_VOID(parentRenderContext);
     parentRenderContext->UpdateAccessibilityFocusRect(rectInt);
 }
-            
+
+void CheckAndReConnectA11ySA()
+{
+    auto client = AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_VOID(client);
+    CHECK_NE_VOID(client->NeedToConnect(), true);
+    client->ConnectAndInit();
+}
+
 } // namespace
 
 
@@ -3272,15 +3296,22 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
         return true;
     }
 
+    auto containerId = ngPipeline ? ngPipeline->GetInstanceId() : 0;
+    bool sameInstance = false;
     for (const auto& [node, status] : extensionComponentStatusVec_) {
         auto frameNode = node.Upgrade();
         CHECK_NULL_CONTINUE(frameNode);
+        auto uecPipeline = frameNode->GetContextRefPtr();
+        auto uecContainerId = uecPipeline ? uecPipeline->GetInstanceId() : 0;
+        if (uecContainerId == containerId) {
+            sameInstance = true;
+        }
         auto nodePageId = frameNode->GetPageId();
         if (!pageIdEventMap_.count(nodePageId)) {
             pageIdEventMap_[nodePageId] = std::nullopt;
         }
     }
-    if (!CheckExtensionComponentReadyByPageId(pageId, extensionComponentStatusVec_)) {
+    if ((!CheckExtensionComponentReadyByPageId(pageId, extensionComponentStatusVec_)) && sameInstance) {
         if (pageIdEventMap_.count(pageId) && pageIdEventMap_[pageId].has_value()) {
             auto event = pageIdEventMap_[pageId].value();
             auto eventType = GetEventTypeByAccessibilityEvent(event);
@@ -3293,7 +3324,6 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
         pageIdEventMap_[pageId] = event;
         return false;
     } else if (!isPageEventControllerEmpty) {
-        auto containerId = ngPipeline ? ngPipeline->GetInstanceId() : 0;
         auto cached = CachePageEventByController(accessibilityEvent, componentType, pageId, containerId);
         return !cached;
     }
@@ -3449,6 +3479,12 @@ bool JsAccessibilityManager::CheckPageEventCached(const RefPtr<NG::FrameNode>& n
 
 void JsAccessibilityManager::AddFrameNodeToUecStatusVec(const RefPtr<NG::FrameNode>& node)
 {
+    for (const auto& [vecNode, status] : extensionComponentStatusVec_) {
+        auto frameNode = vecNode.Upgrade();
+        if (frameNode && (frameNode->GetAccessibilityId() == node->GetAccessibilityId())) {
+            return;
+        }
+    }
     extensionComponentStatusVec_.emplace_back(WeakPtr(node), false);
 }
 
@@ -6794,6 +6830,26 @@ bool JsAccessibilityManager::ActAccessibilityAction(Accessibility::ActionType ac
     return false;
 }
 
+void JsAccessibilityManager::ClearAccessibilityFocusState()
+{
+    if (currentFocusNodeId_ != -1 && lastElementId_ != -1) {
+        auto focusNode = lastFrameNode_.Upgrade();
+        PaintAccessibilityFocusNode(focusNode, false);
+    }
+    lastFrameNode_.Reset();
+    lastElementId_ = -1;
+    currentFocusNodeId_ = -1;
+}
+
+bool JsAccessibilityManager::IsFormRender()
+{
+    auto pipelineContext = GetPipelineContext().Upgrade();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(ngPipeline, false);
+    return ngPipeline->IsFormRender();
+}
+
 bool JsAccessibilityManager::ExecuteExtensionActionNG(int64_t elementId,
     const std::map<std::string, std::string>& actionArguments, int32_t action, const RefPtr<PipelineBase>& context,
     int64_t uiExtensionOffset)
@@ -6930,9 +6986,9 @@ void JsAccessibilityManager::JsInteractionOperation::GetCursorPosition(const int
     const int32_t requestId, AccessibilityElementOperatorCallback &callback)
 {
     auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
+    CHECK_NULL_VOID_WITH_ACTION(jsAccessibilityManager, SetCursorPositionResult(callback, 0, requestId));
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID_WITH_ACTION(context, SetCursorPositionResult(callback, 0, requestId));
     auto instanceId = context->GetInstanceId();
     context->GetTaskExecutor()->PostTask(
         [weak = GetHandler(), elementId, requestId, &callback, instanceId]() {
@@ -6953,36 +7009,51 @@ void JsAccessibilityManager::GetCursorPosition(
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
 
     auto context = GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID_WITH_ACTION(context, SetCursorPositionResult(callback, 0, requestId));
     RefPtr<NG::FrameNode> node;
     auto ngPipeline = FindPipelineByElementId(splitElementId, node);
-    CHECK_NULL_VOID(ngPipeline);
+    CHECK_NULL_VOID_WITH_ACTION(ngPipeline, SetCursorPositionResult(callback, 0, requestId));
     auto instanceId = ngPipeline->GetInstanceId();
     ContainerScope scope(instanceId);
+
+    ngPipeline->AddAfterRenderTask(
+        [weak = WeakClaim(this), weakNgPipeline = WeakClaim(AceType::RawPtr(ngPipeline)),
+            splitElementId, elementId, requestId, &callback]() {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID_WITH_ACTION(jsAccessibilityManager, SetCursorPositionResult(callback, 0, requestId));
+            auto ngPipeline = weakNgPipeline.Upgrade();
+            CHECK_NULL_VOID_WITH_ACTION(ngPipeline, SetCursorPositionResult(callback, 0, requestId));
+            auto instanceId = ngPipeline->GetInstanceId();
+            ContainerScope scope(instanceId);
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
-    CHECK_NULL_VOID(uiExtensionManager);
-    if (uiExtensionManager->IsWrapExtensionAbilityId(splitElementId)) {
-        auto unWrapIdPair = uiExtensionManager->UnWrapExtensionAbilityId(NG::UI_EXTENSION_OFFSET_MAX, elementId);
-        int64_t uiExtensionId = unWrapIdPair.first;
-        auto rootNode = ngPipeline->GetRootElement();
-        CHECK_NULL_VOID(rootNode);
-        auto uiExtensionNode = FindNodeFromRootByExtensionId(rootNode, uiExtensionId);
-        CHECK_NULL_VOID(uiExtensionNode);
-        auto accessibilityProperty = uiExtensionNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        CHECK_NULL_VOID(accessibilityProperty);
-        auto callNumber = accessibilityProperty->ActActionGetIndex();
-        callback.SetCursorPositionResult(callNumber, requestId);
-        return;
-    }
+            auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+            CHECK_NULL_VOID_WITH_ACTION(uiExtensionManager, SetCursorPositionResult(callback, 0, requestId));
+            if (uiExtensionManager->IsWrapExtensionAbilityId(splitElementId)) {
+                auto unWrapIdPair =
+                    uiExtensionManager->UnWrapExtensionAbilityId(NG::UI_EXTENSION_OFFSET_MAX, elementId);
+                int64_t uiExtensionId = unWrapIdPair.first;
+                auto rootNode = ngPipeline->GetRootElement();
+                CHECK_NULL_VOID_WITH_ACTION(rootNode, SetCursorPositionResult(callback, 0, requestId));
+                auto uiExtensionNode = jsAccessibilityManager->FindNodeFromRootByExtensionId(rootNode, uiExtensionId);
+                CHECK_NULL_VOID_WITH_ACTION(uiExtensionNode, SetCursorPositionResult(callback, 0, requestId));
+                auto accessibilityProperty = uiExtensionNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+                CHECK_NULL_VOID_WITH_ACTION(accessibilityProperty, SetCursorPositionResult(callback, 0, requestId));
+                auto callNumber = accessibilityProperty->ActActionGetIndex();
+                SetCursorPositionResult(callback, callNumber, requestId);
+                return;
+            }
 #endif
-    auto frameNode =
-        NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(ngPipeline->GetRootElement(), splitElementId);
-    CHECK_NULL_VOID(frameNode);
-    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    auto callNumber = accessibilityProperty->ActActionGetIndex();
-    callback.SetCursorPositionResult(callNumber, requestId);
+            auto frameNode =
+                NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(
+                    ngPipeline->GetRootElement(), splitElementId);
+            CHECK_NULL_VOID_WITH_ACTION(frameNode, SetCursorPositionResult(callback, 0, requestId));
+            auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            CHECK_NULL_VOID_WITH_ACTION(accessibilityProperty, SetCursorPositionResult(callback, 0, requestId));
+            auto callNumber = accessibilityProperty->ActActionGetIndex();
+            SetCursorPositionResult(callback, callNumber, requestId);
+        }
+    );
+    ngPipeline->RequestFrame();
 }
 
 void JsAccessibilityManager::JsInteractionOperation::ClearFocus()
@@ -7574,13 +7645,7 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_VOID(instance);
     Register(false);
-    if (currentFocusNodeId_ != -1 && lastElementId_ != -1) {
-        auto focusNode = lastFrameNode_.Upgrade();
-        PaintAccessibilityFocusNode(focusNode, false);
-    }
-    lastFrameNode_.Reset();
-    lastElementId_ = -1;
-    currentFocusNodeId_ = -1;
+    ClearAccessibilityFocusState();
     if (parentWindowId_ == 0) {
         instance->DeregisterElementOperator(windowId);
     } else {
@@ -7844,7 +7909,12 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     CHECK_NULL_VOID(instance);
     uint32_t windowId = GetWindowId();
     Register(false);
-    currentFocusNodeId_ = -1;
+
+    // Clear focus state only for form render
+    if (IsFormRender()) {
+        ClearAccessibilityFocusState();
+    }
+
     instance->DeregisterElementOperator(windowId, treeId_);
     InitAccessibilityEnabledAndScreenReadEnabled(); // for many subtrees under the same instance
     parentElementId_ = INVALID_PARENT_ID;
@@ -9363,5 +9433,13 @@ int32_t JsAccessibilityManager::GetTreeId(int32_t instanceId)
         return 0;
     }
     return treeId_;
+}
+
+void JsAccessibilityManager::AccessibilityOnShowHide(bool isOnShow,
+    [[maybe_unused]] const WeakPtr<PipelineBase>& context)
+{
+    if (isOnShow) {
+        CheckAndReConnectA11ySA();
+    }
 }
 } // namespace OHOS::Ace::Framework

@@ -44,11 +44,11 @@ static constexpr int TEST_DEFAULT_VALUE = 0;
 static constexpr int TEST_DEFAULT_STEP = 1;
 
 /**
- * @tc.name: SliderContentModifierHelperAccessorTest
+ * @tc.name: contentModifierSliderTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderContentModifierHelperAccessor, sliderContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(SliderContentModifierHelperAccessor, contentModifierSliderTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierSlider, nullptr);
 

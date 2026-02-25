@@ -451,6 +451,7 @@ void NavDestinationPatternBase::OnColorConfigurationUpdate()
 void NavDestinationPatternBase::InitOnTouchEvent(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto forceSplitMgr = context->GetForceSplitManager();

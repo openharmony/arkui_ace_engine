@@ -102,6 +102,9 @@ HWTEST_F(GridContainerUtilsTestNG, InheritGridColumnsTest02, TestSize.Level0)
     containerSizeArray[0] = 4;
     containerSizeArray[5] = 9;
     V2::GridContainerUtils::InheritGridColumns(gridContainerSize, containerSizeArray);
+    /**
+     * @tc.expected: xs, sm, md, lg, xl have 4 columns, xxl has 9 columns.
+     */
     expectedResult->xs = 4;
     expectedResult->sm = 4;
     expectedResult->md = 4;
@@ -124,6 +127,9 @@ HWTEST_F(GridContainerUtilsTestNG, InheritGridColumnsTest03, TestSize.Level0)
     containerSizeArray[2] = 4;
     containerSizeArray[3] = 9;
     V2::GridContainerUtils::InheritGridColumns(gridContainerSize, containerSizeArray);
+    /**
+     * @tc.expected: xs, sm, md have 4 columns, lg, xl, xxl has 9 columns.
+     */
     expectedResult->xs = 4;
     expectedResult->sm = 4;
     expectedResult->md = 4;

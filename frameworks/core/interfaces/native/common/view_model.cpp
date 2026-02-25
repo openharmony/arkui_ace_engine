@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/node/hyperlink_modifier.h"
+
 #include "base/memory/ace_type.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/group_node.h"
@@ -70,6 +72,7 @@
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/symbol_span_model_static.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
@@ -108,8 +111,6 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
-#include "core/components_ng/pattern/search/search_model_ng.h"
-#include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -117,6 +118,7 @@
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
+#include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/ani/richtext_model_static.h"
 #include "core/components_ng/pattern/web/ani/web_model_static.h"
@@ -126,16 +128,22 @@
 #include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 #endif // WINDOW_SCENE_SUPPORTED
 #include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "core/interfaces/native/node/extension_companion_node.h"
 #include "core/interfaces/native/node/flow_item_modifier.h"
+#include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
+#include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/qrcode_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
+#include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/interfaces/native/node/menu_item_group_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/plugin/plugin_model_static.h"
@@ -154,10 +162,9 @@ void* createTextNode(ArkUI_Int32 nodeId)
 
 void* createSymbolNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = SymbolModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NG::NodeModifier::GetSymbolGlyphCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createSpanNode(ArkUI_Int32 nodeId)
@@ -515,10 +522,11 @@ void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
 
 void* createSearchNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = SearchModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto searchModifier = nodeModifier->getSearchModifier();
+    CHECK_NULL_RETURN(searchModifier, nullptr);
+    return searchModifier->createSearchFrameNode(nodeId);
 }
 
 void* createGridRowNode(ArkUI_Int32 nodeId)
@@ -600,10 +608,9 @@ void* createBadgeNode(ArkUI_Int32 nodeId)
 
 void* createTextClockNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextClockModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto textClockCustomModifier = NodeModifier::GetTextClockCustomModifier();
+    CHECK_NULL_RETURN(textClockCustomModifier, nullptr);
+    return textClockCustomModifier->createTextClockFrameNode(nodeId);
 }
 
 void* createTextTimerNode(ArkUI_Int32 nodeId)
@@ -616,11 +623,9 @@ void* createTextTimerNode(ArkUI_Int32 nodeId)
 
 void* createMarqueeNode(ArkUI_Int32 nodeId)
 {
-    auto nodeModifier = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifier, nullptr);
-    auto marqueeModifier = nodeModifier->getMarqueeModifier();
-    CHECK_NULL_RETURN(marqueeModifier, nullptr);
-    return marqueeModifier->createMarqueeFrameNode(nodeId);
+    auto modifier = NG::NodeModifier::GetMarqueeModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createMarqueeFrameNode(nodeId);
 }
 
 void* createCheckboxGroupNode(ArkUI_Int32 nodeId)
@@ -713,11 +718,11 @@ void* createCounterNode(ArkUI_Int32 nodeId)
 
 void* createDataPanelNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = DataPanelModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto dataPanelModifier = nodeModifier->getDataPanelModifier();
+    CHECK_NULL_RETURN(dataPanelModifier, nullptr);
+    return dataPanelModifier->createFrameNode(nodeId);
 }
 
 void* createEffectComponentNode(ArkUI_Int32 nodeId)
@@ -769,10 +774,10 @@ void* createFormLinkNode(ArkUI_Int32 nodeId)
 
 void* createGaugeNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = GaugeModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto gaugeModifier = nodeModifier->getGaugeModifier();
+    CHECK_NULL_RETURN(gaugeModifier, nullptr);
     return nullptr;
 }
 
@@ -783,10 +788,10 @@ void* createGridContainerNode(ArkUI_Int32 nodeId)
 
 void* createHyperlinkNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = HyperlinkModelStatic::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto hyperlinkModifier = NodeModifier::GetHyperlinkModifier();
+    CHECK_NULL_RETURN(hyperlinkModifier, nullptr);
+
+    return hyperlinkModifier->createHyperlinkFrameNode(nodeId);
 }
 
 void* createLineNode(ArkUI_Int32 nodeId)
@@ -796,39 +801,33 @@ void* createLineNode(ArkUI_Int32 nodeId)
 
 void* createLocationButtonNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = LocationButtonModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createMediaCachedImageNode(ArkUI_Int32 nodeId)
 {
-    return createImageNode(nodeId);
+    return nullptr;
 }
 
 void* createMenuNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuModelStatic::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetMenuModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createMenuFrameNode(nodeId);
 }
 
 void* createMenuItemNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuItemModelStatic::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetMenuItemModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createMenuItemFrameNode(nodeId);
 }
 
 void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuItemGroupViewStatic::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetMenuItemGroupModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createMenuItemGroupFrameNode(nodeId);
 }
 
 void* createNavDestinationNode(ArkUI_Int32 nodeId)
@@ -878,11 +877,11 @@ void* createPathNode(ArkUI_Int32 nodeId)
 
 void* createPatternLockNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = PatternLockModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto patternlockModifier = nodeModifier->getPatternLockModifier();
+    CHECK_NULL_RETURN(patternlockModifier, nullptr);
+    return patternlockModifier->createFrameNode(nodeId);
 }
 
 void* createPluginComponentNode(ArkUI_Int32 nodeId)
@@ -1012,10 +1011,9 @@ void* createStepperItemNode(ArkUI_Int32 nodeId)
 
 void* createSymbolGlyphNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = SymbolModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NG::NodeModifier::GetSymbolGlyphCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createFrameNode(nodeId);
 }
 
 void* createSymbolSpanNode(ArkUI_Int32 nodeId)

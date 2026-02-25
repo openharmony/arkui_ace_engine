@@ -1058,6 +1058,11 @@ void TextFieldModelNG::SetIsShowCancelButton(bool isShowCancelButton)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowCancelButton, isShowCancelButton);
 }
 
+void TextFieldModelNG::SetIsShowVoiceButton(bool isShowButton)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowVoiceButton, isShowButton);
+}
+
 void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);
@@ -1221,6 +1226,19 @@ TextDirection TextFieldModelNG::GetTextDirection(FrameNode* frameNode)
 void TextFieldModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextOverflow, value, frameNode);
+}
+
+TextOverflow TextFieldModelNG::GetTextOverflow(FrameNode* frameNode)
+{
+    TextOverflow defaultValue = TextOverflow::NONE;
+    CHECK_NULL_RETURN(frameNode, defaultValue);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, defaultValue);
+    auto isTextArea = pattern->IsTextArea();
+    defaultValue = isTextArea ? TextOverflow::CLIP : TextOverflow::NONE;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, TextOverflow, defaultValue, frameNode, defaultValue);
+    return defaultValue;
 }
 
 void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
@@ -2676,6 +2694,13 @@ void TextFieldModelNG::SetEllipsisMode(FrameNode* frameNode, EllipsisMode value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value, frameNode);
 }
 
+EllipsisMode TextFieldModelNG::GetEllipsisMode(FrameNode* frameNode)
+{
+    EllipsisMode value = EllipsisMode::TAIL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, EllipsisMode, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetStopBackPress(bool isStopBackPress)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress);
@@ -2893,6 +2918,15 @@ void TextFieldModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const C
 void TextFieldModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, frameNode);
+}
+
+void TextFieldModelNG::SetUserAccessibilityText()
+{
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasUserAccessibilityText();
 }
 
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@ ace_unittest("event_manager_test_ng") {
   type = "new"
   sources = [
     "$ace_root/frameworks/core/event/resample_algo.cpp",
+    "$ace_root/frameworks/core/common/event_info_manager.cpp",
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
     "event_dump_test_ng.cpp",
@@ -83,6 +84,16 @@ ace_unittest("focus_hub_test_ng") {
     "focus_core/focus_api_test.cpp",
     "focus_core/focus_area_test.cpp",
     "focus_core/focus_creatbox_test.cpp",
+    "focus_core/focus_hub_test_ng.cpp",
+    "focus_core/focus_hub_test_ng_branch_coverage.cpp",
+    "focus_core/focus_hub_test_ng_branch_coverage_two.cpp",
+    "focus_core/focus_hub_test_ng_for_property_config.cpp",
+    "focus_core/focus_hub_test_ng_for_property_config_two.cpp",
+    "focus_core/focus_hub_test_ng_new.cpp",
+    "focus_core/focus_hub_test_ng_new_three.cpp",
+    "focus_core/focus_hub_test_ng_new_two.cpp",
+    "focus_core/focus_hub_test_ng_three.cpp",
+    "focus_core/focus_hub_test_ng_two.cpp",
     "focus_core/focus_request_test.cpp",
     "focus_core/focus_test_base.cpp",
     "focus_core/focus_window_test.cpp",
@@ -91,16 +102,6 @@ ace_unittest("focus_hub_test_ng") {
     "focus_core/lost_focus_to_view_root_test.cpp",
     "focus_core/page_focus_switch_test.cpp",
     "focus_core/passive_last_focus_test.cpp",
-    "focus_hub_test_ng.cpp",
-    "focus_hub_test_ng_branch_coverage.cpp",
-    "focus_hub_test_ng_for_paint_focus_state.cpp",
-    "focus_hub_test_ng_for_property_config.cpp",
-    "focus_hub_test_ng_for_property_config_two.cpp",
-    "focus_hub_test_ng_new.cpp",
-    "focus_hub_test_ng_new_three.cpp",
-    "focus_hub_test_ng_new_two.cpp",
-    "focus_hub_test_ng_three.cpp",
-    "focus_hub_test_ng_two.cpp",
   ]
 }
 

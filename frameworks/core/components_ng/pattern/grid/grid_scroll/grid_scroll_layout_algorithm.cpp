@@ -1238,6 +1238,17 @@ inline void UpdateStartIndexByStartLine(GridLayoutInfo& info_)
 }
 } // namespace
 
+bool GridScrollLayoutAlgorithm::IsNextExistLineHeightZero(const int32_t currentLine) const
+{
+    const int32_t nextLine = currentLine + 1;
+    const auto gridIt = info_.gridMatrix_.find(nextLine);
+    const auto heightIt = info_.lineHeightMap_.find(nextLine);
+    if (gridIt == info_.gridMatrix_.end() || heightIt == info_.lineHeightMap_.end()) {
+        return false;
+    }
+    return NearZero(heightIt->second);
+}
+
 bool GridScrollLayoutAlgorithm::MeasureExistingLine(
     int32_t line, float& mainLength, int32_t& endIdx, bool isScrollableSpringMotionRunning)
 {
@@ -1270,16 +1281,30 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(
     }
 
     if (NonNegative(cellAveLength_)) { // Means at least one item has been measured
+        // Calculate height difference between old line height and new average cell height
         auto deltaHeight = info_.lineHeightMap_[line] - cellAveLength_;
-        if (Positive(deltaHeight) && isScrollableSpringMotionRunning && !info_.reachStart_) {
+        // Handle spring rebound height compensation when all conditions are met:
+        // 1. deltaHeight > 0: old line height is greater than new average height (line is compressed)
+        // 2. isScrollableSpringMotionRunning: spring scroll animation is running
+        // 3. !info_.reachStart_: not reached start position
+        // 4. Negative(mainLength): mainLength is negative (in out of start)
+        // mainLength represents the current layout offset along main axis
+        if (Positive(deltaHeight) && isScrollableSpringMotionRunning && !info_.reachStart_ && Negative(mainLength)) {
+            // Add reduced height difference to mainLength for compensation
             mainLength += deltaHeight;
+            // Sync current offset with mainLength
             info_.currentOffset_ = mainLength;
+            // Calculate total content height after subtracting deltaHeight
             float totalHeight = GetContentHeight(wrapper_) - deltaHeight;
+            // If last main size is greater than or equal to new total height,
+            // content may be fully visible in viewport, adjust offset to maintain correct visual position
             if (info_.lastMainSize_ >= totalHeight) {
                 info_.currentOffset_ += totalHeight - info_.lastMainSize_;
             }
         }
+        // Update current line height to the new average cell height
         info_.lineHeightMap_[line] = cellAveLength_;
+        // Accumulate mainLength offset: current line height + main axis gap
         mainLength += cellAveLength_ + mainGap_;
     }
     // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_]
@@ -1303,7 +1328,11 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, runOutOfRecord);
     auto isScrollableSpringMotionRunning = pattern->IsScrollableSpringMotionRunning();
-    while (LessNotEqual(mainLength, mainSize)) {
+    while (LessNotEqual(mainLength, mainSize) ||
+                (NearEqual(mainLength, mainSize) && IsNextExistLineHeightZero(currentMainLineIndex_))) {
+        if (NearEqual(mainLength, mainSize)) {
+            TAG_LOGI(AceLogTag::ACE_GRID, "Measure next grid item with height zero.");
+        }
         if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, isScrollableSpringMotionRunning)) {
             runOutOfRecord = true;
             break;

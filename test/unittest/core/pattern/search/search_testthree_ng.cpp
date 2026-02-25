@@ -126,4 +126,49 @@ HWTEST_F(SearchTestThreeNg, ConvertCopyOptionsToString_Default, TestSize.Level1)
     auto result = pattern->ConvertCopyOptionsToString(static_cast<CopyOptions>(value));
     EXPECT_EQ(result, "");
 }
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: Test SearchPattern OnInjectionEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestThreeNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Search node
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto searchNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(searchNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get SearchPattern
+     */
+    auto pattern = searchNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Test OnInjectionEvent with commands
+     * @tc.expected: OnInjectionEvent return RET_FAILED or RET_SUCCESS accordingly
+     */
+    std::string command = R"()";
+    auto ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({)";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"setText"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"setSearchText"})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
+    command = R"({"cmd":"setSearchText", "params":{}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+    command = R"({"cmd":"setSearchText", "params":{"value":"test"}})";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_SUCCESS);
+}
 } // namespace OHOS::Ace::NG

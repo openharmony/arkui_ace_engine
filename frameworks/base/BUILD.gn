@@ -82,6 +82,7 @@ template("ace_base_source_set") {
       "thread/task_dependency_manager.cpp",
       "utils/base_id.cpp",
       "utils/date_util.cpp",
+      "utils/delay_task.cpp",
       "utils/lifecycle_checkable.cpp",
       "utils/measure_util.cpp",
       "utils/resource_configuration.cpp",
@@ -192,6 +193,7 @@ foreach(item, ace_platforms) {
     if (platform == "ohos") {
       external_deps = [
         "ability_runtime:abilitykit_native",
+        "ability_runtime:napi_common",
         "hilog:libhilog",
         "i18n:intl_util",
         "init:libbeget_proxy",

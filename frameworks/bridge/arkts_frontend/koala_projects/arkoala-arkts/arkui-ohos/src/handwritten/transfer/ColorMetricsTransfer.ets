@@ -50,7 +50,8 @@ export class ColorMetricsTransfer {
             throw Error('Not a ColorMetrics object, convert fail.');
         }
         let nodeModule = ESValue.load('@ohos.arkui.node');
-        let ColorMetricsModule = nodeModule.getProperty('ColorMetrics')
+        let defaultModule = nodeModule.getProperty('default');
+        let ColorMetricsModule = defaultModule.getProperty('ColorMetrics')
         let ret = ColorMetricsModule.invokeMethod('rgba', staticValue.red, staticValue.green ,staticValue.blue, staticValue.alpha/MAX_CHANNEL_VALUE);
         let resId = staticValue.getResourceId();
         if (resId !== undefined) {

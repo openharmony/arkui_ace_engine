@@ -294,6 +294,11 @@ ArkUINodeHandle CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
     return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNodeByNodeId(tag, nodeId));
 }
 
+ArkUINodeHandle CreateCustomNodeWithParam(ArkUI_CharPtr tag, const ArkUIRenderContextParam param)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNodeWithParam(tag, param));
+}
+
 ArkUI_Bool IsRightToLeft()
 {
     return AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -478,6 +483,14 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnSizeChange,
     NodeModifier::SetOnCoastingAxisEvent,
     NodeModifier::SetOnChildTouchTest,
+#ifdef SUPPORT_DIGITAL_CROWN
+    NodeModifier::SetOnDigitalCrownEvent,
+#else
+    nullptr,
+#endif
+    NodeModifier::SetOnCustomOverflowScroll,
+    NodeModifier::SetOnStackOverflowScroll,
+    NodeModifier::SetOnNeedSoftkeyboard,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -539,10 +552,6 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextAreaOnDidDeleteValue,
     NodeModifier::SetOnTextAreaChangeWithPreviewText,
     NodeModifier::SetOnTextAreaWillChange,
-};
-
-const ComponentAsyncEventHandler richEditorNodeAsyncEventHandlers[] = {
-    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnSelectionChange,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -716,6 +725,14 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnSizeChange,
     NodeModifier::ResetOnCoastingAxisEvent,
     NodeModifier::ResetOnChildTouchTest,
+#ifdef SUPPORT_DIGITAL_CROWN
+    NodeModifier::ResetOnDigitalCrownEvent,
+#else
+    nullptr,
+#endif
+    NodeModifier::ResetOnCustomOverflowScroll,
+    NodeModifier::ResetOnStackOverflowScroll,
+    NodeModifier::ResetOnNeedSoftkeyboard,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -777,10 +794,6 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
     nullptr,
     NodeModifier::ResetOnTextAreaChangeWithPreviewText,
     NodeModifier::ResetOnTextAreaWillChange,
-};
-
-const ResetComponentAsyncEventHandler RICH_EDITOR_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
-    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnSelectionChange,
 };
 
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -989,11 +1002,11 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
         }
         case ARKUI_RICH_EDITOR: {
             // richEditor event type.
-            if (subKind >= sizeof(richEditorNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
-            }
-            eventHandle = richEditorNodeAsyncEventHandlers[subKind];
+            auto* richEditorModifier = NodeModifier::GetRichEditorModifier();
+                if (richEditorModifier) {
+                    eventHandle =
+                        reinterpret_cast<ComponentAsyncEventHandler>(richEditorModifier->getEventSetHandler(subKind));
+                }
             break;
         }
         case ARKUI_REFRESH: {
@@ -1271,14 +1284,11 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             break;
         }
         case ARKUI_RICH_EDITOR: {
-            // rich editor event type.
-            if (subKind >=
-                sizeof(RICH_EDITOR_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
-                TAG_LOGE(
-                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
-            }
-            eventHandle = RICH_EDITOR_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            auto* richEditorModifier = NodeModifier::GetRichEditorModifier();
+                if (richEditorModifier) {
+                    eventHandle = reinterpret_cast<ResetComponentAsyncEventHandler>(
+                        richEditorModifier->getEventResetHandler(subKind));
+                }
             break;
         }
         case ARKUI_REFRESH: {
@@ -2040,6 +2050,16 @@ void UnRegisterNodeAsyncCommonEventReceiver()
     NodeCommonEvent::globalCommonEventReceiver = nullptr;
 }
 
+ArkUI_Int32 CheckUIContextInvalid(ArkUI_Int32 instanceId)
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    if (pipeline == nullptr) {
+        LOGW("Cannot find pipeline context by contextHandle ID %{public}d", instanceId);
+        return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2074,6 +2094,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         .greatOrEqualTargetAPIVersion = GreatOrEqualTargetAPIVersion,
         .registerNodeAsyncCommonEventReceiver = RegisterNodeAsyncCommonEventReceiver,
         .unRegisterNodeAsyncCommonEventReceiver = UnRegisterNodeAsyncCommonEventReceiver,
+        .checkUIContextInvalid = CheckUIContextInvalid,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
@@ -2464,6 +2485,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     .registerOEMVisualEffect = RegisterOEMVisualEffect,
     .setOnNodeDestroyCallback = SetOnNodeDestroyCallback,
     .createCustomNodeByNodeId = CreateCustomNodeByNodeId,
+    .createCustomNodeWithParam = CreateCustomNodeWithParam,
 };
 /* clang-format on */
 
@@ -2707,7 +2729,7 @@ const ArkUIExtendedNodeAPI* GetExtendedAPI()
 ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptor()
 {
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor create");
-    return new ArkUI_StyledString_Descriptor;
+    return new ArkUI_StyledString_Descriptor();
 }
 
 void DestroyArkUIStyledStringDescriptor(ArkUI_StyledString_Descriptor* descriptor)
@@ -3072,7 +3094,7 @@ const ArkUIFullNodeAPI* GetArkUIFullNodeAPI()
     return &OHOS::Ace::NG::impl_full;
 }
 
-void SendArkUISyncEvent(ArkUINodeEvent* event)
+ACE_FORCE_EXPORT void SendArkUISyncEvent(ArkUINodeEvent* event)
 {
     OHOS::Ace::NG::NodeEvent::SendArkUISyncEvent(event);
 }

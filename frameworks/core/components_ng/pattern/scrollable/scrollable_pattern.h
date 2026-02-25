@@ -26,6 +26,7 @@
 #include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -75,6 +76,13 @@ enum class ScrollToDirection {
     NONE = 0,
     FORWARD,
     BACKWARD
+};
+enum class ScrollError {
+    SCROLL_NO_ERROR,
+    SCROLL_TOP_ERROR,
+    SCROLL_BOTTOM_ERROR,
+    SCROLL_NOT_SCROLLABLE_ERROR,
+    SCROLL_ERROR_OTHER
 };
 struct ScrollOffsetAbility {
     std::function<bool(float)> scrollFunc = nullptr;
@@ -183,6 +191,8 @@ public:
     virtual bool CanOverScrollWithDelta(double delta, bool isNestScroller = false);
 
     virtual void OnTouchDown(const TouchEventInfo& info);
+
+    void OnTouchpadInteraction(PointF point);
 
     virtual void ProcessFreeScrollOverDrag(const OffsetF velocity) {};
 
@@ -942,13 +952,13 @@ public:
         return scrollBar_;
     }
 
-    static double GetDefaultFriction();
-
     bool IsInitialized() const
     {
         return isInitialized_;
     }
     void ProcessScrollOverDrag(double velocity, bool isNestScroller);
+
+    static double GetDefaultFriction();
 
     void SetCanOverScroll(bool val);
 
@@ -1063,7 +1073,11 @@ protected:
         return isBackToTopRunning_;
     }
 
-    std::string ParseCommand(const std::string& command);
+    std::string ParseCommand(const std::string& command, int& reportEventId, float& moveRatio, bool& isScrollByRatio);
+    void ReportScroll(bool isJump, ScrollError error, int32_t reportEventId);
+    int32_t OnInjectionEventByRatio(const std::string& command);
+    ScrollError ScrollByRatio(bool reverse, float ratio);
+    void HandleScrollByRatio(bool isScrollByRatio, bool reverse, float ratio, int reportEventId);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();
@@ -1091,11 +1105,13 @@ private:
     float GetScrollDelta(float offset, bool& stopAnimation);
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void RegisterTouchpadInteractionCallback();
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
         const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers);
     bool IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer,
         bool isChild, bool isHitTestBlock) const;
+    bool IsInComponent(PointF point);
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};

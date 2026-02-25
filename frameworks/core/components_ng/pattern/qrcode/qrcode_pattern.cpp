@@ -112,7 +112,7 @@ void QRCodePattern::UpdateQRCodeCreate(const std::string& value)
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         paintProperty->UpdateValue(value);
     }
     if (host->GetRerenderable()) {
@@ -128,7 +128,7 @@ void QRCodePattern::UpdateColor(const Color& color, bool isFristLoad)
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFristLoad) {
         paintProperty->UpdateColor(color);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -149,7 +149,7 @@ void QRCodePattern::UpdateBackgroundColor(const Color& color, bool isFristLoad)
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFristLoad) {
         paintProperty->UpdateBackgroundColor(color);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -168,7 +168,7 @@ void QRCodePattern::UpdateContentOpacity(double opacity, bool isFristLoad)
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFristLoad) {
         paintProperty->UpdateOpacity(opacity);
     }
     if (host->GetRerenderable()) {

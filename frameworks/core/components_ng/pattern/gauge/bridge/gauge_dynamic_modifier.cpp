@@ -104,7 +104,7 @@ void SetGaugeStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit
     GaugeModelNG::SetGaugeStrokeWidth(frameNode, Dimension(value, unitEnum));
 }
 
-void SetGaugeStrokeWidthPtr(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit, void* strokeWidthRawPtr)
+void SetGaugeStrokeWidthPtr(ArkUINodeHandle node, ArkUI_Float64 value, int32_t unit, void* strokeWidthRawPtr)
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
@@ -489,7 +489,7 @@ void SetGaugeStrokeWidthImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_In
     GetGaugeModelImpl()->SetStrokeWidth(Dimension(value, unitEnum));
 }
 
-void SetGaugeStrokeWidthPtrImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* strokeWidthRawPtr)
+void SetGaugeStrokeWidthPtrImpl(ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit, void* strokeWidthRawPtr)
 {
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
     GetGaugeModelImpl()->SetStrokeWidth(Dimension(value, unitEnum));

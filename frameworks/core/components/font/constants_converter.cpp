@@ -281,8 +281,9 @@ namespace {
 RSColor ConvertToRSColor(Color color)
 {
     if (ACE_UNLIKELY(color.IsPlaceholder())) {
-        return RSColor(
-            static_cast<RSColorPlaceholder>(color.GetPlaceholder()));
+        RSColor rsColor(color.GetValue());
+        rsColor.SetPlaceholder(static_cast<RSColorPlaceholder>(color.GetPlaceholder()));
+        return rsColor;
     }
     return color.GetValue();
 }
@@ -561,7 +562,9 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
             ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
     if (pipelineContext) {
-        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+        if (textStyle.GetEnableDeviceFontWeightCategory()) {
+            fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+        }
     }
     if (textStyle.GetEnableVariableFontWeight()) {
         fontWeightValue = textStyle.GetVariableFontWeight();

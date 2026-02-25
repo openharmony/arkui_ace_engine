@@ -34,6 +34,8 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+const std::string DETACHED_FREE_ROOT_PROXY_TAG = "DetachedFreeRootProxy";
+
 enum class ShowSubMenuType : int32_t {
     DEFAULT = 0,
     HOVER = 1,
@@ -460,6 +462,22 @@ public:
     mutable RefPtr<UINode> detachedProxy_ = nullptr;
     void HandleCloseSubMenu();
     void DoCloseSubMenu();
+    void SetOnClickEventSet(bool isSet)
+    {
+        onClickEventSet_ = isSet;
+    }
+
+    void SetDetachedFreeRootProxy(const RefPtr<UINode>& node)
+    {
+        if (node && node->GetTag() == DETACHED_FREE_ROOT_PROXY_TAG) {
+            detachedProxy_ = node;
+        }
+    }
+
+    bool HasDetachedFreeRootProxy()
+    {
+        return detachedProxy_ != nullptr;
+    }
 
 protected:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;

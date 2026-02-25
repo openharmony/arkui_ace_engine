@@ -378,6 +378,35 @@ HWTEST_F(WebPatternPartOneTest, OnContextMenuShow_005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuNodeDestroyCallback_001
+ * @tc.desc: MenuNodeDestroyCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, MenuNodeDestroyCallback_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_APPEAR);
+    webPattern->isFocus_ = true;
+    webPattern->MenuNodeDestroyCallback();
+    EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::FOCUS_SWITCH);
+    webPattern->isFocus_ = false;
+    webPattern->MenuNodeDestroyCallback();
+    EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::VIEW_SWITCH);
+#endif
+}
+
+/**
  * @tc.name: NotifyMenuLifeCycleEvent_001
  * @tc.desc: NotifyMenuLifeCycleEvent.
  * @tc.type: FUNC
@@ -405,9 +434,6 @@ HWTEST_F(WebPatternPartOneTest, NotifyMenuLifeCycleEvent_001, TestSize.Level1)
     webPattern->isFocus_ = true;
     webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
     EXPECT_FALSE(webPattern->isMenuShownFromWeb_);
-    webPattern->isFocus_ = false;
-    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
-    EXPECT_EQ(webPattern->delegate_->blurReason_, OHOS::NWeb::BlurReason::VIEW_SWITCH);
 #endif
 }
 
@@ -589,6 +615,40 @@ HWTEST_F(WebPatternPartOneTest, OnAttachToMainTree_001, TestSize.Level1)
 
     webPattern->delegate_->SetPageFinishedState(true);
     EXPECT_EQ(webPattern->delegate_->GetPageFinishedState(), true);
+#endif
+}
+
+/**
+ * @tc.name: IsAccessibilitySamePage_001
+ * @tc.desc: IsAccessibilitySamePage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, IsAccessibilitySamePage_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, [](){ return AceType::MakeRefPtr<WebPattern>();  });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnAttachToMainTree();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    ASSERT_EQ(webPattern->IsAccessibilitySamePage(), false);
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilitySamePage("FULL_SILENT");
+    ASSERT_EQ(webPattern->IsAccessibilitySamePage(), true);
+
+    accessibilityProperty->SetAccessibilitySamePage("SEMI_SILENT");
+    ASSERT_EQ(webPattern->IsAccessibilitySamePage(), true);
+    ASSERT_EQ(webPattern->IsAccessibilitySamePage(), false);
 #endif
 }
 
@@ -863,6 +923,29 @@ HWTEST_F(WebPatternPartOneTest, InitEvent_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitEventAfterUpdate_001
+ * @tc.desc: InitEventAfterUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, InitEventAfterUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    webPattern->InitEventAfterUpdate();
+    EXPECT_NE(webPattern, nullptr);
+#endif
+}
+
+/**
  * @tc.name: InitFeatureParam_001
  * @tc.desc: InitFeatureParam.
  * @tc.type: FUNC
@@ -1083,6 +1166,83 @@ HWTEST_F(WebPatternPartOneTest, InitPinchEvent_002, TestSize.Level1)
     webPattern->pinchGesture_ = nullptr;
 
     webPattern->InitPinchEvent(gestureHub);
+#endif
+}
+
+/**
+ * @tc.name: InitLightTouchEvent_001
+ * @tc.desc: InitLightTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, InitLightTouchEvent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    WeakPtr<EventHub> eventHub = nullptr;
+    RefPtr<InputEventHub> gestureHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
+
+    webPattern->InitLightTouchEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitLightTouchEvent_002
+ * @tc.desc: InitLightTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, InitLightTouchEvent_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    WeakPtr<EventHub> eventHub = nullptr;
+    RefPtr<InputEventHub> gestureHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
+
+    webPattern->InitLightTouchEvent(gestureHub);
+#endif
+}
+
+/**
+ * @tc.name: HandleCancelFling_001
+ * @tc.desc: HandleCancelFling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, HandleCancelFling_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->HandleCancelFling();
 #endif
 }
 

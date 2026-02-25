@@ -125,6 +125,7 @@ private:
     static bool GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId);
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool GetPaddingInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
+    static bool GetSizeWithScale(RefPtr<FrameNode>& node, double& width, double& height);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static NG::RectF UpdateClipRect(NG::RectF& clipRect, NG::RectF& paintRect);
     static NG::RectF UpdatePaintRect(NG::RectF& paintRect, NG::RectF& clipRect);

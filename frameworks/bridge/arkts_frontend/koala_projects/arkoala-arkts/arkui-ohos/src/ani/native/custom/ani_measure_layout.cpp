@@ -262,7 +262,7 @@ ani_object GenEdgeWidths(ani_env* env,  const std::unique_ptr<NG::BorderWidthPro
     return edgeWidths_obj;
 }
 
-ani_object GenEdgesGlobalized(ani_env* env, const NG::PaddingPropertyT<float>& edgeNative, TextDirection direction)
+ani_object GenEdgesGlobalized(ani_env* env, const NG::PaddingPropertyF& edgeNative, TextDirection direction)
 {
     ani_object edges_obj;
     ani_class cls;
@@ -696,7 +696,13 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
     auto layoutProperty = child->GetLayoutProperty();
 
     if (AniUtils::IsUndefined(env, sizeObj)) {
-        return AniUtils::GetUndefined(env);
+        child->Measure(childLayoutConstraint);
+        auto size = child->GetGeometryNode()->GetFrameSize();
+        ptr->UpdateSize(size);
+        FillPlaceSizeProperty(env, aniClass, size);
+
+        ani_object measureResultObject = GenMeasureResult(env, size);
+        return measureResultObject;
     }
 
     CalcDimension minWidth;
@@ -776,6 +782,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
     child->Measure(childLayoutConstraint);
 
     auto size = child->GetGeometryNode()->GetFrameSize();
+    ptr->UpdateSize(size);
     FillPlaceSizeProperty(env, aniClass, size);
 
     ani_object measureResultObject = GenMeasureResult(env, size);

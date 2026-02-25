@@ -34,8 +34,12 @@ LargeStringAshmem::~LargeStringAshmem()
 bool LargeStringAshmem::Marshalling(Parcel& parcel) const
 {
     MessageParcel* messageParcel = static_cast<MessageParcel*>(&parcel);
-    if (!messageParcel->WriteAshmem(ashmem_)) {
-        LOGW("LargeString WriteAshmem failed");
+    if (!messageParcel->WriteInt32(stringSize_)) {
+        LOGW("LargeStringAshmem WriteInt32 failed");
+        return false;
+    }
+    if (stringSize_ != 0 && (ashmem_ == nullptr || !messageParcel->WriteAshmem(ashmem_))) {
+        LOGW("LargeStringAshmem WriteAshmem failed");
         return false;
     }
     return true;
@@ -44,10 +48,9 @@ bool LargeStringAshmem::Marshalling(Parcel& parcel) const
 bool LargeStringAshmem::ReadFromParcel(Parcel& parcel)
 {
     MessageParcel* messageParcel = static_cast<MessageParcel*>(&parcel);
-    ashmem_ = messageParcel->ReadAshmem();
-    if (ashmem_ == nullptr) {
-        LOGW("LargeString ReadFromParcel failed");
-        return false;
+    stringSize_ = messageParcel->ReadInt32();
+    if (stringSize_ != 0) {
+        ashmem_ = messageParcel->ReadAshmem();
     }
     return true;
 }
@@ -67,6 +70,12 @@ bool LargeStringAshmem::WriteToAshmem(std::string name, std::string content, int
     if (size < 0 || size > MAX_ASHMEM_SIZE) {
         LOGW("LargeStringAshmem invalid size = %{public}d", size);
         return false;
+    }
+    stringSize_ = size;
+    // Handle zero-size string: no need to create ashmem
+    if (size == 0) {
+        ashmem_ = nullptr;
+        return true;
     }
     ashmem_ = Ashmem::CreateAshmem(name.c_str(), size);
     if (ashmem_ == nullptr) {
@@ -90,9 +99,10 @@ bool LargeStringAshmem::WriteToAshmem(std::string name, std::string content, int
 
 bool LargeStringAshmem::ReadFromAshmem(std::string& content)
 {
-    if (ashmem_ == nullptr) {
-        LOGW("LargeStringAshmem read shared memory fail");
-        return false;
+    // Handle zero-size string: directly return empty string
+    if (stringSize_ == 0) {
+        content.clear();
+        return true;
     }
     if (!ashmem_->MapReadOnlyAshmem()) {
         LOGW("LargeStringAshmem map readonly shared memory fail");

@@ -103,7 +103,7 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
     if (argc <= 0) {
         napi_coerce_to_native_binding_object(
             env, thisVar, DetachImageBitmap, AttachImageBitmap, AceType::RawPtr(wrapper), nullptr);
-        napi_wrap(env, thisVar, AceType::RawPtr(wrapper), Finalizer, nullptr, nullptr);
+        napi_wrap_s(env, thisVar, AceType::RawPtr(wrapper), Finalizer, nullptr, &JS_RENDER_IMAGE_TYPE_TAG, nullptr);
         wrapper->IncRefCount();
         return thisVar;
     }

@@ -45,10 +45,10 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -59,6 +59,9 @@
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -635,6 +638,7 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     }
 
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
+    ACE_UPDATE_RENDER_CONTEXT(PreBackgroundColor, updateColor);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true);
 }
 
@@ -675,6 +679,7 @@ void ViewAbstract::SetBackgroundColorWithResourceObj(const Color& color, const R
             pipeline->CheckNeedUpdateBackgroundColor(backgroundColor);
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, backgroundColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackgroundColor, backgroundColor, frameNode);
     };
     pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
 }
@@ -686,6 +691,7 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("backgroundColor");
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackgroundColor, color, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
 }
 
@@ -704,9 +710,11 @@ void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color, 
         Color backgroundColor;
         ResourceParseUtils::ParseResColor(resObj, backgroundColor);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, backgroundColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackgroundColor, backgroundColor, frameNode);
     };
     pattern->AddResObj("backgroundColor", resObj, std::move(updateFunc));
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackgroundColor, color, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsUserSetBackgroundColor, true, frameNode);
 }
 
@@ -1585,6 +1593,7 @@ void ViewAbstract::SetBorderColor(const Color& value)
     BorderColorProperty borderColor;
     borderColor.SetColor(value);
     ACE_UPDATE_RENDER_CONTEXT(BorderColor, borderColor);
+    ACE_UPDATE_RENDER_CONTEXT(PreBorderColor, borderColor);
 }
 
 void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
@@ -1608,6 +1617,7 @@ void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedBorderColor(borderColor, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, borderColor, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
             CHECK_NULL_VOID(pattern);
             pattern->UpdateBorderResource();
@@ -1616,6 +1626,7 @@ void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
         pattern->AddResObj("borderColor", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderColor, value);
+    ACE_UPDATE_RENDER_CONTEXT(PreBorderColor, value);
 }
 
 void ViewAbstract::SetBorderColor(const RefPtr<ResourceObject>& resObj)
@@ -1643,6 +1654,7 @@ void ViewAbstract::SetBorderColor(const RefPtr<ResourceObject>& resObj)
         BorderColorProperty borderColorProperty;
         borderColorProperty.SetColor(borderColor);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColorProperty, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, borderColorProperty, frameNode);
         pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
@@ -1662,6 +1674,7 @@ void ViewAbstract::SetBorderWidth(const Dimension& value)
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
     ACE_UPDATE_RENDER_CONTEXT(BorderWidth, borderWidth);
+    ACE_UPDATE_RENDER_CONTEXT(PreBorderWidth, borderWidth);
 }
 
 void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
@@ -1686,6 +1699,7 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
             CheckLocalizedEdgeWidths(borderWidth, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidth, frameNode);
             auto pattern = frameNode->GetPattern<Pattern>();
             CHECK_NULL_VOID(pattern);
             pattern->UpdateBorderResource();
@@ -1695,6 +1709,7 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value);
     ACE_UPDATE_RENDER_CONTEXT(BorderWidth, value);
+    ACE_UPDATE_RENDER_CONTEXT(PreBorderWidth, value);
 }
 
 void ViewAbstract::SetBorderWidth(const RefPtr<ResourceObject>& resObj)
@@ -1727,6 +1742,7 @@ void ViewAbstract::SetBorderWidth(const RefPtr<ResourceObject>& resObj)
         }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidthProperty, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidthProperty, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidthProperty, frameNode);
         pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
@@ -1761,6 +1777,7 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const RefPtr<ResourceObj
         }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidthProperty, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidthProperty, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidthProperty, frameNode);
         pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
@@ -3244,6 +3261,11 @@ const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode,
             *followWithoutTransition = geometryTransition->GetFollowWithoutTransition();
             *doRegisterSharedTransition = geometryTransition->GetDoRegisterSharedTransition();
             return geometryTransition->GetId();
+        } else {
+            auto result = layoutProperty->GetGeometryTransitionInfo();
+            *followWithoutTransition = std::get<1>(result);
+            *doRegisterSharedTransition = std::get<2>(result);
+            return std::get<0>(result);
         }
     }
     return "";
@@ -3813,8 +3835,59 @@ void ViewAbstract::UpdatePopupParamResource(const RefPtr<PopupParam>& param, con
         auto borderResourceObject = param->GetBorderWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_BORDERWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, borderResourceObject, optionsType);
+        auto outlineGradient = param->GetOutlineLinearGradient();
+        UpdatePopupBorderColorResource(outlineGradient, frameNode, true);
+        auto innerGradient = param->GetInnerBorderLinearGradient();
+        UpdatePopupBorderColorResource(innerGradient, frameNode, false);
     }
 #endif
+}
+
+void ViewAbstract::UpdatePopupBorderColorResource(const PopupLinearGradientProperties& gradientProperties, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    uint32_t index = 0;
+    for (const auto& objParam : gradientProperties.gradientColors) {
+        RefPtr<ResourceObject> resValueObj = objParam.gradientColorObj;
+        std::string keyValue = "popupborderColor" + std::to_string(index);
+        if (isOutlineGradient) {
+            keyValue = "popupOutlineColor" + std::to_string(index);
+        } else {
+            keyValue = "popupInnerlineColor" + std::to_string(index);
+        }
+        AddResObjWithCallBack(keyValue, resValueObj, index, frameNode, isOutlineGradient);
+        index++;
+    }
+}
+
+void ViewAbstract::AddResObjWithCallBack(
+    std::string key, const RefPtr<ResourceObject>& resObj, const uint32_t index, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!resObj) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [index, key, isOutlineGradient, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(resObj);
+        std::string color = pattern->GetResCacheMapByKey(key);
+        Color result;
+        if (color.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, result);
+            pattern->AddResCache(key, result.ColorToString());
+        } else {
+            result = Color::FromString(color);
+        }
+        pattern->UpdateBubbleGradient(index, result, isOutlineGradient);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetTransform3DMatrix(const Matrix4& matrix)
@@ -3874,6 +3947,7 @@ void ViewAbstract::BindPopup(
     }
     auto popupId = popupInfo.popupId;
     auto popupNode = popupInfo.popupNode;
+    ACE_UINODE_TRACE(popupNode);
     RefPtr<BubblePattern> popupPattern;
     if (popupNode) {
         popupPattern = popupNode->GetPattern<BubblePattern>();
@@ -4018,6 +4092,7 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
     auto targetTag = targetNode->GetTag();
     auto popupId = tipsInfo.popupId;
     auto popupNode = tipsInfo.popupNode;
+    ACE_UINODE_TRACE(popupNode);
     auto context = targetNode->GetContext();
     CHECK_NULL_VOID(context);
     auto instanceId = context->GetInstanceId();
@@ -4040,8 +4115,7 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
         targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
     } else {
         auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
-            auto subwindow =
-                SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_TIPS);
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_TIPS);
             CHECK_NULL_VOID(subwindow);
             auto overlayManager = subwindow->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
@@ -4083,6 +4157,7 @@ void ViewAbstract::AddHoverEventForTips(
     auto popupId = tipsInfo.popupId;
     auto popupNode = tipsInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
+    ACE_UINODE_TRACE(popupNode);
     auto targetId = targetNode->GetId();
     auto context = targetNode->GetContext();
     CHECK_NULL_VOID(context);
@@ -4137,6 +4212,7 @@ void ViewAbstract::AddTouchEventForTips(const RefPtr<FrameNode>& targetNode, Pop
     auto instanceId = context->GetInstanceId();
     auto touchCallback = [targetId, instanceId,
         popupNode = AceType::WeakClaim(AceType::RawPtr(tipsInfo.popupNode))](const TouchEventInfo& info) {
+        ACE_UINODE_TRACE(popupNode);
         if (info.GetTouches().empty()) {
             return;
         }
@@ -4146,6 +4222,7 @@ void ViewAbstract::AddTouchEventForTips(const RefPtr<FrameNode>& targetNode, Pop
         }
         auto popup = popupNode.Upgrade();
         CHECK_NULL_VOID(popup);
+        ACE_UINODE_TRACE(popup);
         auto pattern = popup->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetIsTipsAppearing(false);
@@ -4172,6 +4249,7 @@ void ViewAbstract::AddMouseEventForTips(const RefPtr<FrameNode>& targetNode, Pop
     auto mouseTask = [popupNode = AceType::WeakClaim(AceType::RawPtr(tipsInfo.popupNode))](MouseInfo& info) {
         auto popup = popupNode.Upgrade();
         CHECK_NULL_VOID(popup);
+        ACE_UINODE_TRACE(popup);
         auto pattern = popup->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetMouseOffset(info.GetScreenLocation());
@@ -4373,6 +4451,7 @@ void ViewAbstract::DismissDialog()
     auto rootNode = overlayManager->GetRootNode().Upgrade();
     CHECK_NULL_VOID(rootNode);
     RefPtr<FrameNode> dialogNode;
+    ACE_UINODE_TRACE(dialogNode);
     auto dialogId = DialogManager::GetInstance().GetDismissDialogId();
     auto dialogTag = DialogManager::GetInstance().GetDialogTag();
     if (dialogId && !dialogTag.empty()) {
@@ -4418,7 +4497,10 @@ void ViewAbstract::ShowMenuPreview(
         CHECK_NULL_VOID(pixelMap);
         gestureHub->SetPixelMap(pixelMap);
         menuWrapperPattern->SetIsShowFromUser(true);
-        MenuView::GetMenuPixelMap(targetNode, menuParam, wrapperNode);
+        const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+        if (menuViewModifier) {
+            menuViewModifier->getMenuPixelMap(targetNode, menuParam, wrapperNode);
+        }
     }
 }
 
@@ -4448,7 +4530,10 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
         // The menu is already opened, close the previous menu and open the new menu
         overlayManager->HideMenu(isShowMenu, targetNode->GetId(), false, HideMenuType::OPEN_MENU);
     }
-    auto wrapperNode = NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_RETURN(menuViewModifier, ERROR_CODE_INTERNAL_ERROR);
+    auto wrapperNode = menuViewModifier->createWithCustomNode(
+        customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, nullptr);
     CHECK_NULL_RETURN(wrapperNode, ERROR_CODE_INTERNAL_ERROR);
     ShowMenuPreview(targetNode, wrapperNode, menuParam);
     auto menuWrapperPattern = wrapperNode->GetPattern<NG::MenuWrapperPattern>();
@@ -4457,10 +4542,11 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     menuWrapperPattern->SetMenuTransitionEffect(wrapperNode, menuParam);
     auto menu = menuWrapperPattern->GetMenu();
     CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
-    auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
-    CHECK_NULL_RETURN(menuPattern, ERROR_CODE_INTERNAL_ERROR);
+    ACE_UINODE_TRACE(menu);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, ERROR_CODE_INTERNAL_ERROR);
     auto node = WeakPtr<UINode>(customNode);
-    menuPattern->SetCustomNode(node);
+    menuModifier->setCustomNode(menu, node);
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
     menuWrapperPattern->SetIsOpenMenu(true);
@@ -4498,12 +4584,17 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
     CHECK_NULL_RETURN(wrapperPattern, ERROR_CODE_INTERNAL_ERROR);
     auto menu = wrapperPattern->GetMenu();
     CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
+    ACE_UINODE_TRACE(menu);
     wrapperPattern->SetMenuParam(menuParam);
-    MenuView::UpdateMenuParam(menuWrapperNode, menu, menuParam);
-    MenuView::UpdateMenuProperties(menuWrapperNode, menu, menuParam, menuParam.type);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    if (menuViewModifier) {
+        menuViewModifier->updateMenuParam(menuWrapperNode, menu, menuParam);
+        menuViewModifier->updateMenuProperties(menuWrapperNode, menu, menuParam, menuParam.type);
+    }
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, ERROR_CODE_INTERNAL_ERROR);
     if (menuParam.anchorPosition.has_value()) {
-        auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
-        if (menuProperty) {
+        if (menuModifier) {
             auto target = ElementRegister::GetInstance()->
                 GetSpecificItemById<NG::FrameNode>(wrapperPattern->GetTargetId());
             CHECK_NULL_RETURN(target, ERROR_CODE_INTERNAL_ERROR);
@@ -4512,23 +4603,21 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
                                          targetNodePosition.GetX(),
                                          menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() +
                                          targetNodePosition.GetY() };
-            menuProperty->UpdateMenuOffset(menuPosition);
-            menuProperty->ResetMenuPlacement();
+            menuModifier->updateMenuOffset(menu, menuPosition);
+            menuModifier->resetMenuPlacement(menu);
         }
     }
     auto pipeline = menuWrapperNode->GetContextRefPtr();
     if (pipeline) {
         wrapperPattern->SetForceUpdateEmbeddedMenu(true);
     }
-    auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
-    CHECK_NULL_RETURN(menuPattern, ERROR_CODE_INTERNAL_ERROR);
-    auto embeddedMenuItems = menuPattern->GetEmbeddedMenuItems();
+    auto embeddedMenuItems = menuModifier->getEmbeddedMenuItems(menu);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (auto iter = embeddedMenuItems.begin(); iter != embeddedMenuItems.end(); ++iter) {
-        auto menuItemPattern = (*iter)->GetPattern<MenuItemPattern>();
-        if (!menuItemPattern) {
+        if (!menuItemModifier) {
             continue;
         }
-        menuItemPattern->HideEmbedded(false);
+        menuItemModifier->hideEmbedded(*iter, false);
     }
     uint32_t minChildrenSize = 1;
     if (menuWrapperNode->GetChildren().size() > minChildrenSize) {
@@ -4573,9 +4662,12 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     if (params.empty()) {
         return;
     }
-    auto menuNode =
-        MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
+    auto menuNode = menuViewModifier->createWithOptionParams(
+                        std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
@@ -4638,8 +4730,12 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
         previewBuildFunc();
         previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
-    auto menuNode =
-        NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
+    auto menuNode = menuViewModifier->createWithCustomNode(
+                        customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
+    CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
@@ -4792,10 +4888,12 @@ void ViewAbstract::SetBackShadow(const Shadow& shadow)
             Shadow& shadowValue = const_cast<Shadow&>(shadow);
             shadowValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadowValue, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadowValue, frameNode);
         };
         pattern->AddResObj("shadow", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
+    ACE_UPDATE_RENDER_CONTEXT(PreBackShadow, shadow);
 }
 
 void ViewAbstract::SetBackShadow(FrameNode* frameNode, const Shadow& shadow)
@@ -4811,10 +4909,12 @@ void ViewAbstract::SetBackShadow(FrameNode* frameNode, const Shadow& shadow)
             Shadow& shadowValue = const_cast<Shadow&>(shadow);
             shadowValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadowValue, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadowValue, frameNode);
         };
         pattern->AddResObj("shadow", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadow, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, frameNode);
 }
 
 void ViewAbstract::SetBlendMode(BlendMode blendMode)
@@ -5669,9 +5769,65 @@ void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* mat
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
     if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
         ViewAbstract::SetSystemMaterialImmediate(frameNode, material);
+    }
+    renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
+}
+
+void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
+{
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto preMaterial = renderContext->GetSystemMaterial();
+    if (!preMaterial) {
+        return;
+    } else {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->RemoveResObj("viewAbstract.uiMaterial");
+        auto preBackgroundColor = renderContext->GetPreBackgroundColor();
+        auto preBorderWidth = renderContext->GetPreBorderWidth();
+        auto preBorderColor = renderContext->GetPreBorderColor();
+        auto preBackShadow = renderContext->GetPreBackShadow();
+
+        if (preBackgroundColor.has_value()) {
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, preBackgroundColor.value(), frameNode);
+        } else {
+            renderContext->ResetBackgroundColor();
+            renderContext->OnBackgroundColorUpdate(Color::TRANSPARENT);
+            pattern->OnBackgroundColorReset();
+        }
+
+        if (preBorderWidth.has_value()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, preBorderWidth.value(), frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, preBorderWidth.value(), frameNode);
+        } else {
+            BorderWidthProperty borderWidth;
+            borderWidth.SetBorderWidth(Dimension(0));
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+            pattern->OnBorderWidthReset();
+        }
+
+        if (preBorderColor.has_value()) {
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, preBorderColor.value(), frameNode);
+        } else {
+            BorderColorProperty borderColor;
+            borderColor.SetColor(Color::BLACK);
+            renderContext->ResetBorderColor();
+            renderContext->OnBorderColorUpdate(borderColor);
+            pattern->OnBorderColorReset();
+        }
+
+        if (preBackShadow.has_value()) {
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, preBackShadow.value(), frameNode);
+        } else {
+            Shadow shadow;
+            renderContext->ResetBackShadow();
+            renderContext->OnBackShadowUpdate(shadow);
+            pattern->OnBackShadowReset();
+        }
     }
 }
 
@@ -5707,15 +5863,17 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         updateFunc(nullptr);
-        if (materialType != MaterialType::NONE) {
-            RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-            pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
-        } else {
-            pattern->RemoveResObj("viewAbstract.uiMaterial");
-        }
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
         return;
     }
-    updateFunc(nullptr);
+
+    if (material != nullptr) {
+        updateFunc(nullptr);
+    } else {
+        ResetSystemMaterialEffect(frameNode);
+    }
+    // This function cannot save uiMaterial to renderContext.
 }
 
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
@@ -6275,12 +6433,14 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const BorderWidthPropert
             CheckLocalizedEdgeWidths(borderWidth, layoutDirection);
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidth, frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
         pattern->AddResObj("borderWidth", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, value, frameNode);
 }
 
 void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const Dimension& value)
@@ -6294,6 +6454,7 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const Dimension& value)
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderWidth, borderWidth, frameNode);
 }
 
 void ViewAbstract::SetBorderWidth(NG::FrameNode* frameNode, const std::optional<Dimension>& left,
@@ -6326,11 +6487,13 @@ void ViewAbstract::SetBorderColor(FrameNode* frameNode, const BorderColorPropert
             auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
             CheckLocalizedBorderColor(borderColor, layoutDirection);
             ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, borderColor, frameNode);
             frameNode->MarkModifyDone();
         };
         pattern->AddResObj("borderColor", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, value, frameNode);
 }
 
 void ViewAbstract::SetBorderColor(FrameNode* frameNode, const Color& value)
@@ -6338,6 +6501,7 @@ void ViewAbstract::SetBorderColor(FrameNode* frameNode, const Color& value)
     BorderColorProperty borderColor;
     borderColor.SetColor(value);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, borderColor, frameNode);
 }
 
 void ViewAbstract::SetBorderColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
@@ -6361,6 +6525,7 @@ void ViewAbstract::SetBorderColor(FrameNode* frameNode, const RefPtr<ResourceObj
         BorderColorProperty borderColorProperty;
         borderColorProperty.SetColor(borderColor);
         ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColorProperty, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(PreBorderColor, borderColorProperty, frameNode);
         pattern->UpdateBorderResource();
     };
     updateFunc(resObj);
@@ -8006,7 +8171,7 @@ ChainInfo ViewAbstract::GetChainStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, chainInfo);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty->GetFlexItemProperty(), chainInfo);
-    layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyle().value_or(chainInfo);
+    chainInfo = layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyle().value_or(chainInfo);
     if (chainInfo.direction.has_value()) {
         return chainInfo;
     }
@@ -8471,6 +8636,24 @@ void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventF
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetTouchEvent(std::move(touchEventFunc));
+}
+
+void ViewAbstract::AddOnTouch(FrameNode* frameNode, const RefPtr<TouchEventImpl>& touchEventImpl)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(touchEventImpl);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->AddTouchEvent(touchEventImpl);
+}
+
+void ViewAbstract::RemoveTouchEvent(FrameNode* frameNode, const RefPtr<TouchEventImpl>& touchEventImpl)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(touchEventImpl);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->RemoveTouchEvent(touchEventImpl);
 }
 
 void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc)
@@ -10633,5 +10816,39 @@ RenderStrategy ViewAbstract::GetRenderStrategy(FrameNode* frameNode)
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, RenderStrategy::FAST);
     return target->GetRenderStrategyValue(RenderStrategy::FAST);
+}
+
+void ViewAbstract::SetOnNeedSoftkeyboard(OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnNeedSoftKeyboard(std::move(onNeedSoftkeyboardCallback));
+}
+
+void ViewAbstract::ResetOnNeedSoftkeyboard()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetOnNeedSoftKeyboard();
+}
+
+void ViewAbstract::SetOnNeedSoftkeyboard(FrameNode* frameNode, OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnNeedSoftKeyboard(std::move(onNeedSoftkeyboardCallback));
+}
+
+void ViewAbstract::ResetOnNeedSoftkeyboard(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetOnNeedSoftKeyboard();
 }
 } // namespace OHOS::Ace::NG

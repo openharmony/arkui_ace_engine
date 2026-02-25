@@ -26,7 +26,8 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace  {
     const auto ATTRIBUTE_COMMANDS_NAME = "commands";
-    const auto ATTRIBUTE_COMMANDS_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_COMMANDS_DEFAULT_VALUE = std::nullopt;
+    const auto ATTRIBUTE_COMMANDS_INVALID_VALUE = "";
     const auto PATH_CMD = "M150 0 L300 300 L0 300 Z";
 
     const auto ATTRIBUTE_WIDTH_NAME = "width";
@@ -41,21 +42,21 @@ class PathModifierTest : public ModifierTestBase<GENERATED_ArkUIPathModifier,
 };
 
 /*
- * @tc.name: setPathOptionsTestSizeDefaultValues
+ * @tc.name: setPathOptionsTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(PathModifierTest, setPathOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_WIDTH_DEFAULT_VALUE));
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_HEIGHT_DEFAULT_VALUE));
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COMMANDS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_COMMANDS_DEFAULT_VALUE));
 }
 
 /*
@@ -65,26 +66,26 @@ HWTEST_F(PathModifierTest, setPathOptionsTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(PathModifierTest, setPathOptionsTestSizeValidValues, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Opt_Union_F64_String, std::string>;
+    using OneTestStep = std::pair<Opt_Length, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.), "1.00vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(0.), "0.00vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(2.45), "2.45vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("5px"), "5.00px" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("22.35px"), "22.35px" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("7vp"), "7.00vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("1.65vp"), "1.65vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("65fp"), "65.00fp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("4.3fp"), "4.30fp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("11lpx"), "11.00lpx" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("0.5lpx"), "0.50lpx" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("3"), "3.00vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("10.65"), "10.65vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("23%"), "23.00%" },
+        { Converter::ArkValue<Opt_Length>(1.), "1.00vp" },
+        { Converter::ArkValue<Opt_Length>(0.), "0.00vp" },
+        { Converter::ArkValue<Opt_Length>(2.45), "2.45vp" },
+        { Converter::ArkValue<Opt_Length>("5px"), "5.00px" },
+        { Converter::ArkValue<Opt_Length>("22.35px"), "22.35px" },
+        { Converter::ArkValue<Opt_Length>("7vp"), "7.00vp" },
+        { Converter::ArkValue<Opt_Length>("1.65vp"), "1.65vp" },
+        { Converter::ArkValue<Opt_Length>("65fp"), "65.00fp" },
+        { Converter::ArkValue<Opt_Length>("4.3fp"), "4.30fp" },
+        { Converter::ArkValue<Opt_Length>("11lpx"), "11.00lpx" },
+        { Converter::ArkValue<Opt_Length>("0.5lpx"), "0.50lpx" },
+        { Converter::ArkValue<Opt_Length>("3"), "3.00vp" },
+        { Converter::ArkValue<Opt_Length>("10.65"), "10.65vp" },
+        { Converter::ArkValue<Opt_Length>("23%"), "23.00%" },
     };
 
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_PathOptions realInputValue = Converter::ArkValue<Opt_PathOptions>(Ark_PathOptions{});
     Ark_PathOptions& inputValueOptions = realInputValue.value;
 
@@ -96,9 +97,9 @@ HWTEST_F(PathModifierTest, setPathOptionsTestSizeValidValues, TestSize.Level1)
 
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
     }
 }
 
@@ -109,25 +110,25 @@ HWTEST_F(PathModifierTest, setPathOptionsTestSizeValidValues, TestSize.Level1)
  */
 HWTEST_F(PathModifierTest, setPathOptionsTestSizeInvalidValues, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Opt_Union_F64_String, std::string>;
+    using OneTestStep = std::pair<Opt_Length, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-1.), "0.00vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("invalid value"), "0.00vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-3.56), "0.00vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-8px"), "0.00px" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-21vp"), "0.00vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-15.6px"), "0.00px" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-8.6vp"), "0.00vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-32fp"), "0.00fp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-22lpx"), "0.00lpx" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-9.99fp"), "0.00fp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-1.23lpx"), "0.00lpx" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-6"), "0.00vp" },
-        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-16.2"), "0.00vp" },
+        { Converter::ArkValue<Opt_Length>(-1.), "0.00vp" },
+        { Converter::ArkValue<Opt_Length>("invalid value"), "0.00vp" },
+        { Converter::ArkValue<Opt_Length>(-3.56), "0.00vp" },
+        { Converter::ArkValue<Opt_Length>("-8px"), "0.00px" },
+        { Converter::ArkValue<Opt_Length>("-21vp"), "0.00vp" },
+        { Converter::ArkValue<Opt_Length>("-15.6px"), "0.00px" },
+        { Converter::ArkValue<Opt_Length>("-8.6vp"), "0.00vp" },
+        { Converter::ArkValue<Opt_Length>("-32fp"), "0.00fp" },
+        { Converter::ArkValue<Opt_Length>("-22lpx"), "0.00lpx" },
+        { Converter::ArkValue<Opt_Length>("-9.99fp"), "0.00fp" },
+        { Converter::ArkValue<Opt_Length>("-1.23lpx"), "0.00lpx" },
+        { Converter::ArkValue<Opt_Length>("-6"), "0.00vp" },
+        { Converter::ArkValue<Opt_Length>("-16.2"), "0.00vp" },
     };
 
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_PathOptions realInputValue = Converter::ArkValue<Opt_PathOptions>(Ark_PathOptions{});
     Ark_PathOptions& inputValueOptions = realInputValue.value;
 
@@ -139,70 +140,76 @@ HWTEST_F(PathModifierTest, setPathOptionsTestSizeInvalidValues, TestSize.Level1)
 
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expected);
+        EXPECT_THAT(resultStr, Eq(expected));
     }
 }
 
 /*
- * @tc.name: setCommandsTestValidValues
+ * @tc.name: setPathOptionsTestCmdValid
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(PathModifierTest, setPathOptionsTestCmdValid, TestSize.Level1)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_PathOptions realInputValue = Converter::ArkValue<Opt_PathOptions>(Ark_PathOptions{});
     Ark_PathOptions& inputValueOptions = realInputValue.value;
 
     // Initial setup/verification
-    inputValueOptions.commands = Converter::ArkValue<Opt_String>(PATH_CMD);
+    inputValueOptions.commands =
+        Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(PATH_CMD));
     modifier_->setPathOptions(node_, &realInputValue);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, PATH_CMD);
+    EXPECT_THAT(resultStr, Eq(PATH_CMD));
 
     // Verifying attribute's other values
-    inputValueOptions.commands =  Converter::ArkValue<Opt_String>("abc");
+    inputValueOptions.commands =
+        Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>("abc"));
     modifier_->setPathOptions(node_, &realInputValue);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, "abc");
+    EXPECT_THAT(resultStr, Eq("abc"));
 }
 
 /*
- * @tc.name: setCommandsTestValidValues
+ * @tc.name: setPathOptionsTestCmdInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(PathModifierTest, setPathOptionsTestCmdInvalid, TestSize.Level1)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     Opt_PathOptions realInputValue = Converter::ArkValue<Opt_PathOptions>(Ark_PathOptions{});
     Ark_PathOptions& inputValueOptions = realInputValue.value;
 
     // Verifying attribute's valid values
-    inputValueOptions.commands = Converter::ArkValue<Opt_String>(PATH_CMD);
+    inputValueOptions.commands =
+        Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(PATH_CMD));
     modifier_->setPathOptions(node_, &realInputValue);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, PATH_CMD);
+    EXPECT_THAT(resultStr, Eq(PATH_CMD));
 
     // Verifying attribute's undefined value
-    inputValueOptions.commands = Converter::ArkValue<Opt_String>();
+    inputValueOptions.commands =
+        Converter::ArkValue<Opt_ResourceStr>();
     modifier_->setPathOptions(node_, &realInputValue);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, PATH_CMD); // nothing changes due to nothing optional value
+    EXPECT_THAT(resultStr, Eq(PATH_CMD)); // nothing changes due to nothing optional value
 
     // Verifying attribute's valid values
-    inputValueOptions.commands = Converter::ArkValue<Opt_String>(PATH_CMD);
+    inputValueOptions.commands =
+        Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(PATH_CMD));
     modifier_->setPathOptions(node_, &realInputValue);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, PATH_CMD);
+    EXPECT_THAT(resultStr, Eq(PATH_CMD));
 
     // Verifying attribute's empty values
-    inputValueOptions.commands = Converter::ArkValue<Opt_String>("");
+    inputValueOptions.commands =
+        Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(""));
     modifier_->setPathOptions(node_, &realInputValue);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COMMANDS_DEFAULT_VALUE); // reset value
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_COMMANDS_INVALID_VALUE));
 }
 
 /*
@@ -213,10 +220,10 @@ HWTEST_F(PathModifierTest, setPathOptionsTestCmdInvalid, TestSize.Level1)
 HWTEST_F(PathModifierTest, setCommandsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COMMANDS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_COMMANDS_DEFAULT_VALUE));
 }
 
 /*
@@ -226,53 +233,56 @@ HWTEST_F(PathModifierTest, setCommandsTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(PathModifierTest, setCommandsTestValidValues, TestSize.Level1)
 {
-    Opt_String inputValueCommands;
-    std::string resultStr;
+    Opt_ResourceStr inputValueCommands;
+    std::optional<std::string> resultStr;
 
     // Initial setup/verification
-    inputValueCommands = Converter::ArkValue<Opt_String>(PATH_CMD);
+    inputValueCommands =
+        Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(PATH_CMD));
     modifier_->setCommands(node_, &inputValueCommands);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, PATH_CMD);
+    EXPECT_THAT(resultStr, Eq(PATH_CMD));
 
     // Verifying attribute's other values
-    inputValueCommands = Converter::ArkValue<Opt_String>("abc");
+    inputValueCommands = Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>("abc"));
     modifier_->setCommands(node_, &inputValueCommands);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, "abc");
+    EXPECT_THAT(resultStr, Eq("abc"));
 }
 
 /*
- * @tc.name: setCommandsTestValidValues
+ * @tc.name: setCommandsTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(PathModifierTest, setCommandsTestInvalidValues, TestSize.Level1)
 {
-    Opt_String inputValueCommands;
-    std::string resultStr;
+    Opt_ResourceStr inputValueCommands;
+    std::optional<std::string> resultStr;
 
     // Verifying attribute's valid values
-    inputValueCommands = Converter::ArkValue<Opt_String>(PATH_CMD);
+    inputValueCommands =
+        Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(PATH_CMD));
     modifier_->setCommands(node_, &inputValueCommands);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, PATH_CMD);
+    EXPECT_THAT(resultStr, Eq(PATH_CMD));
 
     // Verifying attribute's nullptr value
     modifier_->setCommands(node_, nullptr);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COMMANDS_DEFAULT_VALUE); // reset value
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_COMMANDS_INVALID_VALUE));
 
     // Verifying attribute's valid values
-    inputValueCommands = Converter::ArkValue<Opt_String>(PATH_CMD);
+    inputValueCommands =
+        Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(PATH_CMD));
     modifier_->setCommands(node_, &inputValueCommands);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, PATH_CMD);
+    EXPECT_THAT(resultStr, Eq(PATH_CMD));
 
     // Verifying attribute's empty values
-    inputValueCommands = Converter::ArkValue<Opt_String>("");
+    inputValueCommands = Converter::ArkValue<Opt_ResourceStr>(Converter::ArkUnion<Ark_ResourceStr, Ark_String>(""));
     modifier_->setCommands(node_, &inputValueCommands);
     resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_COMMANDS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COMMANDS_DEFAULT_VALUE); // reset value
+    EXPECT_THAT(resultStr, Eq(""));
 }
 } // namespace OHOS::Ace::NG

@@ -102,10 +102,7 @@ public:
 
     void RepeatPlay(bool isRepeatPlay);
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::NODE, false };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     void UpdateCurrentDateModified(int64_t currentDateModified)
     {
@@ -276,6 +273,7 @@ private:
     void RestartVideo();
     void SetEnableTransition(bool enabled);
     bool GetEnableTransition();
+    float GetGlobalInfo();
     bool SetPlaybackPeriod(int64_t startTime, int64_t endTime);
     void EnableAutoPlay(bool enabled);
     void SetStartPlaybackImpl(const SingleTaskExecutor& uiTaskExecutor);
@@ -327,6 +325,8 @@ private:
     RefPtr<PixelMap> pixelMap_;
 
     SharedFd fd_;
+    bool notifyTransitionFlag_ = false;
+    bool isRepeatChangePlayMode_ = false;
     int64_t autoPlayPeriodStartTime_ = -1;
     int64_t autoPlayPeriodEndTime_ = -1;
     float hdrBrightness_ = 1.0f;
@@ -344,13 +344,11 @@ private:
     bool isSetAutoPlayPeriod_ = false;
     bool isVisible_ = false;
     bool isChangePlayMode_ = false;
-    bool isRepeatChangePlayMode_ = false;
     bool isAutoChangePlayMode_ = false;
     bool needUpdateImageNode_ = false;
     bool isPlayWithMask_ = false;
     bool isEnableTransition_ = true;
     bool isStopAnimation_ = false;
-    bool notifyTransitionFlag_ = false;
     bool cameraPostprocessingEnabled_ = false;
     bool isGestureTriggeredLongPress_ = false;
     bool handleImageError_ = false;

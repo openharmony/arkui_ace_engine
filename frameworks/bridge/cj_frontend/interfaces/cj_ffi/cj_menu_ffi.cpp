@@ -15,8 +15,11 @@
 
 #include "cj_menu_ffi.h"
 
+#include "base/log/log_wrapper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/menu_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/menu/menu_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -24,44 +27,60 @@ using namespace OHOS::Ace::Framework;
 namespace {
 enum class SubMenuExpandingMode { SIDE = 0, EMBEDDED, STACK };
 } // namespace
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::MenuModelNG* GetMenuModel()
+{
+    static NG::MenuModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Menu");
+        if (module == nullptr) {
+            LOGF("Can't find Menu dynamic module");
+            abort();
+        }
+        model = reinterpret_cast<NG::MenuModelNG*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
 
 extern "C" {
 void FfiOHOSAceFrameworkMenuCreate()
 {
-    MenuModel::GetInstance()->Create();
+    GetMenuModel()->Create();
 }
 
 void FfiOHOSAceFrameworkMenuFont(double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
-    MenuModel::GetInstance()->SetFontStyle(static_cast<FontStyle>(style));
+    GetMenuModel()->SetFontStyle(static_cast<FontStyle>(style));
 
     std::string familyVal = family;
     auto fontFamilies = ConvertStrToFontFamilies(familyVal);
-    MenuModel::GetInstance()->SetFontFamily(fontFamilies);
+    GetMenuModel()->SetFontFamily(fontFamilies);
 
     CalcDimension fontSize = CalcDimension(size, DimensionUnit(unit));
-    MenuModel::GetInstance()->SetFontSize(fontSize);
+    GetMenuModel()->SetFontSize(fontSize);
 
     std::string weightVal = weight;
-    MenuModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weightVal));
+    GetMenuModel()->SetFontWeight(ConvertStrToFontWeight(weightVal));
 }
 
 void FfiOHOSAceFrameworkMenuSetFontColor(uint32_t color)
 {
     std::optional<Color> colorVal = Color(color);
-    MenuModel::GetInstance()->SetFontColor(colorVal);
+    GetMenuModel()->SetFontColor(colorVal);
 }
 
 void FfiOHOSAceFrameworkMenuSetWidth(double width, int32_t unit)
 {
     CalcDimension widthVal = CalcDimension(width, DimensionUnit(unit));
-    MenuModel::GetInstance()->SetWidth(widthVal);
+    GetMenuModel()->SetWidth(widthVal);
 }
 
 void FfiOHOSAceFrameworkMenuSetRadiusByLength(double size, int32_t unit)
 {
     CalcDimension radius = CalcDimension(size, DimensionUnit(unit));
-    MenuModel::GetInstance()->SetBorderRadius(radius);
+    GetMenuModel()->SetBorderRadius(radius);
 }
 
 void FfiOHOSAceFrameworkMenuSetRadiusByBorderRadiuses(CBorderRadiuses radius)
@@ -74,12 +93,12 @@ void FfiOHOSAceFrameworkMenuSetRadiusByBorderRadiuses(CBorderRadiuses radius)
         CalcDimension(radius.bottomLeftRadiuses, DimensionUnit(radius.bottomLeftUnit));
     std::optional<CalcDimension> radiusBottomRight =
         CalcDimension(radius.bottomRightRadiuses, DimensionUnit(radius.bottomRightUnit));
-    MenuModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+    GetMenuModel()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
 }
 
 void FfiOHOSAceFrameworkMenuResetRadius()
 {
-    MenuModel::GetInstance()->ResetBorderRadius();
+    GetMenuModel()->ResetBorderRadius();
 }
 
 void FfiOHOSAceFrameworkMenuSetItemDivider(DividerParams dividerParams, bool hasValue)
@@ -100,7 +119,7 @@ void FfiOHOSAceFrameworkMenuSetItemDivider(DividerParams dividerParams, bool has
             divider.endMargin.Reset();
         }
     }
-    MenuModel::GetInstance()->SetItemDivider(divider, DividerMode::FLOATING_ABOVE_MENU);
+    GetMenuModel()->SetItemDivider(divider, DividerMode::FLOATING_ABOVE_MENU);
 }
 
 void FfiOHOSAceFrameworkMenuSetItemGroupDivider(DividerParams dividerParams, bool hasValue)
@@ -130,7 +149,7 @@ void FfiOHOSAceFrameworkMenuSetItemGroupDivider(DividerParams dividerParams, boo
             divider.endMargin.SetUnit(DimensionUnit::INVALID);
         }
     }
-    MenuModel::GetInstance()->SetItemGroupDivider(divider, DividerMode::FLOATING_ABOVE_MENU);
+    GetMenuModel()->SetItemGroupDivider(divider, DividerMode::FLOATING_ABOVE_MENU);
 }
 
 void FfiOHOSAceFrameworkMenuSetExpandingMode(int32_t mode)
@@ -139,6 +158,6 @@ void FfiOHOSAceFrameworkMenuSetExpandingMode(int32_t mode)
     auto expandingMode = modeVal == SubMenuExpandingMode::EMBEDDED ? NG::SubMenuExpandingMode::EMBEDDED
                          : modeVal == SubMenuExpandingMode::STACK  ? NG::SubMenuExpandingMode::STACK
                                                                    : NG::SubMenuExpandingMode::SIDE;
-    MenuModel::GetInstance()->SetExpandingMode(expandingMode);
+    GetMenuModel()->SetExpandingMode(expandingMode);
 }
 }

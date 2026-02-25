@@ -23,9 +23,9 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
-#include "bridge/declarative_frontend/jsview/canvas/js_canvas_util.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/pipeline_base.h"
@@ -136,7 +136,7 @@ static bool MatchColorWithRGBA(const std::string& colorStr, Color& color)
         char* pEnd = nullptr;
         errno = 0;
         double val = std::strtod(valueProps[i].c_str(), &pEnd);
-        if (pEnd == valueProps[i].c_str() || *pEnd != '\0' || errno == ERANGE) {
+        if (pEnd == nullptr || pEnd == valueProps[i].c_str() || *pEnd != '\0' || errno == ERANGE) {
             return false;
         }
         if (i < RGB_SUB_SIZE) {
@@ -163,6 +163,15 @@ static bool ProcessColorFromString(std::string colorStr, Color& color)
             Color::MatchColorSpecialString(colorStr, color));
 }
 
+void CreateZeroImageData(JSRef<JSObject> retObj)
+{
+    JSRef<JSArrayBuffer> zeroArrayBuffer = JSRef<JSArrayBuffer>::New(0);
+    auto zeroColorArray =
+        JSRef<JSUint8ClampedArray>::New(zeroArrayBuffer->GetLocalHandle(), 0, zeroArrayBuffer->ByteLength());
+    retObj->SetProperty("width", 0);
+    retObj->SetProperty("height", 0);
+    retObj->SetPropertyObject("data", zeroColorArray);
+}
 } // namespace
 
 JSCanvasRenderer::JSCanvasRenderer()
@@ -632,6 +641,9 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
             image.dy *= density;
             image.dWidth *= density;
             image.dHeight *= density;
+            if (!isImage) {
+                SendStatisticEvent(StatisticEventType::CANVAS_NINE_PARAM_DRAWIMAGE);
+            }
             break;
         default:
             break;
@@ -692,12 +704,7 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
     auto* buffer = static_cast<uint32_t*>(arrayBuffer->GetBuffer());
     // Height or Width is ZERO or Overflow.
     if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
-        JSRef<JSArrayBuffer> zeroArrayBuffer = JSRef<JSArrayBuffer>::New(0);
-        auto zeroColorArray =
-            JSRef<JSUint8ClampedArray>::New(zeroArrayBuffer->GetLocalHandle(), 0, zeroArrayBuffer->ByteLength());
-        retObj->SetProperty("width", 0);
-        retObj->SetProperty("height", 0);
-        retObj->SetPropertyObject("data", zeroColorArray);
+        CreateZeroImageData(retObj);
         return;
     }
     for (uint32_t idx = 0; idx < finalWidth * finalHeight; ++idx) {
@@ -829,19 +836,36 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 
     uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(finalWidth * finalHeight * PIXEL_SIZE);
-    auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
     // Height or Width is ZERO or Overflow.
-    if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
-        JSRef<JSArrayBuffer> zeroArrayBuffer = JSRef<JSArrayBuffer>::New(0);
-        auto zeroColorArray =
-            JSRef<JSUint8ClampedArray>::New(zeroArrayBuffer->GetLocalHandle(), 0, zeroArrayBuffer->ByteLength());
-        retObj->SetProperty("width", 0);
-        retObj->SetProperty("height", 0);
-        retObj->SetPropertyObject("data", zeroColorArray);
+    if (finalWidth == 0 || finalHeight == 0 || finalWidth > (UINT32_MAX / finalHeight)) {
+        CreateZeroImageData(retObj);
         return;
     }
-    renderingContext2DModel_->GetImageDataModel(imageSize, buffer);
+    JSRef<JSArrayBuffer> arrayBuffer;
+    if (SystemProperties::GetLayoutTraceEnabled()) {
+        auto pixelmap = renderingContext2DModel_->GetPixelMap(imageSize);
+        if (!pixelmap) {
+            CreateZeroImageData(retObj);
+            return;
+        }
+        pixelmap->IncRefCount();
+        auto deleter = [](void* env, void* buffer, void* data) -> void {
+            Ace::PixelMap* rawPixelMap = reinterpret_cast<Ace::PixelMap*>(data);
+            if (rawPixelMap != nullptr) {
+                rawPixelMap->DecRefCount();
+            }
+        };
+        arrayBuffer = JSRef<JSArrayBuffer>::New(
+            pixelmap->GetWritablePixels(), finalWidth * finalHeight * PIXEL_SIZE, deleter, AceType::RawPtr(pixelmap));
+    } else {
+        arrayBuffer = JSRef<JSArrayBuffer>::New(finalWidth * finalHeight * PIXEL_SIZE);
+        auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
+        if (!buffer) {
+            CreateZeroImageData(retObj);
+            return;
+        }
+        renderingContext2DModel_->GetImageDataModel(imageSize, buffer);
+    }
     auto colorArray = JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
     retObj->SetProperty("width", finalWidth);
     retObj->SetProperty("height", finalHeight);
@@ -1051,7 +1075,7 @@ void JSCanvasRenderer::JsSetLineWidth(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsSetGlobalAlpha(const JSCallbackInfo& info)
 {
     double alpha = 0.0;
-    if (info.GetDoubleArg(0, alpha, isJudgeSpecialValue_)) { // Indexd0: the 1st arg.
+    if (GetDoubleArg(info, 0, alpha, isJudgeSpecialValue_)) { // Index0: the 1st arg.
         renderingContext2DModel_->SetGlobalAlpha(alpha);
     }
 }
@@ -1085,7 +1109,7 @@ void JSCanvasRenderer::JsSetGlobalCompositeOperation(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsSetLineDashOffset(const JSCallbackInfo& info)
 {
     double lineDashOffset = 0.0;
-    if (info.GetDoubleArg(0, lineDashOffset, isJudgeSpecialValue_)) { // Indexd0: the 1st arg.
+    if (GetDoubleArg(info, 0, lineDashOffset, isJudgeSpecialValue_)) { // Index0: the 1st arg.
         renderingContext2DModel_->SetLineDashOffset(lineDashOffset * GetDensity());
     }
 }
@@ -1154,8 +1178,8 @@ void JSCanvasRenderer::JsMoveTo(const JSCallbackInfo& info)
 {
     double x = 0.0;
     double y = 0.0;
-    if (info.GetDoubleArg(0, x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, y, isJudgeSpecialValue_)) { // Index1: the 2nd arg.
+    if (GetDoubleArg(info, 0, x, isJudgeSpecialValue_) && // Index0: the 1st arg.
+        GetDoubleArg(info, 1, y, isJudgeSpecialValue_)) { // Index1: the 2nd arg.
         double density = GetDensity();
         renderingContext2DModel_->MoveTo(x * density, y * density);
     }
@@ -1166,8 +1190,8 @@ void JSCanvasRenderer::JsLineTo(const JSCallbackInfo& info)
 {
     double x = 0.0;
     double y = 0.0;
-    if (info.GetDoubleArg(0, x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, y, isJudgeSpecialValue_)) { // Index1: the 2nd arg.
+    if (GetDoubleArg(info, 0, x, isJudgeSpecialValue_) && // Index0: the 1st arg.
+        GetDoubleArg(info, 1, y, isJudgeSpecialValue_)) { // Index1: the 2nd arg.
         double density = GetDensity();
         renderingContext2DModel_->LineTo(x * density, y * density);
     }
@@ -1177,12 +1201,12 @@ void JSCanvasRenderer::JsLineTo(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsBezierCurveTo(const JSCallbackInfo& info)
 {
     BezierCurveParam param;
-    if (info.GetDoubleArg(0, param.cp1x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, param.cp1y, isJudgeSpecialValue_) && // Index1: the 2nd arg.
-        info.GetDoubleArg(2, param.cp2x, isJudgeSpecialValue_) && // Index2: the 3rd arg.
-        info.GetDoubleArg(3, param.cp2y, isJudgeSpecialValue_) && // Index3: the 4th arg.
-        info.GetDoubleArg(4, param.x, isJudgeSpecialValue_) && // Index4: the 5th arg.
-        info.GetDoubleArg(5, param.y, isJudgeSpecialValue_)) { // Index5: the 6th arg.
+    if (GetDoubleArg(info, 0, param.cp1x, isJudgeSpecialValue_) && // Index0: the 1st arg.
+        GetDoubleArg(info, 1, param.cp1y, isJudgeSpecialValue_) && // Index1: the 2nd arg.
+        GetDoubleArg(info, 2, param.cp2x, isJudgeSpecialValue_) && // Index2: the 3rd arg.
+        GetDoubleArg(info, 3, param.cp2y, isJudgeSpecialValue_) && // Index3: the 4th arg.
+        GetDoubleArg(info, 4, param.x, isJudgeSpecialValue_) &&    // Index4: the 5th arg.
+        GetDoubleArg(info, 5, param.y, isJudgeSpecialValue_)) {    // Index5: the 6th arg.
         double density = GetDensity();
         param.cp1x *= density;
         param.cp1y *= density;
@@ -1198,10 +1222,10 @@ void JSCanvasRenderer::JsBezierCurveTo(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsQuadraticCurveTo(const JSCallbackInfo& info)
 {
     QuadraticCurveParam param;
-    if (info.GetDoubleArg(0, param.cpx, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, param.cpy, isJudgeSpecialValue_) && // Index1: the 2nd arg.
-        info.GetDoubleArg(2, param.x, isJudgeSpecialValue_) && // Index2: the 3rd arg.
-        info.GetDoubleArg(3, param.y, isJudgeSpecialValue_)) { // Index3: the 4th arg.
+    if (GetDoubleArg(info, 0, param.cpx, isJudgeSpecialValue_) && // Index0: the 1st arg.
+        GetDoubleArg(info, 1, param.cpy, isJudgeSpecialValue_) && // Index1: the 2nd arg.
+        GetDoubleArg(info, 2, param.x, isJudgeSpecialValue_) &&   // Index2: the 3rd arg.
+        GetDoubleArg(info, 3, param.y, isJudgeSpecialValue_)) {   // Index3: the 4th arg.
         double density = GetDensity();
         param.cpx *= density;
         param.cpy *= density;
@@ -1215,11 +1239,11 @@ void JSCanvasRenderer::JsQuadraticCurveTo(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsArcTo(const JSCallbackInfo& info)
 {
     ArcToParam param;
-    if (info.GetDoubleArg(0, param.x1, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, param.y1, isJudgeSpecialValue_) && // Index1: the 2nd arg.
-        info.GetDoubleArg(2, param.x2, isJudgeSpecialValue_) && // Index2: the 3rd arg.
-        info.GetDoubleArg(3, param.y2, isJudgeSpecialValue_) && // Index3: the 4th arg.
-        info.GetDoubleArg(4, param.radius, isJudgeSpecialValue_)) { // Index4: the 5th arg.
+    if (GetDoubleArg(info, 0, param.x1, isJudgeSpecialValue_) &&     // Index0: the 1st arg.
+        GetDoubleArg(info, 1, param.y1, isJudgeSpecialValue_) &&     // Index1: the 2nd arg.
+        GetDoubleArg(info, 2, param.x2, isJudgeSpecialValue_) &&     // Index2: the 3rd arg.
+        GetDoubleArg(info, 3, param.y2, isJudgeSpecialValue_) &&     // Index3: the 4th arg.
+        GetDoubleArg(info, 4, param.radius, isJudgeSpecialValue_)) { // Index4: the 5th arg.
         double density = GetDensity();
         param.x1 *= density;
         param.y1 *= density;
@@ -1234,11 +1258,11 @@ void JSCanvasRenderer::JsArcTo(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsArc(const JSCallbackInfo& info)
 {
     ArcParam param;
-    if (info.GetDoubleArg(0, param.x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, param.y, isJudgeSpecialValue_) && // Index1: the 2nd arg.
-        info.GetDoubleArg(2, param.radius, isJudgeSpecialValue_) && // Index2: the 3rd arg.
-        info.GetDoubleArg(3, param.startAngle, isJudgeSpecialValue_) && // Index3: the 4th arg.
-        info.GetDoubleArg(4, param.endAngle, isJudgeSpecialValue_)) { // Index4: the 5th arg.
+    if (GetDoubleArg(info, 0, param.x, isJudgeSpecialValue_) &&          // Index0: the 1st arg.
+        GetDoubleArg(info, 1, param.y, isJudgeSpecialValue_) &&          // Index1: the 2nd arg.
+        GetDoubleArg(info, 2, param.radius, isJudgeSpecialValue_) &&     // Index2: the 3rd arg.
+        GetDoubleArg(info, 3, param.startAngle, isJudgeSpecialValue_) && // Index3: the 4th arg.
+        GetDoubleArg(info, 4, param.endAngle, isJudgeSpecialValue_)) {   // Index4: the 5th arg.
 
         info.GetBooleanArg(5, param.anticlockwise); // Non mandatory parameter with default value 'false'
         double density = GetDensity();
@@ -1254,13 +1278,13 @@ void JSCanvasRenderer::JsArc(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsEllipse(const JSCallbackInfo& info)
 {
     EllipseParam param;
-    if (info.GetDoubleArg(0, param.x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, param.y, isJudgeSpecialValue_) && // Index1: the 2nd arg.
-        info.GetDoubleArg(2, param.radiusX, isJudgeSpecialValue_) && // Index2: the 3rd arg.
-        info.GetDoubleArg(3, param.radiusY, isJudgeSpecialValue_) && // Index3: the 4th arg.
-        info.GetDoubleArg(4, param.rotation, isJudgeSpecialValue_) && // Index4: the 5th arg.
-        info.GetDoubleArg(5, param.startAngle, isJudgeSpecialValue_) && // Index5: the 6th arg.
-        info.GetDoubleArg(6, param.endAngle, isJudgeSpecialValue_)) { // Index6: the 7th arg.
+    if (GetDoubleArg(info, 0, param.x, isJudgeSpecialValue_) &&          // Index0: the 1st arg.
+        GetDoubleArg(info, 1, param.y, isJudgeSpecialValue_) &&          // Index1: the 2nd arg.
+        GetDoubleArg(info, 2, param.radiusX, isJudgeSpecialValue_) &&    // Index2: the 3rd arg.
+        GetDoubleArg(info, 3, param.radiusY, isJudgeSpecialValue_) &&    // Index3: the 4th arg.
+        GetDoubleArg(info, 4, param.rotation, isJudgeSpecialValue_) &&   // Index4: the 5th arg.
+        GetDoubleArg(info, 5, param.startAngle, isJudgeSpecialValue_) && // Index5: the 6th arg.
+        GetDoubleArg(info, 6, param.endAngle, isJudgeSpecialValue_)) {   // Index6: the 7th arg.
 
         info.GetBooleanArg(7, param.anticlockwise); // Non mandatory parameter with default value 'false'
         double density = GetDensity();
@@ -1339,10 +1363,10 @@ void JSCanvasRenderer::JsRect(const JSCallbackInfo& info)
     double y = 0.0;
     double width = 0.0;
     double height = 0.0;
-    if (info.GetDoubleArg(0, x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, y, isJudgeSpecialValue_) && // Index1: the 2nd arg.
-        info.GetDoubleArg(2, width, isJudgeSpecialValue_) && // Index2: the 3rd arg.
-        info.GetDoubleArg(3, height, isJudgeSpecialValue_)) { // Index3: the 4th arg.
+    if (GetDoubleArg(info, 0, x, isJudgeSpecialValue_) &&      // Index0: the 1st arg
+        GetDoubleArg(info, 1, y, isJudgeSpecialValue_) &&      // Index1: the 2nd arg.
+        GetDoubleArg(info, 2, width, isJudgeSpecialValue_) &&  // Index2: the 3rd arg
+        GetDoubleArg(info, 3, height, isJudgeSpecialValue_)) { // Index3: the 4th arg.
         renderingContext2DModel_->AddRect(Rect(x, y, width, height) * GetDensity());
     }
 }
@@ -1392,7 +1416,7 @@ void JSCanvasRenderer::JsSave(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsRotate(const JSCallbackInfo& info)
 {
     double angle = 0.0;
-    if (info.GetDoubleArg(0, angle, isJudgeSpecialValue_)) { // Indexd0: the 1st arg.
+    if (GetDoubleArg(info, 0, angle, isJudgeSpecialValue_)) { // Index0: the 1st arg.
         renderingContext2DModel_->CanvasRendererRotate(angle);
     }
 }
@@ -1402,8 +1426,8 @@ void JSCanvasRenderer::JsScale(const JSCallbackInfo& info)
 {
     double x = 0.0;
     double y = 0.0;
-    if (info.GetDoubleArg(0, x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, y, isJudgeSpecialValue_)) { // Index1: the 2nd arg.
+    if (GetDoubleArg(info, 0, x, isJudgeSpecialValue_) && // Index0: the 1st arg
+        GetDoubleArg(info, 1, y, isJudgeSpecialValue_)) { // Index1: the 2nd arg.
         renderingContext2DModel_->CanvasRendererScale(x, y);
     }
 }
@@ -1432,12 +1456,12 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
     double density = GetDensity();
     TransformParam param;
     // setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void
-    if (info.GetDoubleArg(0, param.scaleX, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, param.skewY, isJudgeSpecialValue_) && // Index1: the 2nd arg.
-        info.GetDoubleArg(2, param.skewX, isJudgeSpecialValue_) && // Index2: the 3rd arg.
-        info.GetDoubleArg(3, param.scaleY, isJudgeSpecialValue_) && // Index3: the 4th arg.
-        info.GetDoubleArg(4, param.translateX, isJudgeSpecialValue_) && // Index4: the 5th arg.
-        info.GetDoubleArg(5, param.translateY, isJudgeSpecialValue_)) { // Index5: the 6th arg.
+    if (GetDoubleArg(info, 0, param.scaleX, isJudgeSpecialValue_) &&     // Index0: the 1st arg.
+        GetDoubleArg(info, 1, param.skewY, isJudgeSpecialValue_) &&      // Index1: the 2nd arg.
+        GetDoubleArg(info, 2, param.skewX, isJudgeSpecialValue_) &&      // Index2: the 3rd arg.
+        GetDoubleArg(info, 3, param.scaleY, isJudgeSpecialValue_) &&     // Index3: the 4th arg.
+        GetDoubleArg(info, 4, param.translateX, isJudgeSpecialValue_) && // Index4: the 5th arg.
+        GetDoubleArg(info, 5, param.translateY, isJudgeSpecialValue_)) { // Index5: the 6th arg.
         param.translateX *= density;
         param.translateY *= density;
         renderingContext2DModel_->SetTransform(param, true);
@@ -1473,12 +1497,12 @@ void JSCanvasRenderer::JsResetTransform(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsTransform(const JSCallbackInfo& info)
 {
     TransformParam param;
-    if (info.GetDoubleArg(0, param.scaleX, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, param.skewX, isJudgeSpecialValue_) && // Index1: the 2nd arg.
-        info.GetDoubleArg(2, param.skewY, isJudgeSpecialValue_) && // Index2: the 3rd arg.
-        info.GetDoubleArg(3, param.scaleY, isJudgeSpecialValue_) && // Index3: the 4th arg.
-        info.GetDoubleArg(4, param.translateX, isJudgeSpecialValue_) && // Index4: the 5th arg.
-        info.GetDoubleArg(5, param.translateY, isJudgeSpecialValue_)) { // Index5: the 6th arg.
+    if (GetDoubleArg(info, 0, param.scaleX, isJudgeSpecialValue_) &&     // Index0: the 1st arg.
+        GetDoubleArg(info, 1, param.skewX, isJudgeSpecialValue_) &&      // Index1: the 2nd arg.
+        GetDoubleArg(info, 2, param.skewY, isJudgeSpecialValue_) &&      // Index2: the 3rd arg.
+        GetDoubleArg(info, 3, param.scaleY, isJudgeSpecialValue_) &&     // Index3: the 4th arg.
+        GetDoubleArg(info, 4, param.translateX, isJudgeSpecialValue_) && // Index4: the 5th arg.
+        GetDoubleArg(info, 5, param.translateY, isJudgeSpecialValue_)) { // Index5: the 6th arg.
         double density = GetDensity();
         param.translateX *= density;
         param.translateY *= density;
@@ -1491,8 +1515,8 @@ void JSCanvasRenderer::JsTranslate(const JSCallbackInfo& info)
 {
     double x = 0.0;
     double y = 0.0;
-    if (info.GetDoubleArg(0, x, isJudgeSpecialValue_) && // Indexd0: the 1st arg.
-        info.GetDoubleArg(1, y, isJudgeSpecialValue_)) { // Index1: the 2nd arg.
+    if (GetDoubleArg(info, 0, x, isJudgeSpecialValue_) && // Index0: the 1st arg
+        GetDoubleArg(info, 1, y, isJudgeSpecialValue_)) { // Index1: the 2nd arg.
         double density = GetDensity();
         renderingContext2DModel_->Translate(x * density, y * density);
     }
@@ -1661,8 +1685,12 @@ bool JSCanvasRenderer::IsCustomFont(const std::string& fontName)
     CHECK_NULL_RETURN(pipeline, false);
     CHECK_NULL_RETURN(pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY), false);
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
-    return (fontCollection && fontCollection->GetFontMgr() &&
-            fontCollection->GetFontMgr()->MatchFamilyStyle(fontName.c_str(), {}));
+    bool customFont = (fontCollection && fontCollection->GetFontMgr() &&
+                       fontCollection->GetFontMgr()->MatchFamilyStyle(fontName.c_str(), {}));
+    if (customFont) {
+        SendStatisticEvent(StatisticEventType::CANVAS_CUSTOM_FONT);
+    }
+    return customFont;
 }
 
 bool JSCanvasRenderer::IsValidLetterSpacing(const std::string& letterSpacing)

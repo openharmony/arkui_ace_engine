@@ -977,6 +977,7 @@ void WebDelegate::HandleTouchpadFlingEvent(const double& x, const double& y, con
 void WebDelegate::WebHandleTouchpadFlingEvent(
     const double& x, const double& y, const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes)
 {}
+void WebDelegate::WebHandleCancelFlingEvent() {}
 void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY) {}
 void WebDelegate::WebHandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY,
     const std::vector<int32_t>& pressedCodes, const int32_t source)
@@ -1499,4 +1500,5 @@ void WebDelegate::OnRequestAutofill(int32_t menuType) {}
 void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}
+void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::string)>&& callback) {}
 } // namespace OHOS::Ace

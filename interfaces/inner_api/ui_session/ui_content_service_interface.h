@@ -361,7 +361,8 @@ public:
      * @return: result number
      */
     virtual int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
-        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) = 0;
+        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback,
+        bool onlyVisible = false) = 0;
 
     virtual int32_t GetWebInfoByRequest(
         int32_t webId,

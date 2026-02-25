@@ -1,8 +1,4 @@
 {
-    "include": [
-        "src/index.d.ts",
-        "src/for_each.d.ts",
-    ],
     "files": [
         "src/base_node.ts",
         "src/builder_node.ts",
@@ -17,6 +13,9 @@
         "src/component_content.ts",
         "src/node_content.ts",
         "src/common.ts",
+    ],
+    "include": [
+        "types/*.d.ts"
     ],
     "compilerOptions": {
         "module": "none",

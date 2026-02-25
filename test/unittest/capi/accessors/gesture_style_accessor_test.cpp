@@ -54,12 +54,13 @@ public:
 };
 
 /**
- * @tc.name: callbacksTest
+ * @tc.name: constructTestCallbacks
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureStyleAccessorTest, callbacksTest, TestSize.Level1)
+HWTEST_F(GestureStyleAccessorTest, constructTestCallbacks, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->construct, nullptr);
     ASSERT_NE(peer_, nullptr);
     auto style = peer_->span->GetGestureStyle();
     EXPECT_NE(style.onClick, nullptr);

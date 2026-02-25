@@ -2961,4 +2961,35 @@ HWTEST_F(FrameNodeTestNg, AceUINodeTrace001, TestSize.Level1)
     FRAME_NODE->GetOrCreateFocusHub();
     EXPECT_EQ(layoutProperty.calcLayoutConstraint_, nullptr);
 }
+
+/**
+ * @tc.name: FrameNodeTestRoot001
+ * @tc.desc: Test FrameNodeSetRootWithTrue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestRoot001, TestSize.Level1)
+{
+    /* @tc.steps: step1. create Root frameNodeTemp1
+     */
+    auto frameNodeTemp1 = FrameNode::CreateFrameNode("root", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. frameNodeTemp is a root node
+     * @tc.expect: frameNodeTemp isRoot
+     */
+    bool isRoot = frameNodeTemp1->IsRootNode();
+    EXPECT_TRUE(isRoot);
+    auto isPendingState = frameNodeTemp1->IsPendingOnMainRenderTree();
+    EXPECT_TRUE(isRoot);
+
+    /**
+     * @tc.steps: step3. create noRoot frameNodeTemp2
+     * @tc.expect: frameNodeTemp2 is not a root node
+     */
+    auto frameNodeTemp2 = FrameNode::CreateFrameNode("noRoot", 2, AceType::MakeRefPtr<Pattern>(), false);
+    isRoot = frameNodeTemp2->IsRootNode();
+    EXPECT_FALSE(isRoot);
+    isPendingState = frameNodeTemp2->IsPendingOnMainRenderTree();
+    EXPECT_FALSE(isPendingState);
+}
 } // namespace OHOS::Ace::NG

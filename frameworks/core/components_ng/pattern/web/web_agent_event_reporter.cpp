@@ -163,7 +163,7 @@ void WebAgentEventReporter::AddScrollEvent(const std::unique_ptr<JsonValue>& scr
         TAG_LOGE(AceLogTag::ACE_WEB, "WebAgentEventReporter::AddScrollEvent invalid offset json");
         return;
     }
-    info.scrollRect = ConvertToWindow(RectF(scrollLeft, scrollTop, 0.0, 0.0), false);
+    info.scrollRect = RectF(scrollLeft, scrollTop, 0.0, 0.0);
     // no lock here, called in UI thread
     scrollQueue_.push(info);
     ProcessScrollQueue();
@@ -208,7 +208,18 @@ void WebAgentEventReporter::ContinueScrollProcessing()
 WebAgentEventReporter::ScrollEndEventAction WebAgentEventReporter::HandleUpdatedScrollEndEvent(ScrollEventInfo& info)
 {
     auto it = startRecords_.find(info.id);
+    bool needUpdate = false;
+    if (it == startRecords_.end()) {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "WebAgentEventReporter::HandleUpdatedScrollEndEvent no matching start record, trying last start record");
+        it = startRecords_.find(LAST_START_RECORD_INDEX);
+        needUpdate = true;
+    }
     if (it != startRecords_.end()) {
+        if (needUpdate) {
+            info.id = it->second.id;
+            UpdateScrollEventInfoFromTree(info);
+        }
         bool same = NearEqual(it->second.scrollRect.Left(), info.scrollRect.Left()) &&
                     NearEqual(it->second.scrollRect.Top(), info.scrollRect.Top());
         if (same && info.retry < MAX_SCROLL_EVENT_UPDATE_RETRY) {
@@ -240,8 +251,10 @@ void WebAgentEventReporter::ReportAndAdvanceScrollQueue(const ScrollEventInfo& i
         isScrollStart);
     if (isScrollStart) {
         startRecords_[info.id] = info;
+        startRecords_[LAST_START_RECORD_INDEX] = info; // update last start record
     } else {
         startRecords_.erase(info.id);
+        startRecords_.erase(LAST_START_RECORD_INDEX); // clear last start record
     }
     auto jsonValue = info.GetInspectorJsonValue();
     scrollQueue_.pop();
@@ -262,7 +275,7 @@ void WebAgentEventReporter::ProcessScrollQueue()
     processingScroll_ = true;
     // Process items iteratively to avoid recursion.
     while (!scrollQueue_.empty()) {
-        ScrollEventInfo& info = scrollQueue_.front(); // copy so we can pop safely
+        ScrollEventInfo& info = scrollQueue_.front();
         bool isScrollStart = (info.eventType == "ScrollStart");
         bool updated = UpdateScrollEventInfoFromTree(info);
         if (updated) {
@@ -279,6 +292,18 @@ void WebAgentEventReporter::ProcessScrollQueue()
                 }
                 // else PROCEED -> fall through to report
             }
+        } else if (!isScrollStart) {
+            if (!startRecords_.count(LAST_START_RECORD_INDEX)) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "WebAgentEventReporter::ProcessScrollQueue not match start record, dropping");
+                // could not update end event; drop it and continue
+                scrollQueue_.pop();
+                continue;
+            }
+            bool isIdSame = (info.id == startRecords_[LAST_START_RECORD_INDEX].id);
+            TAG_LOGW(AceLogTag::ACE_WEB,
+                "WebAgentEventReporter::ProcessScrollQueue is scroll end event id same: %{public}d", isIdSame);
+            info.id = startRecords_[LAST_START_RECORD_INDEX].id;
         }
 
         // report event immediately and continue loop

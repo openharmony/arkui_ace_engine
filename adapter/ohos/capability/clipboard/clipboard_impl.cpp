@@ -52,37 +52,43 @@ MiscServices::ShareOption TransitionCopyOption(CopyOptions copyOption)
 const std::string SPAN_STRING_TAG = "openharmony.styled-string";
 #endif
 
-void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
+void ClipboardImpl::HasData(const std::function<void(bool hasData, bool isAutoFill)>& callback)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     bool hasData = false;
+    bool isAutoFill = false;
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostSyncTask(
-        [&hasData]() { hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData(); },
+        [&hasData, &isAutoFill]() {
+            hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
+            isAutoFill = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(AUTO_FILL_SECURE_PASTE);
+        },
         TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardHasData");
-    callback(hasData);
+    callback(hasData, isAutoFill);
 #endif
 }
 
 void ClipboardImpl::HasDataType(
-    const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes)
+    const std::function<void(bool hasData, bool isAutoFill)>& callback, const std::vector<std::string>& mimeTypes)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     bool hasData = false;
+    bool isAutoFill = false;
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostSyncTask(
-        [&hasData, mimeTypes]() {
+        [&hasData, &isAutoFill, mimeTypes]() {
             for (auto mimeType = mimeTypes.begin(); mimeType != mimeTypes.end(); ++mimeType) {
                 hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(*mimeType);
                 TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "Clipboard data mimeType %{public}s available ? %{public}d",
                     mimeType->c_str(), hasData);
                 if (hasData) {
+                    isAutoFill = AUTO_FILL_SECURE_PASTE == *mimeType;
                     break;
                 }
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardHasDataType");
-    callback(hasData);
+    callback(hasData, isAutoFill);
 #endif
 }
 

@@ -17,6 +17,9 @@
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/interfaces/native/implementation/spring_back_action_peer.h"
+#include "core/interfaces/native/implementation/sheet_dismiss_peer.h"
+#include "core/interfaces/native/implementation/dismiss_sheet_action_peer.h"
+#include "core/interfaces/native/implementation/dismiss_content_cover_action_peer.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t EFFECT_EDGE_ZERO = 0;
@@ -38,25 +41,25 @@ std::pair<std::optional<OHOS::Ace::Dimension>, std::optional<OHOS::Ace::Dimensio
 
 void BindSheetUtil::ParseLifecycleCallbacks(SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions)
 {
-        auto onAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onAppear);
+    auto onAppear = Converter::OptConvert<VoidCallback>(sheetOptions.onAppear);
     if (onAppear) {
         callbacks.onAppear = [arkCallback = CallbackHelper(onAppear.value())]() {
             arkCallback.InvokeSync();
         };
     }
-    auto onDisappear = Converter::OptConvert<Callback_Void>(sheetOptions.onDisappear);
+    auto onDisappear = Converter::OptConvert<VoidCallback>(sheetOptions.onDisappear);
     if (onDisappear) {
         callbacks.onDisappear = [arkCallback = CallbackHelper(onDisappear.value())]() {
             arkCallback.InvokeSync();
         };
     }
-    auto onWillAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onWillAppear);
+    auto onWillAppear = Converter::OptConvert<VoidCallback>(sheetOptions.onWillAppear);
     if (onWillAppear) {
         callbacks.onWillAppear = [arkCallback = CallbackHelper(onWillAppear.value())]() {
             arkCallback.InvokeSync();
         };
     }
-    auto onWillDisappear = Converter::OptConvert<Callback_Void>(sheetOptions.onWillDisappear);
+    auto onWillDisappear = Converter::OptConvert<VoidCallback>(sheetOptions.onWillDisappear);
     if (onWillDisappear) {
         callbacks.onWillDisappear = [arkCallback = CallbackHelper(onWillDisappear.value())]() {
             arkCallback.InvokeSync();
@@ -65,9 +68,7 @@ void BindSheetUtil::ParseLifecycleCallbacks(SheetCallbacks& callbacks, const Ark
     auto shouldDismiss = Converter::OptConvert<Callback_SheetDismiss_Void>(sheetOptions.shouldDismiss);
     if (shouldDismiss) {
         callbacks.shouldDismiss = [arkCallback = CallbackHelper(shouldDismiss.value())]() {
-            Ark_SheetDismiss parameter;
-            const auto keeper = CallbackKeeper::Claim<VoidCallback>(ViewAbstractModelStatic::DismissSheetStatic);
-            parameter.dismiss = keeper.ArkValue();
+            Ark_SheetDismiss parameter = &g_sheetDismissPeer;
             arkCallback.InvokeSync(parameter);
         };
     }
@@ -83,11 +84,10 @@ void BindSheetUtil::ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ar
     auto onWillDismiss = Converter::OptConvert<Callback_DismissSheetAction_Void>(sheetOptions.onWillDismiss);
     if (onWillDismiss) {
         callbacks.onWillDismiss = [arkCallback = CallbackHelper(onWillDismiss.value())](const int32_t reason) {
-            Ark_DismissSheetAction parameter;
+            Ark_DismissSheetAction parameter = &g_dismissSheetPeer;
             auto reasonOpt = ArkValue<Opt_DismissReason>(static_cast<BindSheetDismissReason>(reason));
-            parameter.reason = OptConvert<Ark_DismissReason>(reasonOpt).value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            const auto keeper = CallbackKeeper::Claim<VoidCallback>(ViewAbstractModelStatic::DismissSheetStatic);
-            parameter.dismiss = keeper.ArkValue();
+            parameter->reason = Converter::OptConvert<OHOS::Ace::NG::BindSheetDismissReason>(reasonOpt)
+                .value_or(OHOS::Ace::NG::BindSheetDismissReason::BACK_PRESSED);
             arkCallback.InvokeSync(parameter);
         };
     }
@@ -181,6 +181,10 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
     sheetStyle.hoverModeArea = OptConvert<HoverModeAreaType>(sheetOptions.hoverModeArea);
     sheetStyle.width = OptConvert<Dimension>(sheetOptions.width);
     sheetStyle.instanceId = OptConvert<int32_t>(sheetOptions.uiContext);
+#ifdef WRONG_GEN_v140
+    auto material = OptConvert<UiMaterial*>(sheetOptions.systemMaterial).value_or(nullptr);
+    sheetStyle.systemMaterial = material ? material->Copy() : nullptr;
+#endif // WRONG_GEN_v140
     auto effectEdge = OptConvert<int>(sheetOptions.effectEdge.value).value_or(3);
     switch (effectEdge) {
         case EFFECT_EDGE_ZERO:
@@ -248,28 +252,28 @@ void BindSheetUtil::ParseContentCoverCallbacks(WeakPtr<FrameNode> weakNode, cons
     std::function<void()>& onWillShowCallback, std::function<void()>& onWillDismissCallback,
     std::function<void(const int32_t& info)>& onWillDismissFunc)
 {
-    auto onAppearValue = OptConvert<Callback_Void>(options.onAppear);
+    auto onAppearValue = OptConvert<VoidCallback>(options.onAppear);
     if (onAppearValue) {
         onShowCallback = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
             arkCallback.InvokeSync();
         };
     }
-    auto onDisappearValue = OptConvert<Callback_Void>(options.onDisappear);
+    auto onDisappearValue = OptConvert<VoidCallback>(options.onDisappear);
     if (onDisappearValue) {
         onDismissCallback = [arkCallback = CallbackHelper(onDisappearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
             arkCallback.InvokeSync();
         };
     }
-    auto onWillAppearValue = OptConvert<Callback_Void>(options.onWillAppear);
+    auto onWillAppearValue = OptConvert<VoidCallback>(options.onWillAppear);
     if (onWillAppearValue) {
         onWillShowCallback = [arkCallback = CallbackHelper(onWillAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
             arkCallback.InvokeSync();
         };
     }
-    auto onWillDisappearValue = OptConvert<Callback_Void>(options.onWillDisappear);
+    auto onWillDisappearValue = OptConvert<VoidCallback>(options.onWillDisappear);
     if (onWillDisappearValue) {
         onWillDismissCallback = [arkCallback = CallbackHelper(onWillDisappearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
@@ -280,13 +284,11 @@ void BindSheetUtil::ParseContentCoverCallbacks(WeakPtr<FrameNode> weakNode, cons
     if (onWillDismissValue) {
         onWillDismissFunc = [arkCallback = CallbackHelper(onWillDismissValue.value()), weakNode](int32_t reason) {
             PipelineContext::SetCallBackNode(weakNode);
-            Ark_DismissContentCoverAction parameter;
+            Ark_DismissContentCoverAction parameter = &g_dismissContentCoverPeer;
             auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
                 static_cast<BindSheetDismissReason>(reason));
-            parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
-                .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            const auto keeper = CallbackKeeper::Claim<VoidCallback>(ViewAbstractModelStatic::DismissContentCoverStatic);
-            parameter.dismiss = keeper.ArkValue();
+            parameter->reason = Converter::OptConvert<OHOS::Ace::NG::BindSheetDismissReason>(reasonOpt)
+                .value_or(OHOS::Ace::NG::BindSheetDismissReason::BACK_PRESSED);
             arkCallback.InvokeSync(parameter);
         };
     }

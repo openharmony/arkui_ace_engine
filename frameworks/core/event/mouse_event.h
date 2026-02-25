@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
+#include "core/event/mouse_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::MMI {
@@ -36,40 +37,6 @@ constexpr int32_t MOUSE_PRESS_LEFT = 1;
 static const int32_t MOUSE_BASE_ID = 1000;
 
 using OnMouseEventFunc = std::function<void(MouseInfo& info)>;
-
-enum class AccessibilityHoverAction : int32_t {
-    UNKNOWN = -1,
-    HOVER_ENTER,
-    HOVER_MOVE,
-    HOVER_EXIT,
-    HOVER_CANCEL
-};
-
-enum class MouseState : int32_t {
-    NONE = 0,
-    HOVER = 1,
-};
-
-enum class MouseButton : int32_t {
-    NONE_BUTTON = 0,
-    LEFT_BUTTON = 1,
-    RIGHT_BUTTON = 2,
-    MIDDLE_BUTTON = 4,
-    BACK_BUTTON = 8,
-    FORWARD_BUTTON = 16,
-    SIDE_BUTTON = 32,
-    EXTRA_BUTTON = 64,
-    TASK_BUTTON = 128,
-};
-
-enum class HoverEffectType : int32_t {
-    NONE,
-    OPACITY,
-    SCALE,
-    BOARD,
-    AUTO,
-    UNKNOWN,
-};
 
 struct MouseEvent final : public PointerEvent {
     int32_t id = 0;

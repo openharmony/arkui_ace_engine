@@ -42,11 +42,11 @@ public:
 };
 
 /**
- * @tc.name: createTest
+ * @tc.name: createTestViewAccessorCreate
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAccessorTest, ViewAccessorCreateTest, TestSize.Level1)
+HWTEST_F(ViewAccessorTest, createTestViewAccessorCreate, TestSize.Level1)
 {
     ASSERT_NE(accessor_->create, nullptr);
     auto newNode = accessor_->create(nullptr, nullptr);

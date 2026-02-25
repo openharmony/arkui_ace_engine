@@ -37,9 +37,9 @@ import {
   HitTestMode,
   Stack,
   Circle,
-  CrownAction,
-  PathShape
+  CrownAction
 } from '@ohos.arkui.component'
+import { PathShape } from '@ohos.arkui.shape';
 import { State, ObservedV2, Trace, Param, Local, Monitor, IMonitor } from '@ohos.arkui.stateManagement'
 
 const ANGLE_TO_RADIAN = Math.PI / 180; // Common or specific numerical values

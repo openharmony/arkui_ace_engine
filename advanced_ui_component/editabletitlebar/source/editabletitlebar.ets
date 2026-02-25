@@ -424,7 +424,7 @@ struct ImageMenuItem {
   maxFontSize: number = 3.2;
   longPressTime: number = 500;
   systemFontScale?: number = 1;
-  isFollowingSystemFontScale: boolean = this.getUIContext().isFollowingSystemFontScale();;
+  isFollowingSystemFontScale: boolean = this.getUIContext().isFollowingSystemFontScale();
   maxFontScale: number = this.getUIContext().getMaxFontScale();
   @State fontSize: number = 1;
   @State isOnFocus: boolean = false;
@@ -462,15 +462,23 @@ struct ImageMenuItem {
 
   aboutToAppear() {
     try {
-      this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
+      this.callbackId =
+        this.getUIContext()?.getHostContext()?.getApplicationContext()?.on('environment', this.envCallback);
     } catch (paramError) {
       let code = (paramError as BusinessError)?.code;
       let message = (paramError as BusinessError)?.message;
-      hilog.error(0x3900, 'Ace',
-        `EditableTitleBar Faild to get environment param error: ${code}, ${message}`);
+      hilog.error(0x3900, 'EditableTitleBar',
+        `Failed to get environment param error: ${code}, ${message}`);
     }
     this.fontSize = this.decideFontScale();
     this.buttonGestureModifier.fontSize = this.fontSize;
+  }
+
+  aboutToDisappear(): void {
+    if (this.callbackId) {
+      this.getUIContext()?.getHostContext()?.getApplicationContext()?.off('environment', this.callbackId);
+      this.callbackId = null;
+    }
   }
 
   private envCallback: EnvironmentCallback = {
@@ -481,13 +489,13 @@ struct ImageMenuItem {
       }
       try {
         this.fontSize = Math.min(
-          this.maxFontScale, config.fontSizeScale ?? 1);
+          this.maxFontScale, config?.fontSizeScale ?? 1);
         this.buttonGestureModifier.fontSize = this.fontSize;
       } catch (paramError) {
         let code = (paramError as BusinessError)?.code;
         let message = (paramError as BusinessError)?.message;
-        hilog.error(0x3900, 'Ace',
-          `EditableTitleBar environmentCallback error: ${code}, ${message}`);
+        hilog.error(0x3900, 'EditableTitleBar',
+          `EnvironmentCallback error: ${code}, ${message}`);
       }
     },
     onMemoryLevel: (level) => {
@@ -497,7 +505,7 @@ struct ImageMenuItem {
   decideFontScale(): number {
     try {
       let uiContent: UIContext = this.getUIContext();
-      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+      this.systemFontScale = (uiContent?.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -505,7 +513,7 @@ struct ImageMenuItem {
     } catch (exception) {
       let code: number = (exception as BusinessError)?.code;
       let message: string = (exception as BusinessError)?.message;
-      hilog.error(0x3900, 'EditableTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'EditableTitleBar', `Failed to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
     }
   }
@@ -699,7 +707,6 @@ struct ImageMenuItem {
           .effectStrategy(SymbolEffectStrategy.NONE)
           .symbolEffect(new SymbolEffect(), false)
           .fontSize(SYMBOL_SIZE)
-          .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
       } else {
         if (Util.isSymbolResource(this.item.value)) {
           SymbolGlyph(this.item.value as Resource)
@@ -709,7 +716,6 @@ struct ImageMenuItem {
             .enabled(this.item.isEnabled)
             .draggable(false)
             .accessibilityText(this.getAccessibilityReadText())
-            .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
         } else {
           Image(this.item.value)
             .fillColor(this.editableTitleBarTheme.iconColor)
@@ -720,7 +726,6 @@ struct ImageMenuItem {
             .enabled(this.item.isEnabled)
             .draggable(false)
             .accessibilityText(this.getAccessibilityReadText())
-            .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
         }
       }
     }
@@ -739,6 +744,7 @@ struct ImageMenuItem {
     .gestureModifier(this.buttonGestureModifier)
     .accessibilityLevel(this.getRightIconAccessibilityLevel())
     .accessibilityDescription(this.getAccessibilityDescription())
+    .defaultFocus(this.item.defaultFocus)
   }
 
   @Builder
@@ -758,7 +764,7 @@ struct ImageMenuItem {
         .buttonStateStyles()
         .buttonEventStyle()
         .gestureModifier(this.buttonGestureModifier)
-        .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
+        .defaultFocus(this.item.defaultFocus)
     }
     .margin({
       start: LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),

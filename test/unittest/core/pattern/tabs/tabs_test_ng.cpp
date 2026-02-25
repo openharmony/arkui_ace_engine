@@ -495,7 +495,8 @@ HWTEST_F(TabsTestNg, TabsNodeToJsonValue002, TestSize.Level2)
     frameNode_->ToJsonValue(json, filter);
     EXPECT_TRUE(filter.IsFastFilter());
     EXPECT_EQ(json->ToString(), "{\"id\":\"\",\"isLayoutDirtyMarked\":false,\"isRenderDirtyMarked\":false,"
-    "\"isMeasureBoundary\":false,\"hasPendingRequest\":false,\"isFirstBuilding\":false}");
+                                "\"isMeasureBoundary\":false,\"hasPendingRequest\":false,\"isFirstBuilding\":false,"
+                                "\"enableClickSoundEffect\":true}");
 }
 
 /**

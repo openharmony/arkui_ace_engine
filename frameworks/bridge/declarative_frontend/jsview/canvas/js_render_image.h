@@ -25,6 +25,11 @@
 
 namespace OHOS::Ace::Framework {
 
+constexpr napi_type_tag JS_RENDER_IMAGE_TYPE_TAG = {
+    .lower = 0xC8E7D5F3A9B4E6D2,
+    .upper = 0x7E9B4C8D3A6F2E5B,
+};
+
 void BindNativeFunction(napi_env env, napi_value object, const char* name, napi_callback func);
 void* GetNapiCallbackInfoAndThis(napi_env env, napi_callback_info info);
 

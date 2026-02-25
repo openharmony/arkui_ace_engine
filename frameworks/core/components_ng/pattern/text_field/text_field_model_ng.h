@@ -131,6 +131,7 @@ public:
     void SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol) override;
     void SetCancelButtonSymbol(bool isShowSymbol) override;
     void SetIsShowCancelButton(bool isShowCancelButton) override;
+    void SetIsShowVoiceButton(bool isShowButton) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetLetterSpacing(const Dimension& value) override;
@@ -170,6 +171,7 @@ public:
     void ResetTextDirection() override;
     void SetSelectedDragPreviewStyle(const Color& value) override;
     void ResetSelectedDragPreviewStyle() override;
+    void SetUserAccessibilityText() override;
 
     static void ScrollToVisible(FrameNode* frameNode, int32_t start, int32_t end);
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
@@ -183,6 +185,7 @@ public:
     void SetTextOverflow(Ace::TextOverflow value) override;
     void SetTextIndent(const Dimension& value) override;
     static void SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value);
+    static TextOverflow GetTextOverflow(FrameNode* frameNode);
     static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static void UpdateTextFieldPattern(const RefPtr<FrameNode>& frameNode, const std::optional<std::u16string>& value);
     static RefPtr<FrameNode> CreateTextInputNode(
@@ -373,6 +376,7 @@ public:
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static bool GetEnablePreviewText(FrameNode* frameNode);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode modal);
+    static EllipsisMode GetEllipsisMode(FrameNode* frameNode);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
     static int32_t GetKeyboardAppearance(FrameNode* frameNode);

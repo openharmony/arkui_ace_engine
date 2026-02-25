@@ -547,27 +547,15 @@ std::string TabsPattern::ProvideRestoreInfo()
 
 void TabsPattern::OnRestoreInfo(const std::string& restoreInfo)
 {
-    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
     auto info = JsonUtil::ParseJsonString(restoreInfo);
     if (!info->IsValid() || !info->IsObject()) {
         return;
     }
     auto jsonIsOn = info->GetValue("Index");
-    swiperLayoutProperty->UpdateIndex(jsonIsOn->GetInt());
-
-    swiperPattern->OnRestoreInfo(restoreInfo);
-    tabBarPattern->OnRestoreInfo(restoreInfo);
+    auto tabsLayoutProperty = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    CHECK_NULL_VOID(jsonIsOn);
+    tabsLayoutProperty->UpdateIndexSetByUser(jsonIsOn->GetInt());
 }
 
 void TabsPattern::AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)

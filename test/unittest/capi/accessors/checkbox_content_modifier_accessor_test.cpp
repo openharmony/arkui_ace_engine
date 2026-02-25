@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 
 #include "accessor_test_base.h"
+#include "accessor_test_utils.h"
+
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -24,13 +26,13 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 class CheckBoxContentModifierHelperAccessor : public StaticAccessorTest<GENERATED_ArkUIContentModifierHelperAccessor,
                                 &GENERATED_ArkUIAccessors::getContentModifierHelperAccessor> {
 public:
     void FireBuilder(CheckBoxPattern* pattern)
     {
-        pattern->FireBuilder();
+        // This is workaround to call FireBuilder function, since it is private
+        pattern->SetToggleBuilderFunc(nullptr);
     }
 };
 
@@ -42,11 +44,11 @@ static const std::string TEST_DEFAULT_NAME = "";
 static constexpr bool TEST_DEFAULT_SELECTED = false;
 
 /**
- * @tc.name: checkBoxContentModifierHelperAccessorTest
+ * @tc.name: contentModifierCheckBoxTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(CheckBoxContentModifierHelperAccessor, contentModifierCheckBoxTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierCheckBox, nullptr);
 
@@ -63,15 +65,14 @@ HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAcc
         std::optional<bool> enabled;
         std::optional<std::string> name;
         std::optional<bool> selected;
+        Callback_Boolean_Void trigger;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto obj = Converter::ArkCreate<Ark_Object>(TEST_OBJ_ID);
 
-    auto modifierCallback = [](const Ark_Int32 resourceId,
-        const Ark_NativePointer parentNode,
-        const Ark_CheckBoxConfiguration config,
-        const Callback_Pointer_Void continuation) {
+    auto modifierCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+        const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation) {
             auto navigationNode = reinterpret_cast<FrameNode *>(parentNode);
             checkEvent = {
                 .nodeId = navigationNode->GetId(),
@@ -80,22 +81,32 @@ HWTEST_F(CheckBoxContentModifierHelperAccessor, checkBoxContentModifierHelperAcc
                 .enabled = Converter::OptConvert<bool>(config.enabled),
                 .name = Converter::OptConvert<std::string>(config.name),
                 .selected = Converter::OptConvert<bool>(config.selected),
+                .trigger = config.triggerChange,
             };
     };
 
     EXPECT_CALL(*MockContainer::Current(), GetFrontend()).WillRepeatedly(Return(nullptr));
 
-    auto builder = Converter::ArkValue<CheckBoxModifierBuilder>(modifierCallback, TEST_BUILDER_ID);
-    Ark_NativePointer nodePtr = reinterpret_cast<Ark_NativePointer>(checkBoxNode.GetRawPtr());
-    accessor_->contentModifierCheckBox(nodePtr, &obj, &builder);
+    auto builder = Converter::ArkCallback<CheckBoxModifierBuilder>(modifierCallback, TEST_BUILDER_ID);
+    accessor_->contentModifierCheckBox(checkBoxNode.GetRawPtr(), &obj, &builder);
 
     FireBuilder(pattern.GetRawPtr());
+    auto builtNode1 = checkBoxNode->GetChildAtIndex(0);
+    EXPECT_NE(builtNode1, nullptr);
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, TEST_NODE_ID);
     EXPECT_EQ(checkEvent->resourceId, TEST_BUILDER_ID);
     EXPECT_EQ(checkEvent->objId, TEST_OBJ_ID);
     EXPECT_THAT(checkEvent->enabled, Optional(TEST_DEFAULT_ENABLED));
     EXPECT_EQ(checkEvent->name, TEST_DEFAULT_NAME);
     EXPECT_THAT(checkEvent->selected, Optional(TEST_DEFAULT_SELECTED));
+    EXPECT_NE(checkEvent->trigger.resource.resourceId, 0);
+    EXPECT_NE(checkEvent->trigger.call, nullptr);
+
+    // Content modifier node should not change after rebuild
+    FireBuilder(pattern.GetRawPtr());
+    auto builtNode2 = checkBoxNode->GetChildAtIndex(0);
+    EXPECT_EQ(AceType::RawPtr(builtNode1), AceType::RawPtr(builtNode2));
 }
 
 }

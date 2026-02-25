@@ -46,6 +46,8 @@ public:
     static void ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsStrokeColor(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsFontConfigs(const JSRef<JSObject>& obj, Font& font);
+    static void ParseFontWeightConfigs(const JSRef<JSObject>& fontConfigsObj, Font& font);
     static void GetStrokeColorFallback(const JSRef<JSObject>& obj, const RefPtr<TextTheme>& theme, Color& color,
         RefPtr<ResourceObject>& resObj, JSRef<JSVal>& colorObj);
     void GetFontColor(const JSCallbackInfo& info);
@@ -64,6 +66,8 @@ public:
     void SetStrokeColor(const JSCallbackInfo& info);
     void GetSuperscript(const JSCallbackInfo& info);
     void SetSuperscript(const JSCallbackInfo& info);
+    void GetFontConfigs(const JSCallbackInfo& info);
+    void SetFontConfigs(const JSCallbackInfo& info);
 
     const RefPtr<FontSpan>& GetFontSpan();
     void SetFontSpan(const RefPtr<FontSpan>& fontSpan);
@@ -369,14 +373,14 @@ public:
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     void SetJsCustomSpanObject(const JSRef<JSObject>& customSpanObj);
-    JSRef<JSObject>& GetJsCustomSpanObject();
+    JSRef<JSObject> GetJsCustomSpanObject();
     void AddStyledString(const WeakPtr<SpanStringBase>& spanString) override;
     void RemoveStyledString(const WeakPtr<SpanStringBase>& spanString) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSCustomSpan);
     RefPtr<JSNativeCustomSpan> customSpan_;
-    JSRef<JSObject> customSpanObj_;
+    JSWeak<JSObject> customSpanObj_;
 };
 
 class JSNativeLeadingMarginSpan : public virtual AceType {

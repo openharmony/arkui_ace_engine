@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/list/list_item_drag_manager.h"
 
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/gestures/gesture_event.h"
 
@@ -25,6 +26,23 @@ static constexpr Dimension HOT_ZONE_HEIGHT_VP_DIM = 59.0_vp;
 static constexpr Dimension HOT_ZONE_WIDTH_VP_DIM = 26.0_vp;
 static constexpr int32_t DEFAULT_Z_INDEX = 100;
 static constexpr float DEFAULT_SCALE = 1.05f;
+
+int32_t GetForEachIndexInList(const RefPtr<ForEachBaseNode>& forEach)
+{
+    RefPtr<UINode> node = forEach;
+    auto parent = node->GetParent();
+    int32_t offset = 0;
+    while (parent) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (frameNode) {
+            return offset + frameNode->GetChildIndex(node);
+        }
+        offset += parent->GetChildIndex(node);
+        node = parent;
+        parent = parent->GetParent();
+    }
+    return -1;
+}
 }
 
 RefPtr<FrameNode> ListItemDragManager::GetListFrameNode() const
@@ -194,6 +212,7 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
 
 void ListItemDragManager::SetNearbyNodeScale(RefPtr<FrameNode> node, float scale)
 {
+    CHECK_NULL_VOID(node);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto it = prevScaleNode_.find(renderContext);
@@ -217,6 +236,25 @@ void ListItemDragManager::ResetPrevScaleNode()
     scaleNode_.clear();
 }
 
+bool ListItemDragManager::GetDummyItemRect(int32_t index, RectF& rect) const
+{
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_RETURN(forEach, false);
+
+    // Check index validity
+    if (index < 0 || index >= forEach->FrameCount()) {
+        return false;
+    }
+
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_RETURN(parent, false);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    int32_t forEachIndex = GetForEachIndexInList(forEach);
+    int32_t listIndex = forEachIndex + index;
+    return pattern->GetDummyItemRect(listIndex, rect);
+}
+
 ListItemDragManager::ScaleResult ListItemDragManager::ScaleAxisNearItem(
     int32_t index, const RectF& rect, const OffsetF& delta, Axis axis)
 {
@@ -225,13 +263,17 @@ ListItemDragManager::ScaleResult ListItemDragManager::ScaleAxisNearItem(
     CHECK_NULL_RETURN(forEach, res);
 
     auto node = forEach->GetFrameNode(index);
-    CHECK_NULL_RETURN(node, res);
-    if (!node->IsActive()) {
+    RectF nearRect = RectF();
+    if (!node) {
+        bool isSuccess = GetDummyItemRect(index, nearRect);
+        CHECK_NULL_RETURN(isSuccess, res);
+    } else if (!node->IsActive()) {
         return res;
+    } else {
+        auto geometry = node->GetGeometryNode();
+        CHECK_NULL_RETURN(geometry, res);
+        nearRect = geometry->GetMarginFrameRect();
     }
-    auto geometry = node->GetGeometryNode();
-    CHECK_NULL_RETURN(geometry, res);
-    auto nearRect = geometry->GetMarginFrameRect();
     if (axis != axis_) {
         float offset1 = nearRect.GetOffset().GetMainOffset(axis_);
         if (!NearEqual(offset1, rect.GetOffset().GetMainOffset(axis_))) {
@@ -249,7 +291,6 @@ ListItemDragManager::ScaleResult ListItemDragManager::ScaleAxisNearItem(
     SetNearbyNodeScale(node, scale);
     res.scale = scale;
     res.needMove = IsNeedMove(nearRect, rect, axis, axisDelta);
-
     return res;
 }
 
@@ -278,11 +319,15 @@ void ListItemDragManager::ScaleDiagonalItem(int32_t index, const RectF& rect, co
     CHECK_NULL_VOID(forEach);
 
     auto node = forEach->GetFrameNode(index);
-    CHECK_NULL_VOID(node);
-    auto geometry = node->GetGeometryNode();
-    CHECK_NULL_VOID(geometry);
-    auto diagonalRect = geometry->GetMarginFrameRect();
-
+    RectF diagonalRect = RectF();
+    if (!node) {
+        bool isSuccess = GetDummyItemRect(index, diagonalRect);
+        CHECK_NULL_VOID(isSuccess);
+    } else {
+        auto geometry = node->GetGeometryNode();
+        CHECK_NULL_VOID(geometry);
+        diagonalRect = geometry->GetMarginFrameRect();
+    }
     OffsetF c0 = rect.GetOffset() + OffsetF(rect.Width() / 2, rect.Height() / 2);
     OffsetF c1 = diagonalRect.GetOffset() + OffsetF(diagonalRect.Width() / 2, diagonalRect.Height() / 2);
     OffsetF c2 = c0 + delta;
@@ -510,11 +555,34 @@ void ListItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     forEach->FireOnMoveThrough(fromIndex_, to);
 }
 
+bool ListItemDragManager::CheckItemExistence(int32_t index) const
+{
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_RETURN(forEach, false);
+    auto node = forEach->GetFrameNode(index);
+    if (node) {
+        return true;
+    }
+
+    auto list = listNode_.Upgrade();
+    CHECK_NULL_RETURN(list, false);
+    auto layoutProperty = list->GetLayoutProperty<ListLayoutProperty>();
+    if (!layoutProperty || !layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
+        return false;
+    }
+
+    // Check index validity
+    if (index < 0 || index >= forEach->FrameCount()) {
+        return false;
+    }
+    return true;
+}
+
 void ListItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
 {
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_VOID(forEach);
-    CHECK_NULL_VOID(forEach->GetFrameNode(to));
+    CHECK_NULL_VOID(CheckItemExistence(to));
     auto list = listNode_.Upgrade();
     CHECK_NULL_VOID(list);
     if (list->CheckNeedForceMeasureAndLayout()) {

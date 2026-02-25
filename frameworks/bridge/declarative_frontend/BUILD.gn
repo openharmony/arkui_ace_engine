@@ -108,6 +108,8 @@ jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 ark_theme_obj_path = base_output_path + "/arkTheme.o"
 jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 arkcomponent_obj_path = base_output_path + "/arkComponent.o"
+arkcommon_obj_path = base_output_path + "/arkCommon.o"
+arkdynamiccomponent_obj_path = base_output_path + "/arkDynamicComponent.o"
 
 action("run_state_mgmt_build") {
   script = "state_mgmt/build.py"
@@ -179,6 +181,24 @@ gen_obj("js_enum_style") {
   snapshot_dep = []
 }
 
+gen_obj("ark_common") {
+  input = "engine/arkCommon.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    arkcommon_obj_path = base_output_path + "/ark_common.c"
+  }
+  output = arkcommon_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("ark_dynamiccomponent") {
+  input = "engine/arkDynamicComponent.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    arkdynamiccomponent_obj_path = base_output_path + "/ark_dynamiccomponent.c"
+  }
+  output = arkdynamiccomponent_obj_path
+  snapshot_dep = []
+}
+
 gen_obj("ark_theme") {
   input = "engine/arkTheme.js"
   if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
@@ -238,11 +258,14 @@ template("declarative_js_engine") {
     deps = [
       ":ark_modifier",
       ":ark_theme_control",
+      ":gen_obj_src_ark_common",
+      ":gen_obj_src_ark_dynamiccomponent",
       ":gen_obj_src_ark_component",
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
+      "ark_layoutalgorithm:layoutalgorithm",
       ":mock",
       ":prefetcher",
       ":shape",
@@ -341,7 +364,6 @@ template("declarative_js_engine") {
       "jsview/js_container_picker.cpp",
       "jsview/js_container_span.cpp",
       "jsview/js_content_slot.cpp",
-      "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
       "jsview/js_divider.cpp",
       "jsview/js_dump_log.cpp",
@@ -358,7 +380,6 @@ template("declarative_js_engine") {
       "jsview/js_grid_container.cpp",
       "jsview/js_grid_item.cpp",
       "jsview/js_grid_row.cpp",
-      "jsview/js_hyperlink.cpp",
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
       "jsview/js_image_animator.cpp",
@@ -432,7 +453,6 @@ template("declarative_js_engine") {
       "jsview/js_stack.cpp",
       "jsview/js_state_mgmt_profiler.cpp",
       "jsview/js_swiper.cpp",
-      "jsview/js_symbol.cpp",
       "jsview/js_symbol_span.cpp",
       "jsview/js_tab_content.cpp",
       "jsview/js_tabs.cpp",
@@ -484,7 +504,6 @@ template("declarative_js_engine") {
       "jsview/models/column_model_impl.cpp",
       "jsview/models/common_view_model_impl.cpp",
       "jsview/models/custom_dialog_controller_model_impl.cpp",
-      "jsview/models/data_panel_model_impl.cpp",
       "jsview/models/divider_model_impl.cpp",
       "jsview/models/ellipse_model_impl.cpp",
       "jsview/models/flex_model_impl.cpp",
@@ -492,7 +511,6 @@ template("declarative_js_engine") {
       "jsview/models/gesture_model_impl.cpp",
       "jsview/models/grid_item_model_impl.cpp",
       "jsview/models/grid_model_impl.cpp",
-      "jsview/models/hyperlink_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
@@ -504,12 +522,10 @@ template("declarative_js_engine") {
       "jsview/models/navigator_model_impl.cpp",
       "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
-      "jsview/models/patternlock_model_impl.cpp",
       "jsview/models/polygon_model_impl.cpp",
       "jsview/models/progress_model_impl.cpp",
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/relative_container_model_impl.cpp",
-      "jsview/models/richeditor_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
       "jsview/models/scroll_bar_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
@@ -519,7 +535,6 @@ template("declarative_js_engine") {
       "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
-      "jsview/models/text_clock_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",
       "jsview/models/text_timer_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
@@ -767,11 +782,14 @@ template("declarative_js_engine_ng") {
     deps = [
       ":ark_modifier",
       ":ark_theme_control",
+      ":gen_obj_src_ark_common",
+      ":gen_obj_src_ark_dynamiccomponent",
       ":gen_obj_src_ark_component",
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
+      "ark_layoutalgorithm:layoutalgorithm",
       ":mock",
       ":prefetcher",
       ":shape",
@@ -878,7 +896,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_container_picker.cpp",
       "jsview/js_container_span.cpp",
       "jsview/js_content_slot.cpp",
-      "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
       "jsview/js_divider.cpp",
       "jsview/js_ellipse.cpp",
@@ -893,7 +910,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_grid_container.cpp",
       "jsview/js_grid_item.cpp",
       "jsview/js_grid_row.cpp",
-      "jsview/js_hyperlink.cpp",
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
       "jsview/js_image_animator.cpp",
@@ -960,7 +976,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
       "jsview/js_swiper.cpp",
-      "jsview/js_symbol.cpp",
       "jsview/js_symbol_span.cpp",
       "jsview/js_tab_content.cpp",
       "jsview/js_tabs.cpp",
@@ -1122,7 +1137,7 @@ template("declarative_js_engine_ng") {
       deps += [ "$ace_root/frameworks/bridge:framework_bridge_ng_$platform" ]
       defines += [ "BUILT_IN_JS_ENGINE" ]
     } else {
-      if (is_asan) {
+      if (is_asan || !ace_engine_feature_enable_libace) {
         deps += [ "$ace_root/build:libace_compatible" ]
       } else {
         deps += [ "$ace_root/build:libace" ]

@@ -18,25 +18,11 @@
 #include <fstream>
 #include <iostream>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
-
-std::string GetStringAttribute(Ark_NodeHandle node, const std::string &name)
-{
-    static const InspectorFilter inspector;
-    if (auto fnode = reinterpret_cast<FrameNode *>(node); fnode) {
-        if (auto jsonVal = JsonUtil::Create(true); jsonVal) {
-            fnode->ToJsonValue(jsonVal, inspector);
-            auto val = jsonVal->GetValue(name);
-            return (val &&
-                (val->IsObject() || val->IsArray() || val->IsNumber() || val->IsBool()))
-                    ? val->ToString() : jsonVal->GetString(name);
-        }
-    }
-    return {};
-}
-
 std::unique_ptr<JsonValue> GetJsonValue(Ark_NodeHandle node)
 {
     static const InspectorFilter inspector;
@@ -83,16 +69,98 @@ std::unique_ptr<JsonValue> GetPatternJsonValue(Ark_NodeHandle node)
 }
 
 template<>
-std::string GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+std::optional<std::string> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+{
+    if (jsonVal) {
+        auto val = jsonVal->GetValue(attrKey);
+        if (!val->IsValid()) {
+            return std::nullopt;
+        }
+        if (val->IsObject() || val->IsArray() || val->IsBool() || val->IsNumber()) {
+            return val->ToString();
+        }
+        return val->GetString();
+    }
+    return std::nullopt;
+}
+
+template<>
+std::optional<int> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+{
+    if (!jsonVal) {
+        return std::nullopt;
+    }
+    auto val = jsonVal->GetValue(attrKey);
+    if (!val->IsValid()) {
+        return std::nullopt;
+    }
+    if (val->IsString()) {
+        char* pEnd = nullptr;
+        auto str = val->GetString();
+        int64_t result = std::strtol(str.c_str(), &pEnd, 10);
+        if (pEnd == str.c_str() || (result < INT_MIN || result > INT_MAX) || errno == ERANGE) {
+            return std::nullopt;
+        }
+        return result;
+    }
+    return val->IsNumber() ? std::make_optional(val->GetInt()) : std::nullopt;
+}
+
+template<>
+std::optional<double> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+{
+    if (!jsonVal) {
+        return std::nullopt;
+    }
+    auto val = jsonVal->GetValue(attrKey);
+    if (!val->IsValid()) {
+        return std::nullopt;
+    }
+    if (val->IsString()) {
+        double result;
+        return StringUtils::StringToDouble(val->GetString(), result) ? std::make_optional(result) : std::nullopt;
+    }
+    return val->IsNumber() ? std::make_optional(val->GetDouble()) : std::nullopt;
+}
+
+template<>
+std::optional<bool> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+{
+    if (!jsonVal) {
+        return std::nullopt;
+    }
+    auto val = jsonVal->GetValue(attrKey);
+    if (!val->IsValid()) {
+        return std::nullopt;
+    }
+    if (val->IsString()) {
+        auto result = val->GetString();
+        if (result == "true") {
+            return true;
+        }
+        if (result == "false") {
+            return false;
+        }
+        return std::nullopt;
+    }
+    return val->IsBool() ? std::optional<bool>(val->GetBool()) : std::nullopt;
+}
+
+std::unique_ptr<JsonValue> GetAttrObject(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
 {
     if (jsonVal) {
         auto result = jsonVal->GetValue(attrKey);
-        if (result->IsObject() || result->IsArray() || result->IsBool() || result->IsNumber()) {
-            return result->ToString();
+        if (!result) {
+            return nullptr;
         }
-        return jsonVal->GetString(attrKey);
+        if (result->IsObject() || result->IsArray()) {
+            return result;
+        }
+        if (result->IsString()) {
+            return JsonUtil::ParseJsonData(result->GetString().c_str());
+        }
     }
-    return std::string();
+    return nullptr;
 }
 
 Ark_Resource CreateResource(int64_t id, ResourceType type)

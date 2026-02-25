@@ -209,7 +209,7 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
     SwiperModelStatic::SetDigitalCrownSensitivity(frameNode, static_cast<int32_t>(*convValue));
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Opt_Callback_I32_Void* handler)
+                  const Opt_arkui_component_idlize_Callback_I32_Void* handler)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

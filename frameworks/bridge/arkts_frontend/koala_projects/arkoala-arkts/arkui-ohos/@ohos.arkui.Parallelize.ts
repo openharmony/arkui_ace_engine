@@ -15,7 +15,6 @@ import { AceTrace } from "arkui/base/AceTrace"
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { OBSERVE } from "arkui/stateManagement";
 
-TaskScheduler.instance
 class ContextScope {
     private oldManager: StateManager | undefined
     private manager: StateManager
@@ -80,7 +79,7 @@ export class ParallelNode<T> {
                 this.rootState = this.manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
                     try {
                         memoEntry1<T, void>(context, 0, builder, this._args as T)
-                    } catch (err: Error) {
+                    } catch (err) {
                         console.error('parallel run in taskpool error :', err)
                         console.error(err.stack)
                     }
@@ -113,7 +112,7 @@ export class ParallelNode<T> {
                 this.rootState = this.manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
                     try {
                         memoEntry<void>(context, 0, builder)
-                    } catch (err: Error) {
+                    } catch (err) {
                         console.error('parallel run in taskpool error :', err)
                         console.error(err.stack)
                     }
@@ -149,7 +148,7 @@ export class ParallelNode<T> {
                 this.rootState = this.manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
                     try {
                         memoEntry<void>(context, 0, () => { content_(this._args as T) })
-                    } catch (err: Error) {
+                    } catch (err) {
                         console.error('parallel run in taskpool error :', err)
                         console.error(err.stack)
                     }

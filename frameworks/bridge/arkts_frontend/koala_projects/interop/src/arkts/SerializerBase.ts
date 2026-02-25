@@ -44,7 +44,7 @@ export function registerCallback(value: object): int32 {
  * Value representing object type in serialized data.
  * Must be synced with "enum Tags" in C++.
  */
-export enum Tags {
+export enum Tags: byte {
     UNDEFINED = 101,
     INT32 = 102,
     FLOAT32 = 103,
@@ -150,7 +150,10 @@ export class SerializerBase implements Disposable {
             return new SerializerBase()
         }
         if (SerializerBase.poolTop === SerializerBase.pool.length) {
-            throw new Error("Pool empty! Release one of taken serializers")
+            // Dynamically expand the pool when all serializers are in use
+            const newSerializer = new SerializerBase()
+            SerializerBase.pool.push(newSerializer)
+            console.log(`SerializerBase pool expanded to size ${SerializerBase.pool.length}`)
         }
         return SerializerBase.pool[SerializerBase.poolTop++]
     }

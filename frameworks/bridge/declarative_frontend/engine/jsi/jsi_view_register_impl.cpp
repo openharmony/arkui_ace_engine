@@ -50,7 +50,6 @@
 #include "bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
-#include "bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
@@ -68,7 +67,6 @@
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_grid_item.h"
 #include "bridge/declarative_frontend/jsview/js_grid_row.h"
-#include "bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "bridge/declarative_frontend/jsview/js_if_else.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
@@ -105,7 +103,7 @@
 #include "bridge/declarative_frontend/jsview/js_paste_button.h"
 #include "bridge/declarative_frontend/jsview/js_path.h"
 #include "bridge/declarative_frontend/jsview/js_path_shape.h"
-#include "bridge/declarative_frontend/jsview/js_pattern_lock.h"
+#include "bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_persistent.h"
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
 #include "bridge/declarative_frontend/jsview/js_polyline.h"
@@ -133,13 +131,12 @@
 #include "bridge/declarative_frontend/jsview/js_stack.h"
 #include "bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
-#include "bridge/declarative_frontend/jsview/js_symbol.h"
 #include "bridge/declarative_frontend/jsview/js_symbol_span.h"
 #include "bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "bridge/declarative_frontend/jsview/js_tabs.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
-#include "bridge/declarative_frontend/jsview/js_text_clock.h"
+#include "bridge/declarative_frontend/jsview/js_text_clock_controller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
@@ -161,6 +158,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 #include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_richeditor_binding.h"
 
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -422,8 +420,7 @@ void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>&
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> formBindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
     { "Text", JSText::JSBind },
-    { "TextClock", JSTextClock::JSBind },
-    { "TextClockController", JSTextClockController::JSBind },
+    { "TextClockController",  JSTextClockControllerBinding::JSBind },
     { "Animator", JSAnimator::JSBind },
     { "SpringProp", JSAnimator::JSBind },
     { "SpringMotion", JSAnimator::JSBind },
@@ -477,7 +474,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
     { "Piece", JSPiece::JSBind },
-    { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
     { "Swiper", JSSwiper::JSBind },
     { "Indicator", JSIndicator::JSBind },
@@ -592,7 +588,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
-    { "Hyperlink", JSHyperlink::JSBind },
     { "ActionSheet", JSActionSheet::JSBind },
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
@@ -612,7 +607,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
-    { "TextClock", JSTextClock::JSBind },
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
     { "FormMenuItem", JSFormMenuItem::JSBind },
@@ -645,7 +639,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "XComponent", JSXComponent::JSBind },
     { "XComponentController", JSXComponentController::JSBind },
 #endif
-    { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
     { "MagnifierController", JSMagnifierController::JSBind },
     { "Gesture", JSGesture::JSBind },
@@ -682,14 +675,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "VideoController", JSVideoController::JSBind },
 #endif
 #endif
-    { "Search", JSSearch::JSBind },
     { "Select", JSSelect::JSBind },
     { "SearchController", JSSearchController::JSBind },
-    { "TextClockController", JSTextClockController::JSBind },
+    { "TextClockController", JSTextClockControllerBinding::JSBind },
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },
-    { "PatternLock", JSPatternLock::JSBind },
-    { "PatternLockController", JSPatternLockController::JSBind },
+    { "PatternLockController", JSPatternLockControllerBinding::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },
@@ -741,13 +732,11 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "IsolatedComponent", JSIsolatedComponent::JSBind },
 #endif
 #endif
-    { "RichEditor", JSRichEditor::JSBind },
     { "RichEditorController", JSRichEditorController::JSBind },
     { "RichEditorStyledStringController", JSRichEditorStyledStringController::JSBind },
     { "LayoutManager", JSLayoutManager::JSBind },
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
-    { "SymbolGlyph", JSSymbol::JSBind },
     { "SymbolSpan", JSSymbolSpan::JSBind },
     { "ContainerSpan",  JSContainerSpan::JSBind},
     { "__RectShape__", JSRectShape::JSBind },
@@ -826,7 +815,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
     JSTextInputController::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
-    JSTextClockController::JSBind(globalObj);
+    JSTextClockControllerBinding::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     JSLinearGradientBinding::JSBind(globalObj);
     JSColorMetricsLinearGradientBinding::JSBind(globalObj);
@@ -890,6 +879,10 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSRepeat::JSBind(globalObj);
         return;
     }
+    if (module == "TextClock") {
+        JSTextClockControllerBinding::JSBind(globalObj);
+        return;
+    }
     auto func = bindFuncs.find(module);
     if (func == bindFuncs.end()) {
         RegisterExtraViewByName(globalObj, module);
@@ -901,8 +894,6 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSCalendarController::JSBind(globalObj);
     } else if ((*func).first == "TextTimer") {
         JSTextTimerController::JSBind(globalObj);
-    } else if ((*func).first == "TextClock") {
-        JSTextClockController::JSBind(globalObj);
     } else if ((*func).first == "Canvas") {
         JSCanvasPattern::JSBind(globalObj);
         JSCanvasGradient::JSBind(globalObj);
@@ -919,6 +910,10 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     auto func = bindFuncs.find(moduleName);
     if (func == bindFuncs.end()) {
         RegisterExtraViewByName(globalObj, moduleName);
+        return;
+    }
+    if (moduleName == "TextClock") {
+        JSTextClockControllerBinding::JSBind(globalObj);
         return;
     }
     if ((*func).first == "Swiper") {
@@ -943,8 +938,6 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSTextTimerController::JSBind(globalObj);
     } else if ((*func).first == "TextInput") {
         JSTextInputController::JSBind(globalObj);
-    } else if ((*func).first == "TextClock") {
-        JSTextClockController::JSBind(globalObj);
     } else if ((*func).first == "TextArea") {
         JSTextAreaController::JSBind(globalObj);
     } else if ((*func).first == "Search") {
@@ -1040,7 +1033,7 @@ void JsBindFormViewsForJsXNode(BindingTarget globalObj, bool isFull)
     if (isFull) {
         JSIndicator::JSBind(globalObj);
         JSSwiperController::JSBind(globalObj);
-        JSTextClockController::JSBind(globalObj);
+        JSTextClockControllerBinding::JSBind(globalObj);
         JSTextTimerController::JSBind(globalObj);
         JSIndicatorController::JSBind(globalObj);
     }

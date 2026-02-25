@@ -32,6 +32,8 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
+#include "core/components_ng/pattern/marquee/marquee_model_ng.h"
+#include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/event/touch_event.h"
@@ -41,6 +43,7 @@
 #include "core/interfaces/native/implementation/hover_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
+#include "core/interfaces/native/utility/accessor_utils.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/interfaces/native/ani/ani_theme.h"
 #include "core/interfaces/native/ani/ani_theme_module.h"
@@ -119,8 +122,6 @@ void SetFrameRateRange(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_I
 {
     NG::FrameNode* peer = reinterpret_cast<NG::FrameNode*>(peerPtr);
     CHECK_NULL_VOID(peer);
-    auto swiperPattern = peer->GetPattern();
-    CHECK_NULL_VOID(swiperPattern);
     ani_double min;
     ani_double max;
     ani_double expect;
@@ -137,8 +138,18 @@ void SetFrameRateRange(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_I
         return;
     }
     auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(min, max, expect);
-    auto sceneType = static_cast<SwiperDynamicSyncSceneType>(type);
-    swiperPattern->SetFrameRateRange(frameRateRange, sceneType);
+
+    if (peer->GetTag() == V2::MARQUEE_ETS_TAG) {
+        auto sceneType = static_cast<MarqueeDynamicSyncSceneType>(type);
+        auto customModifier = NodeModifier::GetMarqueeCustomModifier();
+        CHECK_NULL_VOID(customModifier);
+        customModifier->setMarqueeFrameRateRange(peer, frameRateRange, sceneType);
+    } else {
+        auto swiperPattern = peer->GetPattern();
+        CHECK_NULL_VOID(swiperPattern);
+        auto sceneType = static_cast<SwiperDynamicSyncSceneType>(type);
+        swiperPattern->SetFrameRateRange(frameRateRange, sceneType);
+    }
 }
 
 void SyncInstanceId(ArkUI_Int32 instanceId)
@@ -330,14 +341,12 @@ ani_int CreateWindowFreeContainer(ani_env *env, std::shared_ptr<OHOS::AbilityRun
         &nativeContext, FrontendType::ARK_TS);
     CHECK_NULL_RETURN(container, -1);
     int32_t instanceId = container->GetInstanceId();
-    ContainerScope::Add(instanceId);
     return instanceId;
 }
 
 void DestroyWindowFreeContainer(ani_int id)
 {
     Platform::WindowFreeContainer::DestroyWindowFreeContainer();
-    ContainerScope::RemoveAndCheck(static_cast<int32_t>(id));
 }
 
 ani_boolean CheckIsUIThread(ArkUI_Int32 instanceId)
@@ -388,6 +397,24 @@ void SetParallelScoped(ani_boolean parallel)
 {
     MultiThreadBuildManager::SetIsThreadSafeNodeScope(parallel);
     MultiThreadBuildManager::SetIsParallelizeUI(parallel);
+}
+
+void CheckThreadValid(ani_boolean checkUIThread, ani_long node)
+{
+    if (checkUIThread) {
+        if (!MultiThreadBuildManager::CheckOnUIThread()) {
+            OHOS::Ace::NG::AccessorUtils::ThrowTSException(
+                ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD, "The node is not running on main thread.");
+        }
+    } else {
+        auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(node);
+        CHECK_NULL_VOID(frameNodePeer);
+        auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+        if (!MultiThreadBuildManager::CheckNodeOnValidThread(AceType::RawPtr(frameNode))) {
+            OHOS::Ace::NG::AccessorUtils::ThrowTSException(
+                ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD, "The node is not running on valid thread.");
+        }
+    }
 }
 
 static void SetCustomPropertyCallBack(ArkUINodeHandle node, std::function<void()>&& func,
@@ -1071,6 +1098,18 @@ void ResolveUIContext(std::vector<int32_t>& instnace)
     instnace.push_back(static_cast<int32_t>(currnetId.second));
 }
 
+ani_long GetPageRootNodeInStatic()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context) {
+        auto node = context->GetPageRootNode();
+        if (node) {
+            return reinterpret_cast<ani_long>(node.GetRawPtr());
+        }
+    }
+    return 0;
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -1098,6 +1137,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
         .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout,
         .setParallelScoped = OHOS::Ace::NG::SetParallelScoped,
+        .checkThreadValid = OHOS::Ace::NG::CheckThreadValid,
         .setCustomPropertyCallBack = OHOS::Ace::NG::SetCustomPropertyCallBack,
         .getCustomProperty = OHOS::Ace::NG::GetCustomProperty,
         .setOverlayComponent = OHOS::Ace::NG::SetOverlayComponent,
@@ -1108,7 +1148,6 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .lpx2px = OHOS::Ace::NG::Lpx2px,
         .px2lpx = OHOS::Ace::NG::Px2lpx,
         .getWindowName = OHOS::Ace::NG::GetWindowName,
-        .setIsRecycleInvisibleImageMemory = OHOS::Ace::NG::SetIsRecycleInvisibleImageMemory,
         .getWindowId = OHOS::Ace::NG::GetWindowId,
         .getWindowHeightBreakpoint = OHOS::Ace::NG::GetWindowHeightBreakpoint,
         .getWindowWidthBreakpoint = OHOS::Ace::NG::GetWindowWidthBreakpoint,
@@ -1147,6 +1186,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .setImageCacheCount = OHOS::Ace::NG::SetImageCacheCount,
         .setImageRawDataCacheSize = OHOS::Ace::NG::SetImageRawDataCacheSize,
         .applyThemeScopeId = OHOS::Ace::NG::ApplyThemeScopeId,
+        .setIsRecycleInvisibleImageMemory = OHOS::Ace::NG::SetIsRecycleInvisibleImageMemory,
         .getBaseEventPressedModifierKey = OHOS::Ace::NG::GetBaseEventPressedModifierKey,
         .getKeyEventPressedModifierKey = OHOS::Ace::NG::GetKeyEventPressedModifierKey,
         .setClickEventPreventDefault = OHOS::Ace::NG::SetClickEventPreventDefault,
@@ -1156,6 +1196,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getLastForegroundUIContext = OHOS::Ace::NG::GetLastForegroundUIContext,
         .getAllInstanceIds = OHOS::Ace::NG::GetAllInstanceIds,
         .resolveUIContext = OHOS::Ace::NG::ResolveUIContext,
+        .getPageRootNode = OHOS::Ace::NG::GetPageRootNodeInStatic,
     };
     return &impl;
 }

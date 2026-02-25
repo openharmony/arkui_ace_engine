@@ -110,9 +110,8 @@ bool ImageGeneratorDialogView::Create(int32_t instanceId)
     };
     auto emptySpringBack = []() {};
     auto style = GENERATOR_STYLE;
-    style.instanceId = instanceId;
     NG::BindSheetCreateParam param(style, root, uiNode, std::move(onWillDismiss), std::move(emptySpringBack), true);
-    overlayManager->OpenImageGenerator(std::move(param));
+    overlayManager->OpenImageGenerator(std::move(param), instanceId);
     // after call onBindSheet, find sheetNode and set callback
     auto parent = uiNode->GetParent();
     while (parent) {

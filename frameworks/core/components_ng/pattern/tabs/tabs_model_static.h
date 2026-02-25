@@ -41,7 +41,7 @@ public:
     static void SetIsVertical(FrameNode* frameNode, bool isVertical);
     static void SetScrollable(FrameNode* frameNode, bool scrollable);
     static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);
-    static void SetTabBarMode(FrameNode* frameNode, const std::optional<TabBarMode>& tabBarModeOpt);
+    static void SetTabBarMode(FrameNode* frameNode, const TabBarMode& tabBarMode);
     static void SetTabBarWidth(FrameNode* frameNode, const std::optional<Dimension>& tabBarWidth);
     static void SetTabBarHeight(FrameNode* frameNode, const std::optional<Dimension>& tabBarHeightOpt);
     static void SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight);
@@ -60,7 +60,8 @@ public:
     static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
-    static void SetDivider(FrameNode* frameNode, const std::optional<TabsItemDivider>& dividerOpt);
+    static void SetDivider(FrameNode* frameNode, const TabsItemDivider& dividerOpt);
+    static void SetDividerColorByUser(FrameNode* frameNode, bool isByUser);
     static void InitDivider(FrameNode* frameNode);
     static void SetBarOverlap(FrameNode* frameNode, bool barOverlap);
     static void SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption);
@@ -75,6 +76,7 @@ public:
         std::optional<TabsCacheMode> cacheMode);
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChangeEvent);
     static void ApplyAttributesFinish(FrameNode* frameNode);
+    static void ResetScrollableBarModeOptions(FrameNode* frameNode);
 
 private:
     static RefPtr<TabsNode> GetOrCreateTabsNode(

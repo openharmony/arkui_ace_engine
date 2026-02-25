@@ -45,7 +45,9 @@ public:
 
     bool IsPageOverflowEnabled() const;
     bool IsDialogCorrectionEnabled() const;
+    bool IsRnOverflowEnable() const;
     void SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled);
+    void SetUiCorrectionRnEnableParam(bool rnOverflowEnabled);
 private:
     void MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metadata>& metaData);
     void FeatureParamParseEntry(const std::string& bundleName);
@@ -56,8 +58,8 @@ private:
     static constexpr uint32_t DEFAULT_SYNCLOAD_DEADLINE = 50; // 50ms default time
     static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
 
-    std::shared_ptr<ConfigParserBase> featureParser_;
-    std::shared_ptr<ConfigParserBase> uiCorrectionParser_;
+    std::shared_ptr<ConfigParserBase> featureParser_ = nullptr;
+    std::shared_ptr<ConfigParserBase> uiCorrectionParser_ = nullptr;
     // SyncLoadParser
     bool syncLoadEnabled_ = false;
     uint32_t syncloadResponseDeadline_ = DEFAULT_SYNCLOAD_DEADLINE * MS_TO_NS;
@@ -66,6 +68,7 @@ private:
     bool uiNodeGcEnabled_ = false;
     bool pageOverflowEnabled_ = false;
     bool dialogCorrectionEnabled_ = false;
+    bool rnOverflowEnabled_ = false;
 
     friend class ConfigParserBase;
     friend class SyncLoadParser;

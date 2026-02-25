@@ -31,6 +31,7 @@
 #include "frameworks/core/accessibility/accessibility_node.h"
 #include "frameworks/core/accessibility/utils/accessibility_manager_utils.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#include "js_accessibility_manager_test.h"
 
 using namespace OHOS::Accessibility;
 using namespace testing;
@@ -4343,6 +4344,121 @@ HWTEST_F(JsAccessibilityManagerTest, RegisterScreenReaderObserverCallback, TestS
 }
 
 /**
+ * @tc.name: GetCursorPosition001
+ * @tc.desc: Test GetCursorPosition with null context (CHECK_NULL_VOID_WITH_ACTION macro)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetCursorPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager without context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create mock callback and call GetCursorPosition with null pipeline context
+     * @tc.expected: callback should be called with default value (0) due to CHECK_NULL_VOID_WITH_ACTION
+     */
+    auto callback = std::make_shared<MockAccessibilityElementOperatorCallback>();
+    const int64_t elementId = 1;
+    const int32_t requestId = 100;
+
+    // Call GetCursorPosition with null pipeline context
+    // Should trigger CHECK_NULL_VOID_WITH_ACTION and call callback with 0
+    jsAccessibilityManager->GetCursorPosition(elementId, requestId, *callback);
+
+    // Verify callback was called with default value
+    EXPECT_TRUE(callback->called_);
+    EXPECT_EQ(callback->mockCursorPosition_, 0);
+    EXPECT_EQ(callback->mockRequestId, requestId);
+}
+
+/**
+ * @tc.name: GetCursorPosition002
+ * @tc.desc: Test GetCursorPosition with not UI Extension branch (AddAfterRenderTask executes lambda directly)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetCursorPosition002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    ASSERT_NE(jsAccessibilityManager->GetPipelineContext().Upgrade(), nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    root->AddChild(frameNode);
+
+    /**
+     * @tc.steps: step2. create mock callback
+     */
+    auto callback = std::make_shared<MockAccessibilityElementOperatorCallback>();
+    const int64_t elementId = frameNode->GetAccessibilityId(); // UI Extension ID (UI_EXTENSION_OFFSET_MAX + offset)
+    const int32_t requestId = 102;
+
+    /**
+     * @tc.steps: step3. call GetCursorPosition with UI Extension element ID
+     * @tc.expected: AddAfterRenderTask executes lambda directly in test environment,
+     *               callback will be called when nodes are found or with 0 if not found
+     */
+    auto useFlushUITasks = MockPipelineContext::GetCurrent()->UseFlushUITasks();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(false);
+    jsAccessibilityManager->GetCursorPosition(elementId, requestId, *callback);
+    EXPECT_TRUE(callback->called_);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(useFlushUITasks);
+    root->RemoveChild(frameNode);
+}
+
+/**
+ * @tc.name: GetCursorPosition003
+ * @tc.desc: Test GetCursorPosition with UI Extension branch (AddAfterRenderTask executes lambda directly)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetCursorPosition003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    ASSERT_NE(jsAccessibilityManager->GetPipelineContext().Upgrade(), nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    root->AddChild(frameNode);
+
+    /**
+     * @tc.steps: step2. create mock callback
+     */
+    auto callback = std::make_shared<MockAccessibilityElementOperatorCallback>();
+    const int64_t elementId = 10000000001; // UI Extension ID (UI_EXTENSION_OFFSET_MIN + 1)
+    const int32_t requestId = 102;
+    frameNode->accessibilityId_ = elementId;
+    /**
+     * @tc.steps: step3. call GetCursorPosition with UI Extension element ID
+     * @tc.expected: AddAfterRenderTask executes lambda directly in test environment,
+     *               callback will be called when nodes are found or with 0 if not found
+     */
+    auto useFlushUITasks = MockPipelineContext::GetCurrent()->UseFlushUITasks();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(false);
+    jsAccessibilityManager->GetCursorPosition(elementId, requestId, *callback);
+    EXPECT_TRUE(callback->called_);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(useFlushUITasks);
+    root->RemoveChild(frameNode);
+}
+
+/**
  * @tc.name: UpdateAccessibilityNodeRect001
  * @tc.desc: UpdateAccessibilityNodeRect
  * @tc.type: FUNC
@@ -4453,6 +4569,64 @@ HWTEST_F(JsAccessibilityManagerTest, NeedChangeToReadableNodeTest001, TestSize.L
     // vitural function need return false
     auto ret = accessibilityManager->NeedChangeToReadableNode(frameNode, frameNode2);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: AccessibilityOnShowHide001
+ * @tc.desc: Test AccessibilityOnShowHide with isOnShow = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, AccessibilityOnShowHide001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager and context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. call AccessibilityOnShowHide with isOnShow = false
+     * @tc.expected: should not call CheckAndReConnectA11ySA, no crash
+     */
+    jsAccessibilityManager->AccessibilityOnShowHide(false, context);
+
+    /**
+     * @tc.steps: step3. verify a11y manager state unchanged
+     */
+    EXPECT_FALSE(jsAccessibilityManager->IsRegister());
+}
+
+/**
+ * @tc.name: AccessibilityOnShowHide002
+ * @tc.desc: Test AccessibilityOnShowHide with isOnShow = true, normal case
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, AccessibilityOnShowHide002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager and context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. call AccessibilityOnShowHide with isOnShow = true
+     * @tc.expected: should call CheckAndReConnectA11ySA
+     * Note: This test verifies the function can be called without crash.
+     * Actual behavior depends on AccessibilitySystemAbilityClient state.
+     */
+    jsAccessibilityManager->AccessibilityOnShowHide(true, context);
+
+    /**
+     * @tc.steps: step3. verify a11y manager state unchanged
+     */
+    EXPECT_FALSE(jsAccessibilityManager->IsRegister());
 }
 
 /**
@@ -4618,5 +4792,404 @@ HWTEST_F(JsAccessibilityManagerTest, SendAccessibilityAsyncEventInnerAfterRender
     accessibilityProperty->SetAccessibilityStateDescription("test");
     jsAccessibilityManager->SendAccessibilityAsyncEventInnerAfterRender(accessibilityEvent);
     EXPECT_TRUE(accessibilityProperty->HasAccessibilityStateDescription());
+}
+
+/**
+ * @tc.name: ClearAccessibilityFocusState001
+ * @tc.desc: Test ClearAccessibilityFocusState clears focus state correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ClearAccessibilityFocusState001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager and set focus state
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+
+    // Set focus state
+    jsAccessibilityManager->currentFocusNodeId_ = 1;
+    jsAccessibilityManager->lastElementId_ = 1;
+    jsAccessibilityManager->lastFrameNode_ = frameNode;
+
+    /**
+     * @tc.steps: step2. call ClearAccessibilityFocusState
+     * @tc.expected: focus state should be cleared
+     */
+    jsAccessibilityManager->ClearAccessibilityFocusState();
+
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->lastElementId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->lastFrameNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: ClearAccessibilityFocusState002
+ * @tc.desc: Test ClearAccessibilityFocusState with invalid focus state
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ClearAccessibilityFocusState002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with invalid focus state
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    // Set invalid focus state
+    jsAccessibilityManager->currentFocusNodeId_ = -1;
+    jsAccessibilityManager->lastElementId_ = -1;
+
+    /**
+     * @tc.steps: step2. call ClearAccessibilityFocusState
+     * @tc.expected: should not crash and state remains invalid
+     */
+    jsAccessibilityManager->ClearAccessibilityFocusState();
+
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->lastElementId_, -1);
+}
+
+/**
+ * @tc.name: ClearAccessibilityFocusState003
+ * @tc.desc: Test ClearAccessibilityFocusState with partial valid state
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ClearAccessibilityFocusState003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with partial valid state
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+
+    // Set partial valid state (only currentFocusNodeId_ is valid)
+    jsAccessibilityManager->currentFocusNodeId_ = 1;
+    jsAccessibilityManager->lastElementId_ = -1;
+    jsAccessibilityManager->lastFrameNode_ = frameNode;
+
+    /**
+     * @tc.steps: step2. call ClearAccessibilityFocusState
+     * @tc.expected: state should be cleared even with partial valid data
+     */
+    jsAccessibilityManager->ClearAccessibilityFocusState();
+
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->lastElementId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->lastFrameNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: IsFormRender001
+ * @tc.desc: Test IsFormRender returns false when pipeline context is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsFormRender001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager without pipeline context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. call IsFormRender without setting pipeline context
+     * @tc.expected: should return false
+     */
+    bool isFormRender = jsAccessibilityManager->IsFormRender();
+    EXPECT_FALSE(isFormRender);
+}
+
+/**
+ * @tc.name: IsFormRender002
+ * @tc.desc: Test IsFormRender when isFormRender is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsFormRender002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with NG pipeline context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. backup original form render state and set to true
+     */
+    bool originalIsFormRender = context->IsFormRender();
+    context->SetIsFormRender(true);
+
+    /**
+     * @tc.steps: step3. call IsFormRender
+     * @tc.expected: should return true
+     */
+    bool isFormRender = jsAccessibilityManager->IsFormRender();
+    EXPECT_TRUE(isFormRender);
+
+    /**
+     * @tc.steps: step4. restore original form render state
+     */
+    context->SetIsFormRender(originalIsFormRender);
+}
+
+/**
+ * @tc.name: IsFormRender003
+ * @tc.desc: Test IsFormRender when isFormRender is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsFormRender003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with NG pipeline context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. backup original form render state and set to false
+     */
+    bool originalIsFormRender = context->IsFormRender();
+    context->SetIsFormRender(false);
+
+    /**
+     * @tc.steps: step3. call IsFormRender
+     * @tc.expected: should return false
+     */
+    bool isFormRender = jsAccessibilityManager->IsFormRender();
+    EXPECT_FALSE(isFormRender);
+
+    /**
+     * @tc.steps: step4. restore original form render state
+     */
+    context->SetIsFormRender(originalIsFormRender);
+}
+
+/**
+ * @tc.name: IsFormRender004
+ * @tc.desc: Test IsFormRender with focus state clearing when form render is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsFormRender004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with focus state and form render
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+
+    // Set focus state
+    jsAccessibilityManager->currentFocusNodeId_ = 1;
+    jsAccessibilityManager->lastElementId_ = 1;
+    jsAccessibilityManager->lastFrameNode_ = frameNode;
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. backup and set form render to true
+     */
+    bool originalIsFormRender = context->IsFormRender();
+    context->SetIsFormRender(true);
+
+    /**
+     * @tc.steps: step3. verify IsFormRender returns true and clear focus
+     * @tc.expected: focus state should be cleared
+     */
+    EXPECT_TRUE(jsAccessibilityManager->IsFormRender());
+    jsAccessibilityManager->ClearAccessibilityFocusState();
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->lastElementId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->lastFrameNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step4. restore original form render state
+     */
+    context->SetIsFormRender(originalIsFormRender);
+}
+
+/**
+ * @tc.name: IsFormRender005
+ * @tc.desc: Test IsFormRender with focus state preserving when form render is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsFormRender005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with focus state
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+
+    // Set focus state
+    jsAccessibilityManager->currentFocusNodeId_ = 1;
+    jsAccessibilityManager->lastElementId_ = 1;
+    jsAccessibilityManager->lastFrameNode_ = frameNode;
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. backup and set form render to false
+     */
+    bool originalIsFormRender = context->IsFormRender();
+    context->SetIsFormRender(false);
+
+    /**
+     * @tc.steps: step3. verify IsFormRender returns false
+     * @tc.expected: focus state should NOT be cleared automatically
+     */
+    EXPECT_FALSE(jsAccessibilityManager->IsFormRender());
+    // Focus state remains since we're not calling ClearAccessibilityFocusState
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 1);
+    EXPECT_EQ(jsAccessibilityManager->lastElementId_, 1);
+
+    /**
+     * @tc.steps: step4. restore original form render state
+     */
+    context->SetIsFormRender(originalIsFormRender);
+}
+
+/**
+ * @tc.name: DeregisterInteractionOperationAsChildTree001
+ * @tc.desc: Test DeregisterInteractionOperationAsChildTree clears focus when form render is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DeregisterInteractionOperationAsChildTree001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with focus state
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->Register(true);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+
+    // Set focus state
+    jsAccessibilityManager->currentFocusNodeId_ = 1;
+    jsAccessibilityManager->lastElementId_ = 1;
+    jsAccessibilityManager->lastFrameNode_ = frameNode;
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. backup and set form render to true
+     */
+    bool originalIsFormRender = context->IsFormRender();
+    context->SetIsFormRender(true);
+
+    /**
+     * @tc.steps: step3. call DeregisterInteractionOperationAsChildTree
+     * @tc.expected: focus state should be cleared since form render is true
+     */
+    jsAccessibilityManager->DeregisterInteractionOperationAsChildTree();
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->lastElementId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->lastFrameNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step4. restore original form render state
+     */
+    context->SetIsFormRender(originalIsFormRender);
+}
+
+/**
+ * @tc.name: DeregisterInteractionOperationAsChildTree002
+ * @tc.desc: Test DeregisterInteractionOperationAsChildTree preserves focus when form render is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DeregisterInteractionOperationAsChildTree002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with focus state
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->Register(true);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+
+    // Set focus state
+    jsAccessibilityManager->currentFocusNodeId_ = 1;
+    jsAccessibilityManager->lastElementId_ = 1;
+    jsAccessibilityManager->lastFrameNode_ = frameNode;
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. backup and set form render to false
+     */
+    bool originalIsFormRender = context->IsFormRender();
+    context->SetIsFormRender(false);
+
+    /**
+     * @tc.steps: step3. call DeregisterInteractionOperationAsChildTree
+     * @tc.expected: focus state should NOT be cleared since form render is false
+     */
+    jsAccessibilityManager->DeregisterInteractionOperationAsChildTree();
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 1);
+    EXPECT_EQ(jsAccessibilityManager->lastElementId_, 1);
+    EXPECT_NE(jsAccessibilityManager->lastFrameNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step4. restore original form render state
+     */
+    context->SetIsFormRender(originalIsFormRender);
+}
+
+/**
+ * @tc.name: DeregisterInteractionOperationAsChildTree003
+ * @tc.desc: Test DeregisterInteractionOperationAsChildTree with invalid focus state
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DeregisterInteractionOperationAsChildTree003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager without focus state
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->Register(true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    // Set invalid focus state
+    jsAccessibilityManager->currentFocusNodeId_ = -1;
+    jsAccessibilityManager->lastElementId_ = -1;
+
+    /**
+     * @tc.steps: step2. call DeregisterInteractionOperationAsChildTree
+     * @tc.expected: should not crash even with invalid focus state
+     */
+    jsAccessibilityManager->DeregisterInteractionOperationAsChildTree();
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1);
+    EXPECT_EQ(jsAccessibilityManager->lastElementId_, -1);
 }
 } // namespace OHOS::Ace::NG

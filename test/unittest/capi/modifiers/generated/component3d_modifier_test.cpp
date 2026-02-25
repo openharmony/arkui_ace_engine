@@ -75,16 +75,15 @@ public:
 HWTEST_F(Component3DModifierTest, DISABLED_setComponent3DOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultSceneOptions =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SCENE_OPTIONS_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultSceneOptions = GetAttrObject(jsonValue, ATTRIBUTE_SCENE_OPTIONS_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultSceneOptions, ATTRIBUTE_SCENE_OPTIONS_I_SCENE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SCENE_OPTIONS_I_SCENE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SCENE_OPTIONS_I_SCENE_DEFAULT_VALUE)) <<
         "Default value for attribute 'sceneOptions.scene'";
 
     resultStr = GetAttrValue<std::string>(resultSceneOptions, ATTRIBUTE_SCENE_OPTIONS_I_MODEL_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SCENE_OPTIONS_I_MODEL_TYPE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SCENE_OPTIONS_I_MODEL_TYPE_DEFAULT_VALUE)) <<
         "Default value for attribute 'sceneOptions.modelType'";
 }
 
@@ -112,10 +111,10 @@ HWTEST_F(Component3DModifierTest, DISABLED_setComponent3DOptionsTestSceneOptions
         WriteTo(inputValueSceneOptions).scene = value;
         modifier_->setComponent3DOptions(node, &inputValueSceneOptions);
         auto jsonValue = GetJsonValue(node);
-        auto resultSceneOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SCENE_OPTIONS_NAME);
+        auto resultSceneOptions = GetAttrObject(jsonValue, ATTRIBUTE_SCENE_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSceneOptions, ATTRIBUTE_SCENE_OPTIONS_I_SCENE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setComponent3DOptions, attribute: sceneOptions.scene";
     };
 
@@ -153,10 +152,10 @@ HWTEST_F(Component3DModifierTest, DISABLED_setComponent3DOptionsTestSceneOptions
         WriteTo(inputValueSceneOptions).scene = value;
         modifier_->setComponent3DOptions(node, &inputValueSceneOptions);
         auto jsonValue = GetJsonValue(node);
-        auto resultSceneOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SCENE_OPTIONS_NAME);
+        auto resultSceneOptions = GetAttrObject(jsonValue, ATTRIBUTE_SCENE_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSceneOptions, ATTRIBUTE_SCENE_OPTIONS_I_SCENE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SCENE_OPTIONS_I_SCENE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SCENE_OPTIONS_I_SCENE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setComponent3DOptions, attribute: sceneOptions.scene";
     };
 
@@ -192,10 +191,10 @@ HWTEST_F(Component3DModifierTest, DISABLED_setComponent3DOptionsTestSceneOptions
         WriteTo(inputValueSceneOptions).modelType = value;
         modifier_->setComponent3DOptions(node, &inputValueSceneOptions);
         auto jsonValue = GetJsonValue(node);
-        auto resultSceneOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SCENE_OPTIONS_NAME);
+        auto resultSceneOptions = GetAttrObject(jsonValue, ATTRIBUTE_SCENE_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSceneOptions, ATTRIBUTE_SCENE_OPTIONS_I_MODEL_TYPE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setComponent3DOptions, attribute: sceneOptions.modelType";
     };
 
@@ -227,10 +226,10 @@ HWTEST_F(Component3DModifierTest, DISABLED_setComponent3DOptionsTestSceneOptions
         WriteTo(inputValueSceneOptions).modelType = value;
         modifier_->setComponent3DOptions(node, &inputValueSceneOptions);
         auto jsonValue = GetJsonValue(node);
-        auto resultSceneOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SCENE_OPTIONS_NAME);
+        auto resultSceneOptions = GetAttrObject(jsonValue, ATTRIBUTE_SCENE_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSceneOptions, ATTRIBUTE_SCENE_OPTIONS_I_MODEL_TYPE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SCENE_OPTIONS_I_MODEL_TYPE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SCENE_OPTIONS_I_MODEL_TYPE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setComponent3DOptions, attribute: sceneOptions.modelType";
     };
 
@@ -247,10 +246,11 @@ HWTEST_F(Component3DModifierTest, DISABLED_setComponent3DOptionsTestSceneOptions
 HWTEST_F(Component3DModifierTest, setEnvironmentTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENVIRONMENT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENVIRONMENT_DEFAULT_VALUE) << "Default value for attribute 'environment'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENVIRONMENT_DEFAULT_VALUE)) <<
+        "Default value for attribute 'environment'";
 }
 
 /*
@@ -274,7 +274,7 @@ HWTEST_F(Component3DModifierTest, setEnvironmentTestEnvironmentValidValues, Test
         modifier_->setEnvironment(node_, &inputValueEnvironment);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENVIRONMENT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnvironment, attribute: environment";
     };
 
@@ -307,7 +307,7 @@ HWTEST_F(Component3DModifierTest, DISABLED_setEnvironmentTestEnvironmentInvalidV
         modifier_->setEnvironment(node_, &inputValueEnvironment);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENVIRONMENT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ENVIRONMENT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENVIRONMENT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEnvironment, attribute: environment";
     };
 
@@ -326,10 +326,10 @@ HWTEST_F(Component3DModifierTest, DISABLED_setEnvironmentTestEnvironmentInvalidV
 HWTEST_F(Component3DModifierTest, setShaderTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHADER_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHADER_DEFAULT_VALUE) << "Default value for attribute 'shader'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHADER_DEFAULT_VALUE)) << "Default value for attribute 'shader'";
 }
 
 /*
@@ -352,7 +352,8 @@ HWTEST_F(Component3DModifierTest, setShaderTestShaderValidValues, TestSize.Level
         modifier_->setShader(node_, &inputValueShader);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHADER_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setShader, attribute: shader";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setShader, attribute: shader";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureUriStringValidValues) {
@@ -383,7 +384,7 @@ HWTEST_F(Component3DModifierTest, DISABLED_setShaderTestShaderInvalidValues, Tes
         modifier_->setShader(node_, &inputValueShader);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHADER_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SHADER_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHADER_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setShader, attribute: shader";
     };
 
@@ -402,10 +403,10 @@ HWTEST_F(Component3DModifierTest, DISABLED_setShaderTestShaderInvalidValues, Tes
 HWTEST_F(Component3DModifierTest, setShaderImageTextureTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHADER_IMAGE_TEXTURE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHADER_IMAGE_TEXTURE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHADER_IMAGE_TEXTURE_DEFAULT_VALUE)) <<
         "Default value for attribute 'shaderImageTexture'";
 }
 
@@ -430,7 +431,7 @@ HWTEST_F(Component3DModifierTest, setShaderImageTextureTestShaderImageTextureVal
         modifier_->setShaderImageTexture(node_, &inputValueShaderImageTexture);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHADER_IMAGE_TEXTURE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setShaderImageTexture, attribute: shaderImageTexture";
     };
 
@@ -463,7 +464,7 @@ HWTEST_F(Component3DModifierTest, DISABLED_setShaderImageTextureTestShaderImageT
         modifier_->setShaderImageTexture(node_, &inputValueShaderImageTexture);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHADER_IMAGE_TEXTURE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SHADER_IMAGE_TEXTURE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHADER_IMAGE_TEXTURE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setShaderImageTexture, attribute: shaderImageTexture";
     };
 
@@ -479,10 +480,10 @@ HWTEST_F(Component3DModifierTest, DISABLED_setShaderImageTextureTestShaderImageT
 HWTEST_F(Component3DModifierTest, DISABLED_setShaderInputBufferTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHADER_INPUT_BUFFER_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHADER_INPUT_BUFFER_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHADER_INPUT_BUFFER_DEFAULT_VALUE)) <<
         "Default value for attribute 'shaderInputBuffer'";
 }
 
@@ -504,10 +505,11 @@ HWTEST_F(Component3DModifierTest, DISABLED_setShaderInputBufferTestValidValues, 
 HWTEST_F(Component3DModifierTest, setRenderWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RENDER_WIDTH_DEFAULT_VALUE) << "Default value for attribute 'renderWidth'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RENDER_WIDTH_DEFAULT_VALUE)) <<
+        "Default value for attribute 'renderWidth'";
 }
 
 /*
@@ -530,7 +532,7 @@ HWTEST_F(Component3DModifierTest, setRenderWidthTestRenderWidthValidValues, Test
         modifier_->setRenderWidth(node_, &inputValueRenderWidth);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setRenderWidth, attribute: renderWidth";
     };
 
@@ -559,7 +561,7 @@ HWTEST_F(Component3DModifierTest, setRenderWidthTestRenderWidthInvalidValues, Te
         modifier_->setRenderWidth(node_, &inputValueRenderWidth);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_RENDER_WIDTH_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RENDER_WIDTH_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRenderWidth, attribute: renderWidth";
     };
 
@@ -576,10 +578,11 @@ HWTEST_F(Component3DModifierTest, setRenderWidthTestRenderWidthInvalidValues, Te
 HWTEST_F(Component3DModifierTest, setRenderHeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RENDER_HEIGHT_DEFAULT_VALUE) << "Default value for attribute 'renderHeight'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RENDER_HEIGHT_DEFAULT_VALUE)) <<
+        "Default value for attribute 'renderHeight'";
 }
 
 /*
@@ -602,7 +605,7 @@ HWTEST_F(Component3DModifierTest, setRenderHeightTestRenderHeightValidValues, Te
         modifier_->setRenderHeight(node_, &inputValueRenderHeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setRenderHeight, attribute: renderHeight";
     };
 
@@ -631,7 +634,7 @@ HWTEST_F(Component3DModifierTest, setRenderHeightTestRenderHeightInvalidValues, 
         modifier_->setRenderHeight(node_, &inputValueRenderHeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_RENDER_HEIGHT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RENDER_HEIGHT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRenderHeight, attribute: renderHeight";
     };
 
@@ -648,16 +651,15 @@ HWTEST_F(Component3DModifierTest, setRenderHeightTestRenderHeightInvalidValues, 
 HWTEST_F(Component3DModifierTest, setCustomRenderTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultCustomRender =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CUSTOM_RENDER_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultCustomRender = GetAttrObject(jsonValue, ATTRIBUTE_CUSTOM_RENDER_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultCustomRender, ATTRIBUTE_CUSTOM_RENDER_I_URI_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_RENDER_I_URI_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CUSTOM_RENDER_I_URI_DEFAULT_VALUE)) <<
         "Default value for attribute 'customRender.uri'";
 
     resultStr = GetAttrValue<std::string>(resultCustomRender, ATTRIBUTE_CUSTOM_RENDER_I_SELF_RENDER_UPDATE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_RENDER_I_SELF_RENDER_UPDATE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CUSTOM_RENDER_I_SELF_RENDER_UPDATE_DEFAULT_VALUE)) <<
         "Default value for attribute 'customRender.selfRenderUpdate'";
 }
 
@@ -683,9 +685,9 @@ HWTEST_F(Component3DModifierTest, DISABLED_setCustomRenderTestCustomRenderUriVal
         inputValueUri = value;
         modifier_->setCustomRender(node_, &inputValueUri, inputValueSelfRenderUpdate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultCustomRender = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CUSTOM_RENDER_NAME);
+        auto resultCustomRender = GetAttrObject(jsonValue, ATTRIBUTE_CUSTOM_RENDER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCustomRender, ATTRIBUTE_CUSTOM_RENDER_I_URI_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setCustomRender, attribute: customRender.uri";
     };
 
@@ -720,9 +722,9 @@ HWTEST_F(Component3DModifierTest, DISABLED_setCustomRenderTestCustomRenderUriInv
         inputValueUri = value;
         modifier_->setCustomRender(node_, &inputValueUri, inputValueSelfRenderUpdate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultCustomRender = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CUSTOM_RENDER_NAME);
+        auto resultCustomRender = GetAttrObject(jsonValue, ATTRIBUTE_CUSTOM_RENDER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCustomRender, ATTRIBUTE_CUSTOM_RENDER_I_URI_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_RENDER_I_URI_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CUSTOM_RENDER_I_URI_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setCustomRender, attribute: customRender.uri";
     };
 
@@ -755,7 +757,7 @@ HWTEST_F(Component3DModifierTest, DISABLED_setCustomRenderTestCustomRenderSelfRe
         inputValueSelfRenderUpdate = value;
         modifier_->setCustomRender(node_, &inputValueUri, inputValueSelfRenderUpdate);
         auto jsonValue = GetJsonValue(node_);
-        auto resultCustomRender = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CUSTOM_RENDER_NAME);
+        auto resultCustomRender = GetAttrObject(jsonValue, ATTRIBUTE_CUSTOM_RENDER_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultCustomRender, ATTRIBUTE_CUSTOM_RENDER_I_SELF_RENDER_UPDATE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<

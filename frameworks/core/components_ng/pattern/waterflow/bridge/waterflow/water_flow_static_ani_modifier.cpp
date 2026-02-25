@@ -14,6 +14,7 @@
  */
 
 #include "base/log/log.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_static.h"
 #include "core/interfaces/ani/ani_api.h"
@@ -21,6 +22,26 @@
 #include "core/interfaces/native/implementation/water_flow_scroller_peer_impl.h"
 
 namespace OHOS::Ace::NG {
+bool ParseWaterFlowSectionResourceGap(const ArkUIWaterFlowResourceParam* param, ArkUIWaterFlowSectionGap* out)
+{
+    CHECK_NULL_RETURN(param, false);
+    CHECK_NULL_RETURN(out, false);
+
+    std::vector<ResourceObjectParams> params;
+    std::string bundleStr = param->bundleName ? param->bundleName : "";
+    std::string moduleStr = param->moduleName ? param->moduleName : "";
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+        param->resId, param->resType, params, bundleStr, moduleStr, Container::CurrentIdSafely());
+
+    CalcDimension dimension;
+    if (!ResourceParseUtils::ParseResDimensionVpNG(resourceObject, dimension)) {
+        return false;
+    }
+    out->value = static_cast<float>(dimension.Value());
+    out->unit = static_cast<int32_t>(dimension.Unit());
+    return true;
+}
+
 Dimension ConvertLengthToDimension(const ArkUIWaterFlowSectionGap &src)
 {
     auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
@@ -135,6 +156,7 @@ const ArkUIAniWaterFlowModifier* GetArkUIAniWaterFlowModifier()
         .resetWaterFlowFooter = OHOS::Ace::NG::ResetWaterFlowFooter,
         .setWaterFlowScroller = OHOS::Ace::NG::SetWaterFlowScroller,
         .setWaterFlowLayoutMode = OHOS::Ace::NG::SetWaterFlowLayoutMode,
+        .parseWaterFlowSectionResourceGap = OHOS::Ace::NG::ParseWaterFlowSectionResourceGap,
     };
     return &impl;
 }

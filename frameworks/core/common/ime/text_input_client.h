@@ -161,7 +161,7 @@ public:
         instanceId_ = instanceId;
     }
 
-    bool HandleKeyEvent(const KeyEvent& keyEvent);
+    ACE_FORCE_EXPORT bool HandleKeyEvent(const KeyEvent& keyEvent);
     virtual void UpdateShiftFlag(const KeyEvent& keyEvent) {}
 
     virtual bool HandleOnEscape()

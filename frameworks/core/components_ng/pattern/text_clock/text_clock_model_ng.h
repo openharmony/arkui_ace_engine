@@ -31,7 +31,7 @@ public:
     int64_t timeValue_;
 };
 using TextClockMakeCallback = std::function<RefPtr<FrameNode>(const TextClockConfiguration& textClockConfiguration)>;
-class ACE_EXPORT TextClockModelNG : public OHOS::Ace::TextClockModel {
+class ACE_FORCE_EXPORT TextClockModelNG : public OHOS::Ace::TextClockModel {
 public:
     RefPtr<TextClockController> Create() override;
     void SetFormat(const std::string& format) override;
@@ -68,6 +68,7 @@ public:
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallback&& jsMake);
     static void InitFontDefault(FrameNode* frameNode, const TextStyle& textStyle);
+    static void InitJsFontDefault(FrameNode* frameNode, const TextStyle& textStyle);
     static void SetDateTimeOptions(FrameNode* frameNode, const ZeroPrefixType& hourType);
     static void SetJSTextClockController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextClockController(FrameNode* frameNode);
@@ -77,6 +78,9 @@ public:
     static void CreateWithFontFamilyResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void CreateWithFontWeightResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void CreateWithFormatResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void RemoveResObjByKey(FrameNode* frameNode, const std::string& key);
+    static void SetTextColorByUser(FrameNode* frameNode, bool isSetByUser);
+    static RefPtr<TextClockController> CreateTextClock();
 };
 } // namespace OHOS::Ace::NG
 

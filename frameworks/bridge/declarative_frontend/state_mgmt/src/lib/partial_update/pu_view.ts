@@ -177,7 +177,7 @@ abstract class ViewPU extends PUV2ViewBase
         const error = `${this.debugInfo__()}: mixed use of stateMgmt V1 and V2 variable decorators. Application error!`;
         stateMgmtConsole.applicationError(error);
         // toolchain can check
-        throw new BusinessError(USE_V1_STATE_IN_COMPONENTV2, error);
+        throw new Error(error);
       }
     }
     stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV2 === true ? 3 : 2}`);
@@ -736,7 +736,7 @@ abstract class ViewPU extends PUV2ViewBase
    */
   protected addProvidedVar<T>(providedPropName: string, store: ObservedPropertyAbstractPU<T>, allowOverride: boolean = false) {
     if (!allowOverride && this.findProvidePU__(providedPropName)) {
-      throw new BusinessError(DUPLICATE_PROVIDE_KEY, `${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
+      throw new BusinessError(DUPLICATE_PROVIDE_KEY, `${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already.`);
     }
     store.setDecoratorInfo('@Provide');
     this.getOrCreateProvidedVars().set(providedPropName, store);
@@ -1085,8 +1085,10 @@ abstract class ViewPU extends PUV2ViewBase
         const params = param ? param : this.paramsGenerator_();
         this.updateStateVars(params);
         this.aboutToReuse(params);
-        this.__lifecycle__Internal.setParams(params as Record<string, Object>);
-        this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_REUSE);
+        if (this['__newLifecycleNeedWork__Internal']) {
+          this.__getLifecycle__Internal()?.setParams(params as Record<string, Object>);
+          this.__getLifecycle__Internal()?.handleEvent(LifeCycleEvent.ON_REUSE);
+        }
       }
     }, 'aboutToReuse', this.constructor.name);
 
@@ -1118,7 +1120,9 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`ViewPU ${this.debugInfo__()} aboutToRecycleInternal`);
     stateMgmtTrace.scopedTrace(() => {
       this.aboutToRecycle();
-      this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_RECYCLE);
+      if (this['__newLifecycleNeedWork__Internal']) {
+        this.__getLifecycle__Internal()?.handleEvent(LifeCycleEvent.ON_RECYCLE);
+      }
     }, 'aboutToRecycle', this.constructor.name);
     if (this.preventRecursiveRecycle_) {
       this.preventRecursiveRecycle_ = false;
@@ -1273,7 +1277,7 @@ abstract class ViewPU extends PUV2ViewBase
   public reuseOrCreateNewComponent(params: { componentClass: any, getParams: () => Object,
     getReuseId?: () => string, extraInfo?: ExtraInfo }): void {
       // ViewPU should not have a ReusableV2 Component, throw error!
-      const error = `@Component cannot have a child @ReusableV2 component !`;
+      const error = `@Component cannot have a child @ReusableV2 component.`;
       stateMgmtConsole.applicationError(error);
       throw new BusinessError(USE_REUSABLE_V2_IN_COMPONENT, error);
   }
@@ -1305,15 +1309,7 @@ abstract class ViewPU extends PUV2ViewBase
       return undefined;
     }
     const prop = Reflect.get(this, fieldName);
-    let value = stateMgmtDFX.unwrapRawValue(prop);
-    if (typeof value === 'string') {
-      try {
-        value = JSON.parse(value);
-      } catch {
-        stateMgmtConsole.error('Invalid json string');
-        return undefined;
-      }
-    }
+    const value = stateMgmtDFX.unwrapRawValue(prop);
     if (value === null || value === undefined) {
       return undefined;
     }

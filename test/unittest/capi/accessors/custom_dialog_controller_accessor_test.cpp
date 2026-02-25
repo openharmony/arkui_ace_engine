@@ -76,11 +76,11 @@ public:
 };
 
 /**
- * @tc.name: defaultOptionsTest
+ * @tc.name: constructTestDefaultOptions
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, defaultOptionsTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestDefaultOptions, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->construct(&options));
@@ -112,41 +112,44 @@ HWTEST_F(CustomDialogControllerAccessorTest, defaultOptionsTest, TestSize.Level1
 }
 
 /**
- * @tc.name: DISABLED_defaultBuilderOptionTest
+ * @tc.name: constructTestBuilder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_defaultBuilderOptionTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_constructTestBuilder, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->construct, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /**
- * @tc.name: DISABLED_defaultCancelOptionTest
+ * @tc.name: constructTestCancel
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_defaultCancelOptionTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_constructTestCancel, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->construct, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /**
- * @tc.name: DISABLED_defaultOnWillDismissOptionTest
+ * @tc.name: constructTestOnWillDismiss
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_defaultOnWillDismissOptionTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_constructTestOnWillDismiss, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->construct, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /**
- * @tc.name: autoCancelTest
+ * @tc.name: constructTestAutoCancel
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, autoCancelTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestAutoCancel, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -183,11 +186,11 @@ static const std::vector<std::pair<Ark_DialogAlignment, DialogAlignment>> ALIGNM
 };
 
 /**
- * @tc.name: alignmentTest
+ * @tc.name: constructTestAlignment
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, alignmentTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestAlignment, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -221,11 +224,11 @@ static const std::vector<std::pair<Ark_Length, Dimension>> OFFSET_TEST_PLAN = {
 };
 
 /**
- * @tc.name: offsetTest
+ * @tc.name: constructTestOffset
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, offsetTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestOffset, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -258,11 +261,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, offsetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: customStyleTest
+ * @tc.name: constructTestCustomStyle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, customStyleTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestCustomStyle, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -296,11 +299,11 @@ static const std::vector<std::pair<Ark_Number, int32_t>> GRID_COUNT_TEST_PLAN = 
 };
 
 /**
- * @tc.name: gridCountTest
+ * @tc.name: constructTestGridCount
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, gridCountTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestGridCount, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -324,11 +327,11 @@ static const std::vector<std::pair<Ark_ResourceColor, std::string>> COLOR_TEST_P
 };
 
 /**
- * @tc.name: maskColorTest
+ * @tc.name: constructTestMaskColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, maskColorTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestMaskColor, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -348,21 +351,22 @@ HWTEST_F(CustomDialogControllerAccessorTest, maskColorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_maskRectTest
+ * @tc.name: constructTestMaskRect
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_maskRectTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_constructTestMaskRect, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->construct, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
 /**
- * @tc.name: showInSubWindowTest
+ * @tc.name: constructTestShowInSubWindow
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, showInSubWindowTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestShowInSubWindow, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -386,11 +390,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, showInSubWindowTest, TestSize.Level
 }
 
 /**
- * @tc.name: backgroundColorTest
+ * @tc.name: constructTestBackgroundColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, backgroundColorTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBackgroundColor, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -410,11 +414,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, backgroundColorTest, TestSize.Level
 }
 
 /**
- * @tc.name: isModalTest
+ * @tc.name: constructTestIsModal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, isModalTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestIsModal, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -478,11 +482,11 @@ static const std::vector<Ark_Dimension> SIZE_INVALID_TEST_PLAN_DIM = {
 };
 
 /**
- * @tc.name: widthTest
+ * @tc.name: constructTestWidth
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_widthTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_constructTestWidth, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -500,11 +504,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_widthTest, TestSize.Level1
 }
 
 /**
- * @tc.name: widthInvalidTest
+ * @tc.name: constructTestWidthInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, widthInvalidTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestWidthInvalid, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -521,11 +525,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, widthInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: heightTest
+ * @tc.name: constructTestHeight
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_heightTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_constructTestHeight, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -543,11 +547,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_heightTest, TestSize.Level
 }
 
 /**
- * @tc.name: heightInvalidTest
+ * @tc.name: constructTestHeightInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, heightInvalidTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestHeightInvalid, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -564,11 +568,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, heightInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: cornerRadiusTest
+ * @tc.name: constructTestCornerRadius
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_cornerRadiusTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_constructTestCornerRadius, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -591,11 +595,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_cornerRadiusTest, TestSize
 }
 
 /**
- * @tc.name: cornerRadiusInvalidTest
+ * @tc.name: constructTestCornerRadiusInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_cornerRadiusInvalidTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_constructTestCornerRadiusInvalid, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -618,11 +622,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_cornerRadiusInvalidTest, T
 }
 
 /**
- * @tc.name: cornerRadiusesInvalidTest
+ * @tc.name: constructTestCornerRadiusesInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusesInvalidTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestCornerRadiusesInvalid, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -650,11 +654,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusesInvalidTest, TestSize
 }
 
 /**
- * @tc.name: cornerRadiusTopLeftTest
+ * @tc.name: constructTestCornerRadiusTopLeft
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusTopLeftTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestCornerRadiusTopLeft, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -682,11 +686,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusTopLeftTest, TestSize.L
 }
 
 /**
- * @tc.name: cornerRadiusTopRightTest
+ * @tc.name: constructTestCornerRadiusTopRight
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusTopRightTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestCornerRadiusTopRight, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -714,11 +718,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusTopRightTest, TestSize.
 }
 
 /**
- * @tc.name: cornerRadiusBottomLeftTest
+ * @tc.name: constructTestCornerRadiusBottomLeft
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusBottomLeftTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestCornerRadiusBottomLeft, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -746,11 +750,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusBottomLeftTest, TestSiz
 }
 
 /**
- * @tc.name: cornerRadiusBottomRightTest
+ * @tc.name: constructTestCornerRadiusBottomRight
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusBottomRightTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestCornerRadiusBottomRight, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -778,11 +782,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, cornerRadiusBottomRightTest, TestSi
 }
 
 /**
- * @tc.name: borderWidthTest
+ * @tc.name: constructTestBorderWidth
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_borderWidthTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_constructTestBorderWidth, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -805,11 +809,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_borderWidthTest, TestSize.
 }
 
 /**
- * @tc.name: borderWidthInvalidTest
+ * @tc.name: constructTestBorderWidthInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderWidthInvalidTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderWidthInvalid, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -832,11 +836,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthInvalidTest, TestSize.Le
 }
 
 /**
- * @tc.name: borderWidthsInvalidTest
+ * @tc.name: constructTestBorderWidthsInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderWidthsInvalidTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderWidthsInvalid, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -864,11 +868,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthsInvalidTest, TestSize.L
 }
 
 /**
- * @tc.name: borderWidthLeftTest
+ * @tc.name: constructTestBorderWidthLeft
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderWidthLeftTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderWidthLeft, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -896,11 +900,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthLeftTest, TestSize.Level
 }
 
 /**
- * @tc.name: borderWidthTopTest
+ * @tc.name: constructTestBorderWidthTop
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderWidthTopTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderWidthTop, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -928,11 +932,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthTopTest, TestSize.Level1
 }
 
 /**
- * @tc.name: borderWidthRightTest
+ * @tc.name: constructTestBorderWidthRight
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderWidthRightTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderWidthRight, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -960,11 +964,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthRightTest, TestSize.Leve
 }
 
 /**
- * @tc.name: borderWidthBottomTest
+ * @tc.name: constructTestBorderWidthBottom
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderWidthBottomTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderWidthBottom, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -992,11 +996,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderWidthBottomTest, TestSize.Lev
 }
 
 /**
- * @tc.name: borderColorTest
+ * @tc.name: constructTestBorderColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderColorTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderColor, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1021,11 +1025,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderColorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: borderColorLeftTest
+ * @tc.name: constructTestBorderColorLeft
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderColorLeftTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderColorLeft, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1055,11 +1059,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderColorLeftTest, TestSize.Level
 }
 
 /**
- * @tc.name: borderColorTopTest
+ * @tc.name: constructTestBorderColorTop
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderColorTopTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderColorTop, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1089,11 +1093,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderColorTopTest, TestSize.Level1
 }
 
 /**
- * @tc.name: borderColorRightTest
+ * @tc.name: constructTestBorderColorRight
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderColorRightTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderColorRight, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1123,11 +1127,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderColorRightTest, TestSize.Leve
 }
 
 /**
- * @tc.name: borderColorBottomTest
+ * @tc.name: constructTestBorderColorBottom
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderColorBottomTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderColorBottom, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1163,11 +1167,11 @@ static const std::vector<std::pair<Ark_BorderStyle, BorderStyle>> BORDER_STYLE_T
 };
 
 /**
- * @tc.name: borderStyleTest
+ * @tc.name: constructTestBorderStyle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderStyleTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderStyle, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1190,11 +1194,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderStyleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: borderStyleLeftTest
+ * @tc.name: constructTestBorderStyleLeft
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderStyleLeftTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderStyleLeft, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1222,11 +1226,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderStyleLeftTest, TestSize.Level
 }
 
 /**
- * @tc.name: borderStyleTopTest
+ * @tc.name: constructTestBorderStyleTop
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderStyleTopTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderStyleTop, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1254,11 +1258,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderStyleTopTest, TestSize.Level1
 }
 
 /**
- * @tc.name: borderStyleRightTest
+ * @tc.name: constructTestBorderStyleRight
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderStyleRightTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderStyleRight, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1286,11 +1290,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderStyleRightTest, TestSize.Leve
 }
 
 /**
- * @tc.name: borderStyleBottomTest
+ * @tc.name: constructTestBorderStyleBottom
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, borderStyleBottomTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBorderStyleBottom, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1318,12 +1322,13 @@ HWTEST_F(CustomDialogControllerAccessorTest, borderStyleBottomTest, TestSize.Lev
 }
 
 /**
- * @tc.name: DISABLED_shadowTest
+ * @tc.name: constructTestShadow
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_shadowTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, DISABLED_constructTestShadow, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->construct, nullptr);
     FAIL() << "Test is not implemented yet";
 }
 
@@ -1344,11 +1349,11 @@ static const std::vector<std::pair<Ark_BlurStyle, int32_t>> BKG_BLUR_STYLE_TEST_
 };
 
 /**
- * @tc.name: backgroundBlurStyleTest
+ * @tc.name: constructTestBackgroundBlurStyle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, backgroundBlurStyleTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestBackgroundBlurStyle, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1371,11 +1376,11 @@ static const std::vector<std::pair<Ark_KeyboardAvoidMode, KeyboardAvoidMode>> KE
 };
 
 /**
- * @tc.name: keyboardAvoidModeTest
+ * @tc.name: constructTestKeyboardAvoidMode
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, keyboardAvoidModeTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestKeyboardAvoidMode, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1392,11 +1397,11 @@ HWTEST_F(CustomDialogControllerAccessorTest, keyboardAvoidModeTest, TestSize.Lev
 }
 
 /**
- * @tc.name: enableHoverModeTest
+ * @tc.name: constructTestEnableHoverMode
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, enableHoverModeTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestEnableHoverMode, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;
@@ -1425,11 +1430,11 @@ static const std::vector<std::pair<Ark_HoverModeAreaType, HoverModeAreaType>> HO
 };
 
 /**
- * @tc.name: hoverModeAreaTest
+ * @tc.name: constructTestHoverModeArea
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CustomDialogControllerAccessorTest, hoverModeAreaTest, TestSize.Level1)
+HWTEST_F(CustomDialogControllerAccessorTest, constructTestHoverModeArea, TestSize.Level1)
 {
     Ark_CustomDialogControllerOptions options = GetEmptyOptions();
     DialogProperties dialogProperties;

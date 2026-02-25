@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_model_ng.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/if_else_node.h"
 
@@ -36,6 +37,24 @@ ViewStackProcessor* ViewStackProcessor::GetInstance()
 }
 
 ViewStackProcessor::ViewStackProcessor() = default;
+
+RefPtr<FocusHub> ViewStackProcessor::GetOrCreateMainFrameNodeFocusHub() const
+{
+    auto frameNode = GetMainFrameNode();
+    if (!frameNode) {
+        return nullptr;
+    }
+    return frameNode->GetOrCreateFocusHub();
+}
+
+RefPtr<FocusHub> ViewStackProcessor::GetMainFrameNodeFocusHub() const
+{
+    auto frameNode = GetMainFrameNode();
+    if (!frameNode) {
+        return nullptr;
+    }
+    return frameNode->GetFocusHub();
+}
 
 FrameNode* ViewStackProcessor::GetMainFrameNode() const
 {

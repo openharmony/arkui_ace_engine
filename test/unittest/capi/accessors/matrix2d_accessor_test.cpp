@@ -48,8 +48,19 @@ std::vector<double> NUMBER_TEST_PLAN = {
 } // namespace
 
 class Matrix2DAccessorTest
-    : public AccessorTestBase0<GENERATED_ArkUIMatrix2DAccessor,
-    &GENERATED_ArkUIAccessors::getMatrix2DAccessor, Matrix2DPeer> {};
+    : public AccessorTestBaseParent<GENERATED_ArkUIMatrix2DAccessor,
+        &GENERATED_ArkUIAccessors::getMatrix2DAccessor, Matrix2DPeer> {
+public:
+    void SetUp() override
+    {
+        ASSERT_NE(this->accessor_->construct, nullptr);
+        Opt_LengthMetricsUnit unit = Converter::ArkValue<Opt_LengthMetricsUnit>(Ark_Empty());
+        this->peer_ = static_cast<Matrix2DPeer*>(this->accessor_->construct(&unit));
+        ASSERT_NE(this->peer_, nullptr);
+        AccessorTestBaseParent<GENERATED_ArkUIMatrix2DAccessor,
+            &GENERATED_ArkUIAccessors::getMatrix2DAccessor, Matrix2DPeer>::SetUp();
+    }
+};
 
 /**
  * @tc.name: identityTest
@@ -349,11 +360,11 @@ HWTEST_F(Matrix2DAccessorTest,  rotateTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: rotateTest
+ * @tc.name: rotateTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Matrix2DAccessorTest,  rotateInvalidValuesTest, TestSize.Level1)
+HWTEST_F(Matrix2DAccessorTest, rotateTestInvalidValues, TestSize.Level1)
 {
     auto param = ARRAY_NUMBER_TEST_PLAN[0];
     ASSERT_NE(accessor_->rotate, nullptr);

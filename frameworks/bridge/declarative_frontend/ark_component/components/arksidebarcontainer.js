@@ -277,7 +277,6 @@ class ArkSideBarContainerComponent extends ArkComponent {
 
 class JSSideBarContainer extends JSViewAbstract {
     static create(params) {
-        console.log('JSsideBarContainer create nativeModule');
         if (params !== undefined) {
             getUINativeModule().sideBarContainer.create(params);
         } else {
@@ -363,5 +362,5 @@ function exportComponent() {
 function exportView() {
     globalThis.SideBarContainer = JSSideBarContainer;
 }
-
-export default { ArkSideBarContainerComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkSideBarContainerComponent, createComponent, exportComponent, exportView, loadComponent };

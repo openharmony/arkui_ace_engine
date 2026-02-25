@@ -701,6 +701,12 @@ HWTEST_F(TextInputUpdateTestNg, OnTextInputScroll001, TestSize.Level1)
     EXPECT_TRUE(pattern_->SelectOverlayIsOn());
     pattern_->OnTextInputScroll(2.0f);
     EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), 0.0f);
+
+    /**
+     * @tc.steps: step2. Get CaretRect with scale or not.
+     */
+    pattern_->GetCaretRect(false);
+    pattern_->GetCaretRect(true);
 }
 
 /**

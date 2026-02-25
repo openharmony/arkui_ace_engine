@@ -38,11 +38,11 @@ class TimePickerDialogAccessorTest : public StaticAccessorTest<GENERATED_ArkUITi
 };
 
 /**
- * @tc.name: timePickerDialogAccessorDialogPropertiesTest
+ * @tc.name: showTestDialogProperties
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorDialogPropertiesTest, TestSize.Level1)
+HWTEST_F(TimePickerDialogAccessorTest, showTestDialogProperties, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -86,11 +86,11 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorDialogPropertiesT
 }
 
 /**
- * @tc.name: timePickerDialogAccessorDialogPropertiesCallbacksTest
+ * @tc.name: showTestDialogPropertiesCallbacks
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorDialogPropertiesCallbacksTest, TestSize.Level1)
+HWTEST_F(TimePickerDialogAccessorTest, showTestDialogPropertiesCallbacks, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -142,11 +142,11 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorDialogPropertiesC
 }
 
 /**
- * @tc.name: timePickerDialogAccessorButtonInfosTest
+ * @tc.name: showTestButtonInfos
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorButtonInfosTest, TestSize.Level1)
+HWTEST_F(TimePickerDialogAccessorTest, showTestButtonInfos, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -174,11 +174,11 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorButtonInfosTest, 
 }
 
 /**
- * @tc.name: timePickerDialogAccessorSettingDataTest
+ * @tc.name: showTestSettingData
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorSettingDataTest, TestSize.Level1)
+HWTEST_F(TimePickerDialogAccessorTest, showTestSettingData, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 
@@ -208,11 +208,11 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorSettingDataTest, 
 }
 
 /**
- * @tc.name: timePickerDialogAccessorPickerPropertyTest
+ * @tc.name: showTestPickerProperty
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorPickerPropertyTest, TestSize.Level1)
+HWTEST_F(TimePickerDialogAccessorTest, showTestPickerProperty, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
     std::tm tm {};
@@ -238,11 +238,11 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorPickerPropertyTes
 }
 
 /**
- * @tc.name: timePickerDialogAccessorCallbacksTest
+ * @tc.name: showTestCallbacks
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorCallbacksTest, TestSize.Level1)
+HWTEST_F(TimePickerDialogAccessorTest, showTestCallbacks, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 

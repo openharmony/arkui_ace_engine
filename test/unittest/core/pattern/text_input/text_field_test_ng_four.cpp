@@ -1123,4 +1123,22 @@ HWTEST_F(TextFieldTestNgFour, GetAccessibilityText001, TestSize.Level1)
     EXPECT_EQ(result, "");
 }
 
+
+/**
+ * @tc.name: IsShowVoiceButtonMode
+ * @tc.desc: Test for TextInput IsShowVoiceButtonMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTestNgFour, IsShowVoiceButtonMode, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    layoutProperty_->UpdateIsShowVoiceButton(true);
+    TextFieldModelNG::SetInputStyle(AceType::RawPtr(frameNode_), InputStyle::DEFAULT);
+    EXPECT_TRUE(pattern_->IsShowVoiceButtonMode());
+    TextFieldModelNG::SetType(AceType::RawPtr(frameNode_), TextInputType::NUMBER_PASSWORD);
+    EXPECT_FALSE(pattern_->IsShowVoiceButtonMode());
+}
 } // namespace OHOS::Ace::NG

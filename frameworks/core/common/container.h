@@ -226,6 +226,15 @@ public:
 
     virtual FoldStatus GetCurrentFoldStatus();
 
+    virtual RefPtr<DisplayInfoUtils> GetDisplayInfoUtils()
+    {
+        return displayManager_;
+    }
+
+    virtual DisplaySourceMode GetDisplaySourceMode();
+
+    virtual bool IsNeedModifySize(const RefPtr<Container>& subContainer = nullptr);
+
     virtual FoldStatus GetFoldStatusFromListener()
     {
         return GetCurrentFoldStatus();
@@ -720,6 +729,11 @@ public:
     }
 
     virtual bool IsFloatingWindow() const
+    {
+        return false;
+    }
+
+    virtual bool IsFloatingWindowStatus() const
     {
         return false;
     }

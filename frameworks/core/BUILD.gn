@@ -145,6 +145,7 @@ template("ace_core_source_set") {
       "common/environment/environment_proxy.cpp",
       "common/event_dump.cpp",
       "common/event_manager.cpp",
+      "common/event_info_manager.cpp",
       "common/event_manager_pen.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
@@ -462,7 +463,6 @@ template("ace_core_source_set") {
     ]
 
     deps += [
-      "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/rich_editor:ace_core_components_rich_editor_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/security_component:ace_core_components_security_component_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
@@ -728,6 +728,7 @@ template("ace_core_ng_source_set") {
       "common/environment/environment_proxy.cpp",
       "common/event_dump.cpp",
       "common/event_manager.cpp",
+      "common/event_info_manager.cpp",
       "common/event_manager_pen.cpp",
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
@@ -854,6 +855,7 @@ template("ace_core_ng_source_set") {
       "components/common/layout/grid_column_info.cpp",
       "components/common/layout/grid_container_info.cpp",
       "components/common/layout/grid_system_manager.cpp",
+      "components/common/layout/layout_constants_string_utils.cpp",
       "components/common/layout/screen_system_manager.cpp",
 
       # v1 deps
@@ -1012,7 +1014,6 @@ template("ace_core_ng_source_set") {
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
     } else {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform" ]
       if (qrcodegen_support) {
         deps += [ "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform" ]
       }

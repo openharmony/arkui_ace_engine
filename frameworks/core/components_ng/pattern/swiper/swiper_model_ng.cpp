@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@ RefPtr<SwiperController> SwiperModelNG::Create(bool isCreateArc)
     CHECK_NULL_RETURN(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SWIPER_ETS_TAG, nodeId);
+    ACE_UINODE_TRACE(nodeId);
     RefPtr<FrameNode> swiperNode = nullptr;
     if (isCreateArc) {
         swiperNode = FrameNode::GetOrCreateFrameNode(
@@ -65,6 +66,7 @@ RefPtr<SwiperController> SwiperModelNG::Create(bool isCreateArc)
 
 RefPtr<FrameNode> SwiperModelNG::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto swiperNode = ElementRegister::GetInstance()->GetSpecificItemById<SwiperNode>(nodeId);
     if (swiperNode) {
         if (swiperNode->GetTag() == V2::SWIPER_ETS_TAG) {
@@ -1118,6 +1120,7 @@ int32_t SwiperModelNG::GetIndicatorType(FrameNode* frameNode)
 RefPtr<SwiperController> SwiperModelNG::GetOrCreateSwiperController(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     if (!pattern->GetSwiperController()) {
@@ -1867,5 +1870,65 @@ void SwiperModelNG::ResetDisplayCountWithObject(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MinSize, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, frameNode);
+}
+
+bool SwiperModelNG::CallSwiperStartFakeDrag(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto controller = pattern->GetSwiperController();
+    CHECK_NULL_RETURN(controller, false);
+    return controller->StartFakeDrag();
+}
+
+bool SwiperModelNG::CallSwiperFakeDragBy(FrameNode* frameNode, float offset)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto controller = pattern->GetSwiperController();
+    CHECK_NULL_RETURN(controller, false);
+    return controller->FakeDragBy(offset);
+}
+
+bool SwiperModelNG::CallSwiperStopFakeDrag(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto controller = pattern->GetSwiperController();
+    CHECK_NULL_RETURN(controller, false);
+    return controller->StopFakeDrag();
+}
+
+bool SwiperModelNG::CallSwiperIsFakeDragging(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto controller = pattern->GetSwiperController();
+    CHECK_NULL_RETURN(controller, false);
+    return controller->IsFakeDragging();
+}
+
+void SwiperModelNG::CallSwiperShowPrevious(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto controller = pattern->GetSwiperController();
+    CHECK_NULL_VOID(controller);
+    controller->ShowPrevious();
+}
+
+void SwiperModelNG::CallSwiperShowNext(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto controller = pattern->GetSwiperController();
+    CHECK_NULL_VOID(controller);
+    controller->ShowNext();
 }
 } // namespace OHOS::Ace::NG

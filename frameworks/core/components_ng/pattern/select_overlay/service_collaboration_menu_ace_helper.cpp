@@ -41,13 +41,6 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
-#include "core/components_ng/pattern/menu/menu_layout_property.h"
-#include "core/components_ng/pattern/menu/menu_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
@@ -56,6 +49,9 @@
 #include "frameworks/core/pipeline/base/element_register.h"
 #include "frameworks/base/thread/cancelable_callback.h"
 #include "core/components/common/properties/popup_param.h"
+#include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/interfaces/native/node/menu_item_group_modifier.h"
 #include "image_source.h"
 
 namespace OHOS::Ace::NG {
@@ -63,6 +59,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TOAST_DURATION = 2000;
 const std::string END_ICON_PATH = "resource:///ohos_ic_public_cancel.svg";
+const std::string IMAGE_PROPERTY_ORIENTATION = "Orientation";
 } // namespace
 
 void ServiceCollaborationMenuAceHelper::CreateText(
@@ -131,10 +128,9 @@ void ServiceCollaborationMenuAceHelper::CreateHeaderText(
     margin.bottom = CalcLength(static_cast<float>(HEADER_MARGIN_BOTTOM));
     textProperty->UpdateMargin(margin);
     textNode->MountToParent(row);
-    auto menuItemGroupPattern = menuItemGroupNode->GetPattern<MenuItemGroupPattern>();
-    CHECK_NULL_VOID(menuItemGroupPattern);
-    menuItemGroupPattern->AddHeaderContent(textNode);
-    menuItemGroupPattern->AddHeader(row);
+    const auto* menuItemGroupModifier = NG::NodeModifier::GetMenuItemGroupInnerModifier();
+    menuItemGroupModifier->menuItemGroupAddHeaderContent(menuItemGroupNode, textNode);
+    menuItemGroupModifier->menuItemGroupAddHeader(menuItemGroupNode, row);
     textNode->MarkModifyDone();
 }
 void ServiceCollaborationMenuAceHelper::CreateEndIcon(uint32_t iconId, const RefPtr<FrameNode>& parent)
@@ -213,14 +209,11 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     CHECK_NULL_RETURN(menuPipeline, nullptr);
     auto menuTheme = menuPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(menuTheme, nullptr);
-    auto menuItemPattern = AceType::MakeRefPtr<MenuItemPattern>();
-    menuItemPattern->onClickEventSet_ = true;
-    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), menuItemPattern);
+    auto menuItemModifier = NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_RETURN(menuItemModifier, nullptr);
+    auto menuItemNode = menuItemModifier->createWithOnClickEventSet(true);
     CHECK_NULL_RETURN(menuItemNode, nullptr);
-    auto menuItemProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
-    CHECK_NULL_RETURN(menuItemProperty, nullptr);
-    menuItemProperty->UpdatePadding({ .right = CalcLength(2.0f) });
+    menuItemModifier->menuItemUpdatePadding(menuItemNode, { .right = CalcLength(2.0f) });
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBorderRadius(BorderRadiusProperty(menuTheme->GetMenuDefaultInnerRadius()));
@@ -235,12 +228,11 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     auto rightRowProperty = rightRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(rightRowProperty, nullptr);
     rightRowProperty->UpdatePadding({ .right = CalcLength(22.0f) });
-    auto paintProperty = menuItemNode->GetPaintProperty<MenuItemPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, nullptr);
-    paintProperty->UpdateStrokeWidth(Dimension(static_cast<float>(BORDER_WIDTH), DimensionUnit::PX));
-    paintProperty->UpdateStartMargin(Dimension(12.0f, DimensionUnit::VP));
-    paintProperty->UpdateEndMargin(Dimension(12.0f, DimensionUnit::VP));
-    paintProperty->UpdateDividerColor(menuTheme->GetLineColor());
+    menuItemModifier->menuItemUpdateStrokeWidth(
+        menuItemNode, Dimension(static_cast<float>(BORDER_WIDTH), DimensionUnit::PX));
+    menuItemModifier->menuItemUpdateStartMargin(menuItemNode, Dimension(12.0f, DimensionUnit::VP));
+    menuItemModifier->menuItemUpdateEndMargin(menuItemNode, Dimension(12.0f, DimensionUnit::VP));
+    menuItemModifier->menuItemUpdateDividerColor(menuItemNode, menuTheme->GetLineColor());
     rowProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(MENUITEM_WIDTH), DimensionUnit::VP),
         CalcLength(static_cast<float>(MENUITEM_HEIGHT), DimensionUnit::VP)));
@@ -286,9 +278,9 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateDeviceMenuItem(
     CHECK_NULL_RETURN(menuTheme, nullptr);
     auto richTheme = menuPipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richTheme, nullptr);
-    auto menuItemNode = FrameNode::CreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<MenuItemPattern>());
+    auto menuItemNodeModifier = NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_RETURN(menuItemNodeModifier, nullptr);
+    auto menuItemNode = menuItemNodeModifier->menuItemCreateFrameNode();
     CHECK_NULL_RETURN(menuItemNode, nullptr);
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
@@ -322,11 +314,11 @@ void ServiceCollaborationMenuAceHelper::RemoveSubmenu(const RefPtr<FrameNode>& m
             continue;
         }
         auto frameNode = AceType::DynamicCast<FrameNode>(children);
-        auto pattern = frameNode->GetPattern<MenuPattern>();
-        if (!pattern) {
+        const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        if (!menuModifier) {
             continue;
         }
-        if (pattern && pattern->GetTargetTag() == SUN_MENU_TAG) {
+        if (menuModifier->getTargetTag(frameNode) == SUN_MENU_TAG) {
             menuWrapper->RemoveChild(children);
             subMenuIsShow_ = false;
         }
@@ -344,11 +336,11 @@ void ServiceCollaborationMenuAceHelper::RemoveSubmenu(const RefPtr<FrameNode>& m
         if (!frameNode) {
             continue;
         }
-        auto pattern = frameNode->GetPattern<MenuPattern>();
-        if (!pattern) {
+        const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        if (!menuModifier) {
             continue;
         }
-        if (pattern && pattern->GetTargetTag() == SUN_MENU_TAG) {
+        if (menuModifier && menuModifier->getTargetTag(frameNode) == SUN_MENU_TAG) {
             menuWrapper->RemoveChild(children);
             subMenuIsShow_ = false;
         }
@@ -357,12 +349,13 @@ void ServiceCollaborationMenuAceHelper::RemoveSubmenu(const RefPtr<FrameNode>& m
 RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMenuNode()
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter");
-    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<InnerMenuPattern>(INNER_MENU_ID, V2::MENU_ETS_TAG, MenuType::MULTI_MENU));
+    auto menuModifer = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifer, nullptr);
+    auto menuNode = menuModifer->menuCreateFrameNode(INNER_MENU_ID, ElementRegister::GetInstance()->MakeUniqueId());
     CHECK_NULL_RETURN(menuNode, nullptr);
-    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_RETURN(menuLayoutProperty, nullptr);
-    menuLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, nullptr);
+    menuModifier->updateAlignment(menuNode, Alignment::CENTER_LEFT);
     menuNode->MarkModifyDone();
     return menuNode;
 }
@@ -370,13 +363,12 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMenuItemGroupNode(
     uint32_t index, const std::string& deviceName)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter");
-    auto menuItemGroupNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<MenuItemGroupPattern>();});
+    auto menuItemGroupModifier = NG::NodeModifier::GetMenuItemGroupInnerModifier();
+    CHECK_NULL_RETURN(menuItemGroupModifier, nullptr);
+    auto menuItemGroupNode = menuItemGroupModifier->menuItemGroupAddHeaderGetOrCreateFrameNode();
     CHECK_NULL_RETURN(menuItemGroupNode, nullptr);
-    auto menuItemGroupPaintPros = menuItemGroupNode->GetPaintProperty<MenuItemGroupPaintProperty>();
-    CHECK_NULL_RETURN(menuItemGroupPaintPros, nullptr);
-    menuItemGroupPaintPros->UpdateStrokeWidth(Dimension(static_cast<float>(0), DimensionUnit::VP));
+    menuItemGroupModifier->menuItemGroupUpdateStrokeWidth(
+        menuItemGroupNode, Dimension(static_cast<float>(0), DimensionUnit::VP));
 
     TAG_LOGI(AceLogTag::ACE_MENU, "DEVICE NAME IS %{public}s", deviceName.c_str());
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -425,7 +417,9 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateSubDeviceOutMenu(
     MenuParam param;
     param.type = MenuType::SUB_MENU;
     param.isShowInSubWindow = false;
-    auto subMenu = MenuView::Create(innerMenu, SUB_MENU_ID, SUN_MENU_TAG, param);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_RETURN(menuViewModifier, nullptr);
+    auto subMenu = menuViewModifier->createWithCustomNode(innerMenu, SUB_MENU_ID, SUN_MENU_TAG, param, true, nullptr);
     auto inputHub = subMenu->GetOrCreateInputEventHub();
     CHECK_NULL_RETURN(inputHub, nullptr);
     auto mouseTask = [weakHelper = WeakClaim(this), weakMenuWrapper = WeakClaim(RawPtr(menuWrapper))](bool isHover) {
@@ -485,14 +479,13 @@ void ServiceCollaborationMenuAceHelper::AddHoverEventToMainMenu(
                 auto subMenu = subDeviceMenuCreator();
                 CHECK_NULL_VOID(subMenu);
                 TAG_LOGI(AceLogTag::ACE_MENU, "create SubMenu enter.2");
-                auto submenuPattern = subMenu->GetPattern<MenuPattern>();
-                CHECK_NULL_VOID(submenuPattern);
-                submenuPattern->SetParentMenuItem(menuItemNode);
+                const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+                CHECK_NULL_VOID(menuModifier);
+                menuModifier->setParentMenuItem(subMenu, menuItemNode);
                 subMenu->MountToParent(menuWrapper);
-                auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
                 auto frameSize = menuItemNode->GetGeometryNode()->GetMarginFrameSize();
                 OffsetF position = menuItemNode->GetPaintRectOffset(false, true) + OffsetF(frameSize.Width(), 0.0);
-                menuProps->UpdateMenuOffset(position);
+                menuModifier->updateMenuOffset(subMenu, position);
                 subMenu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
                 helper->subMenuIsShow_ = true;
             }
@@ -541,14 +534,13 @@ void ServiceCollaborationMenuAceHelper::AddClickEventToMainMenu(
             auto subMenu = subDeviceMenuCreator();
             CHECK_NULL_VOID(subMenu);
             TAG_LOGI(AceLogTag::ACE_MENU, "clickTask create SubMenu enter.2");
-            auto submenuPattern = subMenu->GetPattern<MenuPattern>();
-            CHECK_NULL_VOID(submenuPattern);
-            submenuPattern->SetParentMenuItem(menuItemNode);
+            const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+            CHECK_NULL_VOID(menuModifier);
+            menuModifier->setParentMenuItem(subMenu, menuItemNode);
             subMenu->MountToParent(menuWrapper);
-            auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
             auto frameSize = menuItemNode->GetGeometryNode()->GetMarginFrameSize();
             OffsetF position = menuItemNode->GetPaintRectOffset(false, true) + OffsetF(frameSize.Width(), 0.0);
-            menuProps->UpdateMenuOffset(position);
+            menuModifier->updateMenuOffset(subMenu, position);
             subMenu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
             helper->subMenuIsShow_ = true;
         }
@@ -579,15 +571,13 @@ void ServiceCollaborationMenuAceHelper::AddLongPressEventToMainMenu(
             auto subMenu = subDeviceMenuCreator();
             CHECK_NULL_VOID(subMenu);
             TAG_LOGI(AceLogTag::ACE_MENU, "longPressTask create SubMenu enter.2");
-            auto submenuPattern = subMenu->GetPattern<MenuPattern>();
-            CHECK_NULL_VOID(submenuPattern);
-            submenuPattern->SetParentMenuItem(menuItemNode);
+            const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+            CHECK_NULL_VOID(menuModifier);
+            menuModifier->setParentMenuItem(subMenu, menuItemNode);
             subMenu->MountToParent(menuWrapper);
-            auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
-            CHECK_NULL_VOID(menuProps);
             auto frameSize = menuItemNode->GetGeometryNode()->GetMarginFrameSize();
             OffsetF position = menuItemNode->GetPaintRectOffset(false, true) + OffsetF(frameSize.Width(), 0.0);
-            menuProps->UpdateMenuOffset(position);
+            menuModifier->updateMenuOffset(subMenu, position);
             subMenu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
             helper->subMenuIsShow_ = true;
         }
@@ -907,6 +897,35 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
     return 0;
 }
 
+void ServiceCollaborationAceCallback::AdjustImageOrientation(
+    std::shared_ptr<Media::PixelMap> pixelMap, const std::string &currentOrientation)
+{
+    static const std::unordered_map<std::string, OrientationAction> ORIENTATION_TRANS_PARAM_MAP = {
+        {"Top-right", {true, false, 0}},
+        {"Bottom-right", {false, false, 180}},
+        {"Bottom-left", {false, true, 0}},
+        {"Left-top", {true, false, 270}},
+        {"Right-top", {false, false, 90}},
+        {"Right-bottom", {true, false, 90}},
+        {"Left-bottom", {false, false, 270}}
+    };
+    CHECK_NULL_VOID(pixelMap);
+    TAG_LOGI(AceLogTag::ACE_MENU, "currentOrientation: %{public}s", currentOrientation.c_str());
+ 
+    auto it = ORIENTATION_TRANS_PARAM_MAP.find(currentOrientation);
+    if (it == ORIENTATION_TRANS_PARAM_MAP.end()) {
+        TAG_LOGW(AceLogTag::ACE_MENU, "Unsupported orientation: %{public}s", currentOrientation.c_str());
+        return;
+    }
+    const OrientationAction &action = it->second;
+    if (action.flipHorizontal || action.flipVertical) {
+        pixelMap->flip(action.flipHorizontal, action.flipVertical);
+    }
+    if (action.rotateAngle != 0) {
+        pixelMap->rotate(action.rotateAngle);
+    }
+}
+
 RefPtr<PixelMap> ServiceCollaborationAceCallback::CreatePixelMap(void *buffer, uint32_t code, uint32_t dataLength)
 {
     Media::SourceOptions opts;
@@ -917,6 +936,8 @@ RefPtr<PixelMap> ServiceCollaborationAceCallback::CreatePixelMap(void *buffer, u
         return nullptr;
     }
     CHECK_NULL_RETURN(imageSource, nullptr);
+    std::string currentOrientation;
+    imageSource->GetImagePropertyString(0, IMAGE_PROPERTY_ORIENTATION, currentOrientation);
     Media::DecodeOptions decodeOpts;
     std::shared_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOpts, errorCode);
     if (errorCode != 0) {
@@ -924,7 +945,8 @@ RefPtr<PixelMap> ServiceCollaborationAceCallback::CreatePixelMap(void *buffer, u
         return nullptr;
     }
     CHECK_NULL_RETURN(pixelMap, nullptr);
-    auto imagePix = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+    AdjustImageOrientation(pixelMap, currentOrientation);
+    auto imagePix = PixelMap::CreatePixelMap(reinterpret_cast<void *>(&pixelMap));
     return imagePix;
 }
 

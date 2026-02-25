@@ -43,6 +43,13 @@ FoldStatus DisplayInfoUtils::GetCurrentFoldStatus()
     return displayInfo_->GetFoldStatus();
 }
 
+void DisplayInfoUtils::UpdateDisplaySourceMode(const sptr<Rosen::Display>& display) {}
+
+DisplaySourceMode DisplayInfoUtils::GetDisplaySourceMode()
+{
+    return DisplaySourceMode::NONE;
+}
+
 std::vector<Rect> DisplayInfoUtils::GetCurrentFoldCreaseRegion()
 {
     hasInitFoldCreaseRegion_ = true;

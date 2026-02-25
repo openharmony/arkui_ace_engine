@@ -21,6 +21,7 @@ ohos_unittest("system_properties_unittest") {
   module_out_path = adapter_test_output_path
   sources = [
     "$ace_root/adapter/ohos/osal/system_properties.cpp",
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
 
     # test source file
     "system_properties_test.cpp",
@@ -44,6 +45,7 @@ ohos_unittest("system_properties_unittest") {
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_static",
     "googletest:gmock",
     "googletest:gtest_main",
   ]

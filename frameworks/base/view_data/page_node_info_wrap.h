@@ -30,7 +30,7 @@ class PageNodeInfoWrap : public AceType {
     DECLARE_ACE_TYPE(PageNodeInfoWrap, AceType);
 
 public:
-    static RefPtr<PageNodeInfoWrap> CreatePageNodeInfoWrap();
+    ACE_FORCE_EXPORT static RefPtr<PageNodeInfoWrap> CreatePageNodeInfoWrap();
 
     virtual void SetId(int32_t id) {}
     virtual int32_t GetId() const

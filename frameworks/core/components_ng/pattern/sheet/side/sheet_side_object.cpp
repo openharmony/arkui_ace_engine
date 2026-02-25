@@ -216,6 +216,9 @@ void SheetSideObject::ClipSheetNode()
     }
     renderContext->UpdateBorderRadius(borderRadius);
     // innerBorder need to adapt
+    if (sheetStyle.radiusRenderStrategy.has_value()) {
+        renderContext->UpdateRenderStrategy(sheetStyle.radiusRenderStrategy.value());
+    }
 }
 
 void SheetSideObject::InitAnimationForOverlay(bool isTransitionIn, bool isFirstTransition)
@@ -632,6 +635,7 @@ void SheetSideObject::CreatePropertyCallback()
             context->UpdateTransformTranslate({ sheetObject->GetSideSheetMaxWidth() - position, 0.0f, 0.0f });
         }
     };
+    ACE_UINODE_TRACE(sheetPattern->GetHost());
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     sheetPattern->SetProperty(property);
 }

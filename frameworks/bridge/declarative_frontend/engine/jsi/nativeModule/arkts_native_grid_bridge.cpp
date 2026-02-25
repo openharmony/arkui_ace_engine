@@ -32,12 +32,41 @@ namespace OHOS::Ace::NG {
 constexpr int32_t CALL_ARG_0 = 0;
 constexpr int32_t CALL_ARG_1 = 1;
 constexpr int32_t CALL_ARG_2 = 2;
+constexpr int32_t CALL_ARG_3 = 3;
 constexpr int32_t DEFAULT_CACHED_COUNT = 1;
 constexpr int32_t BREAKPOINT_DEFAULT = 0;
 constexpr int32_t BREAKPOINT_SM2MD3LG5 = 2;
 constexpr size_t GRID_ITEM_SIZE_RESULT_LENGTH = 2;
 constexpr size_t GRID_ITEM_RECT_RESULT_LENGTH = 4;
+constexpr size_t GRID_START_LINE_INFO_RESULT_LENGTH = 4;
 namespace {
+void ParseGridStartLineInfo(const Framework::JSRef<Framework::JSVal>& value, GridStartLineInfo& gridStartLineInfo)
+{
+    if (value->IsArray()) {
+        auto array = Framework::JSRef<Framework::JSArray>::Cast(value);
+        auto length = array->Length();
+        if (length != GRID_START_LINE_INFO_RESULT_LENGTH) {
+            return;
+        }
+        Framework::JSRef<Framework::JSVal> startIndex = array->GetValueAt(CALL_ARG_0);
+        if (startIndex->IsNumber()) {
+            gridStartLineInfo.startIndex = startIndex->ToNumber<int32_t>();
+        }
+        Framework::JSRef<Framework::JSVal> startLine = array->GetValueAt(CALL_ARG_1);
+        if (startLine->IsNumber()) {
+            gridStartLineInfo.startLine = startLine->ToNumber<int32_t>();
+        }
+        Framework::JSRef<Framework::JSVal> startOffset = array->GetValueAt(CALL_ARG_2);
+        if (startOffset->IsNumber()) {
+            gridStartLineInfo.startOffset = startOffset->ToNumber<double>();
+        }
+        Framework::JSRef<Framework::JSVal> totalOffset = array->GetValueAt(CALL_ARG_3);
+        if (totalOffset->IsNumber()) {
+            gridStartLineInfo.totalOffset = totalOffset->ToNumber<double>();
+        }
+    }
+}
+
 void ParseGridItemSize(const Framework::JSRef<Framework::JSVal>& value, GridItemSize& gridItemSize)
 {
     if (value->IsArray()) {
@@ -123,6 +152,50 @@ void ParseGetGridItemRect(const EcmaVM* vm, const Local<JSValueRef>& getRectByIn
                 return gridItemRect;
             };
         option.getRectByIndex = std::move(onGetRectByIndex);
+    }
+}
+
+void ParseGetStartIndexByOffset(const EcmaVM* vm, const Local<JSValueRef>& getStartIndexByOffset,
+    GridLayoutOptions& option)
+{
+    if (getStartIndexByOffset->IsFunction(vm)) {
+        Local<panda::FunctionRef> functionRef = getStartIndexByOffset->ToObject(vm);
+        auto onGetStartIndexByOffset =
+            [vm, func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+                 Framework::JSRef<Framework::JSFunc>(Framework::JSFunc(functionRef)))](float offset) {
+                panda::LocalScope scope(vm);
+                GridStartLineInfo gridStartLineInfo;
+                auto offsetValue = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(offset));
+                auto result = func->ExecuteJS(1, &offsetValue);
+                if (!result->IsArray()) {
+                    return gridStartLineInfo;
+                }
+                ParseGridStartLineInfo(result, gridStartLineInfo);
+                return gridStartLineInfo;
+            };
+        option.getStartIndexByOffset = std::move(onGetStartIndexByOffset);
+    }
+}
+
+void ParseGetStartIndexByIndex(const EcmaVM* vm, const Local<JSValueRef>& getStartIndexByIndex,
+    GridLayoutOptions& option)
+{
+    if (getStartIndexByIndex->IsFunction(vm)) {
+        Local<panda::FunctionRef> functionRef = getStartIndexByIndex->ToObject(vm);
+        auto onGetStartIndexByIndex =
+            [vm, func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+                 Framework::JSRef<Framework::JSFunc>(Framework::JSFunc(functionRef)))](int32_t index) {
+                panda::LocalScope scope(vm);
+                GridStartLineInfo gridStartLineInfo;
+                auto itemIndex = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(index));
+                auto result = func->ExecuteJS(1, &itemIndex);
+                if (!result->IsArray()) {
+                    return gridStartLineInfo;
+                }
+                ParseGridStartLineInfo(result, gridStartLineInfo);
+                return gridStartLineInfo;
+            };
+        option.getStartIndexByIndex = std::move(onGetStartIndexByIndex);
     }
 }
 
@@ -940,6 +1013,8 @@ ArkUINativeModuleValue GridBridge::SetGridLayoutOptions(ArkUIRuntimeCallInfo* ru
     irregularIndexes.reset();
     ParseGetGridItemSize(vm, runtimeCallInfo->GetCallArgRef(4), options); // 4: parameter index
     ParseGetGridItemRect(vm, runtimeCallInfo->GetCallArgRef(5), options); // 5: parameter index
+    ParseGetStartIndexByOffset(vm, runtimeCallInfo->GetCallArgRef(6), options); // 6: parameter index
+    ParseGetStartIndexByIndex(vm, runtimeCallInfo->GetCallArgRef(7), options); // 7: parameter index
     GridModelNG::SetLayoutOptions(reinterpret_cast<FrameNode*>(nativeNode), options);
     return panda::JSValueRef::Undefined(vm);
 }

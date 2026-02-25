@@ -46,10 +46,11 @@ public:
     static void ParseMenuOutlineWidth(const JSRef<JSVal>& outlineWidthValue, NG::MenuParam& menuParam);
     static void ParseMenuOutlineColor(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam);
     static void ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuSystemMaterial(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuModalMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuOffsetParam(const JSRef<JSObject>& offsetObj, NG::MenuParam& menuParam);
     static void InitMenuParamColorMode(NG::MenuParam& menuParam);
-    static void ParseMenuPreviewBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
+    static void ParseMenuPreviewBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
     static void SetSheetRenderStrategy(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
 private:
     static void ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam,
@@ -68,15 +69,9 @@ private:
         const RefPtr<ResourceObject>& bottomResObj, NG::BorderWidthProperty& outlineWidth);
     static void ParseMenuBorderRadiusWithResourceObj(const RefPtr<ResourceObject>& borderRadiusResObj,
         NG::BorderRadiusProperty& menuBorderRadius);
+    static void RegisterMenuMaskColorRes(const RefPtr<ResourceObject>& maskColorResObj, NG::MenuParam& menuParam);
     static void ParseMenuPreviewScaleMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuAvailableLayoutArea(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
-    static bool ParseMenuPreviewBorderRadiusObject(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
-    static void ParseMenuPreviewBorderRadiusMultiObject(const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
-    static void SetBorderRadiusProps(const CalcDimension& dim, NG::BorderRadiusProperty& props, const char* propName);
-    static void ParseBorderRadiusProps(
-        const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
-    static void ParseBorderRadiusPropsByLengthMetrics(
-        const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
     static void ParseBackgroundParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuAvoidKeyboard(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuLifeCycleParam(

@@ -650,6 +650,57 @@ HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UIExtensionUsageTest
+ * @tc.desc: Test pattern GetUIExtensionUsage
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. prepare GeometryNode and EventManager
+     */
+    auto geometryNode = uiExtensionNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(720.0f, 1280.0f));
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->lastMouseEvent_.x = 1000.0f;
+    eventManager->lastMouseEvent_.y = 200.0f;
+
+    /**
+     * @tc.steps: step3. get pattern and PointerEvent
+     */
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(uiExtensionNode);
+    pattern->OnModifyDone();
+    pattern->lastPointerEvent_ = std::make_shared<MMI::PointerEvent>(1);
+    EXPECT_EQ(pattern->lastPointerEvent_->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+
+    /**
+     * @tc.steps: step4. Call callback func and verify PointerAction is changed.
+     */
+    eventManager->NotifyTouchpadInteraction();
+    EXPECT_EQ(pattern->lastPointerEvent_->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    eventManager->lastMouseEvent_.x = 100.0f;
+    eventManager->NotifyTouchpadInteraction();
+    EXPECT_EQ(pattern->lastPointerEvent_->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_TOUCHPAD_ACTIVE);
+#endif
+}
+
+/**
  * @tc.name: UIExtensionOnConnect
  * @tc.desc: Test pattern OnConnect
  * @tc.type: FUNC

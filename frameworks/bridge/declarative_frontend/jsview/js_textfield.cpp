@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/interfaces/native/node/search_modifier.h"
 #include "core/image/image_source_info.h"
 #include "core/text/text_emoji_processor.h"
 #ifdef ENABLE_STANDARD_INPUT
@@ -99,8 +100,8 @@ const char* TOP_END_PROPERTY = "topEnd";
 const char* BOTTOM_START_PROPERTY = "bottomStart";
 const char* BOTTOM_END_PROPERTY = "bottomEnd";
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
-const std::vector<TextOverflow> TEXT_OVERFLOWS_INPUT = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
-    TextOverflow::MARQUEE, TextOverflow::DEFAULT };
+const std::vector<TextOverflow> TEXT_OVERFLOWS_INPUT = {
+    TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::MARQUEE, TextOverflow::DEFAULT};
 
 bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
 {
@@ -117,6 +118,7 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     result = dimension;
     return true;
 }
+
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -320,12 +322,11 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
+    UnRegisterResource("placeholderColor");
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     Color color = theme->GetPlaceholderColor();
     RefPtr<ResourceObject> resourceObject;
-    UnRegisterResource("placeholderColor");
     if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor", resourceObject)) {
         TextFieldModel::GetInstance()->ResetPlaceholderColor();
         return;
@@ -450,7 +451,7 @@ void JSTextField::SetTextDirection(const JSCallbackInfo& info)
         return;
     }
     int32_t index = args->ToNumber<int32_t>();
-    auto isNormalValue = index >= 0 && index < TEXT_DIRECTIONS.size();
+    auto isNormalValue = index >= 0 && index < static_cast<int32_t>(TEXT_DIRECTIONS.size());
     if (!isNormalValue) {
         TextFieldModel::GetInstance()->ResetTextDirection();
         return;
@@ -735,8 +736,8 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     RefPtr<ResourceObject> resourceObject;
+    UnRegisterResource("fontColor");
     if (!ParseJsColor(info[0], textColor, resourceObject)) {
-        UnRegisterResource("fontColor");
         TextFieldModel::GetInstance()->ResetTextColor();
         return;
     }
@@ -801,6 +802,7 @@ void JSTextField::SetFontFamily(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    UnRegisterResource("fontFamily");
     std::vector<std::string> fontFamilies;
     RefPtr<ResourceObject> resourceObject;
     if (!ParseJsFontFamilies(info[0], fontFamilies, resourceObject)) {
@@ -808,8 +810,6 @@ void JSTextField::SetFontFamily(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<std::vector<std::string>>("fontFamily", resourceObject, fontFamilies);
-    } else {
-        UnRegisterResource("fontFamily");
     }
     TextFieldModel::GetInstance()->SetFontFamily(fontFamilies);
 }
@@ -1830,6 +1830,7 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
     }
 }
 
+
 void JSTextField::SetPasswordRules(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
@@ -1928,6 +1929,24 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     SetCancelIconColorAndIconSrc(iconParam);
+}
+
+void JSTextField::SetVoiceButton(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto arg = info[0];
+    if (!arg->IsObject()) {
+        return;
+    }
+    auto param = JSRef<JSObject>::Cast(arg);
+    auto enableProp = param->GetProperty("enabled");
+    if (enableProp->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetIsShowVoiceButton(enableProp->ToBoolean());
+    } else {
+        TextFieldModel::GetInstance()->SetIsShowVoiceButton(false);
+    }
 }
 
 void JSTextField::SetCancelDefaultIcon()
@@ -2093,7 +2112,7 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
     }
 }
-
+ 
 void JSTextField::SetMinFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -2114,7 +2133,7 @@ void JSTextField::SetMinFontSize(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
 }
-
+ 
 void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -2140,7 +2159,7 @@ void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
 }
-
+ 
 void JSTextField::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
@@ -2148,7 +2167,7 @@ void JSTextField::SetHeightAdaptivePolicy(int32_t value)
     }
     TextFieldModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
-
+ 
 void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -2164,7 +2183,7 @@ void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetLetterSpacing(value);
 }
-
+ 
 void JSTextField::SetLineHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -2489,9 +2508,14 @@ void JSTextField::SetStrokeColor(const JSCallbackInfo& info)
         return;
     }
     Color strokeColor;
-    if (!ParseJsColor(info[0], strokeColor)) {
+    RefPtr<ResourceObject> resObj;
+    UnRegisterResource("strokeColor");
+    if (!ParseJsColor(info[0], strokeColor, resObj)) {
         TextFieldModel::GetInstance()->ResetStrokeColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<Color>("strokeColor", resObj, strokeColor);
     }
     TextFieldModel::GetInstance()->SetStrokeColor(strokeColor);
 }
@@ -2665,5 +2689,27 @@ void JSTextField::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
         RegisterResource<Color>("selectedDragPreviewStyleColor", resourceObject, color);
     }
     TextFieldModel::GetInstance()->SetSelectedDragPreviewStyle(color);
+}
+
+void JSTextField::SetAccessibilityText(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsAccessibilityText(info);
+    TextFieldModel::GetInstance()->SetUserAccessibilityText();
+}
+
+void JSTextField::SetSearchKeyboardAppearanceConfig(const JSCallbackInfo& info)
+{
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsTargetNode = info[0];
+    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
+    CHECK_NULL_VOID(frameNode);
+    if (!info[1]->IsObject()) {
+        return;
+    }
+    NG::KeyboardAppearanceConfig config = JSTextField::ParseKeyboardAppearanceConfig(JSRef<JSObject>::Cast(info[1]));
+    auto customModifier = NG::NodeModifier::GetSearchCustomModifier();
+    customModifier->setKeyboardAppearanceConfig(frameNode, config);
 }
 } // namespace OHOS::Ace::Framework

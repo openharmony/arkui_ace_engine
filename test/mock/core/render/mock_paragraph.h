@@ -62,6 +62,9 @@ public:
     MOCK_METHOD1(SetParagraphId, void(uint32_t id));
     MOCK_METHOD1(GetLineMetrics, TextLineMetrics(size_t lineNumber));
     MOCK_METHOD1(GetGlyphPositionAtCoordinate, PositionWithAffinity(const Offset& offset));
+    MOCK_METHOD1(GetCharacterPositionAtCoordinate, PositionWithAffinity(const Offset& offset));
+    MOCK_METHOD2(GetGlyphRangeForCharacterRange, std::pair<TextRange, TextRange>(int32_t start, int32_t end));
+    MOCK_METHOD2(GetCharacterRangeForGlyphRange, std::pair<TextRange, TextRange>(int32_t start, int32_t end));
     MOCK_METHOD2(GetGlyphIndexByCoordinate, int32_t(const Offset& offset, bool isSelectionPos));
     MOCK_METHOD3(ComputeOffsetForCaretDownstream, bool(int32_t extent, CaretMetricsF& result,
         bool needLineHighest));

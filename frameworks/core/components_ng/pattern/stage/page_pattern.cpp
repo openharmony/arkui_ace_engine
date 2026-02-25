@@ -979,19 +979,20 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
     }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
     if (type == PageTransitionType::EXIT_POP || isNeedRemove_) {
         auto stageNode = outPage->GetParent();
         CHECK_NULL_VOID(stageNode);
         stageNode->RemoveChild(outPage);
         stageNode->RebuildRenderContextTree();
+        stageManager->SetStageInTrasition(false);
         context->RequestFrame();
         return;
     }
     isPageInTransition_ = false;
     ProcessHideState();
     context->MarkNeedFlushMouseEvent();
-    auto stageManager = context->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
     stageManager->SetStageInTrasition(false);
     ResetPageTransitionEffect();
 }

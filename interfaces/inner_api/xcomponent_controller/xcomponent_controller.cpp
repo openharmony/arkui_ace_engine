@@ -17,9 +17,13 @@
 
 #include "js_native_api.h"
 #include "utils.h"
+#include "ani.h"
+#include "xcomponent_controller_log.h"
 
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -79,6 +83,34 @@ std::shared_ptr<XComponentController> XComponentController::GetXComponentControl
     return controller;
 }
 
+std::shared_ptr<XComponentController> XComponentController::GetXComponentControllerFromAniValue(
+    ani_env* env, ani_object controller)
+{
+    if (env == nullptr) {
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue env is null");
+        return nullptr;
+    }
+    ani_ref ref;
+    if (env->Object_GetFieldByName_Ref(controller, "peer", &ref) != ANI_OK) {
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get peer");
+        return nullptr;
+    }
+    ani_object obj = static_cast<ani_object>(ref);
+    ani_long ptr;
+    auto ret = env->Object_GetFieldByName_Long(obj, "ptr", &ptr);
+    if (ret != ANI_OK) {
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get ptr %{public}d", ret);
+        return nullptr;
+    }
+    auto* controllerPeer = reinterpret_cast<NG::GeneratedModifier::XComponentControllerPeerImpl*>(ptr);
+    if (controllerPeer == nullptr) {
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue controllerPeer is null");
+        return nullptr;
+    }
+    std::shared_ptr<XComponentController> retController = controllerPeer->controller;
+    return retController;
+}
+
 XComponentControllerErrorCode XComponentController::SetSurfaceCallbackMode(
     napi_env env, napi_value node, SurfaceCallbackMode mode)
 {
@@ -97,6 +129,42 @@ XComponentControllerErrorCode XComponentController::SetSurfaceCallbackMode(
         return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
     }
     return ChangeSurfaceCallbackMode(nodePtr->ToNativePointer(vm)->Value(), static_cast<char>(mode));
+}
+
+XComponentControllerErrorCode XComponentController::SetSurfaceCallbackModeFromAniValue(
+    ani_env* env, ani_object node, SurfaceCallbackMode mode)
+{
+    if (env == nullptr) {
+        HILOG_ERROR("XComponentController SetSurfaceCallbackModeFromAniValue env is null");
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    ani_ref framenodePeerRef;
+    if (env->Object_GetFieldByName_Ref(node, "nodePtr_", &framenodePeerRef) != ANI_OK) {
+        HILOG_ERROR("XComponentController fail to get nodePtr in node");
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    ani_object frameNodePeerObj = static_cast<ani_object>(framenodePeerRef);
+    ani_class pointerClass;
+    env->FindClass("std.core.Long", &pointerClass);
+    ani_boolean isPointer;
+    ani_status status = env->Object_InstanceOf(frameNodePeerObj, pointerClass, &isPointer);
+    if (status != ANI_OK || !isPointer) {
+        HILOG_ERROR("XComponentController fail to get frameNodePeerObj value in node");
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    ani_long frameNodePeerPtr;
+    status = env->Object_CallMethodByName_Long(frameNodePeerObj, "toLong", ":l", &frameNodePeerPtr);
+    if (status != ANI_OK) {
+        HILOG_ERROR("XComponentController fail to unbox frameNodePeerPtr");
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(frameNodePeerPtr);
+    if (frameNodePeer == nullptr) {
+        HILOG_ERROR("XComponentController fail to get frameNodePeer value in builderNode");
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    OHOS::Ace::NG::FrameNode* frameNode = OHOS::Ace::AceType::RawPtr(frameNodePeer->node);
+    return ChangeSurfaceCallbackMode(frameNode, static_cast<char>(mode));
 }
 
 XComponentControllerErrorCode XComponentController::SetRenderFitBySurfaceId(

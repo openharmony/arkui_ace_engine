@@ -1629,4 +1629,5 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest010, TestSize.Level1)
     auto result = OH_ArkUI_RenderNodeUtils_GetRenderNode(rootCustomNode, &renderNode);
     ASSERT_EQ(result, ARKUI_ERROR_CODE_RENDER_NOT_ADOPTED_NODE);
 }
+
 } // namespace OHOS::Ace

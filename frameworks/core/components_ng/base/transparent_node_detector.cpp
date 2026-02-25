@@ -34,6 +34,22 @@ TransparentNodeDetector& TransparentNodeDetector::GetInstance()
     return instance;
 }
 
+void CollectOverlayFrameNodes(const RefPtr<FrameNode>& node, std::vector<RefPtr<FrameNode>>& overlays)
+{
+    if (!node) {
+        return;
+    }
+    for (const auto& child : node->GetChildren()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        if (!frameNode) {
+            continue;
+        }
+        if (OverlayManager::OVERLAY_TAGS.count(frameNode->GetTag()) > 0) {
+            overlays.emplace_back(frameNode);
+        }
+    }
+}
+
 bool TransparentNodeDetector::CheckWindowTransparent(const RefPtr<FrameNode>& root, int32_t currentId,
     bool isUECWindow, bool isSubWindow, bool isDialogWindow, bool isNavigation)
 {
@@ -48,16 +64,19 @@ bool TransparentNodeDetector::CheckWindowTransparent(const RefPtr<FrameNode>& ro
     }
 
     if (isNavigation) {
-        RefPtr<NG::FrameNode> topNavDesNode;
-        root->FindTopNavDestination(topNavDesNode);
-        CHECK_NULL_RETURN(topNavDesNode, false);
-        auto navDestinationNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(topNavDesNode);
-        CHECK_NULL_RETURN(navDestinationNodeBase, false);
-        auto navDestContentFrameNode = AceType::DynamicCast<FrameNode>(navDestinationNodeBase->GetContentNode());
-        CHECK_NULL_RETURN(navDestContentFrameNode, false);
-        auto rootNode = navDestContentFrameNode->GetChildren().front();
-        if (rootNode && !rootNode->IsContextTransparent()) {
-            return false;
+        std::list<RefPtr<NG::FrameNode>> navDesNodes;
+        root->FindTopNavDestination(navDesNodes);
+        CHECK_NULL_RETURN(!navDesNodes.empty(), false);
+        for (auto& navDesNode : navDesNodes) {
+            CHECK_NULL_RETURN(navDesNode, false);
+            auto navDestinationNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(navDesNode);
+            CHECK_NULL_RETURN(navDestinationNodeBase, false);
+            auto navDestContentFrameNode = AceType::DynamicCast<FrameNode>(navDestinationNodeBase->GetContentNode());
+            CHECK_NULL_RETURN(navDestContentFrameNode, false);
+            auto rootNode = navDestContentFrameNode->GetChildren().front();
+            if (rootNode && !rootNode->IsContextTransparent()) {
+                return false;
+            }
         }
     } else {
         auto stageNode = root->GetChildren().front();
@@ -69,6 +88,13 @@ bool TransparentNodeDetector::CheckWindowTransparent(const RefPtr<FrameNode>& ro
         auto rootNodeCurrentPage = jsView->GetChildAtIndex(0);
         if (rootNodeCurrentPage && !rootNodeCurrentPage->IsContextTransparent()) {
             return false;
+        }
+        std::vector<RefPtr<FrameNode>> overlayNodes;
+        CollectOverlayFrameNodes(root, overlayNodes);
+        for (const auto& overlay : overlayNodes) {
+            if (!overlay->IsContextTransparent()) {
+                return false;
+            }
         }
     }
     return true;
@@ -117,7 +143,6 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
         LOGW("transparent node detected");
         auto window = pipeline->GetWindow();
         CHECK_NULL_VOID(window);
-        TransparentNodeDetector::GetInstance().DumpNodeInfo(root, window);
         auto container = Container::GetContainer(currentId);
         std::string bundleName = container ? container->GetBundleName() : "";
         std::string moduleName = container ? container->GetModuleName() : "";
@@ -131,20 +156,6 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
         }
     };
     executor->PostDelayedTask(std::move(task), TaskExecutor::TaskType::UI, DELAY_TIME, "ExtensionTransparentDetector");
-}
-
-void TransparentNodeDetector::DumpNodeInfo(const RefPtr<FrameNode>& node, Window* window)
-{
-    std::string path = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/dump_info.log";
-    std::unique_ptr<std::ofstream> out = std::make_unique<std::ofstream>(path);
-    if (out) {
-        DumpLog::GetInstance().Reset();
-        DumpLog::GetInstance().SetDumpFile(std::move(out));
-        DumpLog::GetInstance().Print(std::string("WindowId: ").append(std::to_string(window->GetWindowId())));
-        DumpLog::GetInstance().Print(std::string("WindowName: ").append(window->GetWindowName()));
-        node->DumpTree(0, true);
-        DumpLog::GetInstance().OutPutDefault();
-    }
 }
 } // namespace OHOS::Ace::NG
 

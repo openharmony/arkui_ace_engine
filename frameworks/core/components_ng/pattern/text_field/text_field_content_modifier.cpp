@@ -278,7 +278,9 @@ void TextFieldContentModifier::ModifyTextStyle(TextStyle& textStyle)
         textStyle.SetFontWeight(static_cast<FontWeight>(std::floor(fontWeightFloat_->Get() + 0.5f)));
     }
     if (textColor_.has_value() && animatableTextColor_) {
-        textStyle.SetTextColor(Color(animatableTextColor_->Get().GetValue()));
+        Color color(animatableTextColor_->Get().GetValue());
+        color.SetPlaceholder(textColor_->GetPlaceholder());
+        textStyle.SetTextColor(color);
     }
     ModifyDecorationInTextStyle(textStyle);
 }

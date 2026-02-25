@@ -35,6 +35,11 @@ export enum ImmersiveMode {
     EXTEND = 1,
 }
 
+export declare class LevelOrder {
+    native static clamp(order: double): LevelOrder;
+    native getOrder(): double;
+}
+
 class DismissDialogActionInner implements DismissDialogAction {
     nativePtr: long = 0;
     constructor(nativePtr: long) {
@@ -188,6 +193,7 @@ export default namespace promptAction {
         levelMode?: LevelMode;
         levelUniqueId?: int;
         immersiveMode?: ImmersiveMode;
+        levelOrder?: LevelOrder;
         focusable?: boolean;
     }
 

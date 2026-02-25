@@ -50,6 +50,7 @@ void RatingModelNG::SetRatingScoreStatic(double value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto paintProperty = frameNode->GetPaintPropertyPtr<RatingRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
     if (paintProperty->HasRatingScore() && !NearEqual(paintProperty->GetRatingScore().value(), value)) {
@@ -67,6 +68,7 @@ void RatingModelNG::SetRatingScore(double value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto paintProperty = frameNode->GetPaintPropertyPtr<RatingRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
     if (paintProperty->HasRatingScore() && !NearEqual(paintProperty->GetRatingScore().value(), value)) {
@@ -121,6 +123,7 @@ void RatingModelNG::SetOnChange(RatingChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto eventHub = frameNode->GetEventHub<RatingEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
@@ -130,6 +133,7 @@ void RatingModelNG::SetOnChangeEvent(RatingChangeEvent&& onChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto eventHub = frameNode->GetEventHub<RatingEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
@@ -138,6 +142,7 @@ void RatingModelNG::SetOnChangeEvent(RatingChangeEvent&& onChangeEvent)
 void RatingModelNG::SetOnChangeEvent(FrameNode* frameNode, RatingChangeEvent&& onChangeEvent)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto eventHub = frameNode->GetEventHub<RatingEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
@@ -197,6 +202,7 @@ void RatingModelNG::SetBackgroundSrc(FrameNode* frameNode, const std::string& va
 void RatingModelNG::SetBuilderFunc(FrameNode* frameNode, NG::RatingMakeCallback&& makeFunc)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<RatingPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
@@ -258,6 +264,7 @@ void RatingModelNG::UpdateStarStyleImage(FrameNode* frameNode,
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
+    ACE_UINODE_TRACE(frameNode);
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);

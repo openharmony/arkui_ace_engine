@@ -182,7 +182,7 @@ void CheckBoxPattern::OnModifyDone()
     Pattern::OnModifyDone();
     FireBuilder();
     UpdateIndicator();
-    if (!IsArkTSStatic()) {
+    if ((!IsArkTSStatic()) || (!isFirstCreated_)) {
         UpdateState();
     }
     auto host = GetHost();
@@ -746,7 +746,9 @@ void CheckBoxPattern::LoadBuilder()
         builder_.value()();
         customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         CHECK_NULL_VOID(customNode);
-        builderNode_ = AceType::DynamicCast<FrameNode>(customNode);
+        auto firstFrameNode = customNode->GetFrameChildByIndex(0, false);
+        CHECK_NULL_VOID(firstFrameNode);
+        builderNode_ = AceType::DynamicCast<FrameNode>(firstFrameNode);
         CHECK_NULL_VOID(builderNode_);
         builderNode_->MountToParent(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);

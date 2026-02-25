@@ -39,11 +39,11 @@ private:
 };
 
 /**
- * @tc.name: GetRepeatTest
+ * @tc.name: getRepeatTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LongPressGestureEventAccessorTest, GetRepeatTest, TestSize.Level1)
+HWTEST_F(LongPressGestureEventAccessorTest, getRepeatTest, TestSize.Level1)
 {
     for (auto& [input, expected, value] : AccessorTestFixtures::testFixtureBooleanValues) {
         auto event = peer_->GetEventInfo();
@@ -56,11 +56,11 @@ HWTEST_F(LongPressGestureEventAccessorTest, GetRepeatTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetRepeatTest
+ * @tc.name: setRepeatTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LongPressGestureEventAccessorTest, SetRepeatTest, TestSize.Level1)
+HWTEST_F(LongPressGestureEventAccessorTest, setRepeatTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureBooleanValues) {
         accessor_->setRepeat(peer_, value);

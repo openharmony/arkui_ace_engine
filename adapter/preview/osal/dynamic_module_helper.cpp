@@ -79,12 +79,16 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         }
     }
     static const std::unordered_map<std::string, std::string> soMap = {
+        {"DynamicLayout", "dynamiclayout"},
         {"Counter", "counter"},
+        { "DataPanel", "datapanel" },
         {"Checkbox", "checkbox"},
         {"CheckboxGroup", "checkbox"},
         {"Gauge", "gauge"},
         {"Sidebar", "sidebar"},
         {"QRCode", "qrcode"},
+        {"PatternLock", "patternlock"},
+        {"TextClock", "textclock"},
         {"Rating", "rating"},
         { "FlowItem", "waterflow" },
         { "WaterFlow", "waterflow" },
@@ -96,11 +100,18 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Radio", "radio"},
         { "Slider", "slider" },
         { "FolderStack", "folderstack" },
+        { "Search", "search" },
         { "TimePicker", "timepicker" },
         { "TimePickerDialog", "timepicker" },
         {"CalendarPicker", "calendarpicker"},
         {"CalendarPickerDialog", "calendarpicker"},
         {"Indexer", "indexer"},
+        { "Hyperlink", "hyperlink" },
+        {"SymbolGlyph", "symbol"},
+        {"Richeditor", "richeditor"},
+        { "Menu", "menu" },
+        { "MenuItem", "menu" },
+        { "MenuItemGroup", "menu" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);
@@ -137,5 +148,9 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         return module;
     }
 }
+
+#ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
+void DynamicModuleHelper::TriggerPageFaultForPreLoad() {}
+#endif
 
 } // namespace OHOS::Ace

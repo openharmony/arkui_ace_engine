@@ -57,6 +57,24 @@ public:
         PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
         return finalResult;
     }
+
+    virtual PositionWithAffinity GetCharacterPositionAtCoordinate(int32_t x, int32_t y)
+    {
+        PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+        return finalResult;
+    }
+
+    virtual std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+    {
+        std::pair<TextRange, TextRange> ranges;
+        return ranges;
+    }
+
+    virtual std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+    {
+        std::pair<TextRange, TextRange> ranges;
+        return ranges;
+    }
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_MODEL_H

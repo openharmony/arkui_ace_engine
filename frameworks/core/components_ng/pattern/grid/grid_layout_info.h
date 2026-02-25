@@ -385,6 +385,8 @@ struct GridLayoutInfo {
     float contentEndPadding_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    float totalOffset_ = 0.0f;
+    float currentDelta_ = 0.0f;
 
     std::optional<int32_t> lastCrossCount_;
     // index of first and last GridItem in viewport
@@ -430,6 +432,7 @@ struct GridLayoutInfo {
     bool synced_ = false;
 
     std::optional<int32_t> targetIndex_;
+    std::optional<float> targetPos_;
 
     std::map<int32_t, bool> irregularLines_;
 

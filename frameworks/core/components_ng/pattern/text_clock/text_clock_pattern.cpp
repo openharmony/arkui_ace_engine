@@ -61,6 +61,7 @@ constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
 constexpr char TEXTCLOCK_MONTH[] = "textclock.month";
 constexpr char TEXTCLOCK_DAY[] = "textclock.day";
+constexpr char TEXT_ETS_TAG[] = "Text";
 
 enum class TextClockElementIndex {
     CUR_YEAR_INDEX = 0,
@@ -804,7 +805,7 @@ RefPtr<FrameNode> TextClockPattern::GetTextNode()
     CHECK_NULL_RETURN(host, nullptr);
     auto textNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
     CHECK_NULL_RETURN(textNode, nullptr);
-    if (textNode->GetTag() != V2::TEXT_ETS_TAG) {
+    if (textNode->GetTag() != TEXT_ETS_TAG) {
         return nullptr;
     }
     return textNode;
@@ -935,7 +936,7 @@ void TextClockPattern::UpdateTextClockColor(const Color& color, bool isFirstLoad
     CHECK_NULL_VOID(renderContext);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         layoutProperty->UpdateTextColor(color);
         renderContext->UpdateForegroundColor(color);
         renderContext->ResetForegroundColorStrategy();

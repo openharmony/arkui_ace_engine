@@ -19,7 +19,10 @@
 #include <cstdint>
 #include <memory>
 
+#include "core/components_ng/event/overflow_scroll_event_hub.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/event/focus_hub.h"
 
 struct ArkUI_AccessibilityProvider;
 
@@ -33,6 +36,7 @@ namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class FrameNode;
 class PipelineContext;
+class VerticalOverflowHandler;
 
 class ACE_EXPORT CustomPattern : public Pattern {
     DECLARE_ACE_TYPE(CustomPattern, Pattern);
@@ -61,6 +65,17 @@ public:
     void HandleRegisterAccessibilityEvent(bool isRegister);
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
+    RefPtr<EventHub> CreateEventHub() override;
+
+    RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host) override;
+
+    void DumpInfo() override;
+
+    bool GetIsVertical() const override
+    {
+        return true;
+    }
+
 private:
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext* context) override;
@@ -70,6 +85,7 @@ private:
     RefPtr<AccessibilitySessionAdapter> accessibilitySessionAdapter_;
     uint32_t windowId_ = 0;
     int32_t treeId_ = -1;
+    RefPtr<VerticalOverflowHandler> vOverflowHandler_;
 };
 } // namespace OHOS::Ace::NG
 

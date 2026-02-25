@@ -42,7 +42,7 @@ const bool DEFAULT_SHOW_LUNAR = false;
 const bool DEFAULT_ENABLE_HAPTIC = true;
 const bool DEFAULT_CAN_LOOP = true;
 
-std::optional<PickerDate> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Date_Bindable& value)
+std::optional<PickerDate> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Date_Bindable_Date& value)
 {
     std::optional<PickerDate> result;
     Converter::VisitUnion(value,

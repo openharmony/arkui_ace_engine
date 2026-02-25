@@ -46,7 +46,7 @@ export class ReuseObject {
     private _isRecord: boolean = false;
     constructor(value: RecordData) {
         this._raw = value;
-        if (this._raw instanceof Record<string, RecordData>) {
+        if (this._raw instanceof Record) {
             this._recordValue = value as Record<string, RecordData>;
             this._isRecord = true;
         }
@@ -148,6 +148,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
  
     /** @memo:intrinsic */
     callStyles(): void {
+        if (this.instance instanceof BaseCustomComponent) {
+            const customComponentInstance = this.instance as BaseCustomComponent<T_Options>;
+            customComponentInstance.__set__commonStyle__Internal(new Array<(instance: CommonMethod) => void>());
+        }
         this.styles?.(this.instance as T)
     }
  
@@ -233,7 +237,11 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         if (!this.executedAboutToDisappear) {
             this.instance.aboutToDisappear();
             this.executedAboutToDisappear = true;
+            this.aboutToBeDeletedInternal();
         }
+    }
+    aboutToBeDeletedInternal(): void {
+        this.instance.__clearStateVariables__Internal();
     }
     onDidBuild(): void {
         this.instance.onDidBuild();
@@ -444,7 +452,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         content?: () => void,
         initializers?: T_Options
     ): void {
-        if (this.instance instanceof OptionsCallback<T_Options>) {
+        if (this.instance instanceof OptionsCallback) {
             const optionsCallback = this.instance as OptionsCallback<T_Options>;
             optionsCallback.__initializeStruct(initializers, content);
         } else {
@@ -455,7 +463,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     public __updateStruct(
         initializers?: T_Options
     ): void {
-        if (this.instance instanceof OptionsCallback<T_Options>) {
+        if (this.instance instanceof OptionsCallback) {
             const optionsCallback = this.instance as OptionsCallback<T_Options>;
             optionsCallback.__updateStruct(initializers);
         } else {
@@ -497,6 +505,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     __getJsViewName_Internal(): string {
         const classPath = Class.of(this.instance).getName();
         return classPath.substring(classPath.lastIndexOf('.') + 1);
+    }
+
+    getName(): string {
+        return transferTypeName(Class.of(this.instance).getName());
     }
 }
 
@@ -547,10 +559,20 @@ export abstract class BaseCustomDialog<T extends BaseCustomDialog<T, T_Options>,
 }
 
 export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent implements OptionsCallback<T_Options>, HasCommonMethod, CommonMethod {
-    private __commonStyles = new Array<(instance: CommonMethod) => void>();
+    private __commonStyles: Array<(instance: CommonMethod) => void> | undefined = undefined;
+
     override __get__commonStyles__Internal(): Array<(instance: CommonMethod) => void> | undefined {
         return this.__commonStyles;
     }
+
+    __set__commonStyle__Internal(val: Array<(instance: CommonMethod) => void>): void {
+        this.__commonStyles = val;
+    }
+
+    override __is_CustomComponent__Internal(): boolean {
+        return true;
+    }
+
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         super(useSharedStorage, storage);
     }
@@ -578,15 +600,15 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
  
     __applyStyles(instance: CommonMethod): void {
         if (this.__hasCommonMethod) {            
-            for (let func of this.__commonStyles) {
+            for (let func of (this.__commonStyles as Array<(instance: CommonMethod) => void>)) {
                 func(instance);
             }
-            this.__commonStyles = new Array<(instance: CommonMethod) => void>();
+            this.__commonStyles = undefined;
         }
     }
 
     get __hasCommonMethod(): boolean {
-        return this.__commonStyles.length > 0;
+        return this.__commonStyles? (this.__commonStyles as Array<(instance: CommonMethod) => void>).length > 0 : false;
     }
 
     // manually override CommonMethod methods so it has no effects.
@@ -634,6 +656,10 @@ interface ReusableV2LifeCycle<T_Options> {
     aboutToReuse(): void;
 }
 
+export interface CustomComponentInvokeOptions {
+    sClass?: Class
+}
+
 export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableV2LifeCycle<T_Options> {
     /** @memo */
     static _invokeImpl<S extends CustomComponentV2<S, S_Options>, S_Options>(
@@ -645,16 +671,30 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
         /** @memo */
         content?: () => void
     ): void {
+        CustomComponentV2._invokeImpl<S, S_Options>(style, factory, initializers, reuseKey, content, undefined);
+    }
+
+    /** @memo */
+    static _invokeImpl<S extends CustomComponentV2<S, S_Options>, S_Options>(
+        /** @memo */
+        style: ((instance: S) => void) | undefined,
+        factory: () => S,
+        initializers?: () => S_Options,
+        reuseKey?: () => string,
+        /** @memo */
+        content?: () => void,
+        options?: CustomComponentInvokeOptions
+    ): void {
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
         const reuseKeyValue = remember(() => {
             if (reuseKey) {
-                let key: string | undefined | null = reuseKey() as string | undefined | null; // this means reusekey should be only calculated once
-                if (!key) { // include '' empty string
-                    key = transferTypeName((Type.of(factory) as FunctionType).getResultType().toString());
+                let key: string = reuseKey(); // this means reusekey should be only calculated once
+                if (!key && options?.sClass) { // include '' empty string
+                    key = transferTypeName(options!.sClass!.getName());
                 }
-                return key as string;
+                return key;
             }
             return undefined;
         });

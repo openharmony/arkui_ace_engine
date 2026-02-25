@@ -42,5 +42,17 @@ const CJUIMarqueeModifier* GetCJUIMarqueeModifier()
     }
     return cachedModifier;
 }
+
+const ArkUIMarqueeCustomModifier* GetMarqueeCustomModifier()
+{
+    static const ArkUIMarqueeCustomModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Marquee");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier =
+            reinterpret_cast<const ArkUIMarqueeCustomModifier*>(module->GetCustomModifier("customModifier"));
+    }
+    return cachedModifier;
+}
 }
 } // namespace OHOS::Ace::NG

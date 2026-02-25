@@ -42,24 +42,24 @@ export class MeasurableLayoutableInner implements Measurable, Layoutable {
     uniqueId?: int32 | undefined;
     measureResult: MeasureResult = {width: 0, height: 0};
 
-    public override measure(constraint: ConstraintSizeOptions): MeasureResult | undefined {
+    public override measure(constraint: ConstraintSizeOptions | undefined ): MeasureResult | undefined {
         return this.measureInner(constraint);
     }
-    public override layout(position: Position) {
+    public override layout(position: Position | undefined ) {
         this.layoutInner(position)
     }
-    public override getMargin(): DirectionalEdgesT<number> | undefined {
+    public override getMargin(): DirectionalEdgesT<double> | undefined {
         return this.getMarginInner()
     }
-    public override getPadding(): DirectionalEdgesT<number> | undefined {
+    public override getPadding(): DirectionalEdgesT<double> | undefined {
         return this.getPaddingInner()
     }
-    public override getBorderWidth(): DirectionalEdgesT<number> | undefined {
+    public override getBorderWidth(): DirectionalEdgesT<double> | undefined {
         return this.getBorderWidthInner()
     }
     
-    public native layoutInner(position: Position): void;
-    public native measureInner(constraint: ConstraintSizeOptions): MeasureResult | undefined;
+    public native layoutInner(position: Position | undefined ): void;
+    public native measureInner(constraint: ConstraintSizeOptions | undefined ): MeasureResult | undefined;
     public native getMarginInner(): DirectionalEdgesT<double> | undefined;
     public native getPaddingInner(): DirectionalEdgesT<double> | undefined;
     public native getBorderWidthInner(): DirectionalEdgesT<double> | undefined;

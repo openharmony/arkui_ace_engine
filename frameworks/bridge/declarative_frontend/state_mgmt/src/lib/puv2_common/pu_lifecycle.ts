@@ -72,9 +72,6 @@ class CustomComponentLifecycle {
     }
 
     public handleEvent(event: LifeCycleEvent): boolean {
-        if (!this.owningView_.__newLifecycleNeedWork__Internal) {
-            return false;
-        }
         const nextState = transitionTable[this.currentState_][event];
         if (!nextState) {
             stateMgmtConsole.frequentError(`Lifecycle handleEvent error, event id = ${event}, view id:${this.owningView_.id__()}, view name:${this.owningView_.constructor.name}, current state:${this.currentState_}.`);
@@ -177,7 +174,7 @@ class CustomComponentLifecycle {
     }
 
     public addObserver(target: CustomComponentLifecycleObserver): void {
-        this.owningView_.__newLifecycleNeedWork__Internal = true;
+        this.owningView_['__newLifecycleNeedWork__Internal'] = true;
         if (!this.observers_.includes(target)) {
             this.observers_.push(target);
         }
@@ -186,6 +183,11 @@ class CustomComponentLifecycle {
     public removeObserver(target: CustomComponentLifecycleObserver): void {
         this.observers_ = this.observers_.filter(obs => obs !== target);
     }
+
+    public toJSON(): Object {
+        return {};
+    }
+
 }
 
 interface CustomComponentLifecycleObserver {
@@ -201,7 +203,7 @@ interface CustomComponentLifecycleObserver {
 }
 
 function __componentInit__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
-  target.__newLifecycleNeedWork__Internal = true;
+  target['__newLifecycleNeedWork__Internal'] = true;
   const watchProp = Symbol.for('INIT_INTERNAL_FUNCTION' + target.constructor.name);
   const componentInitFunction = descriptor.value;
   if (componentInitFunction && typeof componentInitFunction === 'function') {
@@ -216,7 +218,7 @@ function __componentInit__Internal(target: PUV2ViewBase, propertyName: string, d
 }
 
 function __componentAppear__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
-  target.__newLifecycleNeedWork__Internal = true;
+  target['__newLifecycleNeedWork__Internal'] = true;
   const watchProp = Symbol.for('APPEAR_INTERNAL_FUNCTION' + target.constructor.name);
   const componentAppearFunction = descriptor.value;
   if (componentAppearFunction && typeof componentAppearFunction === 'function') {
@@ -231,7 +233,7 @@ function __componentAppear__Internal(target: PUV2ViewBase, propertyName: string,
 }
 
 function __componentBuilt__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
-  target.__newLifecycleNeedWork__Internal = true;
+  target['__newLifecycleNeedWork__Internal'] = true;
   const watchProp = Symbol.for('BUILT_INTERNAL_FUNCTION' + target.constructor.name);
   const componentBuiltFunction = descriptor.value;
   if (componentBuiltFunction && typeof componentBuiltFunction === 'function') {
@@ -246,7 +248,7 @@ function __componentBuilt__Internal(target: PUV2ViewBase, propertyName: string, 
 }
 
 function __componentReuse__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
-  target.__newLifecycleNeedWork__Internal = true;
+  target['__newLifecycleNeedWork__Internal'] = true;
   const watchProp = Symbol.for('REUSE_INTERNAL_FUNCTION' + target.constructor.name);
   const componentReuseFunction = descriptor.value;
   if (componentReuseFunction && typeof componentReuseFunction === 'function') {
@@ -261,7 +263,7 @@ function __componentReuse__Internal(target: PUV2ViewBase, propertyName: string, 
 }
 
 function __componentRecycle__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
-  target.__newLifecycleNeedWork__Internal = true;
+  target['__newLifecycleNeedWork__Internal'] = true;
   const watchProp = Symbol.for('RECYCLE_INTERNAL_FUNCTION' + target.constructor.name);
   const componentRecycleFunction = descriptor.value;
   if (componentRecycleFunction && typeof componentRecycleFunction === 'function') {
@@ -276,7 +278,7 @@ function __componentRecycle__Internal(target: PUV2ViewBase, propertyName: string
 }
 
 function __componentDisappear__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
-  target.__newLifecycleNeedWork__Internal = true;
+  target['__newLifecycleNeedWork__Internal'] = true;
   const watchProp = Symbol.for('DISAPPEAR_INTERNAL_FUNCTION' + target.constructor.name);
   const componentDisappearFunction = descriptor.value;
   if (componentDisappearFunction && typeof componentDisappearFunction === 'function') {

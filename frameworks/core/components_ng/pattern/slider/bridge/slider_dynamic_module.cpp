@@ -17,6 +17,7 @@
 
 #include "arkoala_api_generated.h"
 
+#include "frameworks/core/components_ng/pattern/slider/bridge/slider_custom_modifier.h"
 #include "core/components_ng/pattern/slider/bridge/arkts_native_slider_bridge.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 
@@ -31,10 +32,13 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_Slider()
 }
 
 namespace OHOS::Ace {
-
 namespace NG {
 const ArkUISliderModifier* GetSliderDynamicModifier();
 const CJUISliderModifier* GetCJUISliderModifier();
+namespace CustomModifier {
+    constexpr const char* CUSTOM_MODIFIER = "customModifier";
+    const ArkUISliderCustomModifier* GetSliderCustomModifier();
+}
 #ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
 constexpr const char* CONTENT_MODIFIER = "contentModifier";
@@ -78,6 +82,9 @@ void* SliderDynamicModule::GetModel()
 
 const void* SliderDynamicModule::GetCustomModifier(const std::string& name)
 {
+    if (name == NG::CustomModifier::CUSTOM_MODIFIER) {
+        return NG::CustomModifier::GetSliderCustomModifier();
+    }
 #ifdef INCLUDE_GENERATED_SOURCES
     if (name == NG::GeneratedModifier::CONTENT_MODIFIER) {
         return NG::GeneratedModifier::GetSliderStaticContentModifier();

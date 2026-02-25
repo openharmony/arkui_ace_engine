@@ -28,6 +28,7 @@
 
 #include "base/i18n/localization.h"
 #include "core/common/container.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 
 namespace OHOS::Ace::NG {
@@ -54,6 +55,7 @@ void OffscreenCanvasPaintMethod::InitBitmap()
     bool ret = bitmap_.Build(width_, height_, bitmapFormat);
     if (!ret) {
         TAG_LOGE(AceLogTag::ACE_CANVAS, "The width and height exceed the limit size.");
+        SendStatisticEvent(StatisticEventType::CANVAS_BITMAP_SIZE_EXCEED_LIMIT);
         return;
     }
     bitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);

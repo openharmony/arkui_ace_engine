@@ -582,6 +582,7 @@ void ScrollablePattern::AddScrollEvent()
     });
     gestureHub->AddScrollableEvent(scrollableEvent_);
     InitTouchEvent(gestureHub);
+    RegisterTouchpadInteractionCallback();
     RegisterWindowStateChangedCallback();
     if (!clickRecognizer_) {
         InitScrollBarClickEvent();
@@ -1013,6 +1014,35 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
     }
 }
 
+void ScrollablePattern::OnTouchpadInteraction(PointF point)
+{
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    scrollable->HandleTouchDown(true);
+    if (GetNestedScrolling() && !NearZero(GetNestedScrollVelocity())) {
+        auto child = GetScrollOriginChild();
+        CHECK_NULL_VOID(child);
+        child->StopScrollAnimation();
+    }
+    if (scrollBar_) {
+        scrollBar_->StopFlingAnimation();
+    }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->StopScrollBarAnimator(false);
+    }
+    if (isBackToTopRunning_) {
+        if (animator_ && !animator_->IsStopped()) {
+            animator_->Stop();
+        }
+        if (!isAnimationStop_) {
+            StopAnimation(springAnimation_);
+            StopAnimation(curveAnimation_);
+        }
+        isBackToTopRunning_ = false;
+    }
+}
+
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (GetAxis() == Axis::FREE) {
@@ -1051,6 +1081,21 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
     gestureHub->AddTouchEvent(touchEvent_);
 }
 
+void ScrollablePattern::RegisterTouchpadInteractionCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inputEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputEventHub);
+    inputEventHub->AddTouchpadInteractionListenerInner([weak = WeakClaim(this)](PointF point) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsInComponent(point)) {
+            pattern->OnTouchpadInteraction(point);
+        }
+    });
+}
+
 void ScrollablePattern::RegisterWindowStateChangedCallback()
 {
     auto host = GetHost();
@@ -1058,6 +1103,16 @@ void ScrollablePattern::RegisterWindowStateChangedCallback()
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddWindowStateChangedCallback(host->GetId());
+}
+
+bool ScrollablePattern::IsInComponent(PointF point)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto wholeRect = geometryNode->GetFrameRect();
+    return wholeRect.IsInRegion(point);
 }
 
 void ScrollablePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -5027,13 +5082,46 @@ void ScrollablePattern::ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyN
     mgr->OnScrollChangeStart(keyNode);
 }
 
-std::string ScrollablePattern::ParseCommand(const std::string& command)
+std::string ScrollablePattern::ParseCommand(
+    const std::string& command, int& reportEventId, float& moveRatio, bool& isScrollByRatio)
 {
     auto json = JsonUtil::ParseJsonString(command);
     if (!json || json->IsNull()) {
         return std::string("");
     }
+    isScrollByRatio = json->Contains("ratio") && json->Contains("eventId");
+    if (isScrollByRatio) {
+        reportEventId = json->GetInt("eventId");
+        moveRatio = json->GetDouble("ratio");
+    }
     return json->GetString("cmd");
+}
+
+void ScrollablePattern::ReportScroll(bool isJump, ScrollError error, int32_t reportEventId)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    if (isJump) {
+        params->Put("status", "success");
+    } else {
+        params->Put("status", "failed");
+    }
+    params->Put("reason", static_cast<int32_t>(error));
+    auto event = JsonUtil::Create();
+    CHECK_NULL_VOID(event);
+    event->Put("params", params);
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("id", reportEventId);
+    json->Put("event", event);
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", json);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
 
 void ScrollablePattern::ReportOnItemStopEvent()
@@ -5046,12 +5134,8 @@ void ScrollablePattern::ReportOnItemStopEvent()
     auto nodeId = host->GetId();
     auto params = JsonUtil::Create();
     CHECK_NULL_VOID(params);
-    if (host->GetTag() == V2::GRID_ETS_TAG) {
-        params->Put("name", "Grid.onScrollStop");
-    }
-    if (host->GetTag() == V2::LIST_ETS_TAG) {
-        params->Put("name", "List.onScrollStop");
-    }
+    std::string eventName = std::string(host->GetTag()) + ".onScrollStop";
+    params->Put("name", eventName.c_str());
     params->Put("nodeId", nodeId);
     auto result = JsonUtil::Create();
     CHECK_NULL_VOID(result);
@@ -5059,5 +5143,66 @@ void ScrollablePattern::ReportOnItemStopEvent()
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+int32_t ScrollablePattern::OnInjectionEventByRatio(const std::string& command)
+{
+    int reportEventId = 0;
+    float ratio = 0.0f;
+    bool isScrollByRatio = false;
+    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
+
+    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f)) {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    if (ret == "scrollForward") {
+        HandleScrollByRatio(isScrollByRatio, true, ratio, reportEventId);
+    } else if (ret == "scrollBackward") {
+        HandleScrollByRatio(isScrollByRatio, false, ratio, reportEventId);
+    } else {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+ScrollError ScrollablePattern::ScrollByRatio(bool reverse, float ratio)
+{
+    auto height = GetMainContentSize();
+
+    float distance = reverse ? height : -height;
+    distance = distance * ratio;
+    SetIsOverScroll(false);
+    StopAnimate();
+    if ((IsAtBottom() && IsAtTop()) || !IsScrollable()) {
+        return ScrollError::SCROLL_NOT_SCROLLABLE_ERROR;
+    }
+
+    ScrollError error = ScrollError::SCROLL_ERROR_OTHER;
+    if (IsAtTop() && reverse) {
+        return ScrollError::SCROLL_TOP_ERROR;
+    } else if (IsAtBottom() && !reverse) {
+        return ScrollError::SCROLL_BOTTOM_ERROR;
+    }
+
+    if (UpdateCurrentOffset(distance, SCROLL_FROM_JUMP)) {
+        return ScrollError::SCROLL_NO_ERROR;
+    }
+    return error;
+}
+
+void ScrollablePattern::HandleScrollByRatio(bool isScrollByRatio, bool reverse, float ratio, int reportEventId)
+{
+    if (isScrollByRatio) {
+        auto scrollError = ScrollByRatio(reverse, ratio);
+        if (scrollError == ScrollError::SCROLL_NO_ERROR) {
+            ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+        } else {
+            ReportScroll(false, scrollError, reportEventId);
+        }
+    } else {
+        ScrollPage(reverse);
+    }
 }
 } // namespace OHOS::Ace::NG

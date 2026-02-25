@@ -29,6 +29,7 @@ public:
     virtual void* GetImageAnalyzerConfig() = 0;
     virtual void* ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap) = 0;
     virtual bool HasImageAnalyzerConfig() = 0;
+    virtual void* GetNapiEnv() const = 0;
 };
 ImageAnalyzerAdapter* CreateImageAnalyzerAdapter();
 }

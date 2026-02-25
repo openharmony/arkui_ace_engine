@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "grid_test_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "test/mock/adapter/mock_ui_session_manager.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_resource_adapter_v2.h"
 
@@ -939,5 +940,93 @@ HWTEST_F(GridTestNg, OnInjectionEventTest001, TestSize.Level1)
     command = R"({"cmd":"scrollBackward"})";
     pattern_->OnInjectionEvent(command);
     EXPECT_NE(pattern_->info_.currentOffset_, 0);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: Test CreateWithResourceObjScrollBarColor in GridModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, OnInjectionEventTest002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone();
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    std::string command = R"({"cmd":"scrollForward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+
+    command = R"({"cmd":"scrollBackward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -40);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    command = R"({"cmd":"scrollBackward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+
+    command = R"({"cmd":"scrollward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+
+    command = R"({"cmd":"scrollForward","eventId":123123,"ratio":1.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+
+    command = R"({"cmd":"scrollForward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 40);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest002
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, OnInjectionEventTest003, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr");
+    model.SetColumnsTemplate("1fr");
+    CreateDone();
+    EXPECT_FALSE(pattern_->IsScrollable());
+
+    std::string command = R"({"cmd":"scrollForward","eventId":123123,"ratio":0.1})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+
+    command = R"()";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+}
+
+/**
+ * @tc.name: ReportComponentChangeEventTest001
+ * @tc.desc: ReportComponentChangeEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ReportComponentChangeEventTest001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr");
+    model.SetColumnsTemplate("1fr");
+    CreateDone();
+    EXPECT_FALSE(pattern_->IsScrollable());
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetComponentChangeEventRegistered()).WillRepeatedly(Return(true));
+
+    pattern_->ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, 123);
+    pattern_->ReportScroll(true, ScrollError::SCROLL_NO_ERROR, 123);
+    pattern_->ReportOnItemGridEvent("onReachStart");
+
+    std::string command = R"()";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
 }
 } // namespace OHOS::Ace::NG

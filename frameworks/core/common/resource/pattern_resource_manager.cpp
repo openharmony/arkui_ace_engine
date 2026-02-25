@@ -29,6 +29,7 @@ void PatternResourceManager::AddResource(
         return;
     }
     if (resMap_.count(key) > 0) {
+        LOGD("PatternResourceManager::AddResource resMap_ key: %{public}s", key.c_str());
         resCacheMap_.clear();
         resKeyArray_.erase(std::remove(resKeyArray_.begin(), resKeyArray_.end(), key), resKeyArray_.end());
     }
@@ -84,7 +85,7 @@ bool PatternResourceManager::Empty()
 }
 
 void PatternResourceManager::ParsePropertyValue(
-    const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> valueBase)
+    const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> valueBase, bool adaptMaterial)
 {
     if (valueBase->GetValueType() == ValueType::STRING) {
         std::string value;
@@ -101,7 +102,7 @@ void PatternResourceManager::ParsePropertyValue(
         valueBase->SetValue(value);
     } else if (valueBase->GetValueType() == ValueType::COLOR) {
         Color value;
-        ResourceParseUtils::ParseResColor(resObj, value);
+        ResourceParseUtils::ParseResColor(resObj, value, adaptMaterial);
         valueBase->SetValue(value);
     } else if (valueBase->GetValueType() == ValueType::DOUBLE) {
         double value;

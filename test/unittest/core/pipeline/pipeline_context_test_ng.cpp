@@ -27,6 +27,7 @@
 #include "base/log/dump_log.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
@@ -73,15 +74,16 @@ void PipelineContextTestNg::SetUpTestSuite()
     EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
     EXPECT_CALL(*window, OnShow()).Times(AnyNumber());
     EXPECT_CALL(*window, FlushAnimation(NANO_TIME_STAMP))
-        .Times(AtLeast(1))
+        .Times(AnyNumber())
         .WillOnce(testing::Return(true))
         .WillRepeatedly(testing::Return(false));
-    EXPECT_CALL(*window, FlushModifier()).Times(AtLeast(1));
+    EXPECT_CALL(*window, FlushModifier()).Times(AnyNumber());
     EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
     context_ = AceType::MakeRefPtr<PipelineContext>(
         window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
     context_->fontManager_ = FontManager::Create();
+    context_->statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
     MockContainer::SetUp();
     MockContainer::Current()->pipelineContext_ = context_;
 
@@ -1271,7 +1273,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
         { "-rotation" }, { "-animationscale" }, { "-velocityscale" }, { "-scrollfriction" }, { "-threadstuck" },
         { "test" }, { "-navigation" }, { "-focuswindowscene" }, { "-focusmanager" }, { "-jsdump" }, { "-event" },
         { "-imagecache" }, { "-imagefilecache" }, { "-allelements" }, { "-default" }, { "-overlay" }, { "--stylus" },
-        { "-bindaicaller" }};
+        { "-bindaicaller" }, { "-allInfoWithParamConfigTotal" } };
     int turn = 0;
     for (; turn < params.size(); turn++) {
         EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
@@ -2665,16 +2667,16 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_NullPtr_Tes
      * @tc.expected: Functions should handle null pointer gracefully
      */
     ASSERT_NE(context_, nullptr);
-    
+
     // 保存原始的touchOptimizer
     auto originalTouchOptimizer = std::move(context_->touchOptimizer_);
-    
+
     // 设置touchOptimizer为nullptr
     context_->touchOptimizer_ = nullptr;
-    
+
     // 测试FlushVsync中touchOptimizer_为null的情况
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    
+
     // 测试OnTouchEvent中touchOptimizer_为null的情况
     TouchEvent touchEvent;
     touchEvent.type = TouchType::MOVE;
@@ -2682,15 +2684,15 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_NullPtr_Tes
     touchEvent.x = 100.0f;
     touchEvent.y = 100.0f;
     context_->OnTouchEvent(touchEvent, false);
-    
+
     // 测试ConsumeTouchEventsInterpolation中touchOptimizer_为null的情况
     std::unordered_set<int32_t> ids = {1};
     std::map<int32_t, int32_t> timestampToIds = {{0, 1}};
     std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
     std::unordered_map<int, TouchEvent> idToTouchPoints;
-    
+
     context_->ConsumeTouchEventsInterpolation(ids, timestampToIds, newIdTouchPoints, idToTouchPoints);
-    
+
     // 恢复原始的touchOptimizer
     context_->touchOptimizer_ = std::move(originalTouchOptimizer);
 }
@@ -2817,7 +2819,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     
     // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回true
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
-    context_->touchOptimizer_->slideAccepted_ = false; // 这将导致NeedTpFlushVsync返回true
+    context_->touchOptimizer_->slideAccept_ = false; // 这将导致NeedTpFlushVsync返回true
 
     // 创建触摸事件
     TouchEvent touchEvent;
@@ -2833,7 +2835,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     EXPECT_FALSE(context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_);
     // 重置状态
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
-    context_->touchOptimizer_->slideAccepted_ = true;
+    context_->touchOptimizer_->slideAccept_ = false;
 }
 
 /**

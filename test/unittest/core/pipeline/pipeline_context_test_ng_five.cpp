@@ -27,6 +27,8 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 using namespace testing;
@@ -1559,6 +1561,466 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg099, TestSize.Level
     
     // Verify that the keyboard safe area was updated
     EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, -100);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg100
+ * @tc.desc: Test GetPageRootNode returns nullptr when stageManager_ is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg100, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Set stageManager_ to nullptr.
+     * @tc.expected: GetPageRootNode returns nullptr.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->stageManager_ = nullptr;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg101
+ * @tc.desc: Test GetPageRootNode returns nullptr when GetLastPage returns null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg101, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create stageManager_ with null stageNode_.
+     * @tc.expected: GetLastPage returns nullptr, GetPageRootNode returns nullptr.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(nullptr);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg102
+ * @tc.desc: Test GetPageRootNode returns nullptr when last page is PAGE_ETS_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg102, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create a page node with PAGE_ETS_TAG.
+     * @tc.expected: GetPageRootNode returns nullptr (PAGE_ETS_TAG is skipped).
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a stage node
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::GetOrCreateFrameNode(V2::STAGE_ETS_TAG, stageNodeId, nullptr);
+
+    // Create a page node with PAGE_ETS_TAG
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, nullptr);
+
+    stageNode->AddChild(pageNode);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg103
+ * @tc.desc: Test GetPageRootNode returns valid FrameNode when last page is not PAGE_ETS_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg103, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create a page node with a custom tag (not PAGE_ETS_TAG).
+     * @tc.expected: GetPageRootNode returns the FrameNode.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a stage node
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::GetOrCreateFrameNode(V2::STAGE_ETS_TAG, stageNodeId, nullptr);
+
+    // Create a page node with a custom tag (not PAGE_ETS_TAG)
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, pageNodeId, nullptr);
+
+    stageNode->AddChild(pageNode);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetId(), pageNodeId);
+    EXPECT_EQ(result->GetTag(), V2::TEXT_ETS_TAG);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg104
+ * @tc.desc: Test GetPageRootNode searches children when last page is PAGE_ETS_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg104, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create a PAGE_ETS_TAG page with valid child FrameNodes.
+     * @tc.expected: GetPageRootNode returns the first valid child FrameNode.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a stage node
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::GetOrCreateFrameNode(V2::STAGE_ETS_TAG, stageNodeId, nullptr);
+
+    // Create a page node with PAGE_ETS_TAG
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, nullptr);
+
+    // Create a child FrameNode with custom tag
+    auto childNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, childNodeId, nullptr);
+
+    pageNode->AddChild(childNode);
+    stageNode->AddChild(pageNode);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetId(), childNodeId);
+    EXPECT_EQ(result->GetTag(), V2::TEXT_ETS_TAG);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg105
+ * @tc.desc: Test GetPageRootNode with multiple children, returns first valid FrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg105, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create a PAGE_ETS_TAG page with multiple child FrameNodes.
+     * @tc.expected: GetPageRootNode returns the first valid child FrameNode in order.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a stage node
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::GetOrCreateFrameNode(V2::STAGE_ETS_TAG, stageNodeId, nullptr);
+
+    // Create a page node with PAGE_ETS_TAG
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, nullptr);
+
+    // Create multiple child FrameNodes
+    auto childNodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childNode1 = FrameNode::GetOrCreateFrameNode("child1", childNodeId1, nullptr);
+
+    auto childNodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childNode2 = FrameNode::GetOrCreateFrameNode("child2", childNodeId2, nullptr);
+
+    pageNode->AddChild(childNode1);
+    pageNode->AddChild(childNode2);
+    stageNode->AddChild(pageNode);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetId(), childNodeId1);
+    EXPECT_EQ(result->GetTag(), "child1");
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg106
+ * @tc.desc: Test GetPageRootNode with nested PAGE_ETS_TAG structure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg106, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create nested PAGE_ETS_TAG nodes with valid FrameNode deep in hierarchy.
+     * @tc.expected: GetPageRootNode recursively finds the first valid FrameNode.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a stage node
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::GetOrCreateFrameNode(V2::STAGE_ETS_TAG, stageNodeId, nullptr);
+
+    // Create a page node with PAGE_ETS_TAG
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, nullptr);
+
+    // Create another PAGE_ETS_TAG node as child
+    auto nestedPageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto nestedPageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, nestedPageNodeId, nullptr);
+
+    // Create a valid FrameNode as child of nested PAGE_ETS_TAG
+    auto childNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, childNodeId, nullptr);
+
+    nestedPageNode->AddChild(childNode);
+    pageNode->AddChild(nestedPageNode);
+    stageNode->AddChild(pageNode);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetId(), childNodeId);
+    EXPECT_EQ(result->GetTag(), V2::TEXT_ETS_TAG);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg107
+ * @tc.desc: Test GetPageRootNode returns nullptr when only PAGE_ETS_TAG nodes exist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg107, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create a hierarchy with only PAGE_ETS_TAG nodes.
+     * @tc.expected: GetPageRootNode returns nullptr (no valid FrameNode found).
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a stage node
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::GetOrCreateFrameNode(V2::STAGE_ETS_TAG, stageNodeId, nullptr);
+
+    // Create a page node with PAGE_ETS_TAG
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, nullptr);
+
+    // Create another PAGE_ETS_TAG node as child
+    auto nestedPageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto nestedPageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, nestedPageNodeId, nullptr);
+
+    pageNode->AddChild(nestedPageNode);
+    stageNode->AddChild(pageNode);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg108
+ * @tc.desc: Test GetPageRootNode with CustomNode (non-FrameNode) children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg108, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create a PAGE_ETS_TAG page with CustomNode children followed by FrameNode.
+     * @tc.expected: GetPageRootNode skips CustomNode and returns the first FrameNode.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a stage node
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::GetOrCreateFrameNode(V2::STAGE_ETS_TAG, stageNodeId, nullptr);
+
+    // Create a page node with PAGE_ETS_TAG
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, nullptr);
+
+    // Create a CustomNode
+    auto customNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto customNode = CustomNode::CreateCustomNode(customNodeId, "custom");
+
+    // Create a valid FrameNode
+    auto childNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, childNodeId, nullptr);
+
+    pageNode->AddChild(customNode);
+    pageNode->AddChild(childNode);
+    stageNode->AddChild(pageNode);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetId(), childNodeId);
+    EXPECT_EQ(result->GetTag(), V2::TEXT_ETS_TAG);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg109
+ * @tc.desc: Test GetPageRootNode returns nullptr when only CustomNodes exist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg109, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create a PAGE_ETS_TAG page with only CustomNode children.
+     * @tc.expected: GetPageRootNode returns nullptr (no FrameNode found).
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a stage node
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::GetOrCreateFrameNode(V2::STAGE_ETS_TAG, stageNodeId, nullptr);
+
+    // Create a page node with PAGE_ETS_TAG
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, nullptr);
+
+    // Create CustomNodes
+    auto customNodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto customNode1 = CustomNode::CreateCustomNode(customNodeId1, "custom1");
+
+    auto customNodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto customNode2 = CustomNode::CreateCustomNode(customNodeId2, "custom2");
+
+    pageNode->AddChild(customNode1);
+    pageNode->AddChild(customNode2);
+    stageNode->AddChild(pageNode);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg110
+ * @tc.desc: Test GetPageRootNode with deeply nested FrameNode in complex hierarchy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg110, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create complex hierarchy with mixed node types.
+     * @tc.expected: GetPageRootNode performs in-order traversal and returns first valid FrameNode.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a stage node
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::GetOrCreateFrameNode(V2::STAGE_ETS_TAG, stageNodeId, nullptr);
+
+    // Create a page node with PAGE_ETS_TAG
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, nullptr);
+
+    // Create a CustomNode
+    auto customNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto customNode = CustomNode::CreateCustomNode(customNodeId, "custom");
+
+    // Create another PAGE_ETS_TAG node
+    auto nestedPageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto nestedPageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, nestedPageNodeId, nullptr);
+
+    // Create the target FrameNode
+    auto targetNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto targetNode = FrameNode::GetOrCreateFrameNode("target", targetNodeId, nullptr);
+
+    // Build hierarchy: page -> [custom, nestedPage -> [target]]
+    nestedPageNode->AddChild(targetNode);
+    pageNode->AddChild(customNode);
+    pageNode->AddChild(nestedPageNode);
+    stageNode->AddChild(pageNode);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetId(), targetNodeId);
+    EXPECT_EQ(result->GetTag(), "target");
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg111
+ * @tc.desc: Test GetPageRootNode with empty children list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg111, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create a PAGE_ETS_TAG page with no children.
+     * @tc.expected: GetPageRootNode returns nullptr.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a stage node
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::GetOrCreateFrameNode(V2::STAGE_ETS_TAG, stageNodeId, nullptr);
+
+    // Create a page node with PAGE_ETS_TAG and no children
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, nullptr);
+
+    stageNode->AddChild(pageNode);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg112
+ * @tc.desc: Test GetPageRootNode early returns on first valid FrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg112, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create a PAGE_ETS_TAG page with multiple FrameNode children.
+     * @tc.expected: GetPageRootNode returns the first valid FrameNode, not searching further.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a stage node
+    auto stageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::GetOrCreateFrameNode(V2::STAGE_ETS_TAG, stageNodeId, nullptr);
+
+    // Create a page node with PAGE_ETS_TAG
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, pageNodeId, nullptr);
+
+    // Create multiple FrameNode children
+    auto firstNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto firstNode = FrameNode::GetOrCreateFrameNode("first", firstNodeId, nullptr);
+
+    auto secondNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto secondNode = FrameNode::GetOrCreateFrameNode("second", secondNodeId, nullptr);
+
+    auto thirdNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto thirdNode = FrameNode::GetOrCreateFrameNode("third", thirdNodeId, nullptr);
+
+    pageNode->AddChild(firstNode);
+    pageNode->AddChild(secondNode);
+    pageNode->AddChild(thirdNode);
+    stageNode->AddChild(pageNode);
+
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    context_->stageManager_ = stageManager;
+
+    auto result = context_->GetPageRootNode();
+    EXPECT_NE(result, nullptr);
+    // Should return the first node, not the second or third
+    EXPECT_EQ(result->GetId(), firstNodeId);
+    EXPECT_EQ(result->GetTag(), "first");
 }
 
 } // namespace NG

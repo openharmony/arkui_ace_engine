@@ -54,6 +54,8 @@ struct UiMaterialParam;
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
+class FocusPattern;
+struct ScopeFocusAlgorithm;
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -121,7 +123,20 @@ public:
     // The pattern needs softkeyboard is like search, rich editor, text area, text field pattern.
     virtual bool NeedSoftKeyboard() const
     {
+        if (onNeedSoftkeyboardCallback_) {
+            return onNeedSoftkeyboardCallback_();
+        }
         return false;
+    }
+
+    virtual void SetOnNeedSoftKeyboard(std::function<bool()>&& onNeedSoftkeyboardCallback)
+    {
+        onNeedSoftkeyboardCallback_ = std::move(onNeedSoftkeyboardCallback);
+    }
+
+    virtual void ResetOnNeedSoftKeyboard()
+    {
+        onNeedSoftkeyboardCallback_ = nullptr;
     }
 
     virtual bool NeedToRequestKeyboardOnFocus() const
@@ -489,15 +504,9 @@ public:
     // Called before frameNode CreatePaintWrapper.
     virtual void BeforeCreatePaintWrapper() {}
 
-    virtual FocusPattern GetFocusPattern() const
-    {
-        return { FocusType::DISABLE, false, FocusStyleType::NONE };
-    }
+    virtual FocusPattern GetFocusPattern() const;
 
-    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm()
-    {
-        return ScopeFocusAlgorithm();
-    }
+    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm();
 
     virtual bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     {
@@ -784,6 +793,18 @@ public:
         return RET_SUCCESS;
     };
 
+    bool HandleTextBoxComponentCommand(const std::string& command, std::string& cmd,
+        std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& params)
+    {
+        json = JsonUtil::ParseJsonString(command);
+        CHECK_NULL_RETURN(json && !json->IsNull(), false);
+        cmd = json->GetString("cmd");
+        CHECK_NULL_RETURN(!cmd.empty(), false);
+        params = json->GetValue("params");
+        CHECK_NULL_RETURN(params && params->IsObject(), false);
+        return true;
+    }
+
     virtual bool BorderUnoccupied() const
     {
         return false;
@@ -791,8 +812,14 @@ public:
 
     virtual void UnRegisterResource(const std::string& key);
 
+    /**
+     * @param adaptMaterial Indicates whether the new material is adapted to special resources for color inversion.
+     * Only the Color type has differences. If the value is true, the color resolved from special resources will carry
+     * a non-NONE placeholder.
+     */
     template<typename T>
-    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    void RegisterResource(
+        const std::string& key, const RefPtr<ResourceObject>& resObj, T value, bool adaptMaterial = false)
     {
         if (resourceMgr_ == nullptr) {
             resourceMgr_ = MakeRefPtr<PatternResourceManager>();
@@ -803,7 +830,7 @@ public:
             CHECK_NULL_VOID(pattern);
             pattern->UpdatePropertyImpl(key, valueBase);
         };
-        resourceMgr_->RegisterResource<T>(std::move(propUpdateFunc), key, resObj, value);
+        resourceMgr_->RegisterResource<T>(std::move(propUpdateFunc), key, resObj, value, adaptMaterial);
     }
 
     virtual void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> valueBase) {};
@@ -889,6 +916,10 @@ public:
     virtual void OnAttachToMainRenderTree() {}
     virtual void OnOffscreenProcessResource() {}
     virtual void OnUiMaterialParamUpdate(const UiMaterialParam& params) {}
+    virtual void OnBackgroundColorReset() {}
+    virtual void OnBorderWidthReset() {}
+    virtual void OnBorderColorReset() {}
+    virtual void OnBackShadowReset() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}
@@ -897,6 +928,7 @@ protected:
     WeakPtr<FrameNode> frameNode_;
     RefPtr<PatternResourceManager> resourceMgr_;
 
+    std::function<bool()> onNeedSoftkeyboardCallback_;
 private:
     bool onDetach_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);

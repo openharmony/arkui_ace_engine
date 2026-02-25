@@ -63,6 +63,27 @@ void TabContentModelStatic::SetIndicator(FrameNode* frameNode, const std::option
     }
 }
 
+void TabContentModelStatic::SetDrawableIndicatorConfig(FrameNode* frameNode, const ImageInfoConfig& config)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodePattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetDrawableIndicatorConfig(config);
+}
+
+void TabContentModelStatic::SetIndicatorColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, IndicatorColorSetByUser, isByUser, frameNode);
+}
+
+void TabContentModelStatic::SetDrawableIndicatorFlag(FrameNode* frameNode, bool isDrawableIndicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodePattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetDrawableIndicatorFlag(isDrawableIndicator);
+}
+
 void TabContentModelStatic::SetLabelStyle(FrameNode* frameNode,
     const std::optional<LabelStyle>& labelStyleOpt, bool isSubTabStyle)
 {
@@ -207,6 +228,26 @@ void TabContentModelStatic::SetTabBar(FrameNode* node, const std::optional<std::
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
+void TabContentModelStatic::SetTabBarWithContent(FrameNode* node, FrameNode* tabBarNode)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    if (tabBarNode) {
+        frameNodePattern->SetTabBarWithContent(AceType::Claim(tabBarNode));
+    } else {
+        frameNodePattern->SetTabBarWithContent(nullptr);
+    }
+}
+
+void TabContentModelStatic::SetCustomStyleNode(FrameNode* node, const RefPtr<FrameNode>& customStyleNode)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomStyleNode(customStyleNode);
+}
+
 void TabContentModelStatic::SetLayoutMode(FrameNode* node, const std::optional<LayoutMode>& layoutMode)
 {
     CHECK_NULL_VOID(node);
@@ -257,6 +298,7 @@ void TabContentModelStatic::SetOnWillHide(FrameNode* node, std::function<void()>
 
 RefPtr<FrameNode> TabContentModelStatic::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     auto pipelineContext = frameNode->GetContext();
@@ -344,6 +386,7 @@ RefPtr<TabsNode> TabContentModelStatic::FindTabsNode(const RefPtr<UINode>& tabCo
 void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position, bool update)
 {
     CHECK_NULL_VOID(tabContent);
+    ACE_UINODE_TRACE(tabContent);
     auto tabContentId = tabContent->GetId();
 
     auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContent);

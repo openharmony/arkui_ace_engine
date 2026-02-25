@@ -19,8 +19,8 @@
 #include <map>
 
 #include "base/memory/referenced.h"
-#include "core/event/touch_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,6 +28,25 @@ struct PostEventAction {
     RefPtr<NG::UINode> targetNode = nullptr;
     TouchEvent touchEvent;
 };
+
+struct PostMouseEventAction {
+    RefPtr<NG::UINode> targetNode = nullptr;
+    MouseEvent mouseEvent;
+};
+
+struct PostAxisEventAction {
+    RefPtr<NG::UINode> targetNode = nullptr;
+    AxisEvent axisEvent;
+};
+
+struct MouseEventState {
+    bool hasPress = false;
+    bool hasReleaseOrCancel = false;
+    bool hasWindowEnter = false;
+    bool hasWindowLeaveOrCancel = false;
+};
+
+enum class PostInputEventType : uint8_t { TOUCH = 0, MOUSE = 1, AXIS = 2 };
 
 class ACE_FORCE_EXPORT PostEventManager : public virtual AceType {
     DECLARE_ACE_TYPE(PostEventManager, AceType);
@@ -48,8 +67,24 @@ private:
     bool PostDownEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent);
     bool PostMoveEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent);
     bool PostUpEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent);
-    bool CheckTouchEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent);
-    void ClearPostInputActions(const RefPtr<NG::UINode>& targetNode, int32_t id);
+    bool CheckTouchEvent(
+        const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent, const int32_t instanceId = -1);
+    bool CheckMouseEvent(
+        const RefPtr<NG::UINode>& targetNode, const MouseEvent& mouseEvent, const int32_t instanceId = -1);
+    bool CheckAxisEvent(
+        const RefPtr<NG::UINode>& targetNode, const AxisEvent& axisEvent, const int32_t instanceId = -1);
+    void ClearPostInputActions(
+        const RefPtr<NG::UINode>& targetNode, int32_t id, PostInputEventType type = PostInputEventType::TOUCH);
+    void ClearMouseWindowAction(const RefPtr<NG::UINode>& targetNode, int32_t id);
+
+    // Helper methods for CheckMouseEvent
+    MouseEventState CollectMouseEventState(const RefPtr<NG::UINode>& targetNode, int32_t id);
+    bool HandleMousePressEvent(const MouseEventState& state, const RefPtr<NG::UINode>& targetNode, int32_t id,
+        const int32_t instanceId);
+    bool HandleMouseReleaseEvent(const MouseEventState& state, int32_t id);
+    bool HandleMouseWindowEnterEvent(const MouseEventState& state, const RefPtr<NG::UINode>& targetNode, int32_t id,
+        const int32_t instanceId);
+    bool HandleMouseWindowLeaveEvent(const MouseEventState& state, int32_t id);
 
     void HandlePostEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent);
 
@@ -59,6 +94,9 @@ private:
     bool HaveReceiveUpOrCancelEvent(const RefPtr<NG::UINode>& targetNode, int32_t id);
     std::list<PostEventAction> postEventAction_;
     std::list<PostEventAction> postInputEventAction_;
+    std::list<PostMouseEventAction> postMouseEventWindowAction_;
+    std::list<PostMouseEventAction> postMouseEventAction_;
+    std::list<PostAxisEventAction> postAxisEventAction_;
     std::map<int32_t, PostEventAction> lastEventMap_;
     WeakPtr<FrameNode> targetNode_;
     bool passThroughResult_ = false;

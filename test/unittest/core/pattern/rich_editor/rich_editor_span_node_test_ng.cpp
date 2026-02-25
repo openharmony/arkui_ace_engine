@@ -236,6 +236,9 @@ HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes004, TestSize.Level0)
     ASSERT_NE(richEditorPattern, nullptr);
     auto contentNode = richEditorNode_->GetChildAtIndex(0);
     ASSERT_NE(contentNode, nullptr);
+    /**
+     * @tc.steps: step1. init node
+     */
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto newFrameNode = SpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, nodeId);
@@ -245,6 +248,9 @@ HWTEST_F(RichEditorSpanNodeTestNg, RemoveEmptySpanNodes004, TestSize.Level0)
     contentNode->children_.push_back(newAddFrameNode);
     richEditorPattern->RemoveEmptySpanNodes();
     bool emptySpanNodeRemoved = true;
+    /**
+     * @tc.steps: step2. test remove empty node
+     */
     for (const auto& child : contentNode->children_) {
         auto spanNode = AceType::DynamicCast<SpanNode>(child);
         if (spanNode && spanNode->GetSpanItem()->content.empty()) {

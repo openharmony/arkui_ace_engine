@@ -27,6 +27,7 @@
 #include "core/interfaces/native/node/counter_modifier.h"
 #include "core/interfaces/native/node/data_panel_modifier.h"
 #include "core/interfaces/native/node/divider_modifier.h"
+#include "core/interfaces/native/node/dynamic_layout_modifier.h"
 #include "core/interfaces/native/node/flex_modifier.h"
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/frame_node_modifier.h"
@@ -312,6 +313,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getContainerPickerModifier = NodeModifier::GetContainerPickerModifier,
         .getAtomicServiceModifier = NodeModifier::GetAtomicServiceModifier,
         .getMatrix4Modifier = NodeModifier::GetMatrix4Modifier,
+        .getDynamicLayoutModifier = NodeModifier::GetDynamicLayoutModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

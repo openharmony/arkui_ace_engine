@@ -24,7 +24,5 @@ public:
     virtual int32_t InteractiveSoundEffects(int32_t type, int32_t index, int32_t abscissa, int32_t ordinate) = 0;
     virtual ~ClickSoundEffectPolicy() {}
 };
-
-void* GetClickSoundEffectPolicyInstance();
 } // namespace OHOS::Ace::Kit
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_EVENT_CLICK_SOUND_EFFECT_POLICY_H

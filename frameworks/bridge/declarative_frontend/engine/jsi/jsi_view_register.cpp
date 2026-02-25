@@ -50,6 +50,7 @@
 #include "core/components_v2/inspector/inspector.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
+#include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view_register.h"
@@ -340,7 +341,7 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
     }
 #ifdef DYNAMIC_COMPONENT_SUPPORT
     auto container = Container::Current();
-    if (container && container->IsDynamicRender()) {
+    if (container && container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT) {
         LOGD("load dynamic component card through named route");
         panda::Local<panda::FunctionRef> objSupplier = firstArg;
         std::vector<Local<JSValueRef>> argv;
@@ -357,7 +358,31 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
     if (!thirdArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-
+#ifdef DYNAMIC_COMPONENT_SUPPORT
+    if (container && container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT) {
+        LOGD("load dynamic component card through named route");
+        std::string bundleName;
+        std::string moduleName;
+        std::string pagePath;
+        std::string pageFullPath;
+        std::string ohmUrl;
+        if (!JsiDeclarativeEngine::ParseNamedRouterParams(
+            vm, thirdArg->ToObject(vm), bundleName, moduleName, pagePath, pageFullPath, ohmUrl)) {
+            LOGE("parse named router params failed!");
+        }
+        LOGI("RegisterNamedRouter: [%{public}s][%{public}s][%{public}s][%{public}s][%{public}s]",
+            bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), pageFullPath.c_str(), ohmUrl.c_str());
+        LOGI("ContainerBundleInfo: [%{public}s][%{public}s]",
+            container->GetBundleName().c_str(), container->GetModuleName().c_str());
+        if (moduleName == container->GetModuleName()) {
+            panda::Local<panda::FunctionRef> objSupplier = firstArg;
+            std::vector<Local<JSValueRef>> argv;
+            auto obj = objSupplier->Call(vm, JSNApi::GetGlobalObject(vm), argv.data(), 0);
+            UpdateCardRootComponent(vm, obj->ToObject(vm));
+            return panda::JSValueRef::Undefined(vm);
+        }
+    }
+#endif
     JsiDeclarativeEngine::AddToNamedRouterMap(vm,
         panda::Global<panda::FunctionRef>(vm, Local<panda::FunctionRef>(firstArg)),
         secondArg->ToString(vm)->ToString(vm), thirdArg->ToObject(vm));
@@ -2120,6 +2145,8 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
         return;
     }
     auto vm = runtime->GetEcmaVm();
+    IFunctionBinding::runtime = nativeEngine;
+
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadEtsCard"),

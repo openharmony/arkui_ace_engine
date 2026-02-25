@@ -331,7 +331,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addSymbolSpanTest, TestSize.Level1)
  * @tc.desc: Check the functionality of addBuilderSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorControllerAccessorTest, AddBuilderSpanTest, TestSize.Level1)
+HWTEST_F(RichEditorControllerAccessorTest, addBuilderSpanTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->addBuilderSpan, nullptr);
 
@@ -623,7 +623,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTestTextShadow, TestSize.L
     auto inputValueOptions = Converter::ArkValue<Opt_RichEditorTextSpanOptions>(textSpanOptions);
 
     Ark_ShadowOptions shadow = {
-        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(1.5f),
+        .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.5f),
         .type = Converter::ArkValue<Opt_ShadowType>(ARK_SHADOW_TYPE_COLOR),
         .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>("#FF81AABB"),
         .offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(2.5f),

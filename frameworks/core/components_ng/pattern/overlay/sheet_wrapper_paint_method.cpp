@@ -192,7 +192,7 @@ bool SheetWrapperPaintMethod::IsDrawBorder(PaintWrapper* paintWrapper)
     CHECK_NULL_RETURN(layoutProperty, false);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (sheetTheme->IsOuterBorderEnable() && sheetType == SheetType::SHEET_POPUP &&
-        !sheetStyle.borderWidth.has_value()) {
+        !sheetStyle.borderWidth.has_value() && !sheetStyle.systemMaterial) {
         return true;
     }
     return false;

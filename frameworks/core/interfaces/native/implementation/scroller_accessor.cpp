@@ -121,7 +121,7 @@ Ark_Int32 GetItemIndexImpl(Ark_VMContext vmContext,
     auto res = peer->TriggerGetItemIndex(vmContext, x, y);
     return Converter::ArkValue<Ark_Int32>(res);
 }
-Ark_SizeResult ContentSizeImpl(Ark_VMContext vmContext, 
+Ark_SizeResult ContentSizeImpl(Ark_VMContext vmContext,
                                Ark_Scroller peer)
 {
     CHECK_NULL_RETURN(peer, {}); // need to fix default value

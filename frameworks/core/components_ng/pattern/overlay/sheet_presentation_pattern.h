@@ -94,6 +94,7 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<SheetPresentationProperty>();
     }
 
@@ -1075,6 +1076,7 @@ public:
 
     // Create Dark Light Resource Method.
     void UpdateSheetParamResource(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle);
+    void RemoveSheetResourceByMaterial(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle);
     void RegisterWidthRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
     void RegisterHeightRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& sheetHeightResObj);
     void UpdateSheetDetents(const RefPtr<ResourceObject>& resObj,
@@ -1112,10 +1114,21 @@ public:
         return needDoubleAvoidAfterLayout_;
     }
 
+    void SetEnableDragControl(bool enable)
+    {
+        enableDragControl_ = enable;
+    }
+
+    bool GetEnableDragControl() const
+    {
+        return enableDragControl_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
 private:
+    void OnAttachToMainTree() override;
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnColorConfigurationUpdate() override;
@@ -1161,6 +1174,7 @@ private:
     float GetBottomSafeArea();
     void StopModifySheetTransition();
     void AvoidKeyboardBySheetMode(bool forceAvoid = false);
+    bool IsDoubleAvoid(bool forceAvoid);
     void DecreaseScrollHeightInSheet(float decreaseHeight);
     void UpdateSheetWhenSheetTypeChanged();
     void RecoverAvoidKeyboardStatus();
@@ -1287,6 +1301,7 @@ private:
     RefPtr<SheetObject> sheetObject_;
     WeakPtr<FrameNode> dragBarNode_;
     float sheetHeightForTranslate_ { 0.0 };
+    bool enableDragControl_ = true;
     bool needDoubleAvoidAfterLayout_ = false;
 };
 } // namespace OHOS::Ace::NG

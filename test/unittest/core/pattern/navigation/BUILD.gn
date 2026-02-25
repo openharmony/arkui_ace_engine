@@ -24,6 +24,7 @@ ace_unittest("navigation_test_ng") {
     "mock_navigation_stack.cpp",
     "nav_bar_test_ng.cpp",
     "navdestination_base_test_ng.cpp",
+    "navdestination_pattern_base_test_ng.cpp",
     "navdestination_test_ng.cpp",
     "navigation_active_test_ng.cpp",
     "navigation_animation_test_ng.cpp",

@@ -17,6 +17,7 @@
 #include "text_input_base.h"
 
 #include "base/memory/ace_type.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -210,7 +211,41 @@ HWTEST_F(TextFieldPatternTesteleven, TextInputAreaDeleteBackwardModel002, TestSi
 
     pattern_->textFieldController_->DeleteBackward();
     FlushLayoutTask(frameNode_);
-    
+
     EXPECT_FALSE(pattern_->IsPreviewTextInputting());
+}
+
+/**
+ * @tc.name: OnUiMaterialParamUpdate001
+ * @tc.desc: Test OnUiMaterialParamUpdate with background color
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, OnUiMaterialParamUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField node and pattern
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create UiMaterialParam with background color
+     */
+    UiMaterialParam params;
+    params.backgroundColor = Color::BLACK;
+
+    /**
+     * @tc.steps: step3. Call OnUiMaterialParamUpdate
+     * @tc.expected: The paintProperty should be updated with background color
+     */
+    textFieldPattern->OnUiMaterialParamUpdate(params);
+
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto defaultBGColor = Color::TRANSPARENT;
+    auto bgColor = paintProperty->GetBackgroundColorValue(defaultBGColor);
+    EXPECT_EQ(bgColor, Color::BLACK);
 }
 } // namespace OHOS::Ace::NG

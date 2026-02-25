@@ -461,10 +461,8 @@ void ImagePattern::OnImageLoadSuccess()
     image_->SetImageDfxConfig(imageDfxConfig_);
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, srcInfo, frameCount);
-    bool isStaticImage = image_->IsStatic();
     if (srcInfo.IsSvg()) {
         UpdateSvgSmoothEdgeValue();
-        isStaticImage = true;
     }
     PrepareAnimation(image_);
     if (enableDrag_) {
@@ -501,11 +499,6 @@ void ImagePattern::OnImageLoadSuccess()
     if (eventHub) {
         eventHub->FireCompleteEvent(event);
     }
-    /*
-     * Only mark dirty for static images.
-     * Animated images maintain their own dirty marking logic, so no need to trigger here.
-     */
-    CHECK_NULL_VOID(isStaticImage);
     isRecycledImage_ = false;
     host->MarkNeedRenderOnly();
 }
@@ -597,6 +590,10 @@ void ImagePattern::OnImageDataReady()
     // update rotate orientation before decoding
     UpdateOrientation();
     PreprocessYUVDecodeFormat(host);
+
+    if (!host->IsActive()) {
+        ReportCompleteLoadEvent(host);
+    }
 
     if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -944,9 +941,7 @@ void ImagePattern::ClearReloadFlagsAfterLoad()
 void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
 {
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     if (loadingCtx_) {
         auto srcKey = src.GetKey();
         auto loadKey = loadingCtx_->GetSourceInfo().GetKey();
@@ -973,7 +968,7 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
     } else {
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
-        if (pipeline && host->GetId() != INVALID_ID) {
+        if (pipeline && host->GetId() != INVALID_ID && src.IsValid()) {
             pipeline->GetLoadCompleteManager()->AddLoadComponent(host->GetId());
         }
     }
@@ -1436,6 +1431,7 @@ bool ImagePattern::RecycleImageData()
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
     imagePaintMethod_ = nullptr;
+    imagePaintMethod_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
@@ -1471,6 +1467,7 @@ void ImagePattern::OnRecycle()
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
+    imagePaintMethod_ = nullptr;
     UnregisterWindowStateChangedCallback();
     frameNode->SetTrimMemRecycle(false);
 }
@@ -2510,6 +2507,7 @@ void ImagePattern::ResetImage()
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
+        imagePaintMethod_ = nullptr;
     }
     host->SetTrimMemRecycle(false);
 }
@@ -2527,6 +2525,7 @@ void ImagePattern::ResetAltImage()
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
+        imagePaintMethod_ = nullptr;
     }
 }
 
@@ -2556,6 +2555,7 @@ void ImagePattern::ResetImageAndAlt()
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
+    imagePaintMethod_ = nullptr;
     CloseSelectOverlay();
     DestroyAnalyzerOverlay();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -2697,7 +2697,7 @@ void ImagePattern::UpdateImageSourceinfo(const ImageSourceInfo& sourceInfo)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
@@ -2710,7 +2710,7 @@ void ImagePattern::UpdateImageFill(const Color& color)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         auto renderProperty = GetPaintProperty<ImageRenderProperty>();
         CHECK_NULL_VOID(renderProperty);
         renderProperty->UpdateSvgFillColor(color);
@@ -2727,7 +2727,7 @@ void ImagePattern::UpdateImageAlt(const ImageSourceInfo& sourceInfo)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateAlt(sourceInfo);
@@ -2765,9 +2765,7 @@ void ImagePattern::LoadAltErrorImage(const ImageSourceInfo& altErrorImageSourceI
     if (!altErrorCtx_ || altErrorCtx_->GetSourceInfo() != altErrorImageSourceInfo ||
         (altErrorCtx_ && altErrorImageSourceInfo.IsSvg())) {
         auto host = GetHost();
-        if (host) {
-            ACE_UINODE_TRACE(host);
-        }
+        ACE_UINODE_TRACE(host);
         altErrorImageDfxConfig_ = CreateImageDfxConfig(altErrorImageSourceInfo);
         altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
             altErrorImageSourceInfo, std::move(altLoadNotifier), false, isSceneBoardWindow_, altErrorImageDfxConfig_);
@@ -2881,6 +2879,7 @@ void ImagePattern::ResetAltImageError()
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
+        imagePaintMethod_ = nullptr;
     }
 }
 } // namespace OHOS::Ace::NG

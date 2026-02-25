@@ -69,7 +69,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern003
- * @tc.desc: Test TextPattern OnIsFocusActiveUpdate.
+ * @tc.desc: Test TextPattern OnIsFocusActiveUpdate
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
@@ -81,6 +81,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
+    /**
+     * @tc.steps: step2. set parent
+     */
     textFieldNode->SetParent(frameNode_);
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
@@ -89,7 +92,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern004
- * @tc.desc: Test TextPattern HandleExtendAction.
+ * @tc.desc: Test TextPattern HandleExtendAction
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
@@ -100,6 +103,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
     CreateTextField();
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    /**
+     * @tc.steps: step2. set parent
+     */
     textFieldNode->SetParent(frameNode_);
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
@@ -109,7 +115,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern005
- * @tc.desc: Test TextPattern HandleBlurEvent.
+ * @tc.desc: Test TextPattern HandleBlurEvent
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
@@ -125,6 +131,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->isCustomKeyboardAttached_ = true;
+    /**
+     * @tc.steps: step2. get main frameNode
+     */
     auto func1 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto func2 = [] {};
     pattern->customKeyboard_ = AceType::Claim<UINode>(func1);
@@ -134,7 +143,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern006
- * @tc.desc: Test TextPattern HandleOnUndoAction.
+ * @tc.desc: Test TextPattern HandleOnUndoAction
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
@@ -1984,6 +1993,74 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateShowMagnifierTest001
+ * @tc.desc: test UpdateShowMagnifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, UpdateShowMagnifierTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->isShowMagnifier_ = true;
+    auto result = controller->GetShowMagnifier();
+    EXPECT_EQ(result, true);
+
+
+    /**
+     * @tc.steps: step3. GetMagnifierController
+     *
+     */
+    result = controller->GetShowMagnifier();
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: UpdateShowMagnifierTest002
+ * @tc.desc: test UpdateShowMagnifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, UpdateShowMagnifierTest002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->isShowMagnifier_ = false;
+    auto result = controller->GetShowMagnifier();
+    EXPECT_EQ(result, false);
+}
+
+/**
  * @tc.name: TextPattern083
  * @tc.desc: test testInput text HandleTouchEvent
  * @tc.type: FUNC
@@ -2191,6 +2268,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern092, TestSize.Level0)
     auto frameId = tmpHost->GetId();
     Offset offset1(1.0, -1.0);
     pattern->frameRect_ = RectF(0, 0, 0, 0);
+    /**
+     * @tc.steps: step2. change mouse state.
+     */
     pattern->ChangeMouseState(offset1, frameId);
     Offset offset2(1.0, -1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
@@ -2205,6 +2285,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern092, TestSize.Level0)
     // test rtl
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. update layout direction.
+     */
     layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     pattern->frameRect_ = RectF(0, 0, 0, 0);
     pattern->ChangeMouseState(offset1, frameId);
@@ -2710,6 +2793,9 @@ HWTEST_F(TextFieldPatternTest, OnDirtyLayoutWrapperSwap001, TestSize.Level0)
  */
 HWTEST_F(TextFieldPatternTest, IsShowTranslate001, TestSize.Level1)
 {
+    /**
+    * @tc.steps: step1. create target node.
+    */
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -2726,6 +2812,9 @@ HWTEST_F(TextFieldPatternTest, IsShowTranslate001, TestSize.Level1)
  */
 HWTEST_F(TextFieldPatternTest, HandleOnTranslate001, TestSize.Level1)
 {
+    /**
+    * @tc.steps: step1. create target node.
+    */
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -2777,6 +2866,9 @@ HWTEST_F(TextFieldPatternTest, OnDirectionConfigurationUpdate001, TestSize.Level
  */
 HWTEST_F(TextFieldPatternTest, HandleOnCopy001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. create textFieldNode.
+     */
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -2804,7 +2896,9 @@ HWTEST_F(TextFieldPatternTest, HandleOnCopy001, TestSize.Level0)
     eventHub->SetOnCopy([&calledOnCopy](const std::u16string& value) {
         calledOnCopy = true;
     });
-
+    /**
+     * @tc.steps: step2. set mouse state using.
+     */
     ASSERT_NE(pattern->selectOverlay_, nullptr);
     pattern->selectOverlay_->SetUsingMouse(true);
     pattern->HandleOnCopy(false);
@@ -2931,6 +3025,9 @@ HWTEST_F(TextFieldPatternTest, GetAutoFillTriggeredStateByType001, TestSize.Leve
  */
 HWTEST_F(TextFieldPatternTest, SetAutoFillTriggeredStateByType001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. create target node.
+     */
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -2942,7 +3039,9 @@ HWTEST_F(TextFieldPatternTest, SetAutoFillTriggeredStateByType001, TestSize.Leve
         []() { return AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()); });
     ASSERT_NE(parentFrameNode, nullptr);
     textFieldNode->SetParent(parentFrameNode);
-
+    /**
+     * @tc.steps: step2. get firset autolfill container node.
+     */
     auto autoFillContainerNode = textFieldNode->GetFirstAutoFillContainerNode();
     ASSERT_NE(autoFillContainerNode, nullptr);
     auto stateHolder = autoFillContainerNode->GetPattern<AutoFillTriggerStateHolder>();

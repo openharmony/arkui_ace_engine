@@ -1,0 +1,52 @@
+{
+  "static_modifier_missing": {
+    "regex": "undefined symbol.*Get(\\\\w+)StaticModifier",
+    "category": "static_modifier",
+    "fix_template": "static_modifier",
+    "severity": "high"
+  },
+  "converter_api_misuse": {
+    "regex": "GetOptPtr\\(&",
+    "category": "converter_api",
+    "fix_template": "converter_api",
+    "severity": "medium"
+  },
+  "nullptr_modifier_in_tests": {
+    "regex": "modifier_test_base\\.h.*modifier_.*!=.*nullptr",
+    "category": "static_modifier",
+    "fix_template": "static_modifier",
+    "severity": "high"
+  },
+  "test_build_config_missing_files": {
+    "regex": "undefined reference.*static_modifier",
+    "category": "build_config",
+    "fix_template": "build_config",
+    "severity": "high"
+  },
+  "arkui_capi_unittest_compilation_error": {
+    "regex": "ARKUI_CAPI_UNITTEST.*error|#error.*ARKUI_CAPI_UNITTEST",
+    "category": "build_config",
+    "fix_template": "build_config",
+    "severity": "medium"
+  },
+  "dynamic_module_helper_nullptr": {
+    "regex": "DynamicModuleHelper.*nullptr|GetDynamicModule.*nullptr",
+    "category": "static_modifier",
+    "fix_template": "static_modifier",
+    "severity": "high"
+  },
+  "callback_invoke_vs_invoke_sync": {
+    "regex": "Expected equality.*\\bg_\\w+Value\\b.*Which is: 0|callback.*never.*fire|g_indexValue.*Which is: 0",
+    "category": "callback_signature",
+    "fix_template": "callback_sync_fix",
+    "severity": "high",
+    "description": "Test callbacks use call signature (Ark_Int32 nodeId, ...) but implementation uses InvokeSync which requires callSync signature (Ark_VMContext, Ark_Int32 nodeId, ...). Callbacks silently don't fire."
+  },
+  "ark_string_dangling_pointer": {
+    "regex": "Which is: \"\\\\0|garbage.*string|corrupted.*Ark_String|\\\\x[0-9A-Fa-f]{2}.*expectedStr",
+    "category": "memory_safety",
+    "fix_template": "ark_string_lifetime_fix",
+    "severity": "high",
+    "description": "Ark_String getter returns dangling pointer. Peer getter returns std::string by value, ArkValue<Ark_String> stores pointer to temporary. Fix: return const std::string& from peer getter."
+  }
+}

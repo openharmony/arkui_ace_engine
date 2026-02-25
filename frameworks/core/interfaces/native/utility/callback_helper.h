@@ -29,9 +29,14 @@
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG {
+class DetachedFreeRootProxyFrameNode;
 
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
 ACE_FORCE_EXPORT RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode);
+ACE_FORCE_EXPORT RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyFrameNode> CreateProxyFrameNode(
+    const RefPtr<UINode>& uiNode);
+#else
+ACE_FORCE_EXPORT RefPtr<UINode> CreateProxyFrameNode(const RefPtr<UINode>& uiNode);
 #endif // !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
 
 namespace GeneratedApiImpl {

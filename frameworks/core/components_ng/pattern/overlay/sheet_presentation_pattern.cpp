@@ -94,6 +94,7 @@ void SheetPresentationPattern::OnModifyDone()
     Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto renderContext = host->GetRenderContext();
     if (renderContext) {
         auto pipeline = host->GetContext();
@@ -110,7 +111,7 @@ void SheetPresentationPattern::OnModifyDone()
             options.blurStyle = blurStyle;
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
             renderContext->UpdateBackBlurStyle(sheetStyle.backgroundBlurStyle.value_or(options));
-        } else {
+        } else if (!sheetStyle.systemMaterial) {
             renderContext->UpdateBackgroundColor(
                 sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
         }
@@ -234,7 +235,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     ClipSheetNode();
 
     sheetObject_->AvoidKeyboardInDirtyLayoutProcess();
-    
+    SetNeedDoubleAvoidAfterLayout(false);
     if (sheetType_ == SheetType::SHEET_POPUP) {
         MarkSheetPageNeedRender();
     }
@@ -315,6 +316,25 @@ bool SheetPresentationPattern::IsScrollable() const
     return Positive(scrollPattern->GetScrollableDistance());
 }
 
+void SheetPresentationPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto targetNodeContext = targetNode->GetContext();
+    CHECK_NULL_VOID(targetNodeContext);
+    if (IsShowInSubWindow()) {
+        targetNodeContext->AddWindowSizeChangeCallback(host->GetId());
+        targetNodeContext->AddOnAreaChangeNode(targetNode->GetId());
+    } else {
+        auto currentPipeline = host->GetContext();
+        CHECK_NULL_VOID(currentPipeline);
+        currentPipeline->AddWindowSizeChangeCallback(host->GetId());
+        currentPipeline->AddOnAreaChangeNode(targetNode->GetId());
+    }
+}
+
 void SheetPresentationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -330,15 +350,6 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
     scale_ = targetNodeContext->GetFontScale();
-    if (IsShowInSubWindow()) {
-        targetNodeContext->AddWindowSizeChangeCallback(host->GetId());
-        targetNodeContext->AddOnAreaChangeNode(targetNode->GetId());
-    } else {
-        auto currentPipeline = host->GetContext();
-        CHECK_NULL_VOID(currentPipeline);
-        currentPipeline->AddWindowSizeChangeCallback(host->GetId());
-        currentPipeline->AddOnAreaChangeNode(targetNode->GetId());
-    }
     OnAreaChangedFunc onAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -390,6 +401,7 @@ void SheetPresentationPattern::RegisterHoverModeChangeCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto hoverModeChangeCallback = [weak = WeakClaim(this)](bool isHalfFoldHover) {
@@ -437,6 +449,9 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToBounds(true);
+    if (sheetStyle.systemMaterial) {
+        return;
+    }
     if (sheetStyle.borderWidth.has_value()) {
         auto borderWidth = sheetStyle.borderWidth.value();
         borderWidth = GetSheetObject()->PostProcessBorderWidth(borderWidth);
@@ -474,27 +489,27 @@ void SheetPresentationPattern::InitPanEvent()
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && pattern->enableDragControl_) {
             pattern->HandleDragStart();
         }
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && pattern->enableDragControl_) {
             pattern->HandleDragUpdate(info);
         }
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && pattern->enableDragControl_) {
             pattern->HandleDragEnd(info.GetMainVelocity());
         }
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && pattern->enableDragControl_) {
             pattern->HandleDragEnd({});
         }
     };
@@ -544,7 +559,7 @@ void SheetPresentationPattern::SetShadowStyle(bool isFocused)
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetStyle.shadow.has_value()) {
+    if (sheetStyle.shadow.has_value() || sheetStyle.systemMaterial) {
         return;
     }
     auto pipeline = host->GetContext();
@@ -565,6 +580,7 @@ void SheetPresentationPattern::HandleFocusEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto sheetId = host->GetId();
     TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet get focus, and id is : %{public}d", sheetId);
     SheetManager::GetInstance().SetFocusSheetId(sheetId);
@@ -978,7 +994,6 @@ float SheetPresentationPattern::GetSheetHeightChange()
         inputH = textFieldManager ? (pipelineContext->GetRootHeight() -
             textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight()) : 0.f;
     }
-    SetNeedDoubleAvoidAfterLayout(false);
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
@@ -3159,6 +3174,16 @@ void SheetPresentationPattern::StopModifySheetTransition()
     }
 }
 
+bool SheetPresentationPattern::IsDoubleAvoid(bool forceAvoid)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto manager = pipelineContext->GetSafeAreaManager();
+    return forceAvoid && (manager->GetKeyboardInset().Length() != 0);
+}
+
 void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
 {
     if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE ||
@@ -3171,7 +3196,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
-    if (keyboardHeight_ == manager->GetKeyboardInset().Length() && !forceAvoid) {
+    if (keyboardHeight_ == manager->GetKeyboardInset().Length() && !IsDoubleAvoid(forceAvoid)) {
         return;
     }
     keyboardHeight_ = manager->GetKeyboardInset().Length();
@@ -4025,6 +4050,7 @@ void SheetPresentationPattern::UpdateSheetType()
 
 void SheetPresentationPattern::InitSheetObject()
 {
+    ACE_UINODE_TRACE(GetHost());
     // The first CreateObject must be later than UpdateSheetStyle, must be earlier than MarkModifyDone.
     // And must be earlier than the entry animation.
     if (sheetType_ == SheetType::SHEET_SIDE) {
@@ -4060,6 +4086,7 @@ void SheetPresentationPattern::InitSheetObject()
  */
 void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
 {
+    ACE_UINODE_TRACE(GetHost());
     CHECK_NULL_VOID(sheetObject_);
     RefPtr<SheetObject> sheetObject = sheetObject_;
     if (sheetObject->GetSheetType() == newType) {
@@ -4641,6 +4668,7 @@ void SheetPresentationPattern::RegisterShadowRes(const RefPtr<FrameNode>& sheetN
 void SheetPresentationPattern::UpdateSheetParamResource(const RefPtr<FrameNode>& sheetNode,
     NG::SheetStyle& sheetStyle)
 {
+    ACE_UINODE_TRACE(GetHost());
     if (sheetStyle.sheetHeight.height.has_value()) {
         auto resObj = sheetStyle.GetSheetHeightResObj();
         RegisterHeightRes(sheetNode, resObj);
@@ -4677,6 +4705,20 @@ void SheetPresentationPattern::UpdateSheetParamResource(const RefPtr<FrameNode>&
     }
     if (sheetStyle.shadow.has_value()) {
         RegisterShadowRes(sheetNode);
+    }
+    RemoveSheetResourceByMaterial(sheetNode, sheetStyle);
+}
+
+void SheetPresentationPattern::RemoveSheetResourceByMaterial(
+    const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle)
+{
+    if (sheetStyle.systemMaterial) {
+        CHECK_NULL_VOID(sheetNode);
+        auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->RemoveResObj("sheetPage.backgroundColor");
+        pattern->RemoveResObj("sheetPage.border");
+        pattern->RemoveResObj("sheetPage.shadow");
     }
 }
 
@@ -4716,6 +4758,7 @@ bool SheetPresentationPattern::IsPcOrPadFreeMultiWindowMode() const
 
 RefPtr<LayoutAlgorithm> SheetPresentationPattern::CreateLayoutAlgorithm()
 {
+    ACE_UINODE_TRACE(GetHost());
     auto sheetType = sheetType_;
     if (sheetType == SheetType::SHEET_SIDE) {
         return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();

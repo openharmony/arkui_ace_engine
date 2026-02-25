@@ -45,6 +45,8 @@ public:
     virtual void SetShadowOption(const OHOS::Ace::NG::DataPanelShadow& shadowOption) = 0;
     virtual void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetValueColorsSetByUser(bool value) = 0;
+    virtual void SetTrackBackgroundSetByUser(bool value) = 0;
+    virtual void SetStrokeWidthSetByUser(bool value) = 0;
 
 private:
     static std::unique_ptr<DataPanelModel> instance_;

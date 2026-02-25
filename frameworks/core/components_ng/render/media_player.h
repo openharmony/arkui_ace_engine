@@ -23,6 +23,10 @@
 #include "core/components_ng/pattern/video/video_utils.h"
 #include "core/components_ng/render/render_surface.h"
 
+namespace OHOS::Media {
+class Meta;
+}
+
 namespace OHOS::Ace::NG {
 using PositionUpdatedEvent = std::function<void(uint32_t)>;
 using SeekDoneEvent = std::function<void(uint32_t)>;
@@ -168,6 +172,11 @@ public:
     virtual int32_t SetCameraPostprocessing(bool isOpen)
     {
         return -1;
+    }
+    virtual int32_t GetGlobalInfo(std::shared_ptr<OHOS::Media::Meta> &globalInfo)
+    {
+        (void)globalInfo;
+        return 0;
     }
 
 protected:

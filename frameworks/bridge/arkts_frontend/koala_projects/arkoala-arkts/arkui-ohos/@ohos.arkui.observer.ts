@@ -6,6 +6,7 @@ import { NavDestinationMode } from 'arkui/framework'
 import { HeightBreakpoint, WidthBreakpoint } from '/arkui/component/enums';
 import { int32 } from "@koalaui/common"
 import { Size } from 'arkui/Graphics'
+import { Axis } from '/arkui/component/enums';
 
 declare namespace uiObserver {
     export class DensityInfo {
@@ -82,10 +83,9 @@ declare namespace uiObserver {
         onNavDestinationSizeChangeByUniqueId(navigationUniqueId: int, callback: Callback_<NavDestinationInfo>): void;
         offNavDestinationSizeChangeByUniqueId(navigationUniqueId: int, callback?: Callback_<NavDestinationInfo>): void;
 
-        onTextChange(callback?: Callback_<TextChangeEventInfo>): void;
+        onTextChange(callback: Callback_<TextChangeEventInfo>): void;
         offTextChange(callback?: Callback_<TextChangeEventInfo>): void;
-
-        onTextChange(identity: ObserverOptions, callback?: Callback_<TextChangeEventInfo>): void;
+        onTextChange(identity: ObserverOptions, callback: Callback_<TextChangeEventInfo>): void;
         offTextChange(identity: ObserverOptions, callback?: Callback_<TextChangeEventInfo>): void;
     }
     export function createUIObserver(id: number): UIObserver;
@@ -162,28 +162,21 @@ declare namespace uiObserver {
 
     export interface TextChangeEventInfo {
         id: string;
-        uniqueId: int32;
+        uniqueId: int;
         content: string;
     }
 
     export interface ScrollEventInfo {
         id: string;
-        uniqueId: number;
+        uniqueId: int;
         scrollEvent: ScrollEventType;
-        offset: number;
+        offset: double;
         axis: Axis;
     }
 
     export enum ScrollEventType {
       SCROLL_START = 0,
       SCROLL_STOP = 1
-    }
-
-    export enum Axis {
-        VERTICAL = 0,
-        Vertical = 0,
-        HORIZONTAL = 1,
-        Horizontal = 1
     }
 
     export enum TabContentState {

@@ -68,20 +68,6 @@ void LoadingProgressModelNG::SetEnableLoading(bool enable)
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, EnableLoading, enable);
 }
 
-void LoadingProgressModelNG::ResetColor()
-{
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetColorLock(false);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER);
-    ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, true);
-    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
-    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
-    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
-}
-
 void LoadingProgressModelNG::SetForegroundColorParseFailed(bool isParseFailed)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();

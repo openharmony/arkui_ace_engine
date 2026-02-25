@@ -116,7 +116,7 @@ HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNg001, TestSize.Level1)
      */
     std::optional<bool> selectValue = std::nullopt;
     CheckBoxModelStatic::SetSelect(frameNode, selectValue);
-    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelect(), std::nullopt);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelect(), false);
     selectValue = SELECTED;
     CheckBoxModelStatic::SetSelect(frameNode, selectValue);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelect(), SELECTED);

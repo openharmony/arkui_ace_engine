@@ -214,6 +214,13 @@ public:
     UINodeTracer(
         const char* caller, int32_t nodeId, const std::string_view& nodeTag, const std::string_view& nodePattern = "");
 };
+
+#ifdef ACE_UNITTEST
+// Mock-specific functions for unit test verification
+ACE_EXPORT uint64_t GetLastTraceId();
+ACE_EXPORT void ResetLastTraceId();
+#endif // ACE_UNITTEST
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_ACE_TRACE_H

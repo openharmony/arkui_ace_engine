@@ -283,6 +283,9 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan005, TestSize.Level0
  */
 HWTEST_F(RichEditorPlaceholderSpanTestNg, InitPlaceholderSpansMap001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Get RichEditorPattern and verify it's not null
+     */
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
     auto newSpanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
@@ -290,7 +293,15 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, InitPlaceholderSpansMap001, TestSize.L
     size_t index = 0;
     size_t placeholderGains = 0;
     spanItem->spanItemType = SpanItemType::CustomSpan;
+
+    /**
+     * @tc.steps: step2. Call InitPlaceholderSpansMap function
+     */
     richEditorPattern->InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
+
+    /**
+     * @tc.steps: step3. Verify placeholder gains calculation
+     */
     EXPECT_EQ(placeholderGains, placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH);
 }
 

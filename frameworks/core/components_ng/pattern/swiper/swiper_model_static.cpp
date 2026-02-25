@@ -131,6 +131,7 @@ void SwiperModelStatic::SetArrowStyle(FrameNode* frameNode, const SwiperArrowPar
 
 RefPtr<FrameNode> SwiperModelStatic::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto swiperNode = ElementRegister::GetInstance()->GetSpecificItemById<SwiperNode>(nodeId);
     if (swiperNode) {
         if (swiperNode->GetTag() == V2::SWIPER_ETS_TAG) {
@@ -476,6 +477,33 @@ void SwiperModelStatic::SetNextMargin(FrameNode* frameNode, const Dimension& nex
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNextMarginIgnoreBlank(*ignoreBlank);
+}
+
+void SwiperModelStatic::SetMaintainVisibleContentPosition(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MaintainVisibleContentPosition, value, frameNode);
+}
+
+void SwiperModelStatic::SetOnScrollStateChanged(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnScrollStateChangedEvent([event = std::move(onScrollStateChanged)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelStatic::SetFillType(FrameNode* frameNode, int32_t options)
+{
+    if (!InRegion(static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT),
+            static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5), options)) {
+        options = 0;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, options, frameNode);
 }
 
 void SwiperModelStatic::SetOnChangeEvent(FrameNode* frameNode,

@@ -96,7 +96,7 @@ inline std::string ConvertOverflowToString(Overflow overflow)
     return result;
 }
 
-inline std::string ConvertBoolToString(bool flag)
+inline ACE_FORCE_EXPORT std::string ConvertBoolToString(bool flag)
 {
     return flag ? "true" : "false";
 }
@@ -533,7 +533,7 @@ inline MarqueeUpdatePolicy ConvertWrapStringToMarqueeUpdatePolicy(const std::str
     return uMap.count(str) ? uMap.at(str) : MarqueeUpdatePolicy::DEFAULT;
 }
 
-inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
+inline ACE_FORCE_EXPORT std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
 {
     static const LinearEnumMapNode<FontStyle, std::string> fontStyleTable[] = {
         { FontStyle::NORMAL, "FontStyle.Normal" },
@@ -549,7 +549,7 @@ inline FontWeight ConvertFontWeight(FontWeight fontWeight)
     return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
 }
 
-inline std::string ConvertWrapFontWeightToStirng(FontWeight fontWeight)
+inline ACE_FORCE_EXPORT std::string ConvertWrapFontWeightToStirng(FontWeight fontWeight)
 {
     static const LinearEnumMapNode<FontWeight, std::string> fontWeightTable[] = {
         { FontWeight::W100, "100" },
@@ -619,6 +619,8 @@ inline std::string ConvertEllipsisModeToString(EllipsisMode value)
         { EllipsisMode::HEAD, "EllipsisMode.START" },
         { EllipsisMode::MIDDLE, "EllipsisMode.CENTER" },
         { EllipsisMode::TAIL, "EllipsisMode.END" },
+        { EllipsisMode::MULTILINE_HEAD, "EllipsisMode.MULTILINE_HEAD" },
+        { EllipsisMode::MULTILINE_MIDDLE, "EllipsisMode.MULTILINE_MIDDLE" },
     };
     auto index = BinarySearchFindIndex(modalTable, ArraySize(modalTable), value);
     return index < 0 ? "EllipsisMode.END" : modalTable[index].value;
@@ -705,7 +707,7 @@ inline std::string ConvertSideToString(AlignDeclaration::Edge edge)
     }
 }
 
-inline std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
+inline ACE_FORCE_EXPORT std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
 {
     CHECK_NULL_RETURN(!fontFamily.empty(), "");
     std::string result;
@@ -717,7 +719,7 @@ inline std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
     return result;
 }
 
-std::string GetTextStyleInJson(const TextStyle& textStyle);
+ACE_FORCE_EXPORT std::string GetTextStyleInJson(const TextStyle& textStyle);
 
 inline std::string ConvertWrapTextHeightAdaptivePolicyToString(TextHeightAdaptivePolicy heightAdaptivePolicy)
 {

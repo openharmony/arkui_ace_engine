@@ -17,14 +17,17 @@
 
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 namespace OHOS::Ace::NG {
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
+
 void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -156,7 +159,7 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(
     CHECK_NULL_RETURN(parentMenu, position);
     auto scroll = AceType::DynamicCast<FrameNode>(parentMenu->GetParent());
     CHECK_NULL_RETURN(scroll, position);
-    while (scroll && (scroll->GetTag() != V2::SCROLL_ETS_TAG)) {
+    while (scroll && (scroll->GetTag() != SCROLL_ETS_TAG)) {
         scroll = AceType::DynamicCast<FrameNode>(scroll->GetParent());
     }
     CHECK_NULL_RETURN(scroll, position);
@@ -417,6 +420,7 @@ void SubMenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto host = menuPattern->GetHost();
@@ -440,6 +444,7 @@ void SubMenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper
 {
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto pipeline = PipelineContext::GetMainPipelineContext();

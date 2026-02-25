@@ -49,6 +49,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetLinearGradientColors(
 CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetStrokeWidth(double strokeWidth, int32_t strokeUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetShadowOptions(double radius, double offsetX, double offsetY);
 CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetIndicator(const char* icon, double size);
+CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetIndicatorV2(const char* icon, double size, int32_t sizeUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkGaugeSetDescription(void (*builder)());
 CJ_EXPORT void FfiOHOSAceFrameworkSetPrivacySensitive(bool isprivacySensitiveMode);
 }

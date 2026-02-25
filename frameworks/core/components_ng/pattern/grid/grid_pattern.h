@@ -132,6 +132,11 @@ public:
         irregular_ = value;
     }
 
+    void SetUserDefined(bool userDefined)
+    {
+        userDefined_ = userDefined;
+    }
+
     void ResetPositionFlags()
     {
         info_.ResetPositionFlags();
@@ -211,12 +216,15 @@ public:
     float EstimateHeight() const;
     float GetAverageHeight() const;
 
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void GetEventDumpInfo() override;
     void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
     void BuildGridLayoutInfo(std::unique_ptr<JsonValue>& json);
     void BuildScrollAlignInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -326,12 +334,15 @@ private:
     std::string GetIrregularIndexesString() const;
     float GetOffsetWithLimit(float offset) const override;
 
+    std::string GetLayoutMode() const;
+
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
     bool scrollable_ = true;
     bool preSpring_ = false; // true if during SyncLayoutBeforeSpring task.
     bool isSmoothScrolling_ = false;
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
+    bool userDefined_ = false; // true if onGetStartIndex
 
     RefPtr<GridContentModifier> gridContentModifier_;
 

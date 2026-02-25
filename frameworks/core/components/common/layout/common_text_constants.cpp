@@ -17,8 +17,8 @@
 namespace OHOS::Ace {
 const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
 
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY,
-    TextAlign::LEFT, TextAlign::RIGHT };
+ACE_FORCE_EXPORT const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END,
+    TextAlign::JUSTIFY, TextAlign::LEFT, TextAlign::RIGHT };
 
 const std::vector<TextContentAlign> TEXT_CONTENT_ALIGNS = { TextContentAlign::TOP, TextContentAlign::CENTER,
     TextContentAlign::BOTTOM };
@@ -48,6 +48,7 @@ const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 
-const std::vector<EllipsisMode> ELLIPSIS_MODES = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+const std::vector<EllipsisMode> ELLIPSIS_MODES = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL,
+    EllipsisMode::MULTILINE_HEAD, EllipsisMode::MULTILINE_MIDDLE };
 
 } // namespace OHOS::Ace

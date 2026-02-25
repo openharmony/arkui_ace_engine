@@ -14,6 +14,8 @@
  */
 
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
+#define protected public
+#define private public
 
 #include "test/mock/base/mock_subwindow.h"
 #include "test/mock/core/common/mock_container.h"
@@ -25,6 +27,7 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/menu_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
@@ -256,6 +259,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset002, TestSize.Le
     gestureEventHub->frameNodeOffset_.SetX(1);
     gestureEventHub->frameNodeOffset_.SetY(1);
     PreparedInfoForDrag data;
+    data.displayPoint.SetX(0.0f);
+    data.displayPoint.SetY(0.0f);
     gestureEventHub->GetPixelMapOffset(info, size, data, -1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
@@ -290,6 +295,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset003, TestSize.Le
     PreparedInfoForDrag data;
     data.isNeedCreateTiled = true;
 
+    data.displayPoint.SetX(0.0f);
+    data.displayPoint.SetY(0.0f);
     gestureEventHub->GetPixelMapOffset(info, size, data, -1.0f);
     auto frameNode = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode, nullptr);
@@ -423,6 +430,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
     auto pipline = PipelineContext::GetMainPipelineContext();
     auto overlayManager = pipline->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->rootNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(webFrameNode));
     pipline->SetupRootElement();
     webFrameNode->GetOrCreateFocusHub();
     overlayManager->SetIsMenuShow(true);
@@ -433,7 +441,9 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
     auto gestureHub = webFrameNode->GetOrCreateGestureEventHub();
     gestureHub->InitDragDropEvent();
     overlayManager->MountPixelMapToRootNode(columnNode);
-    overlayManager->isMenuShow_ = true;
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->isMenuShow_ = true;
     /**
      * @tc.steps: step3. mock pixelmap and subwindow
      */
@@ -489,6 +499,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart003, TestSize.Level1)
     auto pipline = PipelineContext::GetMainPipelineContext();
     auto overlayManager = pipline->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->rootNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(buttonFrameNode));
     pipline->SetupRootElement();
     buttonFrameNode->GetOrCreateFocusHub();
     overlayManager->SetIsMenuShow(true);
@@ -500,7 +511,9 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart003, TestSize.Level1)
     SystemProperties::dragDropFrameworkStatus_ = 3;
     gestureHub->InitDragDropEvent();
     overlayManager->MountPixelMapToRootNode(columnNode);
-    overlayManager->isMenuShow_ = true;
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->isMenuShow_ = true;
     /**
      * @tc.steps: step3. mock pixelmap and subwindow
      */
@@ -509,9 +522,8 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart003, TestSize.Level1)
     EXPECT_CALL(*pixelMap, GetWidth()).WillRepeatedly(testing::Return(256.0f));
     EXPECT_CALL(*pixelMap, GetHeight()).WillRepeatedly(testing::Return(2.0f));
     gestureHub->SetPixelMap(pixelMap);
-    auto containerId = Container::CurrentId();
     auto subwindow = AceType::MakeRefPtr<MockSubwindow>();
-    SubwindowManager::GetInstance()->AddSubwindow(containerId, subwindow);
+    SubwindowManager::GetInstance()->AddSubwindow(Container::CurrentId(), subwindow);
     EXPECT_CALL(*subwindow, ShowPreviewNG(false)).WillRepeatedly(testing::Return(true));
     EXPECT_CALL(*subwindow, GetOverlayManager()).WillRepeatedly(testing::Return(overlayManager));
     MockContainer::SetUp();
@@ -686,6 +698,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart005, TestSize.Level1)
     auto pipline = PipelineContext::GetMainPipelineContext();
     auto overlayManager = pipline->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->rootNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(webFrameNode));
     pipline->SetupRootElement();
     webFrameNode->GetOrCreateFocusHub();
     overlayManager->SetIsMenuShow(true);
@@ -693,7 +706,9 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart005, TestSize.Level1)
     auto gestureHub = webFrameNode->GetOrCreateGestureEventHub();
     gestureHub->InitDragDropEvent();
     overlayManager->MountPixelMapToRootNode(columnNode);
-    overlayManager->isMenuShow_ = true;
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->isMenuShow_ = true;
     auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     ASSERT_NE(pixelMap, nullptr);
     EXPECT_CALL(*pixelMap, GetWidth()).WillRepeatedly(testing::Return(4.0f));

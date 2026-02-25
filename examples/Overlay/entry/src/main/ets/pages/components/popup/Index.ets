@@ -51,6 +51,9 @@ export struct PopupIndex {
     { name: 'PopupListTest', path: 'PopupListTest' },
     { name: 'TipsAvoidTest', path: 'TipsAvoidTest' },
     { name: 'TipsStyleTest', path: 'TipsStyleTest' },
+    { name: 'SoftKeyboardLevel00Test', path: 'SoftKeyboardLevel00Test' },
+    { name: 'SoftKeyboardLevel01Test', path: 'SoftKeyboardLevel01Test' },
+    { name: 'SoftKeyboardLevel02Test', path: 'SoftKeyboardLevel02Test' },
   ]
 
   build() {

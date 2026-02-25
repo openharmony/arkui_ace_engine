@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,8 +31,9 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback } from '@ohos/arkui/UIContext';
-import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
+import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
+import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, AnimationStatus } from '@ohos.arkui.drawableDescriptor';
+import { Resource } from '#generated';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
 import { TextModifier } from 'arkui.TextModifier'
@@ -48,6 +49,7 @@ import { JavaScriptProxy } from '#generated';
 import { ErrorCallback } from '@ohos.base';
 import { int32 } from '@koalaui/compat';
 import { SaveButtonCallback, PasteButtonCallback } from '#generated';
+import { InputMethodExtraConfig } from '@ohos.inputMethod.ExtraConfig'
 
 export class ArkUIAniModule {
     static {
@@ -58,6 +60,7 @@ export class ArkUIAniModule {
     native static _Extractors_ToDrawingLatticePtr(drawingLattice: drawing.Lattice): KPointer;
     native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
     native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
+    native static _Extractors_ToInputMethodExtraConfigPtr(config: InputMethodExtraConfig): KPointer;
     native static _Extractors_ToRectShapePtr(value: RectShape): KPointer;
     native static _Extractors_FromRectShapePtr(ptr: KPointer): RectShape;
     native static _Extractors_ToCircleShapePtr(value: CircleShape): KPointer;
@@ -81,7 +84,7 @@ export class ArkUIAniModule {
     native static _Image_ColorFilter_TransferDynamic(ptr: KPointer): KPointer
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
     native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
-    native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
+    native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: KInt): void
     native static _Image_DrawingColorFilter(ptr: KPointer, value: drawing.ColorFilter): void
     native static _Image_SetOnErrorCallback(ptr: KPointer, value: ImageErrorCallback | undefined): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
@@ -236,6 +239,33 @@ export class ArkUIAniModule {
     native static _ComponentSnapshot_createFromComponentWithPromise(ptr: KPointer, destroyCallback: () => void,
         delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap> | null
+    
+    // for drawable
+    native static _Drawable_CreatePixelMapDrawable(value: PixelMapDrawableDescriptor, pixelmap?: image.PixelMap): void
+    native static _Drawable_CreateLayeredDrawable(value: LayeredDrawableDescriptor, foreground?: image.PixelMap,
+        background?: image.PixelMap, mask?: image.PixelMap): void
+    native static _Drawable_CreateAnimatedDrawable(value: AnimatedDrawableDescriptor,
+        pixelMaps: Array<image.PixelMap>, options?: AnimationOptions): void
+    native static _Drawable_CreateAnimatedDrawableByResource(value: AnimatedDrawableDescriptor,
+        resourceObjectKPointer: KPointer, options?: AnimationOptions): void
+    native static _Drawable_CreateAnimatedDrawableByString(value: AnimatedDrawableDescriptor,
+        src: string, options?: AnimationOptions): void
+    native static _Drawable_CreatePixelMap(value: DrawableDescriptor): image.PixelMap
+    native static _Drawable_CreateForeground(value: LayeredDrawableDescriptor): DrawableDescriptor
+    native static _Drawable_CreateBackground(value: LayeredDrawableDescriptor): DrawableDescriptor
+    native static _Drawable_CreateMask(value: LayeredDrawableDescriptor): DrawableDescriptor
+    native static _Drawable_GetMaskClipPath(): string
+    native static _Drawable_LoadSync(value: DrawableDescriptor): DrawableDescriptorLoadedResult
+    native static _Drawable_Load(value: DrawableDescriptor): Promise<DrawableDescriptorLoadedResult>
+    native static _Drawable_GetAnimationController(value: AnimatedDrawableDescriptor, id?: string): AnimationController | undefined
+    native static _Drawable_SetBlendMode(value: LayeredDrawableDescriptor, mode: drawing.BlendMode): void
+    native static _Drawable_NativeTransferStatic(input: ESValue, typeName: string): DrawableDescriptor
+    native static _Drawable_DestructDrawable(ptr: KPointer): void
+    native static _Drawable_AnimationControllerStart(value: AnimationController): void
+    native static _Drawable_AnimationControllerStop(value: AnimationController): void
+    native static _Drawable_AnimationControllerPause(value: AnimationController): void
+    native static _Drawable_AnimationControllerResume(value: AnimationController): void
+    native static _Drawable_AnimationControllerGetStatus(value: AnimationController): AnimationStatus
 
     // for dragController
     native static _DragController_executeDragWithCallback(custom: DragItemInfo, builder: KPointer,
@@ -339,16 +369,21 @@ export class ArkUIAniModule {
     // for UIContext without window
     native static _CreateWindowFreeContainer(context: common.Context): KInt
     native static _DestroyWindowFreeContainer(instanceId: KInt): void
+
+    // for UIContext
     native static _GetCallingScopeUIContext(): KInt
     native static _GetLastFocusedUIContext(): KInt
     native static _GetLastForegroundUIContext(): KInt
     native static _GetAllUIContexts(): Array<KInt>
     native static _ResolveUIContext(): Array<KInt>
+    native static _GetPageRootNode(): KPointer
+
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
+    native static _CheckThreadValid(checkUIThread: boolean, ptr: KPointer): void
     native static _Common_SetCustomPropertyCallBack(ptr: KPointer, removeCallback: () => void,
         getCallback: (name: string) => string | undefined,
         getAllCustomPropertiesCallback: () => string): void
@@ -404,6 +439,8 @@ export class ArkUIAniModule {
     native static _TraceEnd(): void
     native static _AsyncTraceBegin(traceName: string, taskId: KInt): void
     native static _AsyncTraceEnd(traceName: string, taskId: KInt): void
+    native static _StartProfiler(asptFileName: string, interval: KInt): void
+    native static _StopProfiler(): void
     native static _GetColorValue(color: number | string): KUInt
     native static _GetStringColorValue(color: string): KUInt
     native static _GetNumberColorValue(color: number): KUInt
@@ -470,4 +507,6 @@ export class ArkUIAniModule {
     native static _GestureEventUIObserver_RemoveClickListenerCallback(instanceId: KInt, tag: string, callback?: ClickEventListenerCallback): void
     native static _GestureEventUIObserver_SetTapListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: GestureEventListenerCallback): void
     native static _GestureEventUIObserver_RemoveTapListenerCallback(instanceId: KInt, tag: string, callback?: GestureEventListenerCallback): void
+    native static _GestureEventUIObserver_AddGlobalGestureListener(resourceId: KInt, type: KInt, callback: GestureListenerCallback): void
+    native static _GestureEventUIObserver_RemoveGlobalGestureListener(type: KInt, callback?: GestureListenerCallback): void
 }

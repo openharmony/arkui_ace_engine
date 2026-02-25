@@ -988,6 +988,15 @@ void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel)
     modifier->getCommonAniModifier()->setParallelScoped(parallel);
 }
 
+void CheckThreadValid(ani_env* env, ani_object obj, ani_boolean checkUIThread, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier()) {
+        return;
+    }
+    modifier->getCommonAniModifier()->checkThreadValid(checkUIThread, node);
+}
+
 void ConvertRemoveCallbackFun(
     ani_vm* vm, std::function<void()>& callback, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
 {
@@ -1816,6 +1825,14 @@ void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, 
             env, "Component does not support prevent function.", ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION);
     }
 }
+
+ani_long GetPageRootNode(ani_env* env, [[maybe_unused]] ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, 0);
+    return modifier->getCommonAniModifier()->getPageRootNode();
+}
+
 ani_int GetCallingScopeUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -1862,7 +1879,7 @@ ani_array GetAllUIContexts(ani_env* env, [[maybe_unused]] ani_object obj)
     status = env->FindClass("std.core.Int", &intCls);
     status = env->Class_FindMethod(intCls, "<ctor>", "i:", &intCtor);
     ani_object result {};
-    for (int i = 0; i < arraySize; ++i) {
+    for (size_t i = 0; i < arraySize; ++i) {
         status = env->Object_New(intCls, intCtor, &result, ani_int(instanceIds[i]));
         status = env->Array_Set(resultArray, i, result);
     }

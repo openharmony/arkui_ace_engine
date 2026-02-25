@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/thread/frame_trace_adapter.h"
 #include "core/common/container.h"
+#include "core/common/event_info_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/common/xcollie/xcollieInterface.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
@@ -1310,6 +1311,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch)
     lastEventTime_ = event.time;
     lastTouchEventEndTimestamp_ = GetSysTimestamp();
     lastSourceTool_ = event.sourceTool;
+    lastAxisEvent_ = event;
     return true;
 }
 
@@ -1966,6 +1968,7 @@ bool EventManager::DispatchAxisEvent(const AxisEvent& event)
     if (responseNode) {
         responseNode->HandleAxisEvent(event);
     }
+    lastAxisEvent_ = event;
     return true;
 }
 
@@ -2005,6 +2008,7 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
     }
     axisTestResultsMap_[event.id].clear();
     axisTestResultsMap_.erase(event.id);
+    lastAxisEvent_ = event;
     return true;
 }
 
@@ -2034,6 +2038,7 @@ EventManager::EventManager()
     postEventRefereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
+    eventInfoManager_ = AceType::MakeRefPtr<EventInfoManager>();
     mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
     InitCoastingAxisEventGenerator();
 
@@ -2310,6 +2315,11 @@ bool EventManager::CheckDifferentTargetDisplay(const std::vector<T>& historyEven
     return true;
 }
 
+const RefPtr<EventInfoManager>& EventManager::GetEventInfoManager() const
+{
+    return eventInfoManager_;
+}
+
 bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
     const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& resample)
 {
@@ -2517,6 +2527,8 @@ void EventManager::FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, boo
     AxisEvent falsifyEvent = axisEvent;
     falsifyEvent.action = AxisAction::CANCEL;
     falsifyEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
+    falsifyEvent.pointerEvent = lastAxisEvent_.pointerEvent;
+    falsifyEvent.isFalsifyCancel = true;
     DispatchTouchEvent(falsifyEvent, sendOnTouch);
 }
 
@@ -2792,10 +2804,11 @@ void EventManager::DelegateTouchEvent(const TouchEvent& touchEvent)
     }
 }
 
-bool EventManager::OnTouchpadInteractionBegin() const
+bool EventManager::OnTouchpadInteractionBegin()
 {
     CHECK_NULL_RETURN(coastingAxisEventGenerator_, true);
     coastingAxisEventGenerator_->NotifyStop();
+    NotifyTouchpadInteraction();
     return true;
 }
 
@@ -2944,6 +2957,47 @@ void EventManager::NotifyHitTestFrameNodeListener(const TouchEvent& touchEvent)
         auto hitIter = hitTestFrameNodeListener_.find(nodeId);
         if (hitIter != hitTestFrameNodeListener_.end() && hitIter->second) {
             hitIter->second(touchEvent);
+        }
+    }
+}
+
+void EventManager::AddTouchpadInteractionListenerInner(int32_t frameNodeId, NG::TouchpadInteractionListener&& listener)
+{
+    CHECK_NULL_VOID(listener.frameNode.Upgrade());
+    CHECK_NULL_VOID(listener.callback);
+    auto iter = touchpadInteractionListeners_.find(frameNodeId);
+    if (iter == touchpadInteractionListeners_.end()) {
+        touchpadInteractionListeners_.emplace(frameNodeId, std::move(listener));
+    } else {
+        iter->second = std::move(listener);
+    }
+}
+
+void EventManager::UnregisterTouchpadInteractionListenerInner(int32_t frameNodeId)
+{
+    auto iter = touchpadInteractionListeners_.find(frameNodeId);
+    if (iter == touchpadInteractionListeners_.end()) {
+        return;
+    }
+    touchpadInteractionListeners_.erase(iter);
+}
+
+void EventManager::NotifyTouchpadInteraction()
+{
+    NG::PointF point(lastMouseEvent_.x, lastMouseEvent_.y);
+    auto iter = touchpadInteractionListeners_.begin();
+    while (iter != touchpadInteractionListeners_.end()) {
+        if (!iter->second.frameNode.Upgrade()) {
+            iter = touchpadInteractionListeners_.erase(iter);
+            continue;
+        }
+
+        if (auto& callback = iter->second.callback) {
+            callback(point);
+            ++iter;
+        } else {
+            iter = touchpadInteractionListeners_.erase(iter);
+            continue;
         }
     }
 }

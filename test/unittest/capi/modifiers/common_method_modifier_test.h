@@ -22,15 +22,11 @@
 
 namespace OHOS::Ace::NG::Converter {
 using ColorStep = std::pair<Ark_ResourceColor, double>;
+// Ark_Tuple_ResourceColor_Number = Ark_Tuple_ResourceColor_F64 in compat; one overload suffices
 inline void AssignArkValue(Ark_Tuple_ResourceColor_F64& dst, const ColorStep& src, ConvContext *ctx)
 {
     dst.value0 = src.first;
     dst.value1 = ArkValue<Ark_Float64>(src.second);
-}
-inline void AssignArkValue(Ark_Tuple_ResourceColor_Number& dst, const ColorStep& src, ConvContext *ctx)
-{
-    dst.value0 = src.first;
-    dst.value1 = ArkValue<Ark_Number>(src.second);
 }
 } // namespace OHOS::Ace::NG::Converter
 

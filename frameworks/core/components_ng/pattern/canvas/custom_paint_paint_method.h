@@ -32,6 +32,10 @@
 #endif
 #include "core/pipeline_ng/pipeline_context.h"
 
+namespace OHOS::Ace {
+enum class StatisticEventType;
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 
 const int32_t DEFAULT_SAVE_COUNT = 1;
@@ -120,7 +124,7 @@ public:
         state_.fillState.SetPattern(pattern);
     }
 
-    void SetFillPatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
+    void SetFillPatternNG(const std::shared_ptr<Ace::Pattern>& pattern)
     {
         state_.fillState.SetPatternNG(pattern);
     }
@@ -130,10 +134,7 @@ public:
         state_.fillState.SetGradient(gradient);
     }
 
-    void SetAlpha(double alpha)
-    {
-        state_.globalState.SetAlpha(alpha);
-    }
+    void SetAlpha(double alpha);
 
     void SetCompositeType(CompositeOperation operation)
     {
@@ -151,7 +152,7 @@ public:
         state_.strokeState.SetColor(color);
     }
 
-    void SetStrokePatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
+    void SetStrokePatternNG(const std::shared_ptr<Ace::Pattern>& pattern)
     {
         state_.strokeState.SetPatternNG(pattern);
     }
@@ -364,6 +365,7 @@ protected:
     void ResetStates();
     virtual TextDirection GetSystemDirection() = 0;
     void DrawImageInternal(const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image);
+    void SendStatisticEvent(StatisticEventType type);
 
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     PaintHolder state_;

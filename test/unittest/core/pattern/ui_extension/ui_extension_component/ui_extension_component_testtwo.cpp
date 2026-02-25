@@ -1466,6 +1466,31 @@ HWTEST_F(UIExtensionComponentTestTwoNg, InitBusinessDataHandleCallback001, TestS
     EXPECT_GT(pattern->businessDataUECConsumeCallbacks_.count(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST), 0);
 }
 
+/**
+ * @tc.name: AddExtraInfoWithParamConfig001
+ * @tc.desc: Test Func AddExtraInfoWithParamConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, AddExtraInfoWithParamConfig001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct UIExtensionNode and get pattern
+     */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test Func AddExtraInfoWithParamConfig
+     */
+    auto json = JsonUtil::CreateSharedPtrJson();
+    ParamConfig config;
+    pattern->AddExtraInfoWithParamConfig(json, config);
+    EXPECT_EQ(json->GetString("$child-uec"), "");
+}
+
 HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
 {
     auto uiExtensionNodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1500,6 +1525,36 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
     context->frontendType_ = FrontendType::DECLARATIVE_JS;
     pattern2->OnAttachContext(rawContext);
     EXPECT_EQ(pattern2->hasAttachContext_, false);
+}
+
+/**
+ * @tc.name: AddExtraInfoWithParamConfig002
+ * @tc.desc: Test Func AddExtraInfoWithParamConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, AddExtraInfoWithParamConfig002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct UIExtensionNode and get pattern
+     */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test Func AddExtraInfoWithParamConfig
+     */
+    auto json = JsonUtil::CreateSharedPtrJson();
+    ParamConfig config;
+    config.accessibilityInfo = true;
+    config.interactionInfo = true;
+    config.cacheNodes = true;
+    config.withUIExtension = true;
+    config.interactionInfo = true;
+    pattern->AddExtraInfoWithParamConfig(json, config);
+    EXPECT_EQ(json->GetString("$child-uec"), "");
 }
 
 /**
@@ -1581,5 +1636,28 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTouchTest001, TestSi
     uiextensionNode->TouchTest(globalPoint, parentLocalPoint,
         parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
     EXPECT_EQ(res, HitTestResult::BUBBLING);
+}
+
+/**
+ * @tc.name: UIExtensionComponentIsModalFixFocusTest001
+ * @tc.desc: Test UIExtension IsModalFixFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentIsModalFixFocusTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct UIExtensionNode and get pattern
+    */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+    * @tc.steps: step2. Test UIExtension pattern SetIsModalFixFocus and GetIsModalFixFocus
+    */
+    EXPECT_FALSE(pattern->GetIsModalFixFocus());
+    pattern->SetIsModalFixFocus(true);
+    EXPECT_TRUE(pattern->GetIsModalFixFocus());
 }
 } // namespace OHOS::Ace::NG

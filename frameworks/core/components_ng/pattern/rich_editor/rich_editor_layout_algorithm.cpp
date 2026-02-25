@@ -41,22 +41,33 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(const RefPtr<RichEditorPatt
 
     IF_TRUE(spans.empty() && paraMapPtr_, paraMapPtr_->Clear());
     allSpans_ = spans;
-    spans_ = ConstructParagraphSpans(spans);
+    spans_ = ConstructParagraphSpans(spans, isSingleLineMode_);
     AppendNewLineSpan();
     HandleAISpan(allSpans_, aiSpanLayoutInfo);
     HandleParagraphCache();
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{public}s", SpansToString().c_str());
 }
 
-// split spans into groups by \newline
 std::vector<std::list<RefPtr<SpanItem>>> RichEditorLayoutAlgorithm::ConstructParagraphSpans(
+    std::list<RefPtr<SpanItem>> spans, bool isSingleLineMode)
+{
+    return isSingleLineMode ? ConstructParagraphSpansSingleLine(spans) : ConstructParagraphSpansMultiLine(spans);
+}
+
+std::vector<std::list<RefPtr<SpanItem>>> RichEditorLayoutAlgorithm::ConstructParagraphSpansSingleLine(
+    std::list<RefPtr<SpanItem>> spans)
+{
+    for (const auto& span : spans) {
+        span->SetNeedRemoveNewLine(false);
+    }
+    return { spans };
+}
+
+// split spans into groups by \newline
+std::vector<std::list<RefPtr<SpanItem>>> RichEditorLayoutAlgorithm::ConstructParagraphSpansMultiLine(
     std::list<RefPtr<SpanItem>> spans)
 {
     std::vector<std::list<RefPtr<SpanItem>>> paragraphSpans;
-    if (isSingleLineMode_) {
-        paragraphSpans.push_back(spans);
-        return paragraphSpans;
-    }
     auto it = spans.begin();
     while (it != spans.end()) {
         auto span = *it;

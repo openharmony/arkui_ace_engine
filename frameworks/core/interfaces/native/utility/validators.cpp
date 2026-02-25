@@ -232,5 +232,42 @@ void ValidateDegree(std::optional<float>& opt)
     }
     opt = deg;
 }
+
+void ValidatePaddingProperty(std::optional<PaddingProperty>& opt)
+{
+    if (!opt.has_value()) {
+        return;
+    }
+    Validator::ValidateNonNegative(opt->left);
+    Validator::ValidateNonPercent(opt->left);
+    if (opt->left && !opt->left.value().IsValid()) {
+        opt->left.reset();
+    }
+    Validator::ValidateNonNegative(opt->top);
+    Validator::ValidateNonPercent(opt->top);
+    if (opt->top && !opt->top.value().IsValid()) {
+        opt->top.reset();
+    }
+    Validator::ValidateNonNegative(opt->right);
+    Validator::ValidateNonPercent(opt->right);
+    if (opt->right && !opt->right.value().IsValid()) {
+        opt->right.reset();
+    }
+    Validator::ValidateNonNegative(opt->bottom);
+    Validator::ValidateNonPercent(opt->bottom);
+    if (opt->bottom && !opt->bottom.value().IsValid()) {
+        opt->bottom.reset();
+    }
+    Validator::ValidateNonNegative(opt->start);
+    Validator::ValidateNonPercent(opt->start);
+    if (opt->start && !opt->start.value().IsValid()) {
+        opt->start.reset();
+    }
+    Validator::ValidateNonNegative(opt->end);
+    Validator::ValidateNonPercent(opt->end);
+    if (opt->end && !opt->end.value().IsValid()) {
+        opt->end.reset();
+    }
+}
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG

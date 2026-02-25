@@ -511,7 +511,11 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
     axisEvent.deviceId = info.GetDeviceId();
     // modifierkeystates
     axisEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
-    axisEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempAxisEvent.action));
+    if (info.GetIsFalsifyCancel()) {
+        axisEvent.action = static_cast<int32_t>(AxisAction::CANCEL);
+    } else {
+        axisEvent.action = info.GetLastAction().value_or(static_cast<int32_t>(tempAxisEvent.action));
+    }
     axisEvent.sourceType = static_cast<int32_t>(tempAxisEvent.sourceType);
     axisEvent.timeStamp = tempAxisEvent.time.time_since_epoch().count();
     axisEvent.horizontalAxis = tempAxisEvent.horizontalAxis;
@@ -838,7 +842,15 @@ void setGestureInterrupterToNodeWithUserData(
             if (item.Invalid()) {
                 continue;
             }
-            auto recognizer = NodeModifier::CreateGestureRecognizer(item.Upgrade());
+            auto innerRecognizer = item.Upgrade();
+            if (!innerRecognizer) {
+                continue;
+            }
+            auto gestureInfo = innerRecognizer->GetGestureInfo();
+            if (gestureInfo && gestureInfo->GetDisposeTag()) {
+                continue;
+            }
+            auto recognizer = NodeModifier::CreateGestureRecognizer(innerRecognizer);
             if (recognizer) {
                 othersRecognizers.push_back(recognizer);
             }

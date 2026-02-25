@@ -53,7 +53,11 @@ public:
     static RefPtr<ThemeConstants> GetThemeConstants(const RefPtr<ResourceObject>& resObj);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::string& result);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result);
-    static bool ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result);
+    /**
+     * @param adaptMaterial Indicates whether the new material is adapted to special resources for color inversion.
+     * If the value is true, the color resolved from special resources will carry a non-NONE placeholder.
+     */
+    static bool ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result, bool adaptMaterial = false);
     static bool ParseResColorWithColorMode(const RefPtr<ResourceObject>& resObj, Color& result,
         const ColorMode& colorMode);
     static bool ParseResourceToDouble(const RefPtr<ResourceObject>& resObj, double& result);

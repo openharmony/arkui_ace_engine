@@ -826,6 +826,11 @@ void PipelineContext::ReloadNodesResource()
                 pattern->OnColorModeChange(static_cast<int32_t>(GetColorMode()));
                 ResourceParseUtils::SetNeedReload(false);
             }
+        } else if (needReloadNode) {
+            bool forceDarkAllowed = needReloadNode->GetForceDarkAllowed();
+            ResourceParseUtils::SetNeedReload(forceDarkAllowed);
+            needReloadNode->OnAllowForceDarkUpdate(static_cast<int32_t>(GetColorMode()));
+            ResourceParseUtils::SetNeedReload(false);
         }
     }
     needReloadResource_ = false;
@@ -1240,14 +1245,26 @@ void PipelineContext::HandleSpecialContainerNode()
     if (!SystemProperties::GetContainerDeleteFlag()) {
         return;
     }
-
     auto positionZSet = GetPositionZNodes();
+    // Group child nodes by their parent to avoid duplicate processing
+    // Key: parent node ID, Value: list of child node IDs (only used for grouping)
+    std::unordered_map<uint64_t, std::vector<uint64_t>> parentToChildrenMap;
     for (auto positionZNodeId : positionZSet) {
         auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(positionZNodeId));
         if (!frameNode) {
             continue;
         }
         auto parentNode = frameNode->GetParentFrameNode();
+        if (!parentNode) {
+            continue;
+        }
+        // Group by parent node ID
+        auto parentId = parentNode->GetId();
+        parentToChildrenMap[parentId].push_back(positionZNodeId);
+    }
+    // Process each unique parent node only once
+    for (const auto& [parentId, childIds] : parentToChildrenMap) {
+        auto parentNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(parentId));
         if (!parentNode) {
             continue;
         }
@@ -2149,12 +2166,6 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             PostKeyboardAvoidTask();
             break;
         }
-        case WindowSizeChangeReason::RESIZE_WITH_ANIMATION: {
-            FlushSafeArea(width, height, safeAvoidArea);
-            SetRootRect(width, height, 0.0);
-            FlushUITasks();
-            break;
-        }
         case WindowSizeChangeReason::SCENE_WITH_ANIMATION: {
             safeAreaManager_->UpdateKeyboardOffset(0.0);
             SetRootRect(width, height, 0.0);
@@ -3052,7 +3063,7 @@ void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY
     }
 }
 
-float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positionY,
+float PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positionY,
     float height, SizeF& rootSize, bool isInline)
 {
     auto newKeyboardOffset = CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
@@ -3062,14 +3073,17 @@ float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positi
     CHECK_NULL_RETURN(manager, newKeyboardOffset);
     auto onFocusField = manager->GetOnFocusTextField().Upgrade();
     CHECK_NULL_RETURN(onFocusField, newKeyboardOffset);
+    auto textBase = DynamicCast<TextBase>(onFocusField);
+    CHECK_NULL_RETURN(textBase, newKeyboardOffset);
     auto host = onFocusField->GetHost();
     CHECK_NULL_RETURN(host, newKeyboardOffset);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
-    auto paintOffset = host->GetPaintRectOffset(false, true);
+    auto paintOffset = host->GetPaintRectOffsetNG(false, true);
     auto frameSize = geometryNode->GetFrameSize();
+    auto scaleY = textBase->GetHostScale(host).y;
     auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffset(true),
-        frameSize.Height() + CARET_AVOID_OFFSET.ConvertToPx(), rootSize);
+        frameSize.Height() * scaleY + CARET_AVOID_OFFSET.ConvertToPx(), rootSize);
     return std::max(offset, newKeyboardOffset);
 }
 
@@ -3992,6 +4006,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     } else if (params[0] == "-simplify") {
+        if (!onShow_) {
+            LOGW("window background, cancel collect simplify dump info");
+            return false;
+        }
         LOGI("start collect simplify dump info");
         if (params.size() >= 3 && params[1] == "-compname") {
             rootNode_->DumpTreeByComponentName(params[2]);
@@ -4000,6 +4018,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
         DumpLog::GetInstance().OutPutByCompress();
         LOGI("end collect simplify dump info");
+    } else if (params[0] == "-allInfo") {
+        auto root = JsonUtil::CreateSharedPtrJson(true);
+        rootNode_->DumpSimplifyTree(0, root);
+        DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-allInfoWithParamConfig") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
@@ -4013,18 +4035,20 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-visibleInfoHasTopNavNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
-        RefPtr<NG::FrameNode> topNavNode;
-        rootNode_->FindTopNavDestination(topNavNode);
-        if (topNavNode != nullptr) {
-            GetOverlayInspector(root, { true, true, true });
+        std::list<RefPtr<NG::FrameNode>> navDesNodes;
+        rootNode_->FindTopNavDestination(navDesNodes);
+        if (!navDesNodes.empty()) {
+            GetOverlayInspector(root, rootNode_, { true, true, true });
             if (!root->Contains("$children")) {
                 auto array = JsonUtil::CreateArray();
                 root->PutRef("$children", std::move(array));
             }
             auto childrenJson = root->GetValue("$children");
-            auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
-            topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, { true, true, true });
-            childrenJson->Put(topNavDestinationJson);
+            for (auto& navDesNode : navDesNodes) {
+                auto navDestinationJson = JsonUtil::CreateSharedPtrJson();
+                navDesNode->DumpSimplifyTreeWithParamConfig(0, navDestinationJson, true, { true, true, true });
+                childrenJson->Put(navDestinationJson);
+            }
         }
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-visibleInfoHasNoTopNavNode") {
@@ -4040,13 +4064,29 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-visibleInfoFromTopPageNodeWithWeb") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
-        RefPtr<NG::FrameNode> topNavNode = nullptr;
-        auto lastPageNode = stageManager_->GetLastPage();
-        if (lastPageNode != nullptr) {
-            lastPageNode->FindTopNavDestination(topNavNode);
-            DumpSimplifyTreeJsonFromTopNavNode(root, topNavNode, { true, true, true, true });
-            DumpLog::GetInstance().Print(root->ToString());
+        RefPtr<NG::FrameNode> atomicServiceNode = nullptr;
+        auto rootChildren = rootNode_->GetChildren();
+        auto config = ParamConfig{true, true, true, true};
+        for (auto rootChild : rootChildren) {
+            if (rootChild->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+                atomicServiceNode = AceType::DynamicCast<NG::FrameNode>(rootChild);
+                break;
+            }
         }
+        if (atomicServiceNode) {
+            auto atomicRoot = JsonUtil::CreateSharedPtrJson(true);
+            DumpSimplifyTreeJsonEntrance(atomicRoot, atomicServiceNode, config);
+            GetOverlayInspector(root, rootNode_, config);
+            if (!root->Contains("$children")) {
+                auto array = JsonUtil::CreateArray();
+                root->PutRef("$children", std::move(array));
+            }
+            auto childrenJson = root->GetValue("$children");
+            childrenJson->Put(atomicRoot);
+        } else {
+            DumpSimplifyTreeJsonEntrance(root, rootNode_, config);
+        }
+        DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-infoOfRootNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
@@ -4071,11 +4111,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-compname" && params.size() >= PARAM_NUM) {
         rootNode_->DumpTreeByComponentName(params[1]);
         DumpLog::GetInstance().OutPutDefault();
-    } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() == SIMPLIFYTREE_WITH_PARAMCONFIG) {
+    } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() >= SIMPLIFYTREE_WITH_PARAMCONFIG) {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
-        rootNode_->DumpSimplifyTreeWithParamConfig(
-            0, root, params[1] == "1", { params[2] == "1", params[3] == "1", params[4] == "1" });
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, params[1] == "1",
+            { params[2] == "1", params[3] == "1", params[4] == "1", params[5] == "1", params[6] == "1" });
         DumpLog::GetInstance().Print(root->ToString());
 #ifndef IS_RELEASE_VERSION
     } else if (params[0] == "-contentChange") {
@@ -4793,6 +4833,7 @@ void PipelineContext::ReDispatch(KeyEvent& keyEvent)
 
 bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& event)
 {
+    ContainerScope scope(instanceId_);
     return eventManager_->OnNonPointerEvent(event);
 }
 
@@ -5092,6 +5133,13 @@ void PipelineContext::UpdateFormLinkInfos()
     }
 }
 
+void PipelineContext::OnShowHideForAccessibility(bool isOnShow)
+{
+    auto accessibilityManager = GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->AccessibilityOnShowHide(isOnShow, WeakClaim(this));
+}
+
 void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
@@ -5101,6 +5149,7 @@ void PipelineContext::OnShow()
     PerfMonitor::GetPerfMonitor()->SetAppForeground(true);
     RequestFrame();
     FlushWindowStateChangedCallback(true);
+    OnShowHideForAccessibility(true);
     AccessibilityEvent event;
     event.windowChangeTypes = WindowUpdateType::WINDOW_UPDATE_ACTIVE;
     event.type = AccessibilityEventType::PAGE_CHANGE;
@@ -5336,7 +5385,9 @@ void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
     SetDestroyed();
-    rootNode_->DetachFromMainTree();
+    if (rootNode_) {
+        rootNode_->DetachFromMainTree();
+    }
     std::set<WeakPtr<UINode>> nodeSet;
     std::swap(nodeSet, attachedNodeSet_);
     for (const auto& node : nodeSet) {
@@ -5345,11 +5396,15 @@ void PipelineContext::Destroy()
             illegalNode->DetachFromMainTree();
         }
     }
-    rootNode_->FireCustomDisappear();
+    if (rootNode_) {
+        rootNode_->FireCustomDisappear();
+    }
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();
-    rootNode_.Reset();
+    if (rootNode_) {
+        rootNode_.Reset();
+    }
     accessibilityManagerNG_.Reset();
     stageManager_.Reset();
     if (overlayManager_) {
@@ -6629,27 +6684,12 @@ bool PipelineContext::IsTagInOverlay(const std::string& tag) const
     return false;
 }
 
-void PipelineContext::GetComponentOverlayInspector(
-    std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) const
+bool PipelineContext::ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& rootNode,
+    std::unique_ptr<JsonValue>& overlayChildrenArray, std::unique_ptr<JsonValue>& subWindowOverlayArray,
+    bool isInSubWindow, ParamConfig config) const
 {
-    CHECK_NULL_VOID(rootNode_);
-    auto subRoot = JsonUtil::CreateSharedPtrJson(true);
-    if (isInSubWindow) {
-        rootNode_->DumpSimplifyTreeBase(subRoot);
-        rootNode_->DumpSimplifyInfoWithParamConfig(subRoot, config);
-    } else {
-        rootNode_->DumpSimplifyTreeBase(root);
-        rootNode_->DumpSimplifyInfoWithParamConfig(root, config);
-    }
-    // children in the value
-    auto overlayArray = JsonUtil::CreateArray();
-    auto overlayContent = JsonUtil::CreateSharedPtrJson();
-    // children of the children in the value
-    auto overlayChildrenArray = JsonUtil::CreateArray();
-    // value of subWindow
-    auto subWindowOverlayArray = JsonUtil::CreateArray();
+    auto childNodes = rootNode->GetChildren();
     bool hasOverlay = false;
-    auto childNodes = rootNode_->GetChildren();
     for (const auto &child : childNodes) {
         auto tag = child->GetTag();
         if (IsTagInOverlay(tag)) {
@@ -6661,6 +6701,39 @@ void PipelineContext::GetComponentOverlayInspector(
             } else {
                 overlayChildrenArray->Put(eachOverlayContent);
             }
+        }
+    }
+    return hasOverlay;
+}
+
+void PipelineContext::GetComponentOverlayInspector(
+    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config, bool isInSubWindow) const
+{
+    CHECK_NULL_VOID(startNode);
+    auto subRoot = JsonUtil::CreateSharedPtrJson(true);
+    if (isInSubWindow) {
+        startNode->DumpSimplifyTreeBase(subRoot);
+        startNode->DumpSimplifyInfoWithParamConfig(subRoot, config);
+    } else {
+        startNode->DumpSimplifyTreeBase(root);
+        startNode->DumpSimplifyInfoWithParamConfig(root, config);
+    }
+    // children in the value
+    auto overlayArray = JsonUtil::CreateArray();
+    auto overlayContent = JsonUtil::CreateSharedPtrJson();
+    // children of the children in the value
+    auto overlayChildrenArray = JsonUtil::CreateArray();
+    // value of subWindow
+    auto subWindowOverlayArray = JsonUtil::CreateArray();
+    bool hasOverlay =
+        ProcessOverlayChildrenDumpInfo(startNode, overlayChildrenArray, subWindowOverlayArray, isInSubWindow, config);
+    // check if the startNode is a atomicServiceNode
+    if (startNode != rootNode_) {
+        auto atomicServiceContainer =
+            AceType::DynamicCast<FrameNode>(overlayManager_->FindChildNodeByKey(startNode, "AtomicServiceContainerId"));
+        if (atomicServiceContainer) {
+            hasOverlay |= ProcessOverlayChildrenDumpInfo(
+                atomicServiceContainer, overlayChildrenArray, subWindowOverlayArray, isInSubWindow, config);
         }
     }
 
@@ -6681,10 +6754,11 @@ void PipelineContext::GetComponentOverlayInspector(
     GetOverlayInfo(hasOverlay, root, overlayContent, overlayChildrenArray, overlayArray);
 }
 
-void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, ParamConfig config) const
+void PipelineContext::GetOverlayInspector(
+    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const
 {
     // component overlay
-    GetComponentOverlayInspector(root, config, false);
+    GetComponentOverlayInspector(root, startNode, config, false);
     // sub-window overlay
     auto subContainerIds = SubwindowManager::GetInstance()->GetAllSubContainerId(Container::CurrentId());
     for (auto& containerId : subContainerIds) {
@@ -6694,22 +6768,41 @@ void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, Para
     }
 }
 
-void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(
-    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> topNavNode, const ParamConfig& config) const
+void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> startNode,
+    std::shared_ptr<JsonValue>& root, std::list<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const
 {
-    if (topNavNode != nullptr) {
-        GetOverlayInspector(root, config);
-        if (!root->Contains("$children")) {
-            auto array = JsonUtil::CreateArray();
-            root->PutRef("$children", std::move(array));
-        }
-        auto childrenJson = root->GetValue("$children");
-        auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
-        topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, config);
-        childrenJson->Put(topNavDestinationJson);
-    } else {
-        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, config);
+    GetOverlayInspector(root, startNode, config);
+    if (!root->Contains("$children")) {
+        auto array = JsonUtil::CreateArray();
+        root->PutRef("$children", std::move(array));
     }
+    auto childrenJson = root->GetValue("$children");
+    for (auto& navNode : navNodeList) {
+        if (navNode == nullptr) {
+            continue;
+        }
+        auto navNodeJson = JsonUtil::CreateSharedPtrJson();
+        navNode->DumpSimplifyTreeWithParamConfig(0, navNodeJson, true, config);
+        childrenJson->Put(navNodeJson);
+    }
+}
+
+void PipelineContext::DumpSimplifyTreeJsonEntrance(
+    std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const
+{
+    // step1: Get the topPageNode if onlyNeedVisible, avoid fetching hidden page.
+    auto lastPageNode = stageManager_->GetLastPage();
+    CHECK_NULL_VOID(lastPageNode);
+    /*
+        * step2: Get topNavNode from topPageNode. If top Page doesn't has a navigation child,
+        * following dump will start at root node, inactive and hidden node will be ignored.
+        */
+    std::list<RefPtr<NG::FrameNode>> navNodes;
+    lastPageNode->FindTopNavDestination(navNodes);
+    if (navNodes.empty()) {
+        navNodes.emplace_back(lastPageNode);
+    }
+    DumpSimplifyTreeJsonFromTopNavNode(startNode, root, navNodes, config);
 }
 
 void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
@@ -6731,16 +6824,27 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
                         "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]",
         onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb);
     if (onlyNeedVisible) {
-        // step1: Get the topPageNode if onlyNeedVisible, avoid fetching hidden page.
-        auto lastPageNode = stageManager_->GetLastPage();
-        CHECK_NULL_VOID(lastPageNode);
-        /*
-         * step2: Get topNavNode from topPageNode. If top Page doesn't has a navigation child,
-         * following dump will start at root node, inactive and hidden node will be ignored.
-         */
-        RefPtr<NG::FrameNode> topNavNode = nullptr;
-        lastPageNode->FindTopNavDestination(topNavNode);
-        DumpSimplifyTreeJsonFromTopNavNode(root, topNavNode, config);
+        RefPtr<NG::FrameNode> atomicServiceNode = nullptr;
+        auto rootChildren = rootNode_->GetChildren();
+        for (auto rootChild : rootChildren) {
+            if (rootChild->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+                atomicServiceNode = AceType::DynamicCast<NG::FrameNode>(rootChild);
+                break;
+            }
+        }
+        if (atomicServiceNode) {
+            auto atomicRoot = JsonUtil::CreateSharedPtrJson(true);
+            DumpSimplifyTreeJsonEntrance(atomicRoot, atomicServiceNode, config);
+            GetOverlayInspector(root, rootNode_, config);
+            if (!root->Contains("$children")) {
+                auto array = JsonUtil::CreateArray();
+                root->PutRef("$children", std::move(array));
+            }
+            auto childrenJson = root->GetValue("$children");
+            childrenJson->Put(atomicRoot);
+        } else {
+            DumpSimplifyTreeJsonEntrance(root, rootNode_, config);
+        }
         taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
     } else {
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, config);
@@ -7355,18 +7459,22 @@ bool PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
 uint32_t PipelineContext::ExeAppAIFunctionCallback(const std::string& funcName, const std::string& params)
 {
     static constexpr uint32_t AI_CALL_NODE_INVALID = 3;
-    RefPtr<NG::FrameNode> topNavNode;
+    std::list<RefPtr<NG::FrameNode>> navNodes;
     CHECK_NULL_RETURN(rootNode_, AI_CALL_NODE_INVALID);
-    rootNode_->FindTopNavDestination(topNavNode);
+    rootNode_->FindTopNavDestination(navNodes);
+    CHECK_NULL_RETURN(!navNodes.empty(), AI_CALL_NODE_INVALID);
+    auto topNavNode = navNodes.back();
     CHECK_NULL_RETURN(topNavNode, AI_CALL_NODE_INVALID);
     return topNavNode->CallAIFunction(funcName, params);
 }
 
 void PipelineContext::OnDumpBindAICaller(const std::vector<std::string>& params) const
 {
-    RefPtr<NG::FrameNode> topNavNode;
+    std::list<RefPtr<NG::FrameNode>> navNodes;
     CHECK_NULL_VOID(rootNode_);
-    rootNode_->FindTopNavDestination(topNavNode);
+    rootNode_->FindTopNavDestination(navNodes);
+    CHECK_NULL_VOID(!navNodes.empty());
+    auto topNavNode = navNodes.back();
     CHECK_NULL_VOID(topNavNode);
     if (params.size() > 1) {
         if (params[1] == "-bind") {
@@ -7432,12 +7540,40 @@ RefPtr<ContentChangeManager>& PipelineContext::GetContentChangeManager()
     return contentChangeMgr_;
 }
 
-void PipelineContext::GetStateMgmtInfo(
-    const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)
+RefPtr<FrameNode> PipelineContext::GetPageRootNode()
+{
+    if (stageManager_ && stageManager_->GetLastPage()) {
+        return FindPageRootNodeInOrder(stageManager_->GetLastPage());
+    }
+    return nullptr;
+}
+
+RefPtr<FrameNode> PipelineContext::FindPageRootNodeInOrder(const RefPtr<UINode>& node)
+{
+    // Perform in-order traversal: check current node, then recurse through all children
+    if (!node) {
+        return nullptr;
+    }
+    // Check if current node is a valid FrameNode (not PAGE_ETS_TAG)
+    if (AceType::InstanceOf<NG::FrameNode>(node) && node->GetTag() != V2::PAGE_ETS_TAG) {
+        return AceType::DynamicCast<NG::FrameNode>(node);
+    }
+    // Recursively check all children in order (not just first child)
+    for (const auto& child : node->GetChildren()) {
+        auto result = FindPageRootNodeInOrder(child);
+        if (result) {
+            return result; // Early return on first match
+        }
+    }
+    return nullptr;
+}
+
+void PipelineContext::GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+    const std::string& jsonPath, bool onlyVisible)
 {
     std::vector<std::string> resultsStateMgmtInfo;
     std::vector<int32_t> matchNodeIds;
-    rootNode_->GetNodeListByComponentName(0, matchNodeIds, componentName);
+    rootNode_->GetNodeListByComponentName(0, matchNodeIds, componentName, onlyVisible);
     if (matchNodeIds.empty()) {
         LOGE("GetStateMgmtInfo can't find componentName: %s", componentName.c_str());
         return;

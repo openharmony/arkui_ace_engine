@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
+#include "base/error/error_code.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "canvas_path_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -133,6 +135,90 @@ void CanvasPathPeerImpl::Path2DRect(double x, double y, double width, double hei
         path2d_->Rect(x * density, y * density, width * density, height * density);
         SetPathSize();
     }
+}
+void CanvasPathPeerImpl::Path2DRoundRect(double x, double y, double width, double height)
+{
+    CHECK_NULL_VOID(path2d_);
+    if (!IfJudgeSpecialValue(x) || !IfJudgeSpecialValue(y) || !IfJudgeSpecialValue(width) ||
+        !IfJudgeSpecialValue(height)) {
+        return;
+    }
+    Rect rect = { x, y, width, height };
+    std::vector<double> radii = std::vector<double>(4, 0.0);
+    double density = GetDensity();
+    path2d_->RoundRect(rect * density, radii);
+    SetPathSize();
+}
+void CanvasPathPeerImpl::Path2DRoundRect(double x, double y, double width, double height, double radiusValue)
+{
+    CHECK_NULL_VOID(path2d_);
+    if (!IfJudgeSpecialValue(x) || !IfJudgeSpecialValue(y) || !IfJudgeSpecialValue(width) ||
+        !IfJudgeSpecialValue(height)) {
+        return;
+    }
+    if (LessNotEqual(radiusValue, 0.0)) {
+        DrawingRenderingContextPeerImpl::ThrowError(ERROR_CODE_CANVAS_PARAM_INVALID,
+            "radii parameter error: The param radii contains negative value.");
+        return;
+    }
+    Rect rect = { x, y, width, height };
+    double density = GetDensity();
+    std::vector<double> radii = std::vector<double>(4, radiusValue * density);
+    path2d_->RoundRect(rect * density, radii);
+    SetPathSize();
+}
+void CanvasPathPeerImpl::Path2DRoundRect(
+    double x, double y, double width, double height, const std::vector<double>& radiiVec)
+{
+    CHECK_NULL_VOID(path2d_);
+    if (!IfJudgeSpecialValue(x) || !IfJudgeSpecialValue(y) || !IfJudgeSpecialValue(width) ||
+        !IfJudgeSpecialValue(height)) {
+        return;
+    }
+    if (radiiVec.size() <= 0 || radiiVec.size() > 4) { // The size of the fifth param > 4 or <= 0
+        DrawingRenderingContextPeerImpl::ThrowError(ERROR_CODE_CANVAS_PARAM_INVALID,
+            "radii parameter error: The param radii is a list that has zero or more than four elements.");
+        return;
+    }
+    for (size_t i = 0; i < radiiVec.size(); ++i) {
+        if (LessNotEqual(radiiVec[i], 0.0)) {
+            DrawingRenderingContextPeerImpl::ThrowError(ERROR_CODE_CANVAS_PARAM_INVALID,
+                "radii parameter error: The param radii contains negative value.");
+            return;
+        }
+    }
+    std::vector<double> radii;
+    double density = GetDensity();
+    switch (radiiVec.size()) {
+        case 1:                                                 // 1: The fifth param has 1 values.
+            radii = std::vector<double>(4, radiiVec[0] * density); // 4: four corners are radii[0].
+            break;
+        case 2: // 2: The fifth param has 2 values.
+            radii = {
+                radiiVec[0] * density,
+                radiiVec[1] * density, // 0: top-left-and-bottom-right, 1: top-right-and-bottom-left.
+                radiiVec[0] * density,
+                radiiVec[1] * density // 0: top-left-and-bottom-right, 1: top-right-and-bottom-left.
+            };
+            break;
+        case 3: // 3: The fifth param has 3 values.
+            radii = {
+                radiiVec[0] * density, radiiVec[1] * density, // 0: top-left, 1: top-right-and-bottom-left.
+                radiiVec[2] * density, radiiVec[1] * density  // 2: bottom-right, 1: top-right-and-bottom-left.
+            };
+            break;
+        case 4: // 4: The fifth param has 4 values.
+            radii = {
+                radiiVec[0] * density, radiiVec[1] * density, // 0: top-left, 1: top-right.
+                radiiVec[2] * density, radiiVec[3] * density  // 2: bottom-right, 3: bottom-left.
+            };
+            break;
+        default:
+            return;
+    }
+    Rect rect = { x, y, width, height };
+    path2d_->RoundRect(rect * density, radii);
+    SetPathSize();
 }
 // protected
 bool CanvasPathPeerImpl::IfJudgeSpecialValue(double value)

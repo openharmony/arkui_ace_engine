@@ -115,7 +115,7 @@ RefPtr<FrameNode> DataPanelPattern::BuildContentModifierNode()
     auto geometryNode = host->GetGeometryNode();
 
     std::vector<double> tmpArry;
-    if (paintProperty->GetValues().value().size() > 0) {
+    if (paintProperty->GetValues() && paintProperty->GetValues().value().size() > 0) {
         for (size_t i = 0; i < paintProperty->GetValues().value().size(); i++) {
             tmpArry.push_back(paintProperty->GetValues().value()[i]);
         }
@@ -139,7 +139,7 @@ void DataPanelPattern::UpdateTrackBackground(const Color& color, bool isFirstLoa
     CHECK_NULL_VOID(paintProperty);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         paintProperty->UpdateTrackBackground(color);
     }
     if (host->GetRerenderable()) {
@@ -155,7 +155,7 @@ void DataPanelPattern::UpdateStrokeWidth(const CalcDimension& strokeWidth, bool 
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<DataPanelPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         paintProperty->UpdateStrokeWidth(strokeWidth);
     }
     if (host->GetRerenderable()) {
@@ -214,5 +214,10 @@ void DataPanelPattern::OnColorConfigurationUpdate()
         paintProperty->UpdateValueColors(colors);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+FocusPattern DataPanelPattern::GetFocusPattern() const
+{
+    return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
 }
 } // namespace OHOS::Ace::NG

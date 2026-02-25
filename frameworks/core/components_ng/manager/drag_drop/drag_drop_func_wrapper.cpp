@@ -361,6 +361,22 @@ int32_t DragDropFuncWrapper::NotifyDragResult(int32_t requestId, int32_t result)
     return DragDropGlobalController::GetInstance().NotifyDragResult(requestId, result);
 }
 
+int32_t DragDropFuncWrapper::NotifySuggestedDropOperation(int32_t requestId, int32_t operation)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifySuggestedDropOperation(requestId, operation);
+}
+
+int32_t DragDropFuncWrapper::NotifyDisableDropAnimation(int32_t requestId, bool disable)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifyDisableDropAnimation(requestId, disable);
+}
+
 int32_t DragDropFuncWrapper::NotifyDragEndPendingDone(int32_t requestId)
 {
     if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
@@ -1414,11 +1430,14 @@ void DragDropFuncWrapper::GetThumbnailPixelMapForCustomNode(
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto dragPreviewInfo = frameNode->GetDragPreview();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto callback = [id = Container::CurrentId(), pipeline, gestureHub, pixelMapCallback](
+    // Use weak reference to avoid RefPtr destruction in non-UI thread
+    auto callback = [id = Container::CurrentId(),
+                        weakGestureHub = AceType::WeakClaim(AceType::RawPtr(gestureHub)),
+                        pixelMapCallback](
                         std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()> finishCallback) {
         ContainerScope scope(id);
+        // Get pipeline from container by id to avoid RefPtr destruction in non-UI thread
+        auto pipeline = PipelineContext::GetContextByContainerId(id);
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
@@ -1432,7 +1451,8 @@ void DragDropFuncWrapper::GetThumbnailPixelMapForCustomNode(
         if (pixelMap != nullptr) {
             auto customPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
             taskScheduler->PostTask(
-                [gestureHub, customPixelMap, pixelMapCallback]() {
+                [weakGestureHub, customPixelMap, pixelMapCallback]() {
+                    auto gestureHub = weakGestureHub.Upgrade();
                     CHECK_NULL_VOID(gestureHub);
                     gestureHub->SetPixelMap(customPixelMap);
                     gestureHub->SetDragPreviewPixelMap(customPixelMap);

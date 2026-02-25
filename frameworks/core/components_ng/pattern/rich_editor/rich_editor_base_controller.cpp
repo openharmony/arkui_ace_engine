@@ -77,6 +77,15 @@ void RichEditorBaseController::SetTypingParagraphStyle(std::optional<struct Upda
     richEditorPattern->ForceTriggerAvoidOnCaretChange();
 }
 
+void RichEditorBaseController::SetPlaceholderStyledString(const RefPtr<SpanStringBase>& value)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    auto spanString = AceType::DynamicCast<SpanString>(value);
+    CHECK_NULL_VOID(spanString);
+    richEditorPattern->SetPlaceholderStyledString(spanString);
+}
+
 void RichEditorBaseController::CloseSelectionMenu()
 {
     auto richEditorPattern = pattern_.Upgrade();

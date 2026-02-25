@@ -48,7 +48,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
@@ -66,7 +65,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_animator.h"
@@ -115,13 +113,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_symbol.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_symbol_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_clock_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
@@ -138,11 +135,12 @@
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_text_layout.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_richeditor_binding.h"
 
 #ifdef USE_COMPONENTS_LIB
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #else
-#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #endif
 
@@ -369,7 +367,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSToggle::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
     JSWithTheme::JSBind(globalObj);
-    JSRichEditor::JSBind(globalObj);
     JSRichEditorController::JSBind(globalObj);
     JSRichEditorStyledStringController::JSBind(globalObj);
     JSLayoutManager::JSBind(globalObj);
@@ -459,13 +456,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSTextPickerDialog::JSBind(globalObj);
     JSDatePickerDialog::JSBind(globalObj);
 #endif
-    JSHyperlink::JSBind(globalObj);
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);
     JSTextArea::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
-    JSTextClock::JSBind(globalObj);
-    JSDataPanel::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
     JSMagnifierController::JSBind(globalObj);
     JSGesture::JSBind(globalObj);
@@ -477,10 +471,9 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSCanvasImageData::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
-    JSSearch::JSBind(globalObj);
     JSSelect::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
-    JSTextClockController::JSBind(globalObj);
+    JSTextClockControllerBinding::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
     JSTextTimer::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);
@@ -508,7 +501,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSDumpLog::JSBind(globalObj);
     JSDumpRegister::JSBind(globalObj);
     JSKeyboardAvoid::JSBind(globalObj);
-    JSSymbol::JSBind(globalObj);
     JSSymbolSpan::JSBind(globalObj);
     JSContainerSpan::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
@@ -518,8 +510,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSBindLibs("arkui.patternlockcontroller", "PatternLockController", true);
 #else
     JSRelativeContainer::JSBind(globalObj);
-    JSPatternLock::JSBind(globalObj);
-    JSPatternLockController::JSBind(globalObj);
+    JSPatternLockControllerBinding::JSBind(globalObj);
 #endif
     // add missing binds to ng build
     JSContextMenu::JSBind(globalObj);

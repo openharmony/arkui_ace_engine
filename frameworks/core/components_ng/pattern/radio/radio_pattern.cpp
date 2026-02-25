@@ -770,7 +770,9 @@ void RadioPattern::LoadBuilder()
         builder_();
         customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         CHECK_NULL_VOID(customNode);
-        builderChildNode_ = AceType::DynamicCast<FrameNode>(customNode);
+        auto firstFrameNode = customNode->GetFrameChildByIndex(0, false);
+        CHECK_NULL_VOID(firstFrameNode);
+        builderChildNode_ = AceType::DynamicCast<FrameNode>(firstFrameNode);
         CHECK_NULL_VOID(builderChildNode_);
         preTypeIsBuilder_ = true;
         builderChildNode_->MountToParent(host);
@@ -1190,6 +1192,12 @@ void RadioPattern::OnColorConfigurationUpdate()
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RadioPattern::OnColorModeChange(uint32_t colorMode)
+{
+    Pattern::OnColorModeChange(colorMode);
+    InitDefaultMargin();
 }
 
 int32_t RadioPattern::OnInjectionEvent(const std::string& command)

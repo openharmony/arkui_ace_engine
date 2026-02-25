@@ -18,7 +18,8 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_static.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
-#include "core/interfaces/native/implementation/checkbox_group_configuration_peer.h"
+#include "core/components_ng/pattern/checkboxgroup/bridge/checkbox_group_configuration_peer.h"
+#include "core/interfaces/native/common/api_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -27,7 +28,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<bool> ProcessBindableSelectAll(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+std::optional<bool> ProcessBindableSelectAll(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean *value)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(value,
@@ -88,7 +89,7 @@ constexpr float CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE = -1.0f;
 const Dimension CHECK_BOX_GROUP_MARK_WIDTH_DEFAULT_VALUE = 2.0_vp;
 }
 void SetSelectAllImpl(Ark_NativePointer node,
-                      const Opt_Union_Boolean_Bindable* value)
+                      const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -202,13 +203,16 @@ void ContentModifierCheckBoxGroupImpl(
         arkConfig->name_ = config.name_;
         arkConfig->status_ = Converter::ArkValue<Ark_SelectStatus>(static_cast<int>(config.status_));
         arkConfig->node_ = node;
-        auto handler = [frameNode](Ark_Boolean retValue) {
-            CheckBoxGroupModelStatic::TriggerChange(frameNode, Converter::Convert<bool>(retValue));
-        };
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
-        arkConfig->triggerChange_ = triggerCallback.ArkValue();
-        auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+        auto boxNode = GeneratedApiImpl::GetContentNode(node);
+        if (boxNode == nullptr) {
+            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+            GeneratedApiImpl::SetContentNode(node, boxNode);
+        }
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
+            auto old = boxNode->GetChildAtIndex(0);
+            if (old != nullptr) {
+                boxNode->RemoveChildSilently(old);
+            }
             boxNode->AddChild(uiNode);
             boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
             }, node, arkConfig);

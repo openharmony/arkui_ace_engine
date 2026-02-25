@@ -133,6 +133,66 @@ void ParseGetGridItemSize(const JSCallbackInfo& info, JSRef<JSObject>& obj, Grid
     }
 }
 
+void ParseGetStartIndexByOffset(const JSCallbackInfo& info, JSRef<JSObject>& obj, GridLayoutOptions& option)
+{
+    auto getStartIndexByOffset = obj->GetProperty("onGetStartIndexByOffset");
+    if (getStartIndexByOffset->IsFunction()) {
+        auto onGetStartIndexByOffset = [execCtx = info.GetExecutionContext(),
+                                           func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+                                               JSRef<JSFunc>::Cast(getStartIndexByOffset))](float offset) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            JSRef<JSVal> jsOffset = JSRef<JSVal>::Make(ToJSValue(Dimension(offset).ConvertToVp()));
+            auto result = func->ExecuteJS(1, &jsOffset);
+
+            int32_t startIndex_ = 0;
+            int32_t startLine_ = 0;
+            Dimension startOffset_;
+            Dimension totalOffset_;
+            if (result->IsObject()) {
+                JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
+                ConvertFromJSValue(obj->GetProperty("startIndex"), startIndex_);
+                ConvertFromJSValue(obj->GetProperty("startLine"), startLine_);
+                ConvertFromJSValue(obj->GetProperty("startOffset"), startOffset_);
+                ConvertFromJSValue(obj->GetProperty("totalOffset"), totalOffset_);
+            }
+            GridStartLineInfo startLineInfo { startIndex_, startLine_, startOffset_.ConvertToPx(),
+                totalOffset_.ConvertToPx() };
+            return startLineInfo;
+        };
+        option.getStartIndexByOffset = std::move(onGetStartIndexByOffset);
+    }
+}
+
+void ParseGetStartIndexByIndex(const JSCallbackInfo& info, JSRef<JSObject>& obj, GridLayoutOptions& option)
+{
+    auto getStartIndexByIndex = obj->GetProperty("onGetStartIndexByIndex");
+    if (getStartIndexByIndex->IsFunction()) {
+        auto onGetStartIndexByIndex = [execCtx = info.GetExecutionContext(),
+                                          func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+                                              JSRef<JSFunc>::Cast(getStartIndexByIndex))](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
+            auto result = func->ExecuteJS(1, &itemIndex);
+
+            int32_t startIndex_ = 0;
+            int32_t startLine_ = 0;
+            Dimension startOffset_;
+            Dimension totalOffset_;
+            if (result->IsObject()) {
+                JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
+                ConvertFromJSValue(obj->GetProperty("startIndex"), startIndex_);
+                ConvertFromJSValue(obj->GetProperty("startLine"), startLine_);
+                ConvertFromJSValue(obj->GetProperty("startOffset"), startOffset_);
+                ConvertFromJSValue(obj->GetProperty("totalOffset"), totalOffset_);
+            }
+            GridStartLineInfo startLineInfo { startIndex_, startLine_, startOffset_.ConvertToPx(),
+                totalOffset_.ConvertToPx() };
+            return startLineInfo;
+        };
+        option.getStartIndexByIndex = std::move(onGetStartIndexByIndex);
+    }
+}
+
 void ParseGetGridItemRect(const JSCallbackInfo& info, JSRef<JSObject>& obj, GridLayoutOptions& option)
 {
     auto getRectByIndex = obj->GetProperty("onGetRectByIndex");
@@ -186,6 +246,8 @@ void SetGridLayoutOptions(const JSCallbackInfo& info)
 
     ParseGetGridItemSize(info, obj, option);
     ParseGetGridItemRect(info, obj, option);
+    ParseGetStartIndexByOffset(info, obj, option);
+    ParseGetStartIndexByIndex(info, obj, option);
 
     GridModel::GetInstance()->SetLayoutOptions(option);
 }
@@ -328,42 +390,15 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    JSViewAbstract::JsHeight(info);
 
-    ViewAbstractModel::GetInstance()->ResetResObj("height");
     CalcDimension value;
-    RefPtr<ResourceObject> valueResObj;
-    auto jsValue = info[0];
-    if (jsValue->IsUndefined()) {
-        GridModel::GetInstance()->ReSetGridHeightLayoutPolicy();
+    if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-
-    if (!ParseJsDimensionVpNG(jsValue, value, valueResObj)) {
-        // JsHeight return false, check if set LayoutPolicy before return.
-        if (jsValue->IsObject()) {
-            JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
-            JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
-            if (layoutPolicy->IsString()) {
-                auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
-                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
-                ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
-                return;
-            }
-        }
-        GridModel::GetInstance()->ReSetGridHeightLayoutPolicy();
-        return;
-    }
-
-    GridModel::GetInstance()->ReSetGridHeightLayoutPolicy();
-    if (!SystemProperties::ConfigChangePerform() ? LessNotEqual(value.Value(), 0.0)
-                                                 : (LessNotEqual(value.Value(), 0.0) && !valueResObj)) {
+    if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
-
-    if (SystemProperties::ConfigChangePerform() && valueResObj) {
-        ViewAbstractModel::GetInstance()->SetHeight(valueResObj);
-    }
-
     GridModel::GetInstance()->SetGridHeight(value);
 }
 

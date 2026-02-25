@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 class Pattern;
 
-class TextOverlayModifier : public OverlayModifier {
+class ACE_FORCE_EXPORT TextOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(TextOverlayModifier, OverlayModifier);
 
 public:

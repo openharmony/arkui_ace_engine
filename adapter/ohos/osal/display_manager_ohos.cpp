@@ -30,4 +30,9 @@ bool DisplayManagerOhos::ConvertScreenIdToRsScreenId(uint64_t screenId, uint64_t
     return Rosen::DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsScreenId);
 }
 
+FoldDisplayMode DisplayManagerOhos::GetFoldDisplayMode()
+{
+    return static_cast<FoldDisplayMode>(static_cast<uint32_t>(
+        Rosen::DisplayManager::GetInstance().GetFoldDisplayMode()));
+}
 } // namespace OHOS::Ace

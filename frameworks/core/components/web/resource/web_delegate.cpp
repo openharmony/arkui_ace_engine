@@ -6045,6 +6045,13 @@ void WebDelegate::AccessibilitySendPageChange()
             }
             delegate->SetPageFinishedState(true);
             if (webNode->IsOnMainTree()) {
+                if (webPattern->IsAccessibilitySamePage()) {
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "WebDelegate::AccessibilitySendPageChange IsAccessibilitySamePage accessibilityId = "
+                        "%{public}" PRId64,
+                        webNode->GetAccessibilityId());
+                    return;
+                }
                 if (!webPattern->CheckVisible()) {
                     bool deleteResult = accessibilityManager->DeleteFromPageEventController(webNode);
                     TAG_LOGI(AceLogTag::ACE_WEB,
@@ -6061,8 +6068,11 @@ void WebDelegate::AccessibilitySendPageChange()
                     accessibilityManager->ReleasePageEvent(webNode, true, true);
                     return;
                 }
+                auto accessibilityProperty = webNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+                CHECK_NULL_VOID(accessibilityProperty);
                 auto navigationMgr = context->GetNavigationManager();
-                if (navigationMgr && navigationMgr->IsNavigationInAnimation()) {
+                if (navigationMgr && navigationMgr->IsNavigationInAnimation() &&
+                    !accessibilityProperty->HasAccessibilitySamePage()) {
                     TAG_LOGI(AceLogTag::ACE_WEB,
                         "WebDelegate::AccessibilitySendPageChange IsNavigationInAnimation accessibilityId = "
                         "%{public}" PRId64,
@@ -7167,6 +7177,13 @@ void WebDelegate::WebHandleTouchpadFlingEvent(const double& x, const double& y,
 {
     if (nweb_) {
         nweb_->WebSendTouchpadFlingEvent(x, y, vx, vy, pressedCodes);
+    }
+}
+
+void WebDelegate::WebHandleCancelFlingEvent()
+{
+    if (nweb_) {
+        nweb_->WebSendCancelFlingEvent();
     }
 }
 
@@ -10046,5 +10063,38 @@ void WebDelegate::SetOfflineWebActiveStatus(int32_t webId, bool isActive)
             }
         },
         TaskExecutor::TaskType::PLATFORM, "SetOfflineWebActiveStatus");
+}
+
+void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::string)>&& callback)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), callback]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (delegate->nweb_) {
+                auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>(weak);
+                if (callbackImpl && callback) {
+                    callbackImpl->SetCallBack([weak, func = std::move(callback)](std::string result) {
+                        auto delegate = weak.Upgrade();
+                        CHECK_NULL_VOID(delegate);
+                        auto context = delegate->context_.Upgrade();
+                        CHECK_NULL_VOID(context);
+                        context->GetTaskExecutor()->PostTask(
+                            [callback = std::move(func), result]() { callback(result); },
+                            TaskExecutor::TaskType::PLATFORM, "ArkUIWebRequestWebDomJsonStringCallback");
+                    });
+                }
+                auto agentManager = delegate->GetNWebAgentManager();
+                if (!agentManager) {
+                    TAG_LOGE(AceLogTag::ACE_WEB, "GetNWebAgentManager failed, WebId: %{public}d",
+                        delegate->GetWebId());
+                    return;
+                }
+                agentManager->RequestWebDomJsonString(callbackImpl);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebRequestWebDomJsonString");
 }
 } // namespace OHOS::Ace

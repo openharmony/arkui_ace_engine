@@ -80,10 +80,7 @@ public:
         return MakeRefPtr<GaugeAccessibilityProperty>();
     }
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     bool HasDescriptionNode() const
     {

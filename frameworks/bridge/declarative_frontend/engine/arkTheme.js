@@ -1125,18 +1125,19 @@ class ArkThemeWhiteList {
         return false;
     }
 }
+// Keep whiteList sorted A~Z (binary search depends on it).
 ArkThemeWhiteList.whiteList = [
     'Badge',
     'Button',
-    'DataPanel',
     'JSAlphabetIndexer',
+    'JSDataPanel',
     'JSMenu',
     'JSMenuItem',
+    'JSPatternLock',
+    'JSQRCode',
     'JSRadio',
-    'PatternLock',
-    'QRCode',
+    'JSTextClock',
     'Scroll',
     'Swiper',
     'Text',
-    'TextClock',
 ];

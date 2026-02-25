@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "interfaces/native/native_type.h"
 
 namespace OHOS::Ace::NG {
 namespace {

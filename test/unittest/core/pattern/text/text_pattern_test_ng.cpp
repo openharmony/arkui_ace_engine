@@ -148,6 +148,12 @@ HWTEST_F(TextPatternTestNg, GetSpansInfo002, TestSize.Level1)
     */
     textPattern->GetSpansInfo(start, end, method);
     EXPECT_NE(realStart, 10);
+
+    /*
+        step3: get spans info
+    */
+    textPattern->GetSpansInfo(start, end, method);
+    EXPECT_NE(realStart, 10);
 }
 
 /**
@@ -163,6 +169,12 @@ HWTEST_F(TextPatternTestNg, GetSpansInfo003, TestSize.Level1)
     int32_t end = 1;
     std::int32_t realEnd = 0;
     GetSpansMethod method = GetSpansMethod::GETSPANS;
+    textPattern->GetSpansInfo(start, end, method);
+    EXPECT_EQ(realEnd, 0);
+
+    /*
+        step3: get spans info
+    */
     textPattern->GetSpansInfo(start, end, method);
     EXPECT_EQ(realEnd, 0);
 }

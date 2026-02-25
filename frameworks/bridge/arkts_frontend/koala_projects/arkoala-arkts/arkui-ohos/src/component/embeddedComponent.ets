@@ -21,7 +21,7 @@ import { KPointer, InteropNativeModule } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { CommonMethod, TerminationInfo, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { CommonMethod, TerminationInfo, ArkCommonMethodComponent } from "./common"
 import { ErrorCallback, BusinessError } from "@ohos.base"
 import { AttributeModifier, hookEmbeddedComponentAttributeModifier } from "#handwritten"
 import { default as Want } from "@ohos.app.ability.Want"
@@ -59,24 +59,6 @@ export interface EmbeddedComponentAttribute extends CommonMethod {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
-export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements EmbeddedComponentAttribute {
-    onTerminated_value?: ((value0: TerminationInfo) => void) | undefined
-    onError_value?: ErrorCallback<BusinessError> | undefined
-    attributeModifier_value?: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    setEmbeddedComponentOptions(loader: Want, type?: EmbeddedType): this {
-        return this
-    }
-    onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
-        return this
-    }
-    onError(value: ErrorCallback<BusinessError> | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
-}
-
 export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent implements EmbeddedComponentAttribute {
     getPeer(): ArkEmbeddedComponentPeer {
         if (!this.peer) {
@@ -127,8 +109,6 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
 export function EmbeddedComponentImpl(
     @memo
     style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkEmbeddedComponentComponent>((): ArkEmbeddedComponentComponent => {
         return new ArkEmbeddedComponentComponent()
@@ -137,7 +117,6 @@ export function EmbeddedComponentImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

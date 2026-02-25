@@ -20,6 +20,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -32,7 +33,9 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
+#include "core/common/display_info.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
@@ -812,6 +815,54 @@ HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SheetMaterial001
+ * @tc.desc: Test OverlayManager::OnBindSheet set SheetMaterial.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetMaterial001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    Shadow shadow = ShadowConfig::DefaultShadowL;
+    sheetStyle.borderWidth = BORDER_WIDTH_TEST;
+    sheetStyle.borderColor = BORDER_COLOR_TEST;
+    sheetStyle.borderStyle = BORDER_STYLE_TEST;
+    sheetStyle.shadow = shadow;
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto type = static_cast<int32_t>(MaterialType::NONE);
+    material->SetType(type);
+    sheetStyle.systemMaterial = nullptr;
+
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBorderWidth().value(), BORDER_WIDTH_TEST);
+    EXPECT_EQ(renderContext->GetBorderColor().value(), BORDER_COLOR_TEST);
+    EXPECT_EQ(renderContext->GetBorderStyle().value(), BORDER_STYLE_TEST);
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
+}
+
+/**
  * @tc.name: CloseBindSheetByUIContext001
  * @tc.desc: Test OverlayManager::CloseBindSheetByUIContext create sheet page.
  * @tc.type: FUNC
@@ -1500,6 +1551,39 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet006, TestSize.Level1)
      */
     overlayManager->PlayBubbleStyleSheetTransition(topSheetNode, true);
     EXPECT_EQ(topSheetPattern->height_, topSheetPattern->sheetHeightForTranslate_);
+}
+
+/**
+ * @tc.name: IsNeedAvoidFoldCrease001
+ * @tc.desc: Test IsNeedAvoidFoldCrease with EXTEND source mode in expand display
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, IsNeedAvoidFoldCrease001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode with pipeline context
+     */
+    auto frameNode = OverlayManagerTestNg::CreateTargetNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set DisplaySourceMode to EXTEND to trigger branch
+     */
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+
+    auto displayInfo = mockContainer->GetMockDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::EXTEND);
+    mockContainer->SetDisplayInfo(displayInfo);
+
+    /**
+     * @tc.steps: step3. Call IsNeedAvoidFoldCrease with expandDisplay=true
+     * @tc.expected: Returns false because branch is taken:
+     *               if (expandDisplay && sourceMode == DisplaySourceMode::EXTEND)
+     */
+    bool result = OverlayManager::IsNeedAvoidFoldCrease(frameNode, false, true, std::nullopt);
+    EXPECT_FALSE(result);
 }
 
 /**

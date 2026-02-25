@@ -264,7 +264,7 @@ const Monitor = function (key : string, ...keys: string[]): (target: any, _: any
   };
 };
 
-const SyncMonitor = function (key : string, ...keys: string[]): (target: any, _: any, descriptor: any) => void {
+const SyncMonitor = function (key : string, ...keys: string[]): (target: Object, _: string, descriptor: PropertyDescriptor) => void {
   // Path can end with the star
   const isValidPath = (typeof key === 'string') && keys.every(item => typeof item === 'string');
   const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
@@ -354,7 +354,7 @@ const Env = (envKey: keyof EnvTypeMap): PropertyDecorator => {
           const message = `@Env can only be declared inside @Component or @ComponentV2.`;
           stateMgmtConsole.applicationError(message);
           // toolchain can check
-          throw new BusinessError(ENV_USED_NOT_IN_COMPONENT, message);
+          throw new Error(message);
         }
         ObserveV2.getObserve().addRef(this, varName);
         if (!this[storeProp]) {
@@ -369,7 +369,7 @@ const Env = (envKey: keyof EnvTypeMap): PropertyDecorator => {
           const message = `@Env(${envKey}) is read-only and cannot assign value for it.`;
           stateMgmtConsole.applicationError(message);
           // toolchain can check
-          throw new BusinessError(ENV_READ_ONLY, message);
+          throw new Error(message);
       },
       enumerable: true
     });

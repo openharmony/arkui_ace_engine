@@ -53,7 +53,7 @@ public:
 
     void SetHandleReverse(bool reverse);
 
-    bool IsClosed() const;
+    ACE_FORCE_EXPORT bool IsClosed() const;
 
     void Close(bool animation = false) const;
 
@@ -74,7 +74,7 @@ public:
     bool IsHandleShow();
     bool IsSingleHandle();
     bool IsHandleReverse();
-    SelectOverlayInfo GetSelectOverlayMangerInfo();
+    ACE_FORCE_EXPORT SelectOverlayInfo GetSelectOverlayMangerInfo();
 
 private:
     int32_t selectOverlayId_ = 0;

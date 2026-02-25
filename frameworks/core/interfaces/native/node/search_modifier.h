@@ -17,10 +17,12 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SEARCH_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/search/bridge/search_custom_modifier.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISearchModifier* GetSearchModifier();
 const CJUISearchModifier* GetCJUISearchModifier();
+const ArkUISearchCustomModifier* GetSearchCustomModifier();
 void SetOnSearchSubmit(ArkUINodeHandle node, void* extraParam);
 void SetOnSearchChange(ArkUINodeHandle node, void* extraParam);
 void SetOnSearchCopy(ArkUINodeHandle node, void* extraParam);

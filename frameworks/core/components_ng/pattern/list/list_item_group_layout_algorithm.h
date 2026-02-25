@@ -383,6 +383,11 @@ public:
         prevMeasureBreak_ = value;
     }
 
+    void SetAxisChanged(bool value)
+    {
+        isAxisChanged_ = value;
+    }
+
     bool GroupMeasureInNextFrame() const
     {
         return measureInNextFrame_;
@@ -557,6 +562,7 @@ private:
     bool isNeedSyncLoad_ = false;
     bool measureInNextFrame_ = false;
     bool prevMeasureBreak_ = false;
+    bool isAxisChanged_ = false;
     int32_t pauseMeasureCacheItem_ = -1;
     int32_t prevItemPosCount_ = 0;
 

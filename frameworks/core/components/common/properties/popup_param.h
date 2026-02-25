@@ -49,6 +49,7 @@ struct ButtonProperties {
 struct PopupGradientColor {
     Color gradientColor;
     double gradientNumber;
+    RefPtr<ResourceObject> gradientColorObj;
 };
 
 struct PopupLinearGradientProperties {

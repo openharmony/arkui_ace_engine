@@ -968,6 +968,549 @@ HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest018, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SequencedRecognizerTest019
+ * @tc.desc: Test CheckStates
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call CheckStates function and compare result.
+     * @tc.steps: case1: currentIndex_ is -1.
+     * @tc.expected: step2. result is equal to RefereeState::READY.
+     */
+    size_t touchId = 100;
+    sequencedRecognizer->currentIndex_ = -1;
+    RefereeState result = sequencedRecognizer->CheckStates(touchId);
+    EXPECT_EQ(result, RefereeState::READY);
+
+    /**
+     * @tc.steps: step2. call CheckStates function and compare result.
+     * @tc.steps: case2: currentIndex_ is 0.
+     * @tc.expected: step2. result is equal to RefereeState::READY.
+     */
+    sequencedRecognizer->currentIndex_ = 0;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    result = sequencedRecognizer->CheckStates(touchId);
+    EXPECT_EQ(result, RefereeState::READY);
+
+    /**
+     * @tc.steps: step2. call CheckStates function and compare result.
+     * @tc.steps: case3: refereeState_ is RefereeState::PENDING.
+     * @tc.expected: step2. result is equal to RefereeState::PENDING.
+     */
+    sequencedRecognizer->refereeState_ = RefereeState::PENDING;
+    result = sequencedRecognizer->CheckStates(touchId);
+    EXPECT_EQ(result, RefereeState::PENDING);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest020
+ * @tc.desc: Test HandleEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call HandleEvent function and compare result.
+     * @tc.steps: case1: currentIndex_ is 0.
+     * @tc.expected: step2. result is true.
+     */
+    AxisEvent point;
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    bool result = sequencedRecognizer->HandleEvent(point);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step2. call HandleEvent function and compare result.
+     * @tc.steps: case2: action is AxisAction::NONE.
+     * @tc.expected: step2. result is true.
+     */
+    point.action = AxisAction::NONE;
+    result = sequencedRecognizer->HandleEvent(point);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step2. call HandleEvent function and compare result.
+     * @tc.steps: case3: action is AxisAction::END.
+     * @tc.expected: step2. result is true.
+     */
+    point.action = AxisAction::END;
+    result = sequencedRecognizer->HandleEvent(point);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step2. call HandleEvent function and compare result.
+     * @tc.steps: case4: refereeState_ is RefereeState::PENDING.
+     * @tc.expected: step2. result is true.
+     */
+    sequencedRecognizer->refereeState_ = RefereeState::PENDING;
+    result = sequencedRecognizer->HandleEvent(point);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest021
+ * @tc.desc: Test HandleEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call HandleEvent function and compare result.
+     * @tc.steps: case1: currentIndex_ is 1.
+     * @tc.expected: step2. result is true.
+     */
+    AxisEvent point;
+    RefPtr<ClickRecognizer> clickRecognizerPtr1 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr1);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr2);
+    sequencedRecognizer->currentIndex_ = 1;
+    bool result = sequencedRecognizer->HandleEvent(point);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step2. call HandleEvent function and compare result.
+     * @tc.steps: case2: clickRecognizerPtr2->refereeState_ is RefereeState::PENDING.
+     * @tc.expected: step2. result is true.
+     */
+    clickRecognizerPtr2->refereeState_ = RefereeState::PENDING;
+    result = sequencedRecognizer->HandleEvent(point);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest022
+ * @tc.desc: Test UpdateCurrentIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call UpdateCurrentIndex function and compare result.
+     * @tc.steps: case1: inputEventType_ is InputEventType::MOUSE_BUTTON.
+     * @tc.expected: step2. result equals.
+     */
+    sequencedRecognizer->currentIndex_ = 0;
+    sequencedRecognizer->inputEventType_ = InputEventType::MOUSE_BUTTON;
+    RefPtr<ClickRecognizer> clickRecognizerPtr1 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr1);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr2);
+    sequencedRecognizer->UpdateCurrentIndex();
+    EXPECT_EQ(sequencedRecognizer->currentIndex_, 1);
+
+    /**
+     * @tc.steps: step2. call UpdateCurrentIndex function and compare result.
+     * @tc.steps: case2: isEventHandoverNeeded_ is true.
+     * @tc.expected: step2. result equals.
+     */
+    sequencedRecognizer->currentIndex_ = 0;
+    sequencedRecognizer->isEventHandoverNeeded_ = true;
+    sequencedRecognizer->UpdateCurrentIndex();
+    EXPECT_EQ(sequencedRecognizer->currentIndex_, 1);
+
+    /**
+     * @tc.steps: step2. call UpdateCurrentIndex function and compare result.
+     * @tc.steps: case3: isEventHandoverNeeded_ is false.
+     * @tc.expected: step2. result equals.
+     */
+    sequencedRecognizer->recognizers_.clear();
+    sequencedRecognizer->currentIndex_ = 0;
+    sequencedRecognizer->isEventHandoverNeeded_ = false;
+    RefPtr<LongPressRecognizer> longPressRecognizer1 =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    RefPtr<LongPressRecognizer> longPressRecognizer2 =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    sequencedRecognizer->recognizers_.push_back(longPressRecognizer1);
+    sequencedRecognizer->recognizers_.push_back(longPressRecognizer2);
+    sequencedRecognizer->UpdateCurrentIndex();
+    EXPECT_EQ(sequencedRecognizer->currentIndex_, 1);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest023
+ * @tc.desc: Test CheckBetweenTwoLongPressRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call CheckBetweenTwoLongPressRecognizer function and compare result.
+     * @tc.steps: case1: currentIndex_ is 2.
+     * @tc.expected: step2. result is false.
+     */
+    sequencedRecognizer->currentIndex_ = 2;
+    RefPtr<LongPressRecognizer> longPressRecognizer1 =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    RefPtr<LongPressRecognizer> longPressRecognizer2 =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    sequencedRecognizer->recognizers_.push_back(longPressRecognizer1);
+    sequencedRecognizer->recognizers_.push_back(longPressRecognizer2);
+    int32_t currentIndex = 1;
+    bool result = sequencedRecognizer->CheckBetweenTwoLongPressRecognizer(currentIndex);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step2. call CheckBetweenTwoLongPressRecognizer function and compare result.
+     * @tc.steps: case2: currentIndex_ is -1.
+     * @tc.expected: step2. result is false.
+     */
+    currentIndex = -1;
+    result = sequencedRecognizer->CheckBetweenTwoLongPressRecognizer(currentIndex);
+    EXPECT_FALSE(result);
+}
+
+ /**
+ * @tc.name: SequencedRecognizerTest024
+ * @tc.desc: Test CheckAndSetRecognizerCleanFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call CheckAndSetRecognizerCleanFlag function and compare result.
+     * @tc.steps: case1: currentIndex_ is -1.
+     * @tc.expected: step2. isNeedResetRecognizerState_ is false.
+     */
+    RefPtr<NGGestureRecognizer> recognizer = nullptr;
+    sequencedRecognizer->CheckAndSetRecognizerCleanFlag(recognizer);
+    EXPECT_FALSE(sequencedRecognizer->IsNeedResetRecognizerState());
+
+    /**
+     * @tc.steps: step2. call CheckAndSetRecognizerCleanFlag function and compare result.
+     * @tc.steps: case1: currentIndex_ is -1.
+     * @tc.expected: step2. isNeedResetRecognizerState_ is true.
+     */
+    sequencedRecognizer->currentIndex_ = -1;
+    sequencedRecognizer->CheckAndSetRecognizerCleanFlag(recognizer);
+    EXPECT_TRUE(sequencedRecognizer->IsNeedResetRecognizerState());
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest025
+ * @tc.desc: Test CleanRecognizerStateVoluntarily
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<SequencedRecognizer> sequencedRecognizerPtr = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call CleanRecognizerStateVoluntarily function and compare result.
+     * @tc.steps: case1: recognizers_ is not empty nullptr.
+     * @tc.expected: step2. isNeedResetRecognizerState_ is false.
+     */
+    sequencedRecognizer->recognizers_.push_back(nullptr);
+    sequencedRecognizer->recognizers_.push_back(sequencedRecognizerPtr);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    sequencedRecognizer->CleanRecognizerStateVoluntarily();
+    EXPECT_FALSE(sequencedRecognizer->IsNeedResetRecognizerState());
+
+    /**
+     * @tc.steps: step2. call CleanRecognizerStateVoluntarily function and compare result.
+     * @tc.steps: case2: isNeedResetRecognizerState_ is true.
+     * @tc.expected: step2. isNeedResetRecognizerState_ is false.
+     */
+    sequencedRecognizer->recognizers_.clear();
+    sequencedRecognizer->SetIsNeedResetRecognizer(true);
+    sequencedRecognizer->CleanRecognizerStateVoluntarily();
+    EXPECT_FALSE(sequencedRecognizer->IsNeedResetRecognizerState());
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest026
+ * @tc.desc: Test ForceCleanRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call ForceCleanRecognizer function and compare result.
+     * @tc.steps: case: recognizers_ is not empty, have nullptr.
+     * @tc.expected: step2. currentIndex_ is equal to 0.
+     */
+    sequencedRecognizer->recognizers_.push_back(nullptr);
+    sequencedRecognizer->ForceCleanRecognizer();
+    EXPECT_EQ(sequencedRecognizer->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest027
+ * @tc.desc: Test NeedStartDeadlineTimerInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call NeedStartDeadlineTimerInner function and compare result.
+     * @tc.steps: case: currentIndex_ is 1.
+     * @tc.expected: step2. result is true.
+     */
+    SourceTool sourceTool = SourceTool::UNKNOWN;
+    sequencedRecognizer->currentIndex_ = 1;
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    bool result = sequencedRecognizer->NeedStartDeadlineTimerInner(clickRecognizerPtr, sourceTool);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest028
+ * @tc.desc: Test HandleEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call HandleEvent function and compare result.
+     * @tc.steps: case1: recognizers_ is not empty, have nullptr.
+     * @tc.expected: step2. result is true.
+     */
+    TouchEvent point;
+    sequencedRecognizer->recognizers_.push_back(nullptr);
+    bool result = sequencedRecognizer->HandleEvent(point);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step2. call HandleEvent function and compare result.
+     * @tc.steps: case2: point.type is TouchType::DOWN.
+     * @tc.expected: step2. result is true.
+     */
+    point.type = TouchType::DOWN;
+    result = sequencedRecognizer->HandleEvent(point);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step2. call HandleEvent function and compare result.
+     * @tc.steps: case3: point.childTouchTestListis not empty.
+     * @tc.expected: step2. result equals.
+     */
+    std::string childTouchTest = "childTouchTest";
+    point.childTouchTestList.push_back(childTouchTest);
+    sequencedRecognizer->recognizers_.clear();
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    result = sequencedRecognizer->HandleEvent(point);
+    EXPECT_EQ(sequencedRecognizer->childTouchTestList_, point.childTouchTestList);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest029
+ * @tc.desc: Test BatchAdjudicate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call BatchAdjudicate function and compare result.
+     * @tc.steps: case1: disposal: ACCEPT.
+     * @tc.expected: step2. result equals.
+     */
+    GestureDisposal disposal = GestureDisposal::ACCEPT;
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    sequencedRecognizer->BatchAdjudicate(clickRecognizerPtr, disposal);
+    EXPECT_EQ(sequencedRecognizer->disposal_, GestureDisposal::ACCEPT);
+
+    /**
+     * @tc.steps: step2. call BatchAdjudicate function and compare result.
+     * @tc.steps: case2: disposal: ACCEPT, refereeState: READY.
+     * @tc.expected: step2. result equals.
+     */
+    sequencedRecognizer->recognizers_.clear();
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    sequencedRecognizer->BatchAdjudicate(clickRecognizerPtr, disposal);
+    EXPECT_EQ(sequencedRecognizer->disposal_, GestureDisposal::PENDING);
+
+    /**
+     * @tc.steps: step2. call BatchAdjudicate function and compare result.
+     * @tc.steps: case3: disposal: REJECT.
+     * @tc.expected: step2. result equals.
+     */
+    disposal = GestureDisposal::REJECT;
+    sequencedRecognizer->BatchAdjudicate(clickRecognizerPtr, disposal);
+    EXPECT_EQ(sequencedRecognizer->disposal_, GestureDisposal::REJECT);
+
+    /**
+     * @tc.steps: step2. call BatchAdjudicate function and compare result.
+     * @tc.steps: case4: disposal: NONE.
+     * @tc.expected: step2. result equals.
+     */
+    disposal = GestureDisposal::NONE;
+    sequencedRecognizer->BatchAdjudicate(clickRecognizerPtr, disposal);
+    EXPECT_EQ(sequencedRecognizer->disposal_, GestureDisposal::PENDING);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest030
+ * @tc.desc: Test SendTouchEventToNextRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    std::string childTouchTest = "childTouchTest";
+
+    /**
+     * @tc.steps: step2. call SendTouchEventToNextRecognizer function and compare result.
+     * @tc.steps: case1: inputEventType_ is InputEventType::AXIS.
+     * @tc.expected: step2. result equals.
+     */
+    int64_t beforeDuration = 0;
+    sequencedRecognizer->inputEventType_ = InputEventType::AXIS;
+    sequencedRecognizer->SendTouchEventToNextRecognizer(clickRecognizerPtr, beforeDuration);
+    EXPECT_EQ(clickRecognizerPtr->inputEventType_, InputEventType::AXIS);
+
+    /**
+     * @tc.steps: step2. call SendTouchEventToNextRecognizer function and compare result.
+     * @tc.steps: case2: inputEventType_ is InputEventType::TOUCH_SCREEN.
+     * @tc.expected: step2. result equals.
+     */
+    beforeDuration = 1;
+    sequencedRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    sequencedRecognizer->touchPoints_[0] = touchEvent;
+    sequencedRecognizer->touchPoints_[1] = touchEvent;
+    sequencedRecognizer->childTouchTestList_.push_back(childTouchTest);
+    sequencedRecognizer->SendTouchEventToNextRecognizer(clickRecognizerPtr, beforeDuration);
+    EXPECT_EQ(sequencedRecognizer->touchPoints_[0].childTouchTestList, sequencedRecognizer->childTouchTestList_);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest031
+ * @tc.desc: Test HandleOverdueDeadline
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
+     * @tc.steps: case: refereeState_ is RefereeState::PENDING.
+     * @tc.expected: step2. result equals.
+     */
+    sequencedRecognizer->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer->HandleOverdueDeadline();
+    EXPECT_EQ(sequencedRecognizer->disposal_, GestureDisposal::REJECT);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest032
+ * @tc.desc: Test ResetStatusOnFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    int32_t callbackCounts = 0;
+    sequencedRecognizer->onActionCancel_ = std::make_unique<GestureEventFunc>(
+        [&callbackCounts](GestureEvent& info) { callbackCounts++; });
+
+    /**
+     * @tc.steps: step2. call ResetStatusOnFinish function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    sequencedRecognizer->currentIndex_ = 0;
+    sequencedRecognizer->refereeState_ = RefereeState::READY;
+    sequencedRecognizer->ResetStatusOnFinish();
+    sequencedRecognizer->currentIndex_ = 0;
+    sequencedRecognizer->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer->ResetStatusOnFinish();
+    sequencedRecognizer->currentIndex_ = -1;
+    sequencedRecognizer->refereeState_ = RefereeState::READY;
+    sequencedRecognizer->ResetStatusOnFinish();
+    sequencedRecognizer->currentIndex_ = -1;
+    sequencedRecognizer->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer->ResetStatusOnFinish();
+    EXPECT_EQ(callbackCounts, 1);
+}
+
+/**
  * @tc.name: GetGestureInfoString001
  * @tc.desc: Test SequencedRecognizer function: GetGestureInfoString
  * @tc.type: FUNC
@@ -986,5 +1529,354 @@ HWTEST_F(SequencedRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
     std::string result = sequencedRecognizer->GetGestureInfoString();
     EXPECT_THAT(result, HasSubstr("EHN:1"));
     EXPECT_THAT(result, HasSubstr("CI:1"));
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest033
+ * @tc.desc: Test OnRejected with IsBridgeMode returning true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. test OnRejected when recognizer has IsBridgeMode returning true
+     * @tc.expected: step2. should skip OnRejected for that recognizer
+     */
+    sequencedRecognizer->currentIndex_ = 0;
+    sequencedRecognizer->recognizers_.clear();
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    sequencedRecognizer->OnRejected();
+    EXPECT_EQ(sequencedRecognizer->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest034
+ * @tc.desc: Test HandleEvent with TouchEvent when sourceType is TOUCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. test HandleEvent with sourceType TOUCH
+     * @tc.expected: step2. inputEventType should be TOUCH_SCREEN
+     */
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.sourceType = SourceType::TOUCH;
+    bool result = sequencedRecognizer->HandleEvent(touchEvent);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(sequencedRecognizer->inputEventType_, InputEventType::TOUCH_SCREEN);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest035
+ * @tc.desc: Test HandleEvent with TouchEvent when sourceType is MOUSE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. test HandleEvent with sourceType MOUSE
+     * @tc.expected: step2. inputEventType should be MOUSE_BUTTON
+     */
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.sourceType = SourceType::MOUSE;
+    bool result = sequencedRecognizer->HandleEvent(touchEvent);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(sequencedRecognizer->inputEventType_, InputEventType::MOUSE_BUTTON);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest036
+ * @tc.desc: Test HandleEvent with TouchEvent with childTouchTestList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. test HandleEvent with childTouchTestList
+     * @tc.expected: step2. childTouchTestList should be populated
+     */
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.childTouchTestList.push_back("test1");
+    touchEvent.childTouchTestList.push_back("test2");
+    bool result = sequencedRecognizer->HandleEvent(touchEvent);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(sequencedRecognizer->childTouchTestList_.size(), 2);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest037
+ * @tc.desc: Test ResetStatusOnFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. test ResetStatusOnFinish when currentIndex != -1 and state is PENDING
+     * @tc.expected: step2. should send cancel callback
+     */
+    sequencedRecognizer->currentIndex_ = 0;
+    sequencedRecognizer->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer->onActionCancel_ = std::make_unique<GestureEventFunc>([](GestureEvent) {});
+    sequencedRecognizer->ResetStatusOnFinish(false);
+    EXPECT_EQ(sequencedRecognizer->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest038
+ * @tc.desc: Test CleanRecognizerStateVoluntarily when child is RecognizerGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. create a child RecognizerGroup
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> childRecognizers = {};
+    childRecognizers.push_back(AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT));
+    RefPtr<ExclusiveRecognizer> childGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(childRecognizers);
+    sequencedRecognizer->recognizers_.push_back(childGroup);
+
+    /**
+     * @tc.steps: step3. test CleanRecognizerStateVoluntarily
+     * @tc.expected: step3. should call child's CleanRecognizerStateVoluntarily
+     */
+    sequencedRecognizer->CleanRecognizerStateVoluntarily();
+    EXPECT_EQ(sequencedRecognizer->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest039
+ * @tc.desc: Test CheckAndSetRecognizerCleanFlag when currentIndex == size - 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. test CheckAndSetRecognizerCleanFlag when currentIndex == size - 1
+     * @tc.expected: step2. should set IsNeedResetRecognizer to true
+     */
+    sequencedRecognizer->currentIndex_ = 0;
+    sequencedRecognizer->CheckAndSetRecognizerCleanFlag(clickRecognizerPtr);
+    EXPECT_TRUE(sequencedRecognizer->IsNeedResetRecognizerState());
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest040
+ * @tc.desc: Test BatchAdjudicate with PENDING disposal
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. test BatchAdjudicate with PENDING disposal when refereeState is READY
+     * @tc.expected: step2. should call GroupAdjudicate with PENDING
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    sequencedRecognizer->refereeState_ = RefereeState::READY;
+    sequencedRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
+    EXPECT_EQ(sequencedRecognizer->disposal_, GestureDisposal::PENDING);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest041
+ * @tc.desc: Test BatchAdjudicate with PENDING disposal when refereeState is PENDING
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. test BatchAdjudicate with PENDING disposal when refereeState is PENDING
+     * @tc.expected: step2. should call OnPending on recognizer
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::READY;
+    sequencedRecognizer->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest042
+ * @tc.desc: Test HandleOverdueDeadline when refereeState is PENDING
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    sequencedRecognizer->recognizers_.push_back(clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. test HandleOverdueDeadline when refereeState is PENDING
+     * @tc.expected: step2. should adjudicate REJECT
+     */
+    sequencedRecognizer->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer->HandleOverdueDeadline();
+    EXPECT_EQ(sequencedRecognizer->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest043
+ * @tc.desc: Test HandleEvent when curRecognizer is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    sequencedRecognizer->recognizers_.push_back(nullptr);
+
+    /**
+     * @tc.steps: step2. test HandleEvent when curRecognizer is null
+     * @tc.expected: step2. should adjudicate REJECT
+     */
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    bool result = sequencedRecognizer->HandleEvent(touchEvent);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(sequencedRecognizer->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest044
+ * @tc.desc: Test CheckGroupState with RecognizerGroup child
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. create a child RecognizerGroup
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> childRecognizers = {};
+    childRecognizers.push_back(AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT));
+    RefPtr<ExclusiveRecognizer> childGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(childRecognizers);
+    sequencedRecognizer->recognizers_.push_back(childGroup);
+
+    /**
+     * @tc.steps: step3. test CheckGroupState with RecognizerGroup child
+     * @tc.expected: step3. should call child's CheckGroupState
+     */
+    sequencedRecognizer->currentIndex_ = 0;
+    sequencedRecognizer->refereeState_ = RefereeState::PENDING;
+    bool result = sequencedRecognizer->CheckGroupState();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SequencedRecognizerTest045
+ * @tc.desc: Test StopLongPressRepeatTimer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest045, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. create LongPressRecognizer with repeat enabled
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(FINGER_NUMBER, false, DURATION);
+    longPressRecognizer->repeat_ = true;
+    sequencedRecognizer->recognizers_.push_back(longPressRecognizer);
+    sequencedRecognizer->currentIndex_ = 1;
+
+    /**
+     * @tc.steps: step3. test StopLongPressRepeatTimer
+     * @tc.expected: step3. should stop repeat timer
+     */
+    TouchEvent touchEvent;
+    touchEvent.id = 0;
+    sequencedRecognizer->StopLongPressRepeatTimer(touchEvent.id);
+    // Test passes if no crash occurs
+    EXPECT_TRUE(true);
 }
 } // namespace OHOS::Ace::NG

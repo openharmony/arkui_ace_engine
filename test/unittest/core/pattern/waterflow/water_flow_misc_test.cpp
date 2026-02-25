@@ -315,4 +315,31 @@ HWTEST_F(WaterFlowTestNg, FadingEdge002, TestSize.Level1)
     EXPECT_TRUE(paintMethod->isFadingTop_);
     EXPECT_FALSE(paintMethod->isFadingBottom_);
 }
+
+/**
+ * @tc.name: GetForegroundDrawFunction001
+ * @tc.desc: Test WaterFlowPaintMethod::GetForegroundDrawFunction returns a valid function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, GetForegroundDrawFunction001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Get paint method via UpdateContentModifier (which creates PaintWrapper internally).
+     * @tc.expected: PaintMethod is valid.
+     */
+    auto paintMethod = UpdateContentModifier();
+    ASSERT_NE(paintMethod, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetForegroundDrawFunction with nullptr wrapper.
+     * @tc.expected: Returns a non-null draw function (lambda always created).
+     */
+    auto drawFunc = paintMethod->GetForegroundDrawFunction(nullptr);
+    EXPECT_NE(drawFunc, nullptr);
+}
 } // namespace OHOS::Ace::NG

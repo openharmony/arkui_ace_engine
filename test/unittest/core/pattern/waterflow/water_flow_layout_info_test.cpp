@@ -543,4 +543,79 @@ HWTEST_F(WaterFlowLayoutInfoTest, ContentOffsetsAffectOverscrollBehavior, TestSi
     // offset.end = 600 - 550 = 50
     EXPECT_FLOAT_EQ(result.end, 50.0f);
 }
+
+/**
+ * @tc.name: InitMargins001
+ * @tc.desc: Test InitMargins with empty sections returns early.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, InitMargins001, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    std::vector<WaterFlowSections::Section> emptySections;
+    ScaleProperty scale;
+    info.InitMargins(emptySections, scale, 480.0f);
+    EXPECT_TRUE(info.margins_.empty());
+}
+
+/**
+ * @tc.name: InitMargins002
+ * @tc.desc: Test InitMargins with multiple sections with margins.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, InitMargins002, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    std::vector<WaterFlowSections::Section> sections(3);
+    sections[0].itemsCount = 5;
+    sections[0].margin = std::make_optional<MarginProperty>();
+    sections[0].margin->top = CalcLength(10.0f);
+    sections[0].margin->bottom = CalcLength(5.0f);
+
+    sections[1].itemsCount = 3;
+    // no margin for section 1
+
+    sections[2].itemsCount = 4;
+    sections[2].margin = std::make_optional<MarginProperty>();
+    sections[2].margin->left = CalcLength(20.0f);
+
+    ScaleProperty scale;
+    info.InitMargins(sections, scale, 480.0f);
+    EXPECT_EQ(info.margins_.size(), 3);
+    EXPECT_TRUE(info.margins_[0].top.has_value());
+    EXPECT_TRUE(info.margins_[0].bottom.has_value());
+    EXPECT_FALSE(info.margins_[1].top.has_value());
+    EXPECT_TRUE(info.margins_[2].left.has_value());
+}
+
+/**
+ * @tc.name: UpdateDefaultCachedCount001
+ * @tc.desc: Test UpdateDefaultCachedCount updates defCachedCount_ based on viewport items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, UpdateDefaultCachedCount001, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    info.startIndex_ = 0;
+    info.endIndex_ = 9;
+    info.defCachedCount_ = 1;
+    info.UpdateDefaultCachedCount();
+    // When pageCount <= 0 (default in test), returns early, defCachedCount_ unchanged
+    EXPECT_GE(info.defCachedCount_, 1);
+}
+
+/**
+ * @tc.name: UpdateDefaultCachedCount002
+ * @tc.desc: Test UpdateDefaultCachedCount with zero items returns early.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowLayoutInfoTest, UpdateDefaultCachedCount002, TestSize.Level1)
+{
+    WaterFlowLayoutInfo info;
+    info.startIndex_ = 5;
+    info.endIndex_ = 4; // itemCount = 0
+    info.defCachedCount_ = 2;
+    info.UpdateDefaultCachedCount();
+    EXPECT_EQ(info.defCachedCount_, 2); // unchanged
+}
 } // namespace OHOS::Ace::NG

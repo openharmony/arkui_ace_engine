@@ -46,11 +46,13 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<NavDestinationLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        ACE_UINODE_TRACE(GetHost());
         auto layout = MakeRefPtr<NavDestinationLayoutAlgorithm>();
         layout->SetIsShown(isOnShow_);
         return layout;
@@ -58,6 +60,7 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<NavDestinationEventHub>();
     }
 
@@ -182,6 +185,7 @@ public:
 
     void CreateOverlayManager(bool isShow)
     {
+        ACE_UINODE_TRACE(GetHost());
         if (!overlayManager_ && isShow) {
             overlayManager_ = MakeRefPtr<OverlayManager>(GetHost());
         }

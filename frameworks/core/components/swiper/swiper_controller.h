@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,8 @@ using ChangeIndexWithModeImpl = std::function<void(const int32_t, SwiperAnimatio
 using PreloadItemsFunc = std::function<void(const std::set<int32_t>)>;
 using PreloadItemsFinishFunc = std::function<void(const int32_t, const std::string)>;
 using OnChangeFunc = std::function<void(int32_t index)>;
+using FakeDragFunc = std::function<bool()>;
+using FakeDragByFunc = std::function<bool(double)>;
 
 class SwiperController : public virtual AceType {
     DECLARE_ACE_TYPE(SwiperController, AceType);
@@ -251,6 +253,58 @@ public:
         }
     }
 
+    bool StartFakeDrag()
+    {
+        if (startFakeDragImpl_) {
+            return startFakeDragImpl_();
+        }
+        return false;
+    }
+
+    void SetStartFakeDragImpl(const FakeDragFunc& startFakeDragImpl)
+    {
+        startFakeDragImpl_ = startFakeDragImpl;
+    }
+
+    bool FakeDragBy(float offset)
+    {
+        if (fakeDragByImpl_) {
+            return fakeDragByImpl_(offset);
+        }
+        return false;
+    }
+
+    void SetFakeDragByImpl(const FakeDragByFunc& fakeDragByImpl)
+    {
+        fakeDragByImpl_ = fakeDragByImpl;
+    }
+
+    bool StopFakeDrag()
+    {
+        if (stopFakeDragImpl_) {
+            return stopFakeDragImpl_();
+        }
+        return false;
+    }
+
+    void SetStopFakeDragImpl(const FakeDragFunc& stopFakeDragImpl)
+    {
+        stopFakeDragImpl_ = stopFakeDragImpl;
+    }
+
+    bool IsFakeDragging()
+    {
+        if (isFakeDraggingImpl_) {
+            return isFakeDraggingImpl_();
+        }
+        return false;
+    }
+
+    void SetIsFakeDraggingImpl(const FakeDragFunc& isFakeDraggingImpl)
+    {
+        isFakeDraggingImpl_ = isFakeDraggingImpl;
+    }
+
 private:
     SwipeToImpl swipeToImpl_;
     SwipeToWithoutAnimationImpl swipeToWithoutAnimationImpl_;
@@ -271,6 +325,10 @@ private:
     PreloadItemsFinishFunc preloadFinishCallback_;
     PreloadItemsFunc preloadItemsImpl_;
     OnChangeFunc onChangeImpl_;
+    FakeDragFunc startFakeDragImpl_;
+    FakeDragByFunc fakeDragByImpl_;
+    FakeDragFunc stopFakeDragImpl_;
+    FakeDragFunc isFakeDraggingImpl_;
 };
 
 } // namespace OHOS::Ace

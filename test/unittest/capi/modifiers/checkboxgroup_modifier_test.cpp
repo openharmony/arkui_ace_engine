@@ -60,58 +60,58 @@ public:
 };
 
 /**
- * @tc.name: CheckboxGroupModifierTest001
+ * @tc.name: setSelectedColorTestVariant001
  * @tc.desc: setSelectedColor test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest001, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, setSelectedColorTestVariant001, TestSize.Level1)
 {
-    auto checkVal1 = GetStringAttribute(node_, "selectedColor");
-    EXPECT_EQ(checkVal1, "#FF007DFF");
+    auto checkVal1 = GetAttrValue<std::string>(node_, "selectedColor");
+    EXPECT_THAT(checkVal1, Eq("#FF007DFF"));
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF123456);
     auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
     modifier_->setSelectedColor(node_, &optColor);
-    auto checkVal2 = GetStringAttribute(node_, "selectedColor");
-    EXPECT_EQ(checkVal2, "#FF123456");
+    auto checkVal2 = GetAttrValue<std::string>(node_, "selectedColor");
+    EXPECT_THAT(checkVal2, Eq("#FF123456"));
 }
 
 /**
- * @tc.name: CheckboxGroupModifierTest002
+ * @tc.name: setUnselectedColorTestVariant002
  * @tc.desc: setUnselectedColor test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest002, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, setUnselectedColorTestVariant002, TestSize.Level1)
 {
-    auto checkVal1 = GetStringAttribute(node_, "unselectedColor");
-    EXPECT_EQ(checkVal1, "#FF000000");
+    auto checkVal1 = GetAttrValue<std::string>(node_, "unselectedColor");
+    EXPECT_THAT(checkVal1, Eq("#FF000000"));
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF123456);
     auto optColor = Converter::ArkValue<Opt_ResourceColor>(color);
     modifier_->setUnselectedColor(node_, &optColor);
-    auto checkVal2 = GetStringAttribute(node_, "unselectedColor");
-    EXPECT_EQ(checkVal2, "#FF123456");
+    auto checkVal2 = GetAttrValue<std::string>(node_, "unselectedColor");
+    EXPECT_THAT(checkVal2, Eq("#FF123456"));
 }
 
 /**
- * @tc.name: CheckboxGroupModifierTest003
+ * @tc.name: setSelectAllTestVariant003
  * @tc.desc: setSelectAll test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest003, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, setSelectAllTestVariant003, TestSize.Level1)
 {
-    auto checkVal1 = GetStringAttribute(node_, "selectAll");
-    EXPECT_EQ(checkVal1, "false");
+    auto checkVal1 = GetAttrValue<std::string>(node_, "selectAll");
+    EXPECT_THAT(checkVal1, Eq("false"));
     auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     modifier_->setSelectAll(node_, &optValue);
-    auto checkVal2 = GetStringAttribute(node_, "selectAll");
-    EXPECT_EQ(checkVal2, "true");
+    auto checkVal2 = GetAttrValue<std::string>(node_, "selectAll");
+    EXPECT_THAT(checkVal2, Eq("true"));
 }
 
 /**
- * @tc.name: CheckboxGroupModifierTest004
+ * @tc.name: setMarkTestVariant004
  * @tc.desc: setMark test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest004, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, setMarkTestVariant004, TestSize.Level1)
 {
     Ark_MarkStyle style;
     Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xFF123456);
@@ -122,46 +122,46 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest004, TestSize.Level
     modifier_->setMark(node_, &optStyle);
 
     auto jsonValue = GetJsonValue(node_);
-    auto mark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, "mark");
+    auto mark = GetAttrObject(jsonValue, "mark");
 
     auto checkVal1 = GetAttrValue<std::string>(mark, "strokeColor");
-    EXPECT_EQ(checkVal1, "#FF123456");
+    EXPECT_THAT(checkVal1, Eq("#FF123456"));
 
     auto checkVal2 = GetAttrValue<std::string>(mark, "size");
-    EXPECT_EQ(checkVal2, "111.00px");
+    EXPECT_THAT(checkVal2, Eq("111.00px"));
 
     auto checkVal3 = GetAttrValue<std::string>(mark, "strokeWidth");
-    EXPECT_EQ(checkVal3, "222.00px");
+    EXPECT_THAT(checkVal3, Eq("222.00px"));
 }
 
 /**
- * @tc.name: CheckboxGroupModifierTest005
+ * @tc.name: setCheckboxShapeTestVariant005
  * @tc.desc: setCheckboxShape test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, DISABLED_CheckboxGroupModifierTest005, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, DISABLED_setCheckboxShapeTestVariant005, TestSize.Level1)
 {
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
-    auto checkVal1 = GetStringAttribute(node_, "checkboxShape");
-    EXPECT_EQ(checkVal1, "CIRCLE");
+    auto checkVal1 = GetAttrValue<std::string>(node_, "checkboxShape");
+    EXPECT_THAT(checkVal1, Eq("CIRCLE"));
     auto optValue = Converter::ArkValue<Opt_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE);
     modifier_->setCheckboxShape(node_, &optValue);
-    auto checkVal2 = GetStringAttribute(node_, "checkboxShape");
-    EXPECT_EQ(checkVal2, "ROUNDED_SQUARE");
+    auto checkVal2 = GetAttrValue<std::string>(node_, "checkboxShape");
+    EXPECT_THAT(checkVal2, Eq("ROUNDED_SQUARE"));
     optValue = Converter::ArkValue<Opt_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_CIRCLE);
     modifier_->setCheckboxShape(node_, &optValue);
-    auto checkVal3 = GetStringAttribute(node_, "checkboxShape");
-    EXPECT_EQ(checkVal3, "CIRCLE");
+    auto checkVal3 = GetAttrValue<std::string>(node_, "checkboxShape");
+    EXPECT_THAT(checkVal3, Eq("CIRCLE"));
 }
 
 /**
- * @tc.name: SetOnChangeTest
+ * @tc.name: setOnChangeTest
  * @tc.desc: onChange event test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, DISABLED_SetOnChangeTest, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     struct CheckEvent {
@@ -190,11 +190,11 @@ HWTEST_F(CheckboxGroupModifierTest, DISABLED_SetOnChangeTest, TestSize.Level1)
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventSelectAllImpl
+ * @tc.name: set_onChangeEvent_selectAllTestOnChangeEventSelectAllImpl
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, setOnChangeEventSelectAllImpl, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, set_onChangeEvent_selectAllTestOnChangeEventSelectAllImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();

@@ -74,8 +74,8 @@ class UiMaterial;
 namespace OHOS::Ace::NG {
 struct AttractionEffect;
 using TransitionFinishCallback = std::function<void(bool)>;
-
-struct OptionParam {
+using OnNeedSoftkeyboardFunc = std::function<bool()>;
+struct ACE_FORCE_EXPORT OptionParam {
     std::string value;
     std::string icon;
     std::string labelInfo;
@@ -918,6 +918,8 @@ public:
         double distanceThreshold = std::numeric_limits<double>::infinity());
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc, Dimension distanceThreshold);
     static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
+    static void AddOnTouch(FrameNode* frameNode, const RefPtr<TouchEventImpl>& touchEventImpl);
+    static void RemoveTouchEvent(FrameNode* frameNode, const RefPtr<TouchEventImpl>& touchEventImpl);
     static void SetOnDragStart(FrameNode* frameNode,
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
     static void SetOnDragEnter(FrameNode* frameNode,
@@ -1163,6 +1165,10 @@ public:
     // Get property value from rsNode
     static std::vector<float> GetRenderNodePropertyValue(FrameNode* frameNode, AnimationPropertyType property);
     static void UpdatePopupParamResource(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& frameNode);
+    static void UpdatePopupBorderColorResource(const PopupLinearGradientProperties& gradientProperties,
+        const RefPtr<FrameNode>& frameNode, bool isOutlineGradient);
+    static void AddResObjWithCallBack(std::string key, const RefPtr<ResourceObject>& resObj,
+        const uint32_t index, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient);
     static void CheckMainThread();
     static void AllowForceDark(bool forceDarkAllowed);
     static void AllowForceDark(UINode* node, bool forceDarkAllowed);
@@ -1173,11 +1179,16 @@ public:
     static BorderWidthProperty GetDashGap(FrameNode* frameNode);
     static BorderWidthProperty GetDashWidth(FrameNode* frameNode);
     static RenderStrategy GetRenderStrategy(FrameNode* frameNode);
+    static void SetOnNeedSoftkeyboard(OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback);
+    static void ResetOnNeedSoftkeyboard();
+    static void SetOnNeedSoftkeyboard(FrameNode* frameNode, OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback);
+    static void ResetOnNeedSoftkeyboard(FrameNode* frameNode);
 
 private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY, TextDirection direction = TextDirection::LTR);
+    static void ResetSystemMaterialEffect(FrameNode* frameNode);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;

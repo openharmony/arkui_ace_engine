@@ -38,11 +38,12 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void AddColorStopImpl(Ark_CanvasGradient peer,
                       Ark_Float64 offset,
-                      const Ark_Union_String_ColorMetrics* color)
+                      const Ark_Union_String_ColorMetricsExt* color)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(color);
     auto value = Converter::Convert<double>(offset);
+    auto colorValue = Converter::OptConvertPtr<Color>(color);
     Converter::VisitUnion(
         *color,
         [value, peer](const Ark_String& opt) {
@@ -53,7 +54,7 @@ void AddColorStopImpl(Ark_CanvasGradient peer,
                 peer->AddColorStop(value, colorValue.value());
             }
         },
-        [value, peer](const Ark_ColorMetrics& opt) {
+        [value, peer](const Ark_ColorMetricsExt& opt) {
         },
         []() {});
 }

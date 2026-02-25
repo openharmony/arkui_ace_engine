@@ -173,13 +173,9 @@ void SetCheckboxGroupWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int3
 
 void ResetCheckboxGroupWidth(ArkUINodeHandle node)
 {
-    auto* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, true);
-    if (!node) {
-        ViewAbstract::ResetResObj(frameNode, "width");
-        ViewAbstract::ResetLayoutPolicyProperty(frameNode, true);
-    }
 }
 
 void SetCheckboxGroupHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
@@ -197,13 +193,9 @@ void SetCheckboxGroupHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int
 
 void ResetCheckboxGroupHeight(ArkUINodeHandle node)
 {
-    auto* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
-    if (!node) {
-        ViewAbstract::ResetResObj(frameNode, "height");
-        ViewAbstract::ResetLayoutPolicyProperty(frameNode, false);
-    }
 }
 
 void SetCheckboxGroupMark(ArkUINodeHandle node, uint32_t color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue)
@@ -436,44 +428,6 @@ void SetCheckboxGroupChangeEvent(void* callback)
     CheckBoxGroupModelNG::SetChangeEvent(frameNode, std::move(*changeEvent));
 }
 
-void SetCheckboxGroupSize(
-    ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* resPtr, ArkUI_Bool isWidth)
-{
-    auto* frameNode = GetFrameNode(nullptr);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetResObj(frameNode, isWidth ? "width" : "height");
-    ViewAbstract::ResetLayoutPolicyProperty(frameNode, isWidth);
-    if (!SystemProperties::ConfigChangePerform() ? LessNotEqual(value, 0.0) : (LessNotEqual(value, 0.0) && !resPtr)) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            ViewAbstract::ClearWidthOrHeight(frameNode, isWidth);
-            return;
-        }
-        value = 0.0f;
-    }
-    if (SystemProperties::ConfigChangePerform() && resPtr) {
-        auto* res = reinterpret_cast<ResourceObject*>(resPtr);
-        auto resObj = AceType::Claim(res);
-        if (isWidth) {
-            ViewAbstract::SetWidth(frameNode, resObj);
-        } else {
-            ViewAbstract::SetHeight(frameNode, resObj);
-        }
-        return;
-    }
-    CalcLength length;
-    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
-    if (unitEnum == DimensionUnit::CALC) {
-        length = CalcLength(std::string(calcValue));
-    } else {
-        length = CalcLength(value, unitEnum);
-    }
-    if (isWidth) {
-        ViewAbstract::SetWidth(frameNode, length);
-    } else {
-        ViewAbstract::SetHeight(frameNode, length);
-    }
-}
-
 void SetCheckboxGroupOnChangeExtraParam(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -584,33 +538,6 @@ void ResetCheckboxGroupUnSelectedColorImpl(ArkUINodeHandle node) {}
 void ResetCheckboxGroupCheckMarkColorImpl(ArkUINodeHandle node) {}
 
 void SetCheckboxGroupChangeEventImpl(void* callback) {}
-
-void ResetCheckboxGroupWidthImpl(ArkUINodeHandle node) {}
-
-void ResetCheckboxGroupHeightImpl(ArkUINodeHandle node) {}
-
-void SetCheckboxGroupSizeImpl(
-    ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* resPtr, ArkUI_Bool isWidth)
-{
-    if (LessNotEqual(value, 0.0)) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            return;
-        }
-        value = 0.0f;
-    }
-    CalcDimension dimension;
-    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
-    if (unitEnum == DimensionUnit::CALC) {
-        dimension = CalcDimension(std::string(calcValue));
-    } else {
-        dimension = CalcDimension(value, unitEnum);
-    }
-    if (isWidth) {
-        GetViewAbstractModelImpl()->SetWidth(dimension);
-    } else {
-        GetViewAbstractModelImpl()->SetHeight(dimension);
-    }
-}
 #endif
 
 const ArkUICheckboxGroupModifier* GetCheckboxGroupDynamicModifier()
@@ -627,9 +554,9 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupDynamicModifier()
             .setCheckboxGroupSelectAll = SetCheckboxGroupSelectAllImpl,
             .resetCheckboxGroupSelectAll = ResetCheckboxGroupSelectAllImpl,
             .setCheckboxGroupWidth = nullptr,
-            .resetCheckboxGroupWidth = ResetCheckboxGroupWidthImpl,
+            .resetCheckboxGroupWidth = nullptr,
             .setCheckboxGroupHeight = nullptr,
-            .resetCheckboxGroupHeight = ResetCheckboxGroupHeightImpl,
+            .resetCheckboxGroupHeight = nullptr,
             .setCheckboxGroupMark = nullptr,
             .resetCheckboxGroupMark = nullptr,
             .setCheckboxGroupStyle = nullptr,
@@ -656,7 +583,6 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupDynamicModifier()
             .resetCheckboxGroupResponseRegion = ResetCheckboxGroupResponseRegionImpl,
             .setCheckboxGroupPadding = SetCheckboxGroupPaddingImpl,
             .setCheckboxGroupChangeEvent = SetCheckboxGroupChangeEventImpl,
-            .setCheckboxGroupSize = SetCheckboxGroupSizeImpl,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -700,7 +626,6 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupDynamicModifier()
         .resetCheckboxGroupResponseRegion = ResetCheckboxGroupResponseRegion,
         .setCheckboxGroupPadding = SetCheckboxGroupPadding,
         .setCheckboxGroupChangeEvent = SetCheckboxGroupChangeEvent,
-        .setCheckboxGroupSize = SetCheckboxGroupSize,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -535,7 +535,7 @@ void ToggleButtonPattern::OnTouchDown()
             return;
         }
         // for system default
-        auto isNeedToHandleHoverOpacity = false;
+        auto isNeedToHandleHoverOpacity = isHover_;
         AnimateTouchAndHover(renderContext, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL, TYPE_TOUCH,
             TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
     }
@@ -564,7 +564,7 @@ void ToggleButtonPattern::OnTouchUp()
             return;
         }
         if (buttonEventHub->IsEnabled()) {
-            auto isNeedToHandleHoverOpacity = false;
+            auto isNeedToHandleHoverOpacity = isHover_;
             AnimateTouchAndHover(renderContext, TYPE_TOUCH, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL,
                 TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
         } else {

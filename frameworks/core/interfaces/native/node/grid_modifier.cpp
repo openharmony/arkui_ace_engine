@@ -655,6 +655,28 @@ void ResetGridFadingEdge(ArkUINodeHandle node)
     NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
 }
 
+void SetItemFillPolicy(ArkUINodeHandle node, int32_t policy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PresetFillType fileType = static_cast<PresetFillType>(policy);
+    GridModelNG::SetItemFillPolicy(frameNode, fileType);
+}
+
+void ResetItemFillPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::ResetItemFillPolicy(frameNode);
+}
+
+ArkUI_Int32 GetItemFillPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int32_t>(GridModelNG::GetItemFillPolicy(frameNode));
+}
+
 void SetGridEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -712,28 +734,6 @@ void ResetGridLayoutOptions(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::ResetLayoutOptions(frameNode);
-}
-
-void SetItemFillPolicy(ArkUINodeHandle node, int32_t policy)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    PresetFillType fileType = static_cast<PresetFillType>(policy);
-    GridModelNG::SetItemFillPolicy(frameNode, fileType);
-}
-
-void ResetItemFillPolicy(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridModelNG::ResetItemFillPolicy(frameNode);
-}
-
-ArkUI_Int32 GetItemFillPolicy(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return static_cast<int32_t>(GridModelNG::GetItemFillPolicy(frameNode));
 }
 
 void SetScrollToIndex(

@@ -25,6 +25,9 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase<T> implem
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
         super('@Param', owningView, varName);
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+
+        // Register the relationship between this Param variable and the observed object it uses
+        this.registerToObservedObject(initValue);
     }
 
     get(): T {
@@ -33,6 +36,7 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase<T> implem
         const value = this.backing_.get(shouldAddRef);
         if (shouldAddRef) {
             uiUtils.builtinContainersAddRefLength(value);
+            this.selfTrack();
         }
         return value;
     }
@@ -43,8 +47,11 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase<T> implem
         if (value === newValue) {
             return;
         }
+        const processedNewValue = uiUtils.autoProxyObject(newValue) as T;
         StateUpdateLoop.add(() => {
-            this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
+            // Update ObservedObjectRegistry registration before setting the new value
+            this.updateObservedObjectRegistration(value, processedNewValue);
+            this.backing_.setNoCheck(processedNewValue);
         });
     }
 
@@ -53,6 +60,18 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase<T> implem
         if (value === newValue) {
             return;
         }
-        this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
+        const processedNewValue = uiUtils.autoProxyObject(newValue) as T;
+        // Update ObservedObjectRegistry registration before setting the new value
+        this.updateObservedObjectRegistration(value, processedNewValue);
+        this.backing_.setNoCheck(processedNewValue);
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        // Unregister from the observed object before deletion
+        const currentValue = this.backing_.get(false);
+        this.unregisterFromObservedObject(currentValue);
+
+        // Call parent's cleanup
+        super.aboutToBeDeletedInternal();
     }
 }

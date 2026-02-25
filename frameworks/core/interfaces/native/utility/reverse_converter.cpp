@@ -25,7 +25,16 @@
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/drag_springloadingcontext_peer.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
+#include "core/interfaces/native/implementation/gesture_trigger_info_peer.h"
+#include "core/interfaces/native/implementation/tap_recognizer_peer.h"
+#include "core/interfaces/native/implementation/long_press_recognizer_peer.h"
+#include "core/interfaces/native/implementation/pan_recognizer_peer.h"
+#include "core/interfaces/native/implementation/pinch_recognizer_peer.h"
+#include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
+#include "core/interfaces/native/implementation/rotation_recognizer_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
@@ -134,9 +143,96 @@ void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>
 void AssignArkValue(
     Ark_dragController_SpringLoadingContext& dst, const RefPtr<OHOS::Ace::DragSpringLoadingContext>& src)
 {
-    const auto peer = PeerUtils::CreatePeer<DragController_SpringLoadingContextPeer>();
+    const auto peer = PeerUtils::CreatePeer<dragController_SpringLoadingContextPeer>();
     peer->context = src;
     dst = peer;
+}
+
+void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<GestureRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<TapRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<LongPressRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<PanRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<PinchRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<SwipeRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src, ConvContext *ctx)
+{
+    dst = PeerUtils::CreatePeer<RotationRecognizerPeer>();
+    if (dst) {
+        dst->IncRefCount();
+        dst->Update(src);
+    }
+}
+
+// Two-parameter versions for gesture recognizers (required by template adapter)
+void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
+}
+void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src)
+{
+    AssignArkValue(dst, src, nullptr);
 }
 
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
@@ -152,7 +248,7 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
-void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx)
 {
     if (src.menuOptionsParam.content.has_value()) {
         dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(src.menuOptionsParam.content.value(), ctx);
@@ -212,11 +308,12 @@ void AssignArkValue(Ark_Vector2& dst, const OffsetF& src)
     dst.y = Converter::ArkValue<Ark_Float64>(src.GetY());
 }
 
-void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx)
 {
-    dst.radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(src.GetBlurRadius());
+    dst.radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(src.GetBlurRadius());
     dst.type = Converter::ArkValue<Opt_ShadowType>(src.GetShadowType());
-    dst.color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(
+    dst.color = Converter::ArkUnion<
+        Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(
         src.GetColor().ColorToString(), ctx);
     auto offset = src.GetOffset();
     dst.offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(offset.GetX());
@@ -597,7 +694,7 @@ void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src, Co
     dst = arkBorder;
 }
 
-void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx)
 {
     dst.radius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(src.backgroundRadius, ctx);
     dst.color = ArkUnion<Opt_ResourceColor, Ark_String>(src.backgroundColor, ctx);
@@ -630,6 +727,13 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
     dst.y = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 
+    // Handle globalDisplayX/Y
+    Offset globalDisplayOffset = src.GetGlobalDisplayLocation();
+    dst.globalDisplayX = ArkValue<Opt_Float64>(
+        PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    dst.globalDisplayY = ArkValue<Opt_Float64>(
+        PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
+
     dst.pressedTime = ArkValue<Opt_Int64>(static_cast<int64_t>(src.GetPressedTime().time_since_epoch().count()));
     dst.pressure = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
 
@@ -652,7 +756,7 @@ void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
     dst.componentWidth = Converter::ArkValue<Ark_Int32>(src.GetComponentWidth());
     dst.componentHeight = Converter::ArkValue<Ark_Int32>(src.GetComponentHeight());
     dst.message = Converter::ArkValue<Ark_String>(src.GetErrorMessage());
-    dst.error = ArkValue<Opt_BusinessError>(std::nullopt);
+    dst.error = ArkValue<Opt_BusinessErrorInterface_Void>(std::nullopt);
 }
 
 void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
@@ -668,7 +772,7 @@ void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
     dst.contentOffsetY = Converter::ArkValue<Ark_Float64>(src.GetContentOffsetY());
 }
 
-void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src, ConvContext *ctx)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src, ConvContext *ctx)
 {
     dst.fontSize = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Float64>(src.fontSize);
     dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(src.fontWeight);
@@ -706,7 +810,7 @@ void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, Con
         center.value1 = ArkUnion<Ark_Length, Ark_Float64>(50.0); // default center y: 50%
     }
     dst.center = center;
-    
+
     // Set radius
     if (radialGradient->radialHorizontalSize.has_value()) {
         AssignArkValue(dst.radius, radialGradient->radialHorizontalSize.value(), ctx);
@@ -715,7 +819,7 @@ void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, Con
     } else {
         dst.radius = ArkUnion<Ark_Length, Ark_Float64>(50.0); // default radius: 50%
     }
-    
+
     // Set colors
     std::vector<Ark_Tuple_ResourceColor_F64> colorStops;
     const auto& colors = src.GetColors();
@@ -728,7 +832,7 @@ void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, Con
         colorStops.push_back(colorStop);
     }
     dst.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorStops, ctx);
-    
+
     // Set repeating
     dst.repeating = Converter::ArkValue<Opt_Boolean>(src.GetRepeat(), ctx);
 }
@@ -743,10 +847,10 @@ void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, Con
     } else {
         dst.angle = Converter::ArkUnion<Opt_Union_F64_String>(Ark_Empty());
     }
-    
+
     // Set direction
     dst.direction = Converter::ArkValue<Opt_GradientDirection>(Ark_Empty());
-    
+
     // Set colors
     std::vector<Ark_Tuple_ResourceColor_F64> colorStops;
     const auto& colors = src.GetColors();
@@ -759,12 +863,12 @@ void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, Con
         colorStops.push_back(colorStop);
     }
     dst.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorStops, ctx);
-    
+
     // Set repeating
     dst.repeating = Converter::ArkValue<Opt_Boolean>(src.GetRepeat(), ctx);
 }
 
-void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx)
 {
     dst.bundleName = Converter::ArkValue<Ark_String>(src.GetBundleName(), ctx);
     dst.moduleName = Converter::ArkValue<Ark_String>(src.GetModuleName(), ctx);
@@ -854,12 +958,12 @@ std::optional<OHOS::Ace::NG::BorderRadiusProperty> ParseBorderRadiusString(const
     return borderRadius;
 }
 
-void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
 {
-    dst.margin = ArkUnion<Opt_Union_Dimension_Margin>(Ark_Empty());
+    dst.margin = ArkUnion<Opt_Union_Dimension_Padding>(Ark_Empty());
     if (auto marginProp = ParseMarginString(src.margin)) {
         auto arkMargin = ArkValue<Ark_Padding>(marginProp.value(), Converter::FC);
-        dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Padding>(arkMargin, Converter::FC);
+        dst.margin = ArkUnion<Opt_Union_Dimension_Padding, Ark_Padding>(arkMargin, Converter::FC);
     }
     dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses>(Ark_Empty());
     auto borderRadius = ParseBorderRadiusString(src.borderRadius);
@@ -963,13 +1067,13 @@ Ark_Resource ArkCreate(std::string name, ResourceType type, ConvContext *ctx)
     };
 }
 
-void AssignArkValue(Ark_TextRange& dst, const TextRange& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_TextRange& dst, const TextRange& src)
 {
     dst.start = Converter::ArkValue<Opt_Int32>(src.start);
     dst.end = Converter::ArkValue<Opt_Int32>(src.end);
 }
 
-void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
 {
     std::optional<int32_t> start;
     std::optional<int32_t> end;
@@ -1012,6 +1116,13 @@ void AssignArkValue(Ark_NavPathInfo& dst, const OHOS::Ace::NG::GeneratedModifier
     dst = peer;
 }
 
+void AssignArkValue(Ark_NavPathStack& dst, const RefPtr<GeneratedModifier::NavigationContext::NavigationStack>& src)
+{
+    const auto peer = PeerUtils::CreatePeer<NavPathStackPeer>();
+    peer->SetNavigationStack(src);
+    dst = peer;
+}
+
 void AssignArkValue(Ark_NativeEmbedParamItem& dst, const NativeEmbedParamItem& src)
 {
     dst.status = Converter::ArkValue<Ark_NativeEmbedParamStatus>(src.status);
@@ -1026,7 +1137,82 @@ void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src)
     dst.y =  ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
     dst.windowX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetX()));
     dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.windowLocation_.GetY()));
-    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
-    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
+    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.displayLocation_.GetX()));
+    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.displayLocation_.GetY()));
+    dst.globalDisplayX =
+        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
+    dst.globalDisplayY =
+        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
+}
+
+// Helper function to create Ark_GestureRecognizer from NG::NGGestureRecognizer
+// This function performs dynamic type casting to create the specific peer type
+static Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NG::NGGestureRecognizer>& recognizer)
+{
+    Ark_GestureRecognizer peer = nullptr;
+    auto tapRecognizer = AceType::DynamicCast<NG::ClickRecognizer>(recognizer);
+    if (tapRecognizer) {
+        peer = Converter::ArkValue<Ark_TapRecognizer>(tapRecognizer);
+        return peer;
+    }
+    auto longPressRecognizer = AceType::DynamicCast<NG::LongPressRecognizer>(recognizer);
+    if (longPressRecognizer) {
+        peer = Converter::ArkValue<Ark_LongPressRecognizer>(longPressRecognizer);
+        return peer;
+    }
+    auto panRecognizer = AceType::DynamicCast<NG::PanRecognizer>(recognizer);
+    if (panRecognizer) {
+        peer = Converter::ArkValue<Ark_PanRecognizer>(panRecognizer);
+        return peer;
+    }
+    auto pinchRecognizer = AceType::DynamicCast<NG::PinchRecognizer>(recognizer);
+    if (pinchRecognizer) {
+        peer = Converter::ArkValue<Ark_PinchRecognizer>(pinchRecognizer);
+        return peer;
+    }
+    auto swipeRecognizer = AceType::DynamicCast<NG::SwipeRecognizer>(recognizer);
+    if (swipeRecognizer) {
+        peer = Converter::ArkValue<Ark_SwipeRecognizer>(swipeRecognizer);
+        return peer;
+    }
+    auto rotationRecognizer = AceType::DynamicCast<NG::RotationRecognizer>(recognizer);
+    if (rotationRecognizer) {
+        peer = Converter::ArkValue<Ark_RotationRecognizer>(rotationRecognizer);
+        return peer;
+    }
+    // Fallback to generic GestureRecognizer
+    peer = Converter::ArkValue<Ark_GestureRecognizer>(recognizer);
+    return peer;
+}
+
+void AssignArkValue(Ark_InnerGestureTriggerInfo& dst, const GestureTriggerInfo& src)
+{
+    // Convert GestureEvent to Ark_GestureEvent using SyncEvent
+    GestureEvent eventInfo = src.event;
+    const auto event = Converter::SyncEvent<Ark_GestureEvent>(eventInfo);
+    dst.event = event.ArkValue();
+
+    // Convert void* current to RefPtr<NG::NGGestureRecognizer> and then to Ark_GestureRecognizer
+    // The current pointer was set using AceType::RawPtr() in observer_handler.cpp
+    if (src.current != nullptr) {
+        auto recognizer = AceType::Claim(reinterpret_cast<NG::NGGestureRecognizer*>(src.current));
+        if (recognizer) {
+            // Use CreateArkGestureRecognizer to create the appropriate peer type
+            dst.current = CreateArkGestureRecognizer(recognizer);
+        }
+    }
+
+    // Set gesture action phase (enum value, not optional)
+    dst.currentPhase = static_cast<Ark_GestureActionPhase>(src.currentPhase);
+}
+
+void AssignArkValue(Ark_ResourceStr &dst, const char *src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_ResourceStr, Ark_String>(src, ctx);
+}
+
+void AssignArkValue(Ark_ResourceStr &dst, const std::string& src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_ResourceStr, Ark_String>(src, ctx);
 }
 } // namespace OHOS::Ace::NG::Converter

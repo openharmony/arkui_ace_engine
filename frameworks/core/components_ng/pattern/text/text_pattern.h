@@ -162,6 +162,8 @@ public:
 
     void OnWindowShow() override;
 
+    bool CheckMeasureFlag();
+
     void PreCreateLayoutWrapper();
 
     void BeforeCreateLayoutWrapper() override;
@@ -500,17 +502,17 @@ public:
     }
     // Deprecated: Use the TextSelectOverlay::ProcessOverlay() instead.
     // It is currently used by RichEditorPattern.
-    virtual void UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, bool animation = false);
+    ACE_FORCE_EXPORT virtual void UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, bool animation = false);
     // Deprecated: Use the TextSelectOverlay::CheckHandleVisible() instead.
     // It is currently used by RichEditorPattern.
     virtual void CheckHandles(SelectHandleInfo& handleInfo) {};
-    OffsetF GetDragUpperLeftCoordinates() override;
+    ACE_FORCE_EXPORT OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void SetTextSelectionMultiThread(int32_t selectionStart, int32_t selectionEnd);
 
     // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
     // It is currently used by RichEditorPattern.
-    void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
+    ACE_FORCE_EXPORT void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
 
     virtual std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const
     {
@@ -554,7 +556,7 @@ public:
         return recoverEnd_;
     }
 
-    void OnHandleAreaChanged() override;
+    ACE_FORCE_EXPORT void OnHandleAreaChanged() override;
     void RemoveAreaChangeInner();
 
     void ResetDragOption() override
@@ -705,7 +707,7 @@ public:
         return sourceType_ == SourceType::MOUSE;
     }
 
-    void OnSensitiveStyleChange(bool isSensitive) override;
+    ACE_FORCE_EXPORT void OnSensitiveStyleChange(bool isSensitive) override;
 
     bool IsSetObscured() const;
     bool IsSensitiveEnable();
@@ -765,7 +767,7 @@ public:
         return textStyle_.value_or(TextStyle());
     }
 
-    bool DidExceedMaxLines() const override;
+    ACE_FORCE_EXPORT bool DidExceedMaxLines() const override;
 
     std::optional<ParagraphStyle> GetExternalParagraphStyle()
     {
@@ -777,6 +779,9 @@ public:
     std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
+    PositionWithAffinity GetCharacterPositionAtCoordinate(int32_t x, int32_t y) override;
+    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end) override;
+    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end) override;
 
     void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
@@ -826,7 +831,7 @@ public:
     size_t GetSubComponentInfos(std::vector<SubComponentInfo>& subComponentInfos);
 
     void ACE_FORCE_EXPORT UpdateFontColor(const Color& value);
-    void BeforeCreatePaintWrapper() override;
+    ACE_FORCE_EXPORT void BeforeCreatePaintWrapper() override;
 
     void OnTextOverflowChanged();
 
@@ -856,10 +861,10 @@ public:
         return true;
     }
     void SetupMagnifier();
-    void DoTextSelectionTouchCancel() override;
+    ACE_FORCE_EXPORT void DoTextSelectionTouchCancel() override;
 
     virtual Color GetUrlSpanColor();
-    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+    ACE_FORCE_EXPORT void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
 
     void RegisterAfterLayoutCallback(std::function<void()> callback)
     {
@@ -884,7 +889,7 @@ public:
     }
 
     void StyledStringRegisterResource();
-    void UnRegisterResource(const std::string& key) override;
+    ACE_FORCE_EXPORT void UnRegisterResource(const std::string& key) override;
     void EmplaceSymbolColorIndex(int32_t index)
     {
         symbolFontColorResObjIndexArr.emplace_back(index);
@@ -929,13 +934,13 @@ public:
     virtual bool CheckAIPreviewMenuEnable();
     void InitAiSelection(const Offset& globalOffset);
     bool PressOnEllipsisTextRange(const Offset& localOffset);
-    bool CanAIEntityDrag() override;
+    ACE_FORCE_EXPORT bool CanAIEntityDrag() override;
     RefPtr<PreviewMenuController> GetOrCreatePreviewMenuController();
-    void ResetAISelected(AIResetSelectionReason reason) override;
+    ACE_FORCE_EXPORT void ResetAISelected(AIResetSelectionReason reason) override;
     std::function<void()> GetPreviewMenuAISpanClickrCallback(const AISpan& aiSpan);
 
-    void ShowAIEntityMenuForCancel() override;
-    bool IsPreviewMenuShow() override;
+    ACE_FORCE_EXPORT void ShowAIEntityMenuForCancel() override;
+    ACE_FORCE_EXPORT bool IsPreviewMenuShow() override;
     void DragNodeDetachFromParent();
     AISpan GetSelectedAIData();
     std::pair<bool, bool> GetCopyAndSelectable();
@@ -988,12 +993,14 @@ public:
         return textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE;
     }
 
-    std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content) override;
+    ACE_FORCE_EXPORT std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(
+        const std::string& content) override;
     std::vector<int32_t> GetSpecifiedContentIndex(const std::string& content, bool isFirst = false) const;
-    void HighlightSpecifiedContent(
+    ACE_FORCE_EXPORT void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
     void ResetHighLightValue();
-    void ReportSelectedText(bool isRegister = false) override;
+    ACE_FORCE_EXPORT void ReportSelectedText(bool isRegister = false) override;
+    bool GetIsSpecialSymbol() const;
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
@@ -1005,9 +1012,9 @@ protected:
     void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnDetachFromFrameNodeMultiThread(FrameNode* node);
-    void OnAfterModifyDone() override;
+    ACE_FORCE_EXPORT void OnAfterModifyDone() override;
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
-    virtual void InitAISpanHoverEvent();
+    ACE_FORCE_EXPORT virtual void InitAISpanHoverEvent();
     virtual void HandleAISpanHoverEvent(const MouseInfo& info);
     void OnHover(bool isHover);
     void InitSpanMouseEvent();
@@ -1051,12 +1058,13 @@ protected:
     virtual void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void ShowSelectOverlay(const OverlayRequest& = OverlayRequest());
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    virtual void UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle);
+    ACE_FORCE_EXPORT virtual void UpdateSelectorOnHandleMove(
+        const OffsetF& localOffset, float handleHeight, bool isFirstHandle);
     void CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
     void UpdateSelectionType(const SelectionInfo& selection);
     void CopyBindSelectionMenuParams(SelectOverlayInfo& selectInfo, std::shared_ptr<SelectionMenuParams> menuParams);
-    virtual void OnHandleSelectionMenuCallback(
+    ACE_FORCE_EXPORT virtual void OnHandleSelectionMenuCallback(
         SelectionMenuCalblackId callbackId, std::shared_ptr<SelectionMenuParams> menuParams);
     bool IsSelectedBindSelectionMenu();
     bool CheckAndClick(const RefPtr<SpanItem>& item);
@@ -1067,7 +1075,7 @@ protected:
     void InitKeyEvent();
     void UpdateShiftFlag(const KeyEvent& keyEvent);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
-    void HandleOnSelect(KeyCode code);
+    bool HandleOnSelect(KeyCode code);
     void HandleSelectionUp();
     void HandleSelectionDown();
     void HandleSelection(bool isEmojiStart, int32_t end);
@@ -1107,10 +1115,10 @@ protected:
     void AddSubComponentInfoForSpan(std::vector<SubComponentInfo>& subComponentInfos, const std::string& content,
         const RefPtr<SpanItem>& span);
 
-    int32_t GetTouchIndex(const OffsetF& offset) override;
-    void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
-    void OnTextGestureSelectionEnd(const TouchLocationInfo& locationInfo) override;
-    void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
+    ACE_FORCE_EXPORT int32_t GetTouchIndex(const OffsetF& offset) override;
+    ACE_FORCE_EXPORT void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
+    ACE_FORCE_EXPORT void OnTextGestureSelectionEnd(const TouchLocationInfo& locationInfo) override;
+    ACE_FORCE_EXPORT void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
     void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
     void SetImageNodePattern(RefPtr<ImageSpanNode> imageNode, const ImageSpanAttribute& imageSpanAttr);
@@ -1235,7 +1243,7 @@ private:
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
     void CreateModifier();
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+    ACE_FORCE_EXPORT void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ProcessOverlayAfterLayout();
     // SpanString
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
@@ -1367,6 +1375,7 @@ private:
 
     int32_t highlightAppearAnimationId_ = 0;
     int32_t highlightDisappearAnimationId_ = 0;
+    bool isSpecialSymbol_ = false;
 
     // ----- multi thread state variables -----
     // ----- multi thread state variables end -----

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,6 +109,10 @@ public:
     void OldPreloadItems(const JSCallbackInfo& args);
     void NewPreloadItems(const JSCallbackInfo& args);
     void PreloadItems(const JSCallbackInfo& args);
+    void StartFakeDrag(const JSCallbackInfo& args);
+    void FakeDragBy(const JSCallbackInfo& args);
+    void StopFakeDrag(const JSCallbackInfo& args);
+    void IsFakeDragging(const JSCallbackInfo& args);
 
     void SetController(const RefPtr<SwiperController>& controller)
     {

@@ -29,6 +29,7 @@ void DataDetectorAdapter::SetParseSelectAIResCallBack(std::function<void()>&& ta
 void DataDetectorAdapter::ParseSelectAIResult() {}
 void DataDetectorAdapter::SetUpdateAISelectMenuCallBack(std::function<void()>&& task) {}
 void DataDetectorAdapter::UpdateAISelectMenu() {}
+void DataDetectorAdapter::ReportStatisticEvent(const RefPtr<NG::PipelineContext>& pipeline, TextDataDetectType type) {}
 
 bool DataDetectorAdapter::ShowAIEntityMenu(
     const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info)

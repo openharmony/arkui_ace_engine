@@ -34,10 +34,10 @@ const std::map<std::string, RefPtr<Curve>> curveMap {
     { "easeOut",            Curves::EASE_OUT    },
     { "easeInOut",          Curves::EASE_IN_OUT },
 };
-const uint32_t CLEAN_WINDOW_DELAY_TIME = 1000;
+const uint32_t CLEAN_WINDOW_DELAY_TIME = 3000;
 const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
-const uint32_t REMOVE_SNAPSHOT_WINDOW_DELAY_TIME = 100;
+const uint32_t REMOVE_SNAPSHOT_WINDOW_DELAY_TIME_MS = 100;
 const uint64_t REMOVE_WINDOW_PRELAUNCH_DELAY_TIME_MS =
     system::GetIntParameter<int>("persist.sys.window.prelaunchDelayTime", 1000);
 std::unordered_map<uint64_t, int> surfaceNodeCountMap_;
@@ -123,7 +123,8 @@ bool WindowScene::IsMainSessionRecent()
     auto windowScene = AceType::DynamicCast<WindowScene>(pattern);
     CHECK_NULL_RETURN(windowScene, false);
     CHECK_NULL_RETURN(windowScene->session_, false);
-    
+    CHECK_NULL_RETURN(windowScene->snapshotWindow_, false);
+
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "IsMainSessionRecent id:%{public}d, nodeId:%{public}d,"
         "type:%{public}d, recent:%{public}d", windowScene->session_->GetPersistentId(), host->GetId(),
         windowScene->session_->GetWindowType(), windowScene->session_->GetShowRecent());
@@ -437,7 +438,6 @@ void WindowScene::BufferAvailableCallback()
                 leashSurfaceNode->SetUIFirstSwitch(Rosen::RSUIFirstSwitch::FORCE_DISABLE);
             }
         }
-        CHECK_NULL_VOID(self->startingWindow_);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
         if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
@@ -581,14 +581,14 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     CHECK_EQUAL_VOID(CheckPrelaunchForBufferAvailableCallback(removeSnapshotWindowTask_, uiTask), true);
-    if (Rosen::SceneSessionManager::GetInstance().GetDelayRemoveSnapshot()) {
+    if (SystemProperties::IsSmallFoldProduct() && Rosen::SceneSessionManager::GetInstance().GetDelayRemoveSnapshot()) {
         Rosen::SceneSessionManager::GetInstance().SetDelayRemoveSnapshot(false);
         removeSnapshotWindowTask_.Cancel();
         removeSnapshotWindowTask_.Reset(uiTask);
         auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostDelayedTask(removeSnapshotWindowTask_, TaskExecutor::TaskType::UI,
-            REMOVE_SNAPSHOT_WINDOW_DELAY_TIME, "ArkUIWindowSceneBufferAvailableDelayedCallback");
+            REMOVE_SNAPSHOT_WINDOW_DELAY_TIME_MS, "ArkUIWindowSceneBufferAvailableDelayedCallback");
     } else {
         pipelineContext->PostAsyncEvent(
             std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallbackForSnapshot", TaskExecutor::TaskType::UI);
@@ -663,7 +663,6 @@ void WindowScene::OnActivation()
             CHECK_EQUAL_VOID(isRestart, true);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         } else if (self->snapshotWindow_) {
-            self->session_->SetEnableAddSnapshot(true);
             self->DisposeSnapshotAndBlankWindow();
             self->SetSubSessionVisible();
         }
@@ -856,17 +855,24 @@ void WindowScene::OnRemoveBlank()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneRemoveBlank", TaskExecutor::TaskType::UI);
 }
 
-void WindowScene::OnAddSnapshot()
+void WindowScene::OnAddSnapshot(std::function<void()>&& callback)
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
+    auto uiTask = [weakThis = WeakClaim(this), callback = std::move(callback)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         CHECK_NULL_VOID(self->session_);
-        CHECK_EQUAL_VOID(self->session_->GetEnableAddSnapshot(), false);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        if (self->snapshotWindow_ || self->startingWindow_ || self->blankWindow_) {
-            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "In snap/start/blank window id %{public}d host id %{public}d",
+        if (self->snapshotWindow_) {
+            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "In snap window id %{public}d host id %{public}d",
+                self->session_->GetPersistentId(), host->GetId());
+            if (callback) {
+                callback();
+            }
+            return;
+        }
+        if (self->startingWindow_ || self->blankWindow_) {
+            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "In start/blank window id %{public}d host id %{public}d",
                 self->session_->GetPersistentId(), host->GetId());
             return;
         }
@@ -877,6 +883,9 @@ void WindowScene::OnAddSnapshot()
         }
         self->AddChild(host, self->snapshotWindow_, self->snapshotWindowName_);
         self->RemoveChild(host, self->appWindow_, self->appWindowName_);
+        if (callback) {
+            callback();
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "OnAddSnapshot id %{public}d host id %{public}d", self->session_->GetPersistentId(), host->GetId());
@@ -960,8 +969,11 @@ void WindowScene::OnPreLoadStartingWindowFinished()
         ACE_SCOPED_TRACE("WindowScene::OnPreLoadStartingWindowFinished");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        CHECK_NULL_VOID(self->startingWindow_);
         CHECK_NULL_VOID(self->session_);
+        if (self->startingWindow_ == nullptr) {
+            self->session_->ResetPreloadStartingWindow();
+            return;
+        }
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         auto imageLayoutProperty = self->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
@@ -1161,11 +1173,6 @@ void WindowScene::CleanBlankWindow()
         deleteWindowTask_, TaskExecutor::TaskType::UI, CLEAN_WINDOW_DELAY_TIME, "ArkUICleanBlankWindow");
 }
 
-uint32_t WindowScene::GetWindowPatternType() const
-{
-    return static_cast<uint32_t>(WindowPatternType::WINDOW_SCENE);
-}
-
 void WindowScene::SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
     CHECK_NULL_VOID(surfaceNode);
@@ -1188,6 +1195,11 @@ void WindowScene::SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rose
             "ArkUIWindowSceneSubWindowBufferAvailable", TaskExecutor::TaskType::UI);
     };
     surfaceNode->SetBufferAvailableCallback(subWindowCallback);
+}
+
+uint32_t WindowScene::GetWindowPatternType() const
+{
+    return static_cast<uint32_t>(WindowPatternType::WINDOW_SCENE);
 }
 
 void WindowScene::SetOpacityAnimation(RefPtr<FrameNode>& window)

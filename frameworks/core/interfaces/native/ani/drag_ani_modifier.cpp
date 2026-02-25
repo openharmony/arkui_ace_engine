@@ -42,6 +42,7 @@ void SetDragData(ani_ref event, ani_ref data)
     CHECK_NULL_VOID(unifiedDataPtr);
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataFromANI(unifiedDataPtr);
     CHECK_NULL_VOID(udData);
+    dragEvent->SetUseDataLoadParams(false);
     dragEvent->SetData(udData);
 }
 

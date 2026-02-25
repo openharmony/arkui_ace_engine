@@ -196,10 +196,7 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     }
     auto contentRect = textFieldPattern->GetContentRect();
     auto textFrameRect = textFieldPattern->GetFrameRect();
-    auto responseArea = textFieldPattern->GetResponseArea();
-    auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
-    auto clearNodeResponseArea = textFieldPattern->GetCleanNodeResponseArea();
-    responseAreaWidth += clearNodeResponseArea ? clearNodeResponseArea->GetAreaRect().Width() : 0.0f;
+    auto responseAreaWidth = textFieldPattern->GetAllResponseAreaWidth();
     auto hasResponseArea = GreatNotEqual(responseAreaWidth, 0.0f);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     Point leftPoint;
@@ -313,7 +310,9 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     if (showOriginCursor) {
         pen.SetColor(ToRSColor(LinearColor(textFieldPattern->GetOriginCursorColor())));
     } else {
-        pen.SetColor(ToRSColor(cursorColor_->Get()));
+        auto color = cursorColor_->Get().ToColor();
+        color.SetPlaceholder(setCursorColor_.GetPlaceholder());
+        pen.SetColor(ToRSColor(color));
     }
     canvas.AttachPen(pen);
     auto paintOffset = contentOffset_->Get();
@@ -488,6 +487,7 @@ void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& contex
 void TextFieldOverlayModifier::SetCursorColor(Color& value)
 {
     cursorColor_->Set(LinearColor(value));
+    setCursorColor_ = value;
 }
 
 void TextFieldOverlayModifier::SetCursorWidth(float value)

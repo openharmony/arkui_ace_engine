@@ -124,7 +124,20 @@ enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
 enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING };
 enum class CaretAffinityPolicy { DEFAULT = 0, UPSTREAM_FIRST, DOWNSTREAM_FIRST };
-enum class OperationType { DEFAULT = 0, DRAG, IME, FINISH_PREVIEW, PASTE, ACCESSIBILITY, AI_WRITE, STYLUS, UNDO };
+enum class OperationType {
+    DEFAULT = 0,
+    DRAG,
+    IME,
+    FINISH_PREVIEW,
+    PASTE,
+    ACCESSIBILITY,
+    AI_WRITE,
+    STYLUS,
+    SAFE_PASTE,
+    AUTO_FILL,
+    UNDO
+};
+
 const std::unordered_map<OperationType, TextChangeReason> OPERATION_REASON_MAP = {
     { OperationType::DEFAULT, TextChangeReason::INPUT },
     { OperationType::DRAG, TextChangeReason::DRAG },
@@ -134,6 +147,8 @@ const std::unordered_map<OperationType, TextChangeReason> OPERATION_REASON_MAP =
     { OperationType::ACCESSIBILITY, TextChangeReason::ACCESSIBILITY },
     { OperationType::AI_WRITE, TextChangeReason::AI_WRITE },
     { OperationType::STYLUS, TextChangeReason::STYLUS },
+    { OperationType::SAFE_PASTE, TextChangeReason::INPUT },
+    { OperationType::AUTO_FILL, TextChangeReason::AUTO_FILL },
 };
 const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
     {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
@@ -405,12 +420,20 @@ public:
         isTextPreviewSupported_ = isTextPreviewSupported;
     }
 
+    bool IsSupportPreviewText()
+    {
+        return isTextPreviewSupported_;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
     TextInputAction GetDefaultTextInputAction() const;
 
     // RichEditor needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
+        if (onNeedSoftkeyboardCallback_) {
+            return Pattern::NeedSoftKeyboard();
+        }
         return true;
     }
 
@@ -426,16 +449,19 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<RichEditorEventHub>();
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<RichEditorLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        ACE_UINODE_TRACE(GetHost());
         HandleSysScaleChanged();
         return MakeRefPtr<RichEditorLayoutAlgorithm>(Claim(this));
     }
@@ -542,12 +568,22 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnableAutoSpacing: [%{public}d]", isEnableAutoSpacing_);
     }
 
+    bool IsEnableAutoSpacing()
+    {
+        return isEnableAutoSpacing_;
+    }
+
     void SetCompressLeadingPunctuation(bool enabled)
     {
         CHECK_NULL_VOID(isCompressLeadingPunctuation_ != enabled);
         isCompressLeadingPunctuation_ = enabled;
         paragraphCache_.Clear();
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetCompressLeadingPunctuation: %{public}d", isCompressLeadingPunctuation_);
+    }
+
+    bool IsCompressLeadingPunctuation()
+    {
+        return isCompressLeadingPunctuation_;
     }
 
     void OnAttachToMainTree() override;
@@ -637,6 +673,7 @@ public:
     int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 1) override;
     void DeleteBackward(int32_t length, TextChangeReason reason, bool isByIME = false);
+    int32_t OnInjectionEvent(const std::string& command) override;
     void DeleteBackwardFunction();
 #ifndef ACE_UNITTEST
     void DeleteSpans(const RangeOptions& options, TextChangeReason reason);
@@ -811,6 +848,7 @@ public:
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);    
     void SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle);
+    void SetPlaceholderStyledString(const RefPtr<SpanString>& value);
     std::optional<struct UpdateSpanStyle> GetTypingStyle();
     int32_t AddImageSpanFromCollaboration(const ImageSpanOptions& options, bool updateCaret);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
@@ -919,7 +957,7 @@ public:
         return selectOverlay_->GetSecondHandleInfo();
     }
 
-    RectF GetCaretRect() const override;
+    RectF GetCaretRect(bool ignoreScale = true) const override;
     void OnDragNodeFloating() override;
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
@@ -932,6 +970,19 @@ public:
     bool IsHandlesShow() override;
     bool IsHandleMoving();
     void SetPreKeyboardNode();
+
+    void SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode);
+ 
+    RefPtr<UINode> GetCustomKeyboardNode()
+    {
+        return customKeyboardNode_;
+    }
+ 
+    bool GetCustomKeyboardOption()
+    {
+        return keyboardAvoidance_;
+    }
+
     void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
@@ -1074,6 +1125,8 @@ public:
     bool IsSelectAreaVisible();
 
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+    bool SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+    bool SetStringPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
     std::string GetPlaceHolder() const;
 
@@ -1233,6 +1286,11 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    bool GetEnableHapticFeedback()
+    {
+        return isEnableHapticFeedback_;
+    }
+
     bool InsertOrDeleteSpace(int32_t index) override;
 
     void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
@@ -1245,6 +1303,11 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetRequestKeyboardOnFocus=%{public}d", needToRequest);
         needToRequestKeyboardOnFocus_ = needToRequest;
+    }
+
+    bool GetRequestKeyboardOnFocus()
+    {
+        return needToRequestKeyboardOnFocus_;
     }
 
     bool IsTextEditableForStylus() const override;
@@ -1341,6 +1404,11 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetIncludeFontPadding: [%{public}d]", isIncludeFontPadding_);
     }
 
+    bool IsIncludeFontPadding()
+    {
+        return isIncludeFontPadding_;
+    }
+
     void SetFallbackLineSpacing(bool isFallbackLineSpacing)
     {
         CHECK_NULL_VOID(isFallbackLineSpacing_ != isFallbackLineSpacing);
@@ -1350,6 +1418,11 @@ public:
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         paragraphCache_.Clear();
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetFallbackLineSpacing: [%{public}d]", isFallbackLineSpacing_);
+    }
+
+    bool IsFallbackLineSpacing()
+    {
+        return isFallbackLineSpacing_;
     }
 
     void SetKeyboardAppearance(KeyboardAppearance value)
@@ -1461,6 +1534,7 @@ public:
     void MarkContentNodeForRender() override;
     void CreateRichEditorOverlayModifier();
     RefPtr<TextOverlayModifier> GetOverlayModifier() const { return overlayMod_; };
+    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
@@ -1469,7 +1543,7 @@ public:
     void ProcessAutoFillOnPaste();
     void HandleOnPasswordVault();
     bool IsShowAutoFill();
-    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
+    bool IsInterceptInput(const bool shouldCommitInput, const OperationType operationType);
 
 protected:
     RefPtr<TextSelectOverlay> GetSelectOverlay() override
@@ -1493,6 +1567,7 @@ private:
     friend class RichEditorLayoutAlgorithm;
     friend class RichEditorPaintMethod;
     friend class RichEditorScrollController;
+    bool ParseCommand(const std::string& command);
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
@@ -1532,6 +1607,7 @@ private:
     void CalcCaretInfoByClick(const Offset& touchOffset);
     std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
+    void ProcessStyledPlaceholder();
     void HandleAISpanHoverEvent(const MouseInfo& info) override;
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
@@ -1932,6 +2008,8 @@ private:
     bool adjusted_ = false;
     bool isShowMenu_ = true;
     bool isShowPlaceholder_ = false;
+    RefPtr<SpanString> styledPlaceholder_;
+    std::list<WeakPtr<FrameNode>> placeholderImageNodes_;
     bool isSingleHandle_ = false;
     TouchAndMoveCaretState moveCaretState_;
     FloatingCaretState floatingCaretState_;

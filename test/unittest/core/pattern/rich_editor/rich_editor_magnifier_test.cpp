@@ -222,6 +222,8 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest003, TestSize.Level1)
 void RichEditorMagnifierTest::TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
     const RefPtr<MagnifierController>& controller, const OffsetF& localOffset)
 {
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     richEditorPattern->selectOverlay_->isHandleMoving_ = false;
     EXPECT_FALSE(richEditorPattern->IsHandleMoving());
     richEditorPattern->HandleTouchUp();

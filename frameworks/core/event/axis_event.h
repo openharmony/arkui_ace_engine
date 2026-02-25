@@ -65,6 +65,7 @@ struct ACE_FORCE_EXPORT AxisEvent final : public PointerEvent {
 
     int32_t scrollStep = 0;
     uint32_t axes = 0;
+    bool isFalsifyCancel = false;
 
     AxisEvent()
     {
@@ -112,6 +113,7 @@ public:
     void SetAction(AxisAction action);
     AxisAction GetAction() const;
     int32_t GetScrollStep() const;
+    void SetScrollStep(int32_t scrollStep);
     void SetRotateAxisAngle(float angle);
     float GetRotateAxisAngle() const;
     void SetIsRotationEvent(bool rotationFlag);
@@ -127,6 +129,7 @@ public:
     const Offset& GetLocalLocation() const;
     const Offset& GetGlobalLocation() const;
     AxisEvent ConvertToAxisEvent() const;
+    const std::shared_ptr<const MMI::PointerEvent>& GetPointerEvent() const;
 
 private:
     AxisAction action_ = AxisAction::NONE;
@@ -142,6 +145,7 @@ private:
     Offset screenLocation_;
     // The location where the touch point touches the screen when there are multiple screens.
     Offset globalDisplayLocation_;
+    std::shared_ptr<const MMI::PointerEvent> pointerEvent_;
 };
 
 class CoastingAxisInfo {

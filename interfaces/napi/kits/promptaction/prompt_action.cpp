@@ -2561,6 +2561,7 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
     }
     auto builder = GetCustomBuilder(env, asyncContext);
     auto* nodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(asyncContext->nativePtr);
+    ACE_UINODE_TRACE(nodePtr);
     RefPtr<ResourceObject> maskColorResObj;
     auto maskColorProps = GetColorProps(env, asyncContext->maskColorApi, maskColorResObj);
     if (maskColorProps && SystemProperties::ConfigChangePerform() && !CheckDarkResource(maskColorResObj)) {
@@ -3096,6 +3097,7 @@ napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
     napi_value argv[1] = { 0 };
     int32_t dialogId = -1;
     WeakPtr<NG::UINode> nodeWk;
+    ACE_UINODE_TRACE(nodeWk);
     bool useDialogId = true;
     std::function<void(int32_t)> contentCallback = nullptr;
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -3146,6 +3148,7 @@ void UpdateCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& async
     PromptDialogAttr& promptDialogAttr, const WeakPtr<NG::UINode>& nodeWk,
     std::function<void(int32_t)>& contentCallback)
 {
+    ACE_UINODE_TRACE(nodeWk);
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
@@ -3180,6 +3183,7 @@ napi_value JSPromptUpdateCustomDialog(napi_env env, napi_callback_info info)
     size_t argc = CUSTOM_DIALOG_PARAM_NUM;
     napi_value argv[CUSTOM_DIALOG_PARAM_NUM] = { nullptr };
     WeakPtr<NG::UINode> nodeWk;
+    ACE_UINODE_TRACE(nodeWk);
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != CUSTOM_DIALOG_PARAM_NUM) {
         NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);

@@ -29,6 +29,14 @@ interface InteractionEventBindingInfo {
   builtInEventRegistered?: boolean;
 }
 
+interface ArkComponentCreator {
+  createSearchComponent?:(node: NodePtr, type: ModifierType) => ArkSearchComponent;
+  createMarqueeComponent?: (node: NodePtr, type: ModifierType) => ArkMarqueeComponent;
+  createSymbolGlyphComponent?: (node: NodePtr, type: ModifierType) => ArkSymbolGlyphComponent;
+}
+
+const __componentCreator__ : ArkComponentCreator = {};
+
 enum ExpandMode {
   NOT_EXPAND = 0,
   EXPAND = 1,
@@ -1177,7 +1185,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Search', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Search', (node: NodePtr, type: ModifierType): ArkSearchComponent => {
-        return new ArkSearchComponent(node, type);
+        if (__componentCreator__.createSearchComponent === undefined) {
+          getUINativeModule().loadNativeModule('Search');
+          let module = globalThis.requireNapi('arkui.components.arksearch');
+          __componentCreator__.createSearchComponent = module.createComponent;
+        }
+        return __componentCreator__.createSearchComponent!(node, type);
       })
     }],
     ['Button', (context: UIContext): FrameNode => {
@@ -1204,7 +1217,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['SymbolGlyph', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'SymbolGlyph', (node: NodePtr, type: ModifierType): ArkSymbolGlyphComponent => {
-        return new ArkSymbolGlyphComponent(node, type);
+        if (__componentCreator__.createSymbolGlyphComponent === undefined) {
+          getUINativeModule().loadNativeModule('SymbolGlyph');
+          let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+          __componentCreator__.createSymbolGlyphComponent = module.createComponent;
+        }
+        return __componentCreator__.createSymbolGlyphComponent!(node, type);
       })
     }],
     ['FlowItem', (context: UIContext): FrameNode => {
@@ -1237,8 +1255,10 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
       })
     }],
     ['TextClock', (context: UIContext): FrameNode => {
-      return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkTextClockComponent => {
-        return new ArkTextClockComponent(node, type);
+      return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkQRCodeComponent => {
+        getUINativeModule().loadNativeModule('TextClock');
+        let module = globalThis.requireNapi('arkui.components.arktextclock');
+        return module.createComponent(node, type);
       })
     }],
     ['TextTimer', (context: UIContext): FrameNode => {
@@ -1248,9 +1268,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Marquee', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Marquee', (node: NodePtr, type: ModifierType): ArkMarqueeComponent => {
-        getUINativeModule().loadNativeModule('Marquee');
-        let module = globalThis.requireNapi('arkui.components.arkmarquee');
-        return module.createComponent(node, type);
+        if (__componentCreator__.createMarqueeComponent === undefined) {
+          getUINativeModule().loadNativeModule('Marquee');
+          let module = globalThis.requireNapi('arkui.components.arkmarquee');
+          __componentCreator__.createMarqueeComponent = module.createComponent;
+        }
+        return __componentCreator__.createMarqueeComponent!(node, type);
       })
     }],
     ['TextArea', (context: UIContext): FrameNode => {

@@ -549,6 +549,13 @@ void HandleCoastingAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerE
     uiEvent.inputEvent = &(innerEvent->coastingAxisEvent);
 }
 
+void HandleCrownEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_DIGITAL_CROWN;
+    uiEvent.eventTypeId = C_DIGITAL_CROWN_ID;
+    uiEvent.inputEvent = &(innerEvent->crownEvent);
+}
+
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -593,6 +600,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_HOVER_EVENT, HandleHoverEvent},
             {NODE_ON_HOVER_MOVE, HandleTouchEvent},
             {NODE_ON_COASTING_AXIS_EVENT, HandleCoastingAxisEvent},
+            {NODE_ON_DIGITAL_CROWN, HandleCrownEvent},
         };
 
         auto it = eventHandlers.find(eventType);
@@ -671,6 +679,12 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent)
         case CHILD_TOUCH_TEST_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->touchTestInfo.subKind);
             break;
+        case DIGITAL_CROWN_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->crownEvent.subKind);
+            break;
+        case PREVENTABLE_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->preventableEvent.subKind);
+            break;
         default:
             break; /* Empty */
     }
@@ -702,15 +716,18 @@ void TriggerNodeEvent(ArkUI_NodeEvent* event, std::set<void (*)(ArkUI_NodeEvent*
     if (!eventListenersSet) {
         return;
     }
-    if (eventListenersSet->size() == 1) {
-        auto eventListener = eventListenersSet->begin();
-        (*eventListener)(event);
-    } else if (eventListenersSet->size() > 1) {
-        for (const auto& eventListener : *eventListenersSet) {
-            (*eventListener)(event);
-            if (!IsValidArkUINode(event->node)) {
-                break;
-            }
+    // Copy listeners to a local vector to avoid UAF when user callbacks modify the original set
+    std::vector<void (*)(ArkUI_NodeEvent*)> listenersCopy;
+    listenersCopy.reserve(eventListenersSet->size());
+    for (const auto& listener : *eventListenersSet) {
+        listenersCopy.push_back(listener);
+    }
+
+    // Use the copy for iteration and callbacks
+    for (const auto& eventListener : listenersCopy) {
+        eventListener(event);
+        if (!IsValidArkUINode(event->node)) {
+            break;
         }
     }
 }
@@ -1423,7 +1440,8 @@ int32_t GetNodeTypeByTag(ArkUI_NodeHandle node)
         { OHOS::Ace::V2::CUSTOM_SPAN_NODE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CUSTOM_SPAN },
         { OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_EMBEDDED_COMPONENT },
         { OHOS::Ace::V2::CONTAINER_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_PICKER },
-        { OHOS::Ace::V2::RICH_EDITOR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_RICH_EDITOR },
+        { OHOS::Ace::V2::RICH_EDITOR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_TEXT_EDITOR  },
+        { OHOS::Ace::V2::CUSTOM_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CUSTOM },
     };
 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1478,7 +1496,8 @@ std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType)
             OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_PICKER), OHOS::Ace::V2::CONTAINER_PICKER_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_UNDEFINED), OHOS::Ace::V2::UNDEFINED_NODE_ETS_TAG },
-        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_RICH_EDITOR), OHOS::Ace::V2::RICH_EDITOR_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_TEXT_EDITOR), OHOS::Ace::V2::RICH_EDITOR_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_CUSTOM), OHOS::Ace::V2::CUSTOM_ETS_TAG },
     };
     auto iter = nodeTypeConvertMap.find(static_cast<uint32_t>(nodeType));
     if (iter == nodeTypeConvertMap.end()) {

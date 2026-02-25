@@ -98,22 +98,22 @@ ani_object WrapBusinessError(ani_env *env, const std::string &msg)
     return obj;
 }
 
-bool InvokeAsyncCallback(ani_env *env, ani_object obj, ani_object error, ani_object arg)
+void InvokeAsyncCallback(ani_env *env, ani_object obj, ani_object error, ani_object arg)
 {
     if (env == nullptr) {
         LOGE("null env");
-        return false;
+        return;
     }
     ani_class clsCall = nullptr;
     ani_status status = env->FindClass(ASYNC_CALLBACK_WRAPPER_CLASS_NAME, &clsCall);
     if (status != ANI_OK || clsCall == nullptr) {
         LOGE("FindClass status: %{public}d, or null clsCall", status);
-        return false;
+        return;
     }
     ani_method method = nullptr;
     if ((status = env->Class_FindMethod(clsCall, "invoke", nullptr, &method)) != ANI_OK || method == nullptr) {
         LOGE("Class_FindMethod status: %{public}d, or null method", status);
-        return false;
+        return;
     }
     if (error == nullptr) {
         ani_ref nullRef = nullptr;
@@ -127,9 +127,7 @@ bool InvokeAsyncCallback(ani_env *env, ani_object obj, ani_object error, ani_obj
     }
     if ((status = env->Object_CallMethod_Void(obj, method, error, arg)) != ANI_OK) {
         LOGE("Object_CallMethod_Void status: %{public}d", status);
-        return false;
     }
-    return true;
 }
 
 ani_object CreateBusinessError(ani_env *env, ani_int code, const std::string& msg)
@@ -168,23 +166,8 @@ void InvokeAsyncWithBusinessError(ani_env *env, ani_object obj, int32_t internal
 {
     auto extErrCode = AppExecFwk::FormErrors::GetInstance().QueryExternalErrorCode(internalErrorCode);
     auto errMsg = AppExecFwk::FormErrors::GetInstance().QueryExternalErrorMessage(internalErrorCode, extErrCode);
-
-    ani_boolean isUndefined;
-    env->Reference_IsUndefined(obj, &isUndefined);
-    auto callbackIsValid = (obj != nullptr) || (isUndefined != ANI_TRUE);
-    if ((internalErrorCode != ERR_OK) && !callbackIsValid) {
-        AbilityRuntime::EtsErrorUtil::ThrowError(env, extErrCode, errMsg);
-        return;
-    }
-
     ani_object errorObject = CreateBusinessError(env, extErrCode, errMsg);
-    bool result = InvokeAsyncCallback(env, obj, errorObject, arg);
-    if (!result) {
-        auto errorCode = static_cast<int>(ERR_APPEXECFWK_FORM_COMMON_CODE);
-        auto message = AppExecFwk::FormErrors::GetInstance().GetErrorMsgByExternalErrorCode(errorCode);
-        AbilityRuntime::EtsErrorUtil::ThrowError(env, errorCode, message);
-        return;
-    }
+    InvokeAsyncCallback(env, obj, errorObject, arg);
 }
 
 static void requestPublishFormWithSnapshot([[maybe_unused]] ani_env* env, ani_object wantObj,
@@ -209,8 +192,12 @@ static void requestPublishFormWithSnapshot([[maybe_unused]] ani_env* env, ani_ob
     std::vector<AppExecFwk::FormDataProxy> formDataProxies;
     int32_t errCode = AppExecFwk::FormMgr::GetInstance().RequestPublishFormWithSnapshot(want,
     withFormBindingData, formBindingData, formId, formDataProxies);
-    if (!callback) {
-        LOGE("callback is null");
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(callback, &isUndefined);
+    auto callbackIsValid = (callback != nullptr) && (isUndefined != ANI_TRUE);
+    LOGI("errCode: %{public}d, callbackIsValid: %{public}d.", errCode, callbackIsValid);
+    if (!callbackIsValid) {
+        LOGW("callback is invalid.");
         return;
     }
     ani_string formIdAniStr = nullptr;

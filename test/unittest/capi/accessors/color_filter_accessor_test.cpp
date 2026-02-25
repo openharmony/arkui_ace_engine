@@ -70,11 +70,11 @@ public:
 };
 
 /**
- * @tc.name: CtorTestRectShapeOptions
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ColorFilterAccessorTest, CtorTest, TestSize.Level1)
+HWTEST_F(ColorFilterAccessorTest, constructTest, TestSize.Level1)
 {
     EXPECT_EQ(peer_->GetColorFilterMatrix(), EMPTY_VECTOR);
     for (auto& [name, value, expected] : floatMatrixTest) {

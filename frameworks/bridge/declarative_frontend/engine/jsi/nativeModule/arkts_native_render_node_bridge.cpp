@@ -33,6 +33,10 @@
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t DEFAULT_COLOR = 0xFF000000;
+constexpr napi_type_tag ROSEN_JS_CANVAS_TYPE_TAG = {
+    .lower = 0x2710bc10cdee8db3,
+    .upper = 0xc5189f88510eadc1
+};
 
 ArkUINativeModuleValue SetRectShape(ArkUIRuntimeCallInfo* runtimeCallInfo, bool isClip)
 {
@@ -225,7 +229,7 @@ void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal
 
     auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
     OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-    napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+    napi_unwrap_s(env, jsCanvas, &ROSEN_JS_CANVAS_TYPE_TAG, reinterpret_cast<void**>(&unwrapCanvas));
     if (unwrapCanvas) {
         unwrapCanvas->SaveCanvas();
         unwrapCanvas->ClipCanvas(context.width, context.height);
@@ -238,8 +242,8 @@ void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal
     contextObj->SetNativePointerFieldCount(vm, 1);
     JSValueWrapper valueWrapper = contextObj;
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
-    napi_wrap(
-        env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+    napi_wrap_s(
+        env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, &ROSEN_JS_CANVAS_TYPE_TAG, nullptr);
     panda::Local<panda::JSValueRef> params[1] = { contextObj };
     func->Call(vm, obj.ToLocal(), params, 1);
     if (unwrapCanvas) {

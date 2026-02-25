@@ -76,7 +76,7 @@ class StatusModifier extends ModifierWithKey {
   }
 }
 
-class JSStepperItem extends JSViewAbstract {
+class JSStepperItem extends JSContainerBase {
     static create() {
         getUINativeModule().stepperItem.create();
     }
@@ -135,5 +135,5 @@ function exportComponent() {
 function exportView() {
     globalThis.StepperItem = JSStepperItem;
 }
-
-export default { ArkStepperItemComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkStepperItemComponent, createComponent, exportComponent, exportView, loadComponent };

@@ -59,12 +59,12 @@ void AssignArkValue(Ark_text_RunMetrics& dst, const RunMetrics& src, ConvContext
     dst.fontMetrics = ArkValue<Ark_drawing_FontMetrics>(src.fontMetrics, ctx);
 }
 /*
-void AssignArkValue(Map_Int32_text_RunMetrics& dst, const std::map<size_t, RunMetrics>& src, ConvContext *ctx)
+void AssignArkValue(Map_I32_text_RunMetrics& dst, const std::map<size_t, RunMetrics>& src, ConvContext *ctx)
 {
     dst = {};
     CHECK_NULL_VOID(ctx);
     CHECK_NULL_VOID(src.size());
-    dst = ctx->AllocateMap<Map_Int32_text_RunMetrics>(src.size());
+    dst = ctx->AllocateMap<Map_I32_text_RunMetrics>(src.size());
     Ark_Int32* keys = dst.keys;
     Ark_text_RunMetrics* values = dst.values;
     CHECK_NULL_VOID(keys && values);
@@ -87,7 +87,7 @@ void AssignArkValue(Ark_text_LineMetrics& dst, const OHOS::Ace::TextLineMetrics&
     dst.baseline = Converter::ArkValue<Ark_Float64>(src.baseline);
     dst.lineNumber = Converter::ArkValue<Ark_Int32>(src.lineNumber);
     dst.topHeight = Converter::ArkValue<Ark_Float64>(src.y);
-    dst.runMetrics = Converter::ArkValue<Map_Int32_text_RunMetrics>(src.runMetrics, ctx);
+    dst.runMetrics = Converter::ArkValue<Map_I32_text_RunMetrics>(src.runMetrics, ctx);
 }
 void AssignArkValue(Ark_common2D_Color& dst, const Color& src, ConvContext *ctx)
 {
@@ -171,6 +171,8 @@ void AssignArkValue(Ark_text_TextStyle& dst, const TextStyle& src, ConvContext *
     dst.textShadows = ArkValue<Opt_Array_text_TextShadow>();
     dst.backgroundRect = ArkValue<Opt_text_RectStyle>();
     dst.fontVariations = ArkValue<Opt_Array_text_FontVariation>();
+    dst.badgeType = ArkValue<Opt_text_TextBadgeType>();
+    dst.fontWidth = ArkValue<Opt_text_FontWidth>();
 }
 void AssignArkValue(Ark_text_Decoration& dst, const TextDecoration& src, ConvContext *ctx)
 {
@@ -236,6 +238,49 @@ Opt_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer
     );
     return Converter::ArkValue<Opt_PositionWithAffinity>(result);
 }
+Opt_PositionWithAffinity GetCharacterPositionAtCoordinateImpl(Ark_LayoutManager peer,
+                                                              Ark_Float64 x,
+                                                              Ark_Float64 y)
+{
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_PositionWithAffinity>(Ark_Empty()));
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_PositionWithAffinity>(Ark_Empty()));
+    PositionWithAffinity result = handler->GetCharacterPositionAtCoordinate(
+        Converter::Convert<Ark_Float64>(x),
+        Converter::Convert<Ark_Float64>(y)
+    );
+    return Converter::ArkValue<Opt_PositionWithAffinity>(result);
+}
+Opt_Array_TextRange GetGlyphRangeForCharacterRangeImpl(Ark_LayoutManager peer, const Ark_TextRange* charRange)
+{
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
+    std::pair<TextRange, TextRange> textRanges =
+        handler->GetGlyphRangeForCharacterRange(Converter::OptConvert<int32_t>(charRange->start).value(),
+            Converter::OptConvert<int32_t>(charRange->end).value());
+    std::vector<Ark_TextRange> values;
+    auto first = Converter::ArkValue<Ark_TextRange>(textRanges.first);
+    values.push_back(first);
+    auto second = Converter::ArkValue<Ark_TextRange>(textRanges.second);
+    values.push_back(second);
+    return Converter::ArkValue<Opt_Array_TextRange>(values, Converter::FC);
+}
+Opt_Array_TextRange GetCharacterRangeForGlyphRangeImpl(Ark_LayoutManager peer, const Ark_TextRange* glyphRange)
+{
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
+    auto handler = peer->handler.Upgrade();
+    CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_Array_TextRange>(Ark_Empty()));
+    std::pair<TextRange, TextRange> textRanges =
+        handler->GetCharacterRangeForGlyphRange(Converter::OptConvert<int32_t>(glyphRange->start).value(),
+            Converter::OptConvert<int32_t>(glyphRange->end).value());
+    std::vector<Ark_TextRange> values;
+    auto first = Converter::ArkValue<Ark_TextRange>(textRanges.first);
+    values.push_back(first);
+    auto second = Converter::ArkValue<Ark_TextRange>(textRanges.second);
+    values.push_back(second);
+    return Converter::ArkValue<Opt_Array_TextRange>(values, Converter::FC);
+}
 Opt_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
                                         Ark_Int32 lineNumber)
 {
@@ -279,6 +324,9 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
         LayoutManagerAccessor::GetFinalizerImpl,
         LayoutManagerAccessor::GetLineCountImpl,
         LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl,
+        LayoutManagerAccessor::GetCharacterPositionAtCoordinateImpl,
+        LayoutManagerAccessor::GetGlyphRangeForCharacterRangeImpl,
+        LayoutManagerAccessor::GetCharacterRangeForGlyphRangeImpl,
         LayoutManagerAccessor::GetLineMetricsImpl,
         LayoutManagerAccessor::GetRectsForRangeImpl,
     };

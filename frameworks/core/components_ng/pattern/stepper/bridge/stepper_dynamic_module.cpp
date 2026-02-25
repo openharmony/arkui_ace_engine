@@ -32,7 +32,9 @@ namespace NG {
 const ArkUIStepperModifier* GetStepperDynamicModifier();
 #ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
+#ifdef WRONG_GEN_v140
 const GENERATED_ArkUIStepperModifier* GetStepperStaticModifier();
+#endif // WRONG_GEN_v140
 } // namespace GeneratedModifier
 #endif
 } // namespace NG
@@ -50,7 +52,11 @@ const void* StepperDynamicModule::GetDynamicModifier()
 const void* StepperDynamicModule::GetStaticModifier()
 {
 #ifdef INCLUDE_GENERATED_SOURCES
+#ifdef WRONG_GEN_v140
     return NG::GeneratedModifier::GetStepperStaticModifier();
+#else // WRONG_GEN_v140
+    return nullptr;
+#endif // WRONG_GEN_v140
 #else
     return nullptr;
 #endif

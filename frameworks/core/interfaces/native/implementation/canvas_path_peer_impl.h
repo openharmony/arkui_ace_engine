@@ -68,6 +68,9 @@ public:
     virtual void Path2DMoveTo(double x, double y);
     virtual void Path2DQuadraticCurveTo(double cpx, double cpy, double x, double y);
     virtual void Path2DRect(double x, double y, double width, double height);
+    virtual void Path2DRoundRect(double x, double y, double width, double height);
+    virtual void Path2DRoundRect(double x, double y, double width, double height, double radiusValue);
+    virtual void Path2DRoundRect(double x, double y, double width, double height, const std::vector<double>& radiiVec);
 
     RefPtr<CanvasPath2D> GetCanvasPath2d() const
     {

@@ -25,6 +25,7 @@ TaskExecutor::Task CustomDialogControllerModelStatic::ParseOpenDialogTask(int32_
                     weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
         ContainerScope scope(currentId);
         RefPtr<NG::FrameNode> dialog;
+        ACE_UINODE_TRACE(dialog);
         auto overlayManager = weakOverlayManager.Upgrade();
         if (!overlayManager) {
             TAG_LOGE(AceLogTag::ACE_DIALOG, "OverlayManager is null.");
@@ -85,6 +86,7 @@ TaskExecutor::Task CustomDialogControllerModelStatic::ParseCloseDialogTask(const
             return;
         }
         RefPtr<NG::FrameNode> dialog;
+        ACE_UINODE_TRACE(dialog);
         while (!dialogs.empty()) {
             dialog = AceType::DynamicCast<NG::FrameNode>(dialogs.back().Upgrade());
             if (dialog && !dialog->IsRemoving()) {
@@ -201,6 +203,7 @@ PromptActionCommonState CustomDialogControllerModelStatic::GetState(
     std::vector<WeakPtr<AceType>>& dialogs, bool& hasBind)
 {
     RefPtr<NG::FrameNode> dialog;
+    ACE_UINODE_TRACE(dialog);
     PromptActionCommonState state = PromptActionCommonState::UNINITIALIZED;
     if (hasBind) {
         state = PromptActionCommonState::INITIALIZED;

@@ -46,7 +46,7 @@ class AniEnvironment implements IAniEnvironment {
     }
 }
 
-interface EnvPropsOptions {
+export interface EnvPropsOptions {
     key: string;
     defaultValue: int | long | double | string | boolean;
 }
@@ -57,7 +57,7 @@ interface EnvPropsOptions {
  * Injects device properties ("environment") into AppStorage
  *
  */
-class Environment {
+export class Environment {
     private static instance_: Environment | undefined = undefined;
     private props_: Map<string, Any> = new Map<string, Any>();
     private readonly aniEnvironment: AniEnvironment = new AniEnvironment();

@@ -1445,6 +1445,7 @@ void SetTextInputPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, 
 void ResetTextInputPadding(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetTextInputPadding(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
@@ -1882,6 +1883,14 @@ void ResetTextInputTextOverflow(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetTextOverflow(frameNode, TextOverflow::DEFAULT);
+}
+
+int32_t GetTextInputTextOverflow(ArkUINodeHandle node)
+{
+    int32_t defaultTextOverflow = static_cast<int32_t>(TextOverflow::NONE);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultTextOverflow);
+    return static_cast<int32_t>(TextFieldModelNG::GetTextOverflow(frameNode));
 }
 
 void SetTextInputTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resRawPtr)
@@ -2598,6 +2607,13 @@ void ResetEllipsisMode(ArkUINodeHandle node)
     TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODES[ELLIPSIS_MODE_TAIL]);
 }
 
+ArkUI_Int32 GetEllipsisMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetEllipsisMode(frameNode));
+}
+
 void SetStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2659,11 +2675,21 @@ ArkUI_Float32 GetTextInputStrokeWidth(ArkUINodeHandle node)
     return TextFieldModelNG::GetStrokeWidth(frameNode).Value();
 }
 
-void SetTextInputStrokeColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetTextInputStrokeColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetStrokeColor(frameNode, Color(color));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("strokeColor", resObj, Color(color));
+        } else {
+            pattern->UnRegisterResource("strokeColor");
+        }
+    }
 }
 
 void ResetTextInputStrokeColor(ArkUINodeHandle node)
@@ -2671,6 +2697,11 @@ void ResetTextInputStrokeColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetStrokeColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("strokeColor");
+    }
 }
 
 ArkUI_Uint32 GetTextInputStrokeColor(ArkUINodeHandle node)
@@ -2956,6 +2987,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputHeightAdaptivePolicy = ResetTextInputHeightAdaptivePolicy,
         .setTextInputTextOverflow = SetTextInputTextOverflow,
         .resetTextInputTextOverflow = ResetTextInputTextOverflow,
+        .getTextInputTextOverflow = GetTextInputTextOverflow,
         .setTextInputTextIndent = SetTextInputTextIndent,
         .resetTextInputTextIndent = ResetTextInputTextIndent,
         .setTextInputOnWillChange = SetTextInputOnWillChange,
@@ -3043,6 +3075,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .getTextInputEnablePreviewText = GetTextInputEnablePreviewText,
         .setEllipsisMode = SetEllipsisMode,
         .resetEllipsisMode = ResetEllipsisMode,
+        .getEllipsisMode = GetEllipsisMode,
         .setTextInputMinFontScale = SetTextInputMinFontScale,
         .resetTextInputMinFontScale = ResetTextInputMinFontScale,
         .setTextInputMaxFontScale = SetTextInputMaxFontScale,

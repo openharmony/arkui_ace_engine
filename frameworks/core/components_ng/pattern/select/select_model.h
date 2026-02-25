@@ -72,7 +72,7 @@ struct Avoidance {
     AvoidanceMode mode = AvoidanceMode::COVER_TARGET;
 };
 
-struct SelectParam {
+struct ACE_FORCE_EXPORT SelectParam {
     std::string text;
     std::string icon;
     std::function<void(WeakPtr<NG::FrameNode>)> symbolIcon = nullptr;
@@ -162,6 +162,7 @@ public:
     virtual void SetSelectedOptionBgColorByUser(bool isValidValue = true) {};
     virtual void SetKeyboardAvoidMode(const std::optional<NG::MenuKeyboardAvoidMode>& mode) {};
     virtual void SetMinKeyboardAvoidDistance(const std::optional<Dimension>& distance) {};
+    virtual void SetMenuSystemMaterial(const RefPtr<UiMaterial>& menuSystemMaterial) {};
 
 private:
     static std::unique_ptr<SelectModel> instance_;

@@ -35,7 +35,7 @@ import { TextMenuOptions } from 'arkui/framework';
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from 'arkui/framework';
 import { KeyProcessingMode } from 'arkui/framework';
 import { default as uiObserver } from '@ohos/arkui/observer';
-import { default as mediaquery } from '@ohos.mediaquery';
+import { default as mediaquery } from '@ohos/mediaquery';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions } from 'arkui/framework';
 import { ActionSheetOptions } from 'arkui/framework';
 import { TimePickerDialogOptions } from 'arkui/framework';
@@ -59,6 +59,32 @@ import { KPointer } from '@koalaui/interop';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
 import { TextLayoutOptions, Paragraph, StyledString } from 'arkui/framework';
+import { InnerGestureObserverConfigs, InnerGestureTriggerInfo } from 'arkui/component/idlize';
+
+export const enum GestureActionPhase {
+    WILL_START = 0,
+    WILL_END = 1
+}
+
+export const enum  GestureListenerType {
+    TAP = 0,
+    LONG_PRESS = 1,
+    PAN = 2,
+    PINCH = 3,
+    SWIPE = 4,
+    ROTATION = 5
+}
+
+export interface GestureTriggerInfo {
+    event: GestureEvent;
+    current: GestureRecognizer;
+    currentPhase: GestureActionPhase;
+    node?: FrameNode;
+}
+
+export interface GestureObserverConfigs {
+    actionPhases: Array<GestureActionPhase>;
+}
 
 export class UIInspector {
     public createComponentObserver(id: string | int): inspector.ComponentObserver {
@@ -560,13 +586,6 @@ export class UIContext {
         let instance = UIContextUtil.resolveUIContext();
         return new ResolvedUIContext(instance[0] as int32, instance[1] as ResolveStrategy);
     }
-    static getFocusedUIContext(): UIContext | undefined {
-        const instanceId = ArkUIAniModule._Common_GetFocused_InstanceId();
-        if (instanceId === -1) {
-            return undefined;
-        }
-        return UIContextUtil.getOrCreateUIContextById(instanceId);
-    }
     public isAvailable() : boolean {
         throw Error("isAvailable not implemented in UIContext!")
     }
@@ -668,7 +687,7 @@ export class UIContext {
         throw Error("animateTo not implemented in UIContext!")
     }
 
-    public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
+    public animateToImmediately(value: AnimateParam, event: () => void): void {
         throw Error("animateToImmediately not implemented in UIContext!")
     }
 
@@ -803,6 +822,10 @@ export class UIContext {
         throw Error("getPageInfoByUniqueId(number) not implemented in UIContext!")
     }
 
+    public getPageRootNode(): FrameNode | null {
+        throw Error('getPageRootNode not implemented in UIContext!')
+    }
+
     public getFilteredInspectorTree(filters?: Array<string>): string {
         throw Error("getFilteredInspectorTree not implemented in UIContext!")
     }
@@ -864,6 +887,9 @@ export abstract class FrameCallback {
 export declare type PanListenerCallback = (event: GestureEvent, current: GestureRecognizer, node?: FrameNode) => void;
 export declare type ClickEventListenerCallback = (event: ClickEvent, node?: FrameNode) => void;
 export declare type GestureEventListenerCallback = (event: GestureEvent, node?: FrameNode) => void;
+
+// Global gesture listener callback type
+export declare type GestureListenerCallback = (triggerInfo: GestureTriggerInfo) => void;
 
 export class UIObserver {
     private instanceId_: number = 100000;
@@ -1130,7 +1156,7 @@ export class UIObserver {
         }
     }
 
-    public onTextChange(callback?: Callback<uiObserver.TextChangeEventInfo>): void {
+    public onTextChange(callback: Callback<uiObserver.TextChangeEventInfo>): void {
         if (this.observerImpl) {
             this.observerImpl!.onTextChange(callback);
         }
@@ -1141,15 +1167,15 @@ export class UIObserver {
         }
     }
     public onTextChange(
-        identity: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TextChangeEventInfo>): void {
+        identity: uiObserver.ObserverOptions, callback: Callback<uiObserver.TextChangeEventInfo>): void {
         if (this.observerImpl) {
-            this.observerImpl!.onTextChange(callback);
+            this.observerImpl!.onTextChange(identity, callback);
         }
     }
     public offTextChange(
         identity: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TextChangeEventInfo>): void {
         if (this.observerImpl) {
-            this.observerImpl!.offTextChange(callback);
+            this.observerImpl!.offTextChange(identity, callback);
         }
     }
 
@@ -1224,6 +1250,28 @@ export class UIObserver {
     public offDidTap(callback?: GestureEventListenerCallback): void {
         ArkUIAniModule._GestureEventUIObserver_RemoveTapListenerCallback(this.instanceId_ as int, 'didTap', callback);
     }
+
+    public addGlobalGestureListener(type: GestureListenerType, option: GestureObserverConfigs, callback: GestureListenerCallback): void
+    {
+        let observer_callback = (info: InnerGestureTriggerInfo,frameNode?: FrameNode) => {
+            let triggerInfo : GestureTriggerInfo = {
+                event: info.event,
+                current: info.current,
+                currentPhase: info.currentPhase,
+                node: frameNode
+            }
+            callback(triggerInfo)
+        }
+        let innerConfig : InnerGestureObserverConfigs = {
+            actionPhases: option.actionPhases
+        }
+        let resourceId = UIObserverGestureEventOps.addGlobalGestureListener(type, innerConfig, observer_callback);
+        ArkUIAniModule._GestureEventUIObserver_AddGlobalGestureListener(resourceId, type, callback);
+    }
+
+    public removeGlobalGestureListener(type: GestureListenerType, callback?: GestureListenerCallback): void {
+        ArkUIAniModule._GestureEventUIObserver_RemoveGlobalGestureListener(type.valueOf(), callback);
+    }
 }
 export interface PageInfo {
         routerPageInfo?: uiObserver.RouterPageInfo;
@@ -1260,6 +1308,25 @@ export class SwiperDynamicSyncScene extends DynamicSyncScene {
     readonly type: SwiperDynamicSyncSceneType;
     nodePtr: KPointer;
     constructor(type: SwiperDynamicSyncSceneType, nodePtr: KPointer) {
+        super({ min: 0, max: 120, expected: 120 } as ExpectedFrameRateRange);
+        this.type = type;
+        this.nodePtr = nodePtr;
+    }
+
+    setFrameRateRange(range: ExpectedFrameRateRange): void {
+        super.setFrameRateRange(range);
+        ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
+    }
+}
+
+export const enum MarqueeDynamicSyncSceneType {
+  ANIMATION = 1
+}
+
+export class MarqueeDynamicSyncScene extends DynamicSyncScene {
+    readonly type: MarqueeDynamicSyncSceneType;
+    nodePtr: KPointer;
+    constructor(type: MarqueeDynamicSyncSceneType, nodePtr: KPointer) {
         super({ min: 0, max: 120, expected: 120 } as ExpectedFrameRateRange);
         this.type = type;
         this.nodePtr = nodePtr;

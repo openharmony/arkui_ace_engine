@@ -31,10 +31,8 @@ int32_t GridIrregularFiller::InitPos(int32_t lineIdx)
 }
 
 using Result = GridIrregularFiller::FillResult;
-Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, int32_t startingLine)
+Result GridIrregularFiller::FillImpl(const FillParameters& params, float targetLen, int32_t idx)
 {
-    startingLine = std::max(0, startingLine);
-    int32_t idx = InitPos(startingLine);
     // no gap on first row
     float len = -params.mainGap;
     auto childrenCount = info_->GetChildrenCount();
@@ -49,8 +47,10 @@ Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, 
         if (UpdateLength(len, targetLen, row, posY_, params.mainGap)) {
             return { len, row, idx - 1 };
         }
-
-        MeasureItem(params, idx, posX_, posY_, false);
+        auto constraint = MeasureItem(params, idx, posX_, posY_, false);
+        if (constraint.first < 0) {
+            return { len, row, idx - 1 };
+        }
     }
 
     if (info_->lineHeightMap_.empty()) {
@@ -62,6 +62,39 @@ Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, 
         return { len, posY_, idx };
     }
     return { len, lastRow, idx };
+}
+
+Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, int32_t startingLine)
+{
+    startingLine = std::max(0, startingLine);
+    int32_t idx = InitPos(startingLine);
+    return FillImpl(params, targetLen, idx);
+}
+
+Result GridIrregularFiller::FillFromStartIndex(const FillParameters& params, float targetLen)
+{
+    posX_ = -1;
+    posY_ = info_->startMainLineIndex_;
+    int32_t idx = info_->startIndex_ - 1;
+    return FillImpl(params, targetLen, idx);
+}
+
+Result GridIrregularFiller::FillBackward(const FillParameters& params, float targetLen, int32_t startingLine)
+{
+    startingLine = std::max(0, startingLine);
+    posX_ = -1;
+    posY_ = startingLine;
+    int32_t idx = info_->FindEndIdx(startingLine).itemIdx;
+    if (idx == -1) {
+        auto startLine = info_->gridMatrix_.find(startingLine);
+        if (startLine != info_->gridMatrix_.end() && (!startLine->second.empty())) {
+            idx = startLine->second.begin()->second - 1;
+        }
+    }
+    if (startingLine == 0 && info_->currentOffset_ > 0) {
+        idx = -1;
+    }
+    return FillImpl(params, targetLen, idx);
 }
 
 void GridIrregularFiller::FillToTarget(const FillParameters& params, int32_t targetIdx, int32_t startingLine)
@@ -207,7 +240,11 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
     auto child = GridLayoutBaseAlgorithm::GetGridItem(wrapper_, itemIdx, !isCache, isCache);
-    CHECK_NULL_RETURN(child, {});
+    if (!child) {
+        TAG_LOGW(
+            ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", itemIdx, info_->GetChildrenCount());
+        return { -1.f, {} };
+    }
 
     const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
     float crossLen = 0.0f;
@@ -223,7 +260,7 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
         constraint.maxSize = SizeF { LayoutInfinity<float>(), crossLen };
         constraint.parentIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
-    
+
     if (isCache) {
         child->SetActive();
     }
@@ -237,6 +274,54 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
         info_->lineHeightMap_[row + i] = std::max(info_->lineHeightMap_[row + i], heightPerRow);
     }
     return { childHeight, constraint };
+}
+
+int32_t GridIrregularFiller::FillAndMeasureUntilIndex(
+    const FillParameters& params, int32_t startIdx, int32_t endIdx, int32_t& outTargetLine)
+{
+    int32_t idx = startIdx;
+    outTargetLine = -1;
+
+    while (idx <= endIdx) {
+        if (!FindNextItem(idx)) {
+            FillOne(idx);
+        }
+
+        // Record the line where endIdx is located
+        if (idx == endIdx) {
+            outTargetLine = posY_;
+        }
+
+        // Measure current item (update lineHeightMap_)
+        auto constraint = MeasureItem(params, idx, posX_, posY_, false);
+        if (constraint.first < 0) {
+            return -1; // Measurement failed
+        }
+        idx++;
+    }
+
+    return idx - 1; // Return last successfully processed index
+}
+
+int32_t GridIrregularFiller::FillAndMeasureUntilLine(const FillParameters& params, int32_t startIdx, int32_t endLine)
+{
+    int32_t idx = startIdx;
+    int32_t childrenCount = info_->GetChildrenCount();
+
+    while (idx < childrenCount && posY_ < endLine) {
+        if (!FindNextItem(idx)) {
+            FillOne(idx);
+        }
+
+        // Measure current item (update lineHeightMap_)
+        auto constraint = MeasureItem(params, idx, posX_, posY_, false);
+        if (constraint.first < 0) {
+            return -1; // Measurement failed
+        }
+        idx++;
+    }
+
+    return idx - 1; // Return last successfully processed index
 }
 
 int32_t GridIrregularFiller::InitPosToLastItem(int32_t lineIdx)
@@ -271,6 +356,22 @@ int32_t GridIrregularFiller::FillMatrixByLine(int32_t startingLine, int32_t targ
         }
     }
     return idx;
+}
+
+void GridIrregularFiller::FillMatrixFromStartIndex(int32_t startLine, int32_t startIndex, int32_t targetIdx)
+{
+    if (targetIdx >= info_->GetChildrenCount()) {
+        targetIdx = info_->GetChildrenCount() - 1;
+    }
+    posY_ = startLine;
+    posX_ = -1;
+    int32_t idx = startIndex;
+    while (idx <= targetIdx) {
+        if (!FindNextItem(idx)) {
+            FillOne(idx);
+        }
+        idx++;
+    }
 }
 
 float GridIrregularFiller::MeasureBackward(const FillParameters& params, float targetLen, int32_t startingLine)
@@ -393,5 +494,43 @@ void GridIrregularFiller::SetItemInfo(
         .mainEnd = row + size.rows - 1,
         .crossStart = col,
         .crossEnd = col + size.columns - 1 });
+}
+
+float GridIrregularFiller::FillMatrixFromStartIndexWithMeasure(
+    const FillParameters& params, int32_t startLine, int32_t startIndex, int32_t targetIdx)
+{
+    // ━━━ Step 0: Parameter validation ━━━
+    if (targetIdx >= info_->GetChildrenCount()) {
+        targetIdx = info_->GetChildrenCount() - 1;
+    }
+    if (targetIdx < 0 || startIndex < 0 || startLine < 0) {
+        TAG_LOGW(AceLogTag::ACE_GRID, "Invalid parameters in FillMatrixFromStartIndexWithMeasure");
+        return 0.0f;
+    }
+
+    posY_ = startLine;
+
+    // ━━━ Step 1: Fill and measure to targetIdx ━━━
+    int32_t targetLine = -1;
+    int32_t lastIdx = FillAndMeasureUntilIndex(params, startIndex, targetIdx, targetLine);
+    if (lastIdx < 0) {
+        return 0.0f; // Measurement failed
+    }
+
+    // ━━━ Step 2: Handle row-spanning items ━━━
+    if (targetLine == -1) {
+        targetLine = posY_;
+    }
+    auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, targetIdx);
+    int32_t rowSpan = itemSize.rows;
+    int32_t endRow = targetLine + rowSpan;
+
+    // ━━━ Step 3: Complete measurement for all spanned rows ━━━
+    if (posY_ < endRow) {
+        FillAndMeasureUntilLine(params, lastIdx + 1, endRow);
+    }
+
+    // ━━━ Step 4: Calculate and return height ━━━
+    return info_->GetHeightInRange(targetLine, targetLine + rowSpan, params.mainGap) - params.mainGap;
 }
 } // namespace OHOS::Ace::NG

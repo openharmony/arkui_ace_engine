@@ -23,6 +23,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "ui/base/geometry/dimension.h"
+#include "ui/resource/resource_object.h"
 
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 
@@ -198,6 +199,20 @@ Array_Number BlendColorByColorMetricsImpl(const Ark_Number* color,
     ParseArrayNumber(blendColor, indexes, true);
     return Converter::ArkValue<Array_Number>(indexes, Converter::FC);
 }
+Ark_NativePointer CreateResourceObjectImpl(const Ark_Resource* resource)
+{
+    CHECK_NULL_RETURN(resource, 0);
+    auto id = Converter::Convert<int64_t>(resource->id);
+    std::vector<ResourceObjectParams> resObjParamsList;
+    auto type = Converter::OptConvert<int32_t>(resource->type).value_or(0);
+    auto bundleName = Converter::Convert<std::string>(resource->bundleName);
+    auto moduleName = Converter::Convert<std::string>(resource->moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+        id, type, resObjParamsList, bundleName, moduleName, Container::CurrentIdSafely());
+    CHECK_NULL_RETURN(resourceObject, 0);
+    resourceObject->IncRefCount();
+    return AceType::RawPtr(resourceObject);
+}
 } // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
@@ -212,6 +227,7 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::ColorMetricsResourceColorImpl,
         SystemOpsAccessor::BlendColorByColorMetricsImpl,
         SystemOpsAccessor::ResourceToLengthMetricsImpl,
+        SystemOpsAccessor::CreateResourceObjectImpl,
     };
     return &SystemOpsAccessorImpl;
 }

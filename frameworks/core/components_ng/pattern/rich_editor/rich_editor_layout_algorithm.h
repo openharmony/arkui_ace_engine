@@ -131,6 +131,8 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
     void Measure(LayoutWrapper* layoutWrapper) override;
+    static std::vector<std::list<RefPtr<SpanItem>>> ConstructParagraphSpans(std::list<RefPtr<SpanItem>> spans,
+        bool isSingleLineMode);
 
     const std::optional<RectF>& GetTextRect()
     {
@@ -193,7 +195,9 @@ private:
     void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const AISpanLayoutInfo& aiSpanLayoutInfo);
     void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const std::map<int32_t, AISpan>& aiSpanMap);
     void HandleTextSizeWhenEmpty(LayoutWrapper* layoutWrapper, SizeF& textSize);
-    std::vector<std::list<RefPtr<SpanItem>>> ConstructParagraphSpans(std::list<RefPtr<SpanItem>> spans);
+    static std::vector<std::list<RefPtr<SpanItem>>> ConstructParagraphSpansSingleLine(
+        std::list<RefPtr<SpanItem>> spans);
+    static std::vector<std::list<RefPtr<SpanItem>>> ConstructParagraphSpansMultiLine(std::list<RefPtr<SpanItem>> spans);
     std::string SpansToString();
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const

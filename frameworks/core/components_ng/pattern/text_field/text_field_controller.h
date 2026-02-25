@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT TextFieldController : public TextFieldControllerBase {
+class ACE_FORCE_EXPORT TextFieldController : public TextFieldControllerBase {
     DECLARE_ACE_TYPE(TextFieldController, TextFieldControllerBase);
 
 public:

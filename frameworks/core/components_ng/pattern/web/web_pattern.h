@@ -659,6 +659,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void RegisterMenuLifeCycleCallback();
     void NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent);
+    void MenuNodeDestroyCallback();
     void UninitMenuLifeCycleCallback();
     void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext = true, bool result = false);
     void OnContextMenuHide();
@@ -802,6 +803,7 @@ public:
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state, bool isDelayed = false);
+    bool IsAccessibilitySamePage();
     void UpdateScrollBarWithBorderRadius();
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void ClearFocusedAccessibilityId();
@@ -846,7 +848,7 @@ public:
     {
         cursorInfo_ = RectF(x, y, width, height);
     }
-    RectF GetCaretRect() const override
+    RectF GetCaretRect(bool ignoreScale = true) const override
     {
         return cursorInfo_;
     }
@@ -1207,6 +1209,7 @@ private:
     int GetWebId();
 
     void InitEvent();
+    void InitEventAfterUpdate();
     void InitConfigChangeCallback(const RefPtr<PipelineContext>& context);
     void InitFeatureParam();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -1218,6 +1221,7 @@ private:
     void InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleFlingMove(const GestureEvent& event);
+    void HandleCancelFling();
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(int32_t x, int32_t y);
@@ -1251,13 +1255,18 @@ private:
     void HandleScaleGestureEnd(const GestureEvent& event);
     void HandleScaleGestureCancel(const GestureEvent& event);
     double getZoomOffset(double& scale) const;
+    void InitLightTouchEvent(const RefPtr<InputEventHub>& inputHub);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragDropPlainText(RefPtr<UnifiedData> aceData);
+    void HandleOnDragDropHTML(RefPtr<UnifiedData> aceData);
+    void HandleOnDragDropSpanString(RefPtr<UnifiedData> aceData);
     void HandleOnDragDropFile(RefPtr<UnifiedData> aceData);
     void HandleOnDragDropLink(RefPtr<UnifiedData> aceData);
+    void HandleMouseEventOnDrag(int32_t x, int32_t y);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
     void ResetDragStateValue();
@@ -1408,6 +1417,7 @@ private:
     std::u16string GetSelectedValue(int32_t startIndex, int32_t endIndex);
     RefPtr<TextFieldTheme> GetTheme() const;
     void GetAIWriteInfo(AIWriteInfo& info);
+    void RemoveOfflineWebWindowStateChangedCallbackIfNeed(const RefPtr<PipelineContext>& context, int32_t nodeId);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1467,6 +1477,7 @@ private:
     bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;
     bool isDragStartFromWeb_ = false;
+    bool isNeedMouseMoveOnDragEnd_ = false;
     RefPtr<AccessibilitySessionAdapter> accessibilitySessionAdapter_;
 
     bool isNewDragStyle_ = false;
@@ -1652,6 +1663,7 @@ private:
     bool dragResizeTimerFlag_ = false;
     int32_t dragResizeTimerCount_ = 0;
     WeakPtr<PipelineContext> pipeline_;
+    WeakPtr<PipelineContext> offlineWebPipelineContext_;
     bool isTextSelectionEnable_ = false;
     bool isMenuShownFromWeb_ = false;
     bool isMenuShownFromWebBeforeStartClose_ = false;
@@ -1666,6 +1678,7 @@ private:
     int showMagnifierFingerId_ = -1;
 
     std::unique_ptr<WebDomDocument> webDomDocument_;
+    bool useSemiSamePage_ {false};  // is true mean SemiSamePage has been used
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

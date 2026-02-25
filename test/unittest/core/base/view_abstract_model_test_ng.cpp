@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_manager.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -846,7 +847,10 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg015, TestSize.Level1)
     auto targetId = targetNode->GetId();
     auto menu =
         FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
-    overlayManager->menuMap_[targetId] = menu;
+    overlayManager->CheckMenuManager();
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId] = menu;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     EXPECT_NE(mainNode, nullptr);
 }
@@ -883,7 +887,10 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg016, TestSize.Level1)
     auto targetId = targetNode->GetId();
     auto menu =
         FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
-    overlayManager->menuMap_[targetId] = menu;
+    overlayManager->CheckMenuManager();
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId] = menu;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     auto inputHub = targetNode->GetOrCreateInputEventHub();
     auto mouseEventActuator_ = inputHub->mouseEventActuator_;
@@ -941,7 +948,10 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg017, TestSize.Level1)
     auto targetId = targetNode->GetId();
     auto menu =
         FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
-    overlayManager->menuMap_[targetId] = menu;
+    overlayManager->CheckMenuManager();
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId] = menu;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     auto hub = targetNode->GetOrCreateGestureEventHub();
     auto longPressEventActuator = hub->longPressEventActuator_;
@@ -993,7 +1003,10 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg018, TestSize.Level1)
     auto targetId = targetNode->GetId();
     auto menu =
         FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
-    overlayManager->menuMap_[targetId] = menu;
+    overlayManager->CheckMenuManager();
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId] = menu;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     auto hub = targetNode->GetOrCreateGestureEventHub();
     auto longPressEventActuator = hub->longPressEventActuator_;

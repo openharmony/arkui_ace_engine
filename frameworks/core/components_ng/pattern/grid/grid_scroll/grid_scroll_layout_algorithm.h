@@ -261,6 +261,14 @@ private:
      */
     bool MeasureExistingLine(
         int32_t line, float& mainLength, int32_t& endIdx, bool isScrollableSpringMotionRunning = false);
+    
+    /**
+     * @brief Check next line(previously recorded) height is zero
+     *
+     * @param currentLine index of current line, next line is (currentLine + 1)
+     * @return true if next line is recorded and line height is zero, false if next line isn't recorded
+     */
+    bool IsNextExistLineHeightZero(const int32_t currentLine) const;
 
     float GetContentHeight(LayoutWrapper* layoutWrapper);
 

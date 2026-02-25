@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_avoid_listener.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
@@ -218,6 +219,9 @@ void UIExtensionPattern::OnAttachContext(PipelineContext *context)
     } else if (detachContextHappened) {
         RegisterEvent(instanceId_);
     }
+
+    RegisterAvoidInfoChangeListener(instanceId_);
+
     /* only for 1.2 begin */
     if (context->GetFrontendType() == FrontendType::ARK_TS) {
         auto wantWrap = GetWantWrap();
@@ -302,6 +306,7 @@ void UIExtensionPattern::UnRegisterEvent(int32_t instanceId)
 {
     UnRegisterUIExtensionManagerEvent(instanceId);
     UnRegisterPipelineEvent(instanceId);
+    UnRegisterAvoidInfoChangeListener();
     hasDetachContext_ = true;
 }
 
@@ -1024,6 +1029,7 @@ void UIExtensionPattern::OnModifyDone()
     CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
     InitHoverEvent(inputHub);
+    InitTouchpadInteraction(inputHub);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitKeyEvent(focusHub);
@@ -1201,6 +1207,32 @@ void UIExtensionPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
     }
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(callback));
     inputHub->AddOnHoverEvent(hoverEvent_);
+}
+
+void UIExtensionPattern::InitTouchpadInteraction(const RefPtr<InputEventHub>& inputHub)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    inputHub->AddTouchpadInteractionListenerInner([weak = WeakClaim(this)](PointF point) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsInComponent(point)) {
+            auto pointerEvent = pattern->lastPointerEvent_;
+            CHECK_NULL_VOID(pointerEvent);
+            pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_TOUCHPAD_ACTIVE);
+            pattern->DispatchPointerEvent(pointerEvent);
+        }
+    });
+}
+
+bool UIExtensionPattern::IsInComponent(PointF point)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto wholeRect = geometryNode->GetFrameRect();
+    return wholeRect.IsInRegion(point);
 }
 
 bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
@@ -1406,6 +1438,7 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
                 MountPlaceholderNode(GetSizeChangeReason());
             }
             sessionWrapper_->NotifyDisplayArea(displayArea_);
+            isUpdateDisplayArea_ = true;
         } else {
             displayAreaChanged_ = true;
         }
@@ -2046,6 +2079,80 @@ void UIExtensionPattern::DumpOthers()
     }
 }
 
+void UIExtensionPattern::AddExtraInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
+{
+    CHECK_EQUAL_VOID(config.withUIExtension, false);
+    CHECK_NULL_VOID(sessionWrapper_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params;
+    params.push_back("-allInfoWithParamConfigTotal");
+    params.push_back("1");
+    params.push_back(config.interactionInfo ? "1" : "0");
+    params.push_back(config.accessibilityInfo ? "1" : "0");
+    params.push_back(config.cacheNodes ? "1" : "0");
+    params.push_back(config.withWeb ? "1" : "0");
+    params.push_back(config.withUIExtension ? "1" : "0");
+    // Use -nouie to choose not dump extra uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        UIEXT_LOGI("Not Support Dump Extra UIE Info");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto dumpNodeIter = std::find(params.begin(), params.end(), std::to_string(host->GetId()));
+    if (dumpNodeIter != params.end()) {
+        params.erase(dumpNodeIter);
+    }
+    if (!container->IsUIExtensionWindow()) {
+        params.push_back(PID_FLAG);
+    }
+    params.push_back(std::to_string(getpid()));
+
+    ExecuteDumpTask(json, params, host);
+}
+
+void UIExtensionPattern::ExecuteDumpTask(
+    std::shared_ptr<JsonValue>& json, const std::vector<std::string>& params, const RefPtr<FrameNode>& host)
+{
+    const int32_t GET_INSPECTOR_TREE_TIMEOUT_TIME = 900;
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    taskExecutor->PostSyncTaskTimeout(
+        [json, params, weakThis = WeakClaim(this)]() {
+            auto pattern = weakThis.Upgrade();
+            if (!pattern || !pattern->sessionWrapper_) {
+                return;
+            }
+            std::vector<std::string> dumpInfo;
+            pattern->sessionWrapper_->NotifyUieDump(params, dumpInfo);
+
+            for (size_t i = 0; i < dumpInfo.size(); i++) {
+                std::string dumpStr = dumpInfo[i];
+                size_t pos = dumpStr.find("UINodeCount:");
+                if (pos == std::string::npos) {
+                    continue;
+                }
+                size_t start = dumpStr.find("\n", pos);
+                if (start == std::string::npos) {
+                    continue;
+                }
+                start++;
+                std::string filteredData = dumpStr.substr(start);
+                filteredData.erase(filteredData.find_last_not_of("\n") + 1);
+                auto childJson = JsonUtil::ParseJsonString(filteredData);
+                if (childJson) {
+                    json->Put("$child-uec", childJson);
+                }
+                break;
+            }
+        },
+        TaskExecutor::TaskType::UI, GET_INSPECTOR_TREE_TIMEOUT_TIME, "UiSessionGetInspectorTree");
+}
+
 void UIExtensionPattern::RegisterEventProxyFlagCallback()
 {
     RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::EVENT_PROXY,
@@ -2118,6 +2225,20 @@ void UIExtensionPattern::RegisterGetAvoidInfoCallback()
         return 0;
     };
     RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::GET_AVOID_INFO, callback);
+}
+
+void UIExtensionPattern::RegisterAvoidInfoChangeListener(int32_t instanceId)
+{
+    if (!avoidListener_) {
+        avoidListener_ = AceType::MakeRefPtr<UIExtensionAvoidListener>(WeakClaim(this));
+    }
+    avoidListener_->RegisterAvoidInfoChangeListener(instanceId);
+}
+
+void UIExtensionPattern::UnRegisterAvoidInfoChangeListener()
+{
+    CHECK_NULL_VOID(avoidListener_);
+    avoidListener_->UnRegisterAvoidInfoChangeListener();
 }
 
 bool UIExtensionPattern::SendBusinessDataSyncReply(

@@ -25,11 +25,12 @@ import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType,
 import { _animateTo } from 'arkui/base/ArkAnimation';
 import { AnimateParam, KeyframeAnimateParam, KeyframeState } from 'arkui/framework'
 import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from '@ohos/animator';
+import { MarqueeDynamicSyncScene, MarqueeDynamicSyncSceneType } from '@ohos/arkui/UIContext';
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
     KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType, PageInfo,
-    CustomKeyboardContinueFeature } from '@ohos/arkui/UIContext';
+    CustomKeyboardContinueFeature, Magnifier } from '@ohos/arkui/UIContext';
 import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
@@ -56,7 +57,7 @@ import { GlobalScopeUicontextTextMenu } from "#generated"
 import { GlobalScopeUicontextFontScale } from "#generated"
 import { SizeOptions, ResourceColor } from 'arkui/component/units';
 import { Frame } from 'arkui/Graphics';
-import { TextMenuOptions } from 'arkui/component/textCommon';
+import { TextMenuOptions, TextLayoutOptions, Paragraph } from 'arkui/component/textCommon';
 import { focusController } from '@ohos/arkui/focusController';
 import { KeyProcessingMode } from 'arkui/component/focus';
 import { componentUtils } from '@ohos/arkui/componentUtils';
@@ -65,7 +66,7 @@ import { dragController } from '@ohos/arkui/dragController';
 import { UIContextAtomicServiceBar, UIContextGetInfo } from 'arkui/component/idlize';
 import { SheetOptions } from '#generated';
 import { GlobalScope } from './../framework/GlobalScope';
-import { default as mediaquery } from '@ohos.mediaquery';
+import { default as mediaquery } from '@ohos/mediaquery';
 import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework';
 import { AsyncCallback } from '#external';
 import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
@@ -78,12 +79,13 @@ import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender,
     DialogExtender, IUIContext, ContextMenu } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
-import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
-import { IUIContext, SystemOps, UIObserverGestureEventOps } from 'arkui/component/idlize';
+import { AsyncCallback as routerAsyncCallback, BusinessError } from "@ohos.base"
+import { IUIContext, SystemOps, UIObserverGestureEventOps, MagnifierExtender } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
 import { FreeRootNode } from '../CallbackTransformer';
+import { StyledString } from "arkui/component/styledString"
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -1261,21 +1263,22 @@ export interface DetachedRootEntry {
 }
 
 export class DetachedRootEntryImpl<T extends IncrementalNode> implements DetachedRootEntry {
-    entry: ComputableState<T>;
+    private entry?: ComputableState<T>;
     constructor(entry: ComputableState<T>) {
         this.entry = entry
     }
 
     compute(): void {
-        this.entry.value;
+        this.entry?.value;
     }
 
     dispose(): void {
-        this.entry.dispose();
+        this.entry?.dispose();
+        this.entry = undefined;
     }
 
     forceCompleteRerender(): void {
-        this.entry.forceCompleteRerender();
+        this.entry?.forceCompleteRerender();
     }
 }
 
@@ -1392,6 +1395,29 @@ export class DetachedRootEntryManager {
     }
 }
 
+export class MagnifierImpl extends Magnifier {
+    instanceId_: int32;
+    constructor(instanceId: int32) {
+        super()
+        this.instanceId_ = instanceId;
+    }
+    public bind(id: string): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        MagnifierExtender.bind(id)
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public show(x: double, y: double): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        MagnifierExtender.show(x, y)
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    public unbind(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        MagnifierExtender.unbind()
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+}
+
 export class UIContextImpl extends UIContext {
     instanceId_: int32 = -1;
     observer_ :UIObserver |null = null;
@@ -1409,6 +1435,7 @@ export class UIContextImpl extends UIContext {
     cursorController_: CursorControllerImpl;
     font_: FontImpl;
     measureUtils_: MeasureUtilsImpl;
+    magnifier_: MagnifierImpl;
     textMenuController_: TextMenuControllerImpl;
     detachedRootEntryManager_: DetachedRootEntryManager;
     isDebugMode_: boolean = false;
@@ -1435,6 +1462,7 @@ export class UIContextImpl extends UIContext {
         this.cursorController_ = new CursorControllerImpl(instanceId);
         this.font_ = new FontImpl(instanceId);
         this.measureUtils_ = new MeasureUtilsImpl(instanceId);
+        this.magnifier_ = new MagnifierImpl(instanceId);
         this.textMenuController_ = new TextMenuControllerImpl(instanceId);
         this.detachedRootEntryManager_ = new DetachedRootEntryManager(this);
         this.isDebugMode_ = ArkUIAniModule._IsDebugMode(instanceId) !== 0;
@@ -1606,6 +1634,34 @@ export class UIContextImpl extends UIContext {
         }
         return pageInfo;
     }
+
+    public getPageRootNode(): FrameNode | null {
+        if (!this.isAvailable()) {
+            throw new BusinessError(120007, 'The UIContext is not available');
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let node: FrameNode | null = null;
+        try {
+            const retval = ArkUIAniModule._GetPageRootNode();
+            if (retval !== nullptr && retval !== 0) {
+                const peer = FrameNodeExtender.createByRawPtr(retval as KPointer);
+                if (!peer) {
+                    ArkUIAniModule._Common_Restore_InstanceId();
+                    return null;
+                }
+                node = FrameNodeUtils.searchNodeInRegisterProxy(peer);
+                if (!node) {
+                    node = FrameNodeUtils.createFrameNode(this, peer);
+                }
+            }
+        } catch (e) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            throw e;
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return node;
+    }
+
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
     }
@@ -1628,7 +1684,7 @@ export class UIContextImpl extends UIContext {
         return this.atomicServiceBar_;
     }
 
-    public dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
+    public dispatchKeyEvent(node: int32 | string, event: KeyEvent): boolean {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let result = IUIContext.dispatchKeyEvent(node, event);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -1768,10 +1824,10 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
+    public animateToImmediately(value: AnimateParam, event: () => void): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         AnimationExtender.AnimateToImmediatelyImpl(value, () => {
-            event(undefined);
+            event();
         }, true);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
@@ -1976,7 +2032,10 @@ export class UIContextImpl extends UIContext {
 
     public setCustomKeyboardContinueFeature(feature: CustomKeyboardContinueFeature): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        IUIContext.setCustomKeyboardContinueFeature(feature);
+        // TODO: remove after regeneration
+        // instructive change start
+        // IUIContext.setCustomKeyboardContinueFeature(feature);
+        // instructive change end
         ArkUIAniModule._Common_Restore_InstanceId()
     }
 
@@ -2027,12 +2086,20 @@ export class UIContextImpl extends UIContext {
             ArkUIAniModule._Common_Restore_InstanceId();
             return [];
         }
-        let tag = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(nodePtr);
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(nodePtr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const tag : string = (retvalDeserializer.readString() as string)
         if (tag === 'Swiper') {
             let ret: Array<SwiperDynamicSyncScene> =
                 [new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.GESTURE, nodePtr),
                 new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.ANIMATION, nodePtr)];
             let result: Array<DynamicSyncScene> = [ret[0], ret[1]];
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return result;
+        } else if (tag === 'Marquee') {
+            let ret: MarqueeDynamicSyncScene[] = [
+                new MarqueeDynamicSyncScene(MarqueeDynamicSyncSceneType.ANIMATION, nodePtr)];
+            let result: DynamicSyncScene[] = [ret[0]];
             ArkUIAniModule._Common_Restore_InstanceId();
             return result;
         }
@@ -2058,5 +2125,9 @@ export class UIContextImpl extends UIContext {
 
     public setUpdateConfiguration(value: boolean) {
         this.isUpdateConfiguration_ = value;
+    }
+
+    public getMagnifier(): Magnifier {
+        return this.magnifier_;
     }
 }

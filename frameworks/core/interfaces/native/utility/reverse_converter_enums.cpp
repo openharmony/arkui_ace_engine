@@ -222,7 +222,7 @@ void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src)
     }
 }
 
-void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src)
 {
     switch (src) {
         case TextInputAction::GO: dst = ARK_ENTER_KEY_TYPE_GO; break;
@@ -238,7 +238,7 @@ void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src)
     }
 }
 
-void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src)
 {
     switch (src) {
         case OHOS::Ace::FontStyle::NORMAL: dst = ARK_FONT_STYLE_NORMAL; break;
@@ -805,6 +805,16 @@ void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src)
     }
 }
 
+void AssignArkValue(Ark_SuperscriptStyle& dst, const SuperscriptStyle& src)
+{
+    switch (src) {
+        case SuperscriptStyle::NORMAL: dst = ARK_SUPERSCRIPT_STYLE_NORMAL; break;
+        case SuperscriptStyle::SUPERSCRIPT: dst = ARK_SUPERSCRIPT_STYLE_SUPERSCRIPT; break;
+        case SuperscriptStyle::SUBSCRIPT: dst = ARK_SUPERSCRIPT_STYLE_SUBSCRIPT; break;
+        default: LOGE("Unexpected enum value in SuperscriptStyle: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src)
 {
     switch (src) {
@@ -860,7 +870,7 @@ void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src)
             LOGE("Unexpected enum value in TextOverflow: %{public}d", src);
     }
 }
-void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src)
 {
     switch (src) {
         case VerticalAlign::TOP: dst = ARK_IMAGE_SPAN_ALIGNMENT_TOP; break;
@@ -895,7 +905,7 @@ void AssignArkValue(Ark_TextChangeReason& dst, const TextChangeReason& src)
             LOGE("Unexpected enum value in TextChangeReason: %{public}d", src);
     }
 }
-void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src)
 {
     switch (src) {
         case ImageFit::CONTAIN: dst = ARK_IMAGE_FIT_CONTAIN; break;
@@ -919,7 +929,7 @@ void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src)
     }
 }
 
-void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src)
 {
     switch (src) {
         case OHOS::Ace::TextDecorationStyle::SOLID: dst = ARK_TEXT_DECORATION_STYLE_SOLID; break;
@@ -934,7 +944,7 @@ void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecoratio
     }
 }
 
-void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src)
 {
     switch (src) {
         case OHOS::Ace::TextDecoration::NONE: dst = ARK_TEXT_DECORATION_TYPE_NONE; break;
@@ -948,40 +958,34 @@ void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration
     }
 }
 
-void AssignArkValue(Ark_ResourceColor& dst, const Color& src, ConvContext *ctx)
-{
-    dst.selector = 0;
-    dst.value0 = Converter::ArkValue<Ark_Color>(src, ctx);
-}
-
-void AssignArkValue(Ark_Color& dst, const Color& src)
+void AssignArkValue(Ark_arkui_component_enums_Color& dst, const Color& src)
 {
     if (src == OHOS::Ace::Color::WHITE) {
-        dst = ARK_COLOR_WHITE;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE;
     } else if (src == OHOS::Ace::Color::BLACK) {
-        dst = ARK_COLOR_BLACK;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK;
     } else if (src == OHOS::Ace::Color::BLUE) {
-        dst = ARK_COLOR_BLUE;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE;
     } else if (src == Color(0xffa52a2a)) {
-        dst = ARK_COLOR_BROWN;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN;
     } else if (src == OHOS::Ace::Color::GRAY) {
-        dst = ARK_COLOR_GRAY;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY;
     } else if (src == OHOS::Ace::Color::GREEN) {
-        dst = ARK_COLOR_GREEN;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN;
     } else if (src == Color(0xff808080)) {
-        dst = ARK_COLOR_GREY;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY;
     } else if (src == Color(0xffffa500)) {
-        dst = ARK_COLOR_ORANGE;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE;
     } else if (src == Color(0xffffc0cb)) {
-        dst = ARK_COLOR_PINK;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK;
     } else if (src == OHOS::Ace::Color::RED) {
-        dst = ARK_COLOR_RED;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED;
     } else if (src == Color(0xFFFFFF00)) {
-        dst = ARK_COLOR_YELLOW;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW;
     } else if (src == OHOS::Ace::Color::TRANSPARENT) {
-        dst = ARK_COLOR_TRANSPARENT;
+        dst = ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT;
     } else {
-        dst = static_cast<Ark_Color>(-1);
+        dst = static_cast<Ark_arkui_component_enums_Color>(-1);
     }
 }
 void AssignArkValue(Ark_FlipDirection& dst, const TextFlipDirection& src)
@@ -994,7 +998,7 @@ void AssignArkValue(Ark_FlipDirection& dst, const TextFlipDirection& src)
             break;
     }
 }
-void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src)
+ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src)
 {
     switch (src) {
         case OHOS::Ace::NG::RichEditorDeleteDirection::BACKWARD:
@@ -1035,8 +1039,8 @@ void AssignArkValue(Ark_SourceType& dst, const SourceType& src)
         case SourceType::TOUCH: dst = Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN; break;
         case SourceType::KEYBOARD: dst = Ark_SourceType::ARK_SOURCE_TYPE_KEY; break;
         case SourceType::JOYSTICK: dst = Ark_SourceType::ARK_SOURCE_TYPE_JOYSTICK; break;
-        default: dst = static_cast<Ark_SourceType>(-1);
-            LOGE("Unexpected enum value in SourceType: %{public}d", src);
+        default: dst = Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN;
+            LOGE("Unexpected enum value in SourceType");
     }
 }
 
