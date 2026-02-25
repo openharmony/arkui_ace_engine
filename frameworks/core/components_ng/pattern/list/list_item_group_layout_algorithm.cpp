@@ -396,23 +396,29 @@ float ListItemGroupLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWr
 {
     float maxCrossSize = 0.0f;
     float crossSize = -laneGutter_;
-    float prevPos = itemPosition_.begin()->second.startPos;
-    for (const auto& pos : itemPosition_) {
-        auto wrapper = GetListItem(layoutWrapper, pos.first, false);
-        if (!wrapper) {
-            continue;
+    float prevPos = 0.0f;
+    if (!itemPosition_.empty()) {
+        prevPos = itemPosition_.begin()->second.startPos;
+        for (const auto &pos : itemPosition_) {
+            auto wrapper = GetListItem(layoutWrapper, pos.first, false);
+            if (!wrapper) {
+                continue;
+            }
+            auto getGeometryNode = wrapper->GetGeometryNode();
+            if (!getGeometryNode) {
+                continue;
+            }
+            if (NearEqual(prevPos, pos.second.startPos)) {
+                crossSize = crossSize + getGeometryNode->GetMarginFrameSize().CrossSize(axis) + laneGutter_;
+            } else {
+                crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+            }
+            prevPos = pos.second.startPos;
+            maxCrossSize = std::max(maxCrossSize, crossSize);
         }
-        auto getGeometryNode = wrapper->GetGeometryNode();
-        if (!getGeometryNode) {
-            continue;
-        }
-        if (NearEqual(prevPos, pos.second.startPos)) {
-            crossSize = crossSize + getGeometryNode->GetMarginFrameSize().CrossSize(axis) + laneGutter_;
-        } else {
-            crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
-        }
-        prevPos = pos.second.startPos;
-        maxCrossSize = std::max(maxCrossSize, crossSize);
+    }
+    if (cachedItemPosition_.empty()) {
+        return maxCrossSize;
     }
     crossSize = -laneGutter_;
     prevPos = cachedItemPosition_.begin()->second.startPos;
