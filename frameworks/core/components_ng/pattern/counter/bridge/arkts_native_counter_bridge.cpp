@@ -14,11 +14,13 @@
  */
 #include "core/components_ng/pattern/counter/bridge/arkts_native_counter_bridge.h"
 
+#include "ui/base/ace_type.h"
+
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components/counter/counter_theme.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
-#include "ui/base/ace_type.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -171,6 +173,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterHeight(ArkUIRuntimeCallInfo* run
     auto state = ArkTSUtils::ConvertFromJSValue(vm, heightValue, jsHeight, heightResObj);
     bool isJsView = IsJsView(firstArg, vm);
     if (isJsView && !state) {
+        ResetCounterHeight(runtimeCallInfo);
         UpdateLayoutPolicy(runtimeCallInfo, false);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -191,6 +194,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterHeight(ArkUIRuntimeCallInfo* run
     auto heightRawPtr = AceType::RawPtr(heightResObj);
     if (isJsView) {
         if (LessNotEqual(jsHeight.Value(), 0.0)) {
+            ResetCounterHeight(runtimeCallInfo);
             return panda::JSValueRef::Undefined(vm);
         }
         GetArkUINodeModifiers()->getCounterModifier()->setCounterHeightRes(
@@ -198,7 +202,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterHeight(ArkUIRuntimeCallInfo* run
         return panda::JSValueRef::Undefined(vm);
     }
     if (LessNotEqual(height.Value(), 0.0)) {
-        GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
+        ResetCounterHeight(runtimeCallInfo);
         return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getCounterModifier()->setCounterHeightRes(
@@ -214,8 +218,9 @@ ArkUINativeModuleValue CounterBridge::ResetCounterHeight(ArkUIRuntimeCallInfo* r
 
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-
-    GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
+    RefPtr<CounterTheme> counterTheme = ArkTSUtils::GetTheme<CounterTheme>();
+    GetArkUINodeModifiers()->getCounterModifier()->setCounterHeightRes(
+        nativeNode, counterTheme->GetHeight().Value(), static_cast<int>(counterTheme->GetHeight().Unit()), nullptr);
     ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -256,6 +261,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterWidth(ArkUIRuntimeCallInfo* runt
     auto state = ArkTSUtils::ConvertFromJSValue(vm, widthValue, jsWidth, widthResObj);
     bool isJsView = IsJsView(firstArg, vm);
     if (isJsView && !state) {
+        ResetCounterWidth(runtimeCallInfo);
         UpdateLayoutPolicy(runtimeCallInfo, true);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -276,6 +282,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterWidth(ArkUIRuntimeCallInfo* runt
     auto widthRawPtr = AceType::RawPtr(widthResObj);
     if (isJsView) {
         if (LessNotEqual(jsWidth.Value(), 0.0)) {
+            ResetCounterWidth(runtimeCallInfo);
             return panda::JSValueRef::Undefined(vm);
         }
         GetArkUINodeModifiers()->getCounterModifier()->setCounterWidthRes(
@@ -284,7 +291,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterWidth(ArkUIRuntimeCallInfo* runt
     }
 
     if (LessNotEqual(width.Value(), 0.0)) {
-        GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
+        ResetCounterWidth(runtimeCallInfo);
         return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getCounterModifier()->setCounterWidthRes(
@@ -300,8 +307,10 @@ ArkUINativeModuleValue CounterBridge::ResetCounterWidth(ArkUIRuntimeCallInfo* ru
 
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    RefPtr<CounterTheme> counterTheme = ArkTSUtils::GetTheme<CounterTheme>();
+    GetArkUINodeModifiers()->getCounterModifier()->setCounterWidthRes(
+        nativeNode, counterTheme->GetWidth().Value(), static_cast<int>(counterTheme->GetWidth().Unit()), nullptr);
 
-    GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
     ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -403,31 +412,31 @@ ArkUINativeModuleValue CounterBridge::SetCounterSize(ArkUIRuntimeCallInfo* runti
     bool isJsView = IsJsView(firstArg, vm);
     if (isJsView) {
         if (widthState && jsWidth.IsValid() && GreatNotEqual(jsWidth.Value(), 0.0)) {
-            auto widthRawPtr = AceType::RawPtr(widthResObj);
             GetArkUINodeModifiers()->getCounterModifier()->setCounterWidthRes(
-                nativeNode, jsWidth.Value(), static_cast<int>(jsWidth.Unit()), widthRawPtr);
+                nativeNode, jsWidth.Value(), static_cast<int>(jsWidth.Unit()), AceType::RawPtr(widthResObj));
+        } else {
+            ResetCounterWidth(runtimeCallInfo);
         }
         if (heightState && jsHeight.IsValid() && GreatNotEqual(jsHeight.Value(), 0.0)) {
-            auto heightRawPtr = AceType::RawPtr(heightResObj);
             GetArkUINodeModifiers()->getCounterModifier()->setCounterHeightRes(
-                nativeNode, jsHeight.Value(), static_cast<int>(jsHeight.Unit()), heightRawPtr);
+                nativeNode, jsHeight.Value(), static_cast<int>(jsHeight.Unit()), AceType::RawPtr(heightResObj));
+        } else {
+            ResetCounterHeight(runtimeCallInfo);
         }
         return panda::JSValueRef::Undefined(vm);
     }
     if (GreatNotEqual(width.Value(), 0.0)) {
-        auto widthRawPtr = AceType::RawPtr(widthResObj);
         GetArkUINodeModifiers()->getCounterModifier()->setCounterWidthRes(
-            nativeNode, width.Value(), static_cast<int>(width.Unit()), widthRawPtr);
+            nativeNode, width.Value(), static_cast<int>(width.Unit()), AceType::RawPtr(widthResObj));
     } else {
-        GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
+        ResetCounterWidth(runtimeCallInfo);
     }
 
     if (GreatNotEqual(height.Value(), 0.0)) {
-        auto heightRawPtr = AceType::RawPtr(heightResObj);
         GetArkUINodeModifiers()->getCounterModifier()->setCounterHeightRes(
-            nativeNode, height.Value(), static_cast<int>(height.Unit()), heightRawPtr);
+            nativeNode, height.Value(), static_cast<int>(height.Unit()), AceType::RawPtr(heightResObj));
     } else {
-        GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
+        ResetCounterHeight(runtimeCallInfo);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -441,8 +450,8 @@ ArkUINativeModuleValue CounterBridge::ResetCounterSize(ArkUIRuntimeCallInfo* run
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
 
-    GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
-    GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
+    ResetCounterHeight(runtimeCallInfo);
+    ResetCounterWidth(runtimeCallInfo);
     return panda::JSValueRef::Undefined(vm);
 }
 

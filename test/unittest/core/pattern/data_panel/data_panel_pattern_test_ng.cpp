@@ -143,23 +143,23 @@ HWTEST_F(DataPanelTestNg, DataPanelPatternTest002, TestSize.Level1)
     dataPanel.Create(VALUES, MAX, TYPE_LINE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    
+
     /**
      * @tc.steps: step2. get pattern and test UpdateStrokeWidth
      */
     auto pattern = frameNode->GetPattern<DataPanelPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     CalcDimension strokeWidth(VALUE);
     pattern->UpdateStrokeWidth(strokeWidth, true); // isFirstLoad = true
-    
+
     /**
      * @tc.expected: step3. property updated and node marked dirty when rerenderable
      */
     auto paintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
     EXPECT_EQ(paintProperty->GetStrokeWidth(), strokeWidth);
-    
+
     // Test with isFirstLoad = false
     CalcDimension strokeWidth2(VALUE);
     pattern->UpdateStrokeWidth(strokeWidth2, false);
