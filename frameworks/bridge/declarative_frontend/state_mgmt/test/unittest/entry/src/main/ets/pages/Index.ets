@@ -46,7 +46,10 @@ struct Parent {
         // Performance should be enabled manually
         // 'pages/performance_tests',
         'pages/v1_get_statemgmt_info_test',
-        'pages/v2_get_statemgmt_info_test'
+        'pages/v2_get_statemgmt_info_test',
+        'pages/v2_change_observation_tests',
+        'pages/v2_computed_tests',
+        'pages/v2_decorated_variables_tests'
       ])
       PageController.start(this.reportFinal)
     }, 200)
