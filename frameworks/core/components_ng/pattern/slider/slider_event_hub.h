@@ -48,7 +48,8 @@ public:
             onChangeEvent_(value);
         }
         CHECK_NULL_VOID(changeEvent_);
-        changeEvent_(value, mode);
+        auto chengeEvent = changeEvent_;
+        chengeEvent(value, mode);
         if (mode > BEGIN_MODE) {
             value_ = value;
         }

@@ -752,7 +752,7 @@ void SetDigitalCrownSensitivity(ArkUINodeHandle node, ArkUI_Int32 value)
 #ifdef SUPPORT_DIGITAL_CROWN
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::SetDigitalCrownSensitivity(frameNode, value);
+    SliderModelNG::SetDigitalCrownSensitivity(frameNode, static_cast<CrownSensitivity>(value));
 #endif
 }
 
@@ -1321,7 +1321,7 @@ void SetSuffixImpl(ArkUINodeHandle node, ArkUINodeHandle suffix, ArkUISliderCust
 void SetDigitalCrownSensitivityImpl(ArkUINodeHandle node, ArkUI_Int32 value)
 {
 #ifdef SUPPORT_DIGITAL_CROWN
-    GetSliderModelImpl()->SetDigitalCrownSensitivity(value);
+    GetSliderModelImpl()->SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(value));
 #endif
 }
 

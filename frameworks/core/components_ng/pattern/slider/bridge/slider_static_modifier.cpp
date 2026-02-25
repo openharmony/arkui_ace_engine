@@ -478,11 +478,13 @@ Gradient CreateSolidGradient(Ark_ResourceColor* color)
 void ContentModifierSliderImpl(
     Ark_NativePointer node, const Ark_Object* contentModifier, const SliderModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(contentModifier);
+    CHECK_NULL_VOID(builder);
     auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
     auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-                           const SliderConfiguration& config) -> RefPtr<FrameNode> {
+        const SliderConfiguration& config) -> RefPtr<FrameNode> {
         Ark_ContentModifier contentModifier = (*objectKeeper).get();
         Ark_SliderConfiguration arkConfig;
         arkConfig.contentModifier = contentModifier;
@@ -499,12 +501,10 @@ void ContentModifierSliderImpl(
         arkConfig.triggerChange.resource.hold(arkConfig.triggerChange.resource.resourceId); // Creates memory leak!
 
         auto sliderNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-        arkBuilder.BuildAsync(
-            [sliderNode](const RefPtr<UINode>& uiNode) mutable {
-                sliderNode->AddChild(uiNode);
-                sliderNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
-            },
-            node, arkConfig);
+        arkBuilder.BuildAsync([sliderNode](const RefPtr<UINode>& uiNode) mutable {
+            sliderNode->AddChild(uiNode);
+            sliderNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            }, node, arkConfig);
         return sliderNode;
     };
     SliderModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));

@@ -108,6 +108,7 @@ bool ConvertSliderGradientColor(const EcmaVM* vm, const Local<JSValueRef>& value
     if (colorLength == 0) {
         return false;
     }
+
     for (size_t colorIndex = 0; colorIndex < colorLength; ++colorIndex) {
         OHOS::Ace::NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
@@ -1095,15 +1096,10 @@ ArkUINativeModuleValue SliderBridge::SetValidSlideRange(ArkUIRuntimeCallInfo* ru
 
     Local<JSValueRef> fromArg = Local<JSValueRef>();
     Local<JSValueRef> toArg = Local<JSValueRef>();
-    if (IsJsView(firstArg, vm)) {
-        Local<JSValueRef> rangeOptionArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-        if (rangeOptionArg->IsObject(vm)) {
-            fromArg = rangeOptionArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "from"));
-            toArg = rangeOptionArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "to"));
-        }
-    } else {
-        fromArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-        toArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> rangeOptionArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (rangeOptionArg->IsObject(vm)) {
+        fromArg = rangeOptionArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "from"));
+        toArg = rangeOptionArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "to"));
     }
 
     if (!fromArg.IsNull() && !fromArg->IsUndefined() && fromArg->IsNumber()) {
@@ -1406,9 +1402,7 @@ ArkUINativeModuleValue SliderBridge::SetPrefix(ArkUIRuntimeCallInfo* runtimeCall
     auto prefixNode = nodePtr(prefixArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(prefixNode, panda::NativePointerRef::New(vm, nullptr));
 
-    std::string text = "";
-    std::string desc = "";
-    std::string level = "";
+    std::string text, desc, level;
     bool group = false;
     ParsePrefixOrSuffixOptions(runtimeCallInfo, text, desc, level, group);
     ArkUISliderCustomContentOptions options;
@@ -1469,9 +1463,7 @@ ArkUINativeModuleValue SliderBridge::JsSetPrefix(ArkUIRuntimeCallInfo* runtimeCa
         }
     }
 
-    std::string text = "";
-    std::string desc = "";
-    std::string level = "";
+    std::string text, desc, level;
     bool group = false;
 
     if (!thirdArg.IsNull() && !thirdArg->IsUndefined() && thirdArg->IsObject(vm)) {
@@ -1510,9 +1502,7 @@ ArkUINativeModuleValue SliderBridge::SetSuffix(ArkUIRuntimeCallInfo* runtimeCall
     auto suffixNode = nodePtr(suffixArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(suffixNode, panda::NativePointerRef::New(vm, nullptr));
 
-    std::string text = "";
-    std::string desc = "";
-    std::string level = "";
+    std::string text, desc, level;
     bool group = false;
     ParsePrefixOrSuffixOptions(runtimeCallInfo, text, desc, level, group);
     ArkUISliderCustomContentOptions options;
@@ -1574,9 +1564,7 @@ ArkUINativeModuleValue SliderBridge::JsSetSuffix(ArkUIRuntimeCallInfo* runtimeCa
         }
     }
 
-    std::string text = "";
-    std::string desc = "";
-    std::string level = "";
+    std::string text, desc, level;
     bool group = false;
 
     if (!thirdArg.IsNull() && !thirdArg->IsUndefined() && thirdArg->IsObject(vm)) {
@@ -1602,11 +1590,8 @@ ArkUINativeModuleValue SliderBridge::SetDigitalCrownSensitivity(ArkUIRuntimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 #ifdef SUPPORT_DIGITAL_CROWN
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     if (!IsJsView(firstArg, vm)) {
-        throw new Error('The method does not support attributeModifier.');
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -1620,7 +1605,7 @@ ArkUINativeModuleValue SliderBridge::SetDigitalCrownSensitivity(ArkUIRuntimeCall
         GetArkUINodeModifiers()->getSliderModifier()->resetDigitalCrownSensitivity(nullptr);
     } else {
         GetArkUINodeModifiers()->getSliderModifier()->setDigitalCrownSensitivity(
-            nullptr, static_cast<CrownSensitivity>(sensitivity));
+            nullptr, sensitivity);
     }
 #endif
     return panda::JSValueRef::Undefined(vm);
