@@ -248,8 +248,6 @@ void SetGradientColors(
 
 void GaugeBridge::RegisterGaugeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
-    LOGE("Strat RegisterGaugeAttributes nativeModule");
-
     const char* functionNames[] = { "create", "setGaugeVaule", "resetGaugeVaule", "setGaugeStartAngle",
         "resetGaugeStartAngle", "setGaugeEndAngle", "resetGaugeEndAngle", "setGaugeStrokeWidth",
         "resetGaugeStrokeWidth", "setGaugeTrackShadow", "resetGaugeTrackShadow", "setGaugeIndicator",

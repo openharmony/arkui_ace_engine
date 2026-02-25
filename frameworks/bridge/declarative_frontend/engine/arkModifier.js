@@ -705,7 +705,6 @@ class LazyArkCounterComponent extends ArkComponent {
         LazyArkCounterComponent.module = globalThis.requireNapi('arkui.components.arkcounter');
       }
       this.lazyComponent = LazyArkCounterComponent.module.createComponent(nativePtr, classType);
-      console.log("LazyArkCounterComponent lazyload nativeModule");
     }
     setMap() {
       this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
@@ -862,7 +861,6 @@ class LazyArkGaugeComponent extends ArkComponent {
       LazyArkGaugeComponent.module = globalThis.requireNapi('arkui.components.arkgauge');
     }
     this.lazyComponent = LazyArkGaugeComponent.module.createComponent(nativePtr, classType);
-    console.log('LazyArkGaugeComponent lazyload nativeModule');
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
@@ -1342,7 +1340,6 @@ class LazyArkPatternLockComponent extends ArkComponent {
       LazyArkPatternLockComponent.module = globalThis.requireNapi('arkui.components.arkpatternlock');
     }
     this.lazyComponent = LazyArkPatternLockComponent.module.createComponent(nativePtr, classType);
-    console.log('LazyArkPatternLockComponent lazyload nativeModule');
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
@@ -2500,7 +2497,6 @@ class LazyArkTextClockComponent extends ArkComponent {
       LazyArkTextClockComponent.module = globalThis.requireNapi('arkui.components.arktextclock');
     }
     this.lazyComponent = LazyArkTextClockComponent.module.createComponent(nativePtr, classType);
-    console.log("LazyArkTextClockComponent lazyload nativeModule")
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
