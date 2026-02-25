@@ -3592,6 +3592,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
 
     isTouchDown_ = false;
     isTouchDownOnOverlong_ = false;
+    SetLazyLoadFeature(true);
     if (!CheckSwiperPanEvent(dragVelocity) || !CheckContentWillScroll(dragVelocity, mainDelta)) {
         dragVelocity = 0.0;
     }
