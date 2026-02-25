@@ -27,7 +27,6 @@ namespace OHOS::Ace::NG {
 enum NativePtrTag {
     NATIVE_PTR_TAG_AXIS_INFO = 0,
     NATIVE_PTR_TAG_MOUSE_INFO,
-    NATIVE_PTR_TAG_TOUCH_EVENT_INFO,
 };
 
 struct ArkUINativeEventInfo : public Referenced {
@@ -56,8 +55,7 @@ public:
     static std::function<void(OffsetF& position)> GetLayoutFunc(EcmaVM* vm, Local<panda::ObjectRef> obj);
     static RefPtr<EventInfoManager> GetEventInfoManager(const WeakPtr<FrameNode>& node);
     static void ReleaseNativePtrFunc(void* env, void* nativePtr, void* data);
-    static Local<panda::ObjectRef> CreateTouchEventInfo(
-        EcmaVM* vm, std::shared_ptr<TouchEventInfo> infoPtr, const WeakPtr<FrameNode>& node);
+    static Local<panda::ObjectRef> CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info);
     static Local<panda::ObjectRef> CreateTouchEventInfoObj(EcmaVM* vm, TouchEventInfo& info);
     static Local<panda::ObjectRef> CreateGestureEventInfo(EcmaVM* vm, GestureEvent& info);
     static Local<panda::ObjectRef> CreateMouseInfo(

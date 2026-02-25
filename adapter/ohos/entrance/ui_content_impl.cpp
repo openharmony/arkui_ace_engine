@@ -6543,17 +6543,4 @@ const std::shared_ptr<const OHOS::MMI::PointerEvent> UIContentImpl::GetPointerEv
     }
     return nullptr;
 }
-
-const std::shared_ptr<const OHOS::MMI::PointerEvent> UIContentImpl::GetPointerEventFromTouchEvent(napi_value event)
-{
-    auto vm = GetEcmaVMOnJsThread();
-    CHECK_NULL_RETURN(vm, nullptr);
-    panda::Local<panda::ObjectRef> localRef((uintptr_t)event);
-    if (localRef->GetNativePointerFieldCount(vm) > 0) {
-        auto touchEventInfo = (TouchEventInfo*)localRef->GetNativePointerField(vm, 0);
-        CHECK_NULL_RETURN(touchEventInfo, nullptr);
-        return touchEventInfo->GetPointerEvent();
-    }
-    return nullptr;
-}
 } // namespace OHOS::Ace
