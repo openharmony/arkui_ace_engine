@@ -1616,7 +1616,7 @@ void ResetTextInputKeyboardAppearance(ArkUINodeHandle node)
 
 void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalColor, void* resRawPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetNormalUnderlineColor(frameNode, Color(normalColor));
     if (SystemProperties::ConfigChangePerform()) {

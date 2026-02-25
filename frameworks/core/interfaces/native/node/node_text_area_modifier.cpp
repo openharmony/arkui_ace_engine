@@ -1408,17 +1408,18 @@ ArkUI_Float32 GetTextAreaLineHeight(ArkUINodeHandle node)
     return TextFieldModelNG::GetLineHeight(frameNode).Value();
 }
 
-ArkUI_Int32 GetTextAreaMaxLines(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return TextFieldModelNG::GetMaxLines(frameNode);
-}
 ArkUI_Bool GetTextAreaHalfLeading(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return static_cast<ArkUI_Bool>(TextFieldModelNG::GetHalfLeading(frameNode));
+}
+
+ArkUI_Int32 GetTextAreaMaxLines(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetMaxLines(frameNode);
 }
 void SetTextAreaLineSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines)
 {

@@ -535,10 +535,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
     });
     GetFocus();
     EXPECT_TRUE(pattern_->GetCursorVisible());
-    PerformActionInfo info;
-    info.action = TextInputAction::DONE;
-    info.forceCloseKeyboard = true;
-    pattern_->PerformActionOperation(info);
+    pattern_->PerformAction(TextInputAction::DONE, true);
     EXPECT_FALSE(pattern_->GetCursorVisible());
 }
 
