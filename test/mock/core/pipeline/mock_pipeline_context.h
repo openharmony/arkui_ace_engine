@@ -138,6 +138,16 @@ public:
     {
         return this;
     }
+    void SetXComponentDisplayConstraintEnabled(bool isEnable) override
+    {
+        xComponentDisplayConstraintEnabled_ = isEnable;
+    }
+
+    bool GetXComponentDisplayConstraintEnabled() override
+    {
+        return xComponentDisplayConstraintEnabled_;
+    }
+
 protected:
     float fontScale_ = 1.0f;
     bool isDeclarative_ = false;
@@ -146,6 +156,7 @@ protected:
     RefPtr<TaskExecutor> taskExecutor_;
     bool useFlushUITasks_ = false;
     int32_t responseTime_ = INT32_MAX;
+    bool xComponentDisplayConstraintEnabled_ = false;
 };
 } // namespace OHOS::Ace::NG
 

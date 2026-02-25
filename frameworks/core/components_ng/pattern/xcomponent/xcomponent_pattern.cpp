@@ -579,7 +579,11 @@ void XComponentPattern::AddLayoutTask()
 
     surfaceOffset_.SetX((overlapWidth - surfaceSize_.Width()) / 2.0f + overlapOffsetX);
     surfaceOffset_.SetY((overlapHeight - surfaceSize_.Height()) / 2.0f + overlapOffsetY);
-    paintRect_ = { surfaceOffset_, surfaceSize_ };
+    RectF newPaintRect = { surfaceOffset_, surfaceSize_ };
+    if (paintRect_ == newPaintRect) {
+        return;
+    }
+    paintRect_ = newPaintRect;
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetBounds(
         paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
@@ -894,6 +898,9 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
         AddAfterLayoutTaskForExportTexture();
     }
     host->MarkNeedSyncRenderTree();
+    if (context->GetXComponentDisplayConstraintEnabled()) {
+        AddLayoutTask();
+    }
 }
 
 void XComponentPattern::DumpInfo()
