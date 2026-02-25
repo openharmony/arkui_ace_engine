@@ -4605,6 +4605,22 @@ PositionWithAffinity RichEditorPattern::GetGlyphPositionAtCoordinate(int32_t x, 
     return paragraphs_.GetGlyphPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
 }
 
+PositionWithAffinity RichEditorPattern::GetCharacterPositionAtCoordinate(int32_t x, int32_t y)
+{
+    Offset offset(x, y);
+    return paragraphs_.GetCharacterPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
+}
+
+std::pair<TextRange, TextRange> RichEditorPattern::GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+{
+    return paragraphs_.GetGlyphRangeForCharacterRange(start, end);
+}
+
+std::pair<TextRange, TextRange> RichEditorPattern::GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+{
+    return paragraphs_.GetCharacterRangeForGlyphRange(start, end);
+}
+
 void RichEditorPattern::InitDragDropEvent()
 {
     auto host = GetHost();

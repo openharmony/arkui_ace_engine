@@ -246,6 +246,9 @@ std::pair<TextRange, TextRange> ParagraphManager::GetGlyphRangeForCharacterRange
         int32_t charLength =
             static_cast<int32_t>(StringUtils::Str16ToStr8(info.paragraph->GetParagraphText()).length() +
                                  info.paragraph->GetPlaceholderCnt());
+        if (LessOrEqual(charLength, 0)) {
+            continue;
+        }
         if (LessOrEqual(end, charLength) || (idx == static_cast<int>(paragraphs_.size()) - 1)) {
             auto range = info.paragraph->GetGlyphRangeForCharacterRange(start, end);
             glyphRange.start += range.first.start;
@@ -286,6 +289,9 @@ std::pair<TextRange, TextRange> ParagraphManager::GetCharacterRangeForGlyphRange
     for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
         auto& info = *it;
         int32_t glyphLength = static_cast<int32_t>(info.end - info.start - 1);
+        if (LessOrEqual(glyphLength, 0)) {
+            continue;
+        }
         if (LessOrEqual(end, glyphLength) || (idx == static_cast<int>(paragraphs_.size()) - 1)) {
             auto range = info.paragraph->GetCharacterRangeForGlyphRange(start, end);
             charRange.start += range.first.start;

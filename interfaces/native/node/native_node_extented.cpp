@@ -1933,7 +1933,11 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate(
     ArkUI_NodeHandle node = layoutManager->node;
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (node->type != ARKUI_NODE_TEXT_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
+        *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorCharacterPositionAtCoordinate(
+                node->uiNodeHandle, dx, dy));
+    } else {
         *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
             fullImpl->getNodeModifiers()->getTextModifier()->getCharacterPositionAtCoordinate(
                 node->uiNodeHandle, dx, dy));
@@ -1951,20 +1955,21 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange(ArkUI_
     int32_t end = static_cast<int32_t>(OH_Drawing_GetEndFromRange(charRange));
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     GlyphCharacterRange range;
-    if (node->type != ARKUI_NODE_TEXT_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
+        fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorGlyphRangeForCharacterRange(
+            node->uiNodeHandle, start, end, &range);
+    } else {
         fullImpl->getNodeModifiers()->getTextModifier()->getGlyphRangeForCharacterRange(
             node->uiNodeHandle, start, end, &range);
-        ArkUI_Boundary* glyphRange = new ArkUI_Boundary();
-        glyphRange->leftIndex = range.glyphStart;
-        glyphRange->rightIndex = range.glyphEnd;
-        *outGlyphRange = reinterpret_cast<OH_Drawing_Range*>(glyphRange);
-        ArkUI_Boundary* charRange = new ArkUI_Boundary();
-        charRange->leftIndex = range.charStart;
-        charRange->rightIndex = range.charEnd;
-        *outActualCharRange = reinterpret_cast<OH_Drawing_Range*>(charRange);
-    } else {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    ArkUI_Boundary* glyphRange = new ArkUI_Boundary();
+    glyphRange->leftIndex = range.glyphStart;
+    glyphRange->rightIndex = range.glyphEnd;
+    *outGlyphRange = reinterpret_cast<OH_Drawing_Range*>(glyphRange);
+    ArkUI_Boundary* actualCharRange = new ArkUI_Boundary();
+    actualCharRange->leftIndex = range.charStart;
+    actualCharRange->rightIndex = range.charEnd;
+    *outActualCharRange = reinterpret_cast<OH_Drawing_Range*>(actualCharRange);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1978,20 +1983,21 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_
     int32_t end = static_cast<int32_t>(OH_Drawing_GetEndFromRange(glyphRange));
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
     GlyphCharacterRange range;
-    if (node->type != ARKUI_NODE_TEXT_EDITOR) {
+    if (node->type == ARKUI_NODE_TEXT_EDITOR) {
+        fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorCharacterRangeForGlyphRange(
+            node->uiNodeHandle, start, end, &range);
+    } else {
         fullImpl->getNodeModifiers()->getTextModifier()->getCharacterRangeForGlyphRange(
             node->uiNodeHandle, start, end, &range);
-        ArkUI_Boundary* charRange = new ArkUI_Boundary();
-        charRange->leftIndex = range.charStart;
-        charRange->rightIndex = range.charEnd;
-        *outCharRange = reinterpret_cast<OH_Drawing_Range*>(charRange);
-        ArkUI_Boundary* glyphRange = new ArkUI_Boundary();
-        glyphRange->leftIndex = range.glyphStart;
-        glyphRange->rightIndex = range.glyphEnd;
-        *outActualGlyphRange = reinterpret_cast<OH_Drawing_Range*>(glyphRange);
-    } else {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    ArkUI_Boundary* charRange = new ArkUI_Boundary();
+    charRange->leftIndex = range.charStart;
+    charRange->rightIndex = range.charEnd;
+    *outCharRange = reinterpret_cast<OH_Drawing_Range*>(charRange);
+    ArkUI_Boundary* actualGlyphRange = new ArkUI_Boundary();
+    actualGlyphRange->leftIndex = range.glyphStart;
+    actualGlyphRange->rightIndex = range.glyphEnd;
+    *outActualGlyphRange = reinterpret_cast<OH_Drawing_Range*>(actualGlyphRange);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
