@@ -144,7 +144,7 @@ declare namespace uiObserver {
         size?: Size;
     }
 
-    export class WindowSizeLayoutBreakpointInfo {
+    export interface WindowSizeLayoutBreakpointInfo {
         widthBreakpoint: WidthBreakpoint;
         heightBreakpoint: HeightBreakpoint;
     }
@@ -196,6 +196,13 @@ declare namespace uiObserver {
 
     export interface ObserverOptions {
         id: string;
+    }
+}
+
+namespace uiObserverImpl {
+    export class WindowSizeLayoutBreakpointImpl implements uiObserver.WindowSizeLayoutBreakpointInfo {
+        widthBreakpoint: WidthBreakpoint = WidthBreakpoint.WIDTH_XS;
+        heightBreakpoint: HeightBreakpoint = HeightBreakpoint.HEIGHT_SM;
     }
 }
 
