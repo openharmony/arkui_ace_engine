@@ -1327,7 +1327,11 @@ bool RefreshPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableS
         }
     }
     if (Positive(scrollOffset_) || Positive(velocity)) {
-        result = true;
+        if (parent && AceType::InstanceOf<RefreshPattern>(parent)) {
+            result = parent->HandleScrollVelocity(velocity);
+        } else {
+            result = true;
+        }
     } else if (parent && ((Negative(velocity) && nestedScroll.forward == NestedScrollMode::SELF_FIRST) ||
                              (Positive(velocity) && nestedScroll.backward == NestedScrollMode::SELF_FIRST))) {
         result = parent->HandleScrollVelocity(velocity);
