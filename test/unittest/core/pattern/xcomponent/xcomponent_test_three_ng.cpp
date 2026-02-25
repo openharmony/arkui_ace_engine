@@ -493,8 +493,8 @@ HWTEST_F(XComponentTestThreeNg, XComponentSourceTypeTest, TestSize.Level1)
     TouchLocationInfo locationInfoSourceType(0);
     pattern->GetNativeXComponent();
     touchEventInfoSourceType.AddChangedTouchLocationInfo(std::move(locationInfoSourceType));
-    std::vector<SourceType> sourceTypes { SourceType::NONE, SourceType::MOUSE, SourceType::TOUCH, SourceType::TOUCH_PAD,
-        SourceType::KEYBOARD };
+    std::vector<SourceType> sourceTypes { SourceType::NONE, SourceType::MOUSE,
+        SourceType::TOUCH, SourceType::TOUCH_PAD, SourceType::KEYBOARD };
     for (SourceType& sourceType : sourceTypes) {
         touchEventInfoSourceType.SetSourceDevice(sourceType);
         pattern->HandleTouchEvent(touchEventInfoSourceType);
@@ -603,8 +603,8 @@ HWTEST_F(XComponentTestThreeNg, SetAndGetRenderFitBySurfaceIdTest, TestSize.Leve
     pattern->RegisterNode();
     for (int i = 0; i < NUM_SIXTEEN; ++i) {
         for (int j = 0; j < NUM_TWO; ++j) {
-            code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(SURFACE_ID, g_renderFitCases[i],
-                g_isEnableNewVersionRenderFitCases[j]);
+            code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(SURFACE_ID,
+                g_renderFitCases[i], g_isEnableNewVersionRenderFitCases[j]);
             EXPECT_EQ(code, 0);
             int32_t renderFitNumber = 0;
             bool isEnable = false;
@@ -621,8 +621,8 @@ HWTEST_F(XComponentTestThreeNg, SetAndGetRenderFitBySurfaceIdTest, TestSize.Leve
     pattern->RegisterNode();
     for (int i = 0; i < NUM_SIXTEEN; ++i) {
         for (int j = 0; j < NUM_TWO; ++j) {
-            code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(INVALID_SURFACE_ID, g_renderFitCases[i],
-                g_isEnableNewVersionRenderFitCases[j]);
+            code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(INVALID_SURFACE_ID,
+                g_renderFitCases[i], g_isEnableNewVersionRenderFitCases[j]);
             EXPECT_EQ(code, 1);
             int32_t renderFitNumber = 0;
             bool isEnable = false;
