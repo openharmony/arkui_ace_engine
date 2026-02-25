@@ -47,24 +47,11 @@ export class XComponentController implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get onSurfaceCreated(): ((breakpoints: string) => void) {
-        return this.getOnSurfaceCreated()
-    }
-    set onSurfaceCreated(onSurfaceCreated: ((breakpoints: string) => void)) {
-        this.setOnSurfaceCreated(onSurfaceCreated)
-    }
-    get onSurfaceChanged(): ((surfaceId: string,rect: SurfaceRect) => void) {
-        return this.getOnSurfaceChanged()
-    }
-    set onSurfaceChanged(onSurfaceChanged: ((surfaceId: string,rect: SurfaceRect) => void)) {
-        this.setOnSurfaceChanged(onSurfaceChanged)
-    }
-    get onSurfaceDestroyed(): ((breakpoints: string) => void) {
-        return this.getOnSurfaceDestroyed()
-    }
-    set onSurfaceDestroyed(onSurfaceDestroyed: ((breakpoints: string) => void)) {
-        this.setOnSurfaceDestroyed(onSurfaceDestroyed)
-    }
+// instructive change start
+    onSurfaceCreated(breakpoints: string): void {}
+    onSurfaceChanged(surfaceId: string,rect: SurfaceRect): void {}
+    onSurfaceDestroyed(breakpoints: string): void {}
+// instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, XComponentController.getFinalizer())
     }
