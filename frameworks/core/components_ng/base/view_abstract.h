@@ -918,6 +918,8 @@ public:
         double distanceThreshold = std::numeric_limits<double>::infinity());
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc, Dimension distanceThreshold);
     static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
+    static void AddOnTouch(FrameNode* frameNode, const RefPtr<TouchEventImpl>& touchEventImpl);
+    static void RemoveTouchEvent(FrameNode* frameNode, const RefPtr<TouchEventImpl>& touchEventImpl);
     static void SetOnDragStart(FrameNode* frameNode,
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);
     static void SetOnDragEnter(FrameNode* frameNode,
