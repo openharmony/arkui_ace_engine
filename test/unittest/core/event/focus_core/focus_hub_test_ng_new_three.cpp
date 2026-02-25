@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -262,7 +262,7 @@ HWTEST_F(FocusHubTestNg, SetFocusable001, TestSize.Level1)
     focusHub->SetFocusable(true, true);
     focusHub->focusDepend_ = FocusDependence::CHILD;
     focusHub->SetFocusable(true, true);
-    ASSERT_NE(focusHub->focusDepend_, FocusDependence::CHILD);
+    EXPECT_NE(focusHub->focusDepend_, FocusDependence::CHILD);
 }
 
 /**
@@ -969,9 +969,9 @@ HWTEST_F(FocusHubTestNg, FocusToHeadOrTailChild003, TestSize.Level1)
      */
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     ASSERT_NE(context, nullptr);
-    ASSERT_FALSE(context->isFocusingByTab_);
+    EXPECT_FALSE(context->isFocusingByTab_);
     auto res = focusHub->FocusToHeadOrTailChild(true);
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
 
     /**
      * @tc.steps3: set tabIndex_ to 0.
@@ -980,18 +980,18 @@ HWTEST_F(FocusHubTestNg, FocusToHeadOrTailChild003, TestSize.Level1)
     focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
     focusHub->focusCallbackEvents_->tabIndex_ = 0;
     auto isFocusableByTab = focusHub->IsFocusableByTab();
-    ASSERT_TRUE(isFocusableByTab);
+    EXPECT_TRUE(isFocusableByTab);
     res = focusHub->FocusToHeadOrTailChild(true);
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
 
     /**
      * @tc.steps4: set tabIndex_ to -1.
      */
     focusHub->focusCallbackEvents_->tabIndex_ = -1;
     isFocusableByTab = focusHub->IsFocusableByTab();
-    ASSERT_FALSE(isFocusableByTab);
+    EXPECT_FALSE(isFocusableByTab);
     res = focusHub->FocusToHeadOrTailChild(true);
-    ASSERT_FALSE(res);
+    EXPECT_FALSE(res);
 }
 
 /**
