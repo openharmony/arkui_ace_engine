@@ -6073,8 +6073,6 @@ struct ArkUICheckboxModifier {
     void (*setCheckboxChangeEvent)(ArkUINodeHandle node, void* callback);
     void (*setCheckboxJsPadding)(const struct ArkUIPaddingType* oldVlaue, const struct ArkUIPaddingType* newVlaue,
         ArkUI_Bool flag);
-    void (*setCheckboxJsMargin)(
-        const struct ArkUIPaddingType* values, ArkUI_Bool isLengthMetrics, void* rawPtr, ArkUI_Bool parse);
 };
 
 struct ArkUICheckboxGroupModifier {
@@ -6120,8 +6118,6 @@ struct ArkUICheckboxGroupModifier {
     void (*setCheckboxGroupPadding)(const struct ArkUIPaddingType* oldVlaue, const struct ArkUIPaddingType* newVlaue,
         ArkUI_Bool flag);
     void (*setCheckboxGroupChangeEvent)(void* callback);
-    void (*setCheckboxGroupSize)(
-        ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* resPtr, ArkUI_Bool isWidth);
 };
 
 struct ArkUIImageSpanModifier {
