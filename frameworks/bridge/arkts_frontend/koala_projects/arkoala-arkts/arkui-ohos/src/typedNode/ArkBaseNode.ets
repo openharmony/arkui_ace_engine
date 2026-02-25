@@ -630,6 +630,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this {
+        this.getPeer().setOnTouchInterceptAttribute(value);
         return this
     }
     public onSizeChange(value: SizeChangeCallback | undefined): this {
