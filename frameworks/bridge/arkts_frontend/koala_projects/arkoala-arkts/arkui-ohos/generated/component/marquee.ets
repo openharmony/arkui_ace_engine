@@ -33,8 +33,10 @@ import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { LengthMetrics } from "arkui.Graphics"
 import { MarqueeModifier } from "./../MarqueeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { LengthMetrics_serializer } from "./../Graphics"
 export class ArkMarqueePeer extends ArkCommonMethodPeer {
     attributeSet?: MarqueeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -217,6 +219,8 @@ export interface MarqueeOptions {
     loop?: int32;
     fromStart?: boolean;
     src: string | undefined;
+    delay?: int32;
+    spacing?: LengthMetrics;
 }
 export interface MarqueeAttribute extends CommonMethod {
     setMarqueeOptions(options: MarqueeOptions): this {
@@ -460,6 +464,22 @@ export class MarqueeOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForDelay  = value.delay
+        if (valueHolderForDelay !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDelayTmpValue  = valueHolderForDelay!
+            valueSerializer.writeInt32(valueHolderForDelayTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSpacing  = value.spacing
+        if (valueHolderForSpacing !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSpacingTmpValue  = valueHolderForSpacing!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForSpacingTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): MarqueeOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -493,7 +513,19 @@ export class MarqueeOptions_serializer {
             srcTmpBuf = (valueDeserializer.readString() as string)
         }
         const srcTmpResult : string | undefined = srcTmpBuf
-        let value : MarqueeOptions = ({start: startTmpResult, step: stepTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, src: srcTmpResult} as MarqueeOptions)
+        const delayTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let delayTmpBuf : int32 | undefined = undefined
+        if ((delayTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            delayTmpBuf = valueDeserializer.readInt32()
+        }
+        const delayTmpResult : int32 | undefined = delayTmpBuf
+        const spacingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let spacingTmpBuf : LengthMetrics | undefined = undefined
+        if ((spacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            spacingTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const spacingTmpResult : LengthMetrics | undefined = spacingTmpBuf
+        let value : MarqueeOptions = ({start: startTmpResult, step: stepTmpResult, loop: loopTmpResult, fromStart: fromStartTmpResult, src: srcTmpResult, delay: delayTmpResult, spacing: spacingTmpResult} as MarqueeOptions)
         return value
     }
 }

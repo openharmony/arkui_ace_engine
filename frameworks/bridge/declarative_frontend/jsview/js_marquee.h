@@ -33,6 +33,9 @@ public:
     static void OnStart(const JSCallbackInfo& info);
     static void OnBounce(const JSCallbackInfo& info);
     static void OnFinish(const JSCallbackInfo& info);
+
+private:
+    static void SetMarqueeSpacingAndDelay(const JSRef<JSObject>& paramObject);
 };
 
 } // namespace OHOS::Ace::Framework

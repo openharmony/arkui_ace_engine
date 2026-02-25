@@ -227,6 +227,56 @@ void ResetMarqueeSrcValue(ArkUINodeHandle node)
     MarqueeModelNG::ResetValue(frameNode);
 }
 
+void SetMarqueeSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* spacingRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    CalcDimension spacing(number, unitEnum);
+    if (number < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC ||
+        unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
+        std::optional<CalcDimension> nullSpacing = std::nullopt;
+        MarqueeModelNG::SetMarqueeSpacing(frameNode, nullSpacing);
+    } else {
+        MarqueeModelNG::SetMarqueeSpacing(frameNode, spacing);
+    }
+
+    if (SystemProperties::ConfigChangePerform() && spacingRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(spacingRawPtr));
+        CHECK_NULL_VOID(resObj);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterResource<CalcDimension>("MarqueeSpacing", resObj, spacing);
+    }
+}
+
+void ResetMarqueeSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<CalcDimension> spacing = std::nullopt;
+    MarqueeModelNG::SetMarqueeSpacing(frameNode, spacing);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MarqueeSpacing");
+    }
+}
+
+void SetMarqueeDelay(ArkUINodeHandle node, ArkUI_Int32 delay)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetMarqueeDelay(frameNode, std::optional<int32_t>(delay));
+}
+
+void ResetMarqueeDelay(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::ResetMarqueeDelay(frameNode);
+}
+
 void SetMarqueePlayerStatus(ArkUINodeHandle node, ArkUI_Bool start)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -307,6 +357,10 @@ const ArkUIMarqueeModifier* GetMarqueeModifier()
         .resetMarqueeOnFinish = ResetMarqueeOnFinish,
         .setMarqueeSrcValue = SetMarqueeSrcValue,
         .resetMarqueeSrcValue = ResetMarqueeSrcValue,
+        .setMarqueeSpacing = SetMarqueeSpacing,
+        .resetMarqueeSpacing = ResetMarqueeSpacing,
+        .setMarqueeDelay = SetMarqueeDelay,
+        .resetMarqueeDelay = ResetMarqueeDelay,
         .setMarqueePlayerStatus = SetMarqueePlayerStatus,
         .resetMarqueePlayerStatus = ResetMarqueePlayerStatus,
         .setMarqueeScrollAmount = SetMarqueeScrollAmount,

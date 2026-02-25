@@ -56,6 +56,16 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         textLayoutConstraint.selfIdealSize.SetHeight(adaptiveSize.Height().value());
         child->Measure(textLayoutConstraint);
     }
+
+    auto secondChild = layoutWrapper->GetAllChildrenWithBuild().back();
+    secondChild->GetLayoutProperty()->UpdatePadding(textPadding);
+    secondChild->Measure(textLayoutConstraint);
+    adaptiveSize = GetMeasureAdaptiveHeight(layoutWrapper, secondChild);
+    if (adaptiveSize.Height().has_value()) {
+        textLayoutConstraint.selfIdealSize.SetHeight(adaptiveSize.Height().value());
+        secondChild->Measure(textLayoutConstraint);
+    }
+
     // measure marquee self, and update marquee padding to zero
     layoutWrapper->GetGeometryNode()->UpdatePaddingWithBorder({ 0.0, 0.0, 0.0, 0.0 });
     OptionalSizeF frameSize;
@@ -107,6 +117,12 @@ void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     translate.SetY(0.0f);
     textGeoNode->SetMarginFrameOffset(translate);
     child->Layout();
+
+    auto secondChild = layoutWrapper->GetAllChildrenWithBuild().back();
+    auto secondTextGeoNode = secondChild->GetGeometryNode();
+    CHECK_NULL_VOID(secondTextGeoNode);
+    secondTextGeoNode->SetMarginFrameOffset(translate);
+    secondChild->Layout();
 }
 
 void MarqueeLayoutAlgorithm::MeasureWithLayoutPolicy(

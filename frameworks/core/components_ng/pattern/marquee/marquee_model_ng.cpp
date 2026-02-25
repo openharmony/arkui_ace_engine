@@ -28,18 +28,33 @@ void MarqueeModelNG::Create()
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::MARQUEE_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::MARQUEE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    ACE_UINODE_TRACE(frameNode);
     if (frameNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateMaxLines(1);
         frameNode->AddChild(textNode);
+
+        auto secondChild = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_VOID(secondChild);
+        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(secondChild);
+        secondLayoutProperty->UpdateMaxLines(1);
+        frameNode->AddChild(secondChild);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
         CHECK_NULL_VOID(textChild);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateMaxLines(1);
+
+        auto secondChild = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+        CHECK_NULL_VOID(secondChild);
+        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(secondLayoutProperty);
+        secondLayoutProperty->UpdateMaxLines(1);
     }
     stack->Push(frameNode);
 }
@@ -178,6 +193,7 @@ RefPtr<FrameNode> MarqueeModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::MARQUEE_ETS_TAG, nodeId, AceType::MakeRefPtr<MarqueePattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
+    ACE_UINODE_TRACE(frameNode);
     if (frameNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -186,12 +202,26 @@ RefPtr<FrameNode> MarqueeModelNG::CreateFrameNode(int32_t nodeId)
         CHECK_NULL_RETURN(textLayoutProperty, nullptr);
         textLayoutProperty->UpdateMaxLines(TEXT_MAX_LINES);
         frameNode->AddChild(textNode);
+
+        auto secondChild = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_RETURN(secondChild, nullptr);
+        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(secondLayoutProperty, nullptr);
+        secondLayoutProperty->UpdateMaxLines(1);
+        frameNode->AddChild(secondChild);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
         CHECK_NULL_RETURN(textChild, nullptr);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, nullptr);
         textLayoutProperty->UpdateMaxLines(TEXT_MAX_LINES);
+
+        auto secondChild = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+        CHECK_NULL_RETURN(secondChild, nullptr);
+        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(secondLayoutProperty, nullptr);
+        secondLayoutProperty->UpdateMaxLines(1);
     }
     return frameNode;
 }
@@ -388,4 +418,54 @@ void MarqueeModelNG::ResetDirection(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(MarqueePaintProperty, Direction, PROPERTY_UPDATE_RENDER, frameNode);
 }
+
+void MarqueeModelNG::SetMarqueeSpacing(const std::optional<CalcDimension>& spacing)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetMarqueeSpacing(frameNode, spacing);
+}
+
+void MarqueeModelNG::SetMarqueeSpacing(FrameNode* frameNode, const std::optional<CalcDimension>& spacing)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (spacing.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            MarqueeLayoutProperty, MarqueeSpacing, spacing.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            MarqueeLayoutProperty, MarqueeSpacing, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void MarqueeModelNG::ResetMarqueeSpacing(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, MarqueeSpacing, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
+void MarqueeModelNG::SetMarqueeDelay(const std::optional<int32_t>& delay)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetMarqueeDelay(frameNode, delay);
+}
+
+void MarqueeModelNG::SetMarqueeDelay(FrameNode* frameNode, const std::optional<int32_t>& delay)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (delay.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            MarqueeLayoutProperty, MarqueeDelay, delay.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            MarqueeLayoutProperty, MarqueeDelay, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void MarqueeModelNG::ResetMarqueeDelay(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        MarqueeLayoutProperty, MarqueeDelay, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

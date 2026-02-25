@@ -7250,6 +7250,10 @@ struct ArkUIMarqueeModifier {
     void (*resetMarqueeOnFinish)(ArkUINodeHandle node);
     void (*setMarqueeSrcValue)(ArkUINodeHandle node, ArkUI_CharPtr src);
     void (*resetMarqueeSrcValue)(ArkUINodeHandle node);
+    void (*setMarqueeSpacing)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* spacingRawPtr);
+    void (*resetMarqueeSpacing)(ArkUINodeHandle node);
+    void (*setMarqueeDelay)(ArkUINodeHandle node, ArkUI_Int32 loop);
+    void (*resetMarqueeDelay)(ArkUINodeHandle node);
     void (*setMarqueePlayerStatus)(ArkUINodeHandle node, ArkUI_Bool start);
     void (*resetMarqueePlayerStatus)(ArkUINodeHandle node);
     void (*setMarqueeScrollAmount)(ArkUINodeHandle node, ArkUI_Float64 step);

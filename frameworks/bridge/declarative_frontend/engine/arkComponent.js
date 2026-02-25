@@ -26712,24 +26712,27 @@ class MarqueeInitializeModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f, _g;
     if (reset) {
-      getUINativeModule().marquee.setInitialize(node, undefined, undefined, undefined, undefined, undefined);
+      getUINativeModule().marquee.setInitialize(node, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
     }
     else {
       getUINativeModule().marquee.setInitialize(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.start,
         (_b = this.value) === null || _b === void 0 ? void 0 : _b.step, (_c = this.value) === null || _c === void 0 ? void 0 : _c.loop,
-        (_d = this.value) === null || _d === void 0 ? void 0 : _d.fromStart, (_e = this.value) === null || _e === void 0 ? void 0 : _e.src);
+        (_d = this.value) === null || _d === void 0 ? void 0 : _d.fromStart, (_e = this.value) === null || _e === void 0 ? void 0 : _e.src,
+        (_f = this.value) === null || _f === void 0 ? void 0 : _f.spacing, (_g = this.value) === null || _g === void 0 ? void 0 : _g.delay);
     }
   }
 
   checkObjectDiff() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _n, _o;
     return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.start, (_b = this.value) === null || _b === void 0 ? void 0 : _b.start) ||
         !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.step, (_d = this.value) === null || _d === void 0 ? void 0 : _d.step) ||
         !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.loop, (_f = this.value) === null || _f === void 0 ? void 0 : _f.loop) ||
         !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.fromStart, (_h = this.value) === null || _h === void 0 ? void 0 : _h.fromStart) ||
-        !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.src, (_k = this.value) === null || _k === void 0 ? void 0 : _k.src);
+        !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.src, (_k = this.value) === null || _k === void 0 ? void 0 : _k.src) ||
+        !isBaseOrResourceEqual((_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.spacing, (_m = this.value) === null || _m === void 0 ? void 0 : _m.spacing) ||
+ 	      !isBaseOrResourceEqual((_n = this.stageValue) === null || _n === void 0 ? void 0 : _n.delay, (_o = this.value) === null || _o === void 0 ? void 0 : _o.delay);
   }
 }
 MarqueeInitializeModifier.identity = Symbol('marqueeInitialize');
