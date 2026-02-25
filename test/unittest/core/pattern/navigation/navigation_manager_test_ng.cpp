@@ -893,7 +893,7 @@ HWTEST_F(NavigationManagerTestNg, CacheNavigationNodeAnimation001, TestSize.Leve
     ASSERT_NE(pipelineContext, nullptr);
     auto navigationManager = pipelineContext->GetNavigationManager();
     navigationManager->hasCacheNavigationNodeEnable_ = false;
-    
+
     navigationManager->CacheNavigationNodeAnimation();
     ASSERT_EQ(navigationManager->preNodeNeverSet_, true);
     NavigationManagerTestNg::TearDownTestSuite();
@@ -922,7 +922,7 @@ HWTEST_F(NavigationManagerTestNg, CacheNavigationNodeAnimation002, TestSize.Leve
     bool isInAnimation = false;
     navigationManager->SetIsNavigationOnAnimation(isInAnimation);
     navigationManager->hasCacheNavigationNodeEnable_ = true;
-    
+
     navigationManager->CacheNavigationNodeAnimation();
     ASSERT_EQ(navigationManager->isInAnimation_, false);
     NavigationManagerTestNg::TearDownTestSuite();
@@ -947,7 +947,7 @@ HWTEST_F(NavigationManagerTestNg, CacheNavigationNodeAnimation003, TestSize.Leve
     ASSERT_NE(pipelineContext, nullptr);
     auto window = std::make_shared<MockWindow>();
     pipelineContext->window_ = window;
-    
+
     auto navigationManager = pipelineContext->GetNavigationManager();
     ASSERT_NE(navigationManager, nullptr);
     bool isInAnimation = true;
@@ -1494,6 +1494,740 @@ HWTEST_F(NavigationManagerTestNg, RestoreNavDestinationInfo002, TestSize.Level1)
     navigationManager->navigationRecoveryInfo_.clear();
     navigationManager->RestoreNavDestinationInfo(navDestinationInfo, true);
     ASSERT_NE(pipelineContext, nullptr);
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+HWTEST_F(NavigationManagerTestNg, SetForceSplitNavState001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create a FrameNode without NavigationPattern
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    // Create a FrameNode with a different pattern (not NavigationPattern)
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(),
+        true
+    );
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pipelineContext = frameNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step2. Get initial state
+    */
+    auto initialState = navigationManager->GetExistForceSplitNav();
+
+    /**
+    * @tc.steps: step3. Call SetForceSplitNavState with null pattern scenario
+    * @tc.expected: Function should not crash and state should remain
+unchanged
+    */
+    navigationManager->SetForceSplitNavState(true, frameNode);
+
+    /**
+    * @tc.steps: step4. Verify state remains unchanged
+    */
+    auto finalState = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(finalState.first, initialState.first);
+    EXPECT_EQ(finalState.second, initialState.second);
+
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+* @tc.name: SetForceSplitNavState002
+* @tc.desc: Branch: CHECK_NULL_VOID(pattern) = false
+*           Branch: isTargetForceSplitNav = true
+*           Expected: Set isTargetForceSplitNav flag and record nodeId
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, SetForceSplitNavState002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create NavigationGroupNode with NavigationPattern
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    int32_t navigationNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG,
+        navigationNodeId,
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationGroupNode, nullptr);
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern =
+        navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step2. Call SetForceSplitNavState with isTargetForceSplitNav
+= true
+    */
+    navigationManager->SetForceSplitNavState(true, navigationGroupNode);
+
+    /**
+    * @tc.steps: step3. Verify NavigationPattern state is set
+    */
+    EXPECT_EQ(navigationPattern->GetIsTargetForceSplitNav(), true);
+
+    /**
+    * @tc.steps: step4. Verify NavigationManager state is recorded
+    */
+    auto existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(existForceSplitNav.first, true);
+    EXPECT_EQ(existForceSplitNav.second, navigationNodeId);
+
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+* @tc.name: SetForceSplitNavState003
+* @tc.desc: Branch: CHECK_NULL_VOID(pattern) = false
+*           Branch: isTargetForceSplitNav = false
+*           Expected: Clear isTargetForceSplitNav flag and set nodeId to
+INVALID_NODE_ID
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, SetForceSplitNavState003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create NavigationGroupNode and set initial state to
+true
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    int32_t navigationNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG,
+        navigationNodeId,
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationGroupNode, nullptr);
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern =
+navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step2. Set initial state to true
+    */
+    navigationManager->SetForceSplitNavState(true, navigationGroupNode);
+    EXPECT_EQ(navigationPattern->GetIsTargetForceSplitNav(), true);
+    EXPECT_EQ(navigationManager->GetExistForceSplitNav().first, true);
+
+    /**
+    * @tc.steps: step3. Call SetForceSplitNavState with isTargetForceSplitNav
+= false
+    */
+    navigationManager->SetForceSplitNavState(false, navigationGroupNode);
+
+    /**
+    * @tc.steps: step4. Verify NavigationPattern state is cleared
+    */
+    EXPECT_EQ(navigationPattern->GetIsTargetForceSplitNav(), false);
+
+    /**
+    * @tc.steps: step5. Verify NavigationManager state is cleared
+    */
+    auto existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(existForceSplitNav.first, false);
+    EXPECT_EQ(existForceSplitNav.second, -1); // INVALID_NODE_ID
+
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+* @tc.name: SetForceSplitNavState004
+* @tc.desc: Branch: Multiple calls with different navigation nodes
+*           Expected: Last call should override previous state
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, SetForceSplitNavState004, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create two NavigationGroupNodes
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    int32_t nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    int32_t nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+
+    auto navigationNode1 = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, nodeId1, []()
+        { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationNode1, nullptr);
+
+    auto navigationNode2 = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, nodeId2, []()
+        { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationNode2, nullptr);
+
+    auto navigationStack1 = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern1 =
+        navigationNode1->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern1, nullptr);
+    navigationPattern1->SetNavigationStack(std::move(navigationStack1));
+
+    auto navigationStack2 = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern2 =
+        navigationNode2->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern2, nullptr);
+    navigationPattern2->SetNavigationStack(std::move(navigationStack2));
+
+    auto pipelineContext = navigationNode1->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step2. Set force split with first navigation node
+    */
+    navigationManager->SetForceSplitNavState(true, navigationNode1);
+
+    auto existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(existForceSplitNav.first, true);
+    EXPECT_EQ(existForceSplitNav.second, nodeId1);
+
+    /**
+    * @tc.steps: step3. Set force split with second navigation node
+    * @tc.expected: State should be overridden
+    */
+    navigationManager->SetForceSplitNavState(true, navigationNode2);
+
+    existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(existForceSplitNav.first, true);
+    EXPECT_EQ(existForceSplitNav.second, nodeId2);
+
+    /**
+    * @tc.steps: step4. Verify first navigation pattern still has its own
+state
+    */
+    EXPECT_EQ(navigationPattern1->GetIsTargetForceSplitNav(), true);
+    EXPECT_EQ(navigationPattern2->GetIsTargetForceSplitNav(), true);
+
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+* @tc.name: SetForceSplitNavState005
+* @tc.desc: Branch: Toggle between true and false states
+*           Expected: State should correctly toggle
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, SetForceSplitNavState005, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create NavigationGroupNode
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    int32_t navigationNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, navigationNodeId,
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationGroupNode, nullptr);
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern =
+        navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step2. Toggle state multiple times
+    */
+    // Initial state
+    auto existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(existForceSplitNav.first, false);
+    EXPECT_EQ(existForceSplitNav.second, -1);
+
+    // Set to true
+    navigationManager->SetForceSplitNavState(true, navigationGroupNode);
+    existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(existForceSplitNav.first, true);
+    EXPECT_EQ(existForceSplitNav.second, navigationNodeId);
+
+    // Set to false
+    navigationManager->SetForceSplitNavState(false, navigationGroupNode);
+    existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(existForceSplitNav.first, false);
+    EXPECT_EQ(existForceSplitNav.second, -1);
+
+    // Set to true again
+    navigationManager->SetForceSplitNavState(true, navigationGroupNode);
+    existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(existForceSplitNav.first, true);
+    EXPECT_EQ(existForceSplitNav.second, navigationNodeId);
+
+    // Set to false again
+    navigationManager->SetForceSplitNavState(false, navigationGroupNode);
+    existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(existForceSplitNav.first, false);
+    EXPECT_EQ(existForceSplitNav.second, -1);
+
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+/**
+* @tc.name: IsTargetForceSplitNav001
+* @tc.desc: Branch: CHECK_NULL_VOID(context) = true (pipeline is null)
+*           Expected: Function returns early without setting state
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, IsTargetForceSplitNav001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create NavigationManager with null pipeline
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationGroupNode, nullptr);
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step2. Clear pipeline to simulate null context
+    */
+    navigationManager->pipeline_ = nullptr;
+
+    /**
+    * @tc.steps: step3. Call GetIsTargetForceSplitNav with null pipeline
+    * @tc.expected: Should not crash and state should remain unchanged
+    */
+    auto initialState = navigationManager->GetExistForceSplitNav();
+    navigationManager->IsTargetForceSplitNav(navigationGroupNode);
+    auto finalState = navigationManager->GetExistForceSplitNav();
+
+    EXPECT_EQ(finalState.first, initialState.first);
+    EXPECT_EQ(finalState.second, initialState.second);
+
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+* @tc.name: IsTargetForceSplitNav002
+* @tc.desc: Branch: existForceSplitNav.first = true (already has force split nav)
+*           Expected: Return early without setting new state
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, IsTargetForceSplitNav002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create NavigationGroupNode with NavigationPattern
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationGroupNode, nullptr);
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step2. Set existForceSplitNav to true
+    */
+    navigationManager->SetExistForceSplitNav(true, 12345);
+
+    /**
+    * @tc.steps: step3. Call GetIsTargetForceSplitNav
+    * @tc.expected: Should return early, pattern state should remain false
+    */
+    navigationManager->IsTargetForceSplitNav(navigationGroupNode);
+
+    EXPECT_EQ(navigationPattern->GetIsTargetForceSplitNav(), false);
+
+    // Verify state is not changed
+    auto existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(existForceSplitNav.first, true);
+    EXPECT_EQ(existForceSplitNav.second, 12345);
+
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+* @tc.name: IsTargetForceSplitNav003
+* @tc.desc: Branch: !navPattern->GetNavBasePageNode() = true (no base page node)
+*           Expected: Return early without setting state
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, IsTargetForceSplitNav003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create NavigationGroupNode without base page node
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationGroupNode, nullptr);
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    // Deliberately not setting base page node
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step2. Call GetIsTargetForceSplitNav without base page node
+    * @tc.expected: Should return early without setting state
+    */
+    navigationManager->IsTargetForceSplitNav(navigationGroupNode);
+
+    EXPECT_EQ(navigationPattern->GetIsTargetForceSplitNav(), false);
+
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+* @tc.name: IsTargetForceSplitNav004
+* @tc.desc: Branch: !TargetIdOrDepthExists() = true
+*           Expected: Set force split to true (is outermost navigation)
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, IsTargetForceSplitNav004, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create NavigationGroupNode with base page node
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationGroupNode, nullptr);
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    /**
+    * @tc.steps: step2. Set base page node
+    */
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()), true
+    );
+    navigationPattern->pageNode_ = pageNode;
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step3. Ensure dumpMap is empty and no target ID/depth is set
+    */
+    ASSERT_FALSE(navigationManager->TargetIdOrDepthExists());
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+* @tc.name: IsTargetForceSplitNav007
+* @tc.desc: Branch: targetInspectorId has value, currInspectorId != targetInspectorId
+*           Expected: Set force split to false (ID doesn't match)
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, IsTargetForceSplitNav007, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create NavigationGroupNode with different inspector ID
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    const std::string TARGET_NAV_ID = "TargetNavigation001";
+    const std::string CURRENT_NAV_ID = "DifferentNavigation002";
+
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationGroupNode, nullptr);
+
+    /**
+    * @tc.steps: step2. Set inspector ID different from target
+    */
+    navigationGroupNode->propInspectorId_ = CURRENT_NAV_ID;
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    /**
+    * @tc.steps: step3. Set base page node
+    */
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()),
+        true
+    );
+    navigationPattern->pageNode_ = pageNode;
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step4. Set target navigation ID to different value
+    */
+    navigationManager->SetForceSplitNavigationId(TARGET_NAV_ID);
+
+    /**
+    * @tc.steps: step5. Call GetIsTargetForceSplitNav
+    * @tc.expected: Should set force split to false (ID doesn't match)
+    */
+    navigationManager->IsTargetForceSplitNav(navigationGroupNode);
+
+    EXPECT_EQ(navigationPattern->GetIsTargetForceSplitNav(), false);
+
+    auto existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    EXPECT_EQ(existForceSplitNav.first, false);
+
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+* @tc.name: IsTargetForceSplitNav008
+* @tc.desc: Branch: targetNestedDepth has no value
+*           Expected: Return early without setting state
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, IsTargetForceSplitNav008, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create NavigationGroupNode with base page node
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationGroupNode, nullptr);
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    /**
+    * @tc.steps: step2. Set base page node
+    */
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()),
+        true
+    );
+    navigationPattern->pageNode_ = pageNode;
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step3. Set target navigation ID (but not depth)
+    * This ensures TargetIdOrDepthExists returns true, but GetTargetNavigationDepth returns no value
+    */
+    navigationManager->SetForceSplitNavigationId("SomeId");
+    navigationManager->SetForceSplitNavigationDepth(std::nullopt);
+
+    /**
+    * @tc.steps: step4. Set inspector ID to not match
+    */
+    navigationGroupNode->propInspectorId_ = "DifferentId";
+
+    /**
+    * @tc.steps: step5. Call GetIsTargetForceSplitNav
+    * @tc.expected: Should return early without setting force split state
+    */
+    navigationManager->IsTargetForceSplitNav(navigationGroupNode);
+
+    EXPECT_EQ(navigationPattern->GetIsTargetForceSplitNav(), false);
+
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+* @tc.name: IsTargetForceSplitNav009
+* @tc.desc: Branch: targetNestedDepth has value, currNestedDepth_ == targetNestedDepth
+*           Expected: Set force split to true (depth matches)
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, IsTargetForceSplitNav009, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create NavigationGroupNode with base page node
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationGroupNode, nullptr);
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    /**
+    * @tc.steps: step2. Set base page node
+    */
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()),
+        true
+    );
+    navigationPattern->pageNode_ = pageNode;
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step3. Set target nested depth to 0 (matches initial currNestedDepth_)
+    */
+    navigationManager->SetForceSplitNavigationDepth(0);
+    navigationManager->currNestedDepth_ = 0;
+
+    /**
+    * @tc.steps: step4. Call GetIsTargetForceSplitNav
+    * @tc.expected: Should set force split to false (depth matches)
+    */
+    navigationManager->IsTargetForceSplitNav(navigationGroupNode);
+
+    EXPECT_EQ(navigationPattern->GetIsTargetForceSplitNav(), false);
+
+    NavigationManagerTestNg::TearDownTestSuite();
+}
+
+/**
+* @tc.name: IsTargetForceSplitNav010
+* @tc.desc: Branch: targetNestedDepth has value, currNestedDepth_ != targetNestedDepth
+*           Expected: Set force split to false (depth doesn't match)
+* @tc.type: FUNC
+*/
+HWTEST_F(NavigationManagerTestNg, IsTargetForceSplitNav010, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create NavigationGroupNode with base page node
+    */
+    NavigationManagerTestNg::SetUpTestSuite();
+
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    ASSERT_NE(navigationGroupNode, nullptr);
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+
+    /**
+    * @tc.steps: step2. Set base page node
+    */
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()),
+        true
+    );
+    navigationPattern->pageNode_ = pageNode;
+
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+
+    /**
+    * @tc.steps: step3. Set target nested depth to 1, but currNestedDepth_ is 0
+    */
+    navigationManager->SetForceSplitNavigationDepth(1);
+    navigationManager->currNestedDepth_ = 0;
+
+    /**
+    * @tc.steps: step4. Call GetIsTargetForceSplitNav
+    * @tc.expected: Should set force split to false (depth doesn't match)
+    */
+    navigationManager->IsTargetForceSplitNav(navigationGroupNode);
+
+    EXPECT_EQ(navigationPattern->GetIsTargetForceSplitNav(), false);
+
     NavigationManagerTestNg::TearDownTestSuite();
 }
 } // namespace OHOS::Ace::NG
