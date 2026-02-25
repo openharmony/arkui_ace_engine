@@ -76,6 +76,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/pattern/canvas/canvas_pattern.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -3152,6 +3153,17 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
     }
     isRenderDirtyMarked_ = true;
     if (isRenderBoundary) {
+        auto pattern = AceType::DynamicCast<CanvasPattern>(GetPattern());
+        if (pattern) {
+            int32_t id = pattern->GetPatternInstanceId();
+            int32_t contextInstanceId = context->GetInstanceId();
+            if (id != contextInstanceId) {
+                TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN,
+                    "MarkNeedRender GetPatternInstanceId:%{public}d, ContextInstanceId:%{public}d"
+                    "FrameNodeInstanceId:%{public}d", id, contextInstanceId, GetInstanceId());
+                LogBacktrace();
+            }
+        }
         context->AddDirtyRenderNode(Claim(this));
         return;
     }

@@ -137,6 +137,7 @@ public:
         pattern->SetTranslateY(transform.translateY);
     }
 
+    virtual void SetPatternInstanceId(int32_t id) {};
 protected:
     int32_t apiVersion_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(RenderingContext2DModel);

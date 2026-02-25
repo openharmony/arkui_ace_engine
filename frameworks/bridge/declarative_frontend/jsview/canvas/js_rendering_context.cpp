@@ -98,6 +98,7 @@ JSRenderingContext::JSRenderingContext()
         }
     }
 #endif
+    renderingContext2DModel_->SetPatternInstanceId(GetInstanceId());
 }
 
 void JSRenderingContext::JSBind(BindingTarget globalObj)

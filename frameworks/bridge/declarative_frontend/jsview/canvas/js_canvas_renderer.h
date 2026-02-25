@@ -187,6 +187,11 @@ public:
         instanceId_ = id;
     }
 
+    int32_t GetInstanceId() override
+    {
+        return instanceId_;
+    }
+
     void SetTransform(unsigned int id, const TransformParam&);
 
     void ResetPaintState();
