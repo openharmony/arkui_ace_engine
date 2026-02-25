@@ -16,11 +16,43 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_PEER_IMPL_H
 
 #include <optional>
+#include "base/error/error_code.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/swiper/swiper_controller.h"
+#include "arkoala_api_generated.h"
+
+#ifdef WINDOWS_PLATFORM
+#include <windows.h>
+inline void* LoadLibrary()
+{
+    const char* libPath = "libArkoalaNative_ark.dll";
+    return LoadLibraryA(libPath);
+}
+inline void* FindSymbol(void* library, const char* name)
+{
+    return (void*)GetProcAddress(reinterpret_cast<HMODULE>(library), name);
+}
+#else
+#include <dlfcn.h>
+inline void* LoadLibrary()
+{
+    const char* libPath = "libArkoalaNative_ark.z.so";
+    void* handle = dlopen(libPath, RTLD_LOCAL | RTLD_LAZY);
+    if (!handle) {
+        return nullptr;
+    }
+    return handle;
+}
+inline void* FindSymbol(void* library, const char* name)
+{
+    return dlsym(library, name);
+}
+#endif
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+using AniThrowErrorFunc = void (*)(Ark_VMContext vmContext, int32_t errCode, const std::string& errorMsg);
 class SwiperControllerPeerImpl : public Referenced {
 public:
     SwiperControllerPeerImpl() = default;
@@ -78,6 +110,8 @@ public:
     {
         if (auto controller = handler_.Upgrade(); controller) {
             controller->SetPreloadFinishCallback(preloadFinishCallback);
+        } else {
+            SwiperControllerPeerImpl::ThrowError(ERROR_CODE_NAMED_ROUTE_ERROR, "Controller not bound to component.");
         }
     }
 
@@ -111,6 +145,24 @@ public:
             return controller->IsFakeDragging();
         }
         return false;
+    }
+
+    static void ThrowError(int32_t errCode, const std::string& errorMsg)
+    {
+        auto container = Container::CurrentSafely();
+        CHECK_NULL_VOID(container);
+        auto frontEnd = container->GetFrontend();
+        CHECK_NULL_VOID(frontEnd);
+        if (!frontEnd->GetEnv() && container->GetSubFrontend()) {
+            frontEnd = container->GetSubFrontend(); // return ArktsFrontend when 1.1 hybrid 1.2
+        }
+        auto vmContext = Ark_VMContext(frontEnd->GetEnv());
+        CHECK_NULL_VOID(vmContext);
+        auto handle = LoadLibrary();
+        CHECK_NULL_VOID(handle);
+        auto aniErrorFunc = reinterpret_cast<AniThrowErrorFunc>(FindSymbol(handle, "AniThrowError"));
+        CHECK_NULL_VOID(aniErrorFunc);
+        aniErrorFunc(vmContext, errCode, errorMsg);
     }
 private:
     Ace::WeakPtr<SwiperController> handler_;
