@@ -728,6 +728,8 @@ public:
 
     static int32_t getFormSharedImageCacheThreshold();
 
+    static bool IsFormSkeletonRSTransactionEnabled();
+
     static bool IsWhiteBlockEnabled();
     static bool IsWhiteBlockIdleChange();
     static int32_t GetWhiteBlockIndexValue();
