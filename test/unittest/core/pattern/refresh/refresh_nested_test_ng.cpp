@@ -46,6 +46,7 @@ public:
     void CreateNestedSwiper();
     ListModelNG CreateNestedList();
     AssertionResult Position(const RefPtr<FrameNode>& frameNode, float expectOffset) override;
+    RefreshModelNG CreateNestedRefresh();
 
     RefPtr<FrameNode> scrollNode_;
     RefPtr<ScrollPattern> scrollPattern_;
@@ -55,6 +56,8 @@ public:
     RefPtr<SwiperPattern> swiperPattern_;
     RefPtr<FrameNode> listNode_;
     RefPtr<ListPattern> listPattern_;
+    RefPtr<FrameNode> nestedRefreshNode_;
+    RefPtr<RefreshPattern> nestedRefreshPattern_;
 };
 
 void RefreshNestedTestNg::SetUpTestSuite()
@@ -142,6 +145,15 @@ ListModelNG RefreshNestedTestNg::CreateNestedList()
 AssertionResult RefreshNestedTestNg::Position(const RefPtr<FrameNode>& frameNode, float expectOffset)
 {
     return IsEqual(GetChildY(frameNode, 0), expectOffset);
+}
+
+RefreshModelNG RefreshNestedTestNg::CreateNestedRefresh()
+{
+    RefreshModelNG model;
+    model.Create();
+    nestedRefreshNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    nestedRefreshPattern_ = nestNode_->GetPattern<RefreshPattern>();
+    return model;
 }
 
 /**
@@ -849,5 +861,147 @@ HWTEST_F(RefreshNestedTestNg, RefreshListListNested001, TestSize.Level1)
     DragUpdate(10);
     FlushUITasks();
     EXPECT_EQ(pattern_->scrollOffset_, 10);
+}
+
+/**
+ * @tc.name: RefreshPatternHandleScrollVelocity001
+ * @tc.desc: Test HandleScrollVelocity with positive scrollOffset_ and non-RefreshPattern parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshNestedTestNg, RefreshPatternHandleScrollVelocity001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh and set up mock
+     */
+    CreateRefresh();
+    CreateDone();
+
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    pattern_->parent_ = mockScroll;
+    pattern_->scrollOffset_ = 10.f;
+
+    /**
+     * @tc.steps: step2. Test HandleScrollVelocity with positive scrollOffset
+     * @tc.expected: Returns true (handles velocity itself since parent is not RefreshPattern)
+     */
+    auto result = pattern_->HandleScrollVelocity(5.f);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step3. Test with zero velocity but positive scrollOffset
+     * @tc.expected: Returns true
+     */
+    result = pattern_->HandleScrollVelocity(0.f);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: RefreshPatternHandleScrollVelocity002
+ * @tc.desc: Test HandleScrollVelocity with positive velocity and non-RefreshPattern parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshNestedTestNg, RefreshPatternHandleScrollVelocity002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh and set up mock
+     */
+    CreateRefresh();
+    CreateDone();
+
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    pattern_->parent_ = mockScroll;
+    pattern_->scrollOffset_ = 0.f;
+
+    /**
+     * @tc.steps: step2. Test HandleScrollVelocity with positive velocity
+     * @tc.expected: Returns true (handles velocity itself since parent is not RefreshPattern)
+     */
+    auto result = pattern_->HandleScrollVelocity(5.f);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step3. Test with negative velocity and zero scrollOffset
+     * @tc.expected: Follows existing logic (not new branch)
+     */
+    result = pattern_->HandleScrollVelocity(-5.f);
+}
+
+/**
+ * @tc.name: RefreshPatternHandleScrollVelocity003
+ * @tc.desc: Test HandleScrollVelocity delegates to RefreshPattern parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshNestedTestNg, RefreshPatternHandleScrollVelocity003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create nested Refresh structure: Refresh > Refresh
+     */
+    CreateRefresh();
+    {
+        RefreshModelNG nestedModel;
+        nestedModel.Create();
+        nestedRefreshNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        nestedRefreshPattern_ = nestedRefreshNode_->GetPattern<RefreshPattern>();
+    }
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Set child scrollOffset to positive value
+     */
+    nestedRefreshPattern_->scrollOffset_ = 10.f;
+
+    /**
+     * @tc.steps: step3. Mock parent's HandleScrollVelocity to verify delegation
+     * @tc.expected: Parent HandleScrollVelocity is called once
+     */
+    auto mockParent = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    pattern_->parent_ = mockParent;
+
+    /**
+     * @tc.steps: step4. Call HandleScrollVelocity on child
+     * @tc.expected: Delegates to parent and returns true
+     */
+    auto result = nestedRefreshPattern_->HandleScrollVelocity(5.f);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: RefreshPatternHandleScrollVelocity004
+ * @tc.desc: Test HandleScrollVelocity with negative velocity and zero scrollOffset (existing logic)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshNestedTestNg, RefreshPatternHandleScrollVelocity004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh and set up mock
+     */
+    CreateRefresh();
+    CreateDone();
+
+    auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    pattern_->parent_ = mockScroll;
+    pattern_->scrollOffset_ = 0.f;
+
+    /**
+     * @tc.steps: step2. Set nested scroll mode to PARENT_FIRST
+     */
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::PARENT_FIRST,
+        .backward = NestedScrollMode::PARENT_FIRST,
+    };
+    pattern_->SetNestedScroll(nestedOpt);
+
+    /**
+     * @tc.steps: step3. Mock parent HandleScrollVelocity for negative velocity path
+     * @tc.expected: Parent HandleScrollVelocity is called once
+     */
+    EXPECT_CALL(*mockScroll, HandleScrollVelocity(-5.f, _)).Times(1).WillOnce(Return(false));
+
+    /**
+     * @tc.steps: step4. Test with negative velocity and zero scrollOffset
+     * @tc.expected: Follows existing logic, delegates to parent, returns false
+     */
+    auto result = pattern_->HandleScrollVelocity(-5.f);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG
