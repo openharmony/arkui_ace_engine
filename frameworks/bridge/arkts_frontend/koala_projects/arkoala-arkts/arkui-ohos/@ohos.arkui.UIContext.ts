@@ -536,28 +536,9 @@ export class UIContext {
     constructor() {
     }
     
-    static getCallingScopeUIContext(): UIContext | undefined {
-        return UIContextImpl.getCallingScopeUIContext();
-    }
-
-    static getLastFocusedUIContext(): UIContext | undefined {
-        return UIContextImpl.getLastFocusedUIContext();
-    }
-
-    static getLastForegroundUIContext(): UIContext | undefined {
-        return UIContextImpl.getLastForegroundUIContext();
-    }
-
-    static getAllUIContexts(): Array<UIContext> {
-        return UIContextImpl.getAllUIContexts();
-    }
-
     static resolveUIContext(): ResolvedUIContext {
         let instance = UIContextUtil.resolveUIContext();
         return new ResolvedUIContext(instance[0] as int32, instance[1] as ResolveStrategy);
-    }
-    public isAvailable() : boolean {
-        throw Error("isAvailable not implemented in UIContext!")
     }
 
     public getFont() : Font {
@@ -965,16 +946,7 @@ export class UIObserver {
             this.observerImpl!.offNavDestinationSwitch(callback);
         }
     }
-    public onWindowSizeLayoutBreakpointChange(callback: Callback<uiObserver.WindowSizeLayoutBreakpointInfo>): void {
-        if (this.observerImpl) {
-            this.observerImpl!.onWindowSizeLayoutBreakpointChange(callback);
-        }
-    }
-    public offWindowSizeLayoutBreakpointChange(callback?: Callback<uiObserver.WindowSizeLayoutBreakpointInfo>): void {
-        if (this.observerImpl) {
-            this.observerImpl!.offWindowSizeLayoutBreakpointChange(callback);
-        }
-    }
+
     public onNavDestinationSwitch(
         observerOptions: uiObserver.NavDestinationSwitchObserverOptions,
         callback: Callback<uiObserver.NavDestinationSwitchInfo>

@@ -339,10 +339,6 @@ export class ArkUIAniModule {
     // for UIContext without window
     native static _CreateWindowFreeContainer(context: common.Context): KInt
     native static _DestroyWindowFreeContainer(instanceId: KInt): void
-    native static _GetCallingScopeUIContext(): KInt
-    native static _GetLastFocusedUIContext(): KInt
-    native static _GetLastForegroundUIContext(): KInt
-    native static _GetAllUIContexts(): Array<KInt>
     native static _ResolveUIContext(): Array<KInt>
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean

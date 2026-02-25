@@ -1464,45 +1464,6 @@ export class UIContextImpl extends UIContext {
         this.position = 0;
     }
 
-    static getCallingScopeUIContext(): UIContext | undefined {
-        const instanceId = ArkUIAniModule._GetCallingScopeUIContext();
-        if (instanceId < 0) {
-            return undefined
-        }
-        let uiContext = UIContextUtil.getOrCreateUIContextById(instanceId)
-        return uiContext
-    }
-    static getLastFocusedUIContext(): UIContext | undefined {
-        const instanceId = ArkUIAniModule._GetLastFocusedUIContext();
-        if (instanceId < 0) {
-            return undefined
-        }
-        let uiContext = UIContextUtil.getOrCreateUIContextById(instanceId)
-        return uiContext
-    }
-    static getLastForegroundUIContext(): UIContext | undefined {
-        const instanceId = ArkUIAniModule._GetLastForegroundUIContext();
-        if (instanceId < 0) {
-            return undefined
-        }
-        let uiContext = UIContextUtil.getOrCreateUIContextById(instanceId)
-        return uiContext
-    }
-    static getAllUIContexts(): Array<UIContext> {
-        let allContainerIds = ArkUIAniModule._GetAllUIContexts();
-        let contextArray = new Array<UIContext>();
-        for (let item of allContainerIds) {
-            if (item >= 0) {
-                contextArray.push(UIContextUtil.getOrCreateUIContextById(item));
-            }
-        }
-        return contextArray;
-    }
-    static availableInstanceIds_: Set<int32> = new Set<int32>();
-
-    public isAvailable() : boolean {
-        return UIContextImpl.availableInstanceIds_.has(this.instanceId_);
-    }
     public getFont() : Font {
         return this.font_;
     }

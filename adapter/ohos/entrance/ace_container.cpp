@@ -717,7 +717,6 @@ void AceContainer::InitializeFrontend()
             }
             frontend_ = arktsFrontend;
         }
-        frontend_->instanceId_ = instanceId_;
     } else if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
         // initialize after AttachView
         LOGI("Init STATIC_HYBRID_DYNAMIC Frontend");
