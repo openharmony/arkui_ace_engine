@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -254,7 +254,20 @@ public:
         return {};
     }
 
-    void SetCreateTime(std::chrono::time_point<std::chrono::high_resolution_clock> time)
+    // Get the window name associated with this container
+    virtual std::string GetWindowName() const
+    {
+        return {};
+    }
+
+    // Get the creation timestamp of this container (in milliseconds since epoch)
+    // Returns timestamp recorded at container construction time
+    int64_t GetCreateTime() const
+    {
+        return createTime_;
+    }
+
+    void SetCreateTime(int64_t time)
     {
         createTime_ = time;
     }
@@ -836,7 +849,9 @@ private:
     static bool IsIdAvailable(int32_t id);
 
 protected:
-    std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
+    // Container creation timestamp for enhanced error messages
+    // Used to provide context when container lookup fails
+    int64_t createTime_;
     bool firstUpdateData_ = true;
     std::string cardHapPath_;
     bool useNewPipeline_ = false;

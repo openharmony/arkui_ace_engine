@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+
+#include <chrono>
 
 #include "auto_fill_manager.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
@@ -417,6 +419,8 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     : instanceId_(instanceId), type_(type), aceAbility_(aceAbility), useCurrentEventRunner_(useCurrentEventRunner)
 {
     ACE_DCHECK(callback);
+    // Record container creation timestamp for enhanced error messages
+    createTime_ = GetCurrentTimestamp();
     if (useNewPipeline) {
         SetUseNewPipeline();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -442,6 +446,8 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
       isSubContainer_(isSubAceContainer)
 {
     ACE_DCHECK(callback);
+    // Record container creation timestamp for enhanced error messages
+    createTime_ = GetCurrentTimestamp();
     if (useNewPipeline) {
         SetUseNewPipeline();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -466,6 +472,8 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
       isSubContainer_(isSubAceContainer)
 {
     ACE_DCHECK(callback);
+    // Record container creation timestamp for enhanced error messages
+    createTime_ = GetCurrentTimestamp();
     if (useNewPipeline) {
         SetUseNewPipeline();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -2704,8 +2712,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             front->SetJsMessageDispatcher(AceType::Claim(this));
             front->SetAssetManager(assetManager_);
         }
-    } else if (type_ != FrontendType::JS_CARD) {
-        aceView_->SetCreateTime(createTime_);
     }
     resRegister_ = aceView_->GetPlatformResRegister();
     auto uiTranslateManager = std::make_shared<UiTranslateManagerImpl>(taskExecutor_);

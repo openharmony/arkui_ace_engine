@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "core/common/container_scope.h"
+#include "frameworks/core/common/ace_engine.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "interfaces/napi/kits/componentutils/js_mistouch_prevention.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -43,10 +44,12 @@ static napi_value JSGetRectangleById(napi_env env, napi_callback_info info)
 
     int32_t safelyId = -1;
     int32_t currentId = ContainerScope::CurrentId();
+    auto currentIdAndReason = InstanceIdGenReason::SCOPE;
     if (currentId >= 0) {
         safelyId = currentId;
     } else {
         safelyId = Container::SafelyId();
+        currentIdAndReason = ContainerScope::CurrentIdWithReason().second;
         int32_t idNum = 0;
         napi_get_value_int32(env, argv[1], &idNum);
         TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN, "JSGetRectangleById instanceId_: %{public}d,"
@@ -55,7 +58,11 @@ static napi_value JSGetRectangleById(napi_env env, napi_callback_info info)
     auto container = Container::GetContainer(safelyId);
     auto delegate = EngineHelper::GetDelegateByContainer(container);
     if (!delegate) {
-        NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
+        // Build enhanced error message with container context information
+        // This helps developers identify which instance was requested and why it failed
+        std::string message = "";
+        message = AceEngine::GetEnhancedContextBNotFoundMessage(currentIdAndReason, safelyId);
+        NapiThrow(env, "UI execution context not found." + message, ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->GetRectangleById(key, rectangle);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -411,6 +411,56 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest010, TestSize.Level1)
     ContainerScope::Remove(TEST_INSTANCE_ID_SUB_CONTAINER);
     ContainerScope::Remove(TEST_INSTANCE_ID_CONTAINER);
     EXPECT_EQ(ContainerScope::GetAllUIContexts().size(), 0);
+}
+
+/**
+ * @tc.name: ContainerScopeTest011
+ * @tc.desc: ReasonToDescription
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerScopeTest, ContainerScopeTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test SCOPE reason description
+     * @tc.expected: Returns correct description for SCOPE
+     */
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::SCOPE), "instance specified by ContainerScope");
+
+    /**
+     * @tc.steps: step2. Test ACTIVE reason description
+     * @tc.expected: Returns correct description for ACTIVE
+     */
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::ACTIVE), "recently active instance");
+
+    /**
+     * @tc.steps: step3. Test DEFAULT reason description
+     * @tc.expected: Returns correct description for DEFAULT
+     */
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::DEFAULT), "no valid instance, using default");
+
+    /**
+     * @tc.steps: step4. Test SINGLETON reason description
+     * @tc.expected: Returns correct description for SINGLETON
+     */
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::SINGLETON), "only one instance exists");
+
+    /**
+     * @tc.steps: step5. Test FOREGROUND reason description
+     * @tc.expected: Returns correct description for FOREGROUND
+     */
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::FOREGROUND), "recently foreground instance");
+
+    /**
+     * @tc.steps: step6. Test UNDEFINED reason description
+     * @tc.expected: Returns correct description for UNDEFINED
+     */
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::UNDEFINED), "no valid instance exists");
+
+    /**
+     * @tc.steps: step7. Test invalid enum value (out of range)
+     * @tc.expected: Returns "unknown reason"
+     */
+    EXPECT_EQ(ContainerScope::ReasonToDescription(static_cast<InstanceIdGenReason>(999)), "unknown reason");
 }
 
 } // namespace OHOS::Ace

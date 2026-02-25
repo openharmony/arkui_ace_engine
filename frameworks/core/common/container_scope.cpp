@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,6 +98,26 @@ std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
         return { currentId, InstanceIdGenReason::FOREGROUND };
     }
     return { ContainerScope::DefaultId(), InstanceIdGenReason::DEFAULT };
+}
+
+const std::string ContainerScope::ReasonToDescription(InstanceIdGenReason reason)
+{
+    switch (reason) {
+        case InstanceIdGenReason::SCOPE:
+            return "instance specified by ContainerScope";
+        case InstanceIdGenReason::ACTIVE:
+            return "recently active instance";
+        case InstanceIdGenReason::DEFAULT:
+            return "no valid instance, using default";
+        case InstanceIdGenReason::SINGLETON:
+            return "only one instance exists";
+        case InstanceIdGenReason::FOREGROUND:
+            return "recently foreground instance";
+        case InstanceIdGenReason::UNDEFINED:
+            return "no valid instance exists";
+        default:
+            return "unknown reason";
+    }
 }
 
 const std::set<int32_t> ContainerScope::GetAllUIContexts()
