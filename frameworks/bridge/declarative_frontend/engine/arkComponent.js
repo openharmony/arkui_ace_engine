@@ -27314,41 +27314,416 @@ if (globalThis.Marquee !== undefined) {
   };
 }
 
-// @ts-ignore
-if (globalThis.Menu === undefined) {
-  globalThis.Menu = {
-    create: function (params) {
-      let module = globalThis.requireNapi('arkui.components.arkmenu');
-      module.exportView();
-      getUINativeModule().menu.create();
-    },
-    name: 'JSMenu'
+/// <reference path='./import.ts' />
+class MenuFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().menu.resetMenuFontColor(node);
+    }
+    else {
+      getUINativeModule().menu.setMenuFontColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+MenuFontColorModifier.identity = Symbol('fontColor');
+class MenuWidthModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().menu.resetWidth(node);
+    } else {
+      getUINativeModule().menu.setWidth(node, this.value);
+    }
+  }
 
-
-// @ts-ignore
-if (globalThis.MenuItem === undefined) {
-  globalThis.MenuItem = {
-    create: function (params) {
-      let module = globalThis.requireNapi('arkui.components.arkmenuitem');
-      module.exportView();
-      getUINativeModule().menuitem.create(params);
-    },
-    name: 'JSMenuItem'
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-
-// @ts-ignore
-if (globalThis.MenuItemGroup === undefined) {
-  globalThis.MenuItemGroup = {
-    create: function (params) {
-      let module = globalThis.requireNapi('arkui.components.arkmenuitemgroup');
-      module.exportView();
-      getUINativeModule().menuitemgroup.createMenuItemGroup(params);
-    },
-    name: 'JSMenuItemGroup'
+MenuWidthModifier.identity = Symbol('menuWidth');
+class MenuFontSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
   }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().menu.resetFontSize(node);
+    } else {
+      getUINativeModule().menu.setFontSize(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MenuFontSizeModifier.identity = Symbol('menuFontSize');
+
+class MenuFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menu.resetFont(node);
+    }
+    else {
+      getUINativeModule().menu.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+    }
+  }
+  checkObjectDiff() {
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+  }
+}
+MenuFontModifier.identity = Symbol('font');
+class RadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().menu.resetRadius(node);
+    }
+    else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value, false);
+      }
+      else {
+        getUINativeModule().menu.setRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight, true);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.topLeft === this.value.topLeft &&
+        this.stageValue.topRight === this.value.topRight &&
+        this.stageValue.bottomLeft === this.value.bottomLeft &&
+        this.stageValue.bottomRight === this.value.bottomRight);
+    }
+    else {
+      return true;
+    }
+  }
+}
+RadiusModifier.identity = Symbol('radius');
+class MenuItemDividerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menu.resetMenuItemDivider(node);
+    } else {
+      getUINativeModule().menu.setMenuItemDivider(node, this.value.strokeWidth,
+        this.value.color, this.value.startMargin, this.value.endMargin, this.value.mode);
+    }
+  }
+  checkObjectDiff() {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
+        this.stageValue.color === this.value.color &&
+        this.stageValue.startMargin === this.value.startMargin &&
+        this.stageValue.endMargin === this.value.endMargin &&
+        this.stageValue.mode === this.value.mode);
+    } else {
+      return true;
+    }
+  }
+}
+MenuItemDividerModifier.identity = Symbol('menuItemDivider');
+class MenuItemGroupDividerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menu.resetMenuItemGroupDivider(node);
+    } else {
+      getUINativeModule().menu.setMenuItemGroupDivider(node, this.value.strokeWidth, this.value.color,
+        this.value.startMargin, this.value.endMargin, this.value.mode);
+    }
+  }
+
+  checkObjectDiff() {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
+        this.stageValue.color === this.value.color &&
+        this.stageValue.startMargin === this.value.startMargin &&
+        this.stageValue.endMargin === this.value.endMargin &&
+        this.stageValue.mode === this.value.mode);
+    } else {
+      return true;
+    }
+  }
+}
+MenuItemGroupDividerModifier.identity = Symbol('menuItemGroupDivider');
+class SubMenuExpandingModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().menu.resetSubMenuExpandingMode(node);
+    } else {
+      getUINativeModule().menu.setSubMenuExpandingMode(node, this.value);
+    }
+  }
+}
+SubMenuExpandingModeModifier.identity = Symbol('subMenuExpandingMode');
+class SubMenuExpandSymbolModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menu.resetSubMenuExpandSymbol(node);
+    } else {
+      getUINativeModule().menu.setSubMenuExpandSymbol(node, this.value);
+    }
+  }
+}
+SubMenuExpandSymbolModifier.identity = Symbol('subMenuExpandSymbol');
+class ArkMenuComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, MenuWidthModifier.identity, MenuWidthModifier, value);
+    return this;
+  }
+  fontSize(value) {
+    modifierWithKey(this._modifiersWithKeys, MenuFontSizeModifier.identity, MenuFontSizeModifier, value);
+    return this;
+  }
+  font(value) {
+    modifierWithKey(this._modifiersWithKeys, MenuFontModifier.identity, MenuFontModifier, value);
+    return this;
+  }
+  fontColor(value) {
+    modifierWithKey(this._modifiersWithKeys, MenuFontColorModifier.identity, MenuFontColorModifier, value);
+    return this;
+  }
+  radius(value) {
+    modifierWithKey(this._modifiersWithKeys, RadiusModifier.identity, RadiusModifier, value);
+    return this;
+  }
+  menuItemDivider(value) {
+    modifierWithKey(this._modifiersWithKeys, MenuItemDividerModifier.identity, MenuItemDividerModifier, value);
+    return this;
+  }
+  menuItemGroupDivider(value) {
+    modifierWithKey(this._modifiersWithKeys, MenuItemGroupDividerModifier.identity, MenuItemGroupDividerModifier, value);
+    return this;
+  }
+  subMenuExpandingMode(value) {
+    modifierWithKey(this._modifiersWithKeys, SubMenuExpandingModeModifier.identity, SubMenuExpandingModeModifier, value);
+    return this;
+  }
+  subMenuExpandSymbol(value) {
+    modifierWithKey(this._modifiersWithKeys, SubMenuExpandSymbolModifier.identity, SubMenuExpandSymbolModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.Menu !== undefined) {
+  globalThis.Menu.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkMenuComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.MenuModifier(nativePtr, classType);
+    });
+  };
+}
+
+/// <reference path='./import.ts' />
+class MenuItemSelectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().menuitem.resetMenuItemSelected(node);
+    }
+    else {
+      getUINativeModule().menuitem.setMenuItemSelected(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MenuItemSelectedModifier.identity = Symbol('menuItemSelected');
+class LabelFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().menuitem.resetLabelFontColor(node);
+    }
+    else {
+      getUINativeModule().menuitem.setLabelFontColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+LabelFontColorModifier.identity = Symbol('labelfontColor');
+class ContentFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().menuitem.resetContentFontColor(node);
+    }
+    else {
+      getUINativeModule().menuitem.setContentFontColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ContentFontColorModifier.identity = Symbol('contentfontColor');
+class LabelFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menuitem.resetLabelFont(node);
+    }
+    else {
+      getUINativeModule().menuitem.setLabelFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+    }
+  }
+  checkObjectDiff() {
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+  }
+}
+LabelFontModifier.identity = Symbol('labelFont');
+class ContentFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menuitem.resetContentFont(node);
+    }
+    else {
+      getUINativeModule().menuitem.setContentFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+    }
+  }
+  checkObjectDiff() {
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+  }
+}
+ContentFontModifier.identity = Symbol('contentFont');
+class MenuItemSelectIconModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menuitem.resetSelectIcon(node);
+    } else {
+      getUINativeModule().menuitem.setSelectIcon(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MenuItemSelectIconModifier.identity = Symbol('selectIcon');
+class MenuItemOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().menuitem.resetOnChange(node);
+    } else {
+      getUINativeModule().menuitem.setOnChange(node, this.value);
+    }
+  }
+}
+MenuItemOnChangeModifier.identity = Symbol('menuItemOnChange');
+
+class ArkMenuItemComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  selected(value) {
+    modifierWithKey(this._modifiersWithKeys, MenuItemSelectedModifier.identity, MenuItemSelectedModifier, value);
+    return this;
+  }
+  selectIcon(value) {
+    modifierWithKey(this._modifiersWithKeys, MenuItemSelectIconModifier.identity, MenuItemSelectIconModifier, value);
+    return this;
+  }
+  onChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, MenuItemOnChangeModifier.identity, MenuItemOnChangeModifier, callback);
+    return this;
+  }
+  contentFont(value) {
+    modifierWithKey(this._modifiersWithKeys, ContentFontModifier.identity, ContentFontModifier, value);
+    return this;
+  }
+  contentFontColor(value) {
+    modifierWithKey(this._modifiersWithKeys, ContentFontColorModifier.identity, ContentFontColorModifier, value);
+    return this;
+  }
+  labelFont(value) {
+    modifierWithKey(this._modifiersWithKeys, LabelFontModifier.identity, LabelFontModifier, value);
+    return this;
+  }
+  labelFontColor(value) {
+    modifierWithKey(this._modifiersWithKeys, LabelFontColorModifier.identity, LabelFontColorModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.MenuItem !== undefined) {
+  globalThis.MenuItem.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkMenuItemComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.MenuItemModifier(nativePtr, classType);
+    });
+  };
+}
+
+/// <reference path='./import.ts' />
+class ArkMenuItemGroupComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+}
+// @ts-ignore
+if (globalThis.MenuItemGroup !== undefined) {
+  globalThis.MenuItemGroup.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkMenuItemGroupComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.CommonModifier(nativePtr, classType);
+    });
+  };
 }
 
 /// <reference path='./import.ts' />

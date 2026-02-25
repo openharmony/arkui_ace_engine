@@ -59,7 +59,6 @@ public:
     static void SetBorderRadius(FrameNode* frameNode, const NG::BorderRadiusProperty& borderRadius);
     static void SetExpandSymbol(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol);
     static RefPtr<FrameNode> CreateMenu();
-    static RefPtr<FrameNode> CreateMenu(int32_t nodeId);
     static void CreateWithColorResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
         const MenuColorType menuColorType);
     static void CreateWithDimensionResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,

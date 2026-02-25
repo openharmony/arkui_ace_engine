@@ -40,7 +40,6 @@
 #include "core/interfaces/native/node/line_modifier.h"
 #include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
-#include "core/interfaces/native/node/menu_item_group_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/nav_destination_modifier.h"
@@ -274,7 +273,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getWebModifier = nullptr, // WebModifier
     #endif
         .getRefreshModifier = NodeModifier::GetRefreshModifier, // RefreshModifier
-        .getMenuItemGroupModifier = NodeModifier::GetMenuItemGroupModifier, // MenuItemGroupModifier
+        .getMenuItemGroupModifier = nullptr, // MenuItemGroupModifier
         .getSearchControllerModifier = nullptr, // SearchControllerModifier
         .getSideBarModifier = nullptr, // SideBarModifier
         .getPatternLockControllerModifier = nullptr, // PatternLockControllerModifier

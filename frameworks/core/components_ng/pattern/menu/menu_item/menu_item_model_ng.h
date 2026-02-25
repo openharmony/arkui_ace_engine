@@ -58,7 +58,6 @@ public:
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, FontWeight weight);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& families);
-    static void SetSelectedChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& selectedChangeEvent);
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle style);
     static void SetSelectIcon(FrameNode* frameNode, bool isShow = false);
     static void SetSelectIconSrc(FrameNode* frameNode, const std::string& src);
