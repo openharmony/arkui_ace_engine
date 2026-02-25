@@ -122,7 +122,7 @@ panda::Local<panda::ObjectRef> JSScroller::CreateRectangle(const Rect& info)
 
 void JSScrollerBinding::ScrollTo(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -204,7 +204,7 @@ bool JSScrollerBinding::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal
 
 void JSScrollerBinding::ScrollEdge(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -240,7 +240,7 @@ void JSScrollerBinding::ScrollEdge(const JSCallbackInfo& args)
 
 void JSScrollerBinding::Fling(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -265,7 +265,7 @@ void JSScrollerBinding::Fling(const JSCallbackInfo& args)
 
 void JSScrollerBinding::ScrollToIndex(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -306,7 +306,7 @@ void JSScrollerBinding::ScrollToIndex(const JSCallbackInfo& args)
 
 void JSScrollerBinding::ScrollPage(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -332,7 +332,7 @@ void JSScrollerBinding::ScrollPage(const JSCallbackInfo& args)
 
 void JSScrollerBinding::CurrentOffset(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -348,7 +348,7 @@ void JSScrollerBinding::CurrentOffset(const JSCallbackInfo& args)
 
 void JSScrollerBinding::Offset(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -366,7 +366,7 @@ void JSScrollerBinding::Offset(const JSCallbackInfo& args)
 
 void JSScrollerBinding::ScrollBy(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -407,7 +407,7 @@ void JSScrollerBinding::ScrollBy(const JSCallbackInfo& args)
 
 void JSScrollerBinding::IsAtEnd(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -421,7 +421,7 @@ void JSScrollerBinding::IsAtEnd(const JSCallbackInfo& args)
 
 void JSScrollerBinding::GetItemRect(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -444,7 +444,7 @@ void JSScrollerBinding::GetItemRect(const JSCallbackInfo& args)
 
 void JSScrollerBinding::GetItemIndex(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -486,7 +486,7 @@ void JSScrollerBinding::GetItemIndex(const JSCallbackInfo& args)
 
 void JSScrollerBinding::ContentSize(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
