@@ -32,6 +32,7 @@
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.h"
+#include "bridge/declarative_frontend/engine/jsi/utils/jsi_stage_utils.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
@@ -2275,6 +2276,9 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadImageGeneratorDialog));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "__requireHspModuleForAdvancedUIComponent__"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRequireHspModuleForAdvancedUIComponent));
+    // __setArkUIStageRenderGroup__ global function for StageNode render group control
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "__setArkUIStageRenderGroup__"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSetStageRenderGroup));
     // need to delete this.
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "onXIconClicked"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsOnXIconClicked));
