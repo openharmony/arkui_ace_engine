@@ -3691,9 +3691,7 @@ PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
 template<>
 ACE_FORCE_EXPORT PresetFillType Convert(const Ark_ItemFillPolicy& src)
 {
-    PresetFillType dst;
-    dst = Converter::OptConvert<PresetFillType>(src.fillType.value).value_or(dst);
-    return dst;
+    return Converter::OptConvert<PresetFillType>(src.fillType.value).value_or(PresetFillType::BREAKPOINT_DEFAULT);
 }
 
 template<>
