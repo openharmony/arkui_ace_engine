@@ -122,6 +122,7 @@ export default namespace promptAction {
         levelMode?: LevelMode;
         levelUniqueId?: int;
         immersiveMode?: ImmersiveMode;
+        levelOrder?: LevelOrder;
     }
 
     export interface ShowDialogOptionsInternal {
