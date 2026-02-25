@@ -539,6 +539,7 @@ uint32_t ContentChangeManager::ConvertEventStringToEnum(const std::string& type)
 {
     std::map<std::string, uint32_t> eventMap = {
         { "scrollTo", SCROLL_TO },
+        { "scrollToIndex", SCROLL_TO_INDEX },
     };
     auto it = eventMap.find(type);
     return it == eventMap.end() ? NONE : it->second;

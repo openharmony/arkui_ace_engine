@@ -1534,7 +1534,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             UpdateStartIndex(index, align);
-            ContentChangeReport(host);
+            ContentChangeReport(host, ContentChangeManager::SCROLL_TO_INDEX);
         }
     }
     FireAndCleanScrollingListener();

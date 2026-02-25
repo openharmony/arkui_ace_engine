@@ -1386,6 +1386,13 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollTo\"]}");
     EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with "scrollToIndex" event.
+     * @tc.expected: returns SCROLL_TO_INDEX mask.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO_INDEX);
 }
 
 /**
@@ -1408,6 +1415,13 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollTo\", \"scrollTo\"]}");
     EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with duplicate "scrollToIndex" events.
+     * @tc.expected: returns SCROLL_TO_INDEX mask (OR operation with same value).
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollToIndex\", \"scrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO_INDEX);
 }
 
 /**
@@ -1440,6 +1454,16 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
 
     mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"SCROLLTO\"]}");
     EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step4. call GetIgnoreEventMask with invalid case for scrollToIndex.
+     * @tc.expected: returns 0 (NONE) - case sensitive.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"ScrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"SCROLLTOINDEX\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
 }
 
 /**
@@ -1469,6 +1493,20 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"\", \"scrollTo\", null, \"unknown\"]}");
     EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step4. call GetIgnoreEventMask with scrollToIndex in mixed events.
+     * @tc.expected: returns SCROLL_TO_INDEX mask.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"unknown1\", \"scrollToIndex\", \"unknown2\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO_INDEX);
+
+    /**
+     * @tc.steps: step5. call GetIgnoreEventMask with both scrollTo and scrollToIndex.
+     * @tc.expected: returns SCROLL_TO | SCROLL_TO_INDEX mask.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollTo\", \"scrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO | ContentChangeManager::SCROLL_TO_INDEX);
 }
 
 /**
@@ -1529,11 +1567,14 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
     ASSERT_NE(contentChangeMgr, nullptr);
 
     /**
-     * @tc.steps: step2. test ConvertEventStringToEnum with "scrollTo".
-     * @tc.expected: returns SCROLL_TO.
+     * @tc.steps: step2. test ConvertEventStringToEnum with "scrollTo" and "scrollToIndex".
+     * @tc.expected: returns SCROLL_TO and SCROLL_TO_INDEX respectively.
      */
     uint32_t eventType = contentChangeMgr->ConvertEventStringToEnum("scrollTo");
     EXPECT_EQ(eventType, ContentChangeManager::SCROLL_TO);
+
+    eventType = contentChangeMgr->ConvertEventStringToEnum("scrollToIndex");
+    EXPECT_EQ(eventType, ContentChangeManager::SCROLL_TO_INDEX);
 
     /**
      * @tc.steps: step3. test ConvertEventStringToEnum with unknown string.
@@ -1573,6 +1614,7 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     EXPECT_EQ(ContentChangeManager::NONE, 0);
     EXPECT_EQ(ContentChangeManager::SCROLL_TO, 1 << 0);
+    EXPECT_EQ(ContentChangeManager::SCROLL_TO_INDEX, 1 << 1);
 
     /**
      * @tc.steps: step2. verify bit operations.
@@ -1584,6 +1626,9 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
 
     mask |= ContentChangeManager::SCROLL_TO;
     EXPECT_EQ(mask, 1); // OR with same value should not change
+
+    mask |= ContentChangeManager::SCROLL_TO_INDEX;
+    EXPECT_EQ(mask, 3); // 1 | 2 = 3
 }
 
 /**

@@ -620,7 +620,7 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
             if (extraOffset.has_value()) {
                 layoutInfo_->extraOffset_ = -extraOffset.value();
             }
-            ContentChangeReport(GetHost());
+            ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO_INDEX);
         }
     }
     FireAndCleanScrollingListener();
