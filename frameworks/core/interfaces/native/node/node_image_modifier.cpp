@@ -377,7 +377,7 @@ void ResetSyncLoad(ArkUINodeHandle node)
 int32_t GetSyncLoad(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, true);
+    CHECK_NULL_RETURN(frameNode, false);
     return ImageModelNG::GetSyncLoad(frameNode);
 }
 
@@ -933,17 +933,6 @@ void ResetResizableLattice(ArkUINodeHandle node)
     ImageModelNG::ResetResizableLattice(frameNode);
 }
 
-void SetDynamicRangeMode(ArkUINodeHandle node, ArkUI_Int32 dynamicRangeMode)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    DynamicRangeMode dynamicRangeModeValue = static_cast<DynamicRangeMode>(dynamicRangeMode);
-    if (dynamicRangeModeValue < DynamicRangeMode::HIGH || dynamicRangeModeValue > DynamicRangeMode::STANDARD) {
-        dynamicRangeModeValue = DynamicRangeMode::STANDARD;
-    }
-    ImageModelNG::SetDynamicRangeMode(frameNode, dynamicRangeModeValue);
-}
-
 int32_t GetDynamicRangeMode(ArkUINodeHandle node)
 {
     int32_t defaultDynamicRangeMode = static_cast<int32_t>(DynamicRangeMode::STANDARD);
@@ -1013,53 +1002,6 @@ void SetDrawableDescriptor(ArkUINodeHandle node, void* newDrawableDescriptor)
     ImageModelNG::SetDrawableDescriptor(frameNode, drawableDescriptor);
 }
 
-void SetAltSourceInfo(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(sourceInfo);
-    if (sourceInfo->url) {
-        if (ImageSourceInfo::ResolveURIType(sourceInfo->url) == SrcType::NETWORK) {
-            return;
-        }
-        ImageModelNG::SetAlt(frameNode, ImageSourceInfo { sourceInfo->url, "", "" });
-        return;
-    }
-    if (sourceInfo->resource) {
-        ImageModelNG::SetAltResource(frameNode, sourceInfo->resource);
-        return;
-    }
-    if (sourceInfo->pixelMap) {
-        ImageModelNG::SetAltPixelMap(frameNode, sourceInfo->pixelMap);
-        return;
-    }
-}
-
-void ResetDynamicRangeMode(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetDynamicRangeMode(frameNode, DynamicRangeMode::STANDARD);
-}
-
-void SetEnhancedImageQuality(ArkUINodeHandle node, ArkUI_Int32 imageQuality)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    AIImageQuality imageQualityValue = static_cast<AIImageQuality>(imageQuality);
-    if (imageQualityValue < AIImageQuality::NONE || imageQualityValue > AIImageQuality::HIGH) {
-        imageQualityValue = AIImageQuality::NONE;
-    }
-    ImageModelNG::SetEnhancedImageQuality(frameNode, imageQualityValue);
-}
-
-void ResetEnhancedImageQuality(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetEnhancedImageQuality(frameNode, AIImageQuality::NONE);
-}
-
 void SetImageResizable(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
     ArkUI_Float32 right, ArkUI_Float32 bottom)
 {
@@ -1094,6 +1036,64 @@ void GetImageResizable(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_In
     if (NUM_3 < size) {
         arrayValue[NUM_3] = resizable.bottom.Value();
     }
+}
+
+void SetDynamicRangeMode(ArkUINodeHandle node, ArkUI_Int32 dynamicRangeMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DynamicRangeMode dynamicRangeModeValue = static_cast<DynamicRangeMode>(dynamicRangeMode);
+    if (dynamicRangeModeValue < DynamicRangeMode::HIGH || dynamicRangeModeValue > DynamicRangeMode::STANDARD) {
+        dynamicRangeModeValue = DynamicRangeMode::STANDARD;
+    }
+    ImageModelNG::SetDynamicRangeMode(frameNode, dynamicRangeModeValue);
+}
+
+void SetAltSourceInfo(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(sourceInfo);
+    if (sourceInfo->url) {
+        if (ImageSourceInfo::ResolveURIType(sourceInfo->url) == SrcType::NETWORK) {
+            return;
+        }
+        ImageModelNG::SetAlt(frameNode, ImageSourceInfo { sourceInfo->url, "", "" });
+        return;
+    }
+    if (sourceInfo->resource) {
+        ImageModelNG::SetAltResource(frameNode, sourceInfo->resource);
+        return;
+    }
+    if (sourceInfo->pixelMap) {
+        ImageModelNG::SetAltPixelMap(frameNode, sourceInfo->pixelMap);
+        return;
+    }
+}
+
+void ResetDynamicRangeMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetDynamicRangeMode(frameNode, DynamicRangeMode::STANDARD);
+}
+ 
+void SetEnhancedImageQuality(ArkUINodeHandle node, ArkUI_Int32 imageQuality)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    AIImageQuality imageQualityValue = static_cast<AIImageQuality>(imageQuality);
+    if (imageQualityValue < AIImageQuality::NONE || imageQualityValue > AIImageQuality::HIGH) {
+        imageQualityValue = AIImageQuality::NONE;
+    }
+    ImageModelNG::SetEnhancedImageQuality(frameNode, imageQualityValue);
+}
+ 
+void ResetEnhancedImageQuality(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetEnhancedImageQuality(frameNode, AIImageQuality::NONE);
 }
 
 void EnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
