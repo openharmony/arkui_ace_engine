@@ -14,7 +14,7 @@
  */
 
 import { memo } from "@koalaui/runtime/annotations"
-import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler, scheduleCallback } from "@koalaui/runtime"
+import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, RuntimeProfiler, scheduleCallback, GlobalUIStateManager } from "@koalaui/runtime"
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { int32, int64 } from "@koalaui/common"
 import { DeserializerBase, pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer, wrapSystemApiHandlerCallback, loadNativeModuleLibrary } from "@koalaui/interop"
@@ -271,12 +271,14 @@ export class Application {
         if (this.withLog) UserView.startNativeLog(1)
         let root: PeerNode | undefined = undefined
         try {
-            this.manager = GlobalStateManager.instance
+            this.manager = GlobalStateManager.instance;
             let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
             this.instanceId = uiContext.getInstanceId();
             let uiData = new ContextRecord();
             uiData.uiContext = uiContext;
             this.uiContext = uiContext;
+            this.uiContext!.workerThreadId_ = CoroutineExtras.getWorkerId();
+            GlobalUIStateManager.setStateManagerForThread(this.uiContext!.workerThreadId_,  this.manager!);
             this.manager!.contextData = uiData;
             this.manager!.isDebugMode = uiContext.isDebugMode_;
             this.manager!.setThreadChecker(() => UIContextUtil.checkCurrentThread());
