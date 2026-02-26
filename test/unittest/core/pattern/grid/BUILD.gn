@@ -63,6 +63,7 @@ ace_unittest("grid_test_ng") {
     "irregular/grid_layout_range_solver_test.cpp",
     "irregular/irregular_matrics.cpp",
     "layout_info_test.cpp",
+    "grid_generated_layout_info_test.cpp",
   ]
 }
 
