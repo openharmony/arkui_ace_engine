@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "progress_test_ng.h"
+
 #include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -94,7 +95,7 @@ void ProgressTestNg::TearDown()
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-    ClearOldNodes();  // Each testcase will create new node at begin
+    ClearOldNodes(); // Each testcase will create new node at begin
 }
 
 void ProgressTestNg::GetProgress()
@@ -1618,10 +1619,10 @@ HWTEST_F(ProgressTestNg, ProgressPatternUpdateColorTest001, TestSize.Level0)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     Color testColor(Color::RED);
     pattern->UpdateColor(testColor, true);
-    
+
     auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
     EXPECT_EQ(paintProperty->GetColorValue(), testColor);

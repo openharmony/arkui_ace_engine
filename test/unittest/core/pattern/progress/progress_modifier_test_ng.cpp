@@ -1840,7 +1840,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierAnimator001, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    ProgressModifier progressModifier(frameNode_);;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetSmoothEffect(false);
     progressModifier.SetValue(PROGRESS_MODIFIER_VALUE);
     EXPECT_EQ(progressModifier.value_->Get(), PROGRESS_MODIFIER_VALUE);
@@ -1861,7 +1861,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierAnimator002, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    ProgressModifier progressModifier(frameNode_);;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetSmoothEffect(false);
     progressModifier.SetValue(PROGRESS_MODIFIER_VALUE2);
     EXPECT_EQ(progressModifier.value_->Get(), PROGRESS_MODIFIER_VALUE2);
