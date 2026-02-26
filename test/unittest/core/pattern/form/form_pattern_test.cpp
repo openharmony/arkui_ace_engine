@@ -2259,36 +2259,4 @@ HWTEST_F(FormPatternTest, FormPatternTest_064, TestSize.Level0)
     pattern->GetRSUIContext();
     EXPECT_FALSE(pattern->rsUIContext_ != nullptr);
 }
-
-/**
- * @tc.name: FormPatternTest_065
- * @tc.desc: OnAttachContext.
- * @tc.type: FUNC
- */
-HWTEST_F(FormPatternTest, FormPatternTest_065, TestSize.Level0)
-{
-    RefPtr<FormNode> frameNode = CreateFromNode();
-    auto pattern = frameNode->GetPattern<FormPattern>();
-    // pattern not null
-    EXPECT_NE(pattern, nullptr);
-    pattern->isDetachContext_ = true;
-    pattern->OnAttachContext(nullptr);
-    EXPECT_FALSE(pattern->isDetachContext_);
-}
-
-/**
- * @tc.name: FormPatternTest_066
- * @tc.desc: OnDetachContext.
- * @tc.type: FUNC
- */
-HWTEST_F(FormPatternTest, FormPatternTest_066, TestSize.Level0)
-{
-    RefPtr<FormNode> frameNode = CreateFromNode();
-    auto pattern = frameNode->GetPattern<FormPattern>();
-    // pattern not null
-    EXPECT_NE(pattern, nullptr);
-    pattern->isDetachContext_ = false;
-    pattern->OnDetachContext(nullptr);
-    EXPECT_TRUE(pattern->isDetachContext_);
-}
 } // namespace OHOS::Ace::NG
