@@ -2821,8 +2821,10 @@ void ArkTSUtils::SetTextBackgroundStyle(std::shared_ptr<TextBackgroundStyle> sty
     if (SystemProperties::ConfigChangePerform() && colorResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, TextBackgroundStyle& textBackgroundStyle) {
             Color color;
-            ResourceParseUtils::ParseResColor(colorResObj, color);
-            textBackgroundStyle.backgroundColor = color;
+            bool parseState = ResourceParseUtils::ParseResColor(colorResObj, color);
+            if (parseState) {
+                textBackgroundStyle.backgroundColor = color;
+            }
         };
         style->AddResource("textBackgroundStyle.color", colorResObj, std::move(updateFunc));
     }
