@@ -1388,7 +1388,10 @@ bool GetPixelMapByCustom(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     napi_open_escapable_handle_scope(asyncCtx->env, &scope);
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        NapiThrow(asyncCtx->env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
+        auto currentIdAndReason = ContainerScope::CurrentIdWithReason();
+        std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
+            currentIdAndReason.second, Container::CurrentIdSafely());
+        NapiThrow(asyncCtx->env, "ace engine delegate is null. " + message, ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(asyncCtx->env, scope);
         return false;
     }
@@ -1431,7 +1434,10 @@ bool GetPixelMapArrayByCustom(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
 
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        NapiThrow(asyncCtx->env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
+        auto currentIdAndReason = ContainerScope::CurrentIdWithReason();
+        std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
+            currentIdAndReason.second, Container::CurrentIdSafely());
+        NapiThrow(asyncCtx->env, "ace engine delegate is null. " + message, ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(asyncCtx->env, scope);
         return false;
     }
@@ -1972,7 +1978,10 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     CreateCallback(dragAsyncContext, &result);
     auto container = AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     if (!container) {
-        NapiThrow(env, "get container failed.", ERROR_CODE_INTERNAL_ERROR);
+        auto currentIdAndReason = ContainerScope::CurrentIdWithReason();
+        std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
+            currentIdAndReason.second, Container::CurrentIdSafely());
+        NapiThrow(env, "get container failed. " + message, ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
@@ -2018,7 +2027,9 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
 
     auto container = AceEngine::Get().GetContainer(dragAsyncContext->instanceId);
     if (!container) {
-        NapiThrow(env, "get container failed.", ERROR_CODE_INTERNAL_ERROR);
+        std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
+            ContainerScope::CurrentIdWithReason().second, Container::CurrentIdSafely());
+        NapiThrow(env, "get container failed. " + message, ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
