@@ -244,4 +244,6 @@ void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(const std::shared_
 void CanvasRenderingContext2DModelNG::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed) {}
 
 void CanvasRenderingContext2DModelNG::StopImageAnalyzer() {}
+
+void CanvasRenderingContext2DModelNG::SetPatternInstanceId(int32_t id) {}
 } // namespace OHOS::Ace::NG

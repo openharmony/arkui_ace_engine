@@ -58,6 +58,11 @@ public:
         instanceId_ = id;
     }
 
+    int32_t GetInstanceId() override
+    {
+        return instanceId_;
+    }
+
     void SetUnit(CanvasUnit unit);
 
     CanvasUnit GetUnit()
