@@ -20,7 +20,8 @@
     defineTest,
     Matcher,
     TestCaseLevel,
-    Tester
+    Tester,
+    assertEqual
   } from '@ohos.arkui.componentTest'
   
   
