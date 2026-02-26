@@ -266,6 +266,11 @@ public:
         return isPressed_;
     }
 
+    void SetIsLongPressed(bool isLongPressed)
+    {
+        isLongPressed_ = isLongPressed;
+    }
+
     void SetLongPointIsHover(bool isHover)
     {
         longPointIsHover_ = isHover;
@@ -419,6 +424,7 @@ protected:
     bool longPointIsHover_ = false;
     bool isHover_ = false;
     bool isPressed_ = false;
+    bool isLongPressed_ = false;
     bool longPointLeftAnimEnd_ = true;
     bool longPointRightAnimEnd_ = true;
 

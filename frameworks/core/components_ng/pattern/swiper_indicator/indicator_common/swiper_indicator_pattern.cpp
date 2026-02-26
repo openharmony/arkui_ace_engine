@@ -753,12 +753,7 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
         swiperPattern->SetIndicatorLongPress(false);
         swiperPattern->StartAutoPlay();
     }
-    if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
-        isLongPressed_ = false;
-        if (IsHorizontalAndRightToLeft()) {
-            swiperPattern->SetTurnPageRate(-1.0f);
-        }
-    }
+    isLongPressed_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     touchBottomType_ = TouchBottomType::NONE;
@@ -928,9 +923,7 @@ void SwiperIndicatorPattern::HandleLongPress(GestureEvent& info)
         swiperPattern->StopSpringAnimation();
         swiperPattern->StopAutoPlay();
     }
-    if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
-        isLongPressed_ = true;
-    }
+    isLongPressed_ = true;
 }
 
 double SwiperIndicatorPattern::GetIndicatorDragAngleThreshold(bool isMaxAngle)

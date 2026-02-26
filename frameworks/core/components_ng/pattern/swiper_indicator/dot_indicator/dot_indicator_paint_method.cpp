@@ -67,10 +67,23 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
     dotIndicatorModifier_->SetIndicatorDotItemSpace(
         paintProperty->GetSpaceValue(swiperTheme->GetIndicatorDotItemSpace()));
+    dotIndicatorModifier_->SetIsLongPressed(isLongPressed_);
 
     SizeF contentSize = geometryNode->GetFrameSize();
     centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * 0.5;
     dotIndicatorModifier_->SetCenterY(centerY_);
+    UpdateIsPressedOrIsHover(paintWrapper);
+
+    auto [rectX, rectY, rectWidth, rectHeight] = dotIndicatorModifier_->CalCBoundsRect();
+    RectF boundsRect(rectX, rectY, rectWidth, rectHeight);
+    auto origin = dotIndicatorModifier_->GetBoundsRect();
+    CHECK_EQUAL_VOID(origin, boundsRect);
+    dotIndicatorModifier_->SetBoundsRect(boundsRect);
+    paintWrapper->FlushContentModifier();
+}
+
+void DotIndicatorPaintMethod::UpdateIsPressedOrIsHover(PaintWrapper* paintWrapper)
+{
     if (touchBottomType_ != TouchBottomType::NONE) {
         if (!dotIndicatorModifier_->GetIsPressed()) {
             PaintPressIndicator(paintWrapper);
@@ -88,13 +101,6 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);
     }
-
-    auto [rectX, rectY, rectWidth, rectHeight] = dotIndicatorModifier_->CalCBoundsRect();
-    RectF boundsRect(rectX, rectY, rectWidth, rectHeight);
-    auto origin = dotIndicatorModifier_->GetBoundsRect();
-    CHECK_EQUAL_VOID(origin, boundsRect);
-    dotIndicatorModifier_->SetBoundsRect(boundsRect);
-    paintWrapper->FlushContentModifier();
 }
 
 std::pair<int32_t, int32_t> DotIndicatorPaintMethod::CalCurrentIndex()
