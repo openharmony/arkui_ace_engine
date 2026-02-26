@@ -40,9 +40,9 @@ enum class DumpMode {
     INJECT_ACTION_TEST,
     EMBED_SEARCH_TEST,
     EMBED_HOVER_TEST,
+    SPECIFIC_SEARCH_TEST,
     SET_CHECKLIST_TEST,
     GET_CHECKLIST_TEST,
-    SPECIFIC_SEARCH_TEST,
 };
 
 struct DumpInfoArgument {
