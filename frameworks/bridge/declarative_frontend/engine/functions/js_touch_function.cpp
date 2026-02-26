@@ -19,7 +19,6 @@
 #include "base/log/log.h"
 #include "bridge/declarative_frontend/engine/functions/js_common_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
 namespace OHOS::Ace::Framework {
@@ -111,14 +110,10 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     return eventObj;
 }
 
-void JsTouchFunction::Execute(EcmaVM* vm, TouchEventInfo& info)
+void JsTouchFunction::Execute(TouchEventInfo& info)
 {
-    auto infoPtr = std::make_shared<TouchEventInfo>(info);
-    auto obj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr);
-    JSRef<JSVal> param = JSRef<JSVal>::Make(obj);
+    JSRef<JSVal> param = JSRef<JSObject>::Cast(CreateJSEventInfo(info));
     JsFunction::ExecuteJS(1, &param);
-    info.SetStopPropagation(infoPtr->IsStopPropagation());
-    info.SetPreventDefault(infoPtr->IsPreventDefault());
 }
 
 } // namespace OHOS::Ace::Framework

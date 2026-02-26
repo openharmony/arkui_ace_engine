@@ -485,7 +485,6 @@ public:
 
     // get PointerEvent ptr from ts
     const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromAxisEvent(napi_value event) override;
-    const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromTouchEvent(napi_value event) override;
 
 protected:
     void RunIntentPageIfNeeded();

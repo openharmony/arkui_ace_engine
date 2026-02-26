@@ -653,10 +653,6 @@ public:
     {
         return nullptr;
     }
-    virtual const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromTouchEvent(napi_value event)
-    {
-        return nullptr;
-    }
 
 private:
     static std::atomic<bool> successFlag_;
