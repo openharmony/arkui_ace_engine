@@ -17,6 +17,7 @@
 #include "interfaces/native/node/node_model.h"
 
 #include "base/utils/system_properties.h"
+#include "base/utils/feature_param.h"
 #include "base/utils/utils.h"
 #include "base/geometry/calc_dimension_rect.h"
 #include "bridge/common/utils/utils.h"
@@ -12590,7 +12591,7 @@ void SetOnCustomOverflowScroll(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() != "Custom") {
+    if (!FeatureParam::IsRnOverflowEnable() || frameNode->GetTag() == V2::CUSTOM_ETS_TAG) {
         return;
     }
     int32_t nodeId = frameNode->GetId();
@@ -12613,7 +12614,7 @@ void SetOnStackOverflowScroll(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() != V2::STACK_ETS_TAG) {
+    if (!FeatureParam::IsRnOverflowEnable() || frameNode->GetTag() != V2::STACK_ETS_TAG) {
         return;
     }
     int32_t nodeId = frameNode->GetId();
