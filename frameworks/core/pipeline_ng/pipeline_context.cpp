@@ -3535,7 +3535,7 @@ void PipelineContext::OnTouchEvent(
 
     if (scalePoint.type == TouchType::UP) {
         if (touchOptimizer_) {
-            touchOptimizer_->EndTpFlushVsyncPeriod();
+            touchOptimizer_->EndTpFlushVsync();
         }
         lastTouchTime_ = GetTimeFromExternalTimer();
         CompensateTouchMoveEvent(scalePoint);

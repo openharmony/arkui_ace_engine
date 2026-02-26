@@ -94,9 +94,9 @@ ResSchedTouchOptimizer::~ResSchedTouchOptimizer()
  * Parameters:
  *     accept [in] Whether the slide is accepted.
  */
-void ResSchedTouchOptimizer::SetSlideAccepted(bool accept)
+void ResSchedTouchOptimizer::SetSlideAccept(bool accept)
 {
-    slideAccepted_ = accept;
+    slideAccept_ = accept;
 }
 
 /*
@@ -155,10 +155,11 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsyncInner(const TouchEvent& touchEvent)
     if (touchEvent.sourceTool != SourceTool::FINGER) {
         return false;
     }
-    // If slide is not accepted, trigger TP flush for the first frame
-    if (!slideAccepted_) {
+    // If slide is accepted, TPflush first frame
+    if (slideAccept_) {
         TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush first frame");
         ACE_SCOPED_TRACE("TpFlush first frame");
+        slideAccept_ = false;
         return true;
     }
     // If last frame was TP triggered and current Vsync count differs,
@@ -264,7 +265,7 @@ bool ResSchedTouchOptimizer::RVSPointCheckWithSignal(TouchEvent& touchEvent, con
         // Calculate gap for the last element
         if (std::next(it) == curDeque.rend()) {
             gap = pointCurrent - pointBefore;
-            uint32_t direction = gap < 0 ? RVS_DIRECTION::RVS_DOWN_LEFT : RVS_DIRECTION::RVS_UP_RIGHT;
+            int32_t direction = gap < 0 ? RVS_DIRECTION::RVS_DOWN_LEFT : RVS_DIRECTION::RVS_UP_RIGHT;
             // Update reverse signal for the specified axis
             if (axis == RVS_AXIS::RVS_AXIS_X) {
                 touchEvent.xReverse = direction;
@@ -319,7 +320,7 @@ bool ResSchedTouchOptimizer::RVSPointCheckWithoutSignal(TouchEvent& touchEvent, 
         }
         // Process the last element
         if (std::next(it) == curDeque.rend()) {
-            uint32_t direction = gap2 < 0 ? RVS_DIRECTION::RVS_DOWN_LEFT : RVS_DIRECTION::RVS_UP_RIGHT;
+            int32_t direction = gap2 < 0 ? RVS_DIRECTION::RVS_DOWN_LEFT : RVS_DIRECTION::RVS_UP_RIGHT;
             // Update reverse signal for the specified axis
             if (axis == RVS_AXIS::RVS_AXIS_X) {
                 touchEvent.xReverse = direction;
@@ -508,7 +509,7 @@ double ResSchedTouchOptimizer::HandleMainDelta(double& mainDelta, const double& 
  */
 void ResSchedTouchOptimizer::SetSlideAcceptOffset(Offset offset)
 {
-    if (!RVSEnableCheck()) {
+    if (RVSEnableCheck()) {
         slideAcceptOffset_.SetX(offset.GetX());
         slideAcceptOffset_.SetY(offset.GetY());
         accumulatedDistance_ = 0.0;
@@ -603,6 +604,10 @@ bool ResSchedTouchOptimizer::HandleState1(const TouchEvent& point, const bool re
     const std::deque<double>& dptQueue = (axis == RVS_AXIS::RVS_AXIS_X) ? dptHistoryPointX_[id] : dptHistoryPointY_[id];
     std::unordered_map<int32_t, double>& dptGap = (axis == RVS_AXIS::RVS_AXIS_X) ? dptGapX_ : dptGapY_;
     int32_t rvsSignal = (axis == RVS_AXIS::RVS_AXIS_X) ? point.xReverse : point.yReverse;
+
+    if (dptQueue.size() < RVS_QUEUE_RTWO_INDEX) {
+        return false;
+    }
 
     // Handle reverse signal
     if (rvsSignal) {
@@ -765,7 +770,7 @@ TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& point
     return point;
 }
 
-void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
+void ResSchedTouchOptimizer::EndTpFlushVsync()
 {
     TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush end by up event");
     ACE_SCOPED_TRACE("TpFlush end by up event");

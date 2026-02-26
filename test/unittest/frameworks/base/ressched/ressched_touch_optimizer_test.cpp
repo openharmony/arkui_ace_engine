@@ -88,10 +88,10 @@ HWTEST_F(ResSchedTouchOptimizerTest, SetterTest001, TestSize.Level1)
 {
     optimizer_->rvsSignalEnable_ = true;
     optimizer_->vsyncPeriod_ = 8.3 * 1000 * 1000;
-    optimizer_->SetSlideAccepted(true);
-    EXPECT_TRUE(optimizer_->slideAccepted_);
-    optimizer_->SetSlideAccepted(false);
-    EXPECT_FALSE(optimizer_->slideAccepted_);
+    optimizer_->SetSlideAccept(true);
+    EXPECT_TRUE(optimizer_->slideAccept_);
+    optimizer_->SetSlideAccept(false);
+    EXPECT_FALSE(optimizer_->slideAccept_);
 }
 
 /**

@@ -192,7 +192,7 @@ void PanRecognizer::OnAccepted()
     }
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->GetTouchOptimizer()) {
-        pipeline->GetTouchOptimizer()->SetSlideAccepted(true);
+        pipeline->GetTouchOptimizer()->SetSlideAccept(true);
         pipeline->GetTouchOptimizer()->SetSlideDirection(static_cast<int32_t>(panVelocity_.GetDirection()));
         pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
     }
@@ -266,10 +266,6 @@ bool PanRecognizer::CheckNeedAddCurrentFingerInfo(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    if (pipeline && pipeline->GetTouchOptimizer()) {
-        pipeline->GetTouchOptimizer()->SetSlideAccepted(false);
-    }
     extraInfo_ = "";
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::DOWN)
                                                                   : static_cast<int32_t>(MouseAction::PRESS);
@@ -373,10 +369,6 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    if (pipeline && pipeline->GetTouchOptimizer()) {
-        pipeline->GetTouchOptimizer()->SetSlideAccepted(true);
-    }
     extraInfo_ = "Fingers: " + std::to_string(currentFingers_) + "(cur) - " + std::to_string(fingers_);
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
                                                                   : static_cast<int32_t>(MouseAction::RELEASE);
@@ -644,10 +636,6 @@ bool PanRecognizer::HandlePanAccept()
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    if (pipeline && pipeline->GetTouchOptimizer()) {
-        pipeline->GetTouchOptimizer()->SetSlideAccepted(true);
-    }
     extraInfo_ += "cancel received.";
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
                                                                   : static_cast<int32_t>(MouseAction::CANCEL);
