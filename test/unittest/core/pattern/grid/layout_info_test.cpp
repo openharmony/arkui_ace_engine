@@ -2186,4 +2186,191 @@ HWTEST_F(GridLayoutInfoTest, FindItemInRange012, TestSize.Level1)
     EXPECT_EQ(res.first, -1);
     EXPECT_EQ(res.second, -1);
 }
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeight003
+ * @tc.desc: Test GetContentHeight with new branch - startMainLineIndex_ = 0 does not enter new branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeight003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 } } },
+        { 1, { { 0, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 } } },
+        { 3, { { 0, 3 } } },
+    };
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 100.0f }, { 2, 50.0f }, { 3, 200.0f } };
+    info.startMainLineIndex_ = 0;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 4;
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 0, 2 },
+    };
+
+    float result = info.GetContentHeight(option, 3, 5.0f);
+    EXPECT_GT(result, 0.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeight004
+ * @tc.desc: Test GetContentHeight with new branch - startMainLineIndex_ >= MAX_CUMULATIVE_LINES
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeight004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 } } },
+        { 1, { { 0, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 } } },
+        { 3, { { 0, 3 } } },
+    };
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 100.0f }, { 2, 50.0f }, { 3, 200.0f } };
+    info.startMainLineIndex_ = 100;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 4;
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 0, 2 },
+    };
+
+    float result = info.GetContentHeight(option, 3, 5.0f);
+    EXPECT_GT(result, 0.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeight005
+ * @tc.desc: Test GetContentHeight with new branch - gridMatrix_ is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeight005, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_.clear();
+    info.lineHeightMap_ = { { 0, 100.0f }, { 1, 100.0f } };
+    info.startMainLineIndex_ = 1;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 4;
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 0, 2 },
+    };
+
+    float result = info.GetContentHeight(option, 1, 5.0f);
+    EXPECT_LE(result, 0.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeight006
+ * @tc.desc: Test GetContentHeight with new branch - first line key != 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeight006, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 1, { { 0, 0 }, { 1, 0 } } },
+        { 2, { { 0, 1 } } },
+        { 3, { { 0, 2 }, { 1, 2 } } },
+        { 4, { { 0, 3 } } },
+    };
+    info.lineHeightMap_ = { { 1, 50.0f }, { 2, 100.0f }, { 3, 50.0f }, { 4, 200.0f } };
+    info.startMainLineIndex_ = 1;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 4;
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 0, 2 },
+    };
+
+    float result = info.GetContentHeight(option, 1, 5.0f);
+    EXPECT_GT(result, 0.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeight007
+ * @tc.desc: Test GetContentHeight with new branch - first line is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeight007, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { } },
+        { 1, { { 0, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 } } },
+        { 3, { { 0, 3 } } },
+    };
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 100.0f }, { 2, 50.0f }, { 3, 200.0f } };
+    info.startMainLineIndex_ = 1;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 4;
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 0, 2 },
+    };
+
+    float result = info.GetContentHeight(option, 1, 5.0f);
+    EXPECT_GT(result, 0.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeight008
+ * @tc.desc: Test GetContentHeight with new branch - first item is not 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeight008, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 1 }, { 1, 1 } } },
+        { 1, { { 0, 2 } } },
+        { 2, { { 0, 3 }, { 1, 3 } } },
+        { 3, { { 0, 4 } } },
+    };
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 100.0f }, { 2, 50.0f }, { 3, 200.0f } };
+    info.startMainLineIndex_ = 1;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 5;
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 1, 3 },
+    };
+
+    float result = info.GetContentHeight(option, 2, 5.0f);
+    EXPECT_GT(result, 0.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeight009
+ * @tc.desc: Test GetContentHeight with new branch - all conditions met, enter new branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeight009, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 } } },
+        { 1, { { 0, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 } } },
+        { 3, { { 0, 3 } } },
+    };
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 100.0f }, { 2, 50.0f }, { 3, 200.0f } };
+    info.startMainLineIndex_ = 3;
+    info.currentOffset_ = -10.0f;
+    info.crossCount_ = 2;
+    info.childrenCount_ = 4;
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 0, 2 },
+    };
+
+    float mainGap = 5.0f;
+    float expectedResult = 50.0f + mainGap + 100.0f + mainGap + 50.0f;
+    float result = info.GetContentHeight(option, 3, mainGap);
+    EXPECT_FLOAT_EQ(result, expectedResult);
+}
+
 } // namespace OHOS::Ace::NG
