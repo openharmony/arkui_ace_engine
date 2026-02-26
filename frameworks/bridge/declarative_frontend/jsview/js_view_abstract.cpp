@@ -9165,7 +9165,7 @@ void ParseKeyModifiers(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
     if (jsObj->HasProperty("unicode")) {
         auto unicode = jsObj->GetProperty("unicode");
         if (unicode->IsNumber()) {
-            keyEvent.unicode = unicode->ToNumber<int32_t>();
+            keyEvent.unicode = unicode->ToNumber<uint32_t>();
         }
     }
 
