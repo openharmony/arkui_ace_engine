@@ -21,6 +21,11 @@ import { RecycleTestsV2 } from '../../v2_tests/recycleTestsV2'
 import { PersistenceV2TestsV2 } from '../../v2_tests/persistenceV2TestsV2.ets'
 import { PuLifecycleTestsV2 } from '../../v2_tests/puLifecycleTestsV2'
 import { Puv2ViewBaseTestsV2 } from '../../v2_tests/puv2ViewBaseTestsV2'
+import { PuUINodeRegistryProxyTestsV2 } from '../../v2_tests/puUINodeRegistryProxyTestsV2'
+import { PuViewTestsV2 } from '../../v2_tests/puViewTestsV2'
+import { PuRecycleManagerTestsV2 } from '../../v2_tests/puRecycleManagerTestsV2'
+import { PuBuilderProxyTestsV2 } from '../../v2_tests/puBuilderProxyTestsV2'
+import { PuBuilderBindingTestsV2 } from '../../v2_tests/puBuilderBindingTestsV2'
 import { PageController } from '../../lib/pageController'
 import { TestRunner } from '../../lib/testRunner'
 
@@ -44,6 +49,11 @@ struct Parent {
       TestRunner.bind(this)(new PersistenceV2TestsV2('V2_PersistenceV2TestsV2'));
       TestRunner.bind(this)(new PuLifecycleTestsV2('V2_puLifecycle'));
       TestRunner.bind(this)(new Puv2ViewBaseTestsV2('V2_puv2ViewBase'));
+      TestRunner.bind(this)(new PuUINodeRegistryProxyTestsV2('V2_puUINodeRegistryProxy'));
+      TestRunner.bind(this)(new PuViewTestsV2('V2_puView'));
+      TestRunner.bind(this)(new PuRecycleManagerTestsV2('V2_puRecycleManager'));
+      TestRunner.bind(this)(new PuBuilderProxyTestsV2('V2_puBuilderProxy'));
+      TestRunner.bind(this)(new PuBuilderBindingTestsV2('V2_puBuilderBinding'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)
