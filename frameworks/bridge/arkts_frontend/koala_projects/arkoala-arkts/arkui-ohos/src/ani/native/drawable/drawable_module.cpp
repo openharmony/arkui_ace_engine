@@ -227,6 +227,7 @@ void DrawableCreatePixelMapDrawable(
     auto* modifier = GetDrawableDescriptorModifier();
     // first create native pixel map drawable descriptor
     auto* drawable = modifier->createDrawableDescriptorByType(static_cast<uint32_t>(DrawableType::PIXELMAP));
+    CHECK_NULL_VOID(drawable);
     modifier->increaseRef(drawable);
     auto ptr = reinterpret_cast<ani_long>(drawable);
     env->Object_SetPropertyByName_Long(drawableAni, "nativeObj", ptr);
@@ -247,6 +248,7 @@ void DrawableCreateLayeredDrawable(ani_env* env, [[maybe_unused]] ani_class aniC
     env->Reference_IsUndefined(maskAni, &isMaskUndefined);
     auto* modifier = GetDrawableDescriptorModifier();
     auto* drawable = modifier->createDrawableDescriptorByType(static_cast<uint32_t>(DrawableType::LAYERED));
+    CHECK_NULL_VOID(drawable);
     modifier->increaseRef(drawable);
     auto ptr = reinterpret_cast<ani_long>(drawable);
     env->Object_SetPropertyByName_Long(drawableAni, "nativeObj", ptr);
@@ -594,6 +596,7 @@ ani_object DrawableGetAnimationController(
     CHECK_NULL_RETURN(native, nullptr);
 
     auto* animationControllerRaw = modifier->getAnimatedController(native, componentId.c_str());
+    CHECK_NULL_RETURN(animationControllerRaw, retValue);
 
     ani_class cls;
     if (ANI_OK != env->FindClass(ANIMATION_CONTROLLER_INNER, &cls)) {
