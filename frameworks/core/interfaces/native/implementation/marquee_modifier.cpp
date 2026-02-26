@@ -27,6 +27,8 @@ struct MarqueeOptions {
     std::optional<std::string> src;
     std::optional<bool> start;
     std::optional<MarqueeDirection> direction;
+    std::optional<CalcDimension> spacing;
+    std::optional<int32_t> delay;
 };
 } // OHOS::Ace::NG
 
@@ -52,6 +54,14 @@ MarqueeOptions Convert(const Ark_MarqueeOptions& src)
     options.start = OptConvert<bool>(src.start);
     auto fromStart = OptConvert<bool>(src.fromStart);
     options.direction = fromStart.value_or(true) ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT;
+    auto optSpacing = OptConvert<CalcDimension>(src.spacing);
+    if (optSpacing && !optSpacing.value().IsNegative()) {
+        options.spacing = optSpacing;
+    }
+    options.delay = OptConvert<int32_t>(src.delay);
+    if (options.delay && options.delay.value() < 0) {
+        options.delay = 0;
+    }
     return options;
 }
 
@@ -101,6 +111,12 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
     MarqueeModelNG::SetPlayerStatus(frameNode, marqueeOptions.start.value_or(false));
     if (marqueeOptions.direction) {
         MarqueeModelNG::SetDirection(frameNode, marqueeOptions.direction);
+    }
+    if (marqueeOptions.spacing) {
+        MarqueeModelNG::SetMarqueeSpacing(frameNode, marqueeOptions.spacing);
+    }
+    if (marqueeOptions.delay) {
+        MarqueeModelNG::SetMarqueeDelay(frameNode, marqueeOptions.delay);
     }
 }
 } // MarqueeInterfaceModifier

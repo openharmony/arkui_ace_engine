@@ -25,6 +25,8 @@ static const std::vector<OHOS::Ace::MarqueeUpdateStrategy> MARQUEE_UPDATE_STRATE
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t NUM_SIX = 6;
+constexpr int32_t NUM_SEVEN = 7;
 constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 void SetMarqueeScrollAmount(const EcmaVM* vm, const Local<JSValueRef>& jsVal, ArkUINodeHandle nativeNode)
 {
@@ -58,6 +60,18 @@ void SetMarqueeLoop(const EcmaVM* vm, const Local<JSValueRef>& jsVal, ArkUINodeH
         return;
     }
     GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeLoop(nativeNode);
+}
+
+void SetMarqueeDelay(const EcmaVM* vm, const Local<JSValueRef>& jsVal, ArkUINodeHandle nativeNode)
+{
+    if (jsVal->IsNumber()) {
+        auto delay = jsVal->Int32Value(vm);
+        if (delay > 0) {
+            GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeDelay(nativeNode, delay);
+            return;
+        }
+    }
+    GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeDelay(nativeNode);
 }
 } // namespace
 
@@ -357,6 +371,8 @@ ArkUINativeModuleValue MarqueeBridge::SetInitialize(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> loopVal = runtimeCallInfo->GetCallArgRef(3);
     Local<JSValueRef> fromStartVal = runtimeCallInfo->GetCallArgRef(4);
     Local<JSValueRef> srcVal = runtimeCallInfo->GetCallArgRef(5);
+    Local<JSValueRef> spacing = runtimeCallInfo->GetCallArgRef(NUM_SIX);
+    Local<JSValueRef> delayVal = runtimeCallInfo->GetCallArgRef(NUM_SEVEN);
     CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
     bool fromStart = fromStartVal->IsBoolean() ? fromStartVal->ToBoolean(vm)->Value() : true;
@@ -372,6 +388,19 @@ ArkUINativeModuleValue MarqueeBridge::SetInitialize(ArkUIRuntimeCallInfo* runtim
     } else {
         GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeSrcValue(nativeNode);
     }
+
+    CalcDimension marqueeSpacing;
+    RefPtr<ResourceObject> spacingResObj;
+    bool spacingParseResult = (spacing->IsNull() || spacing->IsUndefined()) ? false:
+        ArkTSUtils::ParseJsLengthMetrics(vm, spacing, marqueeSpacing, spacingResObj);
+    if (spacingParseResult) {
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeSpacing(nativeNode,
+            marqueeSpacing.Value(), static_cast<int>(marqueeSpacing.Unit()), AceType::RawPtr(spacingResObj));
+    } else {
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeSpacing(nativeNode);
+    }
+
+    SetMarqueeDelay(vm, delayVal, nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

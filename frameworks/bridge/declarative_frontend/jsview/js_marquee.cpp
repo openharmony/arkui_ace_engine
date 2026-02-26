@@ -104,13 +104,39 @@ void JSMarquee::Create(const JSCallbackInfo& info)
 
     auto getFromStart = paramObject->GetProperty("fromStart");
     bool fromStart = getFromStart->IsBoolean() ? getFromStart->ToBoolean() : true;
-    std::optional<MarqueeDirection> directionOpt;
-    if (fromStart) {
-        directionOpt = MarqueeDirection::LEFT;
-    } else {
-        directionOpt = MarqueeDirection::RIGHT;
-    }
+    std::optional<MarqueeDirection> directionOpt = fromStart ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT;
     MarqueeModel::GetInstance()->SetDirection(directionOpt);
+
+    SetMarqueeSpacingAndDelay(paramObject);
+}
+
+void JSMarquee::SetMarqueeSpacingAndDelay(const JSRef<JSObject>& paramObject)
+{
+    auto getSpacing = paramObject->GetProperty("spacing");
+    std::optional<CalcDimension> spacingOpt;
+    if (!getSpacing->IsNull() && !getSpacing->IsUndefined()) {
+        CalcDimension spacing;
+        UnRegisterResource("MarqueeSpacing");
+        RefPtr<ResourceObject> resObj;
+        if (ParseLengthMetricsToDimension(getSpacing, spacing, resObj) && !spacing.IsNegative()
+            && spacing.Unit() != DimensionUnit::PERCENT) {
+            spacingOpt = spacing;
+        }
+        if (SystemProperties::ConfigChangePerform() && resObj) {
+            RegisterResource("MarqueeSpacing", resObj, spacing);
+        }
+    }
+    MarqueeModel::GetInstance()->SetMarqueeSpacing(spacingOpt);
+
+    auto getDelay = paramObject->GetProperty("delay");
+    std::optional<int32_t> delayOpt;
+    if (getDelay->IsNumber()) {
+        auto delayValue = static_cast<int32_t>(getDelay->ToNumber<double>());
+        if (delayValue > 0) {
+            delayOpt = delayValue;
+        }
+    }
+    MarqueeModel::GetInstance()->SetMarqueeDelay(delayOpt);
 }
 
 void JSMarquee::JSBind(BindingTarget globalObj)
