@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 
+#include <future>
 #include <optional>
 
 #include "adapter/ohos/entrance/ace_container.h"
@@ -2081,6 +2082,7 @@ void UIExtensionPattern::DumpOthers()
 
 void UIExtensionPattern::AddExtraInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
 {
+    ACE_SCOPED_TRACE("UIExtensionPattern::AddExtraInfoWithParamConfig");
     CHECK_EQUAL_VOID(config.withUIExtension, false);
     CHECK_NULL_VOID(sessionWrapper_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2093,17 +2095,8 @@ void UIExtensionPattern::AddExtraInfoWithParamConfig(std::shared_ptr<JsonValue>&
     params.push_back(config.cacheNodes ? "1" : "0");
     params.push_back(config.withWeb ? "1" : "0");
     params.push_back(config.withUIExtension ? "1" : "0");
-    // Use -nouie to choose not dump extra uie info
-    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
-        UIEXT_LOGI("Not Support Dump Extra UIE Info");
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto dumpNodeIter = std::find(params.begin(), params.end(), std::to_string(host->GetId()));
-    if (dumpNodeIter != params.end()) {
-        params.erase(dumpNodeIter);
-    }
     if (!container->IsUIExtensionWindow()) {
         params.push_back(PID_FLAG);
     }
@@ -2115,20 +2108,31 @@ void UIExtensionPattern::AddExtraInfoWithParamConfig(std::shared_ptr<JsonValue>&
 void UIExtensionPattern::ExecuteDumpTask(
     std::shared_ptr<JsonValue>& json, const std::vector<std::string>& params, const RefPtr<FrameNode>& host)
 {
+    ACE_SCOPED_TRACE("UIExtensionPattern::ExecuteDumpTask");
     const int32_t GET_INSPECTOR_TREE_TIMEOUT_TIME = 900;
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    taskExecutor->PostSyncTaskTimeout(
-        [json, params, weakThis = WeakClaim(this)]() {
-            auto pattern = weakThis.Upgrade();
-            if (!pattern || !pattern->sessionWrapper_) {
+    // Capture sessionWrapper_ on the calling thread to avoid cross-thread data race
+    // when the lambda runs on the background thread.
+    auto sessionWrapper = sessionWrapper_;
+
+    // PostSyncTaskTimeout explicitly rejects TaskType::BACKGROUND, so use PostTask
+    // with a promise/future pair to run the IPC call (NotifyUieDump) on the background
+    // thread and wait for the result with a timeout on the calling thread.
+    auto promise = std::make_shared<std::promise<void>>();
+    auto future = promise->get_future();
+    taskExecutor->PostTask(
+        [json, params, sessionWrapper, promise]() {
+            auto notifyOnExit = [&promise]() { promise->set_value(); };
+            if (!sessionWrapper) {
+                notifyOnExit();
                 return;
             }
             std::vector<std::string> dumpInfo;
-            pattern->sessionWrapper_->NotifyUieDump(params, dumpInfo);
+            sessionWrapper->NotifyUieDump(params, dumpInfo);
 
             for (size_t i = 0; i < dumpInfo.size(); i++) {
                 std::string dumpStr = dumpInfo[i];
@@ -2149,8 +2153,10 @@ void UIExtensionPattern::ExecuteDumpTask(
                 }
                 break;
             }
+            notifyOnExit();
         },
-        TaskExecutor::TaskType::UI, GET_INSPECTOR_TREE_TIMEOUT_TIME, "UiSessionGetInspectorTree");
+        TaskExecutor::TaskType::BACKGROUND, "UiSessionGetInspectorTree");
+    future.wait_for(std::chrono::milliseconds(GET_INSPECTOR_TREE_TIMEOUT_TIME));
 }
 
 void UIExtensionPattern::RegisterEventProxyFlagCallback()
