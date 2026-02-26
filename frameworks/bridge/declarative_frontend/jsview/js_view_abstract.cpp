@@ -9204,25 +9204,22 @@ void ParsePressedCodes(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
 
 void ParseKeyLockStates(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
 {
-    if (jsObj->HasProperty("numLock")) {
-        auto jsValue = jsObj->GetProperty("numLock");
+    if (jsObj->HasProperty("isNumLockOn")) {
+        auto jsValue = jsObj->GetProperty("isNumLockOn");
         if (jsValue->IsBoolean()) {
             keyEvent.numLock = jsValue->ToBoolean();
         }
     }
 
-    if (jsObj->HasProperty("scrollLock")) {
-        auto jsValue = jsObj->GetProperty("scrollLock");
+    if (jsObj->HasProperty("isScrollLockOn")) {
+        auto jsValue = jsObj->GetProperty("isScrollLockOn");
         if (jsValue->IsBoolean()) {
             keyEvent.scrollLock = jsValue->ToBoolean();
         }
     }
 
-    if (jsObj->HasProperty("enableCapsLock") || jsObj->HasProperty("capsLock")) {
-        auto jsValue = jsObj->GetProperty("enableCapsLock");
-        if (jsValue->IsUndefined()) {
-            jsValue = jsObj->GetProperty("capsLock");
-        }
+    if (jsObj->HasProperty("isCapsLockOn")) {
+        auto jsValue = jsObj->GetProperty("isCapsLockOn");
         if (jsValue->IsBoolean()) {
             keyEvent.enableCapsLock = jsValue->ToBoolean();
         }
