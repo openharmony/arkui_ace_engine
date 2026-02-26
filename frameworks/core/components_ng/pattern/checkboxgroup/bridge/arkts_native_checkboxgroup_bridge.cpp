@@ -679,7 +679,8 @@ ArkUINativeModuleValue CheckboxGroupBridge::JsMark(ArkUIRuntimeCallInfo* runtime
     if (!ArkTSUtils::ParseJsColorAlpha(vm, strokeColorValue, strokeColor, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckMarkColor(nullptr);
     } else {
-        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckMarkColor(nullptr, strokeColor.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckMarkColor(frameNode, strokeColor.GetValue(), colorRawPtr);
     }
 
     auto sizeValue = markObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "size"));

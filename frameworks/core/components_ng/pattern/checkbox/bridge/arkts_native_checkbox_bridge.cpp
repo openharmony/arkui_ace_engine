@@ -782,7 +782,8 @@ ArkUINativeModuleValue CheckboxBridge::JsMark(ArkUIRuntimeCallInfo* runtimeCallI
     auto frameNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(frameNode);
     if (ArkTSUtils::ParseJsColorAlpha(vm, strokeColorValue, strokeColor, colorResObj, nodeInfo)) {
-        GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxMarkColor(nullptr, strokeColor.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxMarkColor(frameNode, strokeColor.GetValue(), colorRawPtr);
     } else {
         GetArkUINodeModifiers()->getCheckboxModifier()->resetCheckboxMarkColor(nullptr);
     }

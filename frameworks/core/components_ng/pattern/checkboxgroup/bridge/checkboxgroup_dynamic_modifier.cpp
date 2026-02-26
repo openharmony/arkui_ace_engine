@@ -354,11 +354,23 @@ ArkUINodeHandle CreateCheckboxGroupFrameNode(ArkUI_Uint32 nodeId)
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
 }
 
-void SetCheckMarkColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetCheckMarkColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxGroupModelNG::SetCheckMarkColor(frameNode, Color(color));
+    Color result = Color(color);
+    CheckBoxGroupModelNG::SetCheckMarkColor(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = GetFrameNode(node);
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::STROKE_COLOR, resObj);
+    }
 }
 
 void ResetCheckMarkColor(ArkUINodeHandle node)

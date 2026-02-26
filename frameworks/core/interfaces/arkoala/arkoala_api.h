@@ -6178,7 +6178,7 @@ struct ArkUICheckboxModifier {
     void (*createCheckbox)(ArkUI_CharPtr namePtr, ArkUI_CharPtr groupPtr);
     void (*setCheckboxBuilder)(ArkUINodeHandle node, void* builder);
     void (*resetCheckboxMarkColor)(ArkUINodeHandle node);
-    void (*setCheckboxMarkColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setCheckboxMarkColor)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setCheckMarkSize)(ArkUINodeHandle node, ArkUI_Float32 sizeValue, ArkUI_Int32 sizeUnit);
     void (*setCheckMarkWidth)(ArkUINodeHandle node, ArkUI_Float32 widthValue, ArkUI_Int32 widthUnit);
     void (*setCheckboxChangeEvent)(ArkUINodeHandle node, void* callback);
@@ -6219,7 +6219,7 @@ struct ArkUICheckboxGroupModifier {
     void (*setCheckboxGroupUnSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
 
     void (*createCheckboxGroup)(ArkUI_CharPtr groupNamePtr);
-    void (*setCheckMarkColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setCheckMarkColor)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*resetCheckMarkColor)(ArkUINodeHandle node);
     void (*setCheckMarkSize)(ArkUINodeHandle node, ArkUI_Float32 sizeValue, ArkUI_Int32 unit);
     void (*setCheckMarkWidth)(ArkUINodeHandle node, ArkUI_Float32 widthValue, ArkUI_Int32 unit);

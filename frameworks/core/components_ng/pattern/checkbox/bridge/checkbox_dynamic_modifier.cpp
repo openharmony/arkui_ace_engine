@@ -430,11 +430,23 @@ void ResetCheckboxMarkColor(ArkUINodeHandle node)
     CheckBoxModelNG::ResetCheckMarkColor(frameNode);
 }
 
-void SetCheckboxMarkColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetCheckboxMarkColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxModelNG::SetCheckMarkColor(frameNode, Color(color));
+    Color result = Color(color);
+    CheckBoxModelNG::SetCheckMarkColor(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = GetFrameNode(node);
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::STROKE_COLOR, resObj);
+    }
 }
 
 void SetCheckboxCheckMarkSize(ArkUINodeHandle node, ArkUI_Float32 sizeValue, ArkUI_Int32 sizeUnit)
