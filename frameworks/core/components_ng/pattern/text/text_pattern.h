@@ -1301,6 +1301,8 @@ private:
     void HighlightDisappearAnimation();
     void HighlightAppearAnimation();
     bool HighlightTriggerScrollableParentToScroll(const RectF& highlightRect);
+    float CalculateScrollTargetOffset(
+        const RefPtr<ScrollablePattern>& scrollablePattern, const RectF& highlightInScroll, const RectF& frameRect);
     const RefPtr<ScrollablePattern> FindScrollableParentWithRelativeOffset(OffsetF& offset);
     RectF GetHighlightRect(const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& paragraphsRects) const;
     std::u16string GetContentWithPlaceholderSpaceFillter() const;

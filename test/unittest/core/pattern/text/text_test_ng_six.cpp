@@ -26,6 +26,7 @@
 
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
@@ -74,7 +75,7 @@ HWTEST_F(TextTestNgSix, TextContentModifier030, TestSize.Level1)
         imageNodeLocalList.emplace_back(imageNode);
     }
     textPattern->SetImageSpanNodeList(imageNodeList);
-    
+
     /**
      * @tc.steps: step3. call CreateNodePaintMethod func.
      * @tc.expected: The imageNodeList_ size is equal to 300.
@@ -98,7 +99,7 @@ HWTEST_F(TextTestNgSix, TextContentModifier030, TestSize.Level1)
         EXPECT_EQ(static_cast<int32_t>(layoutProperty1->GetVisibility().has_value() &&
             (layoutProperty1->GetVisibility().value() == VisibleType::INVISIBLE)), 1);
     }
-    
+
     textPattern->pManager_->Reset();
 }
 
@@ -135,7 +136,7 @@ HWTEST_F(TextTestNgSix, TextContentModifier031, TestSize.Level1)
         imageNodeLocalList.emplace_back(imageNode);
     }
     textPattern->SetImageSpanNodeList(imageNodeList);
-    
+
     /**
      * @tc.steps: step3. call CreateNodePaintMethod func.
      * @tc.expected: The imageNodeList_ size is equal to 300.
@@ -149,7 +150,7 @@ HWTEST_F(TextTestNgSix, TextContentModifier031, TestSize.Level1)
     ASSERT_NE(textPaintMethod, nullptr);
     auto textContentModifier = textPaintMethod->textContentModifier_;
     ASSERT_NE(textContentModifier, nullptr);
-  
+
     textContentModifier->UpdateImageNodeVisible(VisibleType::VISIBLE);
     EXPECT_EQ(textContentModifier->imageNodeList_.size(), 300);
     for (const auto& imageWeak : textContentModifier->imageNodeList_) {
@@ -196,7 +197,7 @@ HWTEST_F(TextTestNgSix, TextContentModifier032, TestSize.Level1)
         imageNodeLocalList.emplace_back(imageNode);
     }
     textPattern->SetImageSpanNodeList(imageNodeList);
-    
+
     /**
      * @tc.steps: step3. call CreateNodePaintMethod func.
      * @tc.expected: The imageNodeList_ size is equal to 300.
@@ -210,7 +211,7 @@ HWTEST_F(TextTestNgSix, TextContentModifier032, TestSize.Level1)
     ASSERT_NE(textPaintMethod, nullptr);
     auto textContentModifier = textPaintMethod->textContentModifier_;
     ASSERT_NE(textContentModifier, nullptr);
-  
+
     textContentModifier->UpdateImageNodeVisible(VisibleType::GONE);
     EXPECT_EQ(textContentModifier->imageNodeList_.size(), 300);
     for (const auto& imageWeak : textContentModifier->imageNodeList_) {
@@ -252,7 +253,7 @@ HWTEST_F(TextTestNgSix, TextContentModifier033, TestSize.Level1)
         imageNodeList.emplace_back(nullptr);
     }
     textPattern->SetImageSpanNodeList(imageNodeList);
-    
+
     /**
      * @tc.steps: step3. call CreateNodePaintMethod func.
      * @tc.expected: The imageNodeList_ size is equal to 200.
@@ -272,7 +273,7 @@ HWTEST_F(TextTestNgSix, TextContentModifier033, TestSize.Level1)
         auto imageNode = imageWeak.Upgrade();
         EXPECT_EQ(imageNode, nullptr);
     }
-    
+
     textPattern->pManager_->Reset();
 }
 
@@ -304,7 +305,7 @@ HWTEST_F(TextTestNgSix, TextContentModifier034, TestSize.Level1)
         imageNodeList.emplace_back(nullptr);
     }
     textPattern->SetImageSpanNodeList(imageNodeList);
-    
+
     /**
      * @tc.steps: step3. call CreateNodePaintMethod func.
      * @tc.expected: The imageNodeList_ size is equal to 200.
@@ -318,7 +319,7 @@ HWTEST_F(TextTestNgSix, TextContentModifier034, TestSize.Level1)
     ASSERT_NE(textPaintMethod, nullptr);
     auto textContentModifier = textPaintMethod->textContentModifier_;
     ASSERT_NE(textContentModifier, nullptr);
-    
+
     textContentModifier->UpdateImageNodeVisible(VisibleType::VISIBLE);
     EXPECT_EQ(textContentModifier->imageNodeList_.size(), 200);
     for (const auto& imageWeak : textContentModifier->imageNodeList_) {
@@ -2231,5 +2232,101 @@ HWTEST_F(TextTestNgSix, GetSpecifiedContentIndex004, TestSize.Level1)
     EXPECT_EQ(result[1], 2);
     EXPECT_EQ(result[2], 5);
     EXPECT_EQ(result[3], 7);
+}
+
+/**
+ * @tc.name: HighlightTriggerScrollableParentToScroll001
+ * @tc.desc: Test HighlightTriggerScrollableParentToScroll when highlightStart equals highlightEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, HighlightTriggerScrollableParentToScroll001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    textPattern->textSelector_.highlightStart = 5;
+    textPattern->textSelector_.highlightEnd = 5;
+
+    RectF highlightRect(10.0f, 10.0f, 100.0f, 50.0f);
+    auto result = textPattern->HighlightTriggerScrollableParentToScroll(highlightRect);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: HighlightTriggerScrollableParentToScroll002
+ * @tc.desc: Test HighlightTriggerScrollableParentToScroll when host is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, HighlightTriggerScrollableParentToScroll002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->textSelector_.highlightStart = 5;
+    pattern->textSelector_.highlightEnd = 10;
+
+    RectF highlightRect(10.0f, 10.0f, 100.0f, 50.0f);
+    auto result = pattern->HighlightTriggerScrollableParentToScroll(highlightRect);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: HighlightTriggerScrollableParentToScroll003
+ * @tc.desc: Test HighlightTriggerScrollableParentToScroll when no scrollable parent exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, HighlightTriggerScrollableParentToScroll003, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    textPattern->textSelector_.highlightStart = 5;
+    textPattern->textSelector_.highlightEnd = 10;
+
+    RectF highlightRect(10.0f, 10.0f, 100.0f, 50.0f);
+    auto result = textPattern->HighlightTriggerScrollableParentToScroll(highlightRect);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: HighlightTriggerScrollableParentToScroll004
+ * @tc.desc: Test HighlightTriggerScrollableParentToScroll with vertical scroll parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, HighlightTriggerScrollableParentToScroll004, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    textPattern->textSelector_.highlightStart = 5;
+    textPattern->textSelector_.highlightEnd = 10;
+
+    auto scrollFrameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(scrollFrameNode, nullptr);
+    auto scrollPattern = scrollFrameNode->GetPattern<ListPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    scrollGeometryNode->SetFrameOffset(OffsetF(0.0f, 0.0f));
+    scrollGeometryNode->SetFrameSize(SizeF(300.0f, 400.0f));
+    scrollFrameNode->SetGeometryNode(scrollGeometryNode);
+
+    textFrameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(scrollFrameNode));
+    auto renderContext = textFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto scrollRenderContext = scrollFrameNode->GetRenderContext();
+    ASSERT_NE(scrollRenderContext, nullptr);
+
+    textPattern->scrollableParent_ = AceType::WeakClaim(AceType::RawPtr(scrollPattern));
+
+    RectF highlightRect(50.0f, 100.0f, 100.0f, 50.0f);
+    auto result = textPattern->HighlightTriggerScrollableParentToScroll(highlightRect);
+    EXPECT_EQ(result, true);
 }
 } // namespace OHOS::Ace::NG

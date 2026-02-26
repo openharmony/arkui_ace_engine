@@ -47,6 +47,7 @@ private:
         LayoutCalPolicy policy, float childDimensionSize, MeasureCalculationContext& context);
     OptionalSizeF GetMeasureAdaptiveHeight(
         LayoutWrapper* marqueeLayoutWrapper, const RefPtr<LayoutWrapper>& textLayoutWrapper);
+    LayoutConstraintF CreateTextLayoutConstraint(LayoutWrapper* layoutWrapper, const SizeF& maxSize);
     ACE_DISALLOW_COPY_AND_MOVE(MarqueeLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
