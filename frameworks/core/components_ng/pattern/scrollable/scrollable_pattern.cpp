@@ -1437,7 +1437,6 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
     }
     DisplayMode oldDisplayMode = DisplayMode::OFF;
     if (!scrollBar_) {
-        ACE_UINODE_TRACE(host);
         scrollBar_ = CreateScrollBar();
         CHECK_NULL_VOID(scrollBar_);
         RegisterScrollBarEventTask();
