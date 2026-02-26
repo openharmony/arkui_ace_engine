@@ -227,6 +227,10 @@ void WebDomDocument::CreateFromJsonString(const std::string &jsonString)
     snapshot_ = JsonUtil::ParseJsonString(jsonString);
     if (!snapshot_ || !snapshot_->IsValid()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "CreateFromJsonString snapshot is not valid");
+        root_.reset();
+        idToNodeMap_.clear();
+        std::unique_lock<std::shared_mutex> lock(activeMutex_);
+        active_.reset();
         return;
     }
     if (snapshot_->Contains(WEB_JSON_ATTRS) && snapshot_->GetValue(WEB_JSON_ATTRS)->IsObject()) {
@@ -266,6 +270,10 @@ void WebDomDocument::UpdateScrollInfoFromJsonString(const std::string& jsonStrin
     auto update = JsonUtil::ParseJsonString(jsonString);
     if (!update || !update->IsValid()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "UpdateScrollInfoFromJsonString is not valid");
+        return;
+    }
+    if (!root_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "UpdateScrollInfoFromJsonString document root is null");
         return;
     }
 
