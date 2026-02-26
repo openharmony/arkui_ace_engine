@@ -263,6 +263,9 @@ std::pair<TextRange, TextRange> ParagraphManager::GetGlyphRangeForCharacterRange
             charRange.end += range.second.end;
             start = 0;
             end -= charLength;
+        } else {
+            start -= charLength;
+            end -= charLength;
         }
     }
     auto info = paragraphs_.back();
@@ -299,6 +302,9 @@ std::pair<TextRange, TextRange> ParagraphManager::GetCharacterRangeForGlyphRange
             glyphRange.start += range.second.start;
             glyphRange.end += range.second.end;
             start = 0;
+            end -= glyphLength;
+        } else {
+            start -= glyphLength;
             end -= glyphLength;
         }
     }
