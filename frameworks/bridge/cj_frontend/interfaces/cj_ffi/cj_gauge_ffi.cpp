@@ -29,6 +29,7 @@ using namespace OHOS::Ace;
 
 namespace {
 const std::string INDICATOR_DEFAULT = "default";
+const std::string INDICATOR_SYSTEM = "SystemStyle";
 const std::string INDICATOR_NULL = "null";
 constexpr double FIX_ANGLE = 720.0;
 }  // namespace
@@ -316,9 +317,13 @@ void FfiOHOSAceFrameworkGaugeSetIndicatorV2(const char* icon, double size, int32
         GetGaugeModel()->SetIsShowIndicator(false);
         return;
     }
-    std::string bundleName;
-    std::string moduleName;
-    GetGaugeModel()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
+    if (icon == INDICATOR_SYSTEM) {
+        GetGaugeModel()->ResetIndicatorIconPath();
+    } else {
+        std::string bundleName;
+        std::string moduleName;
+        GetGaugeModel()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
+    }
 
     CalcDimension space;
     if (size < 0) {
