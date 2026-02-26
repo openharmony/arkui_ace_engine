@@ -54,7 +54,6 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_test_done_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -11199,8 +11198,10 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onMouse");
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<MouseInfo>(mouseInfo);
-        auto eventObj = NG::FrameNodeBridge::CreateMouseInfo(vm, infoPtr, node);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new MouseInfo(mouseInfo);
+        auto eventObj = NG::FrameNodeBridge::CreateMouseInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         func->Call(vm, func.ToLocal(), params, 1);
         mouseInfo.SetStopPropagation(infoPtr->IsStopPropagation());
@@ -11232,10 +11233,12 @@ void JSViewAbstract::JsOnAxisEvent(const JSCallbackInfo& args)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onAxis");
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<AxisInfo>(info);
-        auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, infoPtr, node);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new AxisInfo(info);
+        auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
-        ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", info.GetAction());
+        ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", infoPtr->GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
         info.SetStopPropagation(infoPtr->IsStopPropagation());
     };
@@ -11382,14 +11385,32 @@ void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
         return;
     }
 
-    auto jsOnTouchInterceptFunc = AceType::MakeRefPtr<JsTouchInterceptFunction>(JSRef<JSFunc>::Cast(info[0]));
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnTouchInterceptFunc = JSRef<JSFunc>::Cast(info[0]);
+    if (jsOnTouchInterceptFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnTouchInterceptFuncLocalHandle = jsOnTouchInterceptFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onTouchInterceptfunc = [execCtx = info.GetExecutionContext(), func = jsOnTouchInterceptFunc, node = frameNode](
-                                    TouchEventInfo& info) -> NG::HitTestMode {
+    auto onTouchInterceptfunc = [vm, execCtx = info.GetExecutionContext(),
+                                    func = panda::CopyableGlobal(vm, jsOnTouchInterceptFuncLocalHandle),
+                                    node = frameNode](TouchEventInfo& info) -> NG::HitTestMode {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, NG::HitTestMode::HTMDEFAULT);
         ACE_SCORING_EVENT("onTouchIntercept");
         PipelineContext::SetCallBackNode(node);
-        return func->Execute(info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new TouchEventInfo(info);
+        auto eventObj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        auto ret = func->Call(vm, func.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
+        info.SetPreventDefault(infoPtr->IsPreventDefault());
+        if (ret->IsNumber()) {
+            return static_cast<NG::HitTestMode>(ret->ToNumber(vm)->Value());
+        }
+        return NG::HitTestMode::HTMDEFAULT;
     };
     ViewAbstractModel::GetInstance()->SetOnTouchIntercept(std::move(onTouchInterceptfunc));
 }

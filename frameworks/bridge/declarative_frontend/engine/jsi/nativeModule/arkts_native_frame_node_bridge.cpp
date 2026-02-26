@@ -28,7 +28,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
-#include "core/common/event_info_manager.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
@@ -972,56 +971,26 @@ static int32_t GetOperatingHand(GestureEvent& info)
     return HAND_NONE;
 }
 
-RefPtr<EventInfoManager> FrameNodeBridge::GetEventInfoManager(const WeakPtr<FrameNode>& node)
-{
-    auto frameNode = node.Upgrade();
-    if (!frameNode) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "node is null");
-        return nullptr;
-    }
-    auto pipeline = frameNode->GetContext();
-    if (pipeline == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "pipeline is null");
-        return nullptr;
-    }
-    auto eventManager = pipeline->GetEventManager();
-    if (eventManager == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "eventManager is null");
-        return nullptr;
-    }
-    return eventManager->GetEventInfoManager();
-}
-
 void FrameNodeBridge::ReleaseNativePtrFunc(void* env, void* nativePtr, void* data)
 {
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "release nativePtr func called");
-    auto nativeEventInfo = static_cast<ArkUINativeEventInfo*>(data);
-    if (nativeEventInfo == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "nativeEventInfo is null");
-        return;
-    }
-    auto eventInfoManager = GetEventInfoManager(nativeEventInfo->frameNode_);
-    if (eventInfoManager == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "eventInfoManager is null");
-        return;
-    }
-    int32_t eventId = -1;
-
-    switch (nativeEventInfo->tag_) {
+    NativePtrTag tag = static_cast<NativePtrTag>(reinterpret_cast<intptr_t>(data));
+    switch (tag) {
         case NATIVE_PTR_TAG_AXIS_INFO: {
             auto* axisEvent = static_cast<AxisInfo*>(nativePtr);
             CHECK_NULL_VOID(axisEvent);
-            eventId = axisEvent->GetEventId();
-            eventInfoManager->RemoveAxisInfo(eventId);
-            TAG_LOGI(AceLogTag::ACE_UIEVENT, "Remove AxisInfo: %{public}d", eventId);
+            delete axisEvent;
             break;
         }
         case NATIVE_PTR_TAG_MOUSE_INFO: {
             auto* mouseInfo = static_cast<MouseInfo*>(nativePtr);
             CHECK_NULL_VOID(mouseInfo);
-            eventId = mouseInfo->GetEventId();
-            eventInfoManager->RemoveMouseInfo(eventId);
-            TAG_LOGI(AceLogTag::ACE_UIEVENT, "Remove MouseInfo: %{public}d", eventId);
+            delete mouseInfo;
+            break;
+        }
+        case NATIVE_PTR_TAG_TOUCH_EVENT_INFO: {
+            auto* touchEventInfo = static_cast<TouchEventInfo*>(nativePtr);
+            CHECK_NULL_VOID(touchEventInfo);
+            delete touchEventInfo;
             break;
         }
         default: {
@@ -1029,8 +998,6 @@ void FrameNodeBridge::ReleaseNativePtrFunc(void* env, void* nativePtr, void* dat
             return;
         }
     }
-    nativeEventInfo->DecRefCount();
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "nativePtr released");
 }
 
 Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, GestureEvent& info)
@@ -1131,31 +1098,31 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfoObj(EcmaVM* vm, Tou
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info)
+Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo* infoPtr)
 {
+    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     panda::JsiFastNativeScope fastNativeScope(vm);
-    auto eventObj = CreateTouchEventInfoObj(vm, info);
-    eventObj->SetNativePointerFieldCount(vm, 1);
+    auto eventObj = CreateTouchEventInfoObj(vm, *infoPtr);
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltX().value_or(0.0f))));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))));
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltY().value_or(0.0f))));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetRollAngle().value_or(0.0f))));
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetRollAngle().value_or(0.0f))));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))));
+        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(infoPtr->GetSourceTool()))));
     auto touchArr = panda::ArrayRef::New(vm);
-    const std::list<TouchLocationInfo>& touchList = info.GetTouches();
+    const std::list<TouchLocationInfo>& touchList = infoPtr->GetTouches();
     uint32_t idx = 0;
     for (const TouchLocationInfo& location : touchList) {
-        panda::ArrayRef::SetValueAt(vm, touchArr, idx++, CreateTouchInfo(vm, location, info));
+        panda::ArrayRef::SetValueAt(vm, touchArr, idx++, CreateTouchInfo(vm, location, *infoPtr));
     }
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "touches"), touchArr);
     auto changeTouchArr = panda::ArrayRef::New(vm);
     idx = 0; // reset index counter
-    const std::list<TouchLocationInfo>& changeTouch = info.GetChangedTouches();
+    const std::list<TouchLocationInfo>& changeTouch = infoPtr->GetChangedTouches();
     for (const TouchLocationInfo& change : changeTouch) {
-        panda::ArrayRef::SetValueAt(vm, changeTouchArr, idx++, CreateTouchInfo(vm, change, info));
+        panda::ArrayRef::SetValueAt(vm, changeTouchArr, idx++, CreateTouchInfo(vm, change, *infoPtr));
     }
     if (changeTouch.size() > 0) {
         eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "type"),
@@ -1177,8 +1144,10 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
-        panda::NumberRef::New(vm, info.GetTargetDisplayId()));
-    eventObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+        panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
+    eventObj->SetNativePointerFieldCount(vm, 1);
+    eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
+        (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO);
     return eventObj;
 }
 
@@ -1210,9 +1179,14 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtime
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto eventObj = CreateTouchEventInfo(vm, info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new TouchEventInfo(info);
+        auto eventObj = CreateTouchEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         function->Call(vm, function.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
+        info.SetPreventDefault(infoPtr->IsPreventDefault());
     };
     NG::ViewAbstract::SetFrameNodeCommonOnTouch(frameNode, std::move(onTouch));
     return panda::JSValueRef::Undefined(vm);
@@ -1553,8 +1527,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfoObj(EcmaVM* vm, MouseInf
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(
-    EcmaVM* vm, std::shared_ptr<MouseInfo> infoPtr, const WeakPtr<FrameNode>& node)
+Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo* infoPtr)
 {
     CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     auto obj = CreateMouseInfoObj(vm, *infoPtr);
@@ -1581,19 +1554,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(
             vm, pressedButtonArr, idx++, panda::NumberRef::New(vm, static_cast<int32_t>(button)));
     }
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressedButtons"), pressedButtonArr);
-    auto eventInfoManager = GetEventInfoManager(node);
-    if (eventInfoManager == nullptr) {
-        obj->SetNativePointerFieldCount(vm, 1);
-        obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()));
-        return obj;
-    }
-    auto eventId = eventInfoManager->AddMouseInfo(infoPtr);
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Add MouseInfo: %{public}d", eventId);
-    auto nativeEventInfo = AceType::MakeRefPtr<ArkUINativeEventInfo>(NATIVE_PTR_TAG_MOUSE_INFO, node);
-    nativeEventInfo->IncRefCount();
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()), ReleaseNativePtrFunc,
-        static_cast<void*>(nativeEventInfo.GetRawPtr()));
+    obj->SetNativePointerField(
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_MOUSE_INFO);
     return obj;
 }
 
@@ -1625,8 +1588,10 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnMouse(ArkUIRuntimeCallInfo* runtime
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<MouseInfo>(info);
-        auto obj = CreateMouseInfo(vm, infoPtr, node);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new MouseInfo(info);
+        auto obj = CreateMouseInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
         info.SetStopPropagation(infoPtr->IsStopPropagation());

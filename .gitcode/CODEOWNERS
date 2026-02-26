@@ -844,8 +844,6 @@ frameworks/bridge/declarative_frontend/engine/functions/js_tabs_function.cpp @ar
 frameworks/bridge/declarative_frontend/engine/functions/js_tabs_function.h @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.h @ArkUI_Event
-frameworks/bridge/declarative_frontend/engine/functions/js_touch_intercept_function.cpp @ArkUI_Event
-frameworks/bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_test_done_function.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_test_done_function.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_webview_function.cpp @arkweb-committer-group
@@ -1875,8 +1873,6 @@ frameworks/core/common/dynamic_component_renderer.h @ArkUI_ability_group
 frameworks/core/common/environment/ @arkui_statemgmt
 frameworks/core/common/event_dump.cpp @ArkUI_Event
 frameworks/core/common/event_dump.h @ArkUI_Event
-frameworks/core/common/event_info_manager.cpp @ArkUI_Event
-frameworks/core/common/event_info_manager.h @ArkUI_Event
 frameworks/core/common/event_manager.cpp @ArkUI_Event
 frameworks/core/common/event_manager.h @ArkUI_Event
 frameworks/core/common/focus_animation_manager.cpp @ArkUI_Event
