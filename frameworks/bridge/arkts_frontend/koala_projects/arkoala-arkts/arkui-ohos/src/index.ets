@@ -27,6 +27,7 @@ export {
   ResponseRegion
 } from "./component/common";
 export * from "./component/gesture";
+export * from "./component/customComponentLifecycle";
 export {
   LifeCycle,
   ExtendableComponent,
@@ -40,6 +41,10 @@ export {
   BaseCustomComponent,
   CustomComponent,
   CustomComponentV2,
+  CustomComponentLifecycleState,
+  CustomComponentLifecycleObserver,
+  CustomComponentLifecycle,
+  LifeCycleEvent,
 } from "./component/customComponent";
 
 export { AttributeUpdater } from "./AttributeUpdater";
