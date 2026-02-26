@@ -493,38 +493,39 @@ void ParseBorderColor(ArkUINodeHandle handle, EcmaVM* vm, const Local<JSValueRef
     }
 }
 
-void BuildBorderWidthOption(const CommonCalcDimension& commonCalcDimension, ArkUIBorderWidthOption* borderWidthOption)
+void BuildBorderWidthOption(const CommonCalcDimension& commonCalcDimension,
+    ArkUIBorderWidthOption (*borderWidthOption)[NUM_4])
 {
     if (commonCalcDimension.left.has_value()) {
-        borderWidthOption[NUM_0].value = commonCalcDimension.left.value().Value();
-        borderWidthOption[NUM_0].unit = static_cast<int32_t>(commonCalcDimension.left.value().Unit());
-        borderWidthOption[NUM_0].hasValue = true;
+        (*borderWidthOption)[NUM_0].value = commonCalcDimension.left.value().Value();
+        (*borderWidthOption)[NUM_0].unit = static_cast<int32_t>(commonCalcDimension.left.value().Unit());
+        (*borderWidthOption)[NUM_0].hasValue = true;
     } else {
-        borderWidthOption[NUM_0].hasValue = false;
+        (*borderWidthOption)[NUM_0].hasValue = false;
     }
 
     if (commonCalcDimension.right.has_value()) {
-        borderWidthOption[NUM_1].value = commonCalcDimension.right.value().Value();
-        borderWidthOption[NUM_1].unit = static_cast<int32_t>(commonCalcDimension.right.value().Unit());
-        borderWidthOption[NUM_1].hasValue = true;
+        (*borderWidthOption)[NUM_1].value = commonCalcDimension.right.value().Value();
+        (*borderWidthOption)[NUM_1].unit = static_cast<int32_t>(commonCalcDimension.right.value().Unit());
+        (*borderWidthOption)[NUM_1].hasValue = true;
     } else {
-        borderWidthOption[NUM_1].hasValue = false;
+        (*borderWidthOption)[NUM_1].hasValue = false;
     }
 
     if (commonCalcDimension.top.has_value()) {
-        borderWidthOption[NUM_2].value = commonCalcDimension.top.value().Value();
-        borderWidthOption[NUM_2].unit = static_cast<int32_t>(commonCalcDimension.top.value().Unit());
-        borderWidthOption[NUM_2].hasValue = true;
+        (*borderWidthOption)[NUM_2].value = commonCalcDimension.top.value().Value();
+        (*borderWidthOption)[NUM_2].unit = static_cast<int32_t>(commonCalcDimension.top.value().Unit());
+        (*borderWidthOption)[NUM_2].hasValue = true;
     } else {
-        borderWidthOption[NUM_2].hasValue = false;
+        (*borderWidthOption)[NUM_2].hasValue = false;
     }
 
     if (commonCalcDimension.bottom.has_value()) {
-        borderWidthOption[NUM_3].value = commonCalcDimension.bottom.value().Value();
-        borderWidthOption[NUM_3].unit = static_cast<int32_t>(commonCalcDimension.bottom.value().Unit());
-        borderWidthOption[NUM_3].hasValue = true;
+        (*borderWidthOption)[NUM_3].value = commonCalcDimension.bottom.value().Value();
+        (*borderWidthOption)[NUM_3].unit = static_cast<int32_t>(commonCalcDimension.bottom.value().Unit());
+        (*borderWidthOption)[NUM_3].hasValue = true;
     } else {
-        borderWidthOption[NUM_3].hasValue = false;
+        (*borderWidthOption)[NUM_3].hasValue = false;
     }
 }
 
@@ -557,7 +558,7 @@ void ParseBorderWidth(ArkUINodeHandle node, EcmaVM* vm, const panda::Local<panda
         panda::Local<panda::ObjectRef> obj = args->ToObject(vm);
         if (ArkTSUtils::ParseCommonEdgeWidths(vm, obj, commonCalcDimension, true)) {
             ArkUIBorderWidthOption borderWidthOption[NUM_4];
-            BuildBorderWidthOption(commonCalcDimension, borderWidthOption);
+            BuildBorderWidthOption(commonCalcDimension, &borderWidthOption);
             GetArkUINodeModifiers()->getCalendarPickerModifier()->setJSBorderWidthIsLocalized(
                 node, borderWidthOption, NUM_4, true);
             return;
@@ -568,7 +569,7 @@ void ParseBorderWidth(ArkUINodeHandle node, EcmaVM* vm, const panda::Local<panda
             GetArkUINodeModifiers()->getCalendarPickerModifier()->setJSBorderWidthProperty(node, &borderWidth);
         } else {
             ArkUIBorderWidthOption borderWidthOption[NUM_4];
-            BuildBorderWidthOption(commonCalcDimension, borderWidthOption);
+            BuildBorderWidthOption(commonCalcDimension, &borderWidthOption);
             GetArkUINodeModifiers()->getCalendarPickerModifier()->setJSBorderWidthArray(node, borderWidthOption, NUM_4);
         }
     } else {
@@ -588,20 +589,20 @@ NG::BorderRadiusProperty GetLocalizedBorderRadius(const BorderRadiusOption& bord
 }
 
 void BuildArkUIBorderRadiusOption(const BorderRadiusOption& borderRadius,
-    ArkUIBorderRadiusOption* arkUIBorderRadiusOption)
+    ArkUIBorderRadiusOption (*arkUIBorderRadiusOption)[NUM_4])
 {
-    arkUIBorderRadiusOption[NUM_0].value = borderRadius.topLeft.Value();
-    arkUIBorderRadiusOption[NUM_0].unit = static_cast<ArkUI_Int32>(borderRadius.topLeft.Unit());
-    arkUIBorderRadiusOption[NUM_0].hasValue = true;
-    arkUIBorderRadiusOption[NUM_1].value = borderRadius.topRight.Value();
-    arkUIBorderRadiusOption[NUM_1].unit = static_cast<ArkUI_Int32>(borderRadius.topRight.Unit());
-    arkUIBorderRadiusOption[NUM_1].hasValue = true;
-    arkUIBorderRadiusOption[NUM_2].value = borderRadius.bottomLeft.Value();
-    arkUIBorderRadiusOption[NUM_2].unit = static_cast<ArkUI_Int32>(borderRadius.bottomLeft.Unit());
-    arkUIBorderRadiusOption[NUM_2].hasValue = true;
-    arkUIBorderRadiusOption[NUM_3].value = borderRadius.bottomRight.Value();
-    arkUIBorderRadiusOption[NUM_3].unit = static_cast<ArkUI_Int32>(borderRadius.bottomRight.Unit());
-    arkUIBorderRadiusOption[NUM_3].hasValue = true;
+    (*arkUIBorderRadiusOption)[NUM_0].value = borderRadius.topLeft.Value();
+    (*arkUIBorderRadiusOption)[NUM_0].unit = static_cast<ArkUI_Int32>(borderRadius.topLeft.Unit());
+    (*arkUIBorderRadiusOption)[NUM_0].hasValue = true;
+    (*arkUIBorderRadiusOption)[NUM_1].value = borderRadius.topRight.Value();
+    (*arkUIBorderRadiusOption)[NUM_1].unit = static_cast<ArkUI_Int32>(borderRadius.topRight.Unit());
+    (*arkUIBorderRadiusOption)[NUM_1].hasValue = true;
+    (*arkUIBorderRadiusOption)[NUM_2].value = borderRadius.bottomLeft.Value();
+    (*arkUIBorderRadiusOption)[NUM_2].unit = static_cast<ArkUI_Int32>(borderRadius.bottomLeft.Unit());
+    (*arkUIBorderRadiusOption)[NUM_2].hasValue = true;
+    (*arkUIBorderRadiusOption)[NUM_3].value = borderRadius.bottomRight.Value();
+    (*arkUIBorderRadiusOption)[NUM_3].unit = static_cast<ArkUI_Int32>(borderRadius.bottomRight.Unit());
+    (*arkUIBorderRadiusOption)[NUM_3].hasValue = true;
 }
 
 void ParseBorderRadius(ArkUINodeHandle nativeNode, EcmaVM* vm, const panda::Local<panda::JSValueRef>& args)
@@ -631,7 +632,7 @@ void ParseBorderRadius(ArkUINodeHandle nativeNode, EcmaVM* vm, const panda::Loca
                 nativeNode, &borderRadiusProperty);
         } else {
             ArkUIBorderRadiusOption arkUIBorderRadiusOption[NUM_4];
-            BuildArkUIBorderRadiusOption(borderRadiusOption, arkUIBorderRadiusOption);
+            BuildArkUIBorderRadiusOption(borderRadiusOption, &arkUIBorderRadiusOption);
             GetArkUINodeModifiers()->getCalendarPickerModifier()->setJSBorderRadiusArray(
                 nativeNode, arkUIBorderRadiusOption, NUM_4);
         }
