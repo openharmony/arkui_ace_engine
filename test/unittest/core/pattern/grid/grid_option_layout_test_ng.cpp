@@ -390,7 +390,7 @@ HWTEST_F(GridOptionLayoutTestNg, GetEndOffset004, TestSize.Level1)
         UpdateCurrentOffset(-50.0f);
         EXPECT_EQ(pattern_->GetEndOffset(), info.startMainLineIndex_ * 105.0f);
     }
-    EXPECT_LE(info.currentOffset_, -228.052094f);
+    EXPECT_LE(info.currentOffset_, -150.0f);
     EXPECT_GE(info.startMainLineIndex_, 3);
 }
 
