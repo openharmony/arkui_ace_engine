@@ -396,7 +396,6 @@ bool TextLayoutAlgorithm::CreateParagraph(
     paraStyle.textStyleUid = frameNode->GetId();
     // SymbolGlyph
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        isSpecialSymbol_ = pattern->GetIsSpecialSymbol();
         paragraphManager_->Reset();
         return UpdateSymbolTextStyle(textStyle, paraStyle, layoutWrapper, frameNode);
     }
@@ -429,16 +428,7 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, cons
         symbolEffectOptions.Reset();
         layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
     }
-    auto unicode = symbolSourceInfo->GetUnicode();
-    paragraph->AddSymbol(unicode);
-    if (isSpecialSymbol_ || unicode == 0xF07E0 || unicode == 0xF086B) {
-        isSpecialSymbol_ = true;
-        TAG_LOGI(AceLogTag::ACE_TEXT,
-            "ACE symbol TextLayoutAlgorithm::UpdateSymbolTextStyle id:%{public}d unicode:%{public}d color:%{public}s "
-            "fontFamilay:%{public}s fontSize:%{public}f",
-            frameNode->GetId(), unicode, StringUtils::SymbolColorListToString(textStyle.GetSymbolColorList()).c_str(),
-            GetFontFamilyInJson(textStyle.GetFontFamilies()).c_str(), textStyle.GetFontSizeActual());
-    }
+    paragraph->AddSymbol(symbolSourceInfo->GetUnicode());
     paragraph->PopStyle();
     paragraph->Build();
     paragraph->SetParagraphSymbolAnimation(frameNode);
