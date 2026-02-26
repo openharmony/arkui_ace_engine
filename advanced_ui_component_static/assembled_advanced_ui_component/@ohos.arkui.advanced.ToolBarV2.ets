@@ -249,7 +249,7 @@ export class ToolBarV2Modifier implements AttributeModifier<ColumnAttribute> {
 }
 
 @ObservedV2
-class ToolBarV2Theme {
+export class ToolBarV2Theme {
   @Trace
   public iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
   @Trace

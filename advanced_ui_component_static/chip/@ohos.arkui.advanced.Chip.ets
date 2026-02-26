@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,7 +88,7 @@ enum IconType {
   SUFFIX_SYMBOL = 'SUFFIXSYMBOL',
 }
 
-enum BreakPointsType {
+export enum BreakPointsType {
   SM = 'SM',
   MD = 'MD',
   LG = 'LG'
@@ -142,7 +142,7 @@ export interface LabelOptions {
   localizedLabelMargin?: LocalizedLabelMarginOptions;
 }
 
-interface IconTheme {
+export interface IconTheme {
   normalSize: SizeOptions;
   smallSize: SizeOptions;
   fillColor: ResourceColor;
@@ -151,15 +151,15 @@ interface IconTheme {
   focusActivatedColor: ResourceColor;
 }
 
-interface PrefixIconTheme extends IconTheme {}
+export interface PrefixIconTheme extends IconTheme {}
 
-interface SuffixIconTheme extends IconTheme {
+export interface SuffixIconTheme extends IconTheme {
   defaultDeleteIcon: ResourceStr;
   focusable: boolean;
   isShowMargin: Resource;
 }
 
-interface DefaultSymbolTheme {
+export interface DefaultSymbolTheme {
   normalFontColor: Array<ResourceColor>;
   activatedFontColor: Array<ResourceColor>;
   smallSymbolFontSize: Length;
@@ -167,7 +167,7 @@ interface DefaultSymbolTheme {
   defaultEffect: int;
 }
 
-interface LabelTheme {
+export interface LabelTheme {
   normalFontSize: Dimension;
   smallFontSize: Dimension;
   focusFontColor: ResourceColor;
@@ -183,13 +183,13 @@ interface LabelTheme {
   fontWeight: Resource;
 }
 
-interface ChipNodeOpacity {
+export interface ChipNodeOpacity {
   normal: double;
   hover: double;
   pressed: double;
 }
 
-interface ChipNodeConstraintWidth {
+export interface ChipNodeConstraintWidth {
   breakPointMinWidth: double,
   breakPointSmMaxWidth: double,
   breakPointMdMaxWidth: double,
@@ -206,7 +206,7 @@ export interface CloseOptions extends AccessibilityOptions {
   fontSize?: Dimension;
 }
 
-interface ChipNodeTheme {
+export interface ChipNodeTheme {
   suitAgeScale: double;
   minLabelWidth: Dimension;
   normalHeight: Dimension;
@@ -242,7 +242,7 @@ export interface ChipSymbolGlyphOptions {
   activated?: SymbolGlyphModifier;
 }
 
-interface ChipTheme {
+export interface ChipTheme {
   prefixIcon: PrefixIconTheme;
   label: LabelTheme;
   suffixIcon: SuffixIconTheme;

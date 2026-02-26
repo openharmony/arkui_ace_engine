@@ -71,7 +71,7 @@ export enum FilterType {
   LIST_FILTER
 }
 
-enum FilterAccessibilityType {
+export enum FilterAccessibilityType {
   ACCESSIBILITY_TEXT,
   ACCESSIBILITY_DESC,
   SEND_ACCESSIBILITY,
@@ -104,7 +104,7 @@ export class ObservedBoolean {
 }
 
 @Observed
-class ObservedNumber {
+export class ObservedNumber {
   public value: number;
 
   constructor(value: number) {
@@ -113,7 +113,7 @@ class ObservedNumber {
 }
 
 @Observed
-class FilterAccessibilityText {
+export class FilterAccessibilityText {
   public accessibilitySelectedText: string = '';
   public accessibilityExpand: string = '';
   public accessibilityCollapse: string = '';
@@ -858,7 +858,7 @@ struct MultiFilterRow {
   }
 }
 
-class EnvironmentCallbackEntry implements EnvironmentCallback {
+export class EnvironmentCallbackEntry implements EnvironmentCallback {
   filter: Filter;
 
   constructor(filter: Filter) {

@@ -206,7 +206,7 @@ class Util {
   }
 }
 
-class EnvironmentCallbackEntry implements EnvironmentCallback {
+export class EnvironmentCallbackEntry implements EnvironmentCallback {
   ComposeListItem: ComposeListItem;
 
   constructor(ComposeListItem: ComposeListItem) {
@@ -480,7 +480,7 @@ interface CreateIconParam {
   icon?: OperateIcon;
 }
 
-class OperateItemStructController {
+export class OperateItemStructController {
   public changeRadioState = () => {
   };
   public changeCheckboxState = () => {

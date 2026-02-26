@@ -66,7 +66,7 @@ export interface EditableTitleBarOptions {
   safeAreaEdges?: Array<SafeAreaEdge>;
 }
 
-enum ItemType {
+export enum ItemType {
   Image,
   Icon,
   LeftIcon,
@@ -104,7 +104,7 @@ const SUBTITLE_F: number = getNumberByResource(125831097, SUBTITLE_VP);
 const TITLE_F_VP: string = (TITLE_F > 0 ? TITLE_F : TITLE_VP) + 'vp';
 const SUBTITLE_F_VP: string = (SUBTITLE_F > 0 ? SUBTITLE_F : SUBTITLE_VP) + 'vp';
 
-class EditableTitleBarTheme {
+export class EditableTitleBarTheme {
   public iconColor: ResourceColor = $r('sys.color.titlebar_icon_color');
   public iconBackgroundColor: ResourceColor = $r('sys.color.titlebar_icon_background_color');
   public iconBackgroundPressedColor: ResourceColor = $r('sys.color.titlebar_icon_background_pressed_color');
@@ -114,7 +114,7 @@ class EditableTitleBarTheme {
   public subTitleColor: ResourceColor = $r('sys.color.titlebar_subheader_color');
 }
 
-class ButtonGestureModifier implements GestureModifier {
+export class ButtonGestureModifier implements GestureModifier {
   public static readonly longPressTime: number = 500;
   public static readonly minFontSize: number = 1.75;
   public fontSize: number = 1;
@@ -143,7 +143,7 @@ class ButtonGestureModifier implements GestureModifier {
   }
 }
 
-class EnvironmentCallbackEntry implements EnvironmentCallback {
+export class EnvironmentCallbackEntry implements EnvironmentCallback {
   private imageMenuItem: ImageMenuItem;
 
   constructor(imageMenuItem: ImageMenuItem) {
@@ -477,7 +477,7 @@ struct EditableTitleBarMenuSection {
 
 
 @Component
-struct ImageMenuItem {
+export struct ImageMenuItem {
   item: EditableTitleBarMenuItem = {
     value: '',
     isEnabled: true,
