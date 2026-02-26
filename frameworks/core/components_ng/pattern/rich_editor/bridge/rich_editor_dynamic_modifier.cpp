@@ -1382,7 +1382,7 @@ void SetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 co
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
             ResourceParseUtils::CompleteResourceObjectFromColor(
- 	                 resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }

@@ -1904,7 +1904,8 @@ void RegisterBorderColorRes(FrameNode* frameNode, void* colorRawPtr, NG::BorderC
             ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_1], borderColors.rightColor.value(), nodeInfo);
         }
         if (borderColors.bottomColor.has_value()) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_2], borderColors.bottomColor.value(), nodeInfo);
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                objs[NUM_2], borderColors.bottomColor.value(), nodeInfo);
         }
         if (borderColors.leftColor.has_value()) {
             ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_3], borderColors.leftColor.value(), nodeInfo);

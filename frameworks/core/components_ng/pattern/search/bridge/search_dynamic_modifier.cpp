@@ -701,7 +701,7 @@ void SetSearchDividerColor(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint3
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
             ResourceParseUtils::CompleteResourceObjectFromColor(
- 	                 resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }

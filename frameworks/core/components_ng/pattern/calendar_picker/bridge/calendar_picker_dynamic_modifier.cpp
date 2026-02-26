@@ -170,7 +170,7 @@ void SetTextStyleWithWeightEnumBase(ArkUINodeHandle node, uint32_t color, float 
         RefPtr<ResourceObject> colorResObj;
         Color result = Color(color);
         ResourceParseUtils::CompleteResourceObjectFromColor(
- 	             colorResObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+            colorResObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         if (colorResObj) {
             textStyle.textColor = result;
             textStyle.textColorResObj = colorResObj;

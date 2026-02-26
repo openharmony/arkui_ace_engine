@@ -60,7 +60,6 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
         RefPtr<ResourceObject> resObj;
         ResourceParseUtils::CompleteResourceObjectFromColor(
             resObj, maskColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
-
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
