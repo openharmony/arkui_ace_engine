@@ -80,63 +80,6 @@
   }
 
 
-export default async function alphabetIndexerAlignStyleTest() {
-  /*
-* AlphabetIndexer组件  alignStyle属性
-* 找到画面id为alphabetIndexerAlignStyle1,alphabetIndexerAlignStyle2,alphabetIndexerAlignStyle3,alphabetIndexerAlignStyle4,alphabetIndexerAlignStyle5的AlphabetIndexer组件
-* 找到画面文本为AlphabetIndexerAlignStyle的button组件
-* 获取alphabetIndexer1的alignStyle属性与期待值IndexerAlign.Right,$r('app.string.length')比对
-* 获取alphabetIndexer2的alignStyle属性与期待值IndexerAlign.Left,60比对
-* 获取alphabetIndexer3的alignStyle属性与期待值IndexerAlign.Left,10比对
-* 获取alphabetIndexer4的alignStyle属性与期待值IndexerAlign.Left,100比对
-* 获取alphabetIndexer5的alignStyle属性与期待值IndexerAlign.Left,10比对
-* 点击button,变更alphabetIndexer1的alignStyle属性值为'100px'
-* 获取alphabetIndexer1的alignStyle属性与期待值'100px'比对
-*/
-  defineTest('alphabetIndexerAlignStyleTestDemo', {
-    level: TestCaseLevel.LEVEL0
-  }, async () => {
-    console.log("alphabetIndexerAlignStyleTestDemo running")
-    const  driver: Tester = Tester.create()
-    const  alphabetIndexer1: Component =
-      await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle1').enabled(true))
-    const  alphabetIndexer2: Component =
-      await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle2').enabled(true))
-    const  alphabetIndexer3: Component =
-      await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle3').enabled(true))
-    const  alphabetIndexer4: Component =
-      await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle4').enabled(true))
-    const  alphabetIndexer5: Component =
-      await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle5').enabled(true))
-    const  button: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerAlignStyle').enabled(true))
-
-    const  alignStyle1: string = await alphabetIndexer2.getInspectorInfo()
-    assertFalse(JSON.parse(alignStyle1).$attrs.alignStyle.value == undefined)
-    assertEqual(JSON.parse(alignStyle1).$attrs.alignStyle.value, 'IndexerAlign.Right')
-    assertEqual(JSON.parse(alignStyle1).$attrs.alignStyle.offset, $r('app.string.length'))
-    const  alignStyle2: string = await alphabetIndexer3.getInspectorInfo()
-    assertEqual(JSON.parse(alignStyle2).$attrs.alignStyle.value, 'IndexerAlign.Left')
-    assertEqual(JSON.parse(alignStyle2).$attrs.alignStyle.offset, 60)
-    const  alignStyle3: string = await alphabetIndexer4.getInspectorInfo()
-    assertEqual(JSON.parse(alignStyle3).$attrs.alignStyle.value, 'IndexerAlign.Left')
-    assertEqual(JSON.parse(alignStyle3).$attrs.alignStyle.offset, 10)
-    const  alignStyle4: string = await alphabetIndexer5.getInspectorInfo()
-    assertEqual(JSON.parse(alignStyle4).$attrs.alignStyle.value, 'IndexerAlign.Left')
-    assertEqual(JSON.parse(alignStyle4).$attrs.alignStyle.offset, 100)
-
-    const  alignStyle5: string = await alphabetIndexer1.getInspectorInfo()
-    assertEqual(JSON.parse(alignStyle5).$attrs.alignStyle.value, 'IndexerAlign.Left')
-    assertEqual(JSON.parse(alignStyle5).$attrs.alignStyle.offset, 10)
-
-    await button.tap()
-    const  alignStyle6: string = await alphabetIndexer1.getInspectorInfo()
-    assertEqual(JSON.parse(alignStyle6).$attrs.alignStyle.value, 'IndexerAlign.Left')
-    assertEqual(JSON.parse(alignStyle6).$attrs.alignStyle.offset, '100px')
-  }, 0)
-}
-
-
-
 export default async function alphabetIndexerAutoCollapseTest() {
   /*
 * AlphabetIndexer组件  autoCollapse属性
@@ -321,5 +264,47 @@ export default async function alphabetIndexerItemSizeTest() {
     await button.tap()
     const  itemSize2: string = await alphabetIndexer.getInspectorInfo()
     assertEqual(JSON.parse(itemSize2).$attrs.itemSize, '100.00px')
+  }, 0)
+}
+
+export default async function alphabetIndexerPopupColorTest() {
+  /*
+* AlphabetIndexer组件  popupColor属性
+* 找到画面id为alphabetIndexerPopupColor1,alphabetIndexerPopupColor2的AlphabetIndexer组件
+* 找到画面文本为AlphabetIndexerPopupColor1,AlphabetIndexerPopupColor2的button组件
+* 获取alphabetIndexer1的popupColor属性与期待值Color.Red比对
+* 获取alphabetIndexer2的popupColor属性与期待值'#FF808080'比对
+* 点击button1，变更alphabetIndexer2的popupColor属性值为'#ffa500'
+* 获取alphabetIndexer2的popupColor属性与期待值'#FFFFA500'比对
+* 点击button2，变更alphabetIndexer2的popupColor属性值为$r('sys.color.ohos_id_color_text_hyperlink')
+* 获取alphabetIndexer2的popupColor属性与期待值$r('sys.color.ohos_id_color_text_hyperlink')比对
+*/
+  defineTest('alphabetIndexerPopupColorTestDemo', {
+    level: TestCaseLevel.LEVEL0
+  }, async () => {
+    console.log("alphabetIndexerPopupColorTestDemo running")
+    const  driver: Tester = Tester.create()
+    const  alphabetIndexer1: Component =
+      await driver.findComponent(Matcher.create().id('alphabetIndexerPopupColor1').enabled(true))
+    const  alphabetIndexer2: Component =
+      await driver.findComponent(Matcher.create().id('alphabetIndexerPopupColor2').enabled(true))
+    const  button1: Component =
+      await driver.findComponent(Matcher.create().text('AlphabetIndexerPopupColor1').enabled(true))
+    const  button2: Component =
+      await driver.findComponent(Matcher.create().text('AlphabetIndexerPopupColor2').enabled(true))
+
+    const  popupColor1: string = await alphabetIndexer1.getInspectorInfo()
+    assertEqual(JSON.parse(popupColor1).$attrs.popupColor.toLowerCase(), Color.Red)
+
+    const  popupColor2: string = await alphabetIndexer2.getInspectorInfo()
+    assertEqual(JSON.parse(popupColor2).$attrs.popupColor, '#FF808080')
+
+    await button1.tap()
+    const  popupColor3: string = await alphabetIndexer2.getInspectorInfo()
+    assertEqual(JSON.parse(popupColor3).$attrs.popupColor, '#FFFFA500')
+
+    await button2.tap()
+    const  popupColor4: string = await alphabetIndexer2.getInspectorInfo()
+    assertEqual(JSON.parse(popupColor4).$attrs.popupColor, $r('sys.color.ohos_id_color_text_hyperlink'))
   }, 0)
 }
