@@ -321,7 +321,8 @@ void SetPopupItemBorderRadiusImpl(Ark_NativePointer node,
     }
     Validator::ValidateNonNegative(radius);
     IndexerModelStatic::SetPopupItemBorderRadius(frameNode, radius.value_or(Dimension(0, DimensionUnit::VP)));
-    IndexerModelStatic::SetPopupBorderRadius(frameNode, radius.value_or(Dimension(0, DimensionUnit::VP)));
+    IndexerModelStatic::SetPopupBorderRadius(
+        frameNode, radius.value_or(Dimension(0, DimensionUnit::VP)) + RADIUS_OFFSET);
 }
 void SetItemBorderRadiusImpl(Ark_NativePointer node,
                              const Opt_Float64* value)
@@ -336,7 +337,8 @@ void SetItemBorderRadiusImpl(Ark_NativePointer node,
     }
     Validator::ValidateNonNegative(radius);
     IndexerModelStatic::SetItemBorderRadius(frameNode, radius.value_or(Dimension(0, DimensionUnit::VP)));
-    IndexerModelStatic::SetIndexerBorderRadius(frameNode, radius.value_or(Dimension(0, DimensionUnit::VP)));
+    IndexerModelStatic::SetIndexerBorderRadius(
+        frameNode, radius.value_or(Dimension(0, DimensionUnit::VP)) + RADIUS_OFFSET);
 }
 void SetPopupBackgroundBlurStyleImpl(Ark_NativePointer node,
                                      const Opt_BlurStyle* value)
