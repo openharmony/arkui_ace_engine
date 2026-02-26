@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/scene/input_scene.h"
+#include "core/components_ng/pattern/window_scene/scene/mirror_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/panel_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/transform_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
@@ -27,6 +28,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr uint32_t MIRROR_BIT = 1U << 30;
+}
 std::function<RefPtr<Pattern>(void)> PatternCreator(const sptr<Rosen::SceneSession>& sceneSession)
 {
     std::function<RefPtr<Pattern>(void)> patternCreator;
@@ -77,6 +81,15 @@ void WindowSceneModel::Create(int32_t persistentId)
         return;
     }
 
+    bool mirrorFlag = false;
+    constexpr uint32_t maskMirrorBit = MIRROR_BIT;
+    uint32_t mirrorId = static_cast<uint32_t>(persistentId);
+    if ((mirrorId & maskMirrorBit) != 0) {
+        mirrorId &= ~maskMirrorBit;
+        mirrorFlag = true;
+        persistentId = static_cast<int32_t>(mirrorId);
+    }
+
     auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE,
@@ -93,6 +106,18 @@ void WindowSceneModel::Create(int32_t persistentId)
         stack->Push(node);
         ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
         CheckParentNodeDfx(node, sceneSession, persistentId);
+        return;
+    }
+    if (mirrorFlag) {
+        auto stack = ViewStackProcessor::GetInstance();
+        auto nodeId = stack->ClaimNodeId();
+        ACE_SCOPED_TRACE("Create Mirror Scene[%s][self:%d][%s]",
+            V2::WINDOW_SCENE_ETS_TAG, nodeId, sceneSession->GetSessionInfo().bundleName_.c_str());
+        auto mirrorNode = FrameNode::GetOrCreateFrameNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
+            [sceneSession]() { return AceType::MakeRefPtr<MirrorWindowScene>(sceneSession); });
+        stack->Push(mirrorNode);
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
+        CheckParentNodeDfx(mirrorNode, sceneSession, persistentId);
         return;
     }
 

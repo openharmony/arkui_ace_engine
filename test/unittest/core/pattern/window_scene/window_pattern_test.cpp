@@ -33,6 +33,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/mirror_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
@@ -62,6 +63,7 @@ public:
     sptr<Rosen::SceneSession> sceneSession_;
     RefPtr<FrameNode> frameNode_;
     RefPtr<WindowScene> windowScene_;
+    RefPtr<MirrorWindowScene> mirrorWindowScene_;
 
     void CreateWindowSceneWindowPatternTest();
 };
@@ -117,6 +119,9 @@ void WindowPatternTest::CreateWindowSceneWindowPatternTest()
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene_);
     windowScene_->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode_));
     ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    mirrorWindowScene_ = AceType::MakeRefPtr<MirrorWindowScene>(sceneSession_);
+    ASSERT_NE(mirrorWindowScene_, nullptr);
 
     Rosen::RSSurfaceNodeConfig config = {
         .SurfaceNodeName = "SurfaceNode"
@@ -316,6 +321,31 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode, TestSize.Level0)
     sceneSession_->isAppLockControl_.store(true);
     windowScene_->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+}
+
+/**
+ * @tc.name: AddSnapshot
+ * @tc.desc: AddSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, AddSnapshot, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    sceneSession_->state_ = Rosen::SessionState::STATE_DISCONNECT;
+    sceneSession_->SetShowRecent(true);
+    auto key = Rosen::defaultStatus;
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
+    mirrorWindowScene_->AddSnapshot();
+    EXPECT_EQ(sceneSession_->GetShowRecent(), true);
+
+    sceneSession_->state_ = Rosen::SessionState::STATE_BACKGROUND;
+    sceneSession_->SetShowRecent(false);
+    sceneSession_->isAppLockControl_.store(false);
+    sceneSession_->scenePersistence_->hasSnapshot_[key] = true;
+    mirrorWindowScene_->AddSnapshot();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, false);
 }
 
 /**
