@@ -19,12 +19,12 @@
 - 用户询问"滚动容器" → 搜索别名 → 定位到 `Scroll_Knowledge_Base.md`
 - 用户询问"文本选择器" → 按分类查找 selector → 定位到 `Text_Picker_Knowledge_Base.md`
 
-**统计数据**（截至 2026-02-11）：
+**统计数据**（截至 2026-02-26）：
 
-- 总知识库文档: 38 个
+- 总知识库文档: 41 个
 - 组件知识库: 27 个
 - SDK API 知识库: 2 个
-- 系统功能知识库: 2 个
+- 系统功能知识库: 5 个（含 Layout 模块 3 个专题）
 - CJ Frontend 知识库: 1 个
 - Syntax 模块知识库: 7 个（1 架构总览 + 4 循环组件独立文档 + 2 专题文档）
 - 架构文档: 1 个
@@ -49,6 +49,10 @@ knowledge_base/
   │       └── Drag_Drop_Knowledge_Base_CN.md         # 拖拽系统知识库（基于手势扩展的进阶层）
  ├── architecture/          # 架构文档
  │   └── ThemeManager_Architecture_CN.md        # ThemeManager 主题系统架构
+ ├── layout/                # 布局机制知识库
+ │   ├── Layout_Framework_Knowledge_Base.md      # Layout 框架总览
+ │   ├── Safe_Area_Mechanism_Knowledge_Base.md   # SafeArea 机制
+ │   └── Ignore_Layout_Safe_Area_Knowledge_Base.md # ignoreLayoutSafeArea 机制
  ├── pattern/               # 组件模式知识库
  │   ├── badge/
  │   │   └── Badge_Knowledge_Base_CN.md         # Badge 组件知识库

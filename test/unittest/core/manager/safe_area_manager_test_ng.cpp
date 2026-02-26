@@ -210,6 +210,7 @@ HWTEST_F(SafeAreaManagerTest, CutoutSafeAreaTest, TestSize.Level1)
     EXPECT_EQ(cutoutSafeArea, safeArea);
     CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
         Rect { 0.0f, DISPLAY_WIDTH, 0.0f, DISPLAY_HEIGHT });
+
     /**
      * @tc.steps: step2 call UpdateCutoutSafeArea with rootSize params.
      * @tc.expected: cutout regions need to adjacent to edges.
@@ -222,6 +223,7 @@ HWTEST_F(SafeAreaManagerTest, CutoutSafeAreaTest, TestSize.Level1)
     safeArea = safeAreaManager_->GetSafeArea();
     CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
         Rect { 0.0f, DISPLAY_WIDTH - 20, 0.0f, DISPLAY_HEIGHT - 25 });
+
     /**
      * @tc.steps: step3 call UpdateCutoutSafeArea SafeAreaInsets with invalid params.
      * @tc.expected: cutout regions need to adjacent to edges.
@@ -249,6 +251,7 @@ HWTEST_F(SafeAreaManagerTest, SystemSafeAreaTest, TestSize.Level1)
     EXPECT_EQ(ret, false);
     auto systemSafeArea = safeAreaManager_->GetSystemSafeArea();
     EXPECT_EQ(systemSafeArea, systemArea);
+
     auto safeArea = safeAreaManager_->GetSafeArea();
     auto safeAreaWithoutProcess = safeAreaManager_->GetSafeAreaWithoutProcess();
     EXPECT_EQ(safeArea, safeAreaWithoutProcess);
@@ -272,6 +275,7 @@ HWTEST_F(SafeAreaManagerTest, NavSafeAreaTest, TestSize.Level1)
     EXPECT_EQ(ret, true);
     ret = safeAreaManager_->UpdateNavSafeArea(navArea);
     EXPECT_EQ(ret, false);
+
     auto safeArea = safeAreaManager_->GetSafeArea();
     auto safeAreaWithoutProcess = safeAreaManager_->GetSafeAreaWithoutProcess();
     EXPECT_EQ(safeArea, safeAreaWithoutProcess);
@@ -871,6 +875,7 @@ HWTEST_F(SafeAreaManagerTest, NodesTest, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode3), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode4), true);
+
     auto pipeline = PipelineContext::GetCurrentContext();
     auto manager = pipeline->GetSafeAreaManager();
     EXPECT_EQ(manager->GetGeoRestoreNodes().size(), 5);
@@ -1060,7 +1065,6 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest4, TestSize.Level1)
     safeAreaManager_->SetIsFullScreen(true);
     safeAreaManager_->SetIsNeedAvoidWindow(false);
     PaddingPropertyF paddingProperty = safeAreaManager_->SafeAreaToPadding();
-
     EXPECT_EQ(paddingProperty.left, SYSTEM_LEFT_END - SYSTEM_LEFT_START);
     EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - SYSTEM_RIGHT_START);
     EXPECT_EQ(paddingProperty.top, SYSTEM_TOP_END - SYSTEM_TOP_START);
@@ -1070,7 +1074,6 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest4, TestSize.Level1)
     safeAreaManager_->SetIsFullScreen(false);
     safeAreaManager_->SetIsNeedAvoidWindow(true);
     paddingProperty = safeAreaManager_->SafeAreaToPadding();
-
     EXPECT_EQ(paddingProperty.left, SYSTEM_LEFT_END - SYSTEM_LEFT_START);
     EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - SYSTEM_RIGHT_START);
     EXPECT_EQ(paddingProperty.top, SYSTEM_TOP_END - SYSTEM_TOP_START);
@@ -1920,4 +1923,5 @@ HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest4, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->GetKeyboardOffset(), 0.0f);
     EXPECT_EQ(safeAreaManager_->GetKeyboardOffset(true), 0.0f);
 }
+
 } // namespace OHOS::Ace::NG
