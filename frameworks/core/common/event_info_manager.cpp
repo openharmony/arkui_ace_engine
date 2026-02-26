@@ -15,7 +15,6 @@
 
 #include "core/common/event_info_manager.h"
 
-#include "core/components_ng/event/touch_event.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
 
@@ -44,17 +43,4 @@ int32_t EventInfoManager::RemoveMouseInfo(int32_t eventId)
 {
     return static_cast<int32_t>(mouseMap_.erase(eventId));
 }
-
-int32_t EventInfoManager::AddTouchEventInfo(const std::shared_ptr<TouchEventInfo>& info)
-{
-    int32_t id = touchNextId_++;
-    info->SetEventId(id);
-    touchMap_.emplace(id, info);
-    return id;
-}
-int32_t EventInfoManager::RemoveTouchEventInfo(int32_t eventId)
-{
-    return static_cast<int32_t>(touchMap_.erase(eventId));
-}
-
 } // namespace OHOS::Ace
