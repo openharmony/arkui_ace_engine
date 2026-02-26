@@ -3378,7 +3378,7 @@ public:
     void OnAttributeChange(Rosen::DisplayId dId, const std::vector<std::string>& attributes) override
     {
         std::string changedAttributes;
-        for (const auto &s:attributes) {
+        for (const auto &s : attributes) {
             changedAttributes += s + ";";
         }
         auto delegate = delegate_.Upgrade();
@@ -3414,7 +3414,10 @@ void WebDelegate::RegisterDisplayInfoChange()
 
 void WebDelegate::UnRegisterDisplayInfoChange()
 {
-    CHECK_NULL_VOID(displayListener_);
+    if (displayListener_ == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "displayListener_ is null.");
+        return;
+    }
     auto ret = OHOS::Rosen::DisplayManager::GetInstance().UnRegisterDisplayAttributeListener(displayListener_);
     if (ret != OHOS::Rosen::DMError::DM_OK) {
         TAG_LOGW(AceLogTag::ACE_WEB, "DisplayInfoChange unregister fail, error: %{public}d", static_cast<int>(ret));
