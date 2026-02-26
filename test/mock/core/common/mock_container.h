@@ -176,11 +176,14 @@ public:
     MOCK_METHOD(int32_t, GetViewPosX, (), (const, override));
     MOCK_METHOD(int32_t, GetViewPosY, (), (const, override));
     MOCK_METHOD(uint32_t, GetWindowId, (), (const, override));
+    MOCK_METHOD(std::string, GetWindowName, (), (const, override));
     MOCK_METHOD(void*, GetView, (), (const, override));
     MOCK_METHOD(RefPtr<AceView>, GetAceView, (), (const, override));
 
     MOCK_METHOD(void, DumpHeapSnapshot, (bool isPrivate), (override));
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
+    MOCK_METHOD(void, DestroyHeapProfiler, (), (override));
+    MOCK_METHOD(void, ForceFullGC, (), (override));
     MOCK_METHOD(bool, WindowIsShow, (), (const, override));
     MOCK_METHOD(bool, IsMainWindow, (), (const, override));
     MOCK_METHOD(Rect, GetGlobalScaledRect, (), (const, override));
