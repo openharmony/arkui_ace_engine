@@ -908,36 +908,10 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest029, TestSize.Level1)
 
 /**
  * @tc.name: StateStyleTest030
- * @tc.desc: test AddSupportedUIStateWithCallback with isInner parameter when currentState is SELECTED
- * @tc.type: FUNC
- */
-HWTEST_F(StateStyleManagerTestNg, StateStyleTest030, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
-    ASSERT_NE(stateStyleMgr, nullptr);
-
-    std::function<void(UIState)> callback = [](UIState state) {};
-    UIState callbackUIState = UI_STATE_NORMAL;
-    callback = [&](UIState state) {
-        callbackUIState = state;
-    };
-
-    stateStyleMgr->SetCurrentUIState(UI_STATE_SELECTED, true);
-    EXPECT_TRUE(stateStyleMgr->IsCurrentStateOn(UI_STATE_SELECTED));
-
-    bool result = stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_SELECTED, callback, true);
-    EXPECT_TRUE(result);
-    EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_SELECTED));
-    EXPECT_EQ(callbackUIState, UI_STATE_SELECTED);
-}
-
-/**
- * @tc.name: StateStyleTest031
  * @tc.desc: test AddSupportedUIStateWithCallback with excludeInner parameter when currentState is SELECTED
  * @tc.type: FUNC
  */
-HWTEST_F(StateStyleManagerTestNg, StateStyleTest031, TestSize.Level1)
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest030, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
