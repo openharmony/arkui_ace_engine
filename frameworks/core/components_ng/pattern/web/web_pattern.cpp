@@ -5619,6 +5619,10 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove
         isMove ? showMagnifierFingerId_ : touchEventInfo_.GetChangedTouches().front().GetFingerId();
     if (magnifierController_) {
         OffsetF localOffset = OffsetF(centerOffsetX, centerOffsetY);
+        if (isMove && NearEqual(magnifierController_->GetLocalOffset().GetX(), localOffset.GetX()) &&
+            NearEqual(magnifierController_->GetLocalOffset().GetY(), localOffset.GetY())) {
+            return;
+        }
         magnifierController_->SetLocalOffset(localOffset);
     }
 }

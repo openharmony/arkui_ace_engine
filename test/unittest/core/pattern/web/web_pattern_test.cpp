@@ -878,4 +878,192 @@ HWTEST_F(WebPatternTest, NotifyOverlayRotation, TestSize.Level1)
     EXPECT_EQ(webPattern->webSelectOverlay_->webSelectInfo_.menuInfo.menuIsShow, false);
 }
 
+/**
+ * @tc.name: ShowMagnifierTest001
+ * @tc.desc: Test ShowMagnifier with isMove=false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, ShowMagnifierTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    webPattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(WeakPtr<Pattern>(webPattern));
+    ASSERT_NE(webPattern->magnifierController_, nullptr);
+
+    int32_t centerX = 100;
+    int32_t centerY = 200;
+
+    webPattern->ShowMagnifier(centerX, centerY, false);
+    OffsetF offset = webPattern->magnifierController_->GetLocalOffset();
+    EXPECT_NEAR(offset.GetX(), centerX, 0.01f);
+    EXPECT_NEAR(offset.GetY(), centerY, 0.01f);
+#endif
+}
+
+/**
+ * @tc.name: ShowMagnifierTest002
+ * @tc.desc: Test ShowMagnifier with isMove=true and same position (early return).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, ShowMagnifierTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    webPattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(WeakPtr<Pattern>(webPattern));
+    ASSERT_NE(webPattern->magnifierController_, nullptr);
+
+    int32_t centerX = 100;
+    int32_t centerY = 200;
+
+    webPattern->ShowMagnifier(centerX, centerY, false);
+    OffsetF initialOffset = webPattern->magnifierController_->GetLocalOffset();
+
+    webPattern->ShowMagnifier(centerX, centerY, true);
+    OffsetF sameOffset = webPattern->magnifierController_->GetLocalOffset();
+    EXPECT_NEAR(sameOffset.GetX(), initialOffset.GetX(), 0.01f);
+    EXPECT_NEAR(sameOffset.GetY(), initialOffset.GetY(), 0.01f);
+#endif
+}
+
+/**
+ * @tc.name: ShowMagnifierTest003
+ * @tc.desc: Test ShowMagnifier with isMove=true and different X coordinate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, ShowMagnifierTest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    webPattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(WeakPtr<Pattern>(webPattern));
+    ASSERT_NE(webPattern->magnifierController_, nullptr);
+
+    int32_t centerX = 100;
+    int32_t centerY = 200;
+    int32_t newCenterX = 150;
+
+    webPattern->ShowMagnifier(centerX, centerY, false);
+    webPattern->ShowMagnifier(newCenterX, centerY, true);
+
+    OffsetF offset = webPattern->magnifierController_->GetLocalOffset();
+    EXPECT_NEAR(offset.GetX(), newCenterX, 0.01f);
+    EXPECT_NEAR(offset.GetY(), centerY, 0.01f);
+#endif
+}
+
+/**
+ * @tc.name: ShowMagnifierTest004
+ * @tc.desc: Test ShowMagnifier with isMove=true and different Y coordinate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, ShowMagnifierTest004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    webPattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(WeakPtr<Pattern>(webPattern));
+    ASSERT_NE(webPattern->magnifierController_, nullptr);
+
+    int32_t centerX = 100;
+    int32_t centerY = 200;
+    int32_t newCenterY = 250;
+
+    webPattern->ShowMagnifier(centerX, centerY, false);
+    webPattern->ShowMagnifier(centerX, newCenterY, true);
+
+    OffsetF offset = webPattern->magnifierController_->GetLocalOffset();
+    EXPECT_NEAR(offset.GetX(), centerX, 0.01f);
+    EXPECT_NEAR(offset.GetY(), newCenterY, 0.01f);
+#endif
+}
+
+/**
+ * @tc.name: ShowMagnifierTest005
+ * @tc.desc: Test ShowMagnifier with isMove=true and different X and Y coordinates.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, ShowMagnifierTest005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    webPattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(WeakPtr<Pattern>(webPattern));
+    ASSERT_NE(webPattern->magnifierController_, nullptr);
+
+    int32_t centerX = 100;
+    int32_t centerY = 200;
+    int32_t newCenterX = 150;
+    int32_t newCenterY = 250;
+
+    webPattern->ShowMagnifier(centerX, centerY, false);
+    webPattern->ShowMagnifier(newCenterX, newCenterY, true);
+
+    OffsetF offset = webPattern->magnifierController_->GetLocalOffset();
+    EXPECT_NEAR(offset.GetX(), newCenterX, 0.01f);
+    EXPECT_NEAR(offset.GetY(), newCenterY, 0.01f);
+#endif
+}
+
 } // namespace OHOS::Ace::NG
