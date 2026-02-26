@@ -9006,12 +9006,9 @@ ArkUINativeModuleValue CommonBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtimeCal
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<TouchEventInfo>(info);
-        auto eventObj = FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr, node);
+        auto eventObj = FrameNodeBridge::CreateTouchEventInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         function->Call(vm, function.ToLocal(), params, 1);
-        info.SetStopPropagation(infoPtr->IsStopPropagation());
-        info.SetPreventDefault(infoPtr->IsPreventDefault());
     };
     NG::ViewAbstract::SetOnTouch(frameNode, std::move(onTouch));
     return panda::JSValueRef::Undefined(vm);
@@ -11472,14 +11469,11 @@ ArkUINativeModuleValue CommonBridge::SetOnTouchIntercept(ArkUIRuntimeCallInfo* r
         CHECK_EQUAL_RETURN(function.IsEmpty(), true, HitTestMode::HTMDEFAULT);
         CHECK_EQUAL_RETURN(function->IsFunction(vm), false, HitTestMode::HTMDEFAULT);
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<TouchEventInfo>(info);
-        auto touchEventObj = FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr, node);
+        auto touchEventObj = FrameNodeBridge::CreateTouchEventInfo(vm, info);
         HitTestMode hitTestMode = NG::HitTestMode::HTMDEFAULT;
         auto hitTestModeValue = ConvertHitTestMode(vm, hitTestMode);
         panda::Local<panda::JSValueRef> params[NUM_2] = { touchEventObj, hitTestModeValue };
         auto value = function->Call(vm, function.ToLocal(), params, NUM_2);
-        info.SetStopPropagation(infoPtr->IsStopPropagation());
-        info.SetPreventDefault(infoPtr->IsPreventDefault());
         if (value->IsNumber()) {
             return static_cast<NG::HitTestMode>(value->ToNumber(vm)->Value());
         }

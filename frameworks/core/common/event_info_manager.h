@@ -25,7 +25,6 @@ namespace OHOS::Ace {
 
 class AxisInfo;
 class MouseInfo;
-class TouchEventInfo;
 
 class EventInfoManager : public virtual Referenced {
 public:
@@ -35,18 +34,12 @@ public:
     int32_t AddMouseInfo(const std::shared_ptr<MouseInfo>& info);
     int32_t RemoveMouseInfo(int32_t eventId);
 
-    int32_t AddTouchEventInfo(const std::shared_ptr<TouchEventInfo>& info);
-    int32_t RemoveTouchEventInfo(int32_t eventId);
-
 private:
     int32_t axisNextId_ { 0 };
     std::unordered_map<int32_t, std::shared_ptr<AxisInfo>> axisMap_;
 
     int32_t mouseNextId_ { 0 };
     std::unordered_map<int32_t, std::shared_ptr<MouseInfo>> mouseMap_;
-
-    int32_t touchNextId_ { 0 };
-    std::unordered_map<int32_t, std::shared_ptr<TouchEventInfo>> touchMap_;
 };
 } // namespace OHOS::Ace
 

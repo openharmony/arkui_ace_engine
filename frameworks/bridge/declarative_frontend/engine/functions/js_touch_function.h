@@ -36,7 +36,7 @@ public:
     {
         JsFunction::Execute();
     }
-    void Execute(EcmaVM* vm, TouchEventInfo& info, const WeakPtr<NG::FrameNode>& node);
+    void Execute(TouchEventInfo& info);
     static JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info);
     static JSRef<JSObject> CreateJSEventInfo(TouchEventInfo& info);
 };

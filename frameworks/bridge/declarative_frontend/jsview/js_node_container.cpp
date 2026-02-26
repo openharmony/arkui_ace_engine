@@ -334,7 +334,7 @@ void JSNodeContainer::SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExec
     auto onTouch = [execCtx, func = std::move(jsOnTouchFunc), node = frameNode](TouchEventInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         PipelineContext::SetCallBackNode(node);
-        func->Execute(execCtx.vm_, info, node);
+        func->Execute(info);
     };
     nodeContainerModelInstance->SetOnTouchEvent(std::move(onTouch));
 }

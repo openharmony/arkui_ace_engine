@@ -22,19 +22,17 @@ namespace OHOS::Ace::Framework {
 RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackInfo& args)
 {
     auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
 
     if (jsOnDownFunc_) {
         auto touchDownId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnDownFunc_), node = frameNode](
-                BaseEventInfo* info) {
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnDownFunc_)](BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 TouchEventInfo* touchInfo = static_cast<TouchEventInfo*>(info);
                 if (!touchInfo) {
                     LOGE("Error processing event. Not an instance of TouchEventInfo");
                     return;
                 }
-                func->Execute(execCtx.vm_, *touchInfo, node);
+                func->Execute(*touchInfo);
             },
             "touchDown", 0);
         touchComponent->SetOnTouchDownId(touchDownId);
@@ -42,15 +40,14 @@ RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackI
 
     if (jsOnUpFunc_) {
         auto touchUpId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnUpFunc_), node = frameNode](
-                BaseEventInfo* info) {
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnUpFunc_)](BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 TouchEventInfo* touchInfo = static_cast<TouchEventInfo*>(info);
                 if (!touchInfo) {
                     LOGE("Error processing event. Not an instance of TouchEventInfo");
                     return;
                 }
-                func->Execute(execCtx.vm_, *touchInfo, node);
+                func->Execute(*touchInfo);
             },
             "touchUp", 0);
         touchComponent->SetOnTouchUpId(touchUpId);
@@ -58,15 +55,14 @@ RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackI
 
     if (jsOnMoveFunc_) {
         auto touchMoveId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnMoveFunc_), node = frameNode](
-                BaseEventInfo* info) {
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnMoveFunc_)](BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 TouchEventInfo* touchInfo = static_cast<TouchEventInfo*>(info);
                 if (!touchInfo) {
                     LOGE("Error processing event. Not an instance of TouchEventInfo");
                     return;
                 }
-                func->Execute(execCtx.vm_, *touchInfo, node);
+                func->Execute(*touchInfo);
             },
             "touchMove", 0);
         touchComponent->SetOnTouchMoveId(touchMoveId);
@@ -74,15 +70,14 @@ RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackI
 
     if (jsOnCancelFunc_) {
         auto touchCancelId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnCancelFunc_), node = frameNode](
-                BaseEventInfo* info) {
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnCancelFunc_)](BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 TouchEventInfo* touchInfo = static_cast<TouchEventInfo*>(info);
                 if (!touchInfo) {
                     LOGE("Error processing event. Not an instance of TouchEventInfo");
                     return;
                 }
-                func->Execute(execCtx.vm_, *touchInfo, node);
+                func->Execute(*touchInfo);
             },
             "touchCancel", 0);
         touchComponent->SetOnTouchCancel(touchCancelId);

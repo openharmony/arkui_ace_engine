@@ -1024,14 +1024,6 @@ void FrameNodeBridge::ReleaseNativePtrFunc(void* env, void* nativePtr, void* dat
             TAG_LOGI(AceLogTag::ACE_UIEVENT, "Remove MouseInfo: %{public}d", eventId);
             break;
         }
-        case NATIVE_PTR_TAG_TOUCH_EVENT_INFO: {
-            auto* touchEventInfo = static_cast<TouchEventInfo*>(nativePtr);
-            CHECK_NULL_VOID(touchEventInfo);
-            eventId = touchEventInfo->GetEventId();
-            eventInfoManager->RemoveTouchEventInfo(eventId);
-            TAG_LOGI(AceLogTag::ACE_UIEVENT, "Remove TouchEventInfo: %{public}d", eventId);
-            break;
-        }
         default: {
             TAG_LOGW(AceLogTag::ACE_UIEVENT, "unknown nativePtr type");
             return;
@@ -1139,32 +1131,31 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfoObj(EcmaVM* vm, Tou
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(
-    EcmaVM* vm, std::shared_ptr<TouchEventInfo> infoPtr, const WeakPtr<FrameNode>& node)
+Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info)
 {
-    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     panda::JsiFastNativeScope fastNativeScope(vm);
-    auto eventObj = CreateTouchEventInfoObj(vm, *infoPtr);
+    auto eventObj = CreateTouchEventInfoObj(vm, info);
+    eventObj->SetNativePointerFieldCount(vm, 1);
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltX().value_or(0.0f))));
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltY().value_or(0.0f))));
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetRollAngle().value_or(0.0f))));
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetRollAngle().value_or(0.0f))));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(infoPtr->GetSourceTool()))));
+        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))));
     auto touchArr = panda::ArrayRef::New(vm);
-    const std::list<TouchLocationInfo>& touchList = infoPtr->GetTouches();
+    const std::list<TouchLocationInfo>& touchList = info.GetTouches();
     uint32_t idx = 0;
     for (const TouchLocationInfo& location : touchList) {
-        panda::ArrayRef::SetValueAt(vm, touchArr, idx++, CreateTouchInfo(vm, location, *infoPtr));
+        panda::ArrayRef::SetValueAt(vm, touchArr, idx++, CreateTouchInfo(vm, location, info));
     }
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "touches"), touchArr);
     auto changeTouchArr = panda::ArrayRef::New(vm);
     idx = 0; // reset index counter
-    const std::list<TouchLocationInfo>& changeTouch = infoPtr->GetChangedTouches();
+    const std::list<TouchLocationInfo>& changeTouch = info.GetChangedTouches();
     for (const TouchLocationInfo& change : changeTouch) {
-        panda::ArrayRef::SetValueAt(vm, changeTouchArr, idx++, CreateTouchInfo(vm, change, *infoPtr));
+        panda::ArrayRef::SetValueAt(vm, changeTouchArr, idx++, CreateTouchInfo(vm, change, info));
     }
     if (changeTouch.size() > 0) {
         eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "type"),
@@ -1186,20 +1177,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
-        panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
-    auto eventInfoManager = GetEventInfoManager(node);
-    if (eventInfoManager == nullptr) {
-        eventObj->SetNativePointerFieldCount(vm, 1);
-        eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()));
-        return eventObj;
-    }
-    auto eventId = eventInfoManager->AddTouchEventInfo(infoPtr);
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Add TouchEventInfo: %{public}d", eventId);
-    auto nativeEventInfo = AceType::MakeRefPtr<ArkUINativeEventInfo>(NATIVE_PTR_TAG_TOUCH_EVENT_INFO, node);
-    nativeEventInfo->IncRefCount();
-    eventObj->SetNativePointerFieldCount(vm, 1);
-    eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()), ReleaseNativePtrFunc,
-        static_cast<void*>(nativeEventInfo.GetRawPtr()));
+        panda::NumberRef::New(vm, info.GetTargetDisplayId()));
+    eventObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
     return eventObj;
 }
 
@@ -1231,12 +1210,9 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtime
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<TouchEventInfo>(info);
-        auto eventObj = CreateTouchEventInfo(vm, infoPtr, node);
+        auto eventObj = CreateTouchEventInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         function->Call(vm, function.ToLocal(), params, 1);
-        info.SetStopPropagation(infoPtr->IsStopPropagation());
-        info.SetPreventDefault(infoPtr->IsPreventDefault());
     };
     NG::ViewAbstract::SetFrameNodeCommonOnTouch(frameNode, std::move(onTouch));
     return panda::JSValueRef::Undefined(vm);
