@@ -249,7 +249,7 @@ void SystemWindowScene::RegisterEventCallback()
                     WindowSceneHelper::InjectPointerEventForActionCancel(PointerEvent);
                     return;
                 }
-                    auto host = self->GetHost();
+                auto host = self->GetHost();
                 if (!host) {
                     TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
                         "GetHost null,id:%{public}d", PointerEvent->GetId());
