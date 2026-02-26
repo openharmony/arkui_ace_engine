@@ -1851,13 +1851,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern079, TestSize.Level0)
     ASSERT_NE(paintProperty, nullptr);
     DirtySwapConfig config;
     pattern->OnSyncGeometryNode(config);
-
+    /**
+     * @tc.steps: step3. update InputStyle::INLINE.
+     */
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
     pattern->OnSyncGeometryNode(config);
     textFieldNode->MarkModifyDone();
     pattern->OnModifyDone();
     pattern->ProcNormalInlineStateInBlurEvent();
-
+    /**
+     * @tc.steps: step4. update InputStyle::INLINE again.
+     */
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
     textFieldNode->MarkModifyDone();
     pattern->OnModifyDone();
