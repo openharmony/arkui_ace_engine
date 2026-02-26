@@ -1750,10 +1750,9 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._CanvasRenderer_getLineDash(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<double> = new Array<double>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = retvalDeserializer.readFloat64()
-        }
+        const buffer: Array<double> = new Array<double>(bufferLength, (arg0: int32):double => {
+            return retvalDeserializer.readFloat64();
+        })
         const returnResult: Array<double> = buffer
         return returnResult
     }

@@ -1773,19 +1773,18 @@ export class RichEditorDeleteValue_serializer {
         const directionTmpResult: RichEditorDeleteDirection = RichEditorDeleteDirection.fromValue(valueDeserializer.readInt32())
         const lengthTmpResult: int32 = valueDeserializer.readInt32()
         const richEditorDeleteSpansTmpBufLength: int32 = valueDeserializer.readInt32()
-        let richEditorDeleteSpansTmpBuf: Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = new Array<RichEditorTextSpanResult | RichEditorImageSpanResult>(richEditorDeleteSpansTmpBufLength)
-        for (let richEditorDeleteSpansTmpBufBufCounterI = 0; richEditorDeleteSpansTmpBufBufCounterI < richEditorDeleteSpansTmpBufLength; richEditorDeleteSpansTmpBufBufCounterI++) {
-            const richEditorDeleteSpansTmpBufTempBufUnionSelector: int32 = valueDeserializer.readInt8()
-            let richEditorDeleteSpansTmpBufTempBuf: RichEditorTextSpanResult | RichEditorImageSpanResult | undefined
+        const richEditorDeleteSpansTmpBuf: Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = new Array<RichEditorTextSpanResult | RichEditorImageSpanResult>(richEditorDeleteSpansTmpBufLength, (arg0: int32):RichEditorTextSpanResult | RichEditorImageSpanResult => {
+            const richEditorDeleteSpansTmpBufTempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let richEditorDeleteSpansTmpBufTempBuf: RichEditorTextSpanResult | RichEditorImageSpanResult | undefined;
             if (richEditorDeleteSpansTmpBufTempBufUnionSelector == (0).toByte()) {
-                richEditorDeleteSpansTmpBufTempBuf = RichEditorTextSpanResult_serializer.read(valueDeserializer)
+                richEditorDeleteSpansTmpBufTempBuf = RichEditorTextSpanResult_serializer.read(valueDeserializer);
             } else if (richEditorDeleteSpansTmpBufTempBufUnionSelector == (1).toByte()) {
-                richEditorDeleteSpansTmpBufTempBuf = RichEditorImageSpanResult_serializer.read(valueDeserializer)
+                richEditorDeleteSpansTmpBufTempBuf = RichEditorImageSpanResult_serializer.read(valueDeserializer);
             } else {
-                throw new Error('One of the branches for richEditorDeleteSpansTmpBufTempBuf has to be chosen through deserialisation.')
+                throw new Error('One of the branches for richEditorDeleteSpansTmpBufTempBuf has to be chosen through deserialisation.');
             }
-            richEditorDeleteSpansTmpBuf[richEditorDeleteSpansTmpBufBufCounterI] = (richEditorDeleteSpansTmpBufTempBuf as RichEditorTextSpanResult | RichEditorImageSpanResult)
-        }
+            return (richEditorDeleteSpansTmpBufTempBuf as RichEditorTextSpanResult | RichEditorImageSpanResult);
+        })
         const richEditorDeleteSpansTmpResult: Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = richEditorDeleteSpansTmpBuf
         let value: RichEditorDeleteValue = ({offset: offsetTmpResult, direction: directionTmpResult, length: lengthTmpResult, richEditorDeleteSpans: richEditorDeleteSpansTmpResult} as RichEditorDeleteValue)
         return value
@@ -1982,19 +1981,18 @@ export class RichEditorSelection_serializer {
         const selectionTmpBufValue1: int32 = valueDeserializer.readInt32()
         const selectionTmpResult: [ int32, int32 ] = ([selectionTmpBufValue0, selectionTmpBufValue1] as [ int32, int32 ])
         const spansTmpBufLength: int32 = valueDeserializer.readInt32()
-        let spansTmpBuf: Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = new Array<RichEditorTextSpanResult | RichEditorImageSpanResult>(spansTmpBufLength)
-        for (let spansTmpBufBufCounterI = 0; spansTmpBufBufCounterI < spansTmpBufLength; spansTmpBufBufCounterI++) {
-            const spansTmpBufTempBufUnionSelector: int32 = valueDeserializer.readInt8()
-            let spansTmpBufTempBuf: RichEditorTextSpanResult | RichEditorImageSpanResult | undefined
+        const spansTmpBuf: Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = new Array<RichEditorTextSpanResult | RichEditorImageSpanResult>(spansTmpBufLength, (arg0: int32):RichEditorTextSpanResult | RichEditorImageSpanResult => {
+            const spansTmpBufTempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let spansTmpBufTempBuf: RichEditorTextSpanResult | RichEditorImageSpanResult | undefined;
             if (spansTmpBufTempBufUnionSelector == (0).toByte()) {
-                spansTmpBufTempBuf = RichEditorTextSpanResult_serializer.read(valueDeserializer)
+                spansTmpBufTempBuf = RichEditorTextSpanResult_serializer.read(valueDeserializer);
             } else if (spansTmpBufTempBufUnionSelector == (1).toByte()) {
-                spansTmpBufTempBuf = RichEditorImageSpanResult_serializer.read(valueDeserializer)
+                spansTmpBufTempBuf = RichEditorImageSpanResult_serializer.read(valueDeserializer);
             } else {
-                throw new Error('One of the branches for spansTmpBufTempBuf has to be chosen through deserialisation.')
+                throw new Error('One of the branches for spansTmpBufTempBuf has to be chosen through deserialisation.');
             }
-            spansTmpBuf[spansTmpBufBufCounterI] = (spansTmpBufTempBuf as RichEditorTextSpanResult | RichEditorImageSpanResult)
-        }
+            return (spansTmpBufTempBuf as RichEditorTextSpanResult | RichEditorImageSpanResult);
+        })
         const spansTmpResult: Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = spansTmpBuf
         let value: RichEditorSelection = ({selection: selectionTmpResult, spans: spansTmpResult} as RichEditorSelection)
         return value
@@ -2057,22 +2055,19 @@ export class RichEditorChangeValue_serializer {
         let valueDeserializer: DeserializerBase = buffer
         const rangeBeforeTmpResult: TextRange = TextRange_serializer.read(valueDeserializer)
         const replacedSpansTmpBufLength: int32 = valueDeserializer.readInt32()
-        let replacedSpansTmpBuf: Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>(replacedSpansTmpBufLength)
-        for (let replacedSpansTmpBufBufCounterI = 0; replacedSpansTmpBufBufCounterI < replacedSpansTmpBufLength; replacedSpansTmpBufBufCounterI++) {
-            replacedSpansTmpBuf[replacedSpansTmpBufBufCounterI] = RichEditorTextSpanResult_serializer.read(valueDeserializer)
-        }
+        const replacedSpansTmpBuf: Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>(replacedSpansTmpBufLength, (arg0: int32):RichEditorTextSpanResult => {
+            return RichEditorTextSpanResult_serializer.read(valueDeserializer);
+        })
         const replacedSpansTmpResult: Array<RichEditorTextSpanResult> = replacedSpansTmpBuf
         const replacedImageSpansTmpBufLength: int32 = valueDeserializer.readInt32()
-        let replacedImageSpansTmpBuf: Array<RichEditorImageSpanResult> = new Array<RichEditorImageSpanResult>(replacedImageSpansTmpBufLength)
-        for (let replacedImageSpansTmpBufBufCounterI = 0; replacedImageSpansTmpBufBufCounterI < replacedImageSpansTmpBufLength; replacedImageSpansTmpBufBufCounterI++) {
-            replacedImageSpansTmpBuf[replacedImageSpansTmpBufBufCounterI] = RichEditorImageSpanResult_serializer.read(valueDeserializer)
-        }
+        const replacedImageSpansTmpBuf: Array<RichEditorImageSpanResult> = new Array<RichEditorImageSpanResult>(replacedImageSpansTmpBufLength, (arg0: int32):RichEditorImageSpanResult => {
+            return RichEditorImageSpanResult_serializer.read(valueDeserializer);
+        })
         const replacedImageSpansTmpResult: Array<RichEditorImageSpanResult> = replacedImageSpansTmpBuf
         const replacedSymbolSpansTmpBufLength: int32 = valueDeserializer.readInt32()
-        let replacedSymbolSpansTmpBuf: Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>(replacedSymbolSpansTmpBufLength)
-        for (let replacedSymbolSpansTmpBufBufCounterI = 0; replacedSymbolSpansTmpBufBufCounterI < replacedSymbolSpansTmpBufLength; replacedSymbolSpansTmpBufBufCounterI++) {
-            replacedSymbolSpansTmpBuf[replacedSymbolSpansTmpBufBufCounterI] = RichEditorTextSpanResult_serializer.read(valueDeserializer)
-        }
+        const replacedSymbolSpansTmpBuf: Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>(replacedSymbolSpansTmpBufLength, (arg0: int32):RichEditorTextSpanResult => {
+            return RichEditorTextSpanResult_serializer.read(valueDeserializer);
+        })
         const replacedSymbolSpansTmpResult: Array<RichEditorTextSpanResult> = replacedSymbolSpansTmpBuf
         const changeReasonTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let changeReasonTmpBuf: TextChangeReason | undefined = undefined
@@ -2195,23 +2190,22 @@ export class RichEditorSymbolSpanStyle_serializer {
         let fontColorTmpBuf: Array<ResourceColor> | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontColorTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let fontColorTmpBufOpt: Array<ResourceColor> = new Array<ResourceColor>(fontColorTmpBufOptLength)
-            for (let fontColorTmpBufOptBufCounterI = 0; fontColorTmpBufOptBufCounterI < fontColorTmpBufOptLength; fontColorTmpBufOptBufCounterI++) {
-                const fontColorTmpBufOptTempBufUnionSelector: int32 = valueDeserializer.readInt8()
-                let fontColorTmpBufOptTempBuf: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
-                if (fontColorTmpBufOptTempBufUnionSelector == (0).toByte()) {
-                    fontColorTmpBufOptTempBuf = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
-                } else if (fontColorTmpBufOptTempBufUnionSelector == (1).toByte()) {
-                    fontColorTmpBufOptTempBuf = valueDeserializer.readInt32()
-                } else if (fontColorTmpBufOptTempBufUnionSelector == (2).toByte()) {
-                    fontColorTmpBufOptTempBuf = (valueDeserializer.readString() as string)
-                } else if (fontColorTmpBufOptTempBufUnionSelector == (3).toByte()) {
-                    fontColorTmpBufOptTempBuf = global_resource_Resource_serializer.read(valueDeserializer)
-                } else {
-                    throw new Error('One of the branches for fontColorTmpBufOptTempBuf has to be chosen through deserialisation.')
-                }
-                fontColorTmpBufOpt[fontColorTmpBufOptBufCounterI] = (fontColorTmpBufOptTempBuf as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+            const fontColorTmpBufOpt: Array<ResourceColor> = new Array<ResourceColor>(fontColorTmpBufOptLength, (arg0: int32):ResourceColor => {
+            const fontColorTmpBufOptTempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let fontColorTmpBufOptTempBuf: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined;
+            if (fontColorTmpBufOptTempBufUnionSelector == (0).toByte()) {
+                fontColorTmpBufOptTempBuf = arkui_component_enums_Color.values()[valueDeserializer.readInt32()];
+            } else if (fontColorTmpBufOptTempBufUnionSelector == (1).toByte()) {
+                fontColorTmpBufOptTempBuf = valueDeserializer.readInt32();
+            } else if (fontColorTmpBufOptTempBufUnionSelector == (2).toByte()) {
+                fontColorTmpBufOptTempBuf = (valueDeserializer.readString() as string);
+            } else if (fontColorTmpBufOptTempBufUnionSelector == (3).toByte()) {
+                fontColorTmpBufOptTempBuf = global_resource_Resource_serializer.read(valueDeserializer);
+            } else {
+                throw new Error('One of the branches for fontColorTmpBufOptTempBuf has to be chosen through deserialisation.');
             }
+            return (fontColorTmpBufOptTempBuf as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource);
+        })
             fontColorTmpBuf = fontColorTmpBufOpt
         }
         const fontColorTmpResult: Array<ResourceColor> | undefined = fontColorTmpBuf
@@ -3524,10 +3518,9 @@ export class RichEditorTextStyle_serializer {
                 textShadowTmpBufOpt = ShadowOptions_serializer.read(valueDeserializer)
             } else if (textShadowTmpBufOptUnionSelector == (1).toByte()) {
                 const textShadowTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
-                let textShadowTmpBufOptBufU: Array<ShadowOptions> = new Array<ShadowOptions>(textShadowTmpBufOptBufULength)
-                for (let textShadowTmpBufOptBufUBufCounterI = 0; textShadowTmpBufOptBufUBufCounterI < textShadowTmpBufOptBufULength; textShadowTmpBufOptBufUBufCounterI++) {
-                    textShadowTmpBufOptBufU[textShadowTmpBufOptBufUBufCounterI] = ShadowOptions_serializer.read(valueDeserializer)
-                }
+                const textShadowTmpBufOptBufU: Array<ShadowOptions> = new Array<ShadowOptions>(textShadowTmpBufOptBufULength, (arg0: int32):ShadowOptions => {
+            return ShadowOptions_serializer.read(valueDeserializer);
+        })
                 textShadowTmpBufOpt = textShadowTmpBufOptBufU
             } else {
                 throw new Error('One of the branches for textShadowTmpBufOpt has to be chosen through deserialisation.')
@@ -3764,10 +3757,9 @@ export class RichEditorTextStyleResult_serializer {
         let textShadowTmpBuf: Array<ShadowOptions> | undefined = undefined
         if ((textShadowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const textShadowTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let textShadowTmpBufOpt: Array<ShadowOptions> = new Array<ShadowOptions>(textShadowTmpBufOptLength)
-            for (let textShadowTmpBufOptBufCounterI = 0; textShadowTmpBufOptBufCounterI < textShadowTmpBufOptLength; textShadowTmpBufOptBufCounterI++) {
-                textShadowTmpBufOpt[textShadowTmpBufOptBufCounterI] = ShadowOptions_serializer.read(valueDeserializer)
-            }
+            const textShadowTmpBufOpt: Array<ShadowOptions> = new Array<ShadowOptions>(textShadowTmpBufOptLength, (arg0: int32):ShadowOptions => {
+            return ShadowOptions_serializer.read(valueDeserializer);
+        })
             textShadowTmpBuf = textShadowTmpBufOpt
         }
         const textShadowTmpResult: Array<ShadowOptions> | undefined = textShadowTmpBuf
@@ -4486,19 +4478,18 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         let buffer: Array<RichEditorImageSpanResult | RichEditorTextSpanResult> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            let bufferOpt: Array<RichEditorImageSpanResult | RichEditorTextSpanResult> = new Array<RichEditorImageSpanResult | RichEditorTextSpanResult>(bufferOptLength)
-            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
-                const bufferOptTempBufUnionSelector: int32 = retvalDeserializer.readInt8()
-                let bufferOptTempBuf: RichEditorImageSpanResult | RichEditorTextSpanResult | undefined
-                if (bufferOptTempBufUnionSelector == (0).toByte()) {
-                    bufferOptTempBuf = RichEditorImageSpanResult_serializer.read(retvalDeserializer)
-                } else if (bufferOptTempBufUnionSelector == (1).toByte()) {
-                    bufferOptTempBuf = RichEditorTextSpanResult_serializer.read(retvalDeserializer)
-                } else {
-                    throw new Error('One of the branches for bufferOptTempBuf has to be chosen through deserialisation.')
-                }
-                bufferOpt[bufferOptBufCounterI] = (bufferOptTempBuf as RichEditorImageSpanResult | RichEditorTextSpanResult)
+            const bufferOpt: Array<RichEditorImageSpanResult | RichEditorTextSpanResult> = new Array<RichEditorImageSpanResult | RichEditorTextSpanResult>(bufferOptLength, (arg0: int32):RichEditorImageSpanResult | RichEditorTextSpanResult => {
+            const bufferOptTempBufUnionSelector: int32 = retvalDeserializer.readInt8();
+            let bufferOptTempBuf: RichEditorImageSpanResult | RichEditorTextSpanResult | undefined;
+            if (bufferOptTempBufUnionSelector == (0).toByte()) {
+                bufferOptTempBuf = RichEditorImageSpanResult_serializer.read(retvalDeserializer);
+            } else if (bufferOptTempBufUnionSelector == (1).toByte()) {
+                bufferOptTempBuf = RichEditorTextSpanResult_serializer.read(retvalDeserializer);
+            } else {
+                throw new Error('One of the branches for bufferOptTempBuf has to be chosen through deserialisation.');
             }
+            return (bufferOptTempBuf as RichEditorImageSpanResult | RichEditorTextSpanResult);
+        })
             buffer = bufferOpt
         }
         const returnResult: Array<RichEditorImageSpanResult | RichEditorTextSpanResult> | undefined = buffer
@@ -4520,10 +4511,9 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         let buffer: Array<RichEditorParagraphResult> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            let bufferOpt: Array<RichEditorParagraphResult> = new Array<RichEditorParagraphResult>(bufferOptLength)
-            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
-                bufferOpt[bufferOptBufCounterI] = RichEditorParagraphResult_serializer.read(retvalDeserializer)
-            }
+            const bufferOpt: Array<RichEditorParagraphResult> = new Array<RichEditorParagraphResult>(bufferOptLength, (arg0: int32):RichEditorParagraphResult => {
+            return RichEditorParagraphResult_serializer.read(retvalDeserializer);
+        })
             buffer = bufferOpt
         }
         const returnResult: Array<RichEditorParagraphResult> | undefined = buffer
@@ -4547,19 +4537,18 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         let buffer: Array<RichEditorSpan> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            let bufferOpt: Array<RichEditorSpan> = new Array<RichEditorSpan>(bufferOptLength)
-            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
-                const bufferOptTempBufUnionSelector: int32 = retvalDeserializer.readInt8()
-                let bufferOptTempBuf: RichEditorImageSpanResult | RichEditorTextSpanResult | undefined
-                if (bufferOptTempBufUnionSelector == (0).toByte()) {
-                    bufferOptTempBuf = RichEditorImageSpanResult_serializer.read(retvalDeserializer)
-                } else if (bufferOptTempBufUnionSelector == (1).toByte()) {
-                    bufferOptTempBuf = RichEditorTextSpanResult_serializer.read(retvalDeserializer)
-                } else {
-                    throw new Error('One of the branches for bufferOptTempBuf has to be chosen through deserialisation.')
-                }
-                bufferOpt[bufferOptBufCounterI] = (bufferOptTempBuf as RichEditorImageSpanResult | RichEditorTextSpanResult)
+            const bufferOpt: Array<RichEditorSpan> = new Array<RichEditorSpan>(bufferOptLength, (arg0: int32):RichEditorSpan => {
+            const bufferOptTempBufUnionSelector: int32 = retvalDeserializer.readInt8();
+            let bufferOptTempBuf: RichEditorImageSpanResult | RichEditorTextSpanResult | undefined;
+            if (bufferOptTempBufUnionSelector == (0).toByte()) {
+                bufferOptTempBuf = RichEditorImageSpanResult_serializer.read(retvalDeserializer);
+            } else if (bufferOptTempBufUnionSelector == (1).toByte()) {
+                bufferOptTempBuf = RichEditorTextSpanResult_serializer.read(retvalDeserializer);
+            } else {
+                throw new Error('One of the branches for bufferOptTempBuf has to be chosen through deserialisation.');
             }
+            return (bufferOptTempBuf as RichEditorImageSpanResult | RichEditorTextSpanResult);
+        })
             buffer = bufferOpt
         }
         const returnResult: Array<RichEditorSpan> | undefined = buffer

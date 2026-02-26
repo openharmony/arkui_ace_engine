@@ -2776,10 +2776,9 @@ export class FrameNodeExtender {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodePropertyValue(extractors.toFrameNodePtr(peer), property.valueOf())
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<double> = new Array<double>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = retvalDeserializer.readFloat64()
-        }
+        const buffer: Array<double> = new Array<double>(bufferLength, (arg0: int32):double => {
+            return retvalDeserializer.readFloat64();
+        })
         const returnResult: Array<double> = buffer
         return returnResult
     }
@@ -2811,10 +2810,9 @@ export class FrameNodeExtender {
         thisSerializer.release()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<double> = new Array<double>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = retvalDeserializer.readFloat64()
-        }
+        const buffer: Array<double> = new Array<double>(bufferLength, (arg0: int32):double => {
+            return retvalDeserializer.readFloat64();
+        })
         const returnResult: Array<double> = buffer
         return returnResult
     }
@@ -2851,10 +2849,9 @@ export class FrameNodeExtender {
         thisSerializer.release()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<double> = new Array<double>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = retvalDeserializer.readFloat64()
-        }
+        const buffer: Array<double> = new Array<double>(bufferLength, (arg0: int32):double => {
+            return retvalDeserializer.readFloat64();
+        })
         const returnResult: Array<double> = buffer
         return returnResult
     }
@@ -2865,10 +2862,9 @@ export class FrameNodeExtender {
         thisSerializer.release()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<double> = new Array<double>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = retvalDeserializer.readFloat64()
-        }
+        const buffer: Array<double> = new Array<double>(bufferLength, (arg0: int32):double => {
+            return retvalDeserializer.readFloat64();
+        })
         const returnResult: Array<double> = buffer
         return returnResult
     }
@@ -3276,10 +3272,9 @@ export class GlobalScope_ohos_font {
         const retval = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getSystemFontList()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<string> = new Array<string>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
-        }
+        const buffer: Array<string> = new Array<string>(bufferLength, (arg0: int32):string => {
+            return (retvalDeserializer.readString() as string);
+        })
         const returnResult: Array<string> = buffer
         return returnResult
     }
@@ -3809,10 +3804,9 @@ export class NavExtender {
         const retval = ArkUIGeneratedNativeModule._NavExtender_getIdByName(toPeerPtr(pathStack), name)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<string> = new Array<string>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
-        }
+        const buffer: Array<string> = new Array<string>(bufferLength, (arg0: int32):string => {
+            return (retvalDeserializer.readString() as string);
+        })
         const returnResult: Array<string> = buffer
         return returnResult
     }
@@ -3833,10 +3827,9 @@ export class NavExtender {
         const retval = ArkUIGeneratedNativeModule._NavExtender_getRouteMapInConfig(context)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<string> = new Array<string>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
-        }
+        const buffer: Array<string> = new Array<string>(bufferLength, (arg0: int32):string => {
+            return (retvalDeserializer.readString() as string);
+        })
         const returnResult: Array<string> = buffer
         return returnResult
     }
@@ -5391,10 +5384,9 @@ export class RouterExtender {
         const retval = ArkUIGeneratedNativeModule._RouterExtender_getStateByUrl(url)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<RouterStateInner> = new Array<RouterStateInner>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = RouterStateInner_serializer.read(retvalDeserializer)
-        }
+        const buffer: Array<RouterStateInner> = new Array<RouterStateInner>(bufferLength, (arg0: int32):RouterStateInner => {
+            return RouterStateInner_serializer.read(retvalDeserializer);
+        })
         const returnResult: Array<RouterStateInner> = buffer
         return returnResult
     }
@@ -5731,10 +5723,9 @@ export class SystemOps {
         thisSerializer.release()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<number> = new Array<number>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
-        }
+        const buffer: Array<number> = new Array<number>(bufferLength, (arg0: int32):number => {
+            return (retvalDeserializer.readNumber() as number);
+        })
         const returnResult: Array<number> = buffer
         return returnResult
     }
@@ -5742,10 +5733,9 @@ export class SystemOps {
         const retval = ArkUIGeneratedNativeModule._SystemOps_blendColorByColorMetrics(color, overlayColor)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<number> = new Array<number>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (retvalDeserializer.readNumber() as number)
-        }
+        const buffer: Array<number> = new Array<number>(bufferLength, (arg0: int32):number => {
+            return (retvalDeserializer.readNumber() as number);
+        })
         const returnResult: Array<number> = buffer
         return returnResult
     }
@@ -7627,10 +7617,9 @@ export class InnerGestureObserverConfigs_serializer {
     public static read(buffer: DeserializerBase): InnerGestureObserverConfigs {
         let valueDeserializer: DeserializerBase = buffer
         const actionPhasesTmpBufLength: int32 = valueDeserializer.readInt32()
-        let actionPhasesTmpBuf: Array<GestureActionPhase> = new Array<GestureActionPhase>(actionPhasesTmpBufLength)
-        for (let actionPhasesTmpBufBufCounterI = 0; actionPhasesTmpBufBufCounterI < actionPhasesTmpBufLength; actionPhasesTmpBufBufCounterI++) {
-            actionPhasesTmpBuf[actionPhasesTmpBufBufCounterI] = GestureActionPhase.fromValue(valueDeserializer.readInt32())
-        }
+        const actionPhasesTmpBuf: Array<GestureActionPhase> = new Array<GestureActionPhase>(actionPhasesTmpBufLength, (arg0: int32):GestureActionPhase => {
+            return GestureActionPhase.fromValue(valueDeserializer.readInt32());
+        })
         const actionPhasesTmpResult: Array<GestureActionPhase> = actionPhasesTmpBuf
         let value: InnerGestureObserverConfigs = ({actionPhases: actionPhasesTmpResult} as InnerGestureObserverConfigs)
         return value
@@ -7737,10 +7726,9 @@ export class ParticlesInner_serializer {
     public static read(buffer: DeserializerBase): ParticlesInner {
         let valueDeserializer: DeserializerBase = buffer
         const particlesTmpBufLength: int32 = valueDeserializer.readInt32()
-        let particlesTmpBuf: Array<ParticleOptionsInner> = new Array<ParticleOptionsInner>(particlesTmpBufLength)
-        for (let particlesTmpBufBufCounterI = 0; particlesTmpBufBufCounterI < particlesTmpBufLength; particlesTmpBufBufCounterI++) {
-            particlesTmpBuf[particlesTmpBufBufCounterI] = ParticleOptionsInner_serializer.read(valueDeserializer)
-        }
+        const particlesTmpBuf: Array<ParticleOptionsInner> = new Array<ParticleOptionsInner>(particlesTmpBufLength, (arg0: int32):ParticleOptionsInner => {
+            return ParticleOptionsInner_serializer.read(valueDeserializer);
+        })
         const particlesTmpResult: Array<ParticleOptionsInner> = particlesTmpBuf
         let value: ParticlesInner = ({particles: particlesTmpResult} as ParticlesInner)
         return value
@@ -7784,10 +7772,9 @@ export class PostMessageOptions_serializer {
         let transferTmpBuf: Array<Object> | undefined = undefined
         if ((transferTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const transferTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let transferTmpBufOpt: Array<Object> = new Array<Object>(transferTmpBufOptLength)
-            for (let transferTmpBufOptBufCounterI = 0; transferTmpBufOptBufCounterI < transferTmpBufOptLength; transferTmpBufOptBufCounterI++) {
-                transferTmpBufOpt[transferTmpBufOptBufCounterI] = (valueDeserializer.readObject() as object)
-            }
+            const transferTmpBufOpt: Array<Object> = new Array<Object>(transferTmpBufOptLength, (arg0: int32):Object => {
+            return (valueDeserializer.readObject() as object);
+        })
             transferTmpBuf = transferTmpBufOpt
         }
         const transferTmpResult: Array<Object> | undefined = transferTmpBuf
@@ -8409,10 +8396,9 @@ export class ParticleColorUpdaterOptionsInner_serializer {
                 configTmpBufOpt = ParticleColorOptions_serializer.read(valueDeserializer)
             } else if (configTmpBufOptUnionSelector == (1).toByte()) {
                 const configTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
-                let configTmpBufOptBufU: Array<ParticlePropertyAnimationColorInner> = new Array<ParticlePropertyAnimationColorInner>(configTmpBufOptBufULength)
-                for (let configTmpBufOptBufUBufCounterI = 0; configTmpBufOptBufUBufCounterI < configTmpBufOptBufULength; configTmpBufOptBufUBufCounterI++) {
-                    configTmpBufOptBufU[configTmpBufOptBufUBufCounterI] = ParticlePropertyAnimationColorInner_serializer.read(valueDeserializer)
-                }
+                const configTmpBufOptBufU: Array<ParticlePropertyAnimationColorInner> = new Array<ParticlePropertyAnimationColorInner>(configTmpBufOptBufULength, (arg0: int32):ParticlePropertyAnimationColorInner => {
+            return ParticlePropertyAnimationColorInner_serializer.read(valueDeserializer);
+        })
                 configTmpBufOpt = configTmpBufOptBufU
             } else {
                 throw new Error('One of the branches for configTmpBufOpt has to be chosen through deserialisation.')
@@ -8586,10 +8572,9 @@ export class ParticleUpdaterOptionsInner_serializer {
                 configTmpBufOpt = ([configTmpBufOptBufUValue0, configTmpBufOptBufUValue1] as [ double, double ])
             } else if (configTmpBufOptUnionSelector == (1).toByte()) {
                 const configTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
-                let configTmpBufOptBufU: Array<ParticlePropertyAnimationNumberInner> = new Array<ParticlePropertyAnimationNumberInner>(configTmpBufOptBufULength)
-                for (let configTmpBufOptBufUBufCounterI = 0; configTmpBufOptBufUBufCounterI < configTmpBufOptBufULength; configTmpBufOptBufUBufCounterI++) {
-                    configTmpBufOptBufU[configTmpBufOptBufUBufCounterI] = ParticlePropertyAnimationNumberInner_serializer.read(valueDeserializer)
-                }
+                const configTmpBufOptBufU: Array<ParticlePropertyAnimationNumberInner> = new Array<ParticlePropertyAnimationNumberInner>(configTmpBufOptBufULength, (arg0: int32):ParticlePropertyAnimationNumberInner => {
+            return ParticlePropertyAnimationNumberInner_serializer.read(valueDeserializer);
+        })
                 configTmpBufOpt = configTmpBufOptBufU
             } else {
                 throw new Error('One of the branches for configTmpBufOpt has to be chosen through deserialisation.')

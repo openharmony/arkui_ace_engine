@@ -151,10 +151,9 @@ export class ASTCResource_serializer {
     public static read(buffer: DeserializerBase): ASTCResource {
         let valueDeserializer: DeserializerBase = buffer
         const sourcesTmpBufLength: int32 = valueDeserializer.readInt32()
-        let sourcesTmpBuf: Array<string> = new Array<string>(sourcesTmpBufLength)
-        for (let sourcesTmpBufBufCounterI = 0; sourcesTmpBufBufCounterI < sourcesTmpBufLength; sourcesTmpBufBufCounterI++) {
-            sourcesTmpBuf[sourcesTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const sourcesTmpBuf: Array<string> = new Array<string>(sourcesTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const sourcesTmpResult: Array<string> = sourcesTmpBuf
         const columnTmpResult: int32 = valueDeserializer.readInt32()
         let value: ASTCResource = ({sources: sourcesTmpResult, column: columnTmpResult} as ASTCResource)

@@ -862,10 +862,9 @@ export class ActionSheetOptions_serializer {
         }
         const cancelTmpResult: VoidCallback | undefined = cancelTmpBuf
         const sheetsTmpBufLength: int32 = valueDeserializer.readInt32()
-        let sheetsTmpBuf: Array<SheetInfo> = new Array<SheetInfo>(sheetsTmpBufLength)
-        for (let sheetsTmpBufBufCounterI = 0; sheetsTmpBufBufCounterI < sheetsTmpBufLength; sheetsTmpBufBufCounterI++) {
-            sheetsTmpBuf[sheetsTmpBufBufCounterI] = SheetInfo_serializer.read(valueDeserializer)
-        }
+        const sheetsTmpBuf: Array<SheetInfo> = new Array<SheetInfo>(sheetsTmpBufLength, (arg0: int32):SheetInfo => {
+            return SheetInfo_serializer.read(valueDeserializer);
+        })
         const sheetsTmpResult: Array<SheetInfo> = sheetsTmpBuf
         const autoCancelTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let autoCancelTmpBuf: boolean | undefined = undefined

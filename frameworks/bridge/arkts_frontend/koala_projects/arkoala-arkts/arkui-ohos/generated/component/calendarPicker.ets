@@ -374,10 +374,9 @@ export class CalendarOptions_serializer {
         let disabledDateRangeTmpBuf: Array<DateRange> | undefined = undefined
         if ((disabledDateRangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const disabledDateRangeTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let disabledDateRangeTmpBufOpt: Array<DateRange> = new Array<DateRange>(disabledDateRangeTmpBufOptLength)
-            for (let disabledDateRangeTmpBufOptBufCounterI = 0; disabledDateRangeTmpBufOptBufCounterI < disabledDateRangeTmpBufOptLength; disabledDateRangeTmpBufOptBufCounterI++) {
-                disabledDateRangeTmpBufOpt[disabledDateRangeTmpBufOptBufCounterI] = DateRange_serializer.read(valueDeserializer)
-            }
+            const disabledDateRangeTmpBufOpt: Array<DateRange> = new Array<DateRange>(disabledDateRangeTmpBufOptLength, (arg0: int32):DateRange => {
+            return DateRange_serializer.read(valueDeserializer);
+        })
             disabledDateRangeTmpBuf = disabledDateRangeTmpBufOpt
         }
         const disabledDateRangeTmpResult: Array<DateRange> | undefined = disabledDateRangeTmpBuf
@@ -640,10 +639,9 @@ export class CalendarDialogOptions_serializer {
         let disabledDateRangeTmpBuf: Array<DateRange> | undefined = undefined
         if ((disabledDateRangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const disabledDateRangeTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let disabledDateRangeTmpBufOpt: Array<DateRange> = new Array<DateRange>(disabledDateRangeTmpBufOptLength)
-            for (let disabledDateRangeTmpBufOptBufCounterI = 0; disabledDateRangeTmpBufOptBufCounterI < disabledDateRangeTmpBufOptLength; disabledDateRangeTmpBufOptBufCounterI++) {
-                disabledDateRangeTmpBufOpt[disabledDateRangeTmpBufOptBufCounterI] = DateRange_serializer.read(valueDeserializer)
-            }
+            const disabledDateRangeTmpBufOpt: Array<DateRange> = new Array<DateRange>(disabledDateRangeTmpBufOptLength, (arg0: int32):DateRange => {
+            return DateRange_serializer.read(valueDeserializer);
+        })
             disabledDateRangeTmpBuf = disabledDateRangeTmpBufOpt
         }
         const disabledDateRangeTmpResult: Array<DateRange> | undefined = disabledDateRangeTmpBuf
