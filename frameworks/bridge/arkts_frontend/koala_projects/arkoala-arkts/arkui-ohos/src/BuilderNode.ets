@@ -246,11 +246,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             if (options?.type !== undefined) {
                 buildOptions.type = options.type!;
             }
-            try {
-                this.setOptions(buildOptions);
-            } catch (e) {
-                InteropNativeModule._NativeLog('BuilderNode Warning: ' + e?.message + ', ' + e?.stack);
-            }
+            this.setOptions(buildOptions);
         }
         this.__manager = createStateManager()!;
         let uiData = new ContextRecord();
