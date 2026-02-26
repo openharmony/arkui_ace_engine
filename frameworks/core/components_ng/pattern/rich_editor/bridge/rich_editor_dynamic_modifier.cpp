@@ -737,11 +737,7 @@ void SetRichEditorEditMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallba
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (isJsView) {
-        CHECK_NULL_VOID(onCreateMenuCallback || onMenuItemClickCallback || onPrepareMenuCallback);
-    } else {
-        CHECK_NULL_VOID(onCreateMenuCallback && onMenuItemClickCallback && onPrepareMenuCallback);
-    }
+    CHECK_NULL_VOID(onCreateMenuCallback && onMenuItemClickCallback && onPrepareMenuCallback);
     NG::OnCreateMenuCallback* onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
     NG::OnMenuItemClickCallback* onMenuItemClick
         = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
