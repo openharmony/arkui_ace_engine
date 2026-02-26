@@ -72,6 +72,7 @@ class MockContextMenuResult : public ContextMenuResult {
 public:
     MOCK_METHOD(void, Cancel, (), (const, override));
     MOCK_METHOD(void, CopyImage, (), (const, override));
+    MOCK_METHOD(void, SaveImage, (), (const, override));
     MOCK_METHOD(void, Copy, (), (const, override));
     MOCK_METHOD(void, Paste, (), (const, override));
     MOCK_METHOD(void, Cut, (), (const, override));

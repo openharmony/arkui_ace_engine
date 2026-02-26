@@ -394,6 +394,7 @@ std::string ContextMenuParamOhos::GetSelectionText() const
 }
 void ContextMenuResultOhos::Cancel() const {}
 void ContextMenuResultOhos::CopyImage() const {}
+void ContextMenuResultOhos::SaveImage() const {}
 void ContextMenuResultOhos::Copy() const {}
 void ContextMenuResultOhos::Paste() const {}
 void ContextMenuResultOhos::Cut() const {}

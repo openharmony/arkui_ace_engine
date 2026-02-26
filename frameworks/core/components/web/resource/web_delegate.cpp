@@ -783,6 +783,13 @@ void ContextMenuResultOhos::CopyImage() const
     }
 }
 
+void ContextMenuResultOhos::SaveImage() const
+{
+    if (callback_) {
+        callback_->Continue(CI_IMAGE_SAVE, EF_NONE);
+    }
+}
+
 void ContextMenuResultOhos::Copy() const
 {
     if (callback_) {
