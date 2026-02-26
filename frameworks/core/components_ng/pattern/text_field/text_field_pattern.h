@@ -1969,7 +1969,7 @@ protected:
     virtual IMEClient GetIMEClientInfo();
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     /* --------- select AI detect ---------- */
-    bool isShowAIMenuOption_;
+    bool isShowAIMenuOption_ = false;
     RefPtr<DataDetectorAdapter> selectDetectorAdapter_;
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
     bool selectDetectEnabledIsUserSet_ = false;

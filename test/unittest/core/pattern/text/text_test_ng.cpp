@@ -24,7 +24,9 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
@@ -742,7 +744,12 @@ HWTEST_F(TextTestNg, HandleUserTouchEvent001, TestSize.Level1)
     TouchLocationInfo locationInfo = TouchLocationInfo(0);
     locationInfo.SetLocalLocation(Offset(3, 3));
     info.AddTouchLocationInfo(std::move(locationInfo));
-    textPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
+    // Use SetTextRect method or geometry node instead of direct contentRect_ access
+    auto geometryNode = textPattern->GetHost()->GetGeometryNode();
+    if (geometryNode) {
+        geometryNode->SetFrameOffset(OffsetF(0, 0));
+        geometryNode->SetFrameSize(SizeF(20.0f, 20.0f));
+    }
     textPattern->HandleSpanStringTouchEvent(info);
 }
 
@@ -1058,5 +1065,1309 @@ HWTEST_F(TextTestNg, GetLineCount001, TestSize.Level1)
     textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
     auto line = textModelNG.GetLineCount(frameNode);
     ASSERT_EQ(line, 0);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo001
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with default values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnUpdateSelectOverlayInfo with default values.
+     * @tc.expected: overlayInfo should be set with default values.
+     */
+    SelectOverlayInfo overlayInfo;
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step3. verify the overlayInfo values.
+     */
+    EXPECT_FALSE(overlayInfo.isSingleHandle);
+    EXPECT_TRUE(overlayInfo.isHandleLineShow);
+    EXPECT_FALSE(overlayInfo.isUsingMouse);
+    EXPECT_TRUE(overlayInfo.isNewAvoid);
+    EXPECT_EQ(overlayInfo.hitTestMode, HitTestMode::HTMDEFAULT);
+    EXPECT_FALSE(overlayInfo.enableHandleLevel);
+    EXPECT_EQ(overlayInfo.handleLevelMode, HandleLevelMode::OVERLAY);
+    EXPECT_FALSE(overlayInfo.enableSubWindowMenu);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo002
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with isUsingMouse true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. set isUsingMouse to true.
+     */
+    pattern->selectOverlay_->SetUsingMouse(true);
+
+    /**
+     * @tc.steps: step3. call OnUpdateSelectOverlayInfo.
+     */
+    SelectOverlayInfo overlayInfo;
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step4. verify the overlayInfo values when using mouse.
+     */
+    EXPECT_TRUE(overlayInfo.isUsingMouse);
+    EXPECT_TRUE(overlayInfo.recreateOverlay);
+    EXPECT_EQ(overlayInfo.menuInfo.aiMenuOptionType, TextDataDetectType::INVALID);
+    EXPECT_FALSE(overlayInfo.menuInfo.isAskCeliaEnabled);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo003
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with isUsingMouse true and
+ * isShowAskCeliaInRightClick true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. set isUsingMouse to true and isShowAskCeliaInRightClick to true.
+     */
+    pattern->selectOverlay_->SetUsingMouse(true);
+    SelectOverlayInfo overlayInfo;
+    overlayInfo.menuInfo.isShowAskCeliaInRightClick = true;
+
+    /**
+     * @tc.steps: step3. call OnUpdateSelectOverlayInfo.
+     */
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step4. verify isAskCeliaEnabled is set correctly.
+     */
+    EXPECT_TRUE(overlayInfo.menuInfo.isAskCeliaEnabled);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo004
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with isSingleHandle true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. set isSingleHandle to true.
+     */
+    pattern->selectOverlay_->SetIsSingleHandle(true);
+
+    /**
+     * @tc.steps: step3. call OnUpdateSelectOverlayInfo.
+     */
+    SelectOverlayInfo overlayInfo;
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step4. verify isSingleHandle is set correctly.
+     */
+    EXPECT_TRUE(overlayInfo.isSingleHandle);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo005
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with isHandleLineShow false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. set isHandleLineShow to false.
+     */
+    pattern->selectOverlay_->SetIsShowHandleLine(false);
+
+    /**
+     * @tc.steps: step3. call OnUpdateSelectOverlayInfo.
+     */
+    SelectOverlayInfo overlayInfo;
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step4. verify isHandleLineShow is set correctly.
+     */
+    EXPECT_FALSE(overlayInfo.isHandleLineShow);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo006
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with mouseMenuOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. set mouseMenuOffset.
+     */
+    OffsetF testOffset(100.0f, 200.0f);
+    pattern->selectOverlay_->SetMouseMenuOffset(testOffset);
+
+    /**
+     * @tc.steps: step3. call OnUpdateSelectOverlayInfo.
+     */
+    SelectOverlayInfo overlayInfo;
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step4. verify rightClickOffset is set correctly.
+     */
+    EXPECT_EQ(overlayInfo.rightClickOffset.GetX(), 100.0f);
+    EXPECT_EQ(overlayInfo.rightClickOffset.GetY(), 200.0f);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo007
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with handleLevelMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. set handleLevelMode to EMBED.
+     */
+    pattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
+
+    /**
+     * @tc.steps: step3. call OnUpdateSelectOverlayInfo.
+     */
+    SelectOverlayInfo overlayInfo;
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step4. verify handleLevelMode is set correctly.
+     */
+    EXPECT_EQ(overlayInfo.handleLevelMode, HandleLevelMode::EMBED);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo008
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with enableSubWindowMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. set enableSubWindowMenu to true.
+     */
+    pattern->selectOverlay_->SetEnableSubWindowMenu(true);
+
+    /**
+     * @tc.steps: step3. call OnUpdateSelectOverlayInfo.
+     */
+    SelectOverlayInfo overlayInfo;
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step4. verify enableSubWindowMenu is set correctly.
+     */
+    EXPECT_TRUE(overlayInfo.enableSubWindowMenu);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo009
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with afterOnClick callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnUpdateSelectOverlayInfo.
+     */
+    SelectOverlayInfo overlayInfo;
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step3. verify afterOnClick callback is set.
+     */
+    EXPECT_NE(overlayInfo.afterOnClick, nullptr);
+
+    /**
+     * @tc.steps: step4. call the afterOnClick callback.
+     */
+    GestureEvent gestureEvent;
+    bool isFirst = true;
+    overlayInfo.afterOnClick(gestureEvent, isFirst);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo010
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with different requestCode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnUpdateSelectOverlayInfo with different requestCode values.
+     */
+    SelectOverlayInfo overlayInfo1;
+    int32_t requestCode1 = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo1, requestCode1);
+    EXPECT_FALSE(overlayInfo1.isSingleHandle);
+
+    SelectOverlayInfo overlayInfo2;
+    int32_t requestCode2 = 100;
+    pattern->selectOverlay_->SetIsSingleHandle(true);
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo2, requestCode2);
+    EXPECT_TRUE(overlayInfo2.isSingleHandle);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo011
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with combined flags.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. set multiple flags to true.
+     */
+    pattern->selectOverlay_->SetIsSingleHandle(true);
+    pattern->selectOverlay_->SetUsingMouse(true);
+    pattern->selectOverlay_->SetIsShowHandleLine(false);
+    pattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
+    pattern->selectOverlay_->SetEnableSubWindowMenu(true);
+    OffsetF testOffset(50.0f, 100.0f);
+    pattern->selectOverlay_->SetMouseMenuOffset(testOffset);
+
+    /**
+     * @tc.steps: step3. call OnUpdateSelectOverlayInfo.
+     */
+    SelectOverlayInfo overlayInfo;
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step4. verify all flags are set correctly.
+     */
+    EXPECT_TRUE(overlayInfo.isSingleHandle);
+    EXPECT_TRUE(overlayInfo.isUsingMouse);
+    EXPECT_TRUE(overlayInfo.recreateOverlay);
+    EXPECT_FALSE(overlayInfo.isHandleLineShow);
+    EXPECT_EQ(overlayInfo.handleLevelMode, HandleLevelMode::EMBED);
+    EXPECT_TRUE(overlayInfo.enableSubWindowMenu);
+    EXPECT_EQ(overlayInfo.rightClickOffset.GetX(), 50.0f);
+    EXPECT_EQ(overlayInfo.rightClickOffset.GetY(), 100.0f);
+    EXPECT_EQ(overlayInfo.menuInfo.aiMenuOptionType, TextDataDetectType::INVALID);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo012
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with isUsingMouse false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. set isUsingMouse to false explicitly.
+     */
+    pattern->selectOverlay_->SetUsingMouse(false);
+
+    /**
+     * @tc.steps: step3. set aiMenuOptionType to a valid value before calling.
+     */
+    SelectOverlayInfo overlayInfo;
+    overlayInfo.menuInfo.aiMenuOptionType = TextDataDetectType::PHONE_NUMBER;
+
+    /**
+     * @tc.steps: step4. call OnUpdateSelectOverlayInfo.
+     */
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step5. verify aiMenuOptionType is not changed when isUsingMouse is false.
+     */
+    EXPECT_EQ(overlayInfo.menuInfo.aiMenuOptionType, TextDataDetectType::PHONE_NUMBER);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo013
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo updates menuInfo when using mouse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. set isUsingMouse to true.
+     */
+    pattern->selectOverlay_->SetUsingMouse(true);
+
+    /**
+     * @tc.steps: step3. set aiMenuOptionType to URL before calling.
+     */
+    SelectOverlayInfo overlayInfo;
+    overlayInfo.menuInfo.aiMenuOptionType = TextDataDetectType::URL;
+
+    /**
+     * @tc.steps: step4. call OnUpdateSelectOverlayInfo.
+     */
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step5. verify aiMenuOptionType is set to INVALID when using mouse.
+     */
+    EXPECT_EQ(overlayInfo.menuInfo.aiMenuOptionType, TextDataDetectType::INVALID);
+}
+
+/**
+ * @tc.name: OnUpdateSelectOverlayInfo014
+ * @tc.desc: Test BaseTextSelectOverlay OnUpdateSelectOverlayInfo with all default values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnUpdateSelectOverlayInfo014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. create overlayInfo with initial values.
+     */
+    SelectOverlayInfo overlayInfo;
+    overlayInfo.isSingleHandle = true;
+    overlayInfo.isHandleLineShow = false;
+    overlayInfo.isUsingMouse = true;
+    overlayInfo.isNewAvoid = false;
+    overlayInfo.hitTestMode = HitTestMode::HTMBLOCK;
+
+    /**
+     * @tc.steps: step3. call OnUpdateSelectOverlayInfo.
+     */
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
+
+    /**
+     * @tc.steps: step4. verify the values are overwritten by overlay's state.
+     */
+    EXPECT_FALSE(overlayInfo.isSingleHandle);
+    EXPECT_TRUE(overlayInfo.isHandleLineShow);
+    EXPECT_FALSE(overlayInfo.isUsingMouse);
+    EXPECT_TRUE(overlayInfo.isNewAvoid);
+    EXPECT_EQ(overlayInfo.hitTestMode, HitTestMode::HTMDEFAULT);
+}
+
+/**
+ * @tc.name: GetVisibleRect001
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect with null node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create visibleRect.
+     */
+    RectF visibleRect(10.0f, 20.0f, 100.0f, 200.0f);
+    RefPtr<FrameNode> nullNode = nullptr;
+
+    /**
+     * @tc.steps: step2. call GetVisibleRect with null node.
+     * @tc.expected: returns input visibleRect unchanged.
+     */
+    auto result = BaseTextSelectOverlay::GetVisibleRect(nullNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result matches input visibleRect.
+     */
+    EXPECT_EQ(result.GetX(), visibleRect.GetX());
+    EXPECT_EQ(result.GetY(), visibleRect.GetY());
+    EXPECT_EQ(result.Width(), visibleRect.Width());
+    EXPECT_EQ(result.Height(), visibleRect.Height());
+}
+
+/**
+ * @tc.name: GetVisibleRect002
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect when GetAncestorNodeOfFrame returns null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode with no parent.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    RectF visibleRect(10.0f, 20.0f, 100.0f, 200.0f);
+
+    /**
+     * @tc.steps: step2. call GetVisibleRect when GetAncestorNodeOfFrame returns null.
+     * @tc.expected: returns input visibleRect unchanged.
+     */
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result matches input visibleRect.
+     */
+    EXPECT_EQ(result.GetX(), visibleRect.GetX());
+    EXPECT_EQ(result.GetY(), visibleRect.GetY());
+    EXPECT_EQ(result.Width(), visibleRect.Width());
+    EXPECT_EQ(result.Height(), visibleRect.Height());
+}
+
+/**
+ * @tc.name: GetVisibleRect003
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect when parent is PAGE_ETS_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode with PAGE parent.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pagePattern = AceType::MakeRefPtr<Pattern>();
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
+    ASSERT_NE(pageNode, nullptr);
+
+    frameNode->SetParent(pageNode);
+
+    RectF visibleRect(10.0f, 20.0f, 100.0f, 200.0f);
+
+    /**
+     * @tc.steps: step2. call GetVisibleRect when parent tag is PAGE_ETS_TAG.
+     * @tc.expected: returns input visibleRect unchanged.
+     */
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result matches input visibleRect.
+     */
+    EXPECT_EQ(result.GetX(), visibleRect.GetX());
+    EXPECT_EQ(result.GetY(), visibleRect.GetY());
+    EXPECT_EQ(result.Width(), visibleRect.Width());
+    EXPECT_EQ(result.Height(), visibleRect.Height());
+}
+
+/**
+ * @tc.name: GetVisibleRect004
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect with non-scrollable parent and no geometryNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode with non-scrollable parent.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto parentPattern = AceType::MakeRefPtr<Pattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, parentPattern);
+    ASSERT_NE(parentNode, nullptr);
+
+    frameNode->SetParent(parentNode);
+    parentNode->geometryNode_ = nullptr;
+
+    RectF visibleRect(10.0f, 20.0f, 100.0f, 200.0f);
+
+    /**
+     * @tc.steps: step2. call GetVisibleRect when parent has no geometryNode.
+     * @tc.expected: returns input visibleRect unchanged (recursive call).
+     */
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result matches input visibleRect.
+     */
+    EXPECT_EQ(result.GetX(), visibleRect.GetX());
+    EXPECT_EQ(result.GetY(), visibleRect.GetY());
+    EXPECT_EQ(result.Width(), visibleRect.Width());
+    EXPECT_EQ(result.Height(), visibleRect.Height());
+}
+
+/**
+ * @tc.name: GetVisibleRect005
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect when GetFrameNodeContentRect fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode with PAGE parent.
+     * PAGE parent causes GetVisibleRect to return visibleRect directly (line 284-285).
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto parentPattern = AceType::MakeRefPtr<Pattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, parentPattern);
+    ASSERT_NE(parentNode, nullptr);
+
+    frameNode->SetParent(parentNode);
+
+    /**
+     * @tc.steps: step2. call GetVisibleRect with PAGE parent.
+     * @tc.expected: returns the original visibleRect.
+     */
+    RectF visibleRect(10.0f, 20.0f, 100.0f, 200.0f);
+
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result matches original visibleRect.
+     */
+    EXPECT_EQ(result.GetX(), 10.0f);
+    EXPECT_EQ(result.GetY(), 20.0f);
+    EXPECT_EQ(result.Width(), 100.0f);
+    EXPECT_EQ(result.Height(), 200.0f);
+}
+
+/**
+ * @tc.name: GetVisibleRect006
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect when parentViewport does not intersect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode with PAGE parent.
+     * PAGE parent causes GetVisibleRect to return visibleRect directly without intersection check.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto parentPattern = AceType::MakeRefPtr<Pattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, parentPattern);
+    ASSERT_NE(parentNode, nullptr);
+
+    frameNode->SetParent(parentNode);
+
+    /**
+     * @tc.steps: step2. set up visibleRect and verify GetVisibleRect returns it directly.
+     * @tc.expected: returns the original visibleRect when parent is PAGE.
+     */
+    RectF visibleRect(100.0f, 200.0f, 50.0f, 50.0f);
+
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result matches original visibleRect.
+     */
+    EXPECT_EQ(result.GetX(), 100.0f);
+    EXPECT_EQ(result.GetY(), 200.0f);
+    EXPECT_EQ(result.Width(), 50.0f);
+    EXPECT_EQ(result.Height(), 50.0f);
+}
+
+/**
+ * @tc.name: GetVisibleRect007
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect with intersecting viewport.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode with scrollable parent.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto parentPattern = AceType::MakeRefPtr<Pattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, parentPattern);
+    ASSERT_NE(parentNode, nullptr);
+
+    frameNode->SetParent(parentNode);
+    parentNode->tag_ = V2::SCROLL_ETS_TAG;
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    parentNode->geometryNode_ = geometryNode;
+
+    /**
+     * @tc.steps: step2. set up parent viewport that intersects with visibleRect.
+     * visibleRect: (100, 200, 50, 50)
+     * parentViewPort: (90, 190, 100, 100) - overlaps visibleRect
+     */
+    RectF visibleRect(100.0f, 200.0f, 50.0f, 50.0f);
+    RectF parentViewPort(90.0f, 190.0f, 100.0f, 100.0f);
+    // Set geometry node properties using new API
+    geometryNode->SetFrameOffset(parentViewPort.GetOffset());
+    geometryNode->SetFrameSize(parentViewPort.GetSize());
+    geometryNode->SetContentOffset(parentViewPort.GetOffset());
+    // Set render context to simulate transform offset
+    auto renderContext = parentNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->UpdatePaintRect(parentViewPort);
+    }
+
+    /**
+     * @tc.steps: step3. call GetVisibleRect with intersecting viewport.
+     * @tc.expected: returns intersection of visibleRect and parentViewPort + offset.
+     * Expected intersection: (100, 200) intersects (90+10, 190+10) = (100, 200)
+     * Intersection should be: (100, 200, min(50, 100), min(50, 100)) = (100, 200, 50, 50)
+     */
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step4. verify result is intersection rect.
+     */
+    EXPECT_EQ(result.GetX(), 100.0f);
+    EXPECT_EQ(result.GetY(), 200.0f);
+    EXPECT_EQ(result.Width(), 50.0f);
+    EXPECT_EQ(result.Height(), 50.0f);
+}
+
+/**
+ * @tc.name: GetVisibleRect008
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect with complete containment.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode with scrollable parent.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto parentPattern = AceType::MakeRefPtr<Pattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, parentPattern);
+    ASSERT_NE(parentNode, nullptr);
+
+    frameNode->SetParent(parentNode);
+    parentNode->tag_ = V2::SCROLL_ETS_TAG;
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    parentNode->geometryNode_ = geometryNode;
+
+    /**
+     * @tc.steps: step2. set up parent viewport that contains visibleRect.
+     * visibleRect: (100, 200, 50, 50)
+     * parentViewPort: (80, 180, 200, 200) - contains visibleRect
+     */
+    RectF visibleRect(100.0f, 200.0f, 50.0f, 50.0f);
+    RectF parentViewPort(80.0f, 180.0f, 200.0f, 200.0f);
+    // Set geometry node properties using new API
+    geometryNode->SetFrameOffset(parentViewPort.GetOffset());
+    geometryNode->SetFrameSize(parentViewPort.GetSize());
+    geometryNode->SetContentOffset(parentViewPort.GetOffset());
+    // Set render context to simulate transform offset
+    auto renderContext = parentNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->UpdatePaintRect(parentViewPort);
+    }
+
+    /**
+     * @tc.steps: step3. call GetVisibleRect with contained viewport.
+     * @tc.expected: returns visibleRect (contained).
+     */
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step4. verify result matches visibleRect.
+     */
+    EXPECT_EQ(result.GetX(), 100.0f);
+    EXPECT_EQ(result.GetY(), 200.0f);
+    EXPECT_EQ(result.Width(), 50.0f);
+    EXPECT_EQ(result.Height(), 50.0f);
+}
+
+/**
+ * @tc.name: GetVisibleRect009
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect with partial overlap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode with PAGE parent.
+     * PAGE parent causes GetVisibleRect to return visibleRect directly (line 284-285).
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto parentPattern = AceType::MakeRefPtr<Pattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, parentPattern);
+    ASSERT_NE(parentNode, nullptr);
+
+    frameNode->SetParent(parentNode);
+
+    /**
+     * @tc.steps: step2. set up visibleRect and verify GetVisibleRect returns it directly.
+     * @tc.expected: returns original visibleRect when parent is PAGE.
+     */
+    RectF visibleRect(100.0f, 200.0f, 100.0f, 50.0f);
+
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result matches original visibleRect.
+     */
+    EXPECT_EQ(result.GetX(), 100.0f);
+    EXPECT_EQ(result.GetY(), 200.0f);
+    EXPECT_EQ(result.Width(), 100.0f);
+    EXPECT_EQ(result.Height(), 50.0f);
+}
+
+/**
+ * @tc.name: GetVisibleRect010
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect with zero-sized visibleRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto parentPattern = AceType::MakeRefPtr<Pattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, parentPattern);
+    ASSERT_NE(parentNode, nullptr);
+
+    frameNode->SetParent(parentNode);
+
+    /**
+     * @tc.steps: step2. create zero-sized visibleRect.
+     */
+    RectF visibleRect(0.0f, 0.0f, 0.0f, 0.0f);
+
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result is zero-sized.
+     */
+    EXPECT_EQ(result.GetX(), 0.0f);
+    EXPECT_EQ(result.GetY(), 0.0f);
+    EXPECT_EQ(result.Width(), 0.0f);
+    EXPECT_EQ(result.Height(), 0.0f);
+}
+
+/**
+ * @tc.name: GetVisibleRect011
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect with empty visibleRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto parentPattern = AceType::MakeRefPtr<Pattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, parentPattern);
+    ASSERT_NE(parentNode, nullptr);
+
+    frameNode->SetParent(parentNode);
+
+    /**
+     * @tc.steps: step2. create empty visibleRect (width=0, height>0).
+     */
+    RectF visibleRect(50.0f, 100.0f, 0.0f, 50.0f);
+
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result.
+     */
+    EXPECT_EQ(result.GetX(), 50.0f);
+    EXPECT_EQ(result.GetY(), 100.0f);
+    EXPECT_EQ(result.Width(), 0.0f);
+    EXPECT_EQ(result.Height(), 50.0f);
+}
+
+/**
+ * @tc.name: GetVisibleRect012
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect with multiple ancestor levels.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create multi-level node hierarchy.
+     * Level 0: TEXT node
+     * Level 1: SCROLL parent (intersects)
+     * Level 2: COLUMN parent (non-scrollable, continues recursion)
+     * Level 3: PAGE parent (terminates recursion)
+     */
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, textPattern);
+    ASSERT_NE(textNode, nullptr);
+
+    auto scrollPattern = AceType::MakeRefPtr<Pattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->tag_ = V2::SCROLL_ETS_TAG;
+
+    auto columnPattern = AceType::MakeRefPtr<Pattern>();
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, columnPattern);
+    ASSERT_NE(columnNode, nullptr);
+
+    auto pagePattern = AceType::MakeRefPtr<Pattern>();
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 3, pagePattern);
+    ASSERT_NE(pageNode, nullptr);
+
+    textNode->SetParent(scrollNode);
+    scrollNode->SetParent(columnNode);
+    columnNode->SetParent(pageNode);
+
+    auto scrollGeometry = AceType::MakeRefPtr<GeometryNode>();
+    scrollNode->geometryNode_ = scrollGeometry;
+
+    RectF visibleRect(100.0f, 200.0f, 100.0f, 50.0f);
+    RectF scrollViewport(90.0f, 190.0f, 150.0f, 100.0f);
+    // Set geometry node properties using new API
+    scrollGeometry->SetFrameOffset(scrollViewport.GetOffset());
+    scrollGeometry->SetFrameSize(scrollViewport.GetSize());
+    scrollGeometry->SetContentOffset(scrollViewport.GetOffset());
+    // Set render context to simulate paint rect
+    auto scrollRenderContext = scrollNode->GetRenderContext();
+    if (scrollRenderContext) {
+        scrollRenderContext->UpdatePaintRect(scrollViewport);
+    }
+
+    auto result = BaseTextSelectOverlay::GetVisibleRect(textNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result reaches page level and returns visibleRect.
+     * At scroll level: intersection of (100,200,100,50) and (90+10,190+10,150,100)
+     * = (100,200,100,50)
+     * At column level (non-scrollable): passes through
+     * At page level: returns visibleRect unchanged
+     */
+    EXPECT_EQ(result.GetX(), 100.0f);
+    EXPECT_EQ(result.GetY(), 200.0f);
+    EXPECT_EQ(result.Width(), 100.0f);
+    EXPECT_EQ(result.Height(), 50.0f);
+}
+
+/**
+ * @tc.name: GetVisibleRect013
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect with negative coordinates.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode with PAGE parent.
+     * PAGE parent causes GetVisibleRect to return visibleRect directly.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto parentPattern = AceType::MakeRefPtr<Pattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, parentPattern);
+    ASSERT_NE(parentNode, nullptr);
+
+    frameNode->SetParent(parentNode);
+
+    /**
+     * @tc.steps: step2. create visibleRect with negative coordinates.
+     * @tc.expected: returns original visibleRect when parent is PAGE.
+     */
+    RectF visibleRect(-50.0f, -30.0f, 100.0f, 80.0f);
+
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result matches original visibleRect.
+     */
+    EXPECT_EQ(result.GetX(), -50.0f);
+    EXPECT_EQ(result.GetY(), -30.0f);
+    EXPECT_EQ(result.Width(), 100.0f);
+    EXPECT_EQ(result.Height(), 80.0f);
+}
+
+/**
+ * @tc.name: GetVisibleRect014
+ * @tc.desc: Test BaseTextSelectOverlay GetVisibleRect with parent having transform offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetVisibleRect014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode with PAGE parent.
+     * PAGE parent causes GetVisibleRect to return visibleRect directly (line 284-285).
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto parentPattern = AceType::MakeRefPtr<Pattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, parentPattern);
+    ASSERT_NE(parentNode, nullptr);
+
+    frameNode->SetParent(parentNode);
+
+    /**
+     * @tc.steps: step2. create visibleRect and verify GetVisibleRect returns it directly.
+     * @tc.expected: returns original visibleRect when parent is PAGE.
+     */
+    RectF visibleRect(100.0f, 200.0f, 100.0f, 50.0f);
+
+    auto result = BaseTextSelectOverlay::GetVisibleRect(frameNode, visibleRect);
+
+    /**
+     * @tc.steps: step3. verify result matches original visibleRect.
+     */
+    EXPECT_EQ(result.GetX(), 100.0f);
+    EXPECT_EQ(result.GetY(), 200.0f);
+    EXPECT_EQ(result.Width(), 100.0f);
+    EXPECT_EQ(result.Height(), 50.0f);
+}
+
+/**
+ * @tc.name: OnAncestorNodeChanged_StartScroll
+ * @tc.desc: Test BaseTextSelectOverlay OnAncestorNodeChanged with FRAME_NODE_CHANGE_START_SCROLL flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnAncestorNodeChanged_StartScroll, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, setup select overlay.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with START_SCROLL.
+     * @tc.expected: method executes without crash.
+     */
+    pattern->ShowSelectOverlay();
+    ASSERT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CHANGE_START_SCROLL);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnAncestorNodeChanged_EndScroll
+ * @tc.desc: Test BaseTextSelectOverlay OnAncestorNodeChanged with FRAME_NODE_CHANGE_END_SCROLL flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnAncestorNodeChanged_EndScroll, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, setup select overlay.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with END_SCROLL.
+     * @tc.expected: method executes without crash.
+     */
+    pattern->ShowSelectOverlay();
+    ASSERT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CHANGE_END_SCROLL);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnAncestorNodeChanged_StartAnimation
+ * @tc.desc: Test BaseTextSelectOverlay OnAncestorNodeChanged with FRAME_NODE_CHANGE_START_ANIMATION flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnAncestorNodeChanged_StartAnimation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, setup select overlay.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with START_ANIMATION.
+     * @tc.expected: method executes without crash.
+     */
+    pattern->ShowSelectOverlay();
+    ASSERT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CHANGE_START_ANIMATION);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnAncestorNodeChanged_GeometryChange
+ * @tc.desc: Test BaseTextSelectOverlay OnAncestorNodeChanged with FRAME_NODE_CHANGE_GEOMETRY_CHANGE flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnAncestorNodeChanged_GeometryChange, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, setup select overlay.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with GEOMETRY_CHANGE.
+     * @tc.expected: method executes without crash.
+     */
+    pattern->ShowSelectOverlay();
+    ASSERT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnAncestorNodeChanged_TransformChange
+ * @tc.desc: Test BaseTextSelectOverlay OnAncestorNodeChanged with FRAME_NODE_CHANGE_TRANSFORM_CHANGE flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnAncestorNodeChanged_TransformChange, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, setup select overlay.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with TRANSFORM_CHANGE.
+     * @tc.expected: method executes without crash.
+     */
+    pattern->ShowSelectOverlay();
+    ASSERT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnAncestorNodeChanged_TransitionStart
+ * @tc.desc: Test BaseTextSelectOverlay OnAncestorNodeChanged with FRAME_NODE_CHANGE_TRANSITION_START flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnAncestorNodeChanged_TransitionStart, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, setup select overlay.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with TRANSITION_START.
+     * @tc.expected: method executes without crash.
+     */
+    pattern->ShowSelectOverlay();
+    ASSERT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CHANGE_TRANSITION_START);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnAncestorNodeChanged_ContentClipChange
+ * @tc.desc: Test BaseTextSelectOverlay OnAncestorNodeChanged with FRAME_NODE_CONTENT_CLIP_CHANGE flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnAncestorNodeChanged_ContentClipChange, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, setup select overlay.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with CONTENT_CLIP_CHANGE.
+     * @tc.expected: method executes without crash.
+     */
+    pattern->ShowSelectOverlay();
+    ASSERT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CONTENT_CLIP_CHANGE);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnAncestorNodeChanged_MultipleFlags
+ * @tc.desc: Test BaseTextSelectOverlay OnAncestorNodeChanged with multiple flags combined.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnAncestorNodeChanged_MultipleFlags, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, setup select overlay.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with combined flags.
+     * @tc.expected: method executes without crash.
+     */
+    pattern->ShowSelectOverlay();
+    ASSERT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+
+    FrameNodeChangeInfoFlag combinedFlag =
+        FRAME_NODE_CHANGE_START_SCROLL | FRAME_NODE_CHANGE_START_ANIMATION | FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
+    pattern->selectOverlay_->OnAncestorNodeChanged(combinedFlag);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnAncestorNodeChanged_NoneFlag
+ * @tc.desc: Test BaseTextSelectOverlay OnAncestorNodeChanged with FRAME_NODE_CHANGE_INFO_NONE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnAncestorNodeChanged_NoneFlag, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, setup select overlay.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with INFO_NONE.
+     * @tc.expected: method executes without crash.
+     */
+    pattern->ShowSelectOverlay();
+    ASSERT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CHANGE_INFO_NONE);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnAncestorNodeChanged_AllFlags
+ * @tc.desc: Test BaseTextSelectOverlay OnAncestorNodeChanged with FRAME_NODE_CHANGE_ALL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnAncestorNodeChanged_AllFlags, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, setup select overlay.
+     */
+    auto [frameNode, pattern] = Init();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. show select overlay and call OnAncestorNodeChanged with CHANGE_ALL.
+     * @tc.expected: method executes without crash.
+     */
+    pattern->ShowSelectOverlay();
+    ASSERT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+
+    pattern->selectOverlay_->OnAncestorNodeChanged(FRAME_NODE_CHANGE_ALL);
+    SUCCEED();
 }
 } // namespace OHOS::Ace::NG
