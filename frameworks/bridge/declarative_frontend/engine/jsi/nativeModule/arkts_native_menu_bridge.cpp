@@ -13,26 +13,19 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.h"
-
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_theme.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_ERR_CODE = "-1";
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
-constexpr int NUM_3 = 3;
-constexpr int NUM_4 = 4;
-constexpr int NUM_5 = 5;
+constexpr int ARG_INDEX_0 = 0;
+constexpr int ARG_INDEX_1 = 1;
+constexpr int ARG_INDEX_2 = 2;
+constexpr int ARG_INDEX_3 = 3;
+constexpr int ARG_INDEX_4 = 4;
+constexpr int ARG_INDEX_5 = 5;
 constexpr int COUNT_PROP = 4;
-constexpr uint32_t TRANSPARENT_COLOR = 0x00000000;
-constexpr uint32_t FOREGROUND_COLOR = 0x00000001;
 
 struct RadiusParseParams {
     std::vector<ArkUI_Float32> radiusValues;
@@ -40,239 +33,81 @@ struct RadiusParseParams {
     std::vector<void*> resObjs;
 };
 
-bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
+ArkUIMenuDividerOptions BuildMenuDividerOptions(EcmaVM* vm, Local<JSValueRef> strokeWidthArg,
+    Local<JSValueRef> startMarginArg, Local<JSValueRef> endMarginArg)
 {
-    if (firstArg->IsNativePointer(vm)) {
-        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-        return true;
-    }
-    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
-        nativeNode = nullptr;
-        return true;
-    }
-    return false;
-}
+    ArkUIDimensionType strokeWidthOption;
+    ArkUIDimensionType startMarginOption;
+    ArkUIDimensionType endMarginOption;
 
-bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
-{
-    if (firstArg->IsBoolean()) {
-        return firstArg->ToBoolean(vm)->Value();
-    }
-    return false;
-}
-
-bool ParseMenuDividerOptions(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, const ArkUIMenuModifier* menuModifier,
-    std::vector<Local<JSValueRef>>& args, bool isGroupDivider)
-{
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, false);
-    bool isJsView = IsJsView(firstArg, vm);
-    if (isJsView) {
-        Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-        if (secondArg->IsObject(vm)) {
-            auto secondObj = secondArg->ToObject(vm);
-            args[NUM_0] = secondObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "strokeWidth"));
-            args[NUM_1] = secondObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "color"));
-            args[NUM_2] = secondObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "startMargin"));
-            args[NUM_3] = secondObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "endMargin"));
-            args[NUM_4] = secondObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "mode"));
-        }
-    } else {
-        args[NUM_0] = runtimeCallInfo->GetCallArgRef(NUM_1);
-        args[NUM_1] = runtimeCallInfo->GetCallArgRef(NUM_2);
-        args[NUM_2] = runtimeCallInfo->GetCallArgRef(NUM_3);
-        args[NUM_3] = runtimeCallInfo->GetCallArgRef(NUM_4);
-        args[NUM_4] = runtimeCallInfo->GetCallArgRef(NUM_5);
-        if (args[NUM_0]->IsUndefined() && args[NUM_1]->IsUndefined() && args[NUM_2]->IsUndefined() &&
-            args[NUM_3]->IsUndefined() && args[NUM_4]->IsUndefined()) {
-            if (isGroupDivider) {
-                menuModifier->resetMenuItemGroupDivider(nativeNode);
-            } else {
-                menuModifier->resetMenuItemDivider(nativeNode);
-            }
-            return false;
-        }
-    }
-    return true;
-}
-
-ArkUIMenuDividerOptions BuildMenuDividerOptions(bool isJsView, bool isGroupDivider)
-{
-    ArkUIMenuDividerOptions dividerOptions;
-    dividerOptions.mode = 0;
-    if (isJsView) {
-        if (isGroupDivider) {
-            dividerOptions.strokeWidth = { 0.0f, static_cast<int32_t>(DimensionUnit::INVALID) };
-            dividerOptions.color = FOREGROUND_COLOR;
-        } else {
-            dividerOptions.strokeWidth = { 0.0f, static_cast<int32_t>(DimensionUnit::VP) };
-            dividerOptions.color = TRANSPARENT_COLOR;
-        }
-        dividerOptions.startMargin = { 0.0f, static_cast<int32_t>(DimensionUnit::VP) };
-        dividerOptions.endMargin = { 0.0f, static_cast<int32_t>(DimensionUnit::VP) };
-    } else {
-        dividerOptions.strokeWidth = { 0.0f, static_cast<int32_t>(DimensionUnit::PX) };
-        dividerOptions.color = TRANSPARENT_COLOR;
-        dividerOptions.startMargin = { 0.0f, static_cast<int32_t>(DimensionUnit::PX) };
-        dividerOptions.endMargin = { 0.0f, static_cast<int32_t>(DimensionUnit::PX) };
-    }
-    return dividerOptions;
-}
-
-void ParseMenuDividerStrokeWidth(EcmaVM* vm, std::vector<Local<JSValueRef>>& args,
-    ArkUIMenuDividerOptions& dividerOptions, bool isJsView, bool isGroupDivider)
-{
     CalcDimension strokeWidth;
-    if (isJsView) {
-        if (isGroupDivider) {
-            if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_0], strokeWidth)) {
-                strokeWidth.Reset();
-                strokeWidth.SetUnit(DimensionUnit::INVALID);
-            }
-            if (strokeWidth.IsNegative() || strokeWidth.Unit() < DimensionUnit::PX ||
-                strokeWidth.Unit() > DimensionUnit::LPX) {
-                strokeWidth.Reset();
-                strokeWidth.SetUnit(DimensionUnit::INVALID);
-            }
-        } else {
-            if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_0], strokeWidth)) {
-                strokeWidth.Reset();
-                strokeWidth.SetUnit(dividerOptions.mode == 1 ? DimensionUnit::INVALID : DimensionUnit::PX);
-            }
-            if (strokeWidth.IsNegative()) {
-                strokeWidth.Reset();
-                strokeWidth.SetUnit(dividerOptions.mode == 1 ? DimensionUnit::INVALID : DimensionUnit::PX);
-            }
-        }
-    } else {
-        if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_0], strokeWidth)) {
-            strokeWidth = Dimension(0.0);
-        }
+    if (!ArkTSUtils::ParseJsLengthMetrics(vm, strokeWidthArg, strokeWidth)) {
+        strokeWidth = Dimension(0.0);
     }
-    dividerOptions.strokeWidth.value = strokeWidth.Value();
-    dividerOptions.strokeWidth.units = static_cast<int32_t>(strokeWidth.Unit());
-}
+    strokeWidthOption.value = strokeWidth.Value();
+    strokeWidthOption.units = static_cast<int32_t>(strokeWidth.Unit());
 
-void ParseMenuDividerColor(EcmaVM* vm, std::vector<Local<JSValueRef>>& args, ArkUIMenuDividerOptions& dividerOptions,
-    ArkUINodeHandle nativeNode, RefPtr<ResourceObject>& colorResObj)
-{
-    Color color;
-    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (ArkTSUtils::ParseJsColorAlpha(vm, args[NUM_1], color, colorResObj, nodeInfo)) {
-        dividerOptions.color = color.GetValue();
-    }
-}
-
-
-void ParseMenuDividerStartMargin(EcmaVM* vm, std::vector<Local<JSValueRef>>& args,
-    ArkUIMenuDividerOptions& dividerOptions, bool isJsView, bool isGroupDivider)
-{
     CalcDimension startMargin;
-    if (isJsView) {
-        if (isGroupDivider) {
-            if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_2], startMargin)) {
-                startMargin.Reset();
-                startMargin.SetUnit(DimensionUnit::INVALID);
-            }
-            if (startMargin.IsNegative() || startMargin.Unit() < DimensionUnit::PX ||
-                startMargin.Unit() > DimensionUnit::LPX) {
-                startMargin.Reset();
-                startMargin.SetUnit(DimensionUnit::INVALID);
-            }
-        } else {
-            if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_2], startMargin)) {
-                startMargin.Reset();
-                startMargin.SetUnit(dividerOptions.mode == 1 ? DimensionUnit::INVALID : DimensionUnit::PX);
-            }
-            if (startMargin.IsNegative()) {
-                startMargin.Reset();
-                startMargin.SetUnit(dividerOptions.mode == 1 ? DimensionUnit::INVALID : DimensionUnit::PX);
-            }
-        }
-    } else {
-        if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_2], startMargin)) {
-            startMargin = Dimension(0.0);
-        }
+    if (!ArkTSUtils::ParseJsLengthMetrics(vm, startMarginArg, startMargin)) {
+        startMargin = Dimension(0.0);
     }
-    dividerOptions.startMargin.value = startMargin.Value();
-    dividerOptions.startMargin.units = static_cast<int32_t>(startMargin.Unit());
-}
+    startMarginOption.value = startMargin.Value();
+    startMarginOption.units = static_cast<int32_t>(startMargin.Unit());
 
-void ParseMenuDividerEndMargin(EcmaVM* vm, std::vector<Local<JSValueRef>>& args,
-    ArkUIMenuDividerOptions& dividerOptions, bool isJsView, bool isGroupDivider)
-{
     CalcDimension endMargin;
-    if (isJsView) {
-        if (isGroupDivider) {
-            if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_3], endMargin)) {
-                endMargin.Reset();
-                endMargin.SetUnit(DimensionUnit::INVALID);
-            }
-            if (endMargin.IsNegative() || endMargin.Unit() < DimensionUnit::PX ||
-                endMargin.Unit() > DimensionUnit::LPX) {
-                endMargin.Reset();
-                endMargin.SetUnit(DimensionUnit::INVALID);
-            }
-        } else {
-            if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_3], endMargin)) {
-                endMargin.Reset();
-                endMargin.SetUnit(dividerOptions.mode == 1 ? DimensionUnit::INVALID : DimensionUnit::PX);
-            }
-            if (endMargin.IsNegative()) {
-                endMargin.Reset();
-                endMargin.SetUnit(dividerOptions.mode == 1 ? DimensionUnit::INVALID : DimensionUnit::PX);
-            }
-        }
-    } else {
-        if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_3], endMargin)) {
-            endMargin = Dimension(0.0);
-        }
+    if (!ArkTSUtils::ParseJsLengthMetrics(vm, endMarginArg, endMargin)) {
+        endMargin = Dimension(0.0);
     }
-    dividerOptions.endMargin.value = endMargin.Value();
-    dividerOptions.endMargin.units = static_cast<int32_t>(endMargin.Unit());
-}
+    endMarginOption.value = endMargin.Value();
+    endMarginOption.units = static_cast<int32_t>(endMargin.Unit());
 
-void ParseMenuDividerMode(EcmaVM* vm, std::vector<Local<JSValueRef>>& args, ArkUIMenuDividerOptions& dividerOptions)
-{
-    if (args[NUM_4]->IsNumber() && args[NUM_4]->Int32Value(vm) == 1) {
-        dividerOptions.mode = 1;
-    }
+    ArkUIMenuDividerOptions dividerOptions;
+    dividerOptions.strokeWidth = strokeWidthOption;
+    dividerOptions.startMargin = startMarginOption;
+    dividerOptions.endMargin = endMarginOption;
+    return dividerOptions;
 }
 
 ArkUINativeModuleValue SetMenuDivider(ArkUIRuntimeCallInfo* runtimeCallInfo, bool isGroupDivider)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-    std::vector<Local<JSValueRef>> args(NUM_5, panda::JSValueRef::Undefined(vm));
-    // 0: index of strokeWidth value, 1: index of color value, 2: index of startMargin value,
-    // 3: index of endMargin value, 4: index of mode value
-    bool isJsView = IsJsView(firstArg, vm);
-    CHECK_EQUAL_RETURN(ParseMenuDividerOptions(vm, runtimeCallInfo, menuModifier, args, isGroupDivider), false,
-        panda::JSValueRef::Undefined(vm));
-    RefPtr<ResourceObject> colorResObj;
-    ArkUIMenuDividerOptions dividerOptions = BuildMenuDividerOptions(isJsView, isGroupDivider);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    auto isNeedParseOptions = !(isJsView && !secondArg->IsObject(vm));
-    if (isNeedParseOptions) {
-        ParseMenuDividerMode(vm, args, dividerOptions);
-        ParseMenuDividerStrokeWidth(vm, args, dividerOptions, isJsView, isGroupDivider);
-        ParseMenuDividerStartMargin(vm, args, dividerOptions, isJsView, isGroupDivider);
-        ParseMenuDividerEndMargin(vm, args, dividerOptions, isJsView, isGroupDivider);
-        ParseMenuDividerColor(vm, args, dividerOptions, nativeNode, colorResObj);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_0);
+    Local<JSValueRef> strokeWidthArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_1);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_2);
+    Local<JSValueRef> startMarginArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_3);
+    Local<JSValueRef> endMarginArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_4);
+    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_5);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (strokeWidthArg->IsUndefined() && colorArg->IsUndefined() && startMarginArg->IsUndefined()
+        && endMarginArg->IsUndefined() && modeArg->IsUndefined()) {
+        if (isGroupDivider) {
+            GetArkUINodeModifiers()->getMenuModifier()->resetMenuItemGroupDivider(nativeNode);
+        } else {
+            GetArkUINodeModifiers()->getMenuModifier()->resetMenuItemDivider(nativeNode);
+        }
+        return panda::JSValueRef::Undefined(vm);
     }
+    RefPtr<ResourceObject> colorResObj;
+    auto dividerOptions = BuildMenuDividerOptions(vm, strokeWidthArg, startMarginArg, endMarginArg);
+    Color color;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
+        color = Color::TRANSPARENT;
+    }
+    dividerOptions.color = color.GetValue();
+    int32_t mode = 0;
+    if (modeArg->IsNumber()) {
+        mode = modeArg->Int32Value(vm);
+    }
+    dividerOptions.mode = mode;
     auto colorRawPtr = AceType::RawPtr(colorResObj);
     if (isGroupDivider) {
-        menuModifier->setMenuItemGroupDividerWithResource(nativeNode, &dividerOptions, colorRawPtr);
+        GetArkUINodeModifiers()->getMenuModifier()->setMenuItemGroupDividerWithResource(
+            nativeNode, &dividerOptions, colorRawPtr);
     } else {
-        menuModifier->setMenuItemDividerWithResource(nativeNode, &dividerOptions, colorRawPtr);
+        GetArkUINodeModifiers()->getMenuModifier()->setMenuItemDividerWithResource(
+            nativeNode, &dividerOptions, colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -281,51 +116,103 @@ ArkUINativeModuleValue ResetMenuDivider(ArkUIRuntimeCallInfo* runtimeCallInfo, b
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
     if (isGroupDivider) {
-        menuModifier->resetMenuItemGroupDivider(nativeNode);
+        GetArkUINodeModifiers()->getMenuModifier()->resetMenuItemGroupDivider(nativeNode);
     } else {
-        menuModifier->resetMenuItemDivider(nativeNode);
+        GetArkUINodeModifiers()->getMenuModifier()->resetMenuItemDivider(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
 
-bool ParseFontOptions(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeHandle nativeNode, bool isJsView,
-    std::vector<Local<JSValueRef>>& args)
+ArkUINativeModuleValue MenuBridge::SetMenuFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, false);
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, false);
-    if (isJsView) {
-        Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-        if (secondArg->IsObject(vm)) {
-            auto obj = secondArg->ToObject(vm);
-            args[NUM_0] = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "size"));
-            args[NUM_1] = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "weight"));
-            args[NUM_2] = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "family"));
-            args[NUM_3] = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "style"));
-        } else {
-            menuModifier->resetFont(nativeNode);
-            return false;
-        }
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
+        GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontColor(nativeNode);
     } else {
-        args[NUM_0] = runtimeCallInfo->GetCallArgRef(NUM_1);
-        args[NUM_1] = runtimeCallInfo->GetCallArgRef(NUM_2);
-        args[NUM_2] = runtimeCallInfo->GetCallArgRef(NUM_3);
-        args[NUM_3] = runtimeCallInfo->GetCallArgRef(NUM_4);
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getMenuModifier()->setMenuFontColor(nativeNode, color.GetValue(), colorRawPtr);
     }
-    if (args[NUM_0]->IsUndefined() && args[NUM_1]->IsUndefined() && args[NUM_2]->IsUndefined() &&
-        args[NUM_3]->IsUndefined()) {
-        menuModifier->resetFont(nativeNode);
-        return false;
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue MenuBridge::ResetMenuFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> sizeArg = runtimeCallInfo->GetCallArgRef(1);   // 1: index of font size value
+    Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of font weight value
+    Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(3); // 3: index of font family value
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(4);  // 4: index of font style value
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (sizeArg->IsUndefined() && weightArg->IsUndefined() && familyArg->IsUndefined() && styleArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getMenuModifier()->resetFont(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
-    return true;
+
+    CalcDimension fontSize;
+    RefPtr<ResourceObject> fontSizeResObj;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, fontSizeResObj, false)) {
+        fontSize = Dimension(0.0);
+    }
+    std::string weight = DEFAULT_ERR_CODE;
+    if (weightArg->IsNumber()) {
+        weight = std::to_string(weightArg->Int32Value(vm));
+    } else {
+        if (!ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
+            weight = DEFAULT_ERR_CODE;
+        }
+    }
+
+    int32_t style = -1;
+    if (styleArg->IsNumber()) {
+        style = styleArg->Int32Value(vm);
+    }
+
+    std::string family;
+    RefPtr<ResourceObject> fontFamiliesResObj;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, familyArg, family, fontFamiliesResObj) || family.empty()) {
+        family = DEFAULT_ERR_CODE;
+    }
+    std::string fontSizeStr = fontSize.ToString();
+    std::string fontInfo =
+        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), family.c_str());
+    auto fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+    auto fontFamiliesRawPtr = AceType::RawPtr(fontFamiliesResObj);
+    GetArkUINodeModifiers()->getMenuModifier()->setFont(
+        nativeNode, fontInfo.c_str(), style, fontSizeRawPtr, fontFamiliesRawPtr);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue MenuBridge::ResetFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMenuModifier()->resetFont(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
 }
 
 void SetRadiusResObjs(std::vector<void*>& resObjs, RefPtr<ResourceObject>& topLeftResObj,
@@ -368,57 +255,17 @@ void SetRadiusUnits(std::vector<int32_t>& radiusUnits, CalcDimension topLeft, Ca
     radiusUnits.push_back(static_cast<int32_t>(bottomRight.Unit()));
 }
 
-bool ParseRadiusOptions(
-    EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, bool isJsView, std::vector<Local<JSValueRef>>& args)
-{
-    if (isJsView) {
-        Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-        if (secondArg->IsNumber() || secondArg->IsString(vm)) {
-            args[NUM_0] = secondArg;
-            args[NUM_1] = secondArg;
-            args[NUM_2] = secondArg;
-            args[NUM_3] = secondArg;
-            args[NUM_4] = panda::JSValueRef::False(vm);
-        }
-        if (secondArg->IsObject(vm)) {
-            auto secondObj = secondArg->ToObject(vm);
-            args[NUM_0] = secondObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "topLeft"));
-            args[NUM_1] = secondObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "topRight"));
-            args[NUM_2] = secondObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bottomLeft"));
-            args[NUM_3] = secondObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bottomRight"));
-            if (args[NUM_0]->IsUndefined() && args[NUM_1]->IsUndefined() && args[NUM_2]->IsUndefined() &&
-                args[NUM_3]->IsUndefined()) {
-                return false;
-            } else {
-                args[NUM_4] = panda::JSValueRef::True(vm);
-            }
-        }
-    } else {
-        args[NUM_0] = runtimeCallInfo->GetCallArgRef(NUM_1);
-        args[NUM_1] = runtimeCallInfo->GetCallArgRef(NUM_2);
-        args[NUM_2] = runtimeCallInfo->GetCallArgRef(NUM_3);
-        args[NUM_3] = runtimeCallInfo->GetCallArgRef(NUM_4);
-        args[NUM_4] = runtimeCallInfo->GetCallArgRef(NUM_5);
-    }
-    if (args[NUM_0]->IsUndefined() && args[NUM_1]->IsUndefined() && args[NUM_2]->IsUndefined() &&
-        args[NUM_3]->IsUndefined()) {
-        return false;
-    }
-    return true;
-}
-
-bool ParseRadius(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeHandle nativeNode, bool isJsView,
+bool ParseRadius(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeHandle nativeNode,
     RadiusParseParams& radiusParseParams)
 {
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, false);
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, false);
-    std::vector<Local<JSValueRef>> args(NUM_5, panda::JSValueRef::Undefined(vm));
-    // 0: index of top left value, 1: index of top right value, 2: index of bottom left value,
-    // 3: index of bottom right value, 4: check is object radius
-    if (!ParseRadiusOptions(vm, runtimeCallInfo, isJsView, args)) {
-        menuModifier->resetRadius(nativeNode);
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(1);     // 1: index of top left value
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(2);    // 2: index of top right value
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(3);  // 3: index of bottom left value
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(4); // 4: index of bottom right value
+    Local<JSValueRef> isObjectArgs = runtimeCallInfo->GetCallArgRef(5);    // 5: check is object radius
+    if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
+        bottomRightArgs->IsUndefined()) {
+        GetArkUINodeModifiers()->getMenuModifier()->resetRadius(nativeNode);
         return false;
     }
     CalcDimension topLeft;
@@ -429,29 +276,29 @@ bool ParseRadius(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeHan
     RefPtr<ResourceObject> topRightResObj;
     RefPtr<ResourceObject> bottomLeftResObj;
     RefPtr<ResourceObject> bottomRightResObj;
-    if (args[NUM_4]->IsBoolean() && !args[NUM_4]->ToBoolean(vm)->Value()) {
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, args[NUM_0], topLeft, true)) {
-            menuModifier->resetRadius(nativeNode);
+    if (isObjectArgs->IsBoolean() && !isObjectArgs->ToBoolean(vm)->Value()) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topLeftArgs, topLeft, true)) {
+            GetArkUINodeModifiers()->getMenuModifier()->resetRadius(nativeNode);
             return false;
         }
         if (LessNotEqual(topLeft.Value(), 0.0)) {
-            menuModifier->resetRadius(nativeNode);
+            GetArkUINodeModifiers()->getMenuModifier()->resetRadius(nativeNode);
             return false;
         }
         topRight = topLeft;
         bottomLeft = topLeft;
         bottomRight = topLeft;
     } else {
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, args[NUM_0], topLeft, topLeftResObj, true)) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topLeftArgs, topLeft, topLeftResObj, true)) {
             topLeft = CalcDimension(0.0, DimensionUnit::VP);
         }
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, args[NUM_1], topRight, topRightResObj, true)) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topRightArgs, topRight, topRightResObj, true)) {
             topRight = CalcDimension(0.0, DimensionUnit::VP);
         }
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, args[NUM_2], bottomLeft, bottomLeftResObj, true)) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomLeftArgs, bottomLeft, bottomLeftResObj, true)) {
             bottomLeft = CalcDimension(0.0, DimensionUnit::VP);
         }
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, args[NUM_3], bottomRight, bottomRightResObj, true)) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomRightArgs, bottomRight, bottomRightResObj, true)) {
             bottomRight = CalcDimension(0.0, DimensionUnit::VP);
         }
     }
@@ -460,140 +307,19 @@ bool ParseRadius(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeHan
     SetRadiusResObjs(radiusParseParams.resObjs, topLeftResObj, topRightResObj, bottomLeftResObj, bottomRightResObj);
     return true;
 }
-} // namespace
-
-ArkUINativeModuleValue MenuBridge::SetMenuFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    uint32_t argsNumber = runtimeCallInfo->GetArgsNumber();
-    bool isJsView = IsJsView(firstArg, vm);
-    if (isJsView && argsNumber < NUM_2) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-    Color color;
-    RefPtr<ResourceObject> colorResObj;
-    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
-        menuModifier->resetMenuFontColor(nativeNode);
-    } else {
-        auto colorRawPtr = AceType::RawPtr(colorResObj);
-        menuModifier->setMenuFontColor(nativeNode, color.GetValue(), colorRawPtr);
-    }
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue MenuBridge::ResetMenuFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-    menuModifier->resetMenuFontColor(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-    std::vector<Local<JSValueRef>> args(NUM_4, panda::JSValueRef::Undefined(vm));
-    // 0: index of font size value, 1: index of font weight value, 2: index of font family value,
-    // 3: index of font style value
-    bool isJsView = IsJsView(firstArg, vm);
-    CHECK_EQUAL_RETURN(
-        ParseFontOptions(vm, runtimeCallInfo, nativeNode, isJsView, args), false, panda::JSValueRef::Undefined(vm));
-
-    CalcDimension fontSize;
-    RefPtr<ResourceObject> fontSizeResObj;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, args[NUM_0], fontSize, fontSizeResObj, false)) {
-        fontSize = Dimension(0.0);
-    }
-    std::string weight = DEFAULT_ERR_CODE;
-    if (args[NUM_1]->IsNumber()) {
-        weight = std::to_string(args[NUM_1]->Int32Value(vm));
-    } else {
-        if (!ArkTSUtils::ParseJsString(vm, args[NUM_1], weight) || weight.empty()) {
-            weight = DEFAULT_ERR_CODE;
-        }
-    }
-
-    int32_t style = -1;
-    if (args[NUM_3]->IsNumber()) {
-        style = args[NUM_3]->Int32Value(vm);
-    }
-
-    std::string family;
-    RefPtr<ResourceObject> fontFamiliesResObj;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, args[NUM_2], family, fontFamiliesResObj) || family.empty()) {
-        family = DEFAULT_ERR_CODE;
-    }
-    std::string fontSizeStr = fontSize.ToString();
-    std::string fontInfo =
-        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), family.c_str());
-    auto fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
-    auto fontFamiliesRawPtr = AceType::RawPtr(fontFamiliesResObj);
-    menuModifier->setFont(nativeNode, fontInfo.c_str(), style, fontSizeRawPtr, fontFamiliesRawPtr);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue MenuBridge::ResetFont(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-    menuModifier->resetFont(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
 
 ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    bool isJsView = IsJsView(firstArg, vm);
-    uint32_t argsNumber = runtimeCallInfo->GetArgsNumber();
-    if (isJsView && argsNumber < NUM_2) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     RadiusParseParams radiusParseParams;
-    if (!ParseRadius(vm, runtimeCallInfo, nativeNode, isJsView, radiusParseParams)) {
+    if (!ParseRadius(vm, runtimeCallInfo, nativeNode, radiusParseParams)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    menuModifier->setRadius(nativeNode, radiusParseParams.radiusValues.data(), radiusParseParams.radiusUnits.data(),
-        radiusParseParams.resObjs.data(), COUNT_PROP);
+    GetArkUINodeModifiers()->getMenuModifier()->setRadius(nativeNode, radiusParseParams.radiusValues.data(),
+        radiusParseParams.radiusUnits.data(), radiusParseParams.resObjs.data(), COUNT_PROP);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -601,13 +327,9 @@ ArkUINativeModuleValue MenuBridge::ResetRadius(ArkUIRuntimeCallInfo* runtimeCall
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-    menuModifier->resetRadius(nativeNode);
+    GetArkUINodeModifiers()->getMenuModifier()->resetRadius(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -615,42 +337,16 @@ ArkUINativeModuleValue MenuBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallInf
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    uint32_t argsNumber = runtimeCallInfo->GetArgsNumber();
-    bool isJsView = IsJsView(firstArg, vm);
-    if (isJsView && argsNumber < NUM_2) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-
-    if (isJsView && widthArg->IsObject(vm)) {
-        auto obj = widthArg->ToObject(vm);
-        auto layoutPolicy = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
-        if (layoutPolicy->IsString(vm)) {
-            auto commonModifier = nodeModifiers->getCommonModifier();
-            CHECK_NULL_RETURN(commonModifier, panda::JSValueRef::Undefined(vm));
-            nativeNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            commonModifier->clearWidthOrHeight(nativeNode, true);
-            auto policy = CommonBridge::ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
-            commonModifier->setWidthLayoutPolicy(nativeNode, static_cast<ArkUI_Int32>(policy) - NUM_1);
-            return panda::JSValueRef::Undefined(vm);
-        }
-    }
-
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension width;
-    RefPtr<ResourceObject> resObj;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width, resObj, false)) {
-        menuModifier->resetMenuWidth(nativeNode);
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width, false)) {
+        GetArkUINodeModifiers()->getMenuModifier()->resetMenuWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto resPtr = AceType::RawPtr(resObj);
-    menuModifier->setMenuWidthWithResource(nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), resPtr);
+    GetArkUINodeModifiers()->getMenuModifier()->setMenuWidth(
+        nativeNode, width.Value(), static_cast<int32_t>(width.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -658,13 +354,9 @@ ArkUINativeModuleValue MenuBridge::ResetWidth(ArkUIRuntimeCallInfo* runtimeCallI
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-    menuModifier->resetMenuWidth(nativeNode);
+    GetArkUINodeModifiers()->getMenuModifier()->resetMenuWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -692,21 +384,18 @@ ArkUINativeModuleValue MenuBridge::SetSubMenuExpandingMode(ArkUIRuntimeCallInfo*
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsUndefined() || secondArg->IsNull()) {
+        GetArkUINodeModifiers()->getMenuModifier()->resetSubMenuExpandingMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (secondArg->IsNumber()) {
-        menuModifier->setSubMenuExpandingMode(nativeNode, secondArg->ToNumber(vm)->Value());
+        GetArkUINodeModifiers()->getMenuModifier()->setSubMenuExpandingMode(nativeNode,
+            secondArg->ToNumber(vm)->Value());
     } else {
-        bool isJsView = IsJsView(firstArg, vm);
-        if (!isJsView) {
-            menuModifier->resetSubMenuExpandingMode(nativeNode);
-        }
+        GetArkUINodeModifiers()->getMenuModifier()->resetSubMenuExpandingMode(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -715,13 +404,9 @@ ArkUINativeModuleValue MenuBridge::ResetSubMenuExpandingMode(ArkUIRuntimeCallInf
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-    menuModifier->resetSubMenuExpandingMode(nativeNode);
+    GetArkUINodeModifiers()->getMenuModifier()->resetSubMenuExpandingMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -729,24 +414,17 @@ ArkUINativeModuleValue MenuBridge::SetSubMenuExpandSymbol(ArkUIRuntimeCallInfo* 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
     if (secondArg->IsObject(vm)) {
         Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-        Framework::JSViewAbstract::SetSymbolOptionApply(runtimeCallInfo, symbolApply, info[NUM_1]);
-        menuModifier->setSubMenuExpandSymbol(nativeNode, reinterpret_cast<void*>(&symbolApply));
+        Framework::JSViewAbstract::SetSymbolOptionApply(runtimeCallInfo, symbolApply, info[1]);
+        GetArkUINodeModifiers()->getMenuModifier()->setSubMenuExpandSymbol(
+            nativeNode, reinterpret_cast<void*>(&symbolApply));
     } else {
-        bool isJsView = IsJsView(firstArg, vm);
-        if (!isJsView) {
-            menuModifier->resetSubMenuExpandSymbol(nativeNode);
-        }
+        GetArkUINodeModifiers()->getMenuModifier()->resetSubMenuExpandSymbol(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -755,13 +433,9 @@ ArkUINativeModuleValue MenuBridge::ResetSubMenuExpandSymbol(ArkUIRuntimeCallInfo
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-    menuModifier->resetSubMenuExpandSymbol(nativeNode);
+    GetArkUINodeModifiers()->getMenuModifier()->resetSubMenuExpandSymbol(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -770,28 +444,20 @@ ArkUINativeModuleValue MenuBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     uint32_t argsNumber = runtimeCallInfo->GetArgsNumber();
-    if (argsNumber != NUM_2) {
+    if (argsNumber != ARG_INDEX_2) {
         return panda::JSValueRef::Undefined(vm);
     }
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_0);
+    Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
     RefPtr<ResourceObject> fontSizeResObj;
-    bool isJsView = IsJsView(firstArg, vm);
     if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize, fontSizeResObj) || fontSize.IsNegative()) {
-        if (!isJsView) {
-            menuModifier->resetMenuFontSize(nativeNode);
-        }
-        return panda::JSValueRef::Undefined(vm);
+        GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontSize(nativeNode);
     } else {
         auto fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
-        menuModifier->setMenuFontSize(nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()), fontSizeRawPtr);
+        GetArkUINodeModifiers()->getMenuModifier()->setMenuFontSize(
+            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()), fontSizeRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -800,26 +466,10 @@ ArkUINativeModuleValue MenuBridge::ResetFontSize(ArkUIRuntimeCallInfo* runtimeCa
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-    menuModifier->resetMenuFontSize(nativeNode);
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue MenuBridge::CreateMenu(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto menuModifier = nodeModifiers->getMenuModifier();
-    CHECK_NULL_RETURN(menuModifier, panda::JSValueRef::Undefined(vm));
-    menuModifier->createMenu();
-    Framework::JSMenuTheme::ApplyTheme();
-    return panda::JSValueRef::Undefined(vm);
-}
 } // namespace OHOS::Ace::NG

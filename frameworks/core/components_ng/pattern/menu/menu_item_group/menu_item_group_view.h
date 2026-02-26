@@ -31,18 +31,12 @@ class ACE_FORCE_EXPORT MenuItemGroupView {
 public:
     // createMenuItem with custom
     static void Create();
-    static void Create(const RefPtr<UINode>& groupNode);
     static void SetHeader(const RefPtr<UINode>& header);
     static void SetHeader(const std::string& headerStr);
-    static void SetHeader(FrameNode* frameNode, const RefPtr<UINode>& header);
-    static void SetHeader(FrameNode* frameNode, const std::string& headerStr);
     static void SetFooter(const RefPtr<UINode>& footer);
     static void SetFooter(const std::string& footerStr);
-    static void SetFooter(FrameNode* frameNode, const RefPtr<UINode>& footer);
-    static void SetFooter(FrameNode* frameNode, const std::string& footerStr);
-    static void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemGroupStringType type);
     static void CreateWithStringResourceObj(
-        FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, MenuItemGroupStringType type);
+        const RefPtr<ResourceObject>& resObj, MenuItemGroupStringType type);
     static const std::string StringTypeToString(const MenuItemGroupStringType type);
 };
 } // namespace OHOS::Ace::NG

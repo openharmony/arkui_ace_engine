@@ -16,25 +16,18 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_FORM_MENU_ITEM_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_FORM_MENU_ITEM_H
 
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_menu_item.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSFormMenuItem : public JSContainerBase {
+class JSFormMenuItem : public JSMenuItem {
 public:
     static void JSBind(BindingTarget globalObj);
-    static void Create(const JSCallbackInfo& info);
     static void JsOnRequestPublishFormWithSnapshot(const JSCallbackInfo& info);
     static void OnClickParameterCheck(const JSCallbackInfo& info, bool& retFlag);
-
 private:
-    static void ParseMenuItemOptionsResource(
-        const JSCallbackInfo& info, const JSRef<JSObject>& menuItemObj, MenuItemProperties& menuItemProps);
-    static void AddMenuItemOptionsResource(const RefPtr<ResourceObject>& contentStrObj,
-        const RefPtr<ResourceObject>& labelStrObj, MenuItemProperties& menuItemProps);
-    static void RequestPublishFormWithSnapshot(
-        JSRef<JSVal> wantValue, const std::string& formBindingDataStr, RefPtr<JsFunction> jsCBFunc);
+    static void RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue,
+        const std::string& formBindingDataStr, RefPtr<JsFunction> jsCBFunc);
     static inline RefPtr<JsFunction> jsCBFunc_ = nullptr;
 };
 } // namespace OHOS::Ace::Framework

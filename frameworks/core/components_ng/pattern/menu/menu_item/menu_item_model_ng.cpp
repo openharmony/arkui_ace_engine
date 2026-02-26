@@ -613,14 +613,6 @@ void MenuItemModelNG::SetSelectedChangeEvent(std::function<void(bool)>&& selecte
     eventHub->SetSelectedChangeEvent(selectedChangeEvent);
 }
 
-void MenuItemModelNG::SetSelectedChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& selectedChangeEvent)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetSelectedChangeEvent(selectedChangeEvent);
-}
-
 void MenuItemModelNG::SetSelected(FrameNode* frameNode, bool isSelected)
 {
     CHECK_NULL_VOID(frameNode);

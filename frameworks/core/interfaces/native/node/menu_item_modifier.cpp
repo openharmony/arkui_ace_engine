@@ -14,12 +14,10 @@
  */
 #include "core/interfaces/native/node/menu_item_modifier.h"
 
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
 const char DELIMITER = '|';
 constexpr int32_t SIZE_OF_FONT_INFO = 3;
 static const char* ERR_CODE = "-1";
@@ -27,87 +25,30 @@ const std::string DEFAULT_FONT_WEIGHT = "normal";
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
-
-FrameNode* GetFrameNode(ArkUINodeHandle node)
-{
-    return node ? reinterpret_cast<FrameNode*>(node) : ViewStackProcessor::GetInstance()->GetMainFrameNode();
-}
-
-MenuItemProperties ConvertToMenuItemProperties(const ArkUIMenuItemOptions* options)
-{
-    MenuItemProperties props;
-    if (options->content) {
-        props.content = std::string(options->content);
-    }
-    if (options->labelInfo) {
-        props.labelInfo = std::string(options->labelInfo);
-    }
-    if (options->startIconSrc) {
-        props.startIcon = *reinterpret_cast<ImageSourceInfo*>(options->startIconSrc);
-    }
-    if (options->endIconSrc) {
-        props.endIcon = *reinterpret_cast<ImageSourceInfo*>(options->endIconSrc);
-    }
-    if (options->startSymbolApply) {
-        props.startApply = *reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(options->startSymbolApply);
-    }
-    if (options->endSymbolApply) {
-        props.endApply = *reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(options->endSymbolApply);
-    }
-    if (options->buildFunc) {
-        props.buildFunc = *reinterpret_cast<std::function<void()>*>(options->buildFunc);
-    }
-    CHECK_EQUAL_RETURN(SystemProperties::ConfigChangePerform(), false, props);
-    if (options->contentResObj) {
-        auto* resObj = reinterpret_cast<ResourceObject*>(options->contentResObj);
-        auto contentResObj = AceType::Claim(resObj);
-        props.AddResource(
-            "MenuItem.Content", contentResObj, [](const RefPtr<ResourceObject>& resObj, MenuItemProperties& menuProps) {
-                std::string contentStr;
-                if (ResourceParseUtils::ParseResString(resObj, contentStr)) {
-                    menuProps.content = contentStr;
-                }
-            });
-    }
-    if (options->labelResObj) {
-        auto* resObj = reinterpret_cast<ResourceObject*>(options->labelResObj);
-        auto labelResObj = AceType::Claim(resObj);
-        props.AddResource(
-            "MenuItem.Label", labelResObj, [](const RefPtr<ResourceObject>& resObj, MenuItemProperties& menuProps) {
-                std::string labelInfoStr;
-                if (ResourceParseUtils::ParseResString(resObj, labelInfoStr)) {
-                    menuProps.labelInfo = labelInfoStr;
-                }
-            });
-    }
-    return props;
-}
-} // namespace
-
 void SetMenuItemSelected(ArkUINodeHandle node, ArkUI_Bool value)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelected(frameNode, value);
 }
 
 void ResetMenuItemSelected(ArkUINodeHandle node)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelected(frameNode, false);
 }
 
 void SetLabelFontColor(ArkUINodeHandle node, const uint32_t color)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetLabelFontColor(frameNode, Color(color));
 }
 
 void SetLabelFontColorWithResource(ArkUINodeHandle node, const uint32_t color, void* colorRawPtr)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetLabelFontColor(frameNode, Color(color));
     if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
@@ -119,7 +60,7 @@ void SetLabelFontColorWithResource(ArkUINodeHandle node, const uint32_t color, v
 
 void ResetLabelFontColor(ArkUINodeHandle node)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<Color> color = std::nullopt;
     MenuItemModelNG::SetLabelFontColor(frameNode, color);
@@ -131,14 +72,14 @@ void ResetLabelFontColor(ArkUINodeHandle node)
 
 void SetContentFontColor(ArkUINodeHandle node, const uint32_t color)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetFontColor(frameNode, Color(color));
 }
 
 void SetContentFontColorWithResource(ArkUINodeHandle node, const uint32_t color, void* colorRawPtr)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetFontColor(frameNode, Color(color));
     if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
@@ -150,7 +91,7 @@ void SetContentFontColorWithResource(ArkUINodeHandle node, const uint32_t color,
 
 void ResetContentFontColor(ArkUINodeHandle node)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<Color> color = std::nullopt;
     MenuItemModelNG::SetFontColor(frameNode, color);
@@ -162,7 +103,7 @@ void ResetContentFontColor(ArkUINodeHandle node)
 
 void SetLabelFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     std::vector<std::string> res;
@@ -196,10 +137,10 @@ void SetLabelFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal)
     }
 }
 
-void SetLabelFontWithResource(
-    ArkUINodeHandle node, const char* fontInfo, int32_t styleVal, void* fontSizeRawPtr, void* fontFamilyRawPtr)
+void SetLabelFontWithResource(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal, void* fontSizeRawPtr,
+    void* fontFamilyRawPtr)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     std::vector<std::string> res;
@@ -247,7 +188,7 @@ void SetLabelFontWithResource(
 
 void ResetLabelFont(ArkUINodeHandle node)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension fontSize;
     FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
@@ -257,7 +198,8 @@ void ResetLabelFont(ArkUINodeHandle node)
     MenuItemModelNG::SetLabelFontStyle(frameNode, DEFAULT_FONT_STYLE);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> nullResObj = nullptr;
-        MenuItemModelNG::CreateWithDimensionFpResourceObj(frameNode, nullResObj, MenuItemFontSizeType::LABEL_FONT_SIZE);
+        MenuItemModelNG::CreateWithDimensionFpResourceObj(
+            frameNode, nullResObj, MenuItemFontSizeType::LABEL_FONT_SIZE);
         MenuItemModelNG::CreateWithFontFamilyResourceObj(
             frameNode, nullResObj, MenuItemFontFamilyType::LABEL_FONT_FAMILY);
     }
@@ -265,7 +207,7 @@ void ResetLabelFont(ArkUINodeHandle node)
 
 void SetContentFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     std::vector<std::string> res;
@@ -302,7 +244,7 @@ void SetContentFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal
 void SetContentFontWithResource(
     ArkUINodeHandle node, const char* fontInfo, int32_t styleVal, void* fontSizeRawPtr, void* fontFamilyRawPtr)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     std::vector<std::string> res;
@@ -350,7 +292,7 @@ void SetContentFontWithResource(
 
 void ResetContentFont(ArkUINodeHandle node)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension fontSize;
     FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
@@ -367,24 +309,24 @@ void ResetContentFont(ArkUINodeHandle node)
 
 void SetSelectIcon(ArkUINodeHandle node, ArkUI_Bool showIcon)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelectIcon(frameNode, showIcon);
 }
 
 void ResetSelectIcon(ArkUINodeHandle node)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelectIcon(frameNode, false);
 }
 
 void SetSelectIconSrc(ArkUINodeHandle node, const char* iconSrc)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string iconPathStr;
-    if (iconSrc) {
+    if (iconSrc != nullptr) {
         iconPathStr = iconSrc;
     }
     MenuItemModelNG::SetSelectIconSrc(frameNode, iconPathStr);
@@ -392,7 +334,7 @@ void SetSelectIconSrc(ArkUINodeHandle node, const char* iconSrc)
 
 void SetSelectIconSrcWithResource(ArkUINodeHandle node, const char* iconSrc, void* iconRawPtr)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SetSelectIconSrc(node, iconSrc);
     if (SystemProperties::ConfigChangePerform() && iconRawPtr) {
@@ -404,7 +346,7 @@ void SetSelectIconSrcWithResource(ArkUINodeHandle node, const char* iconSrc, voi
 
 void ResetSelectIconSrc(ArkUINodeHandle node)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string iconPathStr;
     MenuItemModelNG::SetSelectIconSrc(frameNode, iconPathStr);
@@ -416,7 +358,7 @@ void ResetSelectIconSrc(ArkUINodeHandle node)
 
 void SetSelectIconSymbol(ArkUINodeHandle node, void* symbolFunction)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (symbolFunction) {
         auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction);
@@ -428,7 +370,7 @@ void SetSelectIconSymbol(ArkUINodeHandle node, void* symbolFunction)
 
 void ResetSelectIconSymbol(ArkUINodeHandle node)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string iconPathStr;
     MenuItemModelNG::SetSelectIconSymbol(frameNode, nullptr);
@@ -436,7 +378,7 @@ void ResetSelectIconSymbol(ArkUINodeHandle node)
 
 void SetMenuItemOnChange(ArkUINodeHandle node, void* callback)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
         auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
@@ -448,84 +390,39 @@ void SetMenuItemOnChange(ArkUINodeHandle node, void* callback)
 
 void ResetMenuItemOnChange(ArkUINodeHandle node)
 {
-    FrameNode* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string iconPathStr;
     MenuItemModelNG::SetOnChange(frameNode, nullptr);
 }
 
-ArkUINodeHandle CreateMenuItem(ArkUI_Int32 nodeId, ArkUI_Bool enable, ArkUI_CharPtr value)
-{
-    OptionParam param;
-    MenuParam menuParam;
-    param.enabled = enable;
-    param.value = value;
-    auto frameNode = MenuItemModelNG::CreateMenuItem(std::move(param), menuParam);
-    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
-}
-
-void CreateWithCustomNode(ArkUINodeHandle customNode)
-{
-    RefPtr<UINode> uinode = nullptr;
-    if (customNode) {
-        uinode = AceType::Claim(reinterpret_cast<UINode*>(customNode));
-    }
-
-    MenuItemModelNG menuItemModel;
-    menuItemModel.Create(uinode);
-}
-
-void CreateWithOptions(const ArkUIMenuItemOptions* options)
-{
-    MenuItemProperties menuItemProps;
-    if (options) {
-        menuItemProps = ConvertToMenuItemProperties(options);
-    }
-    MenuItemModelNG menuItemModel;
-    menuItemModel.Create(menuItemProps);
-}
-
-void SetSelectedChangeEvent(ArkUINodeHandle node, std::function<void(bool)>&& selectedChangeEvent)
-{
-    FrameNode* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    MenuItemModelNG::SetSelectedChangeEvent(frameNode, std::move(selectedChangeEvent));
-}
-
 namespace NodeModifier {
 const ArkUIMenuItemModifier* GetMenuItemModifier()
 {
-    static bool isCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
-    if (isCurrentUseNewPipeline) {
-        CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-        static const ArkUIMenuItemModifier modifier = {
-            .createWithCustomNode = CreateWithCustomNode,
-            .createWithOptions = CreateWithOptions,
-            .setMenuItemSelected = SetMenuItemSelected,
-            .setSelectedChangeEvent = SetSelectedChangeEvent,
-            .resetMenuItemSelected = ResetMenuItemSelected,
-            .setLabelFontColor = SetLabelFontColorWithResource,
-            .resetLabelFontColor = ResetLabelFontColor,
-            .setContentFontColor = SetContentFontColorWithResource,
-            .resetContentFontColor = ResetContentFontColor,
-            .setLabelFont = SetLabelFontWithResource,
-            .resetLabelFont = ResetLabelFont,
-            .setContentFont = SetContentFontWithResource,
-            .resetContentFont = ResetContentFont,
-            .setSelectIcon = SetSelectIcon,
-            .resetSelectIcon = ResetSelectIcon,
-            .setSelectIconSrc = SetSelectIconSrcWithResource,
-            .resetSelectIconSrc = ResetSelectIconSrc,
-            .setSelectIconSymbol = SetSelectIconSymbol,
-            .resetSelectIconSymbol = ResetSelectIconSymbol,
-            .setOnChange = SetMenuItemOnChange,
-            .resetOnChange = ResetMenuItemOnChange,
-        };
-        CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-        return &modifier;
-    } else {
-        return nullptr;
-    }
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIMenuItemModifier modifier = {
+        .setMenuItemSelected = SetMenuItemSelected,
+        .resetMenuItemSelected = ResetMenuItemSelected,
+        .setLabelFontColor = SetLabelFontColorWithResource,
+        .resetLabelFontColor = ResetLabelFontColor,
+        .setContentFontColor = SetContentFontColorWithResource,
+        .resetContentFontColor = ResetContentFontColor,
+        .setLabelFont = SetLabelFontWithResource,
+        .resetLabelFont = ResetLabelFont,
+        .setContentFont = SetContentFontWithResource,
+        .resetContentFont = ResetContentFont,
+        .setSelectIcon = SetSelectIcon,
+        .resetSelectIcon = ResetSelectIcon,
+        .setSelectIconSrc = SetSelectIconSrcWithResource,
+        .resetSelectIconSrc = ResetSelectIconSrc,
+        .setSelectIconSymbol = SetSelectIconSymbol,
+        .resetSelectIconSymbol = ResetSelectIconSymbol,
+        .setOnChange = SetMenuItemOnChange,
+        .resetOnChange = ResetMenuItemOnChange,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
+    return &modifier;
 }
 
 const CJUIMenuItemModifier* GetCJUIMenuItemModifier()
