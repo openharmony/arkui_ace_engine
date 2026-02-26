@@ -41,39 +41,39 @@
       level: TestCaseLevel.LEVEL0
     }, async () => {
       console.log("alphabetIndexerAlignStyleTestDemo running")
-      let driver: Tester = Tester.create()
-      let alphabetIndexer1: Component =
+      const  driver: Tester = Tester.create()
+      const  alphabetIndexer1: Component =
         await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle1').enabled(true))
-      let alphabetIndexer2: Component =
+      const  alphabetIndexer2: Component =
         await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle2').enabled(true))
-      let alphabetIndexer3: Component =
+      const  alphabetIndexer3: Component =
         await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle3').enabled(true))
-      let alphabetIndexer4: Component =
+      const  alphabetIndexer4: Component =
         await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle4').enabled(true))
-      let alphabetIndexer5: Component =
+      const  alphabetIndexer5: Component =
         await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle5').enabled(true))
-      let button: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerAlignStyle').enabled(true))
+      const  button: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerAlignStyle').enabled(true))
   
-      let alignStyle1: string = await alphabetIndexer2.getInspectorInfo()
+      const  alignStyle1: string = await alphabetIndexer2.getInspectorInfo()
       assertFalse(JSON.parse(alignStyle1).$attrs.alignStyle.value == undefined)
       assertEqual(JSON.parse(alignStyle1).$attrs.alignStyle.value, 'IndexerAlign.Right')
       assertEqual(JSON.parse(alignStyle1).$attrs.alignStyle.offset, $r('app.string.length'))
-      let alignStyle2: string = await alphabetIndexer3.getInspectorInfo()
+      const  alignStyle2: string = await alphabetIndexer3.getInspectorInfo()
       assertEqual(JSON.parse(alignStyle2).$attrs.alignStyle.value, 'IndexerAlign.Left')
       assertEqual(JSON.parse(alignStyle2).$attrs.alignStyle.offset, 60)
-      let alignStyle3: string = await alphabetIndexer4.getInspectorInfo()
+      const  alignStyle3: string = await alphabetIndexer4.getInspectorInfo()
       assertEqual(JSON.parse(alignStyle3).$attrs.alignStyle.value, 'IndexerAlign.Left')
       assertEqual(JSON.parse(alignStyle3).$attrs.alignStyle.offset, 10)
-      let alignStyle4: string = await alphabetIndexer5.getInspectorInfo()
+      const  alignStyle4: string = await alphabetIndexer5.getInspectorInfo()
       assertEqual(JSON.parse(alignStyle4).$attrs.alignStyle.value, 'IndexerAlign.Left')
       assertEqual(JSON.parse(alignStyle4).$attrs.alignStyle.offset, 100)
   
-      let alignStyle5: string = await alphabetIndexer1.getInspectorInfo()
+      const  alignStyle5: string = await alphabetIndexer1.getInspectorInfo()
       assertEqual(JSON.parse(alignStyle5).$attrs.alignStyle.value, 'IndexerAlign.Left')
       assertEqual(JSON.parse(alignStyle5).$attrs.alignStyle.offset, 10)
   
       await button.tap()
-      let alignStyle6: string = await alphabetIndexer1.getInspectorInfo()
+      const  alignStyle6: string = await alphabetIndexer1.getInspectorInfo()
       assertEqual(JSON.parse(alignStyle6).$attrs.alignStyle.value, 'IndexerAlign.Left')
       assertEqual(JSON.parse(alignStyle6).$attrs.alignStyle.offset, '100px')
     }, 0)
@@ -97,39 +97,39 @@ export default async function alphabetIndexerAlignStyleTest() {
     level: TestCaseLevel.LEVEL0
   }, async () => {
     console.log("alphabetIndexerAlignStyleTestDemo running")
-    let driver: Tester = Tester.create()
-    let alphabetIndexer1: Component =
+    const  driver: Tester = Tester.create()
+    const  alphabetIndexer1: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle1').enabled(true))
-    let alphabetIndexer2: Component =
+    const  alphabetIndexer2: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle2').enabled(true))
-    let alphabetIndexer3: Component =
+    const  alphabetIndexer3: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle3').enabled(true))
-    let alphabetIndexer4: Component =
+    const  alphabetIndexer4: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle4').enabled(true))
-    let alphabetIndexer5: Component =
+    const  alphabetIndexer5: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerAlignStyle5').enabled(true))
-    let button: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerAlignStyle').enabled(true))
+    const  button: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerAlignStyle').enabled(true))
 
-    let alignStyle1: string = await alphabetIndexer2.getInspectorInfo()
+    const  alignStyle1: string = await alphabetIndexer2.getInspectorInfo()
     assertFalse(JSON.parse(alignStyle1).$attrs.alignStyle.value == undefined)
     assertEqual(JSON.parse(alignStyle1).$attrs.alignStyle.value, 'IndexerAlign.Right')
     assertEqual(JSON.parse(alignStyle1).$attrs.alignStyle.offset, $r('app.string.length'))
-    let alignStyle2: string = await alphabetIndexer3.getInspectorInfo()
+    const  alignStyle2: string = await alphabetIndexer3.getInspectorInfo()
     assertEqual(JSON.parse(alignStyle2).$attrs.alignStyle.value, 'IndexerAlign.Left')
     assertEqual(JSON.parse(alignStyle2).$attrs.alignStyle.offset, 60)
-    let alignStyle3: string = await alphabetIndexer4.getInspectorInfo()
+    const  alignStyle3: string = await alphabetIndexer4.getInspectorInfo()
     assertEqual(JSON.parse(alignStyle3).$attrs.alignStyle.value, 'IndexerAlign.Left')
     assertEqual(JSON.parse(alignStyle3).$attrs.alignStyle.offset, 10)
-    let alignStyle4: string = await alphabetIndexer5.getInspectorInfo()
+    const  alignStyle4: string = await alphabetIndexer5.getInspectorInfo()
     assertEqual(JSON.parse(alignStyle4).$attrs.alignStyle.value, 'IndexerAlign.Left')
     assertEqual(JSON.parse(alignStyle4).$attrs.alignStyle.offset, 100)
 
-    let alignStyle5: string = await alphabetIndexer1.getInspectorInfo()
+    const  alignStyle5: string = await alphabetIndexer1.getInspectorInfo()
     assertEqual(JSON.parse(alignStyle5).$attrs.alignStyle.value, 'IndexerAlign.Left')
     assertEqual(JSON.parse(alignStyle5).$attrs.alignStyle.offset, 10)
 
     await button.tap()
-    let alignStyle6: string = await alphabetIndexer1.getInspectorInfo()
+    const  alignStyle6: string = await alphabetIndexer1.getInspectorInfo()
     assertEqual(JSON.parse(alignStyle6).$attrs.alignStyle.value, 'IndexerAlign.Left')
     assertEqual(JSON.parse(alignStyle6).$attrs.alignStyle.offset, '100px')
   }, 0)
@@ -155,38 +155,38 @@ export default async function alphabetIndexerAutoCollapseTest() {
     level: TestCaseLevel.LEVEL0
   }, async () => {
     console.log("alphabetIndexerAutoCollapseTestDemo running")
-    let driver: Tester = Tester.create()
-    let alphabetIndexer1: Component =
+    const  driver: Tester = Tester.create()
+    const  alphabetIndexer1: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerAutoCollapse1').enabled(true))
-    let alphabetIndexer2: Component =
+    const  alphabetIndexer2: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerAutoCollapse2').enabled(true))
-    let alphabetIndexer3: Component =
+    const  alphabetIndexer3: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerAutoCollapse3').enabled(true))
-    let alphabetIndexer4: Component =
+    const  alphabetIndexer4: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerAutoCollapse4').enabled(true))
-    let alphabetIndexer5: Component =
+    const  alphabetIndexer5: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerAutoCollapse5').enabled(true))
-    let alphabetIndexer6: Component =
+    const  alphabetIndexer6: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerAutoCollapse6').enabled(true))
-    let button: Component =
+    const  button: Component =
       await driver.findComponent(Matcher.create().text('AlphabetIndexerAutoCollapse').enabled(true))
 
-    let autoCollapse1: string = await alphabetIndexer2.getInspectorInfo()
+    const  autoCollapse1: string = await alphabetIndexer2.getInspectorInfo()
     assertTrue(JSON.parse(autoCollapse1).$attrs.autoCollapse)
-    let autoCollapse2: string = await alphabetIndexer3.getInspectorInfo()
+    const  autoCollapse2: string = await alphabetIndexer3.getInspectorInfo()
     assertTrue(JSON.parse(autoCollapse2).$attrs.autoCollapse)
-    let autoCollapse3: string = await alphabetIndexer4.getInspectorInfo()
+    const  autoCollapse3: string = await alphabetIndexer4.getInspectorInfo()
     assertTrue(JSON.parse(autoCollapse3).$attrs.autoCollapse)
-    let autoCollapse4: string = await alphabetIndexer5.getInspectorInfo()
+    const  autoCollapse4: string = await alphabetIndexer5.getInspectorInfo()
     assertTrue(JSON.parse(autoCollapse4).$attrs.autoCollapse)
-    let autoCollapse5: string = await alphabetIndexer6.getInspectorInfo()
+    const  autoCollapse5: string = await alphabetIndexer6.getInspectorInfo()
     assertTrue(JSON.parse(autoCollapse5).$attrs.autoCollapse)
 
-    let autoCollapse6: string = await alphabetIndexer1.getInspectorInfo()
+    const  autoCollapse6: string = await alphabetIndexer1.getInspectorInfo()
     assertTrue(JSON.parse(autoCollapse6).$attrs.autoCollapse)
 
     await button.tap()
-    let autoCollapse7: string = await alphabetIndexer1.getInspectorInfo()
+    const  autoCollapse7: string = await alphabetIndexer1.getInspectorInfo()
     assertFalse(JSON.parse(autoCollapse7).$attrs.autoCollapse)
   }, 0)
 }
@@ -208,24 +208,24 @@ export default async function alphabetIndexerColorTest() {
     level: TestCaseLevel.LEVEL0
   }, async () => {
     console.log("alphabetIndexerColorTestDemo running")
-    let driver: Tester = Tester.create()
-    let alphabetIndexer1: Component =
+    const  driver: Tester = Tester.create()
+    const  alphabetIndexer1: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerColor1').enabled(true))
-    let alphabetIndexer2: Component =
+    const  alphabetIndexer2: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerColor2').enabled(true))
-    let button1: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerColor1').enabled(true))
-    let button2: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerColor2').enabled(true))
+    const  button1: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerColor1').enabled(true))
+    const  button2: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerColor2').enabled(true))
 
-    let color1: string = await alphabetIndexer1.getInspectorInfo()
+    const  color1: string = await alphabetIndexer1.getInspectorInfo()
     assertEqual(JSON.parse(color1).$attrs.color.toLowerCase(), Color.Gray)
 
-    let color2: string = await alphabetIndexer2.getInspectorInfo()
+    const  color2: string = await alphabetIndexer2.getInspectorInfo()
     assertEqual(JSON.parse(color2).$attrs.color, '#FF808080')
     await button1.tap()
-    let color3: string = await alphabetIndexer2.getInspectorInfo()
+    const  color3: string = await alphabetIndexer2.getInspectorInfo()
     assertEqual(JSON.parse(color3).$attrs.color, '#FFFFA500')
     await button2.tap()
-    let color4: string = await alphabetIndexer2.getInspectorInfo()
+    const  color4: string = await alphabetIndexer2.getInspectorInfo()
     assertEqual(JSON.parse(color4).$attrs.color, $r('sys.color.ohos_id_color_text_hyperlink'))
   }, 0)
 }
@@ -250,45 +250,45 @@ export default async function alphabetIndexerFontTest() {
     level: TestCaseLevel.LEVEL0
   }, async () => {
     console.log("alphabetIndexerFontTestDemo running")
-    let driver: Tester = Tester.create()
-    let alphabetIndexer1: Component =
+    const  driver: Tester = Tester.create()
+    const  alphabetIndexer1: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerFont1').enabled(true))
-    let alphabetIndexer2: Component =
+    const  alphabetIndexer2: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerFont2').enabled(true))
-    let alphabetIndexer3: Component =
+    const  alphabetIndexer3: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerFont3').enabled(true))
-    let alphabetIndexer4: Component =
+    const  alphabetIndexer4: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerFont4').enabled(true))
-    let alphabetIndexer5: Component =
+    const  alphabetIndexer5: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerFont5').enabled(true))
-    let alphabetIndexer6: Component =
+    const  alphabetIndexer6: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerFont6').enabled(true))
-    let alphabetIndexer7: Component =
+    const  alphabetIndexer7: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerFont7').enabled(true))
-    let button1: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerFont1').enabled(true))
+    const  button1: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerFont1').enabled(true))
 
-    let font1: string = await alphabetIndexer2.getInspectorInfo()
+    const  font1: string = await alphabetIndexer2.getInspectorInfo()
     assertEqual(JSON.parse(font1).$attrs.font.fontWeight, 'FontWeight.Normal')
-    let font2: string = await alphabetIndexer3.getInspectorInfo()
+    const  font2: string = await alphabetIndexer3.getInspectorInfo()
     assertEqual(JSON.parse(font2).$attrs.font.fontSize, $r('app.string.font'))
     assertEqual(JSON.parse(font2).$attrs.font.fontWeight, 'FontWeight.Lighter')
-    let font3: string = await alphabetIndexer4.getInspectorInfo()
+    const  font3: string = await alphabetIndexer4.getInspectorInfo()
     assertEqual(JSON.parse(font3).$attrs.font.fontWeight, 'FontWeight.Medium')
-    let font4: string = await alphabetIndexer5.getInspectorInfo()
+    const  font4: string = await alphabetIndexer5.getInspectorInfo()
     assertEqual(JSON.parse(font4).$attrs.font.fontWeight, 'FontWeight.Bold')
-    let font5: string = await alphabetIndexer6.getInspectorInfo()
+    const  font5: string = await alphabetIndexer6.getInspectorInfo()
     assertEqual(JSON.parse(font5).$attrs.font.fontWeight, 'FontWeight.Regular')
-    let font6: string = await alphabetIndexer7.getInspectorInfo()
+    const  font6: string = await alphabetIndexer7.getInspectorInfo()
     assertEqual(JSON.parse(font6).$attrs.font.fontWeight, 'FontWeight.Bolder')
 
-    let font7: string = await alphabetIndexer1.getInspectorInfo()
+    const  font7: string = await alphabetIndexer1.getInspectorInfo()
     assertEqual(JSON.parse(font7).$attrs.font.fontSize, '8.00fp')
     assertEqual(JSON.parse(font7).$attrs.font.fontWeight, '200')
     assertEqual(JSON.parse(font7).$attrs.font.fontFamily, 'Arial')
     assertEqual(JSON.parse(font7).$attrs.font.fontStyle, 'FontStyle::NORMAL')
 
     await button1.tap()
-    let font8: string = await alphabetIndexer1.getInspectorInfo()
+    const  font8: string = await alphabetIndexer1.getInspectorInfo()
     assertEqual(JSON.parse(font8).$attrs.font.fontSize, '10.00px')
     assertEqual(JSON.parse(font8).$attrs.font.fontWeight, '200')
     assertEqual(JSON.parse(font8).$attrs.font.fontFamily, 'TESTFONTRawFile')
@@ -310,16 +310,16 @@ export default async function alphabetIndexerItemSizeTest() {
     level: TestCaseLevel.LEVEL0
   }, async () => {
     console.log("alphabetIndexerItemSizeTestDemo running")
-    let driver: Tester = Tester.create()
-    let alphabetIndexer: Component =
+    const  driver: Tester = Tester.create()
+    const  alphabetIndexer: Component =
       await driver.findComponent(Matcher.create().id('alphabetIndexerItemSize').enabled(true))
-    let button: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerItemSize').enabled(true))
+    const  button: Component = await driver.findComponent(Matcher.create().text('AlphabetIndexerItemSize').enabled(true))
 
-    let itemSize1: string = await alphabetIndexer.getInspectorInfo()
+    const  itemSize1: string = await alphabetIndexer.getInspectorInfo()
     assertEqual(JSON.parse(itemSize1).$attrs.itemSize, '32.00vp')
 
     await button.tap()
-    let itemSize2: string = await alphabetIndexer.getInspectorInfo()
+    const  itemSize2: string = await alphabetIndexer.getInspectorInfo()
     assertEqual(JSON.parse(itemSize2).$attrs.itemSize, '100.00px')
   }, 0)
 }
