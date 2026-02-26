@@ -20702,6 +20702,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void RequestPasswordAutoFillImpl(Ark_WebContextMenuResult peer)
     {
     }
+    void SaveImageImpl(Ark_WebContextMenuResult peer)
+    {
+    }
     } // WebContextMenuResultAccessor
     namespace WebKeyboardControllerAccessor {
     void DestroyPeerImpl(Ark_WebKeyboardController peer)
@@ -24927,6 +24930,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebContextMenuResultAccessor::UndoImpl,
             WebContextMenuResultAccessor::PasteAndMatchStyleImpl,
             WebContextMenuResultAccessor::RequestPasswordAutoFillImpl,
+            WebContextMenuResultAccessor::SaveImageImpl,
         };
         return &WebContextMenuResultAccessorImpl;
     }

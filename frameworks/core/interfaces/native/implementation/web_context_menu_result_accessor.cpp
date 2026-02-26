@@ -18,6 +18,10 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+#ifdef WEB_SUPPORTED
+#include "arkweb_utils.h"
+#endif
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuResultAccessor {
 void DestroyPeerImpl(Ark_WebContextMenuResult peer)
@@ -82,6 +86,14 @@ void RequestPasswordAutoFillImpl(Ark_WebContextMenuResult peer)
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->RequestPasswordAutoFill();
 }
+void SaveImageImpl(Ark_WebContextMenuResult peer)
+{
+#ifdef WEB_SUPPORTED
+    RETURN_IF_CALLING_FROM_M114();
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->SaveImage();
+#endif
+}
 } // WebContextMenuResultAccessor
 const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccessor()
 {
@@ -99,6 +111,7 @@ const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccess
         WebContextMenuResultAccessor::UndoImpl,
         WebContextMenuResultAccessor::PasteAndMatchStyleImpl,
         WebContextMenuResultAccessor::RequestPasswordAutoFillImpl,
+        WebContextMenuResultAccessor::SaveImageImpl,
     };
     return &WebContextMenuResultAccessorImpl;
 }
