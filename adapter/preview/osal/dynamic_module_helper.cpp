@@ -82,20 +82,20 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Checkbox", "checkbox"},
         {"CheckboxGroup", "checkbox"},
         {"Gauge", "gauge"},
-        {"Sidebar", "sidebar"},
         {"Rating", "rating"},
         { "ColumnSplit", "linearsplit" },
         { "RowSplit", "linearsplit" },
+        { "FolderStack", "folderstack" },
         { "Stepper", "stepper" },
         { "StepperItem", "stepper" },
+        {"Sidebar", "sidebar"},
+        {"Indexer", "indexer"},
         {"Radio", "radio"},
         { "Slider", "slider" },
-        { "FolderStack", "folderstack" },
         { "TimePicker", "timepicker" },
         { "TimePickerDialog", "timepicker" },
         {"CalendarPicker", "calendarpicker"},
         {"CalendarPickerDialog", "calendarpicker"},
-        {"Indexer", "indexer"},
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);
