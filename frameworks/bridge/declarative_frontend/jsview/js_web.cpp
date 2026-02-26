@@ -2166,7 +2166,6 @@ public:
 
     void SaveImage(const JSCallbackInfo& args)
     {
-        RETURN_IF_CALLING_FROM_M114();
         if (result_) {
             result_->SaveImage();
         }

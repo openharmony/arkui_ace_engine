@@ -785,6 +785,7 @@ void ContextMenuResultOhos::CopyImage() const
 
 void ContextMenuResultOhos::SaveImage() const
 {
+    RETURN_IF_CALLING_FROM_M114();
     if (callback_) {
         callback_->Continue(CI_IMAGE_SAVE, EF_NONE);
     }

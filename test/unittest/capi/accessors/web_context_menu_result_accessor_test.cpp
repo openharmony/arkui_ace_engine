@@ -137,4 +137,19 @@ HWTEST_F(WebContextMenuResultAccessorTest, selectAllTest, TestSize.Level1)
     accessor_->selectAll(peer_);
 }
 
+/**
+ * @tc.name: saveImageTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuResultAccessorTest, saveImageTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->saveImage, nullptr);
+
+    EXPECT_CALL(*mockHandler_, SaveImage()).Times(3);
+    accessor_->saveImage(peer_);
+    accessor_->saveImage(peer_);
+    accessor_->saveImage(peer_);
+}
+
 } // namespace OHOS::Ace::NG

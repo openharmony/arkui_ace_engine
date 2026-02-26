@@ -107,10 +107,15 @@ class MockContextMenuResult : public ContextMenuResult {
 public:
     MOCK_METHOD(void, Cancel, (), (const));
     MOCK_METHOD(void, CopyImage, (), (const));
+    MOCK_METHOD(void, SaveImage, (), (const));
     MOCK_METHOD(void, Copy, (), (const));
     MOCK_METHOD(void, Paste, (), (const));
     MOCK_METHOD(void, Cut, (), (const));
     MOCK_METHOD(void, SelectAll, (), (const));
+    MOCK_METHOD(void, Undo, (), (const));
+    MOCK_METHOD(void, Redo, (), (const));
+    MOCK_METHOD(void, PasteAndMatchStyle, (), (const));
+    MOCK_METHOD(void, RequestPasswordAutoFill, (), (const));
 };
 
 class MockSslErrorResult : public SslErrorResult {
