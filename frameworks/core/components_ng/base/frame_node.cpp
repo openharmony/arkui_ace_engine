@@ -3157,7 +3157,7 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
         if (pattern) {
             int32_t id = pattern->GetPatternInstanceId();
             int32_t contextInstanceId = context->GetInstanceId();
-            if (id != contextInstanceId) {
+            if (id != INSTANCE_ID_UNDEFINED && id != contextInstanceId) {
                 TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN,
                     "MarkNeedRender GetPatternInstanceId:%{public}d, ContextInstanceId:%{public}d"
                     "FrameNodeInstanceId:%{public}d", id, contextInstanceId, GetInstanceId());
