@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/pipeline/base/element_register.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
@@ -45,6 +46,27 @@ const std::string NAVIGATION_TITLE = "NavigationTestNg";
 const std::string TEST_TAG = "test";
 constexpr float DEFAULT_ROOT_WIDTH = 480.f;
 constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
+
+class PlatformVersionGuard {
+public:
+    explicit PlatformVersionGuard(const RefPtr<MockPipelineContext>& context) : context_(context)
+    {
+        if (context_) {
+            oldVersion_ = context_->GetMinPlatformVersion();
+        }
+    }
+
+    ~PlatformVersionGuard()
+    {
+        if (context_) {
+            context_->SetMinPlatformVersion(oldVersion_);
+        }
+    }
+
+private:
+    RefPtr<MockPipelineContext> context_;
+    int32_t oldVersion_ = 0;
+};
 } // namespace
 
 class NavigationLayoutTestNg : public testing::Test {
@@ -1945,6 +1967,100 @@ HWTEST_F(NavigationLayoutTestNg, ReCalcNavigationSize001, TestSize.Level1)
     
     SizeF targetSize = SizeF(500, 500);
     EXPECT_EQ(geometryNode->GetFrameSize(), targetSize);
+}
+
+/**
+ * @tc.name: NavigationLayoutRange001
+ * @tc.desc: Test NavigationLayoutAlgorithm::RangeCalculation and GetRange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, NavigationLayoutRange001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    /**
+     * @tc.steps: Create navigation through model pipeline.
+     * @tc.expected: Navigation node has complete pattern/property/context chain for range calculation.
+     */
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(navigation, nullptr);
+    auto property = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    LayoutConstraintF constraint;
+    constraint.parentIdealSize = OptionalSizeF(1000.0f, 800.0f);
+    constraint.percentReference = SizeF(1000.0f, 800.0f);
+    property->layoutConstraint_ = constraint;
+    property->propMinNavBarWidth_ = 220.0_vp;
+    property->propMaxNavBarWidth_ = 420.0_vp;
+    property->propMinContentWidth_ = 260.0_vp;
+
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    ASSERT_NE(algorithm, nullptr);
+    algorithm->RangeCalculation(navigation, property);
+    EXPECT_TRUE(algorithm->userSetNavBarRangeFlag_);
+    EXPECT_TRUE(algorithm->userSetMinContentFlag_);
+
+    // reset local cache then load from pattern to verify persistence path.
+    algorithm->userSetNavBarRangeFlag_ = false;
+    algorithm->userSetMinContentFlag_ = false;
+    algorithm->GetRange(navigation);
+    /**
+     * @tc.steps: Reset algorithm local flags, then reload via GetRange().
+     * @tc.expected: Range/user flags persisted in pattern are restored to algorithm.
+     */
+    EXPECT_TRUE(algorithm->userSetNavBarRangeFlag_);
+    EXPECT_TRUE(algorithm->userSetMinContentFlag_);
+}
+
+/**
+ * @tc.name: NavigationLayoutRange002
+ * @tc.desc: Test NavigationLayoutAlgorithm::CalculateNavigationWidth in different platform versions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, NavigationLayoutRange002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    PlatformVersionGuard versionGuard(context);
+
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(navigation, nullptr);
+    auto property = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    LayoutConstraintF constraint;
+    constraint.parentIdealSize = OptionalSizeF(1000.0f, 800.0f);
+    constraint.percentReference = SizeF(1000.0f, 800.0f);
+    property->layoutConstraint_ = constraint;
+
+    auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    ASSERT_NE(algorithm, nullptr);
+    algorithm->minNavBarWidthValue_ = 200.0_vp;
+    algorithm->minContentWidthValue_ = 300.0_vp;
+
+    /**
+     * @tc.steps: Switch platform version to hit both CalculateNavigationWidth branches.
+     * @tc.expected: >=10 uses minNavBar+minContent branch, <10 uses fixed WINDOW_WIDTH branch.
+     */
+    context->SetMinPlatformVersion(10);
+    auto widthForV10 = algorithm->CalculateNavigationWidth(navigation);
+    context->SetMinPlatformVersion(9);
+    auto widthForV9 = algorithm->CalculateNavigationWidth(navigation);
+
+    /**
+     * @tc.steps: Compare widths from both platform branches.
+     * @tc.expected: Both values are valid and different due to different branch strategy.
+     */
+    EXPECT_GT(widthForV10, 0.0f);
+    EXPECT_GT(widthForV9, 0.0f);
+    EXPECT_NE(widthForV10, widthForV9);
 }
 
 } // namespace OHOS::Ace::NG
