@@ -33,16 +33,7 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& maxSize = layoutConstraint->maxSize;
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto child = layoutWrapper->GetAllChildrenWithBuild().front();
-    LayoutConstraintF textLayoutConstraint;
-    textLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(Infinity<float>(), maxSize.Height()));
-    auto heightLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
-    // use marquee constrain size as text child max constrain size
-    if (layoutConstraint->selfIdealSize.Height().has_value()) {
-        textLayoutConstraint.selfIdealSize.SetHeight(layoutConstraint->selfIdealSize.Height().value());
-    } else if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT &&
-               layoutConstraint->parentIdealSize.Height().has_value()) {
-        textLayoutConstraint.selfIdealSize.SetHeight(layoutConstraint->parentIdealSize.Height().value());
-    }
+    auto textLayoutConstraint = CreateTextLayoutConstraint(layoutWrapper, maxSize);
     // measure text, and add marquee padding to text child
     PaddingProperty textPadding;
     textPadding.left = CalcLength(padding.left.value());
@@ -57,13 +48,15 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(textLayoutConstraint);
     }
 
-    auto secondChild = layoutWrapper->GetAllChildrenWithBuild().back();
-    secondChild->GetLayoutProperty()->UpdatePadding(textPadding);
-    secondChild->Measure(textLayoutConstraint);
-    adaptiveSize = GetMeasureAdaptiveHeight(layoutWrapper, secondChild);
-    if (adaptiveSize.Height().has_value()) {
-        textLayoutConstraint.selfIdealSize.SetHeight(adaptiveSize.Height().value());
+    if (layoutWrapper->GetAllChildrenWithBuild().size() > 1) {
+        auto secondChild = layoutWrapper->GetAllChildrenWithBuild().back();
+        secondChild->GetLayoutProperty()->UpdatePadding(textPadding);
         secondChild->Measure(textLayoutConstraint);
+        adaptiveSize = GetMeasureAdaptiveHeight(layoutWrapper, secondChild);
+        if (adaptiveSize.Height().has_value()) {
+            textLayoutConstraint.selfIdealSize.SetHeight(adaptiveSize.Height().value());
+            secondChild->Measure(textLayoutConstraint);
+        }
     }
 
     // measure marquee self, and update marquee padding to zero
@@ -84,6 +77,22 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         break;
     } while (false);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+}
+
+LayoutConstraintF MarqueeLayoutAlgorithm::CreateTextLayoutConstraint(LayoutWrapper* layoutWrapper, const SizeF& maxSize)
+{
+    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    LayoutConstraintF textLayoutConstraint;
+    textLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(Infinity<float>(), maxSize.Height()));
+    auto heightLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
+    // use marquee constrain size as text child max constrain size
+    if (layoutConstraint->selfIdealSize.Height().has_value()) {
+        textLayoutConstraint.selfIdealSize.SetHeight(layoutConstraint->selfIdealSize.Height().value());
+    } else if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT &&
+               layoutConstraint->parentIdealSize.Height().has_value()) {
+        textLayoutConstraint.selfIdealSize.SetHeight(layoutConstraint->parentIdealSize.Height().value());
+    }
+    return textLayoutConstraint;
 }
 
 void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -117,7 +126,7 @@ void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     translate.SetY(0.0f);
     textGeoNode->SetMarginFrameOffset(translate);
     child->Layout();
-
+    CHECK_NULL_VOID(layoutWrapper->GetAllChildrenWithBuild().size() > 1);
     auto secondChild = layoutWrapper->GetAllChildrenWithBuild().back();
     auto secondTextGeoNode = secondChild->GetGeometryNode();
     CHECK_NULL_VOID(secondTextGeoNode);

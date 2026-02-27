@@ -167,6 +167,7 @@ private:
     void UpdateTextNodeAttr(RefPtr<FrameNode>& textChild);
     float GetMarqueeSpacing();
     bool NeedSecondChild();
+    void CreateSecondChild();
     void UpdateNodeInitialPos(bool cancel = false);
     void PlayMarqueeDoubleAnimation(float startPosition, float secondStartPos, int32_t playCount,
         bool needSecondPlay, StartMarqueeAnimationType startType);

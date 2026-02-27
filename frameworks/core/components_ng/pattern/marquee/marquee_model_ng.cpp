@@ -34,24 +34,12 @@ void MarqueeModelNG::Create()
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateMaxLines(1);
         frameNode->AddChild(textNode);
-
-        auto secondChild = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
-        secondLayoutProperty->UpdateMaxLines(1);
-        frameNode->AddChild(secondChild);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
         CHECK_NULL_VOID(textChild);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateMaxLines(1);
-
-        auto secondChild = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
-        CHECK_NULL_VOID(secondChild);
-        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(secondLayoutProperty);
-        secondLayoutProperty->UpdateMaxLines(1);
     }
     stack->Push(frameNode);
 }

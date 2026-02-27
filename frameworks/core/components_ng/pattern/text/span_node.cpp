@@ -248,6 +248,9 @@ void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackground
 void SpanNode::DumpInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();
+    if (propInspectorId_ && !propInspectorId_->empty()) {
+        dumpLog.AddDesc(std::string("compid: ").append(propInspectorId_.value_or("")));
+    }
     spanItem_->SpanDumpInfo();
     if (GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
         auto textStyle = spanItem_->GetTextStyle();
