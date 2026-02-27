@@ -199,6 +199,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
         algo->SetIsFakeDragging(isFakeDragging_);
     }
     algo->SetCachedShow(IsCachedShow());
+    algo->SetCachedIndependent(independent_);
     algo->SetCurrentIndex(currentIndex_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     oldContentMainSize_ = contentMainSize_;
@@ -5548,7 +5549,7 @@ int32_t SwiperPattern::GetCachedCount() const
     CHECK_NULL_RETURN(props, 1);
     auto cachedCount = props->GetCachedCount().value_or(1);
 
-    if (IsSwipeByGroup()) {
+    if (IsSwipeByGroup() && !independent_) {
         cachedCount *= GetDisplayCount();
     }
 

@@ -2443,4 +2443,28 @@ HWTEST_F(SwiperPatternTestNg, GetKeyFrameNodeWhenContentChange001, TestSize.Leve
     ASSERT_EQ(children.size(), 7);
     EXPECT_EQ(keyChildren.front(), children.front());
 }
+
+/**
+ * @tc.name: CachedCountIndependent001
+ * @tc.desc: test CachedCountIndependent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, CachedCountIndependent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Calculate cachedcount with independent attribute.
+     * @tc.expected: If independent is true, cachedCount is 1. If independent is false, cachedCount is 2.
+     */
+    EXPECT_EQ(pattern_->GetCachedCount(), 2);
+    pattern_->independent_ = true;
+    EXPECT_EQ(pattern_->GetCachedCount(), 1);
+}
 } // namespace OHOS::Ace::NG
