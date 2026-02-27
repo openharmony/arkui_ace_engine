@@ -40,8 +40,7 @@ NG::TimePickerModelNG* GetTimePickerModel()
     // from frameworks/core/components_ng/pattern/time_picker directory
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TimePicker");
     if (module == nullptr) {
-        LOGF("Can't find TimePicker dynamic module");
-        abort();
+        LOGF_ABORT("Can't find TimePicker dynamic module");
     }
     return reinterpret_cast<NG::TimePickerModelNG*>(module->GetModel());
 }

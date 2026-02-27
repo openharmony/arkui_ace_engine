@@ -31,8 +31,7 @@ NG::MenuItemGroupView* GetMenuItemGroupModel()
     if (model == nullptr) {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("MenuItemGroup");
         if (module == nullptr) {
-            LOGF("Can't find MenuItem dynamic module");
-            abort();
+            LOGF_ABORT("Can't find MenuItem dynamic module");
         }
         model = reinterpret_cast<NG::MenuItemGroupView*>(module->GetModel());
     }

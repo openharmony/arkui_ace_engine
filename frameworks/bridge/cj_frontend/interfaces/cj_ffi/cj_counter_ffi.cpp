@@ -29,8 +29,7 @@ NG::CounterModelNG* GetCounterModel()
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Counter");
     if (module == nullptr) {
-        LOGF("Can't find counter dynamic module");
-        abort();
+        LOGF_ABORT("Can't find counter dynamic module");
     }
     return reinterpret_cast<NG::CounterModelNG*>(module->GetModel());
 }
