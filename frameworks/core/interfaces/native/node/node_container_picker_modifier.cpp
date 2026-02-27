@@ -296,12 +296,14 @@ void ResetContainerPickerIndicator(ArkUINodeHandle node)
     PickerIndicatorStyle indicatorStyle = {};
     indicatorStyle.type = static_cast<int32_t>(PickerIndicatorType::BACKGROUND);
     indicatorStyle.backgroundColor = Color(Color::TRANSPARENT);
+    indicatorStyle.isDefaultBackgroundColor = false;
     BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = Dimension(0, DimensionUnit::VP);
     borderRadius.radiusTopRight = Dimension(0, DimensionUnit::VP);
     borderRadius.radiusBottomLeft = Dimension(0, DimensionUnit::VP);
     borderRadius.radiusBottomRight = Dimension(0, DimensionUnit::VP);
     indicatorStyle.borderRadius = borderRadius;
+    indicatorStyle.isDefaultBorderRadius = false;
     ContainerPickerModel::SetIndicatorStyle(frameNode, indicatorStyle);
 }
 
