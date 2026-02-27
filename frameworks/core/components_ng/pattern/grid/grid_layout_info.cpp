@@ -326,6 +326,17 @@ float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float m
     if (options.getSizeByIndex) {
         return GetContentOffset(mainGap);
     }
+    if (startMainLineIndex_ > 0 && startMainLineIndex_ < MAX_CUMULATIVE_LINES) {
+        bool hasAllDataToStartMainLine = false;
+        auto firstLine = gridMatrix_.begin();
+        if (firstLine != gridMatrix_.end() && firstLine->first == 0 && !firstLine->second.empty()) {
+            auto firstItem = firstLine->second.begin();
+            hasAllDataToStartMainLine = firstItem->second == 0;
+        }
+        if (hasAllDataToStartMainLine) {
+            return GetStartLineOffset(mainGap);
+        }
+    }
     float prevHeight = GetContentHeight(options, startIndex_, mainGap) + mainGap;
     return prevHeight - currentOffset_;
 }
@@ -390,17 +401,6 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
     }
     if (options.getSizeByIndex) {
         return GetContentHeight(mainGap);
-    }
-    if (startMainLineIndex_ > 0 && startMainLineIndex_ < MAX_CUMULATIVE_LINES) {
-        bool hasAllDataToStartMainLine = false;
-        auto firstLine = gridMatrix_.begin();
-        if (firstLine != gridMatrix_.end() && firstLine->first == 0 && !firstLine->second.empty()) {
-            auto firstItem = firstLine->second.begin();
-            hasAllDataToStartMainLine = firstItem->second == 0;
-        }
-        if (hasAllDataToStartMainLine) {
-            return GetStartLineOffset(mainGap) + currentOffset_ - mainGap;
-        }
     }
     float irregularHeight = -1.0f;
     float regularHeight = -1.0f;
