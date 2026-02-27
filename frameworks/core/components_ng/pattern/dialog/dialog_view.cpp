@@ -58,8 +58,8 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
     if (dialogProps.maskColor.has_value() && dialogProps.hasInvertColor.hasMaskColor) {
         Color maskColor = dialogProps.maskColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, maskColor, dialog->GetTag());
-
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, maskColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
@@ -116,7 +116,8 @@ void UpdateAndAddShadowCallback(RefPtr<FrameNode> dialog, const DialogProperties
         Shadow shadow = dialogProps.shadow.value();
         Color shadowColor = shadow.GetColor();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, shadowColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, shadowColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
@@ -158,7 +159,8 @@ void UpdateAndAddBackgroundColorCallback(RefPtr<FrameNode> dialog, const DialogP
     if (dialogProps.backgroundColor.has_value() && dialogProps.hasInvertColor.hasBackgroundColor) {
         Color backgroundColor = dialogProps.backgroundColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, backgroundColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, backgroundColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
@@ -201,7 +203,8 @@ void UpdateAndAddBorderTopColorCallback(
     if (topColor.has_value() && hasBorderTopColor) {
         Color topBorderColor = topColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, topBorderColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, topBorderColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
@@ -249,7 +252,8 @@ void UpdateAndAddBorderBottomColorCallback(
     if (bottomColor.has_value() && hasBorderBottomColor) {
         Color bottomBorderColor = bottomColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, bottomBorderColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, bottomBorderColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
@@ -298,7 +302,8 @@ void UpdateAndAddBorderLeftColorCallback(
     if (leftColor.has_value() && hasBorderLeftColor) {
         Color leftBorderColor = leftColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, leftBorderColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, leftBorderColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
@@ -347,7 +352,8 @@ void UpdateAndAddBorderRightColorCallback(
     if (rightColor.has_value() && hasBorderRightColor) {
         Color rightBorderColor = rightColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, rightBorderColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, rightBorderColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
@@ -424,7 +430,8 @@ void UpdateAndAddBlurStyleOptionCallback(RefPtr<FrameNode> dialog, const DialogP
         BlurStyleOption blurStyleOption = dialogProps.blurStyleOption.value();
         Color inactiveColor = blurStyleOption.inactiveColor;
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, inactiveColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, inactiveColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
@@ -469,7 +476,8 @@ void UpdateAndAddEffectOptionColorCallback(RefPtr<FrameNode> dialog, const Dialo
         EffectOption effectOption = dialogProps.effectOption.value();
         Color color = effectOption.color;
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, color, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, color, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
@@ -511,7 +519,8 @@ void UpdateAndAddEffectOptionInactiveColorCallback(RefPtr<FrameNode> dialog, con
         EffectOption effectOption = dialogProps.effectOption.value();
         Color inactiveColor = effectOption.inactiveColor;
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, inactiveColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, inactiveColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
