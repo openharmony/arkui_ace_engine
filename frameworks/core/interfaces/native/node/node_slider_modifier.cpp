@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 namespace NodeModifier {
-const ArkUISliderModifier* GetSliderModifier()
+const ArkUISliderModifier *GetSliderModifier()
 {
     static const ArkUISliderModifier* cachedModifier = nullptr;
     if (cachedModifier == nullptr) {

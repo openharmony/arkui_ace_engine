@@ -406,13 +406,15 @@ class JSRadio extends JSViewAbstract {
     getUINativeModule().radio.setRadioChecked(true, checked, callback);
   }
   static size(size) {
-    getUINativeModule().radio.setRadioSize(true, size);
+    JSViewAbstract.width(size?.width);
+    JSViewAbstract.height(size?.height);
   }
   static padding(padding) {
     getUINativeModule().radio.setRadioPadding(true, padding);
   }
   static margin(margin) {
     getUINativeModule().radio.setMargin(true, margin);
+    JSViewAbstract.margin(margin);
   }
   static radioStyle(radioStyle) {
     getUINativeModule().radio.setRadioStyle(true, radioStyle);

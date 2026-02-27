@@ -67,7 +67,7 @@ void ParseIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, std::optional<int32_t
     CHECK_NULL_VOID(vm);
     if (indicatorOpt.value_or(static_cast<int32_t>(RadioIndicatorType::TICK)) ==
         static_cast<int32_t>(RadioIndicatorType::CUSTOM)) {
-        if (!builderObject->IsUndefined() && !builderObject->IsNull() && builderObject->IsFunction(vm)) {
+        if (builderObject->IsFunction(vm)) {
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             panda::Local<panda::FunctionRef> func = builderObject->ToObject(vm);
             customBuilderFunc = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() mutable {
@@ -99,38 +99,15 @@ void ParseCheckedObject(const EcmaVM* vm, Local<JSValueRef>& changeEventVal)
     GetArkUINodeModifiers()->getRadioModifier()->setOnChangeEvent(reinterpret_cast<void*>(&onChecked));
 }
 
-bool ParseCalcDimension(const EcmaVM* vm, const Local<JSValueRef>& jsVal, CalcDimension& result, bool isWidth,
-    RefPtr<ResourceObject>& resObj)
+void ClampPaddingToNonNegative(
+    ArkUIPaddingType& padding, CalcDimension& top, CalcDimension& bottom, CalcDimension& start, CalcDimension& end)
 {
-    CHECK_NULL_RETURN(vm, false);
-    if (jsVal->IsUndefined()) {
-        if (isWidth) {
-            GetArkUINodeModifiers()->getRadioModifier()->resetRadioWidth(nullptr);
-        } else {
-            GetArkUINodeModifiers()->getRadioModifier()->resetRadioHeight(nullptr);
-        }
-        return true;
-    }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsVal, result, resObj)) {
-            // size attr not has layoutPolicy, if attr is not size, need to check if set LayoutPolicy before return
-            if (isWidth) {
-                GetArkUINodeModifiers()->getRadioModifier()->resetRadioWidth(nullptr);
-            } else {
-                GetArkUINodeModifiers()->getRadioModifier()->resetRadioHeight(nullptr);
-            }
-            return false;
-        }
-    } else if (!ArkTSUtils::ParseJsDimensionVp(vm, jsVal, result, resObj)) {
-        return false;
-    }
-    std::string calc = result.CalcValue();
-    auto RawResObj = AceType::RawPtr(resObj);
-    GetArkUINodeModifiers()->getRadioModifier()->setRadioSizeByJs(
-        result.Value(), static_cast<int32_t>(result.Unit()), calc.c_str(), RawResObj, isWidth);
-    return true;
+    padding.top.value = top.IsNonNegative() ? top.Value() : 0;
+    padding.bottom.value = bottom.IsNonNegative() ? bottom.Value() : 0;
+    padding.start.value = start.IsNonNegative() ? start.Value() : 0;
+    padding.end.value = end.IsNonNegative() ? end.Value() : 0;
 }
-}
+} // namespace
 
 panda::Local<panda::JSValueRef> JsRadioChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
@@ -209,10 +186,10 @@ ArkUINativeModuleValue RadioBridge::CreateRadio(ArkUIRuntimeCallInfo* runtimeCal
         Local<JSValueRef> groupVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "group"));
         Local<JSValueRef> indicatorTemp = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "indicatorType"));
         Local<JSValueRef> builderObject = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "indicatorBuilder"));
-        if (!valueVal.IsEmpty() && !valueVal->IsNull() && valueVal->IsString(vm)) {
+        if (valueVal->IsString(vm)) {
             valueOpt = valueVal->ToString(vm)->ToString(vm).c_str();
         }
-        if (!groupVal.IsEmpty() && !groupVal->IsNull() && groupVal->IsString(vm)) {
+        if (groupVal->IsString(vm)) {
             groupOpt = groupVal->ToString(vm)->ToString(vm).c_str();
         }
         if (indicatorTemp->IsNumber()) {
@@ -240,12 +217,14 @@ ArkUINativeModuleValue RadioBridge::SetRadioChecked(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> changeEventVal = panda::JSValueRef::Undefined(vm);
     bool isCheck = DEFAULT_CHECKED;
     bool isJsView = IsJsView(firstArg, vm);
-    if (checkedVal->IsObject(vm)) {
-        Local<panda::ObjectRef> obj = checkedVal->ToObject(vm);
-        checkedVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
-        changeEventVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "$value"));
-    } else if (isJsView) {
-        changeEventVal = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (isJsView) {
+        if (checkedVal->IsObject(vm)) {
+            Local<panda::ObjectRef> obj = checkedVal->ToObject(vm);
+            checkedVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
+            changeEventVal = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "$value"));
+        } else {
+            changeEventVal = runtimeCallInfo->GetCallArgRef(NUM_2);
+        }
     }
     if (checkedVal->IsBoolean()) {
         isCheck = checkedVal->ToBoolean(vm)->Value();
@@ -529,30 +508,12 @@ ArkUINativeModuleValue RadioBridge::SetRadioSize(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);     //0 is node arguments
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> widthArg;
-    Local<JSValueRef> heightArg;
+    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1);  //1 is width value
+    Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(2); //2 is height value
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
     CalcDimension width;
     CalcDimension height;
-    if (IsJsView(nodeArg, vm)) {
-        RefPtr<ResourceObject> widthResObj;
-        RefPtr<ResourceObject> heightResObj;
-        auto sizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-        if (!sizeArg->IsObject(vm)) {
-            ParseCalcDimension(vm, JSValueRef::Undefined(vm), width, true, widthResObj);
-            ParseCalcDimension(vm, JSValueRef::Undefined(vm), height, false, heightResObj);
-            return panda::JSValueRef::Undefined(vm);
-        }
-        auto jsObj = sizeArg->ToObject(vm);
-        widthArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "width"));
-        heightArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "height"));
-        ParseCalcDimension(vm, widthArg, width, true, widthResObj);
-        ParseCalcDimension(vm, heightArg, height, false, heightResObj);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    widthArg = runtimeCallInfo->GetCallArgRef(1);  //1 is width value
-    heightArg = runtimeCallInfo->GetCallArgRef(2); //2 is height value
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, widthArg, width)) {
         GetArkUINodeModifiers()->getRadioModifier()->resetRadioWidth(nativeNode);
     } else {
@@ -706,18 +667,23 @@ ArkUINativeModuleValue RadioBridge::SetRadioPaddingByJs(ArkUIRuntimeCallInfo* ru
             ArkTSUtils::ParsePadding(vm, GetProperty(vm, jsObj, "right"), endDimen, newPaddings.end);
         }
         if (newPaddings.start.isSet || newPaddings.end.isSet || newPaddings.top.isSet || newPaddings.bottom.isSet) {
+            ClampPaddingToNonNegative(newPaddings, topDimen, bottomDimen, startDimen, endDimen);
             GetArkUINodeModifiers()->getRadioModifier()->setRadioPaddingByJs(&oldPaddings, &newPaddings);
             return panda::JSValueRef::Undefined(vm);
         }
     }
-    newPaddings.top = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, true };
-    newPaddings.bottom = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, true };
-    newPaddings.start = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, true };
-    newPaddings.end = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, true };
-    ArkTSUtils::ParsePadding(vm, secondArg, topDimen, newPaddings.top);
-    ArkTSUtils::ParsePadding(vm, secondArg, bottomDimen, newPaddings.bottom);
-    ArkTSUtils::ParsePadding(vm, secondArg, startDimen, newPaddings.start);
-    ArkTSUtils::ParsePadding(vm, secondArg, endDimen, newPaddings.end);
+    CalcDimension length;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, secondArg, length)) {
+        length.Reset();
+    }
+    if (!length.IsNonNegative()) {
+        length = CalcDimension();
+    }
+    newPaddings.top = { length.Value(), static_cast<int8_t>(length.Unit()), nullptr, true };
+    newPaddings.bottom = { length.Value(), static_cast<int8_t>(length.Unit()), nullptr, true };
+    newPaddings.start = { length.Value(), static_cast<int8_t>(length.Unit()), nullptr, true };
+    newPaddings.end = { length.Value(), static_cast<int8_t>(length.Unit()), nullptr, true };
+    ClampPaddingToNonNegative(newPaddings, length, length, length, length);
     GetArkUINodeModifiers()->getRadioModifier()->setRadioPaddingByJs(&oldPaddings, &newPaddings);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -926,11 +892,12 @@ ArkUINativeModuleValue RadioBridge::SetRadioOnChange(ArkUIRuntimeCallInfo* runti
         frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(bool)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), isJsView](
-                                             bool isOnchange) {
+    std::function<void(const bool)> callback = [vm, node = AceType::WeakClaim(frameNode),
+                                                   func = panda::CopyableGlobal(vm, func),
+                                                   isJsView](const bool isOnchange) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { panda::BooleanRef::New(vm, isOnchange) };
         auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
         if (isJsView) {
@@ -941,63 +908,14 @@ ArkUINativeModuleValue RadioBridge::SetRadioOnChange(ArkUIRuntimeCallInfo* runti
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue RadioBridge::SetMarginByJs(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    auto marginArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    if (!marginArg->IsNumber() && !marginArg->IsObject(vm) && !marginArg->IsString(vm)) {
-        GetArkUINodeModifiers()->getRadioModifier()->setRadioMarginByJs(nullptr, false, nullptr, false);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    ArkUIPaddingType margins;
-    CalcDimension topDimen(0, DimensionUnit::VP);
-    CalcDimension bottomDimen(0, DimensionUnit::VP);
-    CalcDimension startDimen(0, DimensionUnit::VP);
-    CalcDimension endDimen(0, DimensionUnit::VP);
-    std::vector<RefPtr<ResourceObject>> resObjs;
-    if (marginArg->IsObject(vm)) {
-        bool useLengthMetrics = false;
-        auto jsObj = marginArg->ToObject(vm);
-        if (ArkTSUtils::CheckLengthMetrics(vm, jsObj)) {
-            ArkTSUtils::ParseLocalizedMargin(vm, GetProperty(vm, jsObj, "top"), topDimen, margins.top);
-            ArkTSUtils::ParseLocalizedMargin(vm, GetProperty(vm, jsObj, "bottom"), bottomDimen, margins.bottom);
-            ArkTSUtils::ParseLocalizedMargin(vm, GetProperty(vm, jsObj, "start"), startDimen, margins.start);
-            ArkTSUtils::ParseLocalizedMargin(vm, GetProperty(vm, jsObj, "end"), endDimen, margins.end);
-            useLengthMetrics = true;
-        } else {
-            ArkTSUtils::ParseMargin(vm, GetProperty(vm, jsObj, "top"), topDimen, margins.top, resObjs);
-            ArkTSUtils::ParseMargin(vm, GetProperty(vm, jsObj, "bottom"), bottomDimen, margins.bottom, resObjs);
-            ArkTSUtils::ParseMargin(vm, GetProperty(vm, jsObj, "left"), startDimen, margins.start, resObjs);
-            ArkTSUtils::ParseMargin(vm, GetProperty(vm, jsObj, "end"), endDimen, margins.end, resObjs);
-        }
-        if (margins.start.isSet || margins.end.isSet || margins.top.isSet || margins.bottom.isSet) {
-            auto rawPtr = useLengthMetrics ? nullptr : static_cast<void*>(&resObjs);
-            GetArkUINodeModifiers()->getRadioModifier()->setRadioMarginByJs(&margins, useLengthMetrics, rawPtr, true);
-            return panda::JSValueRef::Undefined(vm);
-        }
-    }
-    resObjs.clear();
-    margins.top = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, false };
-    margins.bottom = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, false };
-    margins.start = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, false };
-    margins.end = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, false };
-    ArkTSUtils::ParseMargin(vm, marginArg, topDimen, margins.top, resObjs);
-    ArkTSUtils::ParseMargin(vm, marginArg, bottomDimen, margins.bottom, resObjs);
-    ArkTSUtils::ParseMargin(vm, marginArg, startDimen, margins.start, resObjs);
-    ArkTSUtils::ParseMargin(vm, marginArg, endDimen, margins.end, resObjs);
-    auto rawPtr = static_cast<void*>(&resObjs);
-    GetArkUINodeModifiers()->getRadioModifier()->setRadioMarginByJs(&margins, false, rawPtr, true);
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue RadioBridge::SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (IsJsView(firstArg, vm)) {
-        return SetMarginByJs(runtimeCallInfo);
+        GetArkUINodeModifiers()->getRadioModifier()->setIsUserSetMargin(nullptr);
+        return panda::JSValueRef::Undefined(vm);
     }
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
