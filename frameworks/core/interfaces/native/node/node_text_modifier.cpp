@@ -1078,8 +1078,8 @@ void GetTextShadow(ArkUINodeHandle node, ArkUITextShadowStruct* shadow, uint32_t
                 textShadowVector[i].GetOffset().GetX(), textShadowVector[i].GetOffset().GetY(),
                 textShadowVector[i].GetIsFilled()};
         } else {
-            *(shadow + i) = { 0.0f, static_cast<int32_t>(ShadowType::COLOR), Color::TRANSPARENT.GetValue(), 0.0f, 0.0f,
-                0 };
+            *(shadow + i) = { 0.0f, static_cast<int32_t>(ShadowType::COLOR),
+                Color::TRANSPARENT.GetValue(), 0.0f, 0.0f, 0 };
         }
     }
 }
