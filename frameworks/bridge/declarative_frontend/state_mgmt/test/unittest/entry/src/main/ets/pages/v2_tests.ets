@@ -14,6 +14,7 @@
  */
 
 import { CommonTestsV2 } from '../../v2_tests/commonTestsV2'
+import { DataCoderTestsV2 } from '../../v2_tests/dataCoderTestsV2'
 import { MonitorTestsV2 } from '../../v2_tests/monitorTestsV2'
 import { SyncMonitorTestsV2 } from '../../v2_tests/monitorTestsV2'
 import { ObserveTestsV2 } from '../../v2_tests/observeTestsV2'
@@ -43,6 +44,7 @@ struct Parent {
   aboutToAppear() {
     setTimeout(() => {
       TestRunner.bind(this)(new CommonTestsV2('V2_common'));
+      TestRunner.bind(this)(new DataCoderTestsV2('V2_dataCoder'));
       TestRunner.bind(this)(new MonitorTestsV2('V2_monitor'));
       TestRunner.bind(this)(new SyncMonitorTestsV2('V2_syncmonitor'));
       TestRunner.bind(this)(new ObserveTestsV2('V2_observe'));
