@@ -43,8 +43,6 @@ bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
 } // namespace
 void CounterBridge::RegisterCounterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
-    LOGE("Start RegisterCounterAttributes nativeModule");
-
     const char* functionNames[] = { "create", "setEnableInc", "resetEnableInc", "setEnableDec", "resetEnableDec",
         "setCounterHeight", "resetCounterHeight", "setCounterWidth", "resetCounterWidth", "setCounterBackgroundColor",
         "resetCounterBackgroundColor", "setCounterSize", "resetCounterSize", "setCounterOnInc", "resetCounterOnInc",
@@ -74,7 +72,6 @@ void CounterBridge::RegisterCounterAttributes(Local<panda::ObjectRef> object, Ec
 
     auto counter = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "counter"), counter);
-    LOGE("Finish RegisterCounterAttributes nativeModule");
 }
 
 ArkUINativeModuleValue CounterBridge::CreateCounter(ArkUIRuntimeCallInfo* runtimeCallInfo)
