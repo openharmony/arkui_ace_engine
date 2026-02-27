@@ -48,6 +48,8 @@ static napi_value Init(napi_env env, napi_value exports)
         {"createListItemGroupExample", nullptr, Manager::CreateListItemGroupExample, nullptr, nullptr, nullptr,
          napi_default, nullptr},
         {"destroyListExample", nullptr, Manager::DestroyListExample, nullptr, nullptr, nullptr, napi_default, nullptr},
+        {"createGridNativeNodeDragEvent", nullptr, Manager::CreateGridNativeNodeDragEvent, nullptr, nullptr, nullptr,
+            napi_default, nullptr },
         {"SwipeActionTest", nullptr, ArkUICApiDemo::SwipeActionTest::CreateNativeNode, nullptr, nullptr, nullptr,
          napi_default, nullptr},
         {"SwipeActionTestWithDirection", nullptr, ArkUICApiDemo::SwipeActionTest::CreateNativeNode, nullptr, nullptr,
