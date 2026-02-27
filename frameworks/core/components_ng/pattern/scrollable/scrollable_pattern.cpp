@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
@@ -4227,27 +4228,7 @@ void ScrollablePattern::GetPaintPropertyDumpInfo()
 {
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     if (paintProperty) {
-        switch (paintProperty->GetScrollBarMode().value_or(DisplayMode::OFF)) {
-            case DisplayMode::OFF: {
-                DumpLog::GetInstance().AddDesc("innerScrollBarState: OFF");
-                break;
-            }
-            case DisplayMode::AUTO: {
-                DumpLog::GetInstance().AddDesc("innerScrollBarState: AUTO");
-                break;
-            }
-            case DisplayMode::ON: {
-                DumpLog::GetInstance().AddDesc("innerScrollBarState: ON");
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-        auto scrollBarWidth = paintProperty->GetScrollBarWidth();
-        scrollBarWidth.has_value() ? DumpLog::GetInstance().AddDesc(std::string("scrollBarWidth: ")
-            .append(paintProperty->GetScrollBarWidth().value().ToString()))
-            : DumpLog::GetInstance().AddDesc("scrollBarWidth: None");
+        paintProperty->DumpInfo();
     }
 }
 
@@ -4339,10 +4320,16 @@ void ScrollablePattern::DumpAdvanceInfo()
     GetAxisDumpInfo();
     GetPanDirectionDumpInfo();
     GetPaintPropertyDumpInfo();
+    backToTop_ ? DumpLog::GetInstance().AddDesc("backToTop: true")
+            : DumpLog::GetInstance().AddDesc("backToTop: false");
     GetScrollEnabled() ? DumpLog::GetInstance().AddDesc("enableScrollInteraction: true")
                        : DumpLog::GetInstance().AddDesc("enableScrollInteraction: false");
     DumpLog::GetInstance().AddDesc(std::string("friction: ").append(std::to_string(friction_)));
     DumpLog::GetInstance().AddDesc(std::string("flingSpeedLimit: ").append(std::to_string(GetMaxFlingVelocity())));
+    auto layoutProperty = GetLayoutProperty<ScrollableLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->DumpInfo();
+    }
     DumpLog::GetInstance().AddDesc("==========================eventsFiredInfos==============================");
     for (const auto& info : eventsFiredInfos_) {
         DumpLog::GetInstance().AddDesc(info.ToString());
@@ -4461,26 +4448,7 @@ void ScrollablePattern::GetPaintPropertyDumpInfo(std::unique_ptr<JsonValue>& jso
 {
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     if (paintProperty) {
-        switch (paintProperty->GetScrollBarMode().value_or(DisplayMode::OFF)) {
-            case DisplayMode::OFF: {
-                json->Put("innerScrollBarState", "OFF");
-                break;
-            }
-            case DisplayMode::AUTO: {
-                json->Put("innerScrollBarState", "AUTO");
-                break;
-            }
-            case DisplayMode::ON: {
-                json->Put("innerScrollBarState", "ON");
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-        auto scrollBarWidth = paintProperty->GetScrollBarWidth();
-        json->Put("scrollBarWidth",
-            scrollBarWidth.has_value() ? paintProperty->GetScrollBarWidth().value().ToString().c_str() : "None");
+        paintProperty->DumpInfo(json);
     }
 }
 
@@ -4609,10 +4577,14 @@ void ScrollablePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     GetAxisDumpInfo(json);
     GetPanDirectionDumpInfo(json);
     GetPaintPropertyDumpInfo(json);
+    json->Put("backToTop", backToTop_);
     json->Put("enableScrollInteraction", GetScrollEnabled());
     json->Put("friction", friction_);
     json->Put("flingSpeedLimit", std::to_string(GetMaxFlingVelocity()).c_str());
-    json->Put("eventsFiredInfos", friction_);
+    auto layoutProperty = GetLayoutProperty<ScrollableLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->DumpInfo(json);
+    }
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
     for (const auto& info : eventsFiredInfos_) {
         std::unique_ptr<JsonValue> child = JsonUtil::Create(true);

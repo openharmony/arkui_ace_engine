@@ -43,6 +43,10 @@ public:
         ResetSupportLazyLoadingEmptyBranch();
     }
 
+    void DumpInfo();
+
+    void DumpInfo(std::unique_ptr<JsonValue>& json);
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ContentStartOffset, float, PROPERTY_UPDATE_MEASURE);

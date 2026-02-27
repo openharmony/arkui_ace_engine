@@ -13,9 +13,28 @@
  * limitations under the License.
  */
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 
 namespace OHOS::Ace::NG {
+
+void ScrollableLayoutProperty::DumpInfo()
+{
+    propContentStartOffset_.has_value() ? DumpLog::GetInstance().AddDesc(std::string("contentStartOffset: ")
+        .append(std::to_string(propContentStartOffset_.value())))
+        : DumpLog::GetInstance().AddDesc("contentStartOffset: None");
+    propContentEndOffset_.has_value() ? DumpLog::GetInstance().AddDesc(std::string("contentEndOffset: ")
+        .append(std::to_string(propContentEndOffset_.value())))
+        : DumpLog::GetInstance().AddDesc("contentEndOffset: None");
+}
+
+void ScrollableLayoutProperty::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("contentStartOffset",
+        propContentStartOffset_.has_value() ? std::to_string(propContentStartOffset_.value()).c_str() : "None");
+    json->Put("contentEndOffset",
+        propContentEndOffset_.has_value() ? std::to_string(propContentEndOffset_.value()).c_str() : "None");
+}
 
 void ScrollableLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {

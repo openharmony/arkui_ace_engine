@@ -302,7 +302,7 @@ HWTEST_F(ScrollableTestNg, GetPaintPropertyDumpInfo002, TestSize.Level1)
     frameNode->paintProperty_ = paintProperty;
     scrollablePattern->frameNode_ = frameNode;
     scrollablePattern->GetPaintPropertyDumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 2);
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 7);
     EXPECT_EQ(DumpLog::GetInstance().description_[0], "innerScrollBarState: OFF\n");
     EXPECT_EQ(DumpLog::GetInstance().description_[1], "scrollBarWidth: None\n");
 }
@@ -683,6 +683,66 @@ HWTEST_F(ScrollableTestNg, DumpAdvanceInfo_Parameter005, TestSize.Level1)
     auto json = JsonUtil::Create(true);
     scrollablePattern->DumpAdvanceInfo(json);
     EXPECT_EQ(json->GetString("inner ScrollBar"), "null");
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo_Parameter006
+ * @tc.desc: Test ScrollablePattern DumpAdvanceInfo with fadingEdge properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, DumpAdvanceInfo_Parameter006, TestSize.Level1)
+{
+    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    ASSERT_NE(scrollablePattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<PaintProperty> paintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
+    frameNode->paintProperty_ = paintProperty;
+    scrollablePattern->frameNode_ = frameNode;
+    auto json = JsonUtil::Create(true);
+    scrollablePattern->DumpAdvanceInfo(json);
+    EXPECT_EQ(json->GetString("fadingEdge"), "None");
+    EXPECT_EQ(json->GetString("fadingEdgeLength"), "None");
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo_Parameter007
+ * @tc.desc: Test ScrollablePattern DumpAdvanceInfo with fadingEdge set to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, DumpAdvanceInfo_Parameter007, TestSize.Level1)
+{
+    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    ASSERT_NE(scrollablePattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ScrollablePaintProperty> paintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
+    paintProperty->UpdateFadingEdge(true);
+    frameNode->paintProperty_ = paintProperty;
+    scrollablePattern->frameNode_ = frameNode;
+    auto json = JsonUtil::Create(true);
+    scrollablePattern->DumpAdvanceInfo(json);
+    EXPECT_EQ(json->GetString("fadingEdge"), "true");
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo_Parameter008
+ * @tc.desc: Test ScrollablePattern DumpAdvanceInfo with fadingEdgeLength set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, DumpAdvanceInfo_Parameter008, TestSize.Level1)
+{
+    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    ASSERT_NE(scrollablePattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ScrollablePaintProperty> paintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
+    paintProperty->UpdateFadingEdgeLength(20.0_vp);
+    frameNode->paintProperty_ = paintProperty;
+    scrollablePattern->frameNode_ = frameNode;
+    auto json = JsonUtil::Create(true);
+    scrollablePattern->DumpAdvanceInfo(json);
+    EXPECT_EQ(json->GetString("fadingEdgeLength"), "20.00vp");
 }
 
 /**
