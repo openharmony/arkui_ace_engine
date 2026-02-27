@@ -527,7 +527,8 @@ void SetFillColor(ArkUINodeHandle node, ArkUI_Uint32 value)
     Color color = Color(value);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> colorResObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            colorResObj, color, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         ImageModelNG::CreateWithResourceObj(frameNode, ImageResourceType::FILL_COLOR, colorResObj);
     }
     ImageModelNG::SetImageFill(frameNode, color);

@@ -272,7 +272,8 @@ void SetScrollScrollBarColorPtr(ArkUINodeHandle node, uint32_t scrollBarColor, v
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }

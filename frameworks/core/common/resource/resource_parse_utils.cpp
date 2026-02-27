@@ -257,36 +257,6 @@ void ReplaceHolder(std::string& originStr, const std::vector<ResourceObjectParam
     }
 }
 
-void ResourceParseUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
-    Color& color, const std::string& nodeTag)
-{
-    CompleteResObjFromColorWithAllowForceDark(resObj, color, nodeTag, true);
-}
-
-void ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(
-    RefPtr<ResourceObject>& resObj, Color& color, const std::string& nodeTag, bool allowForceDark)
-{
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
-    }
-    auto instanceId = Container::CurrentIdSafely();
-    auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(instanceId, nodeTag);
-    CHECK_NULL_VOID(invertFunc);
-
-    auto colorMode = Container::CurrentColorMode();
-    Color curColor = color;
-    if (colorMode == ColorMode::DARK && allowForceDark) {
-        color = Color(invertFunc(color.GetValue()));
-    }
-    resObj = AceType::MakeRefPtr<ResourceObject>();
-    resObj->SetIsResource(false);
-    resObj->SetInstanceId(instanceId);
-    resObj->SetNodeTag(nodeTag);
-    resObj->SetColorMode(colorMode);
-    resObj->SetHasDarkRes(false);
-    resObj->SetColor(((colorMode == ColorMode::DARK) ? curColor : color));
-}
-
 void ResourceParseUtils::CompleteResourceObjectFromColor(
     RefPtr<ResourceObject>& resObj, Color& color, const NG::NodeInfo& nodeInfo)
 {

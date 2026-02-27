@@ -195,7 +195,8 @@ void SetGridScrollBarColorPtr(ArkUINodeHandle node, ArkUI_Int32 color, void* col
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }

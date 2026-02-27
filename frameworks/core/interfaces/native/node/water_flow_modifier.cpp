@@ -548,7 +548,8 @@ void SetWaterFlowScrollBarColorPtr(ArkUINodeHandle node, ArkUI_Int32 color, void
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }

@@ -220,10 +220,11 @@ NodeInfo ArkTSUtils::MakeNativeNodeInfo(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     if (!frameNode) {
-        return { "", ColorMode::COLOR_MODE_UNDEFINED };
+        return { "", ColorMode::COLOR_MODE_UNDEFINED, true };
     }
     return { frameNode ? frameNode->GetTag() : "",
-        frameNode ? frameNode->GetLocalColorMode() : ColorMode::COLOR_MODE_UNDEFINED };
+        frameNode ? frameNode->GetLocalColorMode() : ColorMode::COLOR_MODE_UNDEFINED,
+        frameNode ? frameNode->GetForceDarkAllowed() : true };
 }
 
 bool ArkTSUtils::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
@@ -265,7 +266,7 @@ void ArkTSUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
     }
     bool hasDarkRes = CheckDarkResource(resObj);
     if (nodeInfo.localColorMode == ColorMode::DARK) {
-        if (!hasDarkRes) {
+        if (!hasDarkRes && nodeInfo.allowForceDark) {
             color = Color(invertFunc(color.GetValue()));
         }
         resObj = nullptr;
@@ -273,7 +274,7 @@ void ArkTSUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
     }
     auto colorMode = Container::CurrentColorMode();
     Color curColor = color;
-    if ((colorMode == ColorMode::DARK) && !hasDarkRes) {
+    if ((colorMode == ColorMode::DARK) && !hasDarkRes && nodeInfo.allowForceDark) {
         color = Color(invertFunc(color.GetValue()));
     }
     if (!resObj) {
