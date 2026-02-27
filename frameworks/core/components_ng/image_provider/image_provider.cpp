@@ -72,7 +72,7 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     // If we reach here with a network image without data, it's an error
     // Only enable this check for real device with recycle feature enabled
     bool enableRecycleForNetwork = SystemProperties::GetDownloadByNetworkEnabled() &&
-                                   SystemProperties::GetRecycleImageEnabled();
+                                   SystemProperties::GetImageReleaseManageObjectEnabled();
     if (enableRecycleForNetwork && imageObj->GetSourceInfo().GetSrcType() == SrcType::NETWORK) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "Network image should have data before PrepareImageData. %{public}s-[%{private}s]",
@@ -306,7 +306,7 @@ void ImageProvider::DownLoadSuccessCallback(
 {
     // Clone before caching and clear data from clone
     // Data is stored in DownloadManager cache, no need to duplicate in ImageCache
-    if (SystemProperties::GetRecycleImageEnabled()) {
+    if (SystemProperties::GetImageReleaseManageObjectEnabled()) {
         auto cloneImageObj = imageObj->Clone();
         CHECK_NULL_VOID(cloneImageObj);
         cloneImageObj->ClearData();
@@ -576,7 +576,7 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
 
     // Check if network data preparation is needed
     bool enableRecycleForNetwork =
-        SystemProperties::GetDownloadByNetworkEnabled() && SystemProperties::GetRecycleImageEnabled();
+        SystemProperties::GetDownloadByNetworkEnabled() && SystemProperties::GetImageReleaseManageObjectEnabled();
     bool needPrepareData =
         enableRecycleForNetwork && obj->GetSourceInfo().GetSrcType() == SrcType::NETWORK && !obj->GetData();
     if (needPrepareData) {

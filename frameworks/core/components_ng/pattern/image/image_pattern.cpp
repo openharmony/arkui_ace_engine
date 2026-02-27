@@ -2059,7 +2059,9 @@ void ImagePattern::DumpOtherInfo()
     DumpLog::GetInstance().AddDesc(renderedImageInfo_.ToString());
     syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
     DumpLog::GetInstance().AddDesc(std::string("SystemRecycleImageEnabled:")
-                                       .append(SystemProperties::GetRecycleImageEnabled() ? "true" : "false"));
+            .append(SystemProperties::GetRecycleImageEnabled() ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc(std::string("SystemImageReleaseManageObjectEnabled:")
+            .append(SystemProperties::GetImageReleaseManageObjectEnabled() ? "true" : "false"));
     DumpLog::GetInstance().AddDesc(
         std::string("UserRecycleImageEnabled:").append(GetIsRecycleInvisibleImageMemory() ? "true" : "false"));
     isRecycledImage_ ? DumpLog::GetInstance().AddDesc("isRecycled:true")
