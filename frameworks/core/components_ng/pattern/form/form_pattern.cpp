@@ -200,7 +200,7 @@ void FormPattern::OnAttachToFrameNode()
         auto subContainer = pattern->GetSubContainer();
         CHECK_NULL_VOID(subContainer);
         auto id = subContainer->GetRunningCardId();
-        TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnAttachToFrameNode, cardId: %{public}" PRId64, id);
+        TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::FormCacheCallback, cardId: %{public}" PRId64, id);
         FormManager::GetInstance().AddSubContainer(id, subContainer);
         ContainerScope containerScope(scopeId);
         PostDelayedUITask(
