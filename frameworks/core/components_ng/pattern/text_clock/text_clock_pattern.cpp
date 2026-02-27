@@ -878,7 +878,8 @@ void TextClockPattern::DumpInfo()
 
 void TextClockPattern::OnColorConfigurationUpdate()
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || contentModifierNode_) {
+        // If contentModifier is used, the color mode change is perceived by the components inside the contentModifier.
         return;
     }
 
@@ -916,6 +917,10 @@ void TextClockPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
 void TextClockPattern::OnColorModeChange(uint32_t colorMode)
 {
     Pattern::OnColorModeChange(colorMode);
+    if (contentModifierNode_) {
+        // If contentModifier is used, the color mode change is perceived by the components inside the contentModifier.
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();

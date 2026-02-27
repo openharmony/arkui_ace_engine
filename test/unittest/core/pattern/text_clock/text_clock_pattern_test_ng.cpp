@@ -18,7 +18,6 @@
 #include <sys/time.h>
 
 #include "gtest/gtest.h"
-
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
@@ -675,22 +674,19 @@ HWTEST_F(TextClockPatternTestNG, TextClockParseDateTime002, TestSize.Level1)
     std::vector<std::string> str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, res);
 
-    std::vector<std::string> res2 = { "1970", "01", "01", "01", "01", "01", "001", "", "0", "70", "1", "1", "00",
-        "" };
+    std::vector<std::string> res2 = { "1970", "01", "01", "01", "01", "01", "001", "", "0", "70", "1", "1", "00", "" };
     strDateTimeValue = "1970/01/01, 01:01:01.001";
     str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, res2);
 
-    std::vector<std::string> res3 = { "1970", "01", "01", "1", "01", "01", "001", "", "0", "70", "1", "1", "00",
-        "" };
+    std::vector<std::string> res3 = { "1970", "01", "01", "1", "01", "01", "001", "", "0", "70", "1", "1", "00", "" };
     strDateTimeValue = "1970/01/01, 01:01:01.001";
     pattern->is24H_ = true;
     textClockProperty->UpdatePrefixHour(ZeroPrefixType::HIDE);
     str = pattern->ParseDateTimeValue(strDateTimeValue);
     EXPECT_EQ(str, res3);
 
-    std::vector<std::string> res4 = { "1970", "01", "01", "01", "01", "01", "001", "", "0", "70", "1", "1", "00",
-        "" };
+    std::vector<std::string> res4 = { "1970", "01", "01", "01", "01", "01", "001", "", "0", "70", "1", "1", "00", "" };
     strDateTimeValue = "1970/01/01, 1:01:01.001";
     pattern->is24H_ = false;
     textClockProperty->UpdatePrefixHour(ZeroPrefixType::SHOW);
@@ -903,7 +899,7 @@ HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontFamily002, TestSize.Level1)
      * @tc.steps: step3. call UpdateTextClockFontFamily function.
      * @tc.expected: step3. check fontFamily property updated.
      */
-    std::vector<std::string> fontFamilies = {"Arial", "sans-serif"};
+    std::vector<std::string> fontFamilies = { "Arial", "sans-serif" };
     pattern->UpdateTextClockFontFamily(fontFamilies);
     EXPECT_EQ(layoutProperty->GetFontFamily().value(), fontFamilies);
 
@@ -911,7 +907,7 @@ HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontFamily002, TestSize.Level1)
      * @tc.steps: step4. Execute font family update operation
      * @tc.expected: Font specifications should be correctly applied
      */
-    std::vector<std::string> typefaceOptions = {"Roboto", "Helvetica Neue"};
+    std::vector<std::string> typefaceOptions = { "Roboto", "Helvetica Neue" };
     pattern->UpdateTextClockFontFamily(typefaceOptions);
     EXPECT_EQ(layoutProperty->GetFontFamily().value(), typefaceOptions);
 }
