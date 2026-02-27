@@ -16933,8 +16933,10 @@ int32_t SetCheckboxMark(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         strokeWidth = item->value[2].f32;
     }
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setMarkColor(
+        node->uiNodeHandle, strokeColor, nullptr);
     GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setMark(
-        node->uiNodeHandle, strokeColor, nullptr, size, unit, strokeWidth, unit);
+        node->uiNodeHandle, size, unit, strokeWidth, unit);
     return ERROR_CODE_NO_ERROR;
 }
 

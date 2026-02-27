@@ -192,8 +192,9 @@ ArkUINativeModuleValue CheckboxBridge::SetMark(ArkUIRuntimeCallInfo* runtimeCall
         strokeWidth = theme->GetCheckStroke();
     }
     auto colorRawPtr = AceType::RawPtr(colorResObj);
-    GetArkUINodeModifiers()->getCheckboxModifier()->setMark(nativeNode, strokeColor.GetValue(), colorRawPtr,
-        size.Value(), static_cast<int>(size.Unit()), strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
+    GetArkUINodeModifiers()->getCheckboxModifier()->setMarkColor(nativeNode, strokeColor.GetValue(), colorRawPtr);
+    GetArkUINodeModifiers()->getCheckboxModifier()->setMark(nativeNode, size.Value(), static_cast<int>(size.Unit()),
+        strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 

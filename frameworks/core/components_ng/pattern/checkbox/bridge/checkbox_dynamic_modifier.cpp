@@ -128,8 +128,7 @@ void SetCheckboxHeight(ArkUINodeHandle node, float value, int unit)
     CheckBoxModelNG::SetHeight(frameNode, height);
 }
 
-void SetMark(ArkUINodeHandle node, uint32_t color, void* colorRawPtr, float sizeValue, int sizeUnit, float widthValue,
-    int widthUnit)
+void SetMarkColor(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -146,6 +145,12 @@ void SetMark(ArkUINodeHandle node, uint32_t color, void* colorRawPtr, float size
         }
         CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::STROKE_COLOR, resObj);
     }
+}
+
+void SetMark(ArkUINodeHandle node, float sizeValue, int sizeUnit, float widthValue, int widthUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
 
     Dimension size = Dimension(static_cast<double>(sizeValue), static_cast<OHOS::Ace::DimensionUnit>(sizeUnit));
     CheckBoxModelNG::SetCheckMarkSize(frameNode, size);
@@ -680,6 +685,7 @@ const ArkUICheckboxModifier* GetCheckboxDynamicModifier()
             .setCheckboxWidth = nullptr,
             .setCheckboxHeight = nullptr,
             .setMark = nullptr,
+            .setMarkColor = nullptr,
             .setCheckboxPadding = nullptr,
             .setCheckboxResponseRegion = SetCheckboxResponseRegionImpl,
             .setCheckboxOnChange = SetCheckboxOnChangeImpl,
@@ -729,6 +735,7 @@ const ArkUICheckboxModifier* GetCheckboxDynamicModifier()
         .setCheckboxWidth = SetCheckboxWidth,
         .setCheckboxHeight = SetCheckboxHeight,
         .setMark = SetMark,
+        .setMarkColor = SetMarkColor,
         .setCheckboxPadding = SetCheckboxPadding,
         .setCheckboxResponseRegion = SetCheckboxResponseRegion,
         .setCheckboxOnChange = SetCheckboxOnChange,
@@ -780,6 +787,7 @@ const CJUICheckboxModifier* GetCJUICheckboxModifier()
         .setCheckboxWidth = SetCheckboxWidth,
         .setCheckboxHeight = SetCheckboxHeight,
         .setMark = SetMark,
+        .setMarkColor = SetMarkColor,
         .setCheckboxPadding = SetCheckboxPadding,
         .setCheckboxResponseRegion = SetCheckboxResponseRegion,
         .resetSelect = ResetSelect,
