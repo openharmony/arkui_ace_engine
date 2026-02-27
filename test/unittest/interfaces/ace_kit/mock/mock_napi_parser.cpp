@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/adapter/animated_image.h"
-
-namespace OHOS::Ace::NG {
-RefPtr<CanvasImage> AnimatedImage::Create(
-    const RefPtr<DrawingImageData>& data, const ResizeParam& size, const std::string& url)
+#include "napi/napi_parser.h"
+namespace OHOS::Ace::Kit {
+bool ACE_FORCE_EXPORT ParseColor(napi_env env, napi_value value, Color& info)
 {
-    return nullptr;
+    return true;
 }
 
-bool AnimatedImage::GetIsAnimating() const
+bool ACE_FORCE_EXPORT ParseDimension(
+    napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit, bool isSupportPercent)
 {
-    return false;
+    return true;
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::Kit

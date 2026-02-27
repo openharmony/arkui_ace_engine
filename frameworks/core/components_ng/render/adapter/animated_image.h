@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,14 +20,13 @@
 #include <memory>
 #include <utility>
 
-#include "include/codec/SkCodec.h"
-#include "include/core/SkImage.h"
+class SkCodec;
 
 #include "base/image/image_source.h"
 #include "base/thread/cancelable_callback.h"
 #include "core/components_ng/image_provider/drawing_image_data.h"
-#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/drawing_image.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace {
 class Animator;
@@ -36,6 +35,7 @@ class Animator;
 namespace OHOS::Ace::NG {
 class AnimatedImage : public virtual CanvasImage {
     DECLARE_ACE_TYPE(AnimatedImage, CanvasImage);
+
 public:
     // initialize animator
     AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url);
@@ -110,11 +110,10 @@ private:
 
 class AnimatedRSImage : public AnimatedImage, public DrawingImage {
     DECLARE_ACE_TYPE(AnimatedRSImage, AnimatedImage, DrawingImage);
+
 public:
-    AnimatedRSImage(std::unique_ptr<SkCodec> codec, std::string url)
-        : AnimatedImage(codec, std::move(url)), codec_(std::move(codec))
-    {}
-    ~AnimatedRSImage() override = default;
+    AnimatedRSImage(std::unique_ptr<SkCodec> codec, std::string url);
+    ~AnimatedRSImage() override;
 
     std::shared_ptr<RSImage> GetImage() const override;
 
@@ -151,10 +150,11 @@ private:
 
 class AnimatedPixmap : public AnimatedImage, public PixelMapImage {
     DECLARE_ACE_TYPE(AnimatedPixmap, AnimatedImage, PixelMapImage);
+
 public:
     AnimatedPixmap(const std::unique_ptr<SkCodec>& codec, const RefPtr<ImageSource>& src, const ResizeParam& size,
         std::string url);
-    ~AnimatedPixmap() override = default;
+    ~AnimatedPixmap() override;
     RefPtr<PixelMap> GetPixelMap() const override;
 
     RefPtr<PixelMap> GetFirstPixelMap() override;
