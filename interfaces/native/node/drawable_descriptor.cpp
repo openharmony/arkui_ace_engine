@@ -153,6 +153,29 @@ int32_t OH_ArkUI_DrawableDescriptor_GetAnimationAutoPlay(
     return OHOS::Ace::NodeModel::GetAutoPlay(drawableDescriptor->newDrawableDescriptor, autoPlay);
 }
 
+int32_t OH_ArkUI_DrawableDescriptor_SetAnimationStopMode(
+    ArkUI_DrawableDescriptor* drawableDescriptor, DrawableDescriptor_AnimationStopMode mode)
+{
+    CHECK_NULL_RETURN(drawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(drawableDescriptor->newDrawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    return OHOS::Ace::NodeModel::SetStopMode(drawableDescriptor->newDrawableDescriptor, static_cast<int32_t>(mode));
+}
+
+int32_t OH_ArkUI_DrawableDescriptor_GetAnimationStopMode(
+    const ArkUI_DrawableDescriptor* drawableDescriptor, DrawableDescriptor_AnimationStopMode* mode)
+{
+    CHECK_NULL_RETURN(drawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(drawableDescriptor->newDrawableDescriptor, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(mode, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    int32_t stopMode = static_cast<int32_t>(DRAWABLE_DESCRIPTOR_ANIMATION_FIRST_FRAME);
+    auto ret = OHOS::Ace::NodeModel::GetStopMode(drawableDescriptor->newDrawableDescriptor, &stopMode);
+    if (ret != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    *mode = static_cast<DrawableDescriptor_AnimationStopMode>(stopMode);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 int32_t OH_ArkUI_DrawableDescriptor_CreateAnimationController(ArkUI_DrawableDescriptor* drawableDescriptor,
     ArkUI_NodeHandle node, ArkUI_DrawableDescriptor_AnimationController** controller)
 {

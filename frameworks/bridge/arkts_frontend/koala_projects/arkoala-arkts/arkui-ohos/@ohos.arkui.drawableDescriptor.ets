@@ -180,11 +180,17 @@ export class LayeredDrawableDescriptor extends DrawableDescriptor {
   }
 }
 
+export enum AnimationStopMode {
+  FIRST_FRAME = 0,
+  LAST_FRAME = 1
+}
+
 export interface AnimationOptions {
   duration?: int;
   iterations?: int;
   frameDurations?: Array<int>;
   autoPlay?: boolean;
+  stopMode?: AnimationStopMode;
 }
 
 class AnimationOptionsImpl implements AnimationOptions {

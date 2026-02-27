@@ -4324,6 +4324,14 @@
         "name": "OH_ArkUI_DrawableDescriptor_GetAnimationAutoPlay"
     },
     {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DrawableDescriptor_SetAnimationStopMode"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DrawableDescriptor_GetAnimationStopMode"
+    },
+    {
         "first_introduced": "22",
         "name": "OH_ArkUI_DrawableDescriptor_CreateAnimationController"
     },

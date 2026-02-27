@@ -201,6 +201,8 @@ int32_t SetFrameDurations(void* object, uint32_t* durations, size_t size);
 int32_t GetFrameDurations(void* object, uint32_t* durations, size_t* size);
 int32_t SetAutoPlay(void* object, uint32_t autoPlay);
 int32_t GetAutoPlay(void* object, uint32_t* autoPlay);
+int32_t SetStopMode(void* object, int32_t stopMode);
+int32_t GetStopMode(void* object, int32_t* stopMode);
 int32_t CreateAnimationController(
     void* object, ArkUI_NodeHandle node, ArkUI_DrawableDescriptor_AnimationController** controller);
 void DisposeAnimationController(ArkUI_DrawableDescriptor_AnimationController* controller);
