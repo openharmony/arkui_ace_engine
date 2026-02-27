@@ -7748,7 +7748,7 @@ bool TextFieldPattern::OnBackPressed()
         }
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (!imeShown_ && !isCustomKeyboardAttached_) {
+    if (!(imeShown_ || voiceKbShown_) && !isCustomKeyboardAttached_) {
         return false;
     }
 #else
