@@ -21,7 +21,7 @@ COMMON_SRC = [
 
 # Test original top-down WaterFlow
 ace_unittest("water_flow_test_original") {
-  module_name = "ScrollingSet-WaterFlowAndFlowItem"
+  module_name = "ScrollingSet-Scroll"
   type = "new"
   sources = [
     "water_flow_dump_test.cpp",

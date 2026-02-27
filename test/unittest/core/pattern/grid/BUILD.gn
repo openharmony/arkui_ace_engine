@@ -52,7 +52,7 @@ ace_unittest("grid_test_regular") {
 }
 
 ace_unittest("grid_test_ng") {
-  module_name = "ScrollingSet-GridAndGridItem"
+  module_name = "StateManagement-InComponent"
   type = "new"
   sources = COMMON_SRC
   defines = [ "TEST_IRREGULAR_GRID" ]
@@ -68,7 +68,7 @@ ace_unittest("grid_test_ng") {
 }
 
 ace_unittest("grid_static_test_ng") {
-  module_name = "ScrollingSet-GridAndGridItem"
+  module_name = "StateManagement-InComponent"
   type = "new"
   sources = [
     "grid_static_test_ng.cpp",
