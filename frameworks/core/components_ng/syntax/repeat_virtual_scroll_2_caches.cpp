@@ -298,7 +298,7 @@ OptCacheItem RepeatVirtualScroll2Caches::GetL1CacheItem4Index(IndexType index)
 {
     const auto iter = l1Rid4Index_.find(index);
     if (iter == l1Rid4Index_.end()) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "GetL1CacheItem4Index(index: %{public}d) returns nullptr, new index", index);
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "GetL1CacheItem4Index(index: %{public}d) returns nullptr, new index", index);
         return std::nullopt;
     }
 
