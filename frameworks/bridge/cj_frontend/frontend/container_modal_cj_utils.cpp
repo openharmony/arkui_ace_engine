@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/advanced_pattern_theme.h"
+#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -259,10 +260,8 @@ void AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode)
     auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
     inputHub->AddOnHoverEvent(hoverEvent);
 }
-} // namespace
 
-RefPtr<FrameNode> BuildControlButtonForCj(
-    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton, bool canDrag)
+std::string GetButtonKeyFromIcon(InternalResource::ResourceId icon)
 {
     static std::unordered_map<InternalResource::ResourceId, std::string> controlButtonKeyMap = {
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, SPLIT_LEFT_KEY },
@@ -276,88 +275,155 @@ RefPtr<FrameNode> BuildControlButtonForCj(
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, CLOSE_KEY },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE, CLOSE_KEY },
     };
+    auto iter = controlButtonKeyMap.find(icon);
+    return (iter != controlButtonKeyMap.end()) ? iter->second : "";
+}
+
+RefPtr<FrameNode> CreateButtonImageIcon(InternalResource::ResourceId icon, bool isCloseButton)
+{
     auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    // button image icon
-    ImageSourceInfo imageSourceInfo;
+    
     auto imageIcon = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageEventHub = imageIcon->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(imageEventHub, nullptr);
     imageEventHub->RemoveDragEvent();
     imageIcon->SetDraggable(false);
+    
     auto imageFocus = imageIcon->GetFocusHub();
     if (imageFocus) {
         imageFocus->SetFocusable(false);
     }
+    
+    ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(icon);
     imageSourceInfo.SetFillColor(theme->GetControlBtnColor(isCloseButton, ControlBtnColorType::NORMAL_FILL));
+    
     auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(TITLE_ICON_SIZE), CalcLength(TITLE_ICON_SIZE)));
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    
     auto imageRenderProperty = imageIcon->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(imageRenderProperty, nullptr);
     imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::HIGH);
     imageIcon->MarkModifyDone();
+    
+    return imageIcon;
+}
 
-    auto buttonNode = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
-    auto buttonFocus = buttonNode->GetFocusHub();
-    if (buttonFocus) {
-        buttonFocus->SetFocusable(false);
-    }
-    std::string buttonKey = "";
-    auto iter = controlButtonKeyMap.find(icon);
-    if (iter != controlButtonKeyMap.end()) {
-        buttonKey = iter->second;
-    }
-    buttonNode->UpdateInspectorId(buttonKey);
-
-    AddButtonHover(buttonNode, imageIcon);
-    AddButtonMouse(buttonNode, imageIcon);
-    AddButtonStyleMouseEvent(buttonNode, imageIcon, isCloseButton);
-
-    auto renderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackgroundColor(theme->GetControlBtnColor(isCloseButton, ControlBtnColorType::NORMAL));
-
+void SetupButtonClickEvent(const RefPtr<FrameNode>& buttonNode, GestureEventFunc&& clickCallback,
+    const std::string& buttonKey)
+{
     auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(buttonEventHub, nullptr);
+    CHECK_NULL_VOID(buttonEventHub);
+    
+    // Wrap click callback to stop event propagation and prevent parent pan gesture from intercepting
+    auto wrappedCallback = [clickCallback, buttonKey](GestureEvent& info) {
+        // Stop event propagation to prevent parent pan gesture from intercepting button clicks
+        info.SetStopPropagation(true);
+        // Check callback validity before calling to avoid undefined behavior
+        if (clickCallback) {
+            clickCallback(info);
+        }
+    };
+    
     auto clickGesture = AceType::MakeRefPtr<TapGesture>();
-    clickGesture->SetOnActionId(clickCallback);
+    clickGesture->SetOnActionId(std::move(wrappedCallback));
     buttonEventHub->AddGesture(clickGesture);
-    buttonNode->SetDraggable(canDrag);
+}
 
+void SetupButtonResponseRegion(const RefPtr<FrameNode>& buttonNode)
+{
     DimensionOffset offsetDimen(TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_X, TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_Y);
     DimensionRect dimenRect(TITLE_BUTTON_RESPONSE_REGIOIN_WIDTH, TITLE_BUTTON_RESPONSE_REGIOIN_HEIGHT, offsetDimen);
     std::vector<DimensionRect> result;
     result.emplace_back(dimenRect);
     auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(gestureHub, nullptr);
+    CHECK_NULL_VOID(gestureHub);
     gestureHub->SetResponseRegion(result);
+}
 
+void SetupButtonLayoutProperties(const RefPtr<FrameNode>& buttonNode, bool isCloseButton)
+{
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    CHECK_NULL_VOID(buttonLayoutProperty);
     buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TITLE_BUTTON_SIZE), CalcLength(TITLE_BUTTON_SIZE)));
-
+    
     MarginProperty margin;
     margin.right = CalcLength(isCloseButton ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL);
     buttonLayoutProperty->UpdateMargin(margin);
     buttonNode->MarkModifyDone();
-
-    buttonNode->AddChild(imageIcon);
-    return buttonNode;
 }
 
-RefPtr<FrameNode> AddControlButtonsForCj(
-    const WeakPtr<ContainerModalPatternEnhance>& weakPattern, const RefPtr<FrameNode>& containerTitleRow)
+RefPtr<ContainerModalPatternEnhance> SearchPatternInParentChain(const WeakPtr<FrameNode>& weakContainerTitleRow)
+{
+    auto containerTitleRow = weakContainerTitleRow.Upgrade();
+    CHECK_NULL_RETURN(containerTitleRow, nullptr);
+
+    constexpr int32_t MAX_DEPTH = 100; // Maximum depth to prevent infinite loop and performance issues
+    auto startNode = containerTitleRow;
+    int32_t depth = 0;
+
+    for (auto parent = containerTitleRow->GetParent();
+         parent && depth < MAX_DEPTH;
+         parent = parent->GetParent(), depth++) {
+        // Cycle detection: check if we've returned to the starting node (indicates a cycle)
+        if (parent == startNode) {
+            break;
+        }
+
+        auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+
+        auto pattern = frameNode->GetPattern<ContainerModalPatternEnhance>();
+        if (pattern) {
+            return pattern;
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<ContainerModalPatternEnhance> SearchPatternInRootElement()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto rootElement = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootElement, nullptr);
+    auto firstChild = AceType::DynamicCast<FrameNode>(rootElement->GetFirstChild());
+    CHECK_NULL_RETURN(firstChild, nullptr);
+    return firstChild->GetPattern<ContainerModalPatternEnhance>();
+}
+
+RefPtr<ContainerModalPatternEnhance> GetPatternFromWeakOrParent(
+    const WeakPtr<ContainerModalPatternEnhance>& weakPattern, const WeakPtr<FrameNode>& weakContainerTitleRow)
+{
+    // Get pattern from weakPattern or search in parent chain as fallback
+    // Note: weakPattern may be invalid if created from a node without pattern
+    auto pattern = weakPattern.Upgrade();
+    if (pattern) {
+        return pattern;
+    }
+    // Search in parent chain (use WeakPtr to avoid circular reference)
+    pattern = SearchPatternInParentChain(weakContainerTitleRow);
+    if (pattern) {
+        return pattern;
+    }
+    // Fallback to root element
+    return SearchPatternInRootElement();
+}
+
+RefPtr<FrameNode> CreateMaximizeButtonForCj(
+    std::function<RefPtr<ContainerModalPatternEnhance>()> getPattern)
 {
     RefPtr<FrameNode> maximizeBtn = BuildControlButtonForCj(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE, [weakPattern](GestureEvent& info) {
-            auto pattern = weakPattern.Upgrade();
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE, [getPattern](GestureEvent& info) {
+            auto pattern = getPattern();
             CHECK_NULL_VOID(pattern);
             pattern->OnMaxButtonClick(info);
         });
@@ -365,8 +431,8 @@ RefPtr<FrameNode> AddControlButtonsForCj(
 
     // add long press event
     WeakPtr<FrameNode> weakMaximizeBtn = maximizeBtn;
-    auto longPressCallback = [weakPattern, weakMaximizeBtn](GestureEvent& info) {
-        auto pattern = weakPattern.Upgrade();
+    auto longPressCallback = [getPattern, weakMaximizeBtn](GestureEvent& info) {
+        auto pattern = getPattern();
         CHECK_NULL_VOID(pattern);
         auto maximizeBtn = weakMaximizeBtn.Upgrade();
         CHECK_NULL_VOID(maximizeBtn);
@@ -378,42 +444,107 @@ RefPtr<FrameNode> AddControlButtonsForCj(
     hub->SetLongPressEvent(longPressEvent, false, true);
 
     auto eventHub = maximizeBtn->GetOrCreateInputEventHub();
-    auto hoverMoveFuc = [weakPattern](MouseInfo& info) {
-        auto pattern = weakPattern.Upgrade();
+    auto hoverMoveFuc = [getPattern](MouseInfo& info) {
+        auto pattern = getPattern();
         CHECK_NULL_VOID(pattern);
         pattern->OnMaxBtnInputEvent(info);
     };
     eventHub->AddOnMouseEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverMoveFuc)));
 
     // add hover in out event
-    auto hoverEventFuc = [weakPattern, weakMaximizeBtn](bool hover) mutable {
-        auto pattern = weakPattern.Upgrade();
+    auto hoverEventFuc = [getPattern, weakMaximizeBtn](bool hover) mutable {
+        auto pattern = getPattern();
         CHECK_NULL_VOID(pattern);
         pattern->OnMaxBtnHoverEvent(hover, weakMaximizeBtn);
     };
     eventHub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFuc)));
-    containerTitleRow->AddChild(maximizeBtn);
+    return maximizeBtn;
+}
 
+RefPtr<FrameNode> CreateMinimizeButtonForCj(
+    std::function<RefPtr<ContainerModalPatternEnhance>()> getPattern)
+{
     RefPtr<FrameNode> minimizeBtn = BuildControlButtonForCj(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [weakPattern](GestureEvent& info) {
-            auto pattern = weakPattern.Upgrade();
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [getPattern](GestureEvent& info) {
+            auto pattern = getPattern();
             CHECK_NULL_VOID(pattern);
             pattern->OnMinButtonClick(info);
         });
     // minimizeBtn add empty panEvent to over fater container event
     minimizeBtn->UpdateInspectorId("EnhanceMinimizeBtn");
-    containerTitleRow->AddChild(minimizeBtn);
+    return minimizeBtn;
+}
 
+RefPtr<FrameNode> CreateCloseButtonForCj(
+    std::function<RefPtr<ContainerModalPatternEnhance>()> getPattern)
+{
     RefPtr<FrameNode> closeBtn = BuildControlButtonForCj(
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
-        [weakPattern](GestureEvent& info) {
-            auto pattern = weakPattern.Upgrade();
+        [getPattern](GestureEvent& info) {
+            auto pattern = getPattern();
             CHECK_NULL_VOID(pattern);
             pattern->OnCloseButtonClick(info);
         },
         true);
     // closeBtn add empty panEvent to over fater container event
     closeBtn->UpdateInspectorId("EnhanceCloseBtn");
+    return closeBtn;
+}
+
+} // namespace
+
+RefPtr<FrameNode> BuildControlButtonForCj(
+    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton, bool canDrag)
+{
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    
+    auto imageIcon = CreateButtonImageIcon(icon, isCloseButton);
+    CHECK_NULL_RETURN(imageIcon, nullptr);
+
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonFocus = buttonNode->GetFocusHub();
+    if (buttonFocus) {
+        buttonFocus->SetFocusable(false);
+    }
+    
+    std::string buttonKey = GetButtonKeyFromIcon(icon);
+    buttonNode->UpdateInspectorId(buttonKey);
+
+    AddButtonHover(buttonNode, imageIcon);
+    AddButtonMouse(buttonNode, imageIcon);
+    AddButtonStyleMouseEvent(buttonNode, imageIcon, isCloseButton);
+
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(theme->GetControlBtnColor(isCloseButton, ControlBtnColorType::NORMAL));
+
+    SetupButtonClickEvent(buttonNode, std::move(clickCallback), buttonKey);
+    buttonNode->SetDraggable(canDrag);
+    SetupButtonResponseRegion(buttonNode);
+    SetupButtonLayoutProperties(buttonNode, isCloseButton);
+
+    buttonNode->AddChild(imageIcon);
+    return buttonNode;
+}
+
+RefPtr<FrameNode> AddControlButtonsForCj(
+    const WeakPtr<ContainerModalPatternEnhance>& weakPattern, const RefPtr<FrameNode>& containerTitleRow)
+{
+    // Use WeakPtr to avoid circular reference
+    WeakPtr<FrameNode> weakContainerTitleRow = containerTitleRow;
+    auto getPattern = [weakPattern, weakContainerTitleRow]() -> RefPtr<ContainerModalPatternEnhance> {
+        return GetPatternFromWeakOrParent(weakPattern, weakContainerTitleRow);
+    };
+    
+    auto maximizeBtn = CreateMaximizeButtonForCj(getPattern);
+    containerTitleRow->AddChild(maximizeBtn);
+
+    auto minimizeBtn = CreateMinimizeButtonForCj(getPattern);
+    containerTitleRow->AddChild(minimizeBtn);
+
+    auto closeBtn = CreateCloseButtonForCj(getPattern);
     containerTitleRow->AddChild(closeBtn);
 
     return containerTitleRow;
