@@ -105,14 +105,7 @@ class DatePickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
   }
 
   checkObjectDiff(): boolean {
-    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style)) {
-      return true;
-    } else {
-      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
-    }
+    return true;
   }
 }
 
@@ -134,14 +127,7 @@ class DatePickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
   }
 
   checkObjectDiff(): boolean {
-    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style)) {
-      return true;
-    } else {
-      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
-    }
+    return true;
   }
 }
 
@@ -163,14 +149,7 @@ class DatePickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
   }
 
   checkObjectDiff(): boolean {
-    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style)) {
-      return true;
-    } else {
-      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
-    }
+    return true;
   }
 }
 class DatePickerOnChangeModifier extends ModifierWithKey<(value: DatePickerResult) => void>{

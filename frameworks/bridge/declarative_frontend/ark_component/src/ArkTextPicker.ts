@@ -229,17 +229,7 @@ class TextpickerDefaultTextStyleModifier extends ModifierWithKey<PickerTextStyle
   }
 
   checkObjectDiff(): boolean {
-    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style &&
-      this.stageValue?.overflow === this.value?.overflow)) {
-      return true;
-    } else {
-      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
-        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
-        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
-    }
+    return true;
   }
 }
 
@@ -264,17 +254,7 @@ class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
   }
 
   checkObjectDiff(): boolean {
-    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style &&
-      this.stageValue?.overflow === this.value?.overflow)) {
-      return true;
-    } else {
-      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
-        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
-        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
-    }
+    return true;
   }
 }
 
@@ -299,17 +279,7 @@ class TextpickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
   }
 
   checkObjectDiff(): boolean {
-    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style &&
-      this.stageValue?.overflow === this.value?.overflow)) {
-      return true;
-    } else {
-      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
-        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
-        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
-    }
+    return true;
   }
 }
 
@@ -334,17 +304,7 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
   }
 
   checkObjectDiff(): boolean {
-    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
-      this.stageValue?.font?.style === this.value?.font?.style &&
-      this.stageValue?.overflow === this.value?.overflow)) {
-      return true;
-    } else {
-      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
-        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
-        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
-        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
-    }
+    return true;
   }
 }
 
