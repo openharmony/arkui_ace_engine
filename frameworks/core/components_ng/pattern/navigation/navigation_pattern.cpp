@@ -5097,13 +5097,6 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
         return;
     }
 
-    /**
-     * During the NavDestination transition with page-level orientation, the orientation should be locked.
-     * Calling the GetPageViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
-     * the end of the locking.
-     * @see SetRequestedOrientationIfNeeded
-     */
-    enableLockOrientation_ = true;
     RefPtr<PageViewportConfig> currentConfig = nullptr;
     RefPtr<PageViewportConfig> targetConfig = nullptr;
     PageViewportConfigParams currentParams;
@@ -5115,7 +5108,13 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
         TAG_LOGE(ACE_NAVIGATION, "failed to get pageViewportConfig");
         return;
     }
-
+    /**
+     * During the NavDestination transition with page-level orientation, the orientation should be locked.
+     * Calling the GetPageViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
+     * the end of the locking.
+     * @see SetRequestedOrientationIfNeeded
+     */
+    enableLockOrientation_ = true;
     auto curDisplayOrientation = container->GetCurrentDisplayOrientation();
     auto targetDisplayOrientation = targetConfig->GetOrientation();
     auto angle = CalcRotateAngleWithDisplayOrientation(curDisplayOrientation, targetDisplayOrientation);
