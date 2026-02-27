@@ -59,10 +59,7 @@ JSOffscreenRenderingContext::JSOffscreenRenderingContext()
         renderingContext2DModel_ = AceType::MakeRefPtr<NG::OffscreenCanvasRenderingContext2DModelNG>();
     } else {
         const auto* modifier = GetCanvasInnerModifier();
-        if (modifier == nullptr) {
-            LOGF("Cannot find video modifier");
-            abort();
-        }
+        CHECK_NULL_VOID(modifier);
         void* renderContext = modifier->createCanvasRenderingContextModel(true);
         if (renderContext != nullptr) {
             renderingContext2DModel_ = AceType::Claim(reinterpret_cast<RenderingContext2DModel*>(renderContext));
