@@ -44,15 +44,17 @@ ViewAbstractModel* ViewAbstractModel::GetInstance()
 // Should use CJUIModifier API later
 NG::GaugeModelNG* GetGaugeModel()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
-    if (module == nullptr) {
-        LOGF("Can't find gauge dynamic module");
-        abort();
+    static NG::GaugeModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find gauge dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::GaugeModelNG*>(module->GetModel());
     }
-    return reinterpret_cast<NG::GaugeModelNG*>(module->GetModel());
+    return cachedModel;
 }
-
-}
+} // namespace OHOS::Ace
 
 extern "C" {
 VectorColorStops FFICJCreateVectorColorStop(int64_t size)

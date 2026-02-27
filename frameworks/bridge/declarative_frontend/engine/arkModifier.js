@@ -902,6 +902,10 @@ class LazyArkGaugeComponent extends ArkComponent {
     this.lazyComponent.contentModifier(value);
     return this;
   }
+  privacySensitive(value) {
+    this.lazyComponent.privacySensitive(value);
+    return this;
+  }
 }
 
 class GaugeModifier extends LazyArkGaugeComponent {
