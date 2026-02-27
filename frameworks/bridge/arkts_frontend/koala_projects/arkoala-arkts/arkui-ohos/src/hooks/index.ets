@@ -561,12 +561,10 @@ export function hookSetNavDestination(peer: ArkNavigationPeer, value: PageMapBui
   NavigationOpsHandWritten.hookSetNavDestinationImpl(peer, value);
 }
 
-export function hookSplitPlaceholder(component: ArkNavigationComponent, value: ComponentContent<Object>): void {
-  NavigationOpsHandWritten.hookSplitPlaceholderImpl(component.getPeer(), value);
-}
-
-export function hookSplitPlaceholder(peer: ArkNavigationPeer, value: ComponentContent<Object>): void {
-  NavigationOpsHandWritten.hookSplitPlaceholderImpl(peer, value);
+export function hookSplitPlaceholder(node: ArkNavigationComponent | ArkNavigationPeer, value: ComponentContent<Object>): void {
+  const navPeer: ArkNavigationPeer = node instanceof ArkNavigationComponent ?
+    (node as ArkNavigationComponent).getPeer() : (node as ArkNavigationPeer);
+  NavigationOpsHandWritten.hookSplitPlaceholderImpl(navPeer, value);
 }
 
 export function hookGetConfigInRouteMap(info: NavDestinationContextInternal): RouteMapConfig | undefined {

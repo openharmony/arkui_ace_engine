@@ -1067,6 +1067,6 @@ void NavigationModelStatic::SetSplitPlaceholder(FrameNode* frameNode, const RefP
         navigationGroupNode->AddChild(placeholderContentNode);
         navigationGroupNode->SetPlaceholderContentNode(placeholderContentNode);
     }
-    navigationGroupNode->SetSplitPlaceholder(splitPlaceholder);
+    navigationGroupNode->SetStaticSplitPlaceholder(splitPlaceholder);
 }
 } // namespace OHOS::Ace::NG

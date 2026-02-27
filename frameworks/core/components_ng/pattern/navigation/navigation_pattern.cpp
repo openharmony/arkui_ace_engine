@@ -1539,6 +1539,26 @@ void NavigationPattern::ProcessSameTopNavPath()
     ClearRecoveryList();
 }
 
+void NavigationPattern::UpdatePlaceholderVisibilityIfNeeded()
+{
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    if (!host->GetIsStaticPlaceholder()) {
+        return;
+    }
+    auto phNode = AceType::DynamicCast<FrameNode>(host->GetPlaceholderContentNode());
+    CHECK_NULL_VOID(phNode);
+    CHECK_NULL_VOID(navigationStack_);
+    auto navProperty = host->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navProperty);
+    bool isHideNavBar = navProperty->GetHideNavBar().value_or(false);
+    auto phProperty = phNode->GetLayoutProperty();
+    CHECK_NULL_VOID(phProperty);
+    if (navigationStack_->Empty() && navigationMode_ == NavigationMode::SPLIT && !isHideNavBar) {
+        phProperty->UpdateVisibility(VisibleType::VISIBLE);
+    }
+}
+
 void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
@@ -1549,6 +1569,8 @@ void NavigationPattern::CheckTopNavPathChange(
     if (preTopNavPath != newTopNavPath) {
         UpdateSystemBarStyleOnTopNavPathChange(newTopNavPath);
     }
+
+    UpdatePlaceholderVisibilityIfNeeded();
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (preTopNavPath == newTopNavPath) {
         ProcessSameTopNavPath();
