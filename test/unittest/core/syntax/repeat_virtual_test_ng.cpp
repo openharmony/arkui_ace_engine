@@ -1469,5 +1469,196 @@ HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest045, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
+/**
+ * @tc.name: RepeatNodeIsAllowAnimation001
+ * @tc.desc: Test IsAllowAnimation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimation001, TestSize.Level1)
+{
+    auto listNode = CreateNode(V2::LIST_ETS_TAG, 100);
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(repeatNode, nullptr);
+    
+    listNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), true);
+}
+
+/**
+ * @tc.name: RepeatNodeIsAllowAnimation002
+ * @tc.desc: Test IsAllowAnimation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimation002, TestSize.Level1)
+{
+    auto gridNode = CreateNode(V2::GRID_ETS_TAG, 100);
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(repeatNode, nullptr);
+    
+    gridNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
+}
+
+/**
+ * @tc.name: RepeatNodeIsChildInAnimation001
+ * @tc.desc: Test IsChildInAnimation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsChildInAnimation001, TestSize.Level1)
+{
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(repeatNode, nullptr);
+    EXPECT_EQ(repeatNode->IsChildInAnimation(0), false);
+}
+
+/**
+ * @tc.name: RepeatNodeGetActiveRange001
+ * @tc.desc: Test GetActiveRange function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeGetActiveRange001, TestSize.Level1)
+{
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->activeRangeStart_ = 5;
+    repeatNode->activeRangeEnd_ = 10;
+    auto activeRange = repeatNode->GetActiveRange();
+    EXPECT_EQ(activeRange.first, 5);
+    EXPECT_EQ(activeRange.second, 10);
+}
+
+/**
+ * @tc.name: RepeatNodeDoSetActiveChildRange001
+ * @tc.desc: Test DoSetActiveChildRange function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeDoSetActiveChildRange001, TestSize.Level1)
+{
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->DoSetActiveChildRange(5, 10, 2, 2, false);
+    EXPECT_EQ(repeatNode->activeRangeStart_, 3);
+    EXPECT_EQ(repeatNode->activeRangeEnd_, 12);
+}
+
+/**
+ * @tc.name: RepeatNodeAdjustFromIndex001
+ * @tc.desc: Test AdjustFromIndex function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeAdjustFromIndex001, TestSize.Level1)
+{
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->from_ = -1;
+    repeatNode->to_ = -1;
+    EXPECT_EQ(repeatNode->AdjustFromIndex(1), 1);
+
+    repeatNode->from_ = 5;
+    repeatNode->to_ = 10;
+    EXPECT_EQ(repeatNode->AdjustFromIndex(5), 10);
+    EXPECT_EQ(repeatNode->AdjustFromIndex(1), 1);
+    EXPECT_EQ(repeatNode->AdjustFromIndex(8), 7);
+    EXPECT_EQ(repeatNode->AdjustFromIndex(15), 15);
+
+    repeatNode->from_ = 10;
+    repeatNode->to_ = 5;
+    EXPECT_EQ(repeatNode->AdjustFromIndex(1), 1);
+    EXPECT_EQ(repeatNode->AdjustFromIndex(8), 9);
+    EXPECT_EQ(repeatNode->AdjustFromIndex(15), 15);
+}
+
+/**
+ * @tc.name: RepeatModelIsAllowAnimation001
+ * @tc.desc: Test IsAllowAnimation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatModelIsAllowAnimation001, TestSize.Level1)
+{
+    auto listNode = CreateNode(V2::LIST_ETS_TAG, 100);
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(repeatNode, nullptr);
+    
+    listNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatModel.IsAllowAnimation(), true);
+}
+
+/**
+ * @tc.name: RepeatModelIsAllowAnimation002
+ * @tc.desc: Test IsAllowAnimation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatModelIsAllowAnimation002, TestSize.Level1)
+{
+    auto gridNode = CreateNode(V2::GRID_ETS_TAG, 100);
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(repeatNode, nullptr);
+    
+    gridNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatModel.IsAllowAnimation(), false);
+}
+
+/**
+ * @tc.name: RepeatModelIsImplicitAnimationOpen001
+ * @tc.desc: Test IsImplicitAnimationOpen function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatModelIsImplicitAnimationOpen001, TestSize.Level1)
+{
+    RepeatModelNG repeatModel;
+    EXPECT_EQ(repeatModel.IsImplicitAnimationOpen(), AnimationUtils::IsImplicitAnimationOpen());
+}
+
+/**
+ * @tc.name: RepeatModelIsChildInAnimation001
+ * @tc.desc: Test IsChildInAnimation function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatModelIsChildInAnimation001, TestSize.Level1)
+{
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(repeatNode, nullptr);
+    EXPECT_EQ(repeatModel.IsChildInAnimation(0), false);
+}
+
+/**
+ * @tc.name: RepeatModelGetActiveRange001
+ * @tc.desc: Test GetActiveRange function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtualTestNg, RepeatModelGetActiveRange001, TestSize.Level1)
+{
+    RepeatModelNG repeatModel;
+    repeatModel.StartRender();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->activeRangeStart_ = 5;
+    repeatNode->activeRangeEnd_ = 10;
+    auto activeRange = repeatNode->GetActiveRange();
+    EXPECT_EQ(activeRange.first, 5);
+    EXPECT_EQ(activeRange.second, 10);
+}
 
 } // namespace OHOS::Ace::NG
