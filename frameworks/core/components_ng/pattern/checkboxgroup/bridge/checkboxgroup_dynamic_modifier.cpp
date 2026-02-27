@@ -210,7 +210,8 @@ void SetCheckboxGroupMark(ArkUINodeHandle node, uint32_t color, void* colorRawPt
         CHECK_NULL_VOID(frameNode);
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result,
+                ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
@@ -365,7 +366,8 @@ void SetCheckMarkColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawP
         CHECK_NULL_VOID(frameNode);
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result,
+                ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
