@@ -1000,7 +1000,6 @@ public:
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
     void ResetHighLightValue();
     ACE_FORCE_EXPORT void ReportSelectedText(bool isRegister = false) override;
-    bool GetIsSpecialSymbol() const;
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
@@ -1377,7 +1376,6 @@ private:
 
     int32_t highlightAppearAnimationId_ = 0;
     int32_t highlightDisappearAnimationId_ = 0;
-    bool isSpecialSymbol_ = false;
 
     // ----- multi thread state variables -----
     // ----- multi thread state variables end -----

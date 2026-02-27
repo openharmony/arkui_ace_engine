@@ -999,7 +999,7 @@ public:
         return fontSize_.value;
     }
 
-    float GetFontSizeActual() const
+    float GetFontSizeActual()
     {
         return fontSize_.actualValue;
     }

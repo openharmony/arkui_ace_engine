@@ -77,11 +77,6 @@ public:
         return paragraphManager_->GetParagraphs().front().paragraph;
     }
 
-    bool GetIsSpecialSymbol()
-    {
-        return isSpecialSymbol_;
-    }
-
 protected:
     virtual int32_t GetPreviousLength() const
     {
@@ -149,7 +144,6 @@ private:
     std::optional<LayoutConstraintF> cachedCalcContentConstraint_;
     bool isFixIdealSizeAndNoMaxWidth_ = false;
     bool alwaysReCreateParagraph_ = false;
-    bool isSpecialSymbol_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
