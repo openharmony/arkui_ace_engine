@@ -45436,7 +45436,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // UIContextAtomicServiceBarAccessor
     namespace UIContextGetInfoAccessor {
-    Opt_uiObserver_NavigationInfo GetNavigationInfoByUniqueIdImpl(Ark_Int64 id)
+    Opt_uiObserver_NavigationInfo GetNavigationInfoByUniqueIdImpl(Ark_Int32 id)
     {
         if (!needGroupedLog(1)) {
             return { .tag=INTEROP_TAG_UNDEFINED };

@@ -42662,7 +42662,7 @@ KInteropReturnBuffer impl_UIContextAtomicServiceBar_getBarRect() {
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_0(UIContextAtomicServiceBar_getBarRect, KInteropReturnBuffer)
-KInteropReturnBuffer impl_UIContextGetInfo_getNavigationInfoByUniqueId(KLong id) {
+KInteropReturnBuffer impl_UIContextGetInfo_getNavigationInfoByUniqueId(Ark_Int32 id) {
         const auto &retValue = GetAccessors()->getUIContextGetInfoAccessor()->getNavigationInfoByUniqueId(id);
         SerializerBase _retSerializer {};
         if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
@@ -42674,7 +42674,7 @@ KInteropReturnBuffer impl_UIContextGetInfo_getNavigationInfoByUniqueId(KLong id)
         }
         return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_1(UIContextGetInfo_getNavigationInfoByUniqueId, KInteropReturnBuffer, KLong)
+KOALA_INTEROP_1(UIContextGetInfo_getNavigationInfoByUniqueId, KInteropReturnBuffer, Ark_Int32)
 void impl_UIContextGetInfo_enableSwipeBack(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto enabledValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
