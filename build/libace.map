@@ -1126,6 +1126,12 @@
       vtable?for?OHOS::Ace::NG::ListItemPattern;
       VTT?for?OHOS::Ace::NG::ListItemPattern;
       OHOS::Ace::V2::ItemDivider::*;
+      "OHOS::Ace::NG::LazyGridLayoutPattern::DumpAdvanceInfo()";
+      "OHOS::Ace::NG::LazyGridLayoutPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)";
+      "RefPtr<LayoutAlgorithm> OHOS::Ace::NG::LazyGridLayoutPattern::CreateLayoutAlgorithm()";
+      "OHOS::Ace::NG::LazyGridLayoutPattern::OnAttachToMainTree()";
+      VTT?for?OHOS::Ace::NG::LazyGridLayoutPattern;
+      vtable?for?OHOS::Ace::NG::LazyGridLayoutPattern;
 
       OHOS::Ace::Framework::ViewStackProcessor::ClaimElementId*;
       OHOS::Ace::Framework::ViewStackProcessor::Push*;

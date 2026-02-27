@@ -68,6 +68,9 @@ public:
 
     static std::optional<ViewPosReference> GetReferencePos(RefPtr<FrameNode> frameNode);
 
+    // DynamicLayout 支持
+    void SetDynamicLayout(bool isDynamic) { isDynamicLayout_ = isDynamic; }
+
 private:
     void SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize, const PaddingPropertyF& padding);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t laneIdx) const;
@@ -83,7 +86,8 @@ private:
     void MeasureBackward(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos);
     void LayoutGridItems(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
     void SetItemOffset(RefPtr<LayoutWrapper>& wrapper, const GridItemMainPos& pos,
-        float crossSize, const OffsetF& paddingOffset);
+        float crossSize, const OffsetF& paddingOffset,
+        bool needAlign = false, float rowHeight = 0.0f, Alignment align = Alignment::TOP_CENTER);
     void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
     // cached
     void LayoutCachedItems(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
@@ -129,6 +133,9 @@ private:
 
     std::vector<LayoutConstraintF> childLayoutConstraints_;
     RefPtr<LazyGridLayoutInfo> layoutInfo_;
+
+    // DynamicLayout 标识
+    bool isDynamicLayout_ = false;
 };
 } // namespace OHOS::Ace::NG
 
