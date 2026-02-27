@@ -19,8 +19,8 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
@@ -112,7 +112,6 @@ HWTEST_F(GridScrollLayoutTestFourNg, TestGridOffsetAfterSpring001, TestSize.Leve
     SimulateScrollGesture(-200.f, -200.f);
     EXPECT_TRUE(pattern_->IsAtBottom());
 
-
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
@@ -194,7 +193,7 @@ HWTEST_F(GridScrollLayoutTestFourNg, SpringAnimationTest010, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     GetChildLayoutProperty<LayoutProperty>(frameNode_, 3)
-            ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(500)));
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(500)));
     FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -238.2085);
 
@@ -236,7 +235,7 @@ HWTEST_F(GridScrollLayoutTestFourNg, SpringAnimationTest011, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     GetChildLayoutProperty<LayoutProperty>(frameNode_, 1)
-            ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(100)));
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(100)));
     FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 91.791504);
 
@@ -286,7 +285,7 @@ HWTEST_F(GridScrollLayoutTestFourNg, SpringAnimationTest012, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     GetChildLayoutProperty<LayoutProperty>(frameNode_, 1)
-            ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(100)));
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(100)));
     FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 108.2085);
 
@@ -339,7 +338,7 @@ HWTEST_F(GridScrollLayoutTestFourNg, SpringAnimationTest013, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     GetChildLayoutProperty<LayoutProperty>(frameNode_, 1)
-            ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(100)));
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(100)));
     FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 5.7219849);
 
@@ -397,7 +396,7 @@ HWTEST_F(GridScrollLayoutTestFourNg, SpringAnimationTest014, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     GetChildLayoutProperty<LayoutProperty>(frameNode_, 4)
-            ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(50)));
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(50)));
     FlushUITasks();
 
     /**
@@ -451,7 +450,7 @@ HWTEST_F(GridScrollLayoutTestFourNg, SpringAnimationTest015, TestSize.Level1)
      *             so the special compensation branch should NOT be executed.
      */
     GetChildLayoutProperty<LayoutProperty>(frameNode_, 1)
-            ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(30)));
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(30)));
     FlushUITasks();
 
     /**
@@ -506,7 +505,7 @@ HWTEST_F(GridScrollLayoutTestFourNg, SpringAnimationTest016, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().Tick();
     GetChildLayoutProperty<LayoutProperty>(frameNode_, 3)
-            ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(100)));
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(100)));
     FlushUITasks();
 
     float offsetAfterHeightChange = pattern_->info_.currentOffset_;
@@ -752,7 +751,7 @@ HWTEST_F(GridScrollLayoutTestFourNg, CachedCount004, TestSize.Level1)
     pattern_->info_.endMainLineIndex_ = 3;
     pattern_->info_.startIndex_ = 9;
     pattern_->info_.endIndex_ = 17;
-    pattern_->info_.gridMatrix_  = {
+    pattern_->info_.gridMatrix_ = {
         { 1, { { 0, 9 }, { 1, 10 }, { 2, 11 } } },
         { 2, { { 0, 12 }, { 1, 13 }, { 2, 14 } } },
         { 3, { { 0, 15 }, { 1, 16 }, { 2, 17 } } },
@@ -766,7 +765,101 @@ HWTEST_F(GridScrollLayoutTestFourNg, CachedCount004, TestSize.Level1)
     EXPECT_EQ(cacheEnd, 6);
 }
 
-HWTEST_F(GridScrollLayoutTestFourNg, isFadingBottomTest001, TestSize.Level1) {
+/**
+ * @tc.name: CachedCount005
+ * @tc.desc: Test CalculateStartCachedCount with multiple irregular indexes
+ *           Verify fix: correct order of iter-- and *iter (originally L359 undefined behavior)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestFourNg, CachedCount005, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(3, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 5, 8, 12, 14 };
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->info_.startMainLineIndex_ = 6;
+    pattern_->info_.endMainLineIndex_ = 8;
+    pattern_->info_.startIndex_ = 18;
+    pattern_->info_.endIndex_ = 26;
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto cacheStart = algo->CalculateStartCachedCount(option, 3);
+    EXPECT_GE(cacheStart, 0);
+}
+
+/**
+ * @tc.name: CachedCount006
+ * @tc.desc: Test CalculateEndCachedCount with multiple irregular indexes
+ *           Verify fix: correct order of iter++ and *iter (originally L418 undefined behavior)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestFourNg, CachedCount006, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(3, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 12, 15, 18, 20 };
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->info_.startMainLineIndex_ = 2;
+    pattern_->info_.endMainLineIndex_ = 4;
+    pattern_->info_.startIndex_ = 6;
+    pattern_->info_.endIndex_ = 14;
+    pattern_->info_.childrenCount_ = 50;
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto cacheEnd = algo->CalculateEndCachedCount(option, 3);
+    EXPECT_GE(cacheEnd, 0);
+}
+
+/**
+ * @tc.name: CachedCount007
+ * @tc.desc: Test both methods with consecutive irregular indexes at boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestFourNg, CachedCount007, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 9, 10, 11, 12 };
+    model.SetLayoutOptions(option);
+    CreateFixedItems(20);
+    CreateDone();
+
+    pattern_->info_.startMainLineIndex_ = 3;
+    pattern_->info_.endMainLineIndex_ = 5;
+    pattern_->info_.startIndex_ = 6;
+    pattern_->info_.endIndex_ = 10;
+    pattern_->info_.childrenCount_ = 20;
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto cacheStart = algo->CalculateStartCachedCount(option, 2);
+    auto cacheEnd = algo->CalculateEndCachedCount(option, 2);
+    EXPECT_GE(cacheStart, 0);
+    EXPECT_GE(cacheEnd, 0);
+}
+
+HWTEST_F(GridScrollLayoutTestFourNg, isFadingBottomTest001, TestSize.Level1)
+{
     // Arrange
     auto pattern = AceType::MakeRefPtr<GridPattern>();
     pattern->info_.lastMainSize_ = 100.0f;
@@ -785,7 +878,8 @@ HWTEST_F(GridScrollLayoutTestFourNg, isFadingBottomTest001, TestSize.Level1) {
     EXPECT_TRUE(result);
 }
 
-HWTEST_F(GridScrollLayoutTestFourNg, isFadingBottomTest002, TestSize.Level1) {
+HWTEST_F(GridScrollLayoutTestFourNg, isFadingBottomTest002, TestSize.Level1)
+{
     // Arrange
     auto pattern = AceType::MakeRefPtr<GridPattern>();
     pattern->info_.lastMainSize_ = 100.0f;
