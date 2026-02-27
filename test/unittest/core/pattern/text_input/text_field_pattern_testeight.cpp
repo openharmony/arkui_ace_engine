@@ -1942,6 +1942,12 @@ HWTEST_F(TextFieldPatternTestEight, ProcessVoiceButton, TestSize.Level0)
     layoutProperty->UpdateIsShowVoiceButton(true);
     pattern_->ProcessVoiceButton();
     EXPECT_EQ(pattern_->voiceResponseArea_, nullptr);
+
+    // get voice button text
+    auto textFieldTheme = pattern_->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto voiceButtonText = textFieldTheme->GetVoiceButton();
+    EXPECT_TRUE(voiceButtonText.empty());
 }
 
 /**
