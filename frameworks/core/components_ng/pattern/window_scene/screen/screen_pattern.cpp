@@ -233,7 +233,9 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         CHECK_NULL_RETURN(screenScene, false);
         screenScene->SetDisplayDensity(density);
         int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
+        uint64_t displayId = screenSession_->GetScreenId();
         screenScene->SetDisplayOrientation(orientation);
+        screenScene->SetDisplayId(displayId);
         screenScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
     } else {
         LOGE("others type");

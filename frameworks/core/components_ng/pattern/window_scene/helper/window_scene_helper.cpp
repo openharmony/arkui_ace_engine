@@ -96,7 +96,7 @@ bool WindowSceneHelper::IsWindowScene(const RefPtr<FrameNode>& focusedFrameNode)
 {
     auto window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is null.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
         return false;
     }
 
@@ -109,7 +109,7 @@ int32_t WindowSceneHelper::GetFocusSystemWindowId(const RefPtr<FrameNode>& focus
     bool isWindowScene = IsWindowScene(focusedFrameNode);
     sptr<Rosen::Session> window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is null.");
         return focusSystemWindowId;
     }
     if (isWindowScene) {

@@ -32,6 +32,7 @@ ace_unittest("window_scene_test") {
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/helper/starting_window_layout_helper.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/helper/window_scene_helper.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/input_scene.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/mirror_window_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/panel_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/transform_scene.cpp",
@@ -41,7 +42,6 @@ ace_unittest("window_scene_test") {
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene_model.cpp",
-
     # test
     "$ace_root/adapter/preview/osal/device_config.cpp",
     "$ace_root/test/unittest/core/pattern/window_scene/window_pattern_test.cpp",
