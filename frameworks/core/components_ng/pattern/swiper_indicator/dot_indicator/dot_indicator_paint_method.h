@@ -194,6 +194,11 @@ public:
         targetIndex_ = targetIndex;
     }
 
+    void SetIsLongPressed(bool isLongPressed)
+    {
+        isLongPressed_ = isLongPressed;
+    }
+
 protected:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
@@ -233,6 +238,7 @@ protected:
     bool NeedBottomAnimation() const;
     int32_t CalculateMouseClickIndexOnRTL();
     std::pair<int32_t, int32_t> CalCurrentIndex();
+    void UpdateIsPressedOrIsHover(PaintWrapper* paintWrapper);
 
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     PointF hoverPoint_;
@@ -259,6 +265,7 @@ protected:
     bool isLoop_ = true;
     bool isHover_ = false;
     bool isPressed_ = false;
+    bool isLongPressed_ = false;
     bool longPointIsHover_ = false;
     bool IsCustomSizeValue_ = false;
     bool isSwipeByGroup_ = false;

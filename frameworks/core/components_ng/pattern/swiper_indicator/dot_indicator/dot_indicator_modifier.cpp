@@ -220,7 +220,7 @@ void DotIndicatorModifier::CalCBackground(ContentProperty& contentProperty)
 
     auto [rectLeft, rectRight, rectTop, rectBottom] =
         CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
-    if (Positive(pointNumber)) {
+    if (Positive(pointNumber) && isLongPressed_) {
         auto [leftCenterX, rightCenterX] = GetTouchBottomCenterX(contentProperty);
         leftCenterX = std::min(leftCenterX, contentProperty.vectorBlackPointCenterX[0]);
         rightCenterX = std::max(rightCenterX,
