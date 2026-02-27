@@ -8595,6 +8595,24 @@ void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventF
     gestureHub->SetTouchEvent(std::move(touchEventFunc));
 }
 
+void ViewAbstract::AddOnTouch(FrameNode* frameNode, const RefPtr<TouchEventImpl>& touchEventImpl)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(touchEventImpl);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->AddTouchEvent(touchEventImpl);
+}
+
+void ViewAbstract::RemoveTouchEvent(FrameNode* frameNode, const RefPtr<TouchEventImpl>& touchEventImpl)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(touchEventImpl);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->RemoveTouchEvent(touchEventImpl);
+}
+
 void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc)
 {
     auto eventHub = frameNode->GetOrCreateInputEventHub();

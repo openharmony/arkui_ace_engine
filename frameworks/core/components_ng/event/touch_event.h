@@ -23,6 +23,7 @@
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/event/touch_event.h"
 #include "core/event/axis_event.h"
+#include "ui/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,29 +36,6 @@ struct TouchTestResultInfo {
 };
 
 class GestureEventHub;
-
-class TouchEventImpl : public virtual AceType {
-    DECLARE_ACE_TYPE(TouchEventImpl, AceType);
-public:
-    explicit TouchEventImpl(TouchEventFunc&& callback) : callback_(std::move(callback)) {}
-    TouchEventImpl(const TouchEventFunc& callback) : callback_(callback) {}
-    ~TouchEventImpl() override = default;
-
-    const TouchEventFunc& GetTouchEventCallback() const
-    {
-        return callback_;
-    }
-
-    void operator()(TouchEventInfo& info) const
-    {
-        if (callback_) {
-            callback_(info);
-        }
-    }
-
-private:
-    TouchEventFunc callback_;
-};
 
 class ACE_FORCE_EXPORT TouchEventActuator : public GestureEventActuator, public TouchEventTarget {
     DECLARE_ACE_TYPE(TouchEventActuator, GestureEventActuator, TouchEventTarget);
