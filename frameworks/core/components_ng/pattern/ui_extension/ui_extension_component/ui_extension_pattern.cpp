@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 
+#include <atomic>
 #include <future>
 #include <optional>
 
@@ -86,6 +87,50 @@ bool StartWith(const std::string &source, const std::string &prefix)
     }
 
     return source.find(prefix) == 0;
+}
+
+void ParseDumpInfoToJson(const std::shared_ptr<JsonValue>& json, const std::vector<std::string>& dumpInfo,
+    const std::shared_ptr<std::atomic_bool>& taskValid)
+{
+    for (const auto& dumpStr : dumpInfo) {
+        if (!taskValid->load(std::memory_order_acquire)) {
+            return;
+        }
+        size_t pos = dumpStr.find("UINodeCount:");
+        if (pos == std::string::npos) {
+            continue;
+        }
+        size_t start = dumpStr.find("\n", pos);
+        if (start == std::string::npos) {
+            continue;
+        }
+        std::string filteredData = dumpStr.substr(start + 1);
+        filteredData.erase(filteredData.find_last_not_of("\n") + 1);
+        auto childJson = JsonUtil::ParseJsonString(filteredData);
+        if (childJson && taskValid->load(std::memory_order_acquire)) {
+            json->Put("$child-uec", childJson);
+        }
+        return;
+    }
+}
+
+void ExecuteNotifyDumpTask(const std::shared_ptr<JsonValue>& json, const std::vector<std::string>& params,
+    const RefPtr<SessionWrapper>& sessionWrapper, const std::shared_ptr<std::promise<void>>& promise,
+    const std::shared_ptr<std::atomic_bool>& taskValid)
+{
+    auto notifyOnExit = [&promise]() { promise->set_value(); };
+    if (!taskValid->load(std::memory_order_acquire)) {
+        notifyOnExit();
+        return;
+    }
+    std::vector<std::string> dumpInfo;
+    sessionWrapper->NotifyUieDump(params, dumpInfo);
+    if (!taskValid->load(std::memory_order_acquire)) {
+        notifyOnExit();
+        return;
+    }
+    ParseDumpInfoToJson(json, dumpInfo, taskValid);
+    notifyOnExit();
 }
 }
 UIExtensionPattern::UIExtensionPattern(
@@ -2122,41 +2167,27 @@ void UIExtensionPattern::ExecuteDumpTask(
     // PostSyncTaskTimeout explicitly rejects TaskType::BACKGROUND, so use PostTask
     // with a promise/future pair to run the IPC call (NotifyUieDump) on the background
     // thread and wait for the result with a timeout on the calling thread.
-    auto promise = std::make_shared<std::promise<void>>();
-    auto future = promise->get_future();
-    taskExecutor->PostTask(
-        [json, params, sessionWrapper, promise]() {
-            auto notifyOnExit = [&promise]() { promise->set_value(); };
-            if (!sessionWrapper) {
-                notifyOnExit();
-                return;
-            }
-            std::vector<std::string> dumpInfo;
-            sessionWrapper->NotifyUieDump(params, dumpInfo);
+    if (!sessionWrapper) {
+        return;
+    }
 
-            for (size_t i = 0; i < dumpInfo.size(); i++) {
-                std::string dumpStr = dumpInfo[i];
-                size_t pos = dumpStr.find("UINodeCount:");
-                if (pos == std::string::npos) {
-                    continue;
-                }
-                size_t start = dumpStr.find("\n", pos);
-                if (start == std::string::npos) {
-                    continue;
-                }
-                start++;
-                std::string filteredData = dumpStr.substr(start);
-                filteredData.erase(filteredData.find_last_not_of("\n") + 1);
-                auto childJson = JsonUtil::ParseJsonString(filteredData);
-                if (childJson) {
-                    json->Put("$child-uec", childJson);
-                }
-                break;
-            }
-            notifyOnExit();
-        },
-        TaskExecutor::TaskType::BACKGROUND, "UiSessionGetInspectorTree");
-    future.wait_for(std::chrono::milliseconds(GET_INSPECTOR_TREE_TIMEOUT_TIME));
+    auto taskValid = std::make_shared<std::atomic_bool>(true);
+    CHECK_NULL_VOID(taskValid);
+    auto promise = std::make_shared<std::promise<void>>();
+    CHECK_NULL_VOID(promise);
+    auto future = promise->get_future();
+    auto postResult = taskExecutor->PostTask([json, params, sessionWrapper, promise, taskValid]() {
+        ExecuteNotifyDumpTask(json, params, sessionWrapper, promise, taskValid);
+    }, TaskExecutor::TaskType::BACKGROUND, "UiSessionGetInspectorTree");
+    if (!postResult) {
+        taskValid->store(false, std::memory_order_release);
+        return;
+    }
+
+    auto result = future.wait_for(std::chrono::milliseconds(GET_INSPECTOR_TREE_TIMEOUT_TIME));
+    if (result == std::future_status::timeout) {
+        taskValid->store(false, std::memory_order_release);
+    }
 }
 
 void UIExtensionPattern::RegisterEventProxyFlagCallback()
