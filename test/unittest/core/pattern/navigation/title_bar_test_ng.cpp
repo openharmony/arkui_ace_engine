@@ -2449,6 +2449,8 @@ HWTEST_F(TitleBarTestNg, CreateBarItemIconNode, TestSize.Level1)
     ASSERT_NE(navigationTheme, nullptr);
     BarItem barItem;
     barItem.icon = "icon";
+    barItem.bundleName = "com.example.test";
+    barItem.moduleName = "entry";
     bool isButtonEnable = true;
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
@@ -2462,6 +2464,8 @@ HWTEST_F(TitleBarTestNg, CreateBarItemIconNode, TestSize.Level1)
     ASSERT_NE(imageLayoutProperty, nullptr);
     auto info = imageLayoutProperty->GetImageSourceInfo().value();
     EXPECT_EQ(navigationTheme->GetIconColor(), info.GetFillColor());
+    EXPECT_EQ(info.GetBundleName(), "com.example.test");
+    EXPECT_EQ(info.GetModuleName(), "entry");
 }
 
 /**
