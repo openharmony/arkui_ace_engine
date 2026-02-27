@@ -294,7 +294,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupSelectAll(ArkUIRunti
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> selectAllArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> changeEventVal;
+    Local<JSValueRef> changeEventVal = panda::JSValueRef::Undefined(vm);
     bool isJsView = IsJsView(nodeArg, vm);
     if (isJsView) {
         if (selectAllArg->IsObject(vm)) {
