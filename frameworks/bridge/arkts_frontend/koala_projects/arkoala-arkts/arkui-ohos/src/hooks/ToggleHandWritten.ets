@@ -44,7 +44,6 @@ export class ToggleHandWritten {
             const node = toggle.getPeer().parent! as PeerNode
             const preNativePtr = toggle.getPeer().peer.ptr
             node.peer.removeChild(toggle.getPeer().peer.ptr)
-            ArkUINativeModule._DisposeNode(preNativePtr)
             
             if (options.type == ToggleType.Switch) {
                 const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(toggle.getPeer().getId(), 0)
@@ -59,6 +58,7 @@ export class ToggleHandWritten {
                 throw new Error("Invalid Toggle Type")
                 return
             }
+            ArkUINativeModule._DisposeNode(preNativePtr)
 
             if (sibling === undefined) {
                 // Add to the end (common case!).
