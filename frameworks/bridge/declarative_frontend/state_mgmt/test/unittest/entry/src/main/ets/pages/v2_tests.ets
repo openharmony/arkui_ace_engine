@@ -28,6 +28,7 @@ import { PuBuilderProxyTestsV2 } from '../../v2_tests/puBuilderProxyTestsV2'
 import { PuBuilderBindingTestsV2 } from '../../v2_tests/puBuilderBindingTestsV2'
 import { PageController } from '../../lib/pageController'
 import { TestRunner } from '../../lib/testRunner'
+import { V2ViewTests } from '../../v2_tests/v2ViewTests'
 
 import router from '@system.router'
 
@@ -54,6 +55,7 @@ struct Parent {
       TestRunner.bind(this)(new PuRecycleManagerTestsV2('V2_puRecycleManager'));
       TestRunner.bind(this)(new PuBuilderProxyTestsV2('V2_puBuilderProxy'));
       TestRunner.bind(this)(new PuBuilderBindingTestsV2('V2_puBuilderBinding'));
+      TestRunner.bind(this)(new V2ViewTests('V2_v2View'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)
