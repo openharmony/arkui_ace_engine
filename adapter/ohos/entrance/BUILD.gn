@@ -62,6 +62,7 @@ template("ace_ohos_standard_source_set") {
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/ui_event_tracker.cpp",
       "$ace_root/adapter/ohos/entrance/ui_event_impl.cpp",
       "$ace_root/adapter/ohos/entrance/utils.cpp",
 
@@ -140,6 +141,7 @@ template("ace_ohos_standard_source_set") {
       "graphic_2d:2d_graphics",
       "graphic_2d:librender_service_client",
       "graphic_2d:rosen_text",
+      "hilog:libsandboxlog",
       "i18n:intl_util",
       "input:libmmi-client",
       "ipc:ipc_core",

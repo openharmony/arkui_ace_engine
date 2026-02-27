@@ -38,6 +38,7 @@
 #include "adapter/ohos/entrance/high_contrast_observer.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
+#include "adapter/ohos/entrance/ui_event_tracker.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/page_viewport_config_ohos.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
@@ -521,6 +522,14 @@ void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
     } else {
         taskExecutorImpl->InitJsThread();
     }
+}
+
+void AceContainer::InitializeUIEventTracker()
+{
+    if (uiEventTracker_ || !taskExecutor_) {
+        return;
+    }
+    uiEventTracker_ = std::make_shared<UIEventTracker>(instanceId_, WeakPtr<TaskExecutor>(taskExecutor_));
 }
 
 bool AceContainer::IsKeyboard()
@@ -2782,6 +2791,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
     pipelineContext_->SetWindowModal(windowModal_);
+    InitializeUIEventTracker();
     if (uiWindow_) {
         bool isAppWindow = uiWindow_->IsAppWindow();
         bool isSystemWindow = uiWindow_->IsSystemWindow();

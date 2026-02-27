@@ -57,6 +57,7 @@ class AccessibilityElementInfo;
 
 namespace OHOS::Ace {
 class FontManager;
+class UIEventTracker;
 }
 
 namespace OHOS::AppExecFwk {
@@ -194,6 +195,11 @@ public:
     RefPtr<TaskExecutor> GetTaskExecutor() const override
     {
         return taskExecutor_;
+    }
+
+    const std::shared_ptr<UIEventTracker>& GetUIEventTracker() const
+    {
+        return uiEventTracker_;
     }
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager)
@@ -961,6 +967,7 @@ private:
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper = nullptr);
+    void InitializeUIEventTracker();
     void InitWindowCallback();
 
     void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
@@ -1013,6 +1020,7 @@ private:
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
+    std::shared_ptr<UIEventTracker> uiEventTracker_;
     RefPtr<AssetManager> assetManager_;
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineBase> pipelineContext_;

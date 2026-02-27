@@ -22,6 +22,7 @@
 #define private public
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -378,7 +379,31 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest007, TestSize.Level1)
     ASSERT_EQ(managerPreNode, nullptr);
     ASSERT_EQ(isInAnimation, false);
 }
+/**
+ * @tc.name: NavigationManagerTest008
+ * @tc.desc: Test unregister navigate change callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationManagerTestNg, NavigationManagerTest008, TestSize.Level1)
+{
+    auto navigationManager = GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    navigationManager->changeCallbacks_.clear();
 
+    bool callbackCalled = false;
+    int32_t callbackId = navigationManager->RegisterNavigateChangeCallback(
+        [&callbackCalled](const NavigateChangeInfo&, const NavigateChangeInfo&, bool) { callbackCalled = true; });
+    ASSERT_GE(callbackId, 0);
+    EXPECT_EQ(navigationManager->changeCallbacks_.count(callbackId), 1);
+
+    navigationManager->UnregisterNavigateChangeCallback(callbackId);
+    EXPECT_EQ(navigationManager->changeCallbacks_.count(callbackId), 0);
+
+    NavigateChangeInfo from = { .name = "from", .isSplit = false };
+    NavigateChangeInfo to = { .name = "to", .isSplit = false };
+    navigationManager->FireNavigateChangeCallback(from, to, true);
+    EXPECT_FALSE(callbackCalled);
+}
 /**
  * @tc.name: AttachNavigation001
  * @tc.desc: Test AttachNavigation adds navigation to targetNavigationMap_
