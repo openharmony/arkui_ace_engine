@@ -1323,8 +1323,8 @@ class Util {
       let currentDeviceType: resourceManager.DeviceType | undefined = 
         resourceManager.getSysResourceManager()?.getConfigurationSync()?.deviceType;
       let systemConfiguration: resourceManager.Configuration =
-        resourceManager.getSystemResourceManager().getConfigurationSync();
-      if (currentDeviceType !== undefined) {
+        resourceManager.getSystemResourceManager()?.getConfigurationSync();
+      if (currentDeviceType !== undefined && systemConfiguration !== undefined) {
         systemConfiguration.deviceType = currentDeviceType;
       }
       let resourceNumber: number = resourceManager.getSystemResourceManager()
