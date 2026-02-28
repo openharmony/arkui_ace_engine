@@ -356,7 +356,9 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateStartCachedCount(
                 return (cachedCount - lineCount) * crossCount + sum;
             }
 
-            diff = (*iter) - (*(--iter)) - 1;
+            int32_t currentValue = *iter;
+            --iter;
+            diff = currentValue - (*iter) - 1;
         }
         return sum;
     }
@@ -415,7 +417,9 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateEndCachedCount(
                 return (cachedCount - lineCount) * crossCount + sum;
             }
 
-            diff = -*(iter) + *(++iter) - 1;
+            int32_t currentValue = *iter;
+            ++iter;
+            diff = -currentValue + (*iter) - 1;
         }
         return sum;
     }
