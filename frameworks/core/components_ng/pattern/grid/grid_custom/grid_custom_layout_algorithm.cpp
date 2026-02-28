@@ -659,7 +659,7 @@ void GridCustomLayoutAlgorithm::MeasureToTarget(float mainSize)
         float totalOffset = info_.totalOffset_;
         UpdateTotalOffset(info_, targetRow.second, mainGap_);
         info_.totalOffset_ += info_.currentOffset_;
-        itemHeight = info_.GetHeightInRange(targetRow.second, targetRow.second + height, mainGap_);
+        itemHeight = info_.GetHeightInRange(targetRow.second, targetRow.second + height, mainGap_) - mainGap_;
         targetOffset = info_.totalOffset_;
         info_.totalOffset_ = totalOffset;
     } else {
