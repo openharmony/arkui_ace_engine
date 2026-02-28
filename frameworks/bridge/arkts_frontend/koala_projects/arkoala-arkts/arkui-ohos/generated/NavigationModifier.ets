@@ -68,7 +68,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
     public _systemBarStyle_0_0value?: SystemBarStyle | undefined
     public _recoverable_0_0value?: boolean | undefined
     public _enableDragBar_0_0value?: boolean | undefined
-    public _divider_0_0value?: NavigationDividerStyle | undefined
+    public _divider_0_0value?: NavigationDividerStyle | null
     public _enableModeChangeAnimation_0_0value?: boolean | undefined
     public _splitPlaceholder_0_0value?: ComponentContent<object>
     public _enableVisibilityLifecycleWithContentCover_0_0value?: boolean | undefined
@@ -421,7 +421,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         if (flagArray[19] != 0) {
             switch (flagArray[19]) {
                 case 1: {
-                    peer.setDividerAttribute((this._divider_0_0value as NavigationDividerStyle | undefined));
+                    peer.setDividerAttribute((this._divider_0_0value as NavigationDividerStyle | null));
                     flagArray[19] = 2;
                     break;
                 }
@@ -431,7 +431,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
                 }
                 default: {
                     flagArray[19] = 0;
-                    peer.setDividerAttribute((undefined as NavigationDividerStyle | undefined));
+                    peer.setDividerAttribute((null as NavigationDividerStyle | null));
                 }
             }
         }
@@ -847,11 +847,11 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
             switch (flagArray[19]) {
                 case 1:
                 case 3: {
-                    this.divider((modifier._divider_0_0value as NavigationDividerStyle | undefined));
+                    this.divider((modifier._divider_0_0value as NavigationDividerStyle | null));
                     break;
                 }
                 default: {
-                    this.divider((undefined as NavigationDividerStyle | undefined));
+                    this.divider((null as NavigationDividerStyle | null));
                 }
             }
         }
@@ -1167,7 +1167,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         }
         return this
     }
-    divider(value: NavigationDividerStyle | undefined): this {
+    divider(value: NavigationDividerStyle | null): this {
         if (((this._flagArray[19]) == (0)) || (true)) {
             this._flagArray[19] = 1
             this._divider_0_0value = value
