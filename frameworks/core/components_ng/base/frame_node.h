@@ -743,8 +743,14 @@ public:
 
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
     {
+        isNeedRefreshBackgroundBuilder_ = true;
         builderFunc_ = std::move(buildFunc);
         backgroundNode_ = nullptr;
+    }
+
+    void SetIsNeedRefreshBackgroundBuilder(bool isNeedRefreshBackgroundBuilder)
+    {
+        isNeedRefreshBackgroundBuilder_ = isNeedRefreshBackgroundBuilder;
     }
 
     bool IsDraggable() const
@@ -1499,7 +1505,7 @@ public:
         return isPendingState_;
     }
 
-    void UpdateBackground();
+    void UpdateBackground(bool frameSizeChange = true);
     void ReplacePattern(const RefPtr<Pattern>& newPattern);
 
     void RegisterLpxAttribute(LpxAttribute attribute);
@@ -1801,6 +1807,9 @@ private:
     bool isAncestorScrollable_ = false;
     // Marks whether this FrameNode has been attached to the main RenderTree and is awaiting a matching detach.
     bool isPendingState_ = false;
+    // Marks whether the background builder needs to be refreshed due to surface changes.
+    bool isNeedRefreshBackgroundBuilder_ = false;
+    int32_t refreshBackgroundBuilderId_ = 0;
 
     RefPtr<FrameNode> overlayNode_;
 
