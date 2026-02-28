@@ -306,7 +306,8 @@ public:
     {
         auto iter = drawChildrenEvents_.find(componentId);
         if (iter != drawChildrenEvents_.end()) {
-            for (auto&& observer : iter->second) {
+            auto events = iter->second;
+            for (auto&& observer : events) {
                 (*observer)();
             }
         }
