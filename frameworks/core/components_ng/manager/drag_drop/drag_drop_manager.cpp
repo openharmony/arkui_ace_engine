@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
-#include "drag_drop_func_wrapper.h"
 
 #include "base/geometry/point.h"
 #include "base/geometry/rect.h"
