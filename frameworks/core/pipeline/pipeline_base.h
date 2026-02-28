@@ -917,7 +917,7 @@ public:
         isCurrentInForceSplitMode_ = split;
     }
 
-    bool IsCurrentInForceSplitMode() const
+    virtual bool IsCurrentInForceSplitMode() const
     {
         return isCurrentInForceSplitMode_;
     }

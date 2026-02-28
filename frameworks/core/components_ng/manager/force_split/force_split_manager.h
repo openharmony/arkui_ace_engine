@@ -44,7 +44,10 @@ public:
     {
         isRouter_ = isRouter;
     }
-
+    bool IsRouterForceSplit() const
+    {
+        return isRouter_;
+    }
     void SetForceSplitSupported(bool isForceSplitSupported)
     {
         isForceSplitSupported_ = isForceSplitSupported;
@@ -111,6 +114,9 @@ public:
 
 private:
     void OnForceSplitEnableChange();
+    bool IsTopFullScreenPage();
+    bool IsWindowConditionMatched();
+    bool HasForceSplitTargetNavigation();
     void RegisterSurfaceChangeCallbackIfNeeded();
     void ChangeForceSplitModeIfNeeded();
 

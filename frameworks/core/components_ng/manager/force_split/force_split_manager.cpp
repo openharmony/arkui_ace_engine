@@ -19,6 +19,7 @@
 #include "base/utils/system_properties.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/force_split/force_split_utils.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 namespace OHOS::Ace::NG {
 void ForceSplitManager::RegisterSurfaceChangeCallbackIfNeeded()
@@ -123,34 +124,88 @@ void ForceSplitManager::NotifyForceFullScreenChange(bool isForceFullScreen)
     windowManager->NotifyForceFullScreenChange(isForceFullScreen);
 }
 
+bool ForceSplitManager::IsTopFullScreenPage()
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    if (isRouter_) {
+        auto stageMgr = context->GetStageManager();
+        CHECK_NULL_RETURN(stageMgr, false);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsTopFullScreenPage, router:%{public}d", stageMgr->IsTopFullScreenPage());
+        return stageMgr->IsTopFullScreenPage();
+    }
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_RETURN(navMgr, false);
+    auto existForceSplitNav = navMgr->GetExistForceSplitNav();
+    if (!existForceSplitNav.first) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsTopFullScreenPage, no force split nav");
+        return false;
+    }
+    auto navNode = FrameNode::GetFrameNodeOnly(V2::NAVIGATION_VIEW_ETS_TAG, existForceSplitNav.second);
+    CHECK_NULL_RETURN(navNode, false);
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navPattern, false);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsTopFullScreenPage, nav:%{public}d", navPattern->IsTopFullScreenPage());
+    return navPattern->IsTopFullScreenPage();
+}
+
+bool ForceSplitManager::IsWindowConditionMatched()
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    auto container = Container::GetContainer(context->GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    auto windowManager = context->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, false);
+    bool isMainWindow = container->IsMainWindow();
+    auto windowMode = windowManager->GetWindowMode();
+    /**
+     * The foce split mode must meet the following conditions to take effect:
+     *  1. Belonging to the main window of the application
+     *  2. The application is not in split screen mode
+     */
+    bool isInSplitScreenMode = windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsWindowConditionMatched, isMainWindow:%{public}d, "
+        "isInSplitScreenMode:%{public}d", isMainWindow, isInSplitScreenMode);
+    return isMainWindow && !isInSplitScreenMode;
+}
+
+bool ForceSplitManager::HasForceSplitTargetNavigation()
+{
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_RETURN(navMgr, false);
+    auto existForceSplitNav = navMgr->GetExistForceSplitNav();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "HasForceSplitTargetNavigation: %{public}d", existForceSplitNav.first);
+    return existForceSplitNav.first;
+}
+
 void ForceSplitManager::UpdateIsInForceSplitMode()
 {
     if (!isForceSplitSupported_) {
         return;
     }
- 
     auto context = pipeline_.Upgrade();
     CHECK_NULL_VOID(context);
-    auto container = Container::GetContainer(context->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    auto windowManager = context->GetWindowManager();
-    CHECK_NULL_VOID(windowManager);
     bool forceSplitSuccess = false;
-    if (isForceSplitEnable_ && (isRouter_ || !disableNavForceSplitInternal_)) {
-        /**
-         * The force split mode must meet the following conditions to take effect:
-         *   1. Belonging to the main window of the application
-         *   2. The application is not in split screen mode
-         */
-        bool isMainWindow = container->IsMainWindow();
-        auto windowMode = windowManager->GetWindowMode();
-        bool isInSplitScreenMode = windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
-        forceSplitSuccess = isMainWindow && !isInSplitScreenMode;
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplitManager calc splitMode, isMainWindow:%{public}d, "
-            "isInSplitScreenMode:%{public}d, forceSplitSuccess:%{public}d",
-            isMainWindow, isInSplitScreenMode, forceSplitSuccess);
-    }
+    do {
+        if (!IsForceSplitEnable(isRouter_)) {
+            break;
+        }
+        if (!IsWindowConditionMatched()) {
+            break;
+        }
+        if (IsTopFullScreenPage()) {
+            break;
+        }
+        if (isRouter_) {
+            forceSplitSuccess = true;
+            break;
+        }
+        forceSplitSuccess = HasForceSplitTargetNavigation();
+    } while (false);
     context->SetIsCurrentInForceSplitMode(forceSplitSuccess);
 }
 
