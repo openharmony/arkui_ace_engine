@@ -70,7 +70,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(navigationManager);
     auto existForceSplitNav = navigationManager->GetExistForceSplitNav();
     auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
-    CHECK_NULL_VOID(foceSplitMgr);
+    CHECK_NULL_VOID(forceSplitMgr);
     NG::RectF floatButtons;
     dialogPattern->GetWindowButtonRect(floatButtons);
     floatButtonsHeight_ = floatButtons.Height();
