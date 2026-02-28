@@ -930,7 +930,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifyDragEndPendingDone, TestSize.L
     DragDropGlobalController::GetInstance().requestId_ = requestId;
     ret = DragDropFuncWrapper::NotifyDragEndPendingDone(requestId);
     EXPECT_EQ(ret, 0);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
     DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
 }
 
