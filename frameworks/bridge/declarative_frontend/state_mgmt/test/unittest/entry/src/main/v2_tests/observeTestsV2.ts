@@ -36,12 +36,22 @@ declare class ObserveV2   {
   runIdleTasks(deadline?: number): void;
 }
 
+interface IMonitorValue<T> {
+  before: T;
+  after: T;
+  path: string;
+}
+
 interface IMonitor {
   dirty: Array<string>;
   value<T>(key?: string): IMonitorValue<T> | undefined;
 }
 
 declare const Monitor: (key: string, ...keys: string[]) => (target: any, _: any, descriptor: any) => void;
+
+declare const ObservedV2: <TFunction extends Function>(target: TFunction) => TFunction | void;
+
+declare const Local: (target: Object, properyKey: string | symbol) => void;
 
 @ObservedV2
 class TestClass {
