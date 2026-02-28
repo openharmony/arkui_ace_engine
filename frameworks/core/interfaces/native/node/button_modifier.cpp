@@ -181,25 +181,6 @@ void SetButtonFontColorPtr(ArkUINodeHandle node, uint32_t fontColor, void* color
     SetButtonFontColor(node, result.GetValue());
 }
 
-void SetButtonFontColorUseColorPtr(ArkUINodeHandle node, const ArkUI_InnerColor* fontColor, void* colorRawPtr)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(fontColor);
-    Color result = *(reinterpret_cast<const Color*>(fontColor));
-    if (SystemProperties::ConfigChangePerform()) {
-        RefPtr<ResourceObject> resObj;
-        if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(
-                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
-        } else {
-            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
-        }
-        ButtonModelNG::CreateWithColorResourceObj(frameNode, resObj, ButtonColorType::FONT_COLOR);
-    }
-    ButtonModelNG::SetFontColor(frameNode, result);
-}
-
 void ResetButtonFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -920,7 +901,6 @@ const ArkUIButtonModifier* GetButtonModifier()
         .getButtonMinFontScale = GetButtonMinFontScale,
         .getButtonMaxFontScale = GetButtonMaxFontScale,
         .setButtonFontColorPtr = SetButtonFontColorPtr,
-        .setButtonFontColorUseColorPtr = SetButtonFontColorUseColorPtr,
         .setButtonFontFamilyPtr = SetButtonFontFamilyPtr,
         .setButtonLabelStylePtr = SetButtonLabelStylePtr,
         .setButtonBackgroundColorWithColorSpacePtr = SetButtonBackgroundColorWithColorSpacePtr,

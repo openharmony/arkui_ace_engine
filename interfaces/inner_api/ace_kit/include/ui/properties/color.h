@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "ui/base/macros.h"
@@ -59,33 +58,6 @@ enum class ColorPlaceholder : uint8_t {
     TEXT_CONTRAST = 3,
     ACCENT = 4,
     FOREGROUND = 5,
-    BRAND,
-    BRAND_FONT,
-    WARNING,
-    FONT_ON_PRIMARY,
-    FONT_PRIMARY,
-    FONT_SECONDARY,
-    FONT_TERTIARY,
-    FONT_FOURTH,
-    FONT_EMPHASIZE,
-    ICON_PRIMARY,
-    ICON_SECONDARY,
-    ICON_TERTIARY,
-    ICON_FOURTH,
-    ICON_EMPHASIZE,
-    ICON_SUB_EMPHASIZE,
-    COMP_BACKGROUND_PRIMARY_CONTRARY,
-    COMP_BACKGROUND_PRIMARY_CONTRARY_SECONDARY,
-    COMP_BACKGROUND_SECONDARY,
-    COMP_BACKGROUND_TERTIARY,
-    COMP_BACKGROUND_EMPHASIZE,
-    COMP_EMPHASIZE_SECONDARY,
-    COMP_EMPHASIZE_TERTIARY,
-    COMP_DIVIDER,
-    INTERACTIVE_HOVER,
-    INTERACTIVE_FOCUS,
-    INTERACTIVE_PRESSED,
-    MAX = INTERACTIVE_PRESSED
 };
 
 // Strategy used by dynamic color picker extraction.
@@ -95,9 +67,6 @@ enum class ColorPickStrategy : char {
     AVERAGE = 2,
     CONTRAST = 3,
 };
-
-// Map for special system resource. Key is resId, value is the enum of ColorPlaceholder.
-extern const std::unordered_map<int32_t, ColorPlaceholder> g_specialResourceHolderMap;
 
 // A color value present by 32 bit.
 class ACE_FORCE_EXPORT Color {
@@ -194,8 +163,7 @@ public:
     bool operator==(const Color& color) const
     {
         if (IsPlaceholder() || color.IsPlaceholder()) {
-            return placeholder_ == color.placeholder_ && colorSpace_ == color.colorSpace_ &&
-                   colorValue_.value == color.GetValue();
+            return placeholder_ == color.placeholder_ && colorSpace_ == color.colorSpace_;
         }
         return colorValue_.value == color.GetValue() && colorSpace_ == color.GetColorSpace();
     }

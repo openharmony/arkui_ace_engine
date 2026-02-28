@@ -520,7 +520,7 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     NG::IconOptions cancelIconOptions;
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() &&
-        ParseJsColorForMaterial(iconColorProp, iconColor, colorObject)) {
+        ParseJsColor(iconColorProp, iconColor, colorObject)) {
         cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, bundleName, moduleName);
     } else {
         cancelIconOptions = NG::IconOptions(iconSize, iconSrc, bundleName, moduleName);
@@ -589,8 +589,7 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     RefPtr<ResourceObject> colorObject;
     NG::IconOptions searchIconOptions;
     auto colorProp = param->GetProperty("color");
-    if (!colorProp->IsUndefined() && !colorProp->IsNull() &&
-        ParseJsColorForMaterial(colorProp, colorVal, colorObject)) {
+    if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal, colorObject)) {
         searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
     } else {
         searchIconOptions = NG::IconOptions(size, src, bundleName, moduleName);
@@ -670,7 +669,7 @@ void JSSearch::SetTextColor(const JSCallbackInfo& info)
     Color colorVal;
     RefPtr<ResourceObject> resourceObject;
     UnregisterResource("fontColor");
-    if (!ParseJsColorForMaterial(value, colorVal, resourceObject)) {
+    if (!ParseJsColor(value, colorVal, resourceObject)) {
         SearchModel::GetInstance()->ResetTextColor();
         return;
     }
@@ -707,7 +706,7 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
         UnregisterResource("caretColor");
         auto caretColorProp = param->GetProperty("color");
         if (caretColorProp->IsUndefined() || caretColorProp->IsNull() ||
-            !ParseJsColorForMaterial(caretColorProp, caretColor, colorObject)) {
+            !ParseJsColor(caretColorProp, caretColor, colorObject)) {
             caretColor = textFieldTheme->GetCursorColor();
         }
         if (SystemProperties::ConfigChangePerform() && colorObject) {
@@ -787,7 +786,7 @@ void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
     Color colorVal;
     RefPtr<ResourceObject> resourceObject;
     UnregisterResource("placeholderColor");
-    if (!ParseJsColorForMaterial(value, colorVal, resourceObject)) {
+    if (!ParseJsColor(value, colorVal, resourceObject)) {
         SearchModel::GetInstance()->ResetPlaceholderColor();
         return;
     }

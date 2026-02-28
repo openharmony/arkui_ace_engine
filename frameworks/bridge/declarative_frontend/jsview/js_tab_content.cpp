@@ -508,7 +508,7 @@ void JSTabContent::SetIconStyle(const JSRef<JSVal>& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
         Color unselectedColor;
         JSRef<JSVal> unselectedColorValue = obj->GetProperty("unselectedColor");
-        if (ParseJsColorForMaterial(unselectedColorValue, unselectedColor, unselectedColorResObj)) {
+        if (ConvertFromJSValue(unselectedColorValue, unselectedColor, unselectedColorResObj)) {
             iconStyle.unselectedColor = unselectedColor;
             TabContentModel::GetInstance()->SetIconUnselectedColorByUser(true);
         } else {
@@ -517,7 +517,7 @@ void JSTabContent::SetIconStyle(const JSRef<JSVal>& info)
 
         Color selectedColor;
         JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
-        if (ParseJsColorForMaterial(selectedColorValue, selectedColor, selectedColorResObj)) {
+        if (ConvertFromJSValue(selectedColorValue, selectedColor, selectedColorResObj)) {
             iconStyle.selectedColor = selectedColor;
             TabContentModel::GetInstance()->SetIconSelectedColorByUser(true);
         } else {
@@ -537,7 +537,7 @@ void JSTabContent::GetLabelUnselectedContent(const JSRef<JSVal> unselectedColorV
 {
     Color unselectedColor;
     RefPtr<ResourceObject> unselectColorResObj;
-    if (ParseJsColorForMaterial(unselectedColorValue, unselectedColor, unselectColorResObj)) {
+    if (ConvertFromJSValue(unselectedColorValue, unselectedColor, unselectColorResObj)) {
         labelStyle.unselectedColor = unselectedColor;
         TabContentModel::GetInstance()->SetLabelUnselectedColorByUser(true);
     } else {
@@ -553,7 +553,7 @@ void JSTabContent::GetLabelSelectedContent(const JSRef<JSVal> selectedColorValue
 {
     Color selectedColor;
     RefPtr<ResourceObject> selectColorResObj;
-    if (ParseJsColorForMaterial(selectedColorValue, selectedColor, selectColorResObj)) {
+    if (ConvertFromJSValue(selectedColorValue, selectedColor, selectColorResObj)) {
         labelStyle.selectedColor = selectedColor;
         TabContentModel::GetInstance()->SetLabelSelectedColorByUser(true);
     } else {

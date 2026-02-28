@@ -487,32 +487,6 @@ void ResetFontColor(ArkUINodeHandle node)
     }
 }
 
-void SetFontColorPtr(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* fontColorRawPtr)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    const auto* colorPtr = reinterpret_cast<const Color*>(color);
-    CHECK_NULL_VOID(colorPtr);
-    Color result = *colorPtr;
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_VOID(pattern);
-        RefPtr<ResourceObject> resObj;
-        if (!fontColorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(
-                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
-        } else {
-            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fontColorRawPtr));
-        }
-        if (resObj) {
-            pattern->RegisterResource<Color>("TextColor", resObj, result);
-        } else {
-            pattern->UnRegisterResource("TextColor");
-        }
-    }
-    TextModelNG::SetTextColor(frameNode, result);
-}
-
 uint32_t GetFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2975,7 +2949,6 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextSelectedDragPreviewStyle = ResetTextSelectedDragPreviewStyle,
         .getTextSelectedDragPreviewStyle = GetTextSelectedDragPreviewStyle,
         .setFontColorWithPlaceholder = SetFontColorWithPlaceholder,
-        .setFontColorPtr = SetFontColorPtr,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
