@@ -20,6 +20,8 @@ import { PersistentStorageTestsV1 } from '../../v1_tests/persistentStorageTestsV
 import { EnvironmentTestsV1 } from '../../v1_tests/environmentTestsV1'
 import { TestRunner } from '../../lib/testRunner'
 import { PageController } from '../../lib/pageController'
+import { PuSyncedPropertyOneWayTests } from '../../v1_tests/pu_synced_property_one_way_tests'
+import { PuSyncedPropertyTwoWayTests } from '../../v1_tests/pu_synced_property_two_way_tests'
 import router from '@system.router'
 
 const storage = new LocalStorage();
@@ -39,6 +41,8 @@ struct Parent {
       TestRunner.bind(this)(new AppStorageTestsV1('V1_appstorage'));
       TestRunner.bind(this)(new PersistentStorageTestsV1('V1_persistentstorage'));
       TestRunner.bind(this)(new EnvironmentTestsV1('V1_environment'));
+      TestRunner.bind(this)(new PuSyncedPropertyOneWayTests('V1_pu_synced_property_one_way'));
+      TestRunner.bind(this)(new PuSyncedPropertyTwoWayTests('V1_pu_synced_property_two_way'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)
