@@ -25,6 +25,35 @@ import { ShapeClipTransfer } from "../handwritten/transfer/ShapeClipTransfer"
 import { ShapeMaskTransfer } from "../handwritten/transfer/ShapeMaskTransfer"
 import { TransferUtil } from "../handwritten/transfer/TransferUtil"
 
+function getRenderNodeColorInt(inVal: ESValue, name: string): int {
+    const propVal = inVal.getProperty(name);
+    if (propVal.typeOf() === 'string') {
+        let parStr = propVal.toString();
+        if (parStr.startsWith('#')) {
+            parStr = parStr.replace('#', '0x');
+        }
+        const nVal = Number(parStr);
+        return ArkUIAniModule._ToColorInt(Double.toLong(nVal));
+    } else if (propVal.typeOf() === 'number') {
+        const nVal = propVal.toNumber();
+        return ArkUIAniModule._ToColorInt(Double.toLong(nVal));
+    }
+    return 0;
+}
+
+function getRenderNodeEdgeColors(inVal: ESValue, name: string): NodeEdges<int> | undefined {
+    let borderVal = inVal.getProperty(name);
+    if (borderVal.isUndefined() || borderVal.isNull()) {
+        return undefined;
+    }
+    let left = getRenderNodeColorInt(borderVal, 'left') as int;
+    let top = getRenderNodeColorInt(borderVal, 'top') as int;
+    let right = getRenderNodeColorInt(borderVal, 'right') as int;
+    let bottom = getRenderNodeColorInt(borderVal, 'bottom') as int;
+    let egVal = {left: left, top: top, right: right, bottom: bottom} as NodeEdges<int>;
+    return egVal;
+}
+
 export class RenderNodeTransfer {
     private mapNodeStatic = new Map<int, RenderNode>();
     private mapNodeDynamic = new Map<int, ESValue>();
@@ -39,7 +68,7 @@ export class RenderNodeTransfer {
         if (borderWidthVal) {
             rn.borderWidth = borderWidthVal as NodeEdges<number>;
         }
-        let borderColorVal = TransferUtil.getPropEdgesColor(inVal, "borderColorValue");
+        let borderColorVal = getRenderNodeEdgeColors(inVal, 'borderColorValue');
         if (borderColorVal) {
             rn.borderColor = borderColorVal as NodeEdges<int>;
         }
@@ -55,7 +84,7 @@ export class RenderNodeTransfer {
         if (clipVal) {
             rn.shapeClip = clipVal as ShapeClip;
         }
-        let colorVal = TransferUtil.getPropColorInt(inVal, "backgroundColorValue");
+        let colorVal = getRenderNodeColorInt(inVal, 'backgroundColorValue');
         if (colorVal !== undefined) {
             rn.backgroundColor = colorVal as int;
         }
@@ -66,9 +95,9 @@ export class RenderNodeTransfer {
         rn.rotation = TransferUtil.getPropVector3(inVal, "rotationValue");
 
         rn.scale = TransferUtil.getPropVector2(inVal, "scaleValue");
-        let ClrVal = TransferUtil.getPropColorInt(inVal, "shadowColorValue");
-        if (ClrVal !== undefined) {
-            rn.shadowColor = ClrVal as int;
+        let clrVal = getRenderNodeColorInt(inVal, 'shadowColorValue');
+        if (clrVal !== undefined) {
+            rn.shadowColor = clrVal as int;
         }
         rn.shadowOffset = TransferUtil.getPropVector2(inVal, "shadowOffsetValue");
         rn.label = TransferUtil.getPropString(inVal, "labelValue");
