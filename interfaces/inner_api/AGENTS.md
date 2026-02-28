@@ -54,6 +54,12 @@ adapter (Platform Adapter Layer)
 OpenHarmony Subsystems (Ability, Window, Graphic2D, MMI, IPC)
 ```
 
+| Property | Value |
+| -------- | ----- |
+| Repo name | ace_engine |
+| Subsystem | foundation/arkui |
+| Primary programming language | C++ |
+
 ### Code Scale
 
 - **Total Files**: 273 files
