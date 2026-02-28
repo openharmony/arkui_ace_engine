@@ -584,6 +584,92 @@ HWTEST_F(RichEditorDragTestNG, InitDragShadow001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: CreateDragNodeIsFilled001
+ * @tc.desc: test CreateDragNode isFilled when drag background color is not explicitly configured.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, CreateDragNodeIsFilled001, TestSize.Level0)
+{
+    CreateRichEditor([](RichEditorModelNG model) { model.SetTextDetectEnable(true); });
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->textSelector_.baseOffset = 0;
+    pattern_->textSelector_.destinationOffset = 10;
+    pattern_->paragraphs_.paragraphs_.clear();
+
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    ParagraphManager::ParagraphInfo paragraphInfo1;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(10, 10, 250, 250));
+        }));
+    const OHOS::Ace::NG::ParagraphStyle expectedStyle;
+    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo1.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    paragraphInfo1.end = 10;
+    pattern_->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    pattern_->paragraphs_.paragraphs_.emplace_back(paragraphInfo1);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->ResetSelectedDragPreviewStyle();
+    ASSERT_FALSE(layoutProperty->HasSelectedDragPreviewStyle());
+
+    pattern_->CreateDragNode();
+    ASSERT_NE(pattern_->dragNode_, nullptr);
+    auto option = frameNode_->GetDragPreviewOption();
+    EXPECT_TRUE(option.options.shadow.has_value());
+    EXPECT_TRUE(option.options.isFilled);
+}
+
+/**
+ * @tc.name: CreateDragNodeIsFilled002
+ * @tc.desc: test CreateDragNode isFilled when drag background color is explicitly configured.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, CreateDragNodeIsFilled002, TestSize.Level0)
+{
+    CreateRichEditor([](RichEditorModelNG model) { model.SetTextDetectEnable(true); });
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->textSelector_.baseOffset = 0;
+    pattern_->textSelector_.destinationOffset = 10;
+    pattern_->paragraphs_.paragraphs_.clear();
+
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    ParagraphManager::ParagraphInfo paragraphInfo1;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(10, 10, 250, 250));
+        }));
+    const OHOS::Ace::NG::ParagraphStyle expectedStyle;
+    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo1.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    paragraphInfo1.end = 10;
+    pattern_->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    pattern_->paragraphs_.paragraphs_.emplace_back(paragraphInfo1);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSelectedDragPreviewStyle(Color::RED);
+    ASSERT_TRUE(layoutProperty->HasSelectedDragPreviewStyle());
+
+    pattern_->CreateDragNode();
+    ASSERT_NE(pattern_->dragNode_, nullptr);
+    auto option = frameNode_->GetDragPreviewOption();
+    EXPECT_TRUE(option.options.shadow.has_value());
+    EXPECT_FALSE(option.options.isFilled);
+}
+
+/**
  * @tc.name: GetMaxSelectedWidth001
  * @tc.desc: test GetMaxSelectedWidth
  * @tc.type: FUNC

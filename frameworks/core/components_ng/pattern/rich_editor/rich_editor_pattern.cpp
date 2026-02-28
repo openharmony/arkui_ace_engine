@@ -143,6 +143,20 @@ const std::string EDITOR_BLUR_EVENT = "blur";
 const std::string EDITOR_FOCUS_EVENT = "focus";
 const static std::regex REMOVE_SPACE_CHARS{SPACE_CHARS};
 const auto URL_SPAN_FILTER = [](const RefPtr<SpanItem>& span){ return (span->urlOnRelease); };
+
+std::list<RefPtr<FrameNode>> GetDragImageChildren(const RefPtr<FrameNode>& contentHost)
+{
+    std::list<RefPtr<FrameNode>> imageChildren;
+    CHECK_NULL_RETURN(contentHost, imageChildren);
+    for (const auto& child : contentHost->GetChildren()) {
+        auto node = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(node);
+        if (auto& tag = node->GetTag(); tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            imageChildren.emplace_back(node);
+        }
+    }
+    return imageChildren;
+}
 } // namespace
 
 RichEditorPattern::RichEditorPattern(bool isStyledStringMode) :
@@ -9577,16 +9591,9 @@ void RichEditorPattern::CreateDragNode()
     auto contentHost = GetContentHost();
     CHECK_NULL_VOID(host && contentHost);
     ACE_UINODE_TRACE(host);
-    auto children = contentHost->GetChildren();
-    std::list<RefPtr<FrameNode>> imageChildren;
-    for (const auto& child : children) {
-        auto node = DynamicCast<FrameNode>(child);
-        CHECK_NULL_CONTINUE(node);
-        if (auto& tag = node->GetTag(); tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            imageChildren.emplace_back(node);
-        }
-    }
+    auto imageChildren = GetDragImageChildren(contentHost);
     TextDragInfo info;
+    bool hasDragBackgroundColor = false;
     info.maxSelectedWidth = GetMaxSelectedWidth();
     info.handleColor = GetCaretColor();
     info.selectedBackgroundColor = GetSelectedBackgroundColor();
@@ -9605,14 +9612,19 @@ void RichEditorPattern::CreateDragNode()
         if (placeholderSpanItem) {
             info.dragBackgroundColor = placeholderSpanItem->dragBackgroundColor_;
             info.isDragShadowNeeded = placeholderSpanItem->isDragShadowNeeded_;
+            hasDragBackgroundColor = info.dragBackgroundColor.has_value();
         }
+    }
+    if (!hasDragBackgroundColor) {
+        auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+        hasDragBackgroundColor = layoutProperty && layoutProperty->HasSelectedDragPreviewStyle();
     }
     if (!info.dragBackgroundColor.has_value()) {
         info.dragBackgroundColor = GetSelectedDragPreviewStyleColor();
     }
     dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
     CHECK_NULL_VOID(dragNode_);
-    InitDragShadow(host, dragNode_, info.isDragShadowNeeded, info.dragBackgroundColor.has_value());
+    InitDragShadow(host, dragNode_, info.isDragShadowNeeded, hasDragBackgroundColor);
     FrameNode::ProcessOffscreenNode(dragNode_);
 }
 
