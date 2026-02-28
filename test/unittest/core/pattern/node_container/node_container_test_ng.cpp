@@ -275,6 +275,177 @@ HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure002, TestSize.L
 }
 
 /**
+ * @tc.name: NodeContainerLayoutAlgorithmMeasure003
+ * @tc.desc: Test the Measure function when isEnabledChildrenMatchParent is false and layoutPolicy has value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode with mock pattern returning false for IsEnableChildrenMatchParent.
+     */
+    auto nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    auto mockPattern = AceType::MakeRefPtr<MockNodeContainerPattern>(false);
+    nodeContainerNode->pattern_ = mockPattern;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = LayoutWrapperNode(nodeContainerNode, geometryNode, nodeContainerNode->GetLayoutProperty());
+    auto contentChanges = layoutWrapper.GetContentChanges();
+    contentChanges.UpdateFlags(std::nullopt, std::nullopt);
+    layoutWrapper.GetContentChanges().ToString();
+    auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+    auto childLayoutProperty = childNode->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+
+    /**
+     * @tc.steps: step2. update layoutWrapper.
+     */
+    auto childLayoutWrapper = childNode->CreateLayoutWrapper();
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
+    layoutWrapper.cachedList_.push_back(childLayoutWrapper);
+
+    /**
+     * @tc.steps: step3. call the function Measure.
+     */
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
+}
+
+/**
+ * @tc.name: NodeContainerLayoutAlgorithmMeasure004
+ * @tc.desc: Test the Measure function when widthLayoutPolicy is MATCH_PARENT and heightLayoutPolicy is NO_MATCH.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    auto mockPattern = AceType::MakeRefPtr<MockNodeContainerPattern>(true);
+    nodeContainerNode->pattern_ = mockPattern;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = LayoutWrapperNode(nodeContainerNode, geometryNode, nodeContainerNode->GetLayoutProperty());
+    auto contentChanges = layoutWrapper.GetContentChanges();
+    contentChanges.UpdateFlags(std::nullopt, std::nullopt);
+    layoutWrapper.GetContentChanges().ToString();
+    auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+    auto childLayoutProperty = childNode->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+
+    /**
+     * @tc.steps: step2. update layoutWrapper.
+     */
+    auto childLayoutWrapper = childNode->CreateLayoutWrapper();
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
+    layoutWrapper.cachedList_.push_back(childLayoutWrapper);
+
+    /**
+     * @tc.steps: step3. call the function Measure.
+     */
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
+}
+
+/**
+ * @tc.name: NodeContainerLayoutAlgorithmMeasure005
+ * @tc.desc: Test the Measure function when widthLayoutPolicy is NO_MATCH and heightLayoutPolicy is MATCH_PARENT.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    auto mockPattern = AceType::MakeRefPtr<MockNodeContainerPattern>(true);
+    nodeContainerNode->pattern_ = mockPattern;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = LayoutWrapperNode(nodeContainerNode, geometryNode, nodeContainerNode->GetLayoutProperty());
+    auto contentChanges = layoutWrapper.GetContentChanges();
+    contentChanges.UpdateFlags(std::nullopt, std::nullopt);
+    layoutWrapper.GetContentChanges().ToString();
+    auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+    auto childLayoutProperty = childNode->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+
+    /**
+     * @tc.steps: step2. update layoutWrapper.
+     */
+    auto childLayoutWrapper = childNode->CreateLayoutWrapper();
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
+    layoutWrapper.cachedList_.push_back(childLayoutWrapper);
+
+    /**
+     * @tc.steps: step3. call the function Measure.
+     */
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
+}
+
+/**
+ * @tc.name: NodeContainerLayoutAlgorithmMeasure006
+ * @tc.desc: Test the Measure function when both widthLayoutPolicy and heightLayoutPolicy are NO_MATCH.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    auto mockPattern = AceType::MakeRefPtr<MockNodeContainerPattern>(true);
+    nodeContainerNode->pattern_ = mockPattern;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = LayoutWrapperNode(nodeContainerNode, geometryNode, nodeContainerNode->GetLayoutProperty());
+    auto contentChanges = layoutWrapper.GetContentChanges();
+    contentChanges.UpdateFlags(std::nullopt, std::nullopt);
+    layoutWrapper.GetContentChanges().ToString();
+    auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
+    auto childLayoutProperty = childNode->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+
+    /**
+     * @tc.steps: step2. update layoutWrapper.
+     */
+    auto childLayoutWrapper = childNode->CreateLayoutWrapper();
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
+    layoutWrapper.cachedList_.push_back(childLayoutWrapper);
+
+    /**
+     * @tc.steps: step3. call the function Measure.
+     */
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
+}
+
+/**
  * @tc.name: NodeContainerModelNGSetMakeFunction001
  * @tc.desc: Test the SetMakeFunction function of NodeContainerModelNG.
  * @tc.type: FUNC
@@ -1342,174 +1513,30 @@ HWTEST_F(NodeContainerTestNg, NodeContainerFireOnBind001, TestSize.Level1)
     EXPECT_EQ(flag, 0);
 }
 
-/**
- * @tc.name: NodeContainerLayoutAlgorithmMeasure003
- * @tc.desc: Test the Measure function when isEnabledChildrenMatchParent is false and layoutPolicy has value.
+/*
+ * @tc.name: NodeContainerFireOnUnbind001
+ * @tc.desc: Test the FireOnUnbind function of NodeContainerEventHub.
  * @tc.type: FUNC
  */
-HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure003, TestSize.Level1)
+HWTEST_F(NodeContainerTestNg, NodeContainerFireOnUnbind001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create frameNode with mock pattern returning false for IsEnableChildrenMatchParent.
+     * @tc.steps: step1. create node and get eventHub.
      */
-    auto nodeContainerNode = CreateNode();
-    ASSERT_NE(nodeContainerNode, nullptr);
-    auto mockPattern = AceType::MakeRefPtr<MockNodeContainerPattern>(false);
-    nodeContainerNode->pattern_ = mockPattern;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = LayoutWrapperNode(nodeContainerNode, geometryNode, nodeContainerNode->GetLayoutProperty());
-    auto contentChanges = layoutWrapper.GetContentChanges();
-    contentChanges.UpdateFlags(std::nullopt, std::nullopt);
-    layoutWrapper.GetContentChanges().ToString();
-    auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
-    auto childLayoutProperty = childNode->GetLayoutProperty();
-    ASSERT_NE(childLayoutProperty, nullptr);
-    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    RefPtr<FrameNode> node = CreateNode();
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    int32_t flag = 0;
+    auto onUnbindCallback = [&flag](int32_t containerId) { flag = 1; };
 
     /**
-     * @tc.steps: step2. update layoutWrapper.
+     * @tc.steps: step2. call FireOnUnbind when onUnbindCallback_ is nullptr.
+     * @tc.expected: callback is not triggered.
      */
-    auto childLayoutWrapper = childNode->CreateLayoutWrapper();
-    ASSERT_NE(childLayoutWrapper, nullptr);
-    layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
-    layoutWrapper.cachedList_.push_back(childLayoutWrapper);
-
-    /**
-     * @tc.steps: step3. call the function Measure.
-     */
-    layoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
-}
-
-/**
- * @tc.name: NodeContainerLayoutAlgorithmMeasure004
- * @tc.desc: Test the Measure function when widthLayoutPolicy is MATCH_PARENT and heightLayoutPolicy is NO_MATCH.
- * @tc.type: FUNC
- */
-HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode.
-     */
-    auto nodeContainerNode = CreateNode();
-    ASSERT_NE(nodeContainerNode, nullptr);
-    auto mockPattern = AceType::MakeRefPtr<MockNodeContainerPattern>(true);
-    nodeContainerNode->pattern_ = mockPattern;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = LayoutWrapperNode(nodeContainerNode, geometryNode, nodeContainerNode->GetLayoutProperty());
-    auto contentChanges = layoutWrapper.GetContentChanges();
-    contentChanges.UpdateFlags(std::nullopt, std::nullopt);
-    layoutWrapper.GetContentChanges().ToString();
-    auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
-    auto childLayoutProperty = childNode->GetLayoutProperty();
-    ASSERT_NE(childLayoutProperty, nullptr);
-    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
-    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
-
-    /**
-     * @tc.steps: step2. update layoutWrapper.
-     */
-    auto childLayoutWrapper = childNode->CreateLayoutWrapper();
-    ASSERT_NE(childLayoutWrapper, nullptr);
-    layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
-    layoutWrapper.cachedList_.push_back(childLayoutWrapper);
-
-    /**
-     * @tc.steps: step3. call the function Measure.
-     */
-    layoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
-}
-
-/**
- * @tc.name: NodeContainerLayoutAlgorithmMeasure005
- * @tc.desc: Test the Measure function when widthLayoutPolicy is NO_MATCH and heightLayoutPolicy is MATCH_PARENT.
- * @tc.type: FUNC
- */
-HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode.
-     */
-    auto nodeContainerNode = CreateNode();
-    ASSERT_NE(nodeContainerNode, nullptr);
-    auto mockPattern = AceType::MakeRefPtr<MockNodeContainerPattern>(true);
-    nodeContainerNode->pattern_ = mockPattern;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = LayoutWrapperNode(nodeContainerNode, geometryNode, nodeContainerNode->GetLayoutProperty());
-    auto contentChanges = layoutWrapper.GetContentChanges();
-    contentChanges.UpdateFlags(std::nullopt, std::nullopt);
-    layoutWrapper.GetContentChanges().ToString();
-    auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
-    auto childLayoutProperty = childNode->GetLayoutProperty();
-    ASSERT_NE(childLayoutProperty, nullptr);
-    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
-    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
-
-    /**
-     * @tc.steps: step2. update layoutWrapper.
-     */
-    auto childLayoutWrapper = childNode->CreateLayoutWrapper();
-    ASSERT_NE(childLayoutWrapper, nullptr);
-    layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
-    layoutWrapper.cachedList_.push_back(childLayoutWrapper);
-
-    /**
-     * @tc.steps: step3. call the function Measure.
-     */
-    layoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
-}
-
-/**
- * @tc.name: NodeContainerLayoutAlgorithmMeasure006
- * @tc.desc: Test the Measure function when both widthLayoutPolicy and heightLayoutPolicy are NO_MATCH.
- * @tc.type: FUNC
- */
-HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode.
-     */
-    auto nodeContainerNode = CreateNode();
-    ASSERT_NE(nodeContainerNode, nullptr);
-    auto mockPattern = AceType::MakeRefPtr<MockNodeContainerPattern>(true);
-    nodeContainerNode->pattern_ = mockPattern;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = LayoutWrapperNode(nodeContainerNode, geometryNode, nodeContainerNode->GetLayoutProperty());
-    auto contentChanges = layoutWrapper.GetContentChanges();
-    contentChanges.UpdateFlags(std::nullopt, std::nullopt);
-    layoutWrapper.GetContentChanges().ToString();
-    auto layoutAlgorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode("ChildNode", 0, AceType::MakeRefPtr<Pattern>());
-    auto childLayoutProperty = childNode->GetLayoutProperty();
-    ASSERT_NE(childLayoutProperty, nullptr);
-    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
-    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
-
-    /**
-     * @tc.steps: step2. update layoutWrapper.
-     */
-    auto childLayoutWrapper = childNode->CreateLayoutWrapper();
-    ASSERT_NE(childLayoutWrapper, nullptr);
-    layoutWrapper.cachedList_ = std::list<RefPtr<LayoutWrapper>>();
-    layoutWrapper.cachedList_.push_back(childLayoutWrapper);
-
-    /**
-     * @tc.steps: step3. call the function Measure.
-     */
-    layoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
+    eventHub->SetControllerOnUnbind(onUnbindCallback);
+    eventHub->SetControllerOnUnbind(nullptr);
+    eventHub->FireOnUnbind(1);
+    EXPECT_EQ(flag, 0);
 }
 } // namespace OHOS::Ace::NG
