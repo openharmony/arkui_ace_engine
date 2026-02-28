@@ -2129,4 +2129,209 @@ HWTEST_F(DragEventTestNg, DragEventTryTriggerThumbnailCallbackTest001, TestSize.
     dragEventActuator->TryTriggerThumbnailCallback();
     EXPECT_TRUE(dragEventActuator->isThumbnailCallbackTriggered_);
 }
+
+/**
+ * @tc.name: DragEventHandleDragDampingMoveTest001
+ * @tc.desc: Test HandleDragDampingMove function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventHandleDragDampingMoveTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+
+    /**
+     * @tc.steps: step2. Call HandleDragDampingMove with valid parameters.
+     * @tc.expected: Function executes without crash.
+     */
+    Point point(100.0f, 200.0f);
+    int32_t pointerId = 1;
+    dragEventActuator->HandleDragDampingMove(point, pointerId, false);
+    EXPECT_EQ(dragEventActuator->lastTouchFingerId_, pointerId);
+}
+
+/**
+ * @tc.name: DragEventUpdateDragNodePositionTest001
+ * @tc.desc: Test UpdateDragNodePosition function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventUpdateDragNodePositionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and imageNode.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId() + 1,
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+
+    /**
+     * @tc.steps: step2. Call UpdateDragNodePosition.
+     * @tc.expected: Function executes without crash.
+     */
+    float width = 100.0f;
+    float height = 100.0f;
+    DragEventActuator::UpdateDragNodePosition(imageNode, frameNode, width, height);
+    EXPECT_NE(imageNode, nullptr);
+}
+
+/**
+ * @tc.name: DragEventCopyDragEventTest001
+ * @tc.desc: Test CopyDragEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventCopyDragEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create two DragEventActuators.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+
+    auto dragEventActuator1 = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    auto dragEventActuator2 = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+
+    /**
+     * @tc.steps: step2. Set properties on first actuator and copy to second.
+     * @tc.expected: Properties are copied.
+     */
+    dragEventActuator1->isDragUserReject_ = true;
+    dragEventActuator1->defaultOnDragStartExecuted_ = true;
+    dragEventActuator1->CopyDragEvent(dragEventActuator2);
+
+    EXPECT_EQ(dragEventActuator2->isDragUserReject_, dragEventActuator1->isDragUserReject_);
+    EXPECT_EQ(dragEventActuator2->defaultOnDragStartExecuted_, dragEventActuator1->defaultOnDragStartExecuted_);
+}
+
+/**
+ * @tc.name: DragEventSetTextAnimationTest001
+ * @tc.desc: Test SetTextAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventSetTextAnimationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+
+    /**
+     * @tc.steps: step2. Call SetTextAnimation with global location.
+     * @tc.expected: Function executes without crash.
+     */
+    Offset globalLocation(100.0f, 200.0f);
+    dragEventActuator->SetTextAnimation(gestureEventHub, globalLocation);
+    EXPECT_NE(dragEventActuator, nullptr);
+}
+
+/**
+ * @tc.name: DragEventPrepareFinalPixelMapTest001
+ * @tc.desc: Test PrepareFinalPixelMapForDragThroughTouch function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventPrepareFinalPixelMapTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+
+    /**
+     * @tc.steps: step2. Call PrepareFinalPixelMapForDragThroughTouch with pixelMap.
+     * @tc.expected: Function executes without crash.
+     */
+    auto pixelMap = PixelMap::CreatePixelMap(static_cast<void*>(new char[0]));
+    dragEventActuator->PrepareFinalPixelMapForDragThroughTouch(pixelMap, true);
+    EXPECT_NE(dragEventActuator, nullptr);
+}
+
+/**
+ * @tc.name: DragEventDoPixelMapScaleTest001
+ * @tc.desc: Test DoPixelMapScaleForDragThroughTouch function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventDoPixelMapScaleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+
+    /**
+     * @tc.steps: step2. Call DoPixelMapScaleForDragThroughTouch.
+     * @tc.expected: Function executes without crash.
+     */
+    auto pixelMap = PixelMap::CreatePixelMap(static_cast<void*>(new char[0]));
+    float targetScale = 1.05f;
+    dragEventActuator->DoPixelMapScaleForDragThroughTouch(pixelMap, targetScale);
+    EXPECT_NE(dragEventActuator, nullptr);
+}
+
+/**
+ * @tc.name: DragEventHandleTextDragCallbackTest001
+ * @tc.desc: Test HandleTextDragCallback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventHandleTextDragCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator with textDragCallback_.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+
+    /**
+     * @tc.steps: step2. Set textDragCallback_ and call HandleTextDragCallback.
+     * @tc.expected: Function executes without crash.
+     */
+    Offset offset(100.0f, 200.0f);
+    dragEventActuator->textDragCallback_ = [](Offset) {};
+    dragEventActuator->HandleTextDragCallback(offset);
+    EXPECT_NE(dragEventActuator, nullptr);
+}
+
 } // namespace OHOS::Ace::NG
