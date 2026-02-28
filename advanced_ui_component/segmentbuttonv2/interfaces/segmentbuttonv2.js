@@ -480,6 +480,10 @@ export class TabSegmentButtonV2 extends ViewV2 {
       'backgroundSystemMaterial',
       params && 'backgroundSystemMaterial' in params ? params.backgroundSystemMaterial : undefined
     );
+    this.initParam(
+      'enableStateAnimation',
+      params && 'enableStateAnimation' in params ? params.enableStateAnimation : false
+    );
     this.finalizeConstruction();
   }
   initialRender() {
@@ -527,6 +531,7 @@ export class TabSegmentButtonV2 extends ViewV2 {
                 buttonPadding: this.buttonPadding,
                 languageDirection: this.languageDirection,
                 backgroundSystemMaterial: this.backgroundSystemMaterial,
+                enableStateAnimation: this.enableStateAnimation,
               },
               undefined,
               elmtId,
@@ -576,6 +581,7 @@ export class TabSegmentButtonV2 extends ViewV2 {
                 buttonPadding: this.buttonPadding,
                 languageDirection: this.languageDirection,
                 backgroundSystemMaterial: this.backgroundSystemMaterial,
+                enableStateAnimation: this.enableStateAnimation,
               };
             };
             componentCall.paramsGenerator_ = paramsLambda;
@@ -613,6 +619,7 @@ export class TabSegmentButtonV2 extends ViewV2 {
               buttonPadding: this.buttonPadding,
               languageDirection: this.languageDirection,
               backgroundSystemMaterial: this.backgroundSystemMaterial,
+              enableStateAnimation: this.enableStateAnimation,
             });
           }
         },
@@ -718,6 +725,9 @@ export class TabSegmentButtonV2 extends ViewV2 {
     if ('backgroundSystemMaterial' in params) {
       this.updateParam('backgroundSystemMaterial', params.backgroundSystemMaterial);
     }
+    if ('enableStateAnimation' in params) {
+      this.updateParam('enableStateAnimation', params.enableStateAnimation);
+    }
   }
   rerender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
@@ -758,6 +768,7 @@ __decorate([Param], TabSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
 __decorate([Param], TabSegmentButtonV2.prototype, 'buttonPadding', void 0);
 __decorate([Param], TabSegmentButtonV2.prototype, 'languageDirection', void 0);
 __decorate([Param], TabSegmentButtonV2.prototype, 'backgroundSystemMaterial', void 0);
+__decorate([Param], TabSegmentButtonV2.prototype, 'enableStateAnimation', void 0);
 export class CapsuleSegmentButtonV2 extends ViewV2 {
   constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
     super(parent, elmtId, extraInfo);
@@ -836,6 +847,10 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
       'backgroundSystemMaterial',
       params && 'backgroundSystemMaterial' in params ? params.backgroundSystemMaterial : undefined
     );
+    this.initParam(
+      'enableStateAnimation',
+      params && 'enableStateAnimation' in params ? params.enableStateAnimation : false
+    );
     this.finalizeConstruction();
   }
   initialRender() {
@@ -883,6 +898,7 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
                 buttonPadding: this.buttonPadding,
                 languageDirection: this.languageDirection,
                 backgroundSystemMaterial: this.backgroundSystemMaterial,
+                enableStateAnimation: this.enableStateAnimation,
               },
               undefined,
               elmtId,
@@ -932,6 +948,7 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
                 buttonPadding: this.buttonPadding,
                 languageDirection: this.languageDirection,
                 backgroundSystemMaterial: this.backgroundSystemMaterial,
+                enableStateAnimation: this.enableStateAnimation,
               };
             };
             componentCall.paramsGenerator_ = paramsLambda;
@@ -969,6 +986,7 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
               buttonPadding: this.buttonPadding,
               languageDirection: this.languageDirection,
               backgroundSystemMaterial: this.backgroundSystemMaterial,
+              enableStateAnimation: this.enableStateAnimation,
             });
           }
         },
@@ -1074,6 +1092,9 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
     if ('backgroundSystemMaterial' in params) {
       this.updateParam('backgroundSystemMaterial', params.backgroundSystemMaterial);
     }
+    if ('enableStateAnimation' in params) {
+      this.updateParam('enableStateAnimation', params.enableStateAnimation);
+    }
   }
   rerender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
@@ -1114,6 +1135,7 @@ __decorate([Param], CapsuleSegmentButtonV2.prototype, 'buttonMinHeight', void 0)
 __decorate([Param], CapsuleSegmentButtonV2.prototype, 'buttonPadding', void 0);
 __decorate([Param], CapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
 __decorate([Param], CapsuleSegmentButtonV2.prototype, 'backgroundSystemMaterial', void 0);
+__decorate([Param], CapsuleSegmentButtonV2.prototype, 'enableStateAnimation', void 0);
 class SimpleSegmentButtonV2 extends ViewV2 {
   constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
     super(parent, elmtId, extraInfo);
@@ -1123,10 +1145,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           ? PUV2ViewBase.contextStack[PUV2ViewBase.contextStack.length - 1]
           : null;
       this.observeComponentCreation2((elmtId, isInitialRender) => {
-        Flex.create({
-          alignItems: ItemAlign.Stretch,
-          space: { main: this.getItemSpace() },
-        });
+        Flex.create({ alignItems: ItemAlign.Stretch, space: { main: this.getItemSpace() } });
         Flex.constraintSize({
           minWidth: '100%',
           minHeight: this.getButtonMinHeight(),
@@ -1388,10 +1407,12 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           this.ifElseBranchUpdateFunction(0, () => {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
               Stack.create();
+              Context.animation(this.enableStateAnimation ? { curve: curves.springMotion(0.347, 0.99) } : undefined);
               Stack.position({
                 x: this.selectedItemRect.position.x,
                 y: this.selectedItemRect.position.y,
               });
+              Context.animation(null);
               Stack.backgroundColor(this.getItemSelectedBackgroundColor());
               Stack.borderRadius(this.getItemBorderRadius());
               Stack.scale({ x: this.itemScale, y: this.itemScale });
@@ -1518,6 +1539,10 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     this.panStartGlobalX = 0;
     this.panStartIndex = -1;
     this.focusGroupId = GroupIdGenerator.getInstance().generate();
+    this.initParam(
+      'enableStateAnimation',
+      params && 'enableStateAnimation' in params ? params.enableStateAnimation : false
+    );
     this.finalizeConstruction();
   }
   get normalizedSelectedIndex() {
@@ -1699,9 +1724,9 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     if (!this.isItemEnabled(selectedIndex) || selectedIndex === this.selectedIndex) {
       return;
     }
-    this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
-      this.$selectedIndex?.(selectedIndex);
-    });
+      this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
+        this.$selectedIndex?.(selectedIndex);
+      });
   }
   updateItemScale(scale) {
     if (this.itemScale === scale) {
@@ -1845,6 +1870,9 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     if ('backgroundSystemMaterial' in params) {
       this.updateParam('backgroundSystemMaterial', params.backgroundSystemMaterial);
     }
+    if ('enableStateAnimation' in params) {
+      this.updateParam('enableStateAnimation', params.enableStateAnimation);
+    }
   }
   rerender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
@@ -1891,6 +1919,7 @@ __decorate([Local], SimpleSegmentButtonV2.prototype, 'itemScale', void 0);
 __decorate([Local], SimpleSegmentButtonV2.prototype, 'hoveredItemIndex', void 0);
 __decorate([Local], SimpleSegmentButtonV2.prototype, 'mousePressedItemIndex', void 0);
 __decorate([Local], SimpleSegmentButtonV2.prototype, 'touchPressedItemIndex', void 0);
+__decorate([Param], SimpleSegmentButtonV2.prototype, 'enableStateAnimation', void 0);
 __decorate([Computed], SimpleSegmentButtonV2.prototype, 'normalizedSelectedIndex', null);
 __decorate([Computed], SimpleSegmentButtonV2.prototype, 'selectedItemRect', null);
 const multiplyCapsuleTheme = {
@@ -2094,10 +2123,7 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
-      Flex.create({
-        alignItems: ItemAlign.Stretch,
-        space: { main: this.getItemSpace() },
-      });
+      Flex.create({ alignItems: ItemAlign.Stretch, space: { main: this.getItemSpace() } });
       Flex.clip(false);
       Flex.direction(this.languageDirection);
       Flex.focusScopeId(this.focusGroupId, true);
@@ -2113,9 +2139,7 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
             Button.accessibilityDescription(this.getItemAccessibilityDescription(repeatItem));
             Button.accessibilityLevel(repeatItem.item.accessibilityLevel);
             Button.backgroundColor(this.getItemBackgroundColor(repeatItem));
-            Button.backgroundEffect(this.itemBackgroundEffect, {
-              disableSystemAdaptation: true,
-            });
+            Button.backgroundEffect(this.itemBackgroundEffect, { disableSystemAdaptation: true });
             Button.borderRadius(this.getItemButtonBorderRadius(repeatItem));
             Button.constraintSize({ minHeight: this.getItemMinHeight() });
             Button.direction(this.languageDirection);
@@ -2496,10 +2520,7 @@ class SegmentButtonV2ItemContent extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create({ space: 2 });
-      Column.constraintSize({
-        minHeight: this.getItemMinHeight(),
-        minWidth: '100%',
-      });
+      Column.constraintSize({ minHeight: this.getItemMinHeight(), minWidth: '100%' });
       Column.direction(this.languageDirection);
       Column.justifyContent(FlexAlign.Center);
       Column.padding(this.getItemPadding());

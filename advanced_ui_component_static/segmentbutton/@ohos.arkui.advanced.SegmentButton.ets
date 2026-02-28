@@ -91,7 +91,8 @@ import {
   State,
   Require,
   Provide,
-  UIUtils
+  UIUtils,
+  PropRef
 } from '@ohos.arkui.stateManagement';
 
 import curves from '@ohos.curves';
@@ -1549,6 +1550,7 @@ export struct SegmentButton {
   private isSegmentFocusStyleCustomized: boolean =
     resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED, 1) === 0;
   private isGestureInProgress: boolean = false;
+  @PropRef enableStateAnimation: boolean = false;
 
   onItemsPositionChange(a: string) {
     if (this.options === undefined || this.options.buttons === undefined) {
@@ -1624,7 +1626,7 @@ export struct SegmentButton {
     }
     this.updateSelectedIndexes();
     this.setItemsSelected();
-    if (this.doSelectedChangeAnimate) {
+    if (this.doSelectedChangeAnimate || this.enableStateAnimation) {
       this.updateAnimatedProperty(this.getSelectedChangeCurve());
     } else {
       this.updateAnimatedProperty(null);
