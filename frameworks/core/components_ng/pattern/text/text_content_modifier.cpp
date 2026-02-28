@@ -562,13 +562,24 @@ bool TextContentModifier::HandleDrawCallback(
         auto paintOffsetY = paintOffset_.GetY();
         SetTextContentAlingOffsetY(paintOffsetY);
         auto contentRect = textPattern->GetTextContentRect();
-        float paintOffsetX = AdjustParagraphX(paragraphs.front(), contentRect);
+        ExternalDrawCallbackInfo callbackInfo;
+        callbackInfo.paintX = AdjustParagraphX(paragraphs.front(), contentRect);
+        callbackInfo.paintY = paintOffsetY;
         auto host = textPattern->GetHost();
         CHECK_NULL_RETURN(host, false);
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_RETURN(geometryNode, false);
-        return drawCallback(
-            paintOffsetX, paintOffsetY, geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+        auto textStyle = textPattern->GetTextStyle();
+        callbackInfo.width = geometryNode->GetFrameSize().Width();
+        callbackInfo.height = geometryNode->GetFrameSize().Height();
+        if (textPattern->IsMeasured()) {
+            callbackInfo.isFontChanged = textPattern->IsOnlyFontSizeOrColorChanged();
+            textPattern->MarkMeasured(false);
+        } else {
+            callbackInfo.isFontChanged = true;
+        }
+        callbackInfo.fontSize = textStyle.GetFontSize().Value();
+        return drawCallback(callbackInfo);
     }
     return false;
 }
