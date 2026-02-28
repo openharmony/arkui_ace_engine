@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 
 #include "bridge/declarative_frontend/jsview/models/counter_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_counter_theme.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
@@ -289,6 +290,7 @@ void JSCounter::JsBackgroundColor(const JSCallbackInfo& args)
 void JSCounter::Create()
 {
     CounterModel::GetInstance()->Create();
+    JSCounterTheme::ApplyTheme();
 }
 
 } // namespace OHOS::Ace::Framework

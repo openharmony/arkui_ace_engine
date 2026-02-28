@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "core/components/counter/counter_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -51,8 +52,8 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                               : std::min(constraint->percentReference.Width(), constraint->maxSize.Width()));
     frameSize.SetWidth(std::max(frameWidthMax, constraint->minSize.Width()));
     auto frameHeightMax = ((constraint->selfIdealSize.Height().has_value())
-                              ? std::min(constraint->selfIdealSize.Height().value(), constraint->maxSize.Height())
-                              : std::min(constraint->percentReference.Height(), constraint->maxSize.Height()));
+                               ? std::min(constraint->selfIdealSize.Height().value(), constraint->maxSize.Height())
+                               : std::min(constraint->percentReference.Height(), constraint->maxSize.Height()));
     frameSize.SetHeight(std::max(frameHeightMax, constraint->minSize.Height()));
     bool checkSizeFlag = false;
     if (layoutPolicy.has_value()) {
@@ -72,9 +73,12 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         geometryNode->SetFrameSize(frameSize);
         geometryNode->SetContentSize(selfContentSize);
     }
+
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto counterTheme = pipeline->GetTheme<CounterTheme>();
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto counterTheme = pipeline->GetTheme<CounterTheme>(frameNode->GetThemeScopeId());
     CHECK_NULL_VOID(counterTheme);
     auto buttonWidth = counterTheme->GetControlWidth().ConvertToPx();
     auto layoutConstraint = layoutProperty->CreateChildConstraint();
@@ -130,6 +134,12 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // sub button measure
+    auto counterRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(counterRenderContext);
+    Color textColor = counterRenderContext->GetForegroundColor().has_value()
+                          ? counterRenderContext->GetForegroundColorValue()
+                          : counterTheme->GetContentTextStyle().GetTextColor();
+
     auto subButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(SUB_BUTTON);
     CHECK_NULL_VOID(subButtonWrapper);
     auto subButtonGeometryNode = subButtonWrapper->GetGeometryNode();
@@ -164,6 +174,8 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto subButtonRenderContext = subButtonHostNode->GetRenderContext();
     CHECK_NULL_VOID(subButtonRenderContext);
     subButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto subTextNode = AceType::DynamicCast<FrameNode>(subButtonHostNode->GetChildren().front());
+    UpdateTextColor(subTextNode, textColor);
 
     // add button measure
     auto addButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(ADD_BUTTON);
@@ -195,6 +207,8 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto addButtonRenderContext = addButtonHostNode->GetRenderContext();
     CHECK_NULL_VOID(addButtonRenderContext);
     addButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto addTextNode = AceType::DynamicCast<FrameNode>(addButtonHostNode->GetChildren().front());
+    UpdateTextColor(addTextNode, textColor);
 }
 
 static void LayoutItem(LayoutWrapper* layoutWrapper, int32_t leftButton, int32_t rightButton)
@@ -249,4 +263,19 @@ void CounterLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
+void CounterLayoutAlgorithm::UpdateTextColor(const RefPtr<FrameNode>& frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColorByRender(value);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateForegroundColor(value);
+    renderContext->ResetForegroundColorStrategy();
+    renderContext->UpdateForegroundColorFlag(true);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->UpdateFontColor(value);
+}
 } // namespace OHOS::Ace::NG
