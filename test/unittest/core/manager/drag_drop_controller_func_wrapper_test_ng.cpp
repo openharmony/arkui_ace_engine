@@ -945,4 +945,530 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest023, Test
     auto material = imageContext->GetSystemMaterial();
     EXPECT_NE(material, nullptr);
 }
+
+/**
+ * @tc.name: GetUpdateDragMovePosition_001
+ * @tc.desc: Test GetUpdateDragMovePosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, GetUpdateDragMovePosition_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetUpdateDragMovePosition with containerId
+     * @tc.expected: Returns default OffsetF (0, 0) without proper setup
+     */
+    int32_t containerId = 0;
+    auto offset = DragControllerFuncWrapper::GetUpdateDragMovePosition(containerId);
+    EXPECT_FLOAT_EQ(offset.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: ResetContextMenuDragPosition_001
+ * @tc.desc: Test ResetContextMenuDragPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, ResetContextMenuDragPosition_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call ResetContextMenuDragPosition
+     * @tc.expected: Function executes without crash
+     */
+    int32_t containerId = 0;
+    DragControllerFuncWrapper::ResetContextMenuDragPosition(containerId);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: CreatePreviewNode_001
+ * @tc.desc: Test CreatePreviewNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, CreatePreviewNode_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call CreatePreviewNode
+     * @tc.expected: Function executes without crash
+     */
+    RefPtr<FrameNode> imageNode;
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+
+    DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GetOriginNodeOffset_001
+ * @tc.desc: Test GetOriginNodeOffset with null pixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, GetOriginNodeOffset_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetOriginNodeOffset with null pixelMap
+     * @tc.expected: Returns empty OffsetF
+     */
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+    data.pixelMap = nullptr;
+
+    auto offset = DragControllerFuncWrapper::GetOriginNodeOffset(data, asyncCtxData);
+    EXPECT_EQ(offset.GetX(), 0.0f);
+    EXPECT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: GetPixelMapScaledOffset_001
+ * @tc.desc: Test GetPixelMapScaledOffset with null pixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, GetPixelMapScaledOffset_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetPixelMapScaledOffset with null pixelMap
+     * @tc.expected: Returns empty OffsetF
+     */
+    OffsetF pointPosition(100.0f, 100.0f);
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+    data.pixelMap = nullptr;
+
+    auto offset = DragControllerFuncWrapper::GetPixelMapScaledOffset(pointPosition, data, asyncCtxData);
+    EXPECT_EQ(offset.GetX(), 0.0f);
+    EXPECT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: GetScaleInfo_001
+ * @tc.desc: Test GetScaleInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, GetScaleInfo_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetScaleInfo
+     * @tc.expected: Returns nullptr without proper setup
+     */
+    int32_t containerId = 0;
+    float width = 100.0f;
+    float height = 100.0f;
+
+    auto scaleInfo = DragControllerFuncWrapper::GetScaleInfo(containerId, width, height);
+    EXPECT_EQ(scaleInfo, nullptr);
+}
+
+/**
+ * @tc.name: GetTouchPointOffset_001
+ * @tc.desc: Test GetTouchPointOffset with null pixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, GetTouchPointOffset_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetTouchPointOffset with null pixelMap
+     * @tc.expected: Returns empty OffsetF
+     */
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+    data.pixelMap = nullptr;
+
+    auto offset = DragControllerFuncWrapper::GetTouchPointOffset(data, asyncCtxData);
+    EXPECT_EQ(offset.GetX(), 0.0f);
+    EXPECT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: GetTouchPointOffset_002
+ * @tc.desc: Test GetTouchPointOffset with hasTouchPoint=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, GetTouchPointOffset_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetTouchPointOffset with hasTouchPoint=false
+     * @tc.expected: Returns calculated offset with negative values
+     */
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+    data.pixelMap = AceType::MakeRefPtr<PixelMap>();
+    asyncCtxData.hasTouchPoint = false;
+    asyncCtxData.touchPoint = DimensionOffset(Dimension(0.0f), Dimension(0.0f));
+
+    auto offset = DragControllerFuncWrapper::GetTouchPointOffset(data, asyncCtxData);
+    // Expected to return negative offset based on PIXELMAP_WIDTH_RATE and PIXELMAP_HEIGHT_RATE
+    SUCCEED();
+}
+
+/**
+ * @tc.name: UpdatePreviewPositionAndScale_001
+ * @tc.desc: Test UpdatePreviewPositionAndScale with null imageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, UpdatePreviewPositionAndScale_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call UpdatePreviewPositionAndScale with null imageNode
+     * @tc.expected: Function executes without crash
+     */
+    RefPtr<FrameNode> imageNode;
+    OffsetF frameOffset(100.0f, 100.0f);
+    float scale = 1.0f;
+
+    DragControllerFuncWrapper::UpdatePreviewPositionAndScale(imageNode, frameOffset, scale);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: UpdatePreviewPositionAndScale_002
+ * @tc.desc: Test UpdatePreviewPositionAndScale with scale=0
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, UpdatePreviewPositionAndScale_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call UpdatePreviewPositionAndScale with scale=0
+     * @tc.expected: TransformScale is not updated
+     */
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    OffsetF frameOffset(100.0f, 100.0f);
+    float scale = 0.0f;
+
+    DragControllerFuncWrapper::UpdatePreviewPositionAndScale(imageNode, frameOffset, scale);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: UpdatePreviewAttr_001
+ * @tc.desc: Test UpdatePreviewAttr with null imageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, UpdatePreviewAttr_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call UpdatePreviewAttr with null imageNode
+     * @tc.expected: Function executes without crash
+     */
+    RefPtr<FrameNode> imageNode;
+    DragPreviewOption dragPreviewOption;
+
+    DragControllerFuncWrapper::UpdatePreviewAttr(imageNode, dragPreviewOption);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: MarkDirtyNode_001
+ * @tc.desc: Test MarkDirtyNode with null gatherNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, MarkDirtyNode_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call MarkDirtyNode with null gatherNode
+     * @tc.expected: Function executes without crash
+     */
+    RefPtr<FrameNode> gatherNode;
+    DragControllerFuncWrapper::MarkDirtyNode(gatherNode);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: SubWindowShow_001
+ * @tc.desc: Test SubWindowShow with null context
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, SubWindowShow_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call SubWindowShow with null context
+     * @tc.expected: Returns nullptr
+     */
+    RefPtr<PipelineBase> context;
+    auto subWindow = DragControllerFuncWrapper::SubWindowShow(context);
+    EXPECT_EQ(subWindow, nullptr);
+}
+
+/**
+ * @tc.name: TryDoDragStartAnimation_001
+ * @tc.desc: Test TryDoDragStartAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, TryDoDragStartAnimation_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call TryDoDragStartAnimation
+     * @tc.expected: Returns false without proper setup
+     */
+    RefPtr<Subwindow> subWindow;
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+
+    auto result = DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: UpdateGatherAnimatePosition_001
+ * @tc.desc: Test UpdateGatherAnimatePosition with empty gatherNodeChildrenInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, UpdateGatherAnimatePosition_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call UpdateGatherAnimatePosition with empty children info
+     * @tc.expected: Function executes without crash
+     */
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo;
+    OffsetF GatherNodeOffset(100.0f, 100.0f);
+
+    DragControllerFuncWrapper::UpdateGatherAnimatePosition(gatherNodeChildrenInfo, GatherNodeOffset);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GetOrCreateGatherNode_001
+ * @tc.desc: Test GetOrCreateGatherNode with pixelMapList.size() <= 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, GetOrCreateGatherNode_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetOrCreateGatherNode with pixelMapList.size()=1
+     * @tc.expected: Returns nullptr
+     */
+    RefPtr<NG::OverlayManager> overlayManager;
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo;
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+    asyncCtxData.pixelMapList.push_back(AceType::MakeRefPtr<PixelMap>());
+
+    auto gatherNode = DragControllerFuncWrapper::GetOrCreateGatherNode(overlayManager, gatherNodeChildrenInfo, data, asyncCtxData);
+    EXPECT_EQ(gatherNode, nullptr);
+}
+
+/**
+ * @tc.name: GetOrCreateGatherNode_002
+ * @tc.desc: Test GetOrCreateGatherNode with null overlayManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, GetOrCreateGatherNode_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetOrCreateGatherNode with null overlayManager
+     * @tc.expected: Returns nullptr
+     */
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo;
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+    asyncCtxData.pixelMapList.push_back(AceType::MakeRefPtr<PixelMap>());
+    asyncCtxData.pixelMapList.push_back(AceType::MakeRefPtr<PixelMap>());
+
+    auto gatherNode = DragControllerFuncWrapper::GetOrCreateGatherNode(nullptr, gatherNodeChildrenInfo, data, asyncCtxData);
+    EXPECT_EQ(gatherNode, nullptr);
+}
+
+/**
+ * @tc.name: CreateGatherNode_001
+ * @tc.desc: Test CreateGatherNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, CreateGatherNode_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call CreateGatherNode
+     * @tc.expected: Returns nullptr without proper setup
+     */
+    std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo;
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+
+    auto gatherNode = DragControllerFuncWrapper::CreateGatherNode(gatherNodeChildrenInfo, data, asyncCtxData);
+    EXPECT_EQ(gatherNode, nullptr);
+}
+
+/**
+ * @tc.name: MountPixelMap_001
+ * @tc.desc: Test MountPixelMap with null manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, MountPixelMap_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call MountPixelMap with null manager
+     * @tc.expected: Function executes without crash
+     */
+    RefPtr<OverlayManager> manager;
+    PreparedInfoForDrag data;
+    RefPtr<FrameNode> imageNode;
+    RefPtr<FrameNode> textNode;
+    bool isDragPixelMap = true;
+
+    DragControllerFuncWrapper::MountPixelMap(manager, data, imageNode, textNode, isDragPixelMap);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: MountPixelMap_002
+ * @tc.desc: Test MountPixelMap with null imageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, MountPixelMap_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call MountPixelMap with null imageNode
+     * @tc.expected: Function executes without crash
+     */
+    auto manager = MockPipelineContext::GetCurrent()->GetOverlayManager();
+    PreparedInfoForDrag data;
+    RefPtr<FrameNode> imageNode;
+    RefPtr<FrameNode> textNode;
+    bool isDragPixelMap = true;
+
+    DragControllerFuncWrapper::MountPixelMap(manager, data, imageNode, textNode, isDragPixelMap);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: UpdateBadgeTextNodePosition_001
+ * @tc.desc: Test UpdateBadgeTextNodePosition with badgeNumber <= 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, UpdateBadgeTextNodePosition_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call UpdateBadgeTextNodePosition with badgeNumber=1
+     * @tc.expected: Function returns early without crash
+     */
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+    data.badgeNumber = 1;
+    OffsetF previewOffset(100.0f, 100.0f);
+
+    DragControllerFuncWrapper::UpdateBadgeTextNodePosition(textNode, data, asyncCtxData, previewOffset);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: UpdateBadgeTextNodePosition_002
+ * @tc.desc: Test UpdateBadgeTextNodePosition with null textNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, UpdateBadgeTextNodePosition_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call UpdateBadgeTextNodePosition with null textNode
+     * @tc.expected: Function executes without crash
+     */
+    RefPtr<FrameNode> textNode;
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+    data.badgeNumber = 2;
+    OffsetF previewOffset(100.0f, 100.0f);
+
+    DragControllerFuncWrapper::UpdateBadgeTextNodePosition(textNode, data, asyncCtxData, previewOffset);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: UpdateDragPreviewScale_001
+ * @tc.desc: Test UpdateDragPreviewScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, UpdateDragPreviewScale_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call UpdateDragPreviewScale
+     * @tc.expected: Function executes without crash
+     */
+    DragControllerFuncWrapper::UpdateDragPreviewScale();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: TransDragWindowToDragFwk_001
+ * @tc.desc: Test TransDragWindowToDragFwk
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, TransDragWindowToDragFwk_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call TransDragWindowToDragFwk
+     * @tc.expected: Function executes without crash
+     */
+    int32_t containerId = 0;
+    DragControllerFuncWrapper::TransDragWindowToDragFwk(containerId);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: CalcDragMoveOffset_001
+ * @tc.desc: Test CalcDragMoveOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, CalcDragMoveOffset_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call CalcDragMoveOffset
+     * @tc.expected: Returns default Offset without proper setup
+     */
+    int32_t x = 100;
+    int32_t y = 200;
+
+    auto offset = DragControllerFuncWrapper::CalcDragMoveOffset(x, y);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: DoDragStartAnimation_001
+ * @tc.desc: Test DoDragStartAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, DoDragStartAnimation_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call DoDragStartAnimation
+     * @tc.expected: Function executes without crash
+     */
+    RefPtr<OverlayManager> overlayManager;
+    PreparedInfoForDrag data;
+    PreparedAsyncCtxForAnimate asyncCtxData;
+
+    DragControllerFuncWrapper::DoDragStartAnimation(overlayManager, data, asyncCtxData);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GetDragPreviewInfo_001
+ * @tc.desc: Test GetDragPreviewInfo with null overlayManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, GetDragPreviewInfo_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call GetDragPreviewInfo with null overlayManager
+     * @tc.expected: Returns false
+     */
+    RefPtr<OverlayManager> overlayManager;
+    int32_t containerId = 0;
+
+    auto result = DragControllerFuncWrapper::GetDragPreviewInfo(overlayManager, containerId);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HideDragPreviewWindow_001
+ * @tc.desc: Test HideDragPreviewWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragControllerFuncWrapperTest, HideDragPreviewWindow_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call HideDragPreviewWindow
+     * @tc.expected: Function executes without crash
+     */
+    int32_t containerId = 0;
+    DragControllerFuncWrapper::HideDragPreviewWindow(containerId);
+    SUCCEED();
+}
 } // namespace OHOS::Ace::NG
