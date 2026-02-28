@@ -1,6 +1,0 @@
-{
-    "AttributeModifier": "arkui.component.common.AttributeModifier",
-    "AttributeUpdater": "arkui.AttributeUpdater.AttributeUpdater",
-    "AttributeUpdaterFlag": "arkui.AttributeUpdaterFlag.AttributeUpdaterFlag",
-    "CommonMethod": "arkui.component.common.CommonMethod"
-}

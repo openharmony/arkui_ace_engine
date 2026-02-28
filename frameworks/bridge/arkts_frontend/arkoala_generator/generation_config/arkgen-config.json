@@ -9,6 +9,7 @@
     "dumpSerialized": false,
     "ignoreMaterialized": [
         "AnimatableArithmetic",
+        "CrownEvent",
         "CustomLayoutRoot",
         "DynamicNode",
         "GestureHandler",
@@ -46,6 +47,10 @@
         {
             "from": "arkui.component.waterFlow.WaterFlowSections",
             "to": "arkui.component.idlize.WaterFlowSectionsInterface"
+        },
+        {
+            "from": "arkui.Graphics.ColorMetrics",
+            "to": "arkui.component.idlize.ColorMetricsExt"
         }
     ],
     "forceMaterialized": [
@@ -73,6 +78,7 @@
         "arkui.component.gesture.SwipeGestureEvent",
         "arkui.component.gesture.TapGestureEvent",
         "arkui.ComponentContent.ComponentContent",
+        "arkui.ComponentContent.ComponentContentBase",
         "ohos.animator.AnimatorOptions",
         "ohos.animator.AnimatorResult",
         "ohos.animator.SimpleAnimatorOptions",
@@ -132,6 +138,10 @@
         "ohos.graphics.drawing.Brush",
         "ohos.graphics.drawing.Matrix",
         "ohos.graphics.drawing.Region",
+        "ohos.graphics.uiEffect.uiEffect.Blender",
+        "ohos.graphics.uiEffect.uiEffect.BrightnessBlender",
+        "ohos.graphics.uiEffect.uiEffect.HdrBrightnessBlender",
+        "ohos.inputMethod.ExtraConfig.InputMethodExtraConfig",
         "ohos.multimedia.image.Size",
         "ohos.multimedia.image.Region",
         "ohos.multimedia.image.PositionArea",
@@ -177,10 +187,10 @@
         "ohos.resourceManager.ResourceManager",
         "ohos.resourceManager.Configuration",
         "ohos.resourceManager.DeviceCapability",
-        "ohos.router.RouterOptions",
-        "ohos.router.RouterState",
+        "ohos.router.router.RouterOptions",
+        "ohos.router.router.RouterState",
         "ohos.router.EnableAlertOptions",
-        "ohos.router.NamedRouterOptions",
+        "ohos.router.router.NamedRouterOptions",
         "ohos.rpc.Parcelable",
         "ohos.rpc.RequestResult",
         "ohos.rpc.IRemoteBroker",
@@ -462,14 +472,18 @@
         "CustomSpan": [
             "onMeasure",
             "onDraw"
+        ],
+        "LeadingMarginSpan": [
+            "onDraw",
+            "getLeadingMargin"
         ]
     },
     "forceResource": [
+        "ChildrenMainSize",
         "PeerNode",
         "ExtendableComponent",
         "LifeCycle",
         "ContentModifier",
-        "ComponentContentBase",
         "UserDataSpan",
         "Gesture",
         "GestureGroup",
@@ -576,9 +590,9 @@
         "CommonTransition",
         "CalendarAttribute",
         "ContainerSpanAttribute",
+        "CustomLayoutRoot",
         "SymbolSpanAttribute",
-        "SpanAttribute",
-        "CustomLayoutRoot"
+        "SpanAttribute"
     ],
     "standaloneComponents": [
         "TextPickerDialog",
@@ -586,7 +600,8 @@
         "AlertDialog",
         "CanvasPattern",
         "WithThemeAttribute",
-        "ToolBarItemAttribute"
+        "ToolBarItemAttribute",
+        "IfAttribute"
     ],
     "parameterized": [
         "Indicator",
@@ -597,11 +612,8 @@
         "Record"
     ],
     "builderClasses": [
-        "Indicator",
         "SubTabBarStyle",
-        "BottomTabBarStyle",
-        "DotIndicator",
-        "DigitIndicator"
+        "BottomTabBarStyle"
     ],
     "components": {
         "customNodeTypes": [
@@ -646,6 +658,7 @@
             "KeyGeneratorFunc",
             "WrappedBuilder",
             "TabContent",
+            "Toggle",
             "ListItem",
             "ImageData",
             "Gesture",
@@ -664,9 +677,15 @@
             "RotationGestureHandler",
             "SwipeGestureHandler",
             "GestureType",
+            "DrawModifier",
             "Badge",
             "ChildrenMainSize",
-            "WaterFlowSections"
+            "WaterFlowSections",
+            "IfAttribute",
+            "IfInterface",
+            "WithTheme",
+            "SaveButton",
+            "PasteButton"
         ],
         "ignoreEntry": [
             "Optional",
@@ -717,7 +736,8 @@
             "Particle",
             "ForEach",
             "LazyForEach",
-            "ContentSlot"
+            "ContentSlot",
+            "If"
         ],
         "ignorePeerMethod": [
             "attributeModifier"
@@ -735,7 +755,7 @@
         ]
     },
     "hooks": {
-        "DragEventInternal": {
+        "DragEvent": {
             "startDataLoading": {
                 "hookName": "hookDragEventStartDataLoading",
                 "replaceImplementation": true
@@ -743,12 +763,42 @@
             "getSummary": {
                 "hookName": "hookDragEventGetSummary",
                 "replaceImplementation": true
+            },
+            "setDataLoadParams": {
+                "hookName": "hookDragEventSetDataLoadParams",
+                "replaceImplementation": true
+            },
+            "enableInternalDropAnimation": {
+                "hookName": "hookEnableInternalDropAnimation",
+                "replaceImplementation": true
+            },
+            "getGetModifierKeyState": {
+                "hookName": "hookDragEventGetModifierKeyState",
+                "replaceImplementation": true
+            }
+        },
+        "KeyEvent": {
+            "getGetModifierKeyState": {
+                "hookName": "hookKeyEventGetModifierKeyState",
+                "replaceImplementation": true
+            }
+        },
+        "BaseEvent": {
+            "getGetModifierKeyState": {
+                "hookName": "hookBaseEventGetModifierKeyState",
+                "replaceImplementation": true
             }
         },
         "ButtonAttribute": {
             "contentModifier": {
                 "hookName": "hookButtonContentModifier",
                 "replaceImplementation": true
+            }
+        },
+        "CanvasAttribute": {
+            "setCanvasOptions": {
+                "hookName": "hookSetCanvasOptions",
+                "replaceImplementation": false
             }
         },
         "CommonMethod": {
@@ -799,9 +849,19 @@
                 "replaceImplementation": true
             }
         },
+        "CheckboxGroupAttribute": {
+            "contentModifier": {
+                "hookName": "hookCheckBoxGroupContentModifier",
+                "replaceImplementation": true
+            }
+        },
         "DataPanelAttribute": {
             "contentModifier": {
                 "hookName": "hookDataPanelContentModifier",
+                "replaceImplementation": true
+            },
+            "trackShadow": {
+                "hookName": "hookDataPanelTrackShadow",
                 "replaceImplementation": true
             }
         },
@@ -809,11 +869,23 @@
             "contentModifier": {
                 "hookName": "hookGaugeContentModifier",
                 "replaceImplementation": true
+            },
+            "indicator": {
+                "hookName": "hookGaugeIndicator",
+                "replaceImplementation": true
+            },
+            "trackShadow": {
+                "hookName": "hookGaugeTrackShadow",
+                "replaceImplementation": true
+            },
+            "description": {
+                "hookName": "hookGaugeDescription",
+                "replaceImplementation": true
             }
         },
         "ImageAttribute": {
-            "setImageOptions": {
-                "hookName": "hookImageSetImageOptions",
+            "onError": {
+                "hookName": "hookImageOnError",
                 "replaceImplementation": false
             }
         },
@@ -826,6 +898,10 @@
         "ListItemGroupAttribute": {
             "childrenMainSize": {
                 "hookName": "hookListItemGroupChildrenMainSizeImpl",
+                "replaceImplementation": true
+            },
+            "setListItemGroupOptions": {
+                "hookName": "hookListItemGroupOptionsImpl",
                 "replaceImplementation": true
             }
         },
@@ -843,6 +919,22 @@
             "navDestination": {
                 "hookName": "hookSetNavDestination",
                 "replaceImplementation": true
+            },
+            "splitPlaceholder": {
+                "hookName": "hookSplitPlaceholder",
+                "replaceImplementation": true
+            }
+        },
+        "NavDestinationContextInternal": {
+            "getConfigInRouteMap": {
+                "hookName": "hookGetConfigInRouteMap",
+                "replaceImplementation": true
+            }
+        },
+        "PasteButtonAttribute": {
+            "onClick": {
+                "hookName": "hookPasteButtonOnClickImpl",
+                "replaceImplementation": false
             }
         },
         "ProgressAttribute": {
@@ -863,6 +955,12 @@
                 "replaceImplementation": true
             }
         },
+        "SaveButtonAttribute": {
+            "onClick": {
+                "hookName": "hookSaveButtonOnClickImpl",
+                "replaceImplementation": false
+            }
+        },
         "SelectAttribute": {
             "menuItemContentModifier": {
                 "hookName": "hookSelectContentModifier",
@@ -876,6 +974,14 @@
         "SliderAttribute": {
             "contentModifier": {
                 "hookName": "hookSliderContentModifier",
+                "replaceImplementation": true
+            },
+            "prefix": {
+                "hookName": "hookSliderSetPrefixMethod",
+                "replaceImplementation": true
+            },
+            "suffix": {
+                "hookName": "hookSliderSetSuffixMethod",
                 "replaceImplementation": true
             }
         },
@@ -901,10 +1007,28 @@
             "contentModifier": {
                 "hookName": "hookToggleContentModifier",
                 "replaceImplementation": true
+            },
+            "setToggleOptions": {
+                "hookName": "hookSetToggleOptions",
+                "replaceImplementation": false
+            }
+        },
+        "VideoAttribute": {
+            "setVideoOptions": {
+                "hookName": "hookSetVideoOptions",
+                "replaceImplementation": false
+            },
+            "analyzerConfig": {
+                "hookName": "hookVideoAnalyzerConfig",
+                "replaceImplementation": false
+            },
+            "onError": {
+                "hookName": "hookVideoOnError",
+                "replaceImplementation": false
             }
         },
         "waterFlowAttribute": {
-            "setWaterFlowOptionsAttribute": {
+            "setWaterFlowOptions": {
                 "hookName": "hookWaterFlowOptionsImpl",
                 "replaceImplementation": true
             }
@@ -923,12 +1047,6 @@
                 "replaceImplementation": true
             }
         },
-        "OffscreenCanvas": {
-            "getContext": {
-                "hookName": "hookGetContext",
-                "replaceImplementation": false
-            }
-        },
         "CanvasRenderingContext2D": {
             "onAttach": {
                 "hookName": "registerAttach",
@@ -945,6 +1063,20 @@
             "offDetach": {
                 "hookName": "unregisterDetach",
                 "replaceImplementation": false
+            },
+            "startImageAnalyzer": {
+                "hookName": "hookCanvasStartImageAnalyzer",
+                "replaceImplementation": false
+            },
+            "getCanvas": {
+                "hookName": "hookGetCanvas",
+                "replaceImplementation": true
+            }
+        },
+        "XComponentController": {
+            "startImageAnalyzer": {
+                "hookName": "hookXComponentStartImageAnalyzer",
+                "replaceImplementation": true
             }
         },
         "XComponentAttribute": {
@@ -960,25 +1092,15 @@
             }
         },
         "CommonMethodModifier": {
-            "size": {
-                "hookName": "hookCommonMethodModifierSize",
-                "replaceImplementation": true
-            },
             "customProperty": {
                 "hookName": "hookCommonMethodModifierCustomProperty",
                 "replaceImplementation": true
             }
         },
-        "TabsAttribute": {
-            "pageFlipMode": {
-                "hookName": "hookTabsApplyAttributesFinish",
-                "replaceImplementation": false
-            }
-        },
         "WebAttribute": {
             "javaScriptProxy": {
                 "hookName": "hookJavaScriptProxy",
-                "replaceImplementation": true
+                "replaceImplementation": false
             }
         }
     },
@@ -1047,11 +1169,31 @@
         "TestCallVoidIntArrayPrefixSum",
         "TestCallIntRecursiveCallback",
         "TestCallIntMemory",
-        "arkui.component.idlize.RouterExtender.back",
-        "arkui.component.idlize.RouterExtender.runPage",
         "arkui.component.idlize.BuilderNodeOps.create",
-        "arkui.component.idlize.WebInterface.setWebOptions",
-        "arkui.component.idlize.NavExtender.syncStack",
+        "arkui.component.idlize.LazyForEachOps.NotifyChange",
+        "arkui.component.idlize.AnimationExtender.AnimateToImmediatelyImpl",
+        "arkui.component.idlize.AnimationExtender.KeyframeAnimationImpl",
+        "arkui.component.idlize.AnimationExtender.OpenImplicitAnimationForAnimation",
+        "arkui.component.idlize.AnimationExtender.CloseImplicitAnimationForAnimation",
+        "idlize.internal.interop.Node.ApplyModifierFinish",
+        "arkui.component.idlize.RouterExtender.back",
+        "arkui.component.idlize.RouterExtender.clear",
+        "arkui.component.idlize.RouterExtender.push",
+        "arkui.component.idlize.RouterExtender.replace",
+        "arkui.component.idlize.RouterExtender.runPage",
+        "arkui.component.navigation.NavigationAttribute.title",
+        "arkui.component.navigation.NavigationAttribute.menus",
+        "arkui.component.navigation.NavigationAttribute.toolbarConfiguration",
+        "arkui.component.navigation.NavPathStack.pushPath",
+        "arkui.component.navigation.NavPathStack.pushDestination",
+        "arkui.component.navigation.NavPathStack.pushPathByName",
+        "arkui.component.navigation.NavPathStack.pushDestinationByName",
+        "arkui.component.navigation.NavPathStack.replacePath",
+        "arkui.component.navigation.NavPathStack.replaceDestination",
+        "arkui.component.navigation.NavPathStack.replacePathByName",
+        "arkui.component.navDestination.NavDestinationAttribute.title",
+        "arkui.component.navDestination.NavDestinationAttribute.menus",
+        "arkui.component.navDestination.NavDestinationAttribute.toolbarConfiguration",
         "arkui.component.list.ListScroller.getItemRectInGroup",
         "arkui.component.list.ListScroller.scrollToItemInGroup",
         "arkui.component.list.ListScroller.closeAllSwipeActions",
@@ -1065,7 +1207,8 @@
         "arkui.component.scroll.Scroller.scrollBy",
         "arkui.component.scroll.Scroller.isAtEnd",
         "arkui.component.scroll.Scroller.getItemRect",
-        "arkui.component.scroll.Scroller.getItemIndex"
+        "arkui.component.scroll.Scroller.getItemIndex",
+        "arkui.component.scroll.Scroller.contentSize"
     ],
     "constants": {
         "TouchTestInfo.rect": "{ x: 0, y: 0, width: 0, height: 0 }",
