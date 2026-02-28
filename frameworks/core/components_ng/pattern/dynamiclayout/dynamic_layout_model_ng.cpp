@@ -111,7 +111,7 @@ void DynamicLayoutModelNG::Create(
     ACE_LAYOUT_SCOPED_TRACE(
         "Create[%s][self:%d][layoutType:%d]", "DynamicLayout", nodeId, static_cast<int32_t>(type));
     auto patternGenerator =
-        [layoutType = type, params = params]() -> RefPtr<Pattern> {
+        [layoutType = type, params = AceType::DynamicCast<CustomLayoutAlgorithmParam>(params)]() -> RefPtr<Pattern> {
         switch (layoutType) {
             case DynamicLayoutType::COLUMN_LAYOUT:
                 return AceType::MakeRefPtr<LinearLayoutPattern>(true);
@@ -120,11 +120,9 @@ void DynamicLayoutModelNG::Create(
             case DynamicLayoutType::STACK_LAYOUT:
                 return AceType::MakeRefPtr<StackPattern>();
             case DynamicLayoutType::CUSTOM_LAYOUT: {
-                auto customParams = AceType::DynamicCast<CustomLayoutAlgorithmParam>(params);
-                return AceType::MakeRefPtr<DynamicLayoutPattern>(customParams);
+                return AceType::MakeRefPtr<DynamicLayoutPattern>(params);
             }
             case DynamicLayoutType::GRID_LAYOUT: {
-                auto gridParams = AceType::DynamicCast<GridLayoutAlgorithmParam>(params);
                 auto pattern = AceType::MakeRefPtr<LazyGridLayoutPattern>();
                 // Set DynamicLayout flag
                 pattern->SetDynamicLayoutOptions(true);
