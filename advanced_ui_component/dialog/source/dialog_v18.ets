@@ -1503,6 +1503,16 @@ struct CustomDialogContentComponent {
     };
   }
 
+  private getButtonLabelStyle(buttonOptions: ButtonOptions): LabelStyle {
+    return {
+      maxLines: 1,
+      overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
+      maxFontSize: this.buttonMaxFontSize,
+      minFontSize: this.buttonMinFontSize,
+      textAlign: buttonOptions.textAlign ?? TextAlign.Start
+    }
+  }
+
   @Builder
   buildSingleButton(buttonOptions: ButtonOptions): void {
     if (this.isNewPropertiesHighPriority(buttonOptions)) {
@@ -1510,46 +1520,26 @@ struct CustomDialogContentComponent {
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .backgroundColor(buttonOptions.background)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     } else if (buttonOptions.background !== undefined) {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .backgroundColor(buttonOptions.background)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     } else {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     }
   }
 
