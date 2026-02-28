@@ -443,6 +443,34 @@ HWTEST_F(NodeContainerTestNg, NodeContainerNodeOnRecycle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NodeContainerNodeOnRecycle002
+ * @tc.desc: Test the OnRecycle function of NodeContainerNode with null destroy callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerNodeOnRecycle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create nodeContainerNode.
+     */
+    RefPtr<FrameNode> nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    
+    /**
+     * @tc.steps: step2: add null destroy callback to trigger if (destroyCallback.second) false branch.
+     * @tc.expected: process success without crash.
+     */
+    std::function<void()> nullCallback;
+    nodeContainerNode->PushDestroyCallbackWithTag(std::move(nullCallback), "nullTag");
+    
+    /**
+     * @tc.steps: step3: call OnRecycle directly.
+     * @tc.expected: process success without crash.
+     */
+    nodeContainerNode->OnRecycle();
+    EXPECT_TRUE(true);
+}
+
+/**
  * @tc.name: NodeContainerPatternOnDirtyLayoutWrapperSwap001
  * @tc.desc: Test the OnDirtyLayoutWrapperSwap function of NodeContainerPattern.
  * @tc.type: FUNC
@@ -964,6 +992,33 @@ HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnAttach001, TestSize.Level
 }
 
 /**
+ * @tc.name: NodeContainerEventHubFireOnAttach002
+ * @tc.desc: Test the FireOnAttach function of NodeContainerEventHub without callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnAttach002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create nodeContainerNode without setting onAttach callback.
+     */
+    RefPtr<FrameNode> nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    auto eventHub = nodeContainerNode->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    
+    /**
+     * @tc.steps: step2: call FireOnAttach directly without callback.
+     * @tc.expected: process success without crash.
+     */
+    eventHub->FireOnAttach();
+    
+    /**
+     * @tc.steps: step3: verify no crash occurred.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
  * @tc.name: NodeContainerModelNGSetOnDetach001
  * @tc.desc: Test the SetOnDetach function of NodeContainerModelNG.
  * @tc.type: FUNC
@@ -986,6 +1041,33 @@ HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnDetach001, TestSize.Level
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnDetach();
     EXPECT_EQ(flag, 1);
+}
+
+/**
+ * @tc.name: NodeContainerEventHubFireOnDetach002
+ * @tc.desc: Test the FireOnDetach function of NodeContainerEventHub without callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnDetach002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create nodeContainerNode without setting onDetach callback.
+     */
+    RefPtr<FrameNode> nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    auto eventHub = nodeContainerNode->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    
+    /**
+     * @tc.steps: step2: call FireOnDetach directly without callback.
+     * @tc.expected: process success without crash.
+     */
+    eventHub->FireOnDetach();
+    
+    /**
+     * @tc.steps: step3: verify no crash occurred.
+     */
+    EXPECT_TRUE(true);
 }
 
 /**
@@ -1017,6 +1099,34 @@ HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnWillBind001, TestSize.Lev
 }
 
 /**
+ * @tc.name: NodeContainerPatternFireOnWillBind002
+ * @tc.desc: Test the FireOnWillBind function of NodeContainerPattern without callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerPatternFireOnWillBind002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create nodeContainerNode without setting onWillBind callback.
+     */
+    RefPtr<FrameNode> nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    auto pattern = nodeContainerNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto nodeContainerId = nodeContainerNode->GetId();
+    
+    /**
+     * @tc.steps: step2. call FireOnWillBind directly without callback.
+     * @tc.expected: process success without crash.
+     */
+    pattern->FireOnWillBind(nodeContainerId);
+    
+    /**
+     * @tc.steps: step3. verify no crash occurred.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
  * @tc.name: NodeContainerModelNGSetOnWillUnbind001
  * @tc.desc: Test the SetOnWillUnbind function of NodeContainerModelNG.
  * @tc.type: FUNC
@@ -1042,6 +1152,34 @@ HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnWillUnbind001, TestSize.L
     CHECK_NULL_VOID(pattern);
     pattern->FireOnWillUnbind(nodeContainerId);
     EXPECT_EQ(flag, nodeContainerId);
+}
+
+/**
+ * @tc.name: NodeContainerPatternFireOnWillUnbind002
+ * @tc.desc: Test the FireOnWillUnbind function of NodeContainerPattern without callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerPatternFireOnWillUnbind002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create node: create nodeContainerNode without setting onWillUnbind callback.
+     */
+    RefPtr<FrameNode> nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    auto pattern = nodeContainerNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto nodeContainerId = nodeContainerNode->GetId();
+    
+    /**
+     * @tc.steps: step2: call FireOnWillUnbind directly without callback.
+     * @tc.expected: process success without crash.
+     */
+    pattern->FireOnWillUnbind(nodeContainerId);
+    
+    /**
+     * @tc.steps: step3: verify no crash occurred.
+     */
+    EXPECT_TRUE(true);
 }
 
 /**
@@ -1098,6 +1236,34 @@ HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnUnbind001, TestSize.Level
     CHECK_NULL_VOID(pattern);
     pattern->FireOnUnbind(nodeContainerId);
     EXPECT_EQ(flag, nodeContainerId);
+}
+
+/**
+ * @tc.name: NodeContainerPatternFireOnUnbind002
+ * @tc.desc: Test the FireOnUnbind function of NodeContainerPattern without callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerPatternFireOnUnbind002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create nodeContainerNode without setting onUnbind callback.
+     */
+    RefPtr<FrameNode> nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    auto pattern = nodeContainerNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto nodeContainerId = nodeContainerNode->GetId();
+    
+    /**
+     * @tc.steps: step2: call FireOnUnbind directly without callback.
+     * @tc.expected: process success without crash.
+     */
+    pattern->FireOnUnbind(nodeContainerId);
+    
+    /**
+     * @tc.steps: step3: verify no crash occurred.
+     */
+    EXPECT_TRUE(true);
 }
 
 /**
@@ -1290,6 +1456,70 @@ HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnAppear001, TestSize.Lev
 }
 
 /**
+ * @tc.name: NodeContainerEventHubFireOnAppear002
+ * @tc.desc: Test the FireOnAppear function of NodeContainerEventHub without callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnAppear002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create nodeContainerNode without setting onAppear callback.
+     */
+    RefPtr<FrameNode> nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    auto eventHub = nodeContainerNode->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    
+    /**
+     * @tc.steps: step2: call FireOnAppear directly without callback.
+     * @tc.expected: process success without crash.
+     */
+    eventHub->FireOnAppear();
+    
+    /**
+     * @tc.steps: step3: verify no crash occurred.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: NodeContainerEventHubFireOnAppear003
+ * @tc.desc: Test the FireOnAppear function of NodeContainerEventHub when callback is overwritten.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnAppear003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node and get eventHub.
+     */
+    RefPtr<FrameNode> node = CreateNode();
+    ASSERT_NE(node, nullptr);
+    node->context_ = AceType::RawPtr(MockPipelineContext::pipeline_);
+    if (node->context_) {
+        node->context_->taskExecutor_ = AceType::MakeRefPtr<::testing::NiceMock<MockTaskExecutor>>();
+    }
+    auto eventHub = node->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    int32_t flag = 0;
+    auto onAppearCallback = [&flag, eventHub]() {
+        flag = 1;
+        eventHub->SetControllerAboutToAppear([]() {});
+    };
+
+    /**
+     * @tc.steps: step2. set callback and call FireOnAppear.
+     * @tc.expected: callback is triggered.
+     */
+    eventHub->SetControllerAboutToAppear(std::move(onAppearCallback));
+    eventHub->FireOnAppear();
+    EXPECT_EQ(flag, 1);
+    if (node->context_) {
+        node->context_->taskExecutor_ = nullptr;
+        node->context_ = nullptr;
+    }
+}
+
+/**
  * @tc.name: NodeContainerEventHubFireOnDisappear001
  * @tc.desc: Test the FireOnDisappear function of NodeContainerEventHub.
  * @tc.type: FUNC
@@ -1313,6 +1543,33 @@ HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnDisappear001, TestSize.
     eventHub->SetControllerAboutToDisappear(std::move(onDisappearCallback));
     eventHub->FireOnDisappear();
     EXPECT_EQ(flag, 1);
+}
+
+/**
+ * @tc.name: NodeContainerEventHubFireOnDisappear002
+ * @tc.desc: Test the FireOnDisappear function of NodeContainerEventHub without callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerEventHubFireOnDisappear002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node and get eventHub without setting callback.
+     */
+    RefPtr<FrameNode> node = CreateNode();
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetEventHub<NodeContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    
+    /**
+     * @tc.steps: step2. call FireOnDisappear directly without callback.
+     * @tc.expected: process success without crash.
+     */
+    eventHub->FireOnDisappear();
+    
+    /**
+     * @tc.steps: step3. verify no crash occurred.
+     */
+    EXPECT_TRUE(true);
 }
 
 /**
