@@ -387,13 +387,16 @@ void SwitchModeWithAnimation(const RefPtr<NavigationGroupNode>& hostNode)
         CHECK_NULL_VOID(hostNode);
         hostNode->ReduceModeSwitchAnimationCnt();
         if (hostNode->GetModeSwitchAnimationCnt() == 0) {
-            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
-            CHECK_NULL_VOID(dividerNode);
-            auto layoutProperty = dividerNode->GetLayoutProperty();
-            CHECK_NULL_VOID(layoutProperty);
-            layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             auto pattern = hostNode->GetPattern<NavigationPattern>();
             CHECK_NULL_VOID(pattern);
+            auto userSetDividerInvisible = pattern->GetUserSetDividerInvisibleFlag();
+            if (!userSetDividerInvisible) {
+                auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
+                CHECK_NULL_VOID(dividerNode);
+                auto layoutProperty = dividerNode->GetLayoutProperty();
+                CHECK_NULL_VOID(layoutProperty);
+                layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+            }
             auto lastStandardIndex = hostNode->GetLastStandardIndex();
             auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
             CHECK_NULL_VOID(navigationLayoutProperty);
@@ -409,11 +412,16 @@ void SwitchModeWithAnimation(const RefPtr<NavigationGroupNode>& hostNode)
     AnimationUtils::Animate(option, [weakHost = WeakPtr<NavigationGroupNode>(hostNode)]() {
         auto hostNode = weakHost.Upgrade();
         CHECK_NULL_VOID(hostNode);
-        auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
-        CHECK_NULL_VOID(dividerNode);
-        auto layoutProperty = dividerNode->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        auto pattern = hostNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto userSetDividerInvisible = pattern->GetUserSetDividerInvisibleFlag();
+        if (!userSetDividerInvisible) {
+            auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
+            CHECK_NULL_VOID(dividerNode);
+            auto layoutProperty = dividerNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
         hostNode->IncreaseModeSwitchAnimationCnt();
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         hostNode->GetContext()->FlushUITasks();

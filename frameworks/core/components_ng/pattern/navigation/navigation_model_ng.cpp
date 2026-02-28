@@ -3296,6 +3296,9 @@ void NavigationModelNG::UpdateDividerVisibility(FrameNode* frameNode, bool isSho
     auto layoutProperty = dividerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetUserSetDividerInvisibleFlag(!isShow);
 }
 
 void NavigationModelNG::UpdateDefineColor(bool isDefined)

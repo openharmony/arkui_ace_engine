@@ -271,6 +271,16 @@ public:
         userSetNavBarWidthFlag_ = userSetNavBarWidthFlag;
     }
 
+    bool GetUserSetDividerInvisibleFlag() const
+    {
+        return userSetDividerInvisibleFlag_;
+    }
+
+    void SetUserSetDividerInvisibleFlag(bool userSetDividerInvisibleFlag)
+    {
+        userSetDividerInvisibleFlag_ = userSetDividerInvisibleFlag;
+    }
+
     void SetInitNavBarWidth(const Dimension& initNavBarWidth)
     {
         realNavBarWidth_ = static_cast<float>(initNavBarWidth.ConvertToPx());
@@ -885,6 +895,7 @@ private:
     bool userSetNavBarRangeFlag_ = false;
     bool userSetMinContentFlag_ = false;
     bool userSetNavBarWidthFlag_ = false;
+    bool userSetDividerInvisibleFlag_ = false;
     bool isChanged_ = false; // check navigation top page is change
     Dimension initNavBarWidthValue_ = DEFAULT_NAV_BAR_WIDTH;
     Dimension minNavBarWidthValue_ = 0.0_vp;
