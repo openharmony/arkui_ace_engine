@@ -3836,6 +3836,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     ACE_UINODE_TRACE(hostNode);
+    ContentChangeOnTransitionStart(topDestination);
     bool isNotNeedAnimation = !isAnimated;
 #if defined(ENABLE_NAV_SPLIT_MODE)
     isNotNeedAnimation = !isAnimated ||
@@ -6324,6 +6325,26 @@ void NavigationPattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnPageTransitionEnd(keyNode);
+}
+
+void NavigationPattern::ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    CHECK_NULL_VOID(keyNode);
+    mgr->OnTransitionAdded(keyNode->GetId());
+}
+
+void NavigationPattern::ContentChangeByDetaching(PipelineContext* pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    mgr->OnTransitionRemoved(host->GetId());
 }
 
 void NavigationPattern::FireNavigateChangeCallback()

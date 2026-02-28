@@ -891,6 +891,10 @@ public:
         return isFakeDragging_;
     }
 
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool needSwiperChangeEnd);
+    void ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode) const;
+    void ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNode) const;
+
     void SetCachedCountIndependent(bool independent)
     {
         independent_ = independent;
@@ -1004,6 +1008,8 @@ private:
     void OnDetachFromFrameNodeMultiThread(FrameNode* node);
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTreeMultiThread();
+
+    void ContentChangeByDetaching(PipelineContext* pipeline) override;
 
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

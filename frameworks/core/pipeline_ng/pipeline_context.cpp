@@ -185,7 +185,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
-    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
+    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -213,7 +213,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
-    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
+    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
 }
 
 PipelineContext::PipelineContext()
@@ -236,7 +236,7 @@ PipelineContext::PipelineContext()
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
-    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
+    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
 }
 
 std::string PipelineContext::GetCurrentPageNameCallback()

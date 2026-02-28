@@ -96,6 +96,11 @@ public:
         return frameSizeHeight_;
     }
 
+    int32_t GetSrcType() const
+    {
+        return srcType_;
+    }
+
 private:
     ImageNodeId nodeInfo_ = ImageNodeId();
     int32_t srcType_ = -1;
