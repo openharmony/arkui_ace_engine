@@ -5200,15 +5200,6 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 {
     FREE_RS_CONTEXT_CHECK(OnBackShadowUpdate, shadow);
     CHECK_NULL_VOID(rsNode_);
-    if (!shadow.IsValid()) {
-        if (shadow.GetHardwareAcceleration()) {
-            rsNode_->SetShadowElevation(0.0);
-        } else {
-            rsNode_->SetShadowRadius(0.0);
-        }
-        RequestNextFrame();
-        return;
-    }
     rsNode_->SetShadowColor(shadow.GetColor().GetValue());
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
@@ -5216,9 +5207,10 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
     rsNode_->SetShadowIsFilled(shadow.GetIsFilled());
     rsNode_->SetShadowColorStrategy(ToShadowColorStrategy(shadow.GetShadowColorStrategy()));
     if (shadow.GetHardwareAcceleration()) {
-        rsNode_->SetShadowElevation(shadow.GetElevation());
+        rsNode_->SetShadowElevation(shadow.IsValid() ? shadow.GetElevation() : 0.0);
     } else {
-        rsNode_->SetShadowRadius(DrawingDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()));
+        rsNode_->SetShadowRadius(
+            shadow.IsValid() ? DrawingDecorationPainter::ConvertRadiusToSigma(shadow.GetBlurRadius()) : 0.0);
     }
     RequestNextFrame();
 }
