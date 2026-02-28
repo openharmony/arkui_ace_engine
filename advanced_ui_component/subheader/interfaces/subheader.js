@@ -2397,8 +2397,8 @@ class Util {
             let currentDeviceType = 
                 resourceManager.getSysResourceManager()?.getConfigurationSync()?.deviceType;
             let systemConfiguration =
-                resourceManager.getSystemResourceManager().getConfigurationSync();
-            if (currentDeviceType !== undefined) {
+                resourceManager.getSystemResourceManager()?.getConfigurationSync();
+            if (currentDeviceType !== undefined && systemConfiguration !== undefined) {
                 systemConfiguration.deviceType = currentDeviceType;
             }
             let w1 = resourceManager.getSystemResourceManager()
