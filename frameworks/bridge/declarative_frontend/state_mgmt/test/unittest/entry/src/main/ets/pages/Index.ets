@@ -50,6 +50,7 @@ struct Parent {
         'pages/v2_change_observation_tests',
         'pages/v2_computed_tests',
         'pages/v2_decorated_variables_tests'
+        'pages/env_tests',
       ])
       PageController.start(this.reportFinal)
     }, 200)
