@@ -64,7 +64,7 @@ void FocusBoxTestNg::TearDown() {}
  * @tc.desc: Create SetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusBoxTestNg, FocusBoxTest001, TestSize.Level1)
+HWTEST_F(FocusBoxTestNg, FocusBoxTest001, TestSize.Level0)
 {
     auto focusBox = AceType::MakeRefPtr<FocusBox>();
     NG::FocusBoxStyle style;
@@ -98,7 +98,7 @@ HWTEST_F(FocusBoxTestNg, FocusBoxTest002, TestSize.Level1)
  * @tc.desc: Create SetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusBoxTestNg, FocusBoxTest003, TestSize.Level1)
+HWTEST_F(FocusBoxTestNg, FocusBoxTest003, TestSize.Level0)
 {
     auto focusBox = AceType::MakeRefPtr<FocusBox>();
     NG::FocusBoxStyle style;
@@ -129,7 +129,7 @@ HWTEST_F(FocusBoxTestNg, FocusBoxTest004, TestSize.Level1)
  * @tc.desc: Create SetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusBoxTestNg, FocusBoxTest005, TestSize.Level1)
+HWTEST_F(FocusBoxTestNg, FocusBoxTest005, TestSize.Level0)
 {
     auto focusBox = AceType::MakeRefPtr<FocusBox>();
     NG::FocusBoxStyle style;
@@ -158,7 +158,7 @@ HWTEST_F(FocusBoxTestNg, FocusBoxTest006, TestSize.Level1)
  * @tc.desc: Create ToJsonValue.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusBoxTestNg, FocusBoxTest007, TestSize.Level1)
+HWTEST_F(FocusBoxTestNg, FocusBoxTest007, TestSize.Level0)
 {
     auto focusBox = AceType::MakeRefPtr<FocusBox>();
     NG::FocusBoxStyle style;
@@ -205,7 +205,7 @@ HWTEST_F(FocusBoxTestNg, FocusBoxTest009, TestSize.Level1)
  * @tc.desc: Create ToJsonValue.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusBoxTestNg, FocusBoxTest010, TestSize.Level1)
+HWTEST_F(FocusBoxTestNg, FocusBoxTest010, TestSize.Level0)
 {
     auto focusBox = AceType::MakeRefPtr<FocusBox>();
     focusBox->ToJsonValue(*focusBox);

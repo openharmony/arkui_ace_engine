@@ -47,7 +47,7 @@ void MouseStyleManagerTestNG::TearDown()
  * @tc.desc: Test case userSetCursor_ is false.
  * @tc.type: FUNC
  */
-HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager001, TestSize.Level1)
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create mouseStyleManager.
@@ -151,7 +151,7 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager002, TestSize.Level1)
  * @tc.desc: Test case isByPass is true.
  * @tc.type: FUNC
  */
-HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager003, TestSize.Level1)
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create mouseStyleManager.
@@ -252,7 +252,7 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager004, TestSize.Level1)
  * @tc.desc: Test case userSetCursor_ is different.
  * @tc.type: FUNC
  */
-HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager005, TestSize.Level1)
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create mouseStyleManager.
@@ -353,7 +353,7 @@ HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager006, TestSize.Level1)
  * @tc.desc: Test all case when passBy = false.
  * @tc.type: FUNC
  */
-HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager007, TestSize.Level1)
+HWTEST_F(MouseStyleManagerTestNG, MouseStyleManager007, TestSize.Level0)
 {
     auto mouseStyleManager = AceType::MakeRefPtr<MouseStyleManager>();
     ASSERT_NE(mouseStyleManager, nullptr);
