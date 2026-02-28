@@ -534,13 +534,11 @@ void SetFillColor(ArkUINodeHandle node, ArkUI_Uint32 value)
     ImageModelNG::SetImageFill(frameNode, color);
 }
 
-void SetFillColorWithColorSpace(ArkUINodeHandle node, const ArkUI_InnerColor* colorPtr, void* colorRawPtr)
+void SetFillColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 value, ArkUI_Uint32 colorSpace, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    const auto* realColorPtr = reinterpret_cast<const Color*>(colorPtr);
-    CHECK_NULL_VOID(realColorPtr);
-    ImageModelNG::SetImageFill(frameNode, *realColorPtr);
+    ImageModelNG::SetImageFill(frameNode, Color(value, static_cast<ColorSpace>(colorSpace)));
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> colorResObj;
         if (colorRawPtr) {

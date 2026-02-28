@@ -67,12 +67,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
         }
     }
 
-    if (colorArray.size()) {
-        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontColorPtr(
-            nativeNode, reinterpret_cast<ArkUI_InnerColor*>(colorArr.data()), colorArr.size());
-    } else {
-        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontColorPtr(nativeNode, nullptr, 0);
-    }
+    GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontColor(nativeNode, colorArray.data(), colorArray.size());
 
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);

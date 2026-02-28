@@ -170,7 +170,7 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
 {
     Color textColor;
     RefPtr<ResourceObject> resObj;
-    if (!ParseJsColorForMaterial(info[0], textColor, resObj)) {
+    if (!ParseJsColor(info[0], textColor, resObj)) {
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         textColor = buttonTheme->GetTextStyle().GetTextColor();
     }

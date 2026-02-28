@@ -156,8 +156,6 @@ public:
         return color4f_;
     }
 
-    void SetPlaceholder(TestingColorPlaceholder ph) {}
-
     uint32_t red_;
     uint32_t green_;
     uint32_t blue_;

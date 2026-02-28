@@ -281,9 +281,8 @@ namespace {
 RSColor ConvertToRSColor(Color color)
 {
     if (ACE_UNLIKELY(color.IsPlaceholder())) {
-        RSColor rsColor(color.GetValue());
-        rsColor.SetPlaceholder(static_cast<RSColorPlaceholder>(color.GetPlaceholder()));
-        return rsColor;
+        return RSColor(
+            static_cast<RSColorPlaceholder>(color.GetPlaceholder()));
     }
     return color.GetValue();
 }

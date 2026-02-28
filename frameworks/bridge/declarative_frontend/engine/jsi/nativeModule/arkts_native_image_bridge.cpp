@@ -756,11 +756,11 @@ ArkUINativeModuleValue ImageBridge::SetFillColor(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     RefPtr<ResourceObject> colorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    bool colorAlphaParseStatus = ArkTSUtils::ParseJsColorAlphaForMaterial(vm, colorArg, color, colorResObj, nodeInfo);
+    bool colorAlphaParseStatus = ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo);
     if (colorAlphaParseStatus) {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
         nodeModifiers->getImageModifier()->setFillColorWithColorSpace(
-            nativeNode, reinterpret_cast<ArkUI_InnerColor*>(&color), colorRawPtr);
+            nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr);
     } else if (ArkTSUtils::ParseJsColorContent(vm, colorArg)) {
         nodeModifiers->getImageModifier()->resetImageFill(nativeNode);
     } else {

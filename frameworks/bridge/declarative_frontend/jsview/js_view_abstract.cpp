@@ -6791,34 +6791,6 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
     return ok;
 }
 
-bool JSViewAbstract::ParseJsColorFromResourceForMaterial(
-    const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
-{
-    if (!jsValue->IsObject()) {
-        return false;
-    }
-    int32_t resIdNum = UNKNOWN_RESOURCE_ID;
-    int32_t type = UNKNOWN_RESOURCE_TYPE;
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
-
-    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj, resIdNum, type);
-    if (ok) {
-        JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
-        if (jsOpacityRatio->IsNumber()) {
-            double opacityRatio = jsOpacityRatio->ToNumber<double>();
-            result = result.BlendOpacity(opacityRatio);
-        }
-        if (type == static_cast<int32_t>(ResourceType::COLOR)) {
-            auto iter = g_specialResourceHolderMap.find(resIdNum);
-            if (iter != g_specialResourceHolderMap.end()) {
-                result.SetPlaceholder(iter->second);
-            }
-        }
-    }
-    return ok;
-}
-
 bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
     RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
 {
@@ -6990,34 +6962,6 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
     return state;
 }
 
-bool JSViewAbstract::ParseJsColorForMaterial(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
-{
-    bool state = false;
-    if (jsValue->IsNumber()) {
-        result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
-        CompleteResourceObjectFromColor(resObj, result, true);
-        return true;
-    }
-    if (jsValue->IsString()) {
-        state = Color::ParseColorString(jsValue->ToString(), result);
-        CompleteResourceObjectFromColor(resObj, result, state);
-        return state;
-    }
-    if (!jsValue->IsObject()) {
-        return state;
-    }
-    if (jsValue->IsObject()) {
-        if (ParseColorMetricsToColor(jsValue, result, resObj)) {
-            CompleteResourceObjectFromColor(resObj, result, true);
-            return true;
-        }
-        state = ParseJsColorFromResourceForMaterial(jsValue, result, resObj);
-        CompleteResourceObjectFromColor(resObj, result, state);
-        return state;
-    }
-    return state;
-}
-
 bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy)
 {
     if (jsValue->IsString()) {
@@ -7148,7 +7092,7 @@ bool JSViewAbstract::ParseJsSymbolId(
 }
 
 bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result,
-    bool enableResourceUpdate, std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr, bool supportMaterial)
+    bool enableResourceUpdate, std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
 {
     if (!jsValue->IsArray()) {
         return false;
@@ -7165,8 +7109,6 @@ bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector
             color = Color(ColorAlphaAdapt(value->ToNumber<uint32_t>()));
         } else if (value->IsString()) {
             Color::ParseColorString(value->ToString(), color);
-        } else if (supportMaterial) {
-            ParseJsColorFromResourceForMaterial(value, color, resObj);
         } else {
             ParseJsColorFromResource(value, color, resObj);
         }
