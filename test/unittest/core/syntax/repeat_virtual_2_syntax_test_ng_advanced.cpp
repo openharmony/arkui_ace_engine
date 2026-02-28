@@ -704,4 +704,20 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2EmptyChildrenTest035, TestS
     (void)node->GetChildren(false);
 }
 
+/**
+ * @tc.name: RepeatVirtual2EmptyChildrenTest036
+ * @tc.desc: Test behavior with empty children and notDetach parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2EmptyChildrenTest036, TestSize.Level1)
+{
+    auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
+        NODE_ID_2, ARR_LEN_10, TOTAL_COUNT_10,
+        g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
+        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+
+    ASSERT_NE(node, nullptr);
+    (void)node->GetChildren(true);
+}
+
 } // namespace OHOS::Ace::NG
