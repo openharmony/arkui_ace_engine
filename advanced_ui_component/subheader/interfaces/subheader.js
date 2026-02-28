@@ -2394,7 +2394,16 @@ class Util {
 
     static getNumberByResource(r1, s1) {
         try {
-            let w1 = resourceManager.getSystemResourceManager().getNumber(r1);
+            let currentDeviceType = 
+                resourceManager.getSysResourceManager()?.getConfigurationSync()?.deviceType;
+            let systemConfiguration =
+                resourceManager.getSystemResourceManager().getConfigurationSync();
+            if (currentDeviceType !== undefined) {
+                systemConfiguration.deviceType = currentDeviceType;
+            }
+            let w1 = resourceManager.getSystemResourceManager()
+                .getOverrideResourceManager(systemConfiguration)
+                .getNumber(r1);
             if (w1 === 0) {
                 return s1;
             } else {
