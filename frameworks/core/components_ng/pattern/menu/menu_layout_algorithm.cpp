@@ -407,7 +407,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     dumpInfo_.offset = positionOffset_;
     InitializePadding(layoutWrapper);
     InitializeParam(menuPattern);
-    auto needModify = !menuPattern->IsSelectMenu() && !menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
+    auto needModify = !menuPattern->IsSelectMenu();
     if (needModify && canExpandCurrentWindow_) {
         TAG_LOGI(AceLogTag::ACE_MENU, "original position is : %{public}s", position_.ToString().c_str());
         ModifyOffset(position_, menuPattern);
@@ -837,7 +837,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
     auto isContextMenu = menuPattern->IsContextMenu();
-    InitCanExpandCurrentWindow(isContextMenu, menuLayoutProperty);
+    InitCanExpandCurrentWindow(isContextMenu, menuLayoutProperty, menuPattern);
     dumpInfo_.canExpandCurrentWindow = canExpandCurrentWindow_;
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
@@ -3573,11 +3573,12 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRightBottom(
     return childPosition;
 }
 
-void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(
-    bool isContextMenu, const RefPtr<MenuLayoutProperty>& menuLayoutProperty)
+void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isContextMenu,
+    const RefPtr<MenuLayoutProperty>& menuLayoutProperty, const RefPtr<MenuPattern>& menuPattern)
 {
-    CHECK_NULL_VOID(menuLayoutProperty);
-    showInSubWindow_ = menuLayoutProperty->GetShowInSubWindowValue(false) || isContextMenu;
+    CHECK_NULL_VOID(menuLayoutProperty && menuPattern);
+    showInSubWindow_ = menuLayoutProperty->GetShowInSubWindowValue(false) || isContextMenu ||
+        menuPattern->IsSelectOverlayShowInSubWindow();
     dumpInfo_.showInSubWindow = showInSubWindow_;
     if (!showInSubWindow_) {
         canExpandCurrentWindow_ = false;

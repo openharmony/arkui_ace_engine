@@ -102,7 +102,8 @@ public:
     // 1. menu showed in subwindow for PC can show expand main window
     // 2. menu showed in subwindow from UIExtension can show expand UIExtension window
     bool canExpandCurrentWindow_ = false;
-    void InitCanExpandCurrentWindow(bool isContextMenu, const RefPtr<MenuLayoutProperty>& menuLayoutProperty);
+    void InitCanExpandCurrentWindow(bool isContextMenu, const RefPtr<MenuLayoutProperty>& menuLayoutProperty,
+        const RefPtr<MenuPattern>& menuPattern);
     bool HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper);
     Rect GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern);
     bool IsExpandDisplay();
