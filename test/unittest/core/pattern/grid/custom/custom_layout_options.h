@@ -35,5 +35,14 @@ GridLayoutOptions GetRegularDemoOptions(int32_t crossCount, float itemMainSize);
  */
 GridLayoutOptions Get3LinesIrregularDemoOptions(int32_t childrenCount, float itemMainSize);
 
+/**
+ * @brief Get 6 nodes group demo options.
+ * Each group has 6 nodes, the 1st and 5th nodes occupy 2 rows and 2 columns
+ * @param childrenCount The children count of grid.
+ * @param itemMainSize The main size of grid item.
+ * @return The GridLayoutOptions object.
+ */
+GridLayoutOptions Get6NodesGroupDemoOptions(int32_t childrenCount, float itemMainSize);
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_GRID_CUSTOM_CUSTOM_LAYOUT_OPTIONS_H

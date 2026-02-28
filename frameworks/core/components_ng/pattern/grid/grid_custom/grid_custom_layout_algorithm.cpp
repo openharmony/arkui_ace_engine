@@ -723,17 +723,16 @@ void GridCustomLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
     if (itemsToPreload.empty()) {
         return;
     }
-    int32_t startLine = 0;
+    GridIrregularFiller filler(&info_, wrapper_);
     const auto pos = info_.GetItemPos(startIndex);
     if (pos.second == -1) {
         auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
         const auto& options = *props->GetLayoutOptions();
-        startLine = GetStartIndexByIndex(startIndex, options).startLine;
+        auto startLineInfo = GetStartIndexByIndex(startIndex, options);
+        filler.FillMatrixFromStartIndex(startLineInfo.startLine, startLineInfo.startIndex, endIndex);
     } else {
-        startLine = pos.second;
+        filler.FillMatrixFromStartIndex(pos.second, startIndex, endIndex);
     }
-    GridIrregularFiller filler(&info_, wrapper_);
-    filler.FillMatrixFromStartIndex(startLine, startIndex, endIndex);
 
     auto wrapper = wrapper_->GetHostNode();
     CHECK_NULL_VOID(wrapper);
