@@ -102,6 +102,7 @@ struct NavigationTitlebarOptions;
 struct NavigationTransition;
 struct PreviewBadge;
 struct KeyboardAppearanceConfig;
+struct UnionEffectContainerOptions;
 
 namespace Converter {
 // SORTED_SECTION
@@ -1076,6 +1077,8 @@ namespace Converter {
         const Ark_ResponseRegionSupportedTool& src);
     template<> void AssignCast(std::optional<SharedTransitionEffectType>& dst,
         const Ark_SharedTransitionEffectType& src);
+    template<>
+    void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_UnionEffectContainerOptions& src);
     // DO NOT ADD NEW DECLARATIONS HERE!!! Add in alphabetic order above!
 
     template<typename From>
