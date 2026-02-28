@@ -417,8 +417,11 @@ RectF TextFieldSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
     auto globalContentRect = GetVisibleContentRect(true);
     auto intersectRect = res.IntersectRectT(globalContentRect);
     if (hasTransform_) {
-        intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
-        GetGlobalRectWithTransform(intersectRect);
+        res.SetOffset(res.GetOffset() - textPaintOffset);
+        GetGlobalRectWithTransform(res);
+        globalContentRect = pattern->GetContentRect();
+        GetGlobalRectWithTransform(globalContentRect);
+        intersectRect = res.Constrain(globalContentRect);
     }
     ApplySelectAreaWithKeyboard(intersectRect);
     return intersectRect;
