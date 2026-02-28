@@ -151,7 +151,7 @@ export class BuilderNode<T = undefined> {
         BuilderNodeFinalizationRegisterProxy.register<T>(this);
     }
     //@ts-ignore
-    public build(builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options?: BuildOptions): void {
+    public build(builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options: BuildOptions): void {
         this._JSBuilderNode.buildT(builder, params, options);
         this.nodePtr_ = this._JSBuilderNode.getValidNodePtr();
     }

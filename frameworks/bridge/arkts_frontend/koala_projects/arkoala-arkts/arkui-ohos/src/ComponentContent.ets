@@ -31,7 +31,13 @@ export class ComponentContent<T = undefined> implements ComponentContentBase {
     private parentWeak_?: WeakRef<FrameNode>;
     private attachedNodeRef_?:pointer;
     //@ts-ignore
-    constructor(uiContext: UIContext, builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options?: BuildOptions) {
+    constructor(uiContext: UIContext, builder: WrappedBuilder<TBuilderFunc<T>>, params: T) {
+        let builderNode = new BuilderNode<T>(uiContext);
+        this.builderNode_ = builderNode;
+        this.builderNode_.build(builder, params);
+    }
+
+    constructor(uiContext: UIContext, builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options: BuildOptions) {
         let builderNode = new BuilderNode<T>(uiContext);
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, params, options);
