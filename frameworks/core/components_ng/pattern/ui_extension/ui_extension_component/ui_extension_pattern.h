@@ -224,6 +224,10 @@ public:
     {
         isModal_ = isModal;
     }
+    bool GetModalFlag() const
+    {
+        return isModal_;
+    }
     bool GetIsModalFixFocus() const
     {
         return isModalFixFocus_;
