@@ -928,7 +928,9 @@ bool ArkTSUtils::ParseJsColorFromResourceForMaterial(
         }
         Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
         auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
-        result = resourceWrapper->GetColorByName(param->ToString(vm)->ToString(vm));
+        auto paramStr = param->ToString(vm)->ToString(vm);
+        result = resourceWrapper->GetColorByName(paramStr);
+        result.FillColorPlaceholderIfNeed(paramStr);
         return true;
     }
     auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));

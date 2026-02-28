@@ -6824,15 +6824,14 @@ bool JSViewAbstract::ParseJsColorFromResourceForMaterial(
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
 
-    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj, resIdNum, type);
+    auto ok = JSViewAbstract::ParseJsObjColorFromResourceForMaterial(jsObj, result, resObj, resIdNum, type);
     if (ok) {
         JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
         if (jsOpacityRatio->IsNumber()) {
+            auto placeholder = result.GetPlaceholder();
             double opacityRatio = jsOpacityRatio->ToNumber<double>();
             result = result.BlendOpacity(opacityRatio);
-        }
-        if (type == static_cast<int32_t>(ResourceType::COLOR)) {
-            result.FillColorPlaceholderIfNeed(resIdNum);
+            result.SetPlaceholder(placeholder);
         }
     }
     return ok;
@@ -6892,6 +6891,68 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     if (type == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(static_cast<uint32_t>(resIdNum));
         result.SetResourceId(static_cast<uint32_t>(resIdNum));
+        return true;
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseJsObjColorFromResourceForMaterial(
+    const JSRef<JSObject>& jsObj, Color& result, RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
+{
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (!resId->IsNumber()) {
+        return false;
+    }
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+        GetResourceObjectByBundleAndModule(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
+    if (!resourceWrapper) {
+        return false;
+    }
+
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(jsObj)) {
+            return false;
+        }
+        JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+        auto param = params->GetValueAt(0);
+        if (type == static_cast<int32_t>(ResourceType::STRING)) {
+            auto value = resourceWrapper->GetStringByName(param->ToString());
+            return Color::ParseColorString(value, result);
+        }
+        if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+            auto value = resourceWrapper->GetIntByName(param->ToString());
+            result = Color(ColorAlphaAdapt(value));
+            return true;
+        }
+        if (type == static_cast<int32_t>(ResourceType::COLOR)) {
+            auto paramStr = param->ToString();
+            result = resourceWrapper->GetColorByName(paramStr);
+            result.SetResourceId(static_cast<uint32_t>(UNKNOWN_RESOURCE_ID));
+            result.FillColorPlaceholderIfNeed(paramStr);
+            return true;
+        }
+        result = resourceWrapper->GetColorByName(param->ToString());
+        return true;
+    }
+
+    if (type == static_cast<int32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(static_cast<uint32_t>(resIdNum));
+        return Color::ParseColorString(value, result);
+    }
+    if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto value = resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum));
+        result = Color(ColorAlphaAdapt(value));
+        return true;
+    }
+    if (type == static_cast<int32_t>(ResourceType::COLOR)) {
+        result = resourceWrapper->GetColor(static_cast<uint32_t>(resIdNum));
+        result.SetResourceId(static_cast<uint32_t>(resIdNum));
+        result.FillColorPlaceholderIfNeed(resIdNum);
         return true;
     }
     return false;
