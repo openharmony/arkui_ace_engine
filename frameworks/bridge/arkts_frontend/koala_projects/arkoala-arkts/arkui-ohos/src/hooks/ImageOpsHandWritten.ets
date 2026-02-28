@@ -26,6 +26,7 @@ import { Resource_serializer } from './../framework/resource'
 import { DrawableDescriptor_serializer } from "./../framework/ohos.arkui.drawableDescriptor"
 import { ArkUIAniModule } from "arkui.ani";
 import { int32 } from "@koalaui/common";
+import { ObserveSingleton } from "../stateManagement/base/observeSingleton"
 
 class ImageErrorImpl implements ImageError {
     componentWidth: int32;
@@ -110,6 +111,13 @@ export class ImageOpsHandWritten {
         if (peerPtr === undefined) {
             return;
         }
-        ArkUIAniModule._Image_SetOnErrorCallback(peerPtr, value);
+        const wrappedErrorCallback = (error: ImageError) => {
+            ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                if (value) {
+                    value(error)
+                }
+            });
+        };
+        ArkUIAniModule._Image_SetOnErrorCallback(peerPtr, wrappedErrorCallback);
     }
 }
