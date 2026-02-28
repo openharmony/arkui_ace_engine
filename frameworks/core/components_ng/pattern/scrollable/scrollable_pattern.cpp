@@ -1131,6 +1131,12 @@ void ScrollablePattern::OnDetachFromMainTree()
     auto host = GetHost();
     // call OnDetachFromMainTreeMultiThread() by multi thread
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    if (!scrollStop_) {
+        auto parent = GetNestedScrollParent();
+        if (parent) {
+            parent->OnScrollEndRecursive(GetVelocity());
+        }
+    }
 }
 
 void ScrollablePattern::OnWindowHide()
