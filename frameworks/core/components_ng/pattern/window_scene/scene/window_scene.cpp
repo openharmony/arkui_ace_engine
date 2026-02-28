@@ -825,6 +825,13 @@ void WindowScene::OnDrawingCompleted()
         CHECK_NULL_VOID(self->snapshotWindow_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
+        if (!self->session_->GetIsNeedRemoveSnapShot()) {
+            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE,
+                "No need to remove SnapShot in snap window id %{public}d isMidScene %{public}d",
+                self->session_->GetPersistentId(),
+                self->session_->GetIsMidScene());
+            return;
+        }
         self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
         self->snapshotWindow_.Reset();
         self->session_->SetNeedSnapshot(true);
