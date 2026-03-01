@@ -701,6 +701,14 @@ class UIContext {
         return this.observer_;
     }
 
+    getLuminanceSampler(target) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const luminanceSampler = globalThis.requireNapi("luminancesampler");
+        let result = luminanceSampler?.getOrCreateLuminanceSampler(this.instanceId_, target);
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+
     keyframeAnimateTo(param, keyframes) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         Context.keyframeAnimateTo(param, keyframes);

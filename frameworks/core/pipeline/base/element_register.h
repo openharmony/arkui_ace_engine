@@ -126,7 +126,7 @@ public:
 
     ElementIdType GetLatestElementId() const;
 
-    RefPtr<NG::FrameNode> GetAttachedFrameNodeById(
+    ACE_FORCE_EXPORT RefPtr<NG::FrameNode> GetAttachedFrameNodeById(
         const std::string& key, bool willGetAll = false, int32_t instanceId = -1);
 
     void AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node, int32_t nodeId);
