@@ -13,25 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_LOADING_PROGRESS_THEME_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_LOADING_PROGRESS_THEME_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_COUNTER_THEME_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_COUNTER_THEME_H
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
+#include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/counter/counter_model.h"
 
 namespace OHOS::Ace::Framework {
-class JSLoadingProgressTheme {
+class JSCounterTheme {
 public:
     static void ApplyTheme()
     {
+        // check whether we have Theme for id or not
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors) {
             // no need to apply custom theme colors
             return;
         }
-
-        LoadingProgressModel::GetInstance()->SetColor(themeColors->IconSecondary());
+        ViewAbstractModel::GetInstance()->SetForegroundColor(themeColors->FontPrimary());
     }
 };
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_LOADING_PROGRESS_THEME_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_COUNTER_THEME_H
