@@ -47,6 +47,7 @@ constexpr bool DEFAULT_NATIVE_EMBED_MODE_ENABLE = false;
 constexpr bool DEFAULT_ENABLE_IMAGE_ANALYZER = true;
 constexpr bool DEFAULT_FORCE_ENABLE_ZOOM_ENABLED = false;
 constexpr bool DEFAULT_AUTO_FILL_ENABLED = true;
+constexpr bool DEFAULT_ENABLE_DEFAULT_CONTEXT_MENU = true;
 constexpr int32_t DEFAULT_MINFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 0;
 constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 0;
@@ -2493,6 +2494,20 @@ void ResetEnableAutoFill(ArkUINodeHandle node)
     WebModelNG::SetEnableAutoFill(frameNode, DEFAULT_AUTO_FILL_ENABLED);
 }
 
+void SetEnableDefaultContextMenu(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableDefaultContextMenu(frameNode, value);
+}
+
+void ResetEnableDefaultContextMenu(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetEnableDefaultContextMenu(frameNode, DEFAULT_ENABLE_DEFAULT_CONTEXT_MENU);
+}
+
 void SetForceEnableZoom(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2821,6 +2836,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnMicrophoneCaptureStateChanged = ResetOnMicrophoneCaptureStateChanged,
         .setEnableAutoFill = SetEnableAutoFill,
         .resetEnableAutoFill = ResetEnableAutoFill,
+        .setEnableDefaultContextMenu = SetEnableDefaultContextMenu,
+        .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -3066,6 +3083,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnMicrophoneCaptureStateChanged = ResetOnMicrophoneCaptureStateChanged,
         .setEnableAutoFill = SetEnableAutoFill,
         .resetEnableAutoFill = ResetEnableAutoFill,
+        .setEnableDefaultContextMenu = SetEnableDefaultContextMenu,
+        .resetEnableDefaultContextMenu = ResetEnableDefaultContextMenu,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

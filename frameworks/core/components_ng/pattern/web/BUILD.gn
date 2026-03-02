@@ -47,6 +47,7 @@ build_component_ng("web_pattern_ng") {
       "web_pattern.cpp",
       "web_select_overlay.cpp",
       "web_statusbar_click.cpp",
+      "web_context_menu_overlay.cpp",
     ]
     sources += [
       "ani/richtext_model_static.cpp",

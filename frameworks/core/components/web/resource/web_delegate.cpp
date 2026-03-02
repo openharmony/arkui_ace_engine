@@ -6373,15 +6373,17 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         CHECK_NULL_VOID(eventInfo);
         auto contextMenuParam = eventInfo->GetParam();
         CHECK_NULL_VOID(contextMenuParam);
-        if (!contextMenuParam->IsAILink()) {
-            auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
-            CHECK_NULL_VOID(propOnContextMenuShowEvent);
+        auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
+        if (propOnContextMenuShowEvent && !contextMenuParam->IsAILink()) {
             result = propOnContextMenuShowEvent(info);
-        } else {
+        } else if (contextMenuParam->IsAILink()) {
             result = true;
         }
         if (!delegate->richtextData_) {
             webPattern->OnContextMenuShow(info, false, result);
+        }
+        if (webPattern->IsEnableDefaultContextMenu()) {
+            result = true;
         }
         return;
 #else
@@ -6399,15 +6401,17 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
             CHECK_NULL_VOID(eventInfo);
             auto contextMenuParam = eventInfo->GetParam();
             CHECK_NULL_VOID(contextMenuParam);
-            if (!contextMenuParam->IsAILink()) {
-                auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
-                CHECK_NULL_VOID(propOnContextMenuShowEvent);
+            auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
+            if (propOnContextMenuShowEvent && !contextMenuParam->IsAILink()) {
                 result = propOnContextMenuShowEvent(info);
-            } else {
+            } else if (contextMenuParam->IsAILink()) {
                 result = true;
             }
             if (!delegate->richtextData_) {
                 webPattern->OnContextMenuShow(info, false, result);
+            }
+            if (webPattern->IsEnableDefaultContextMenu()) {
+                result = true;
             }
             return;
         }

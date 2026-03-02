@@ -2226,6 +2226,8 @@ struct CJUIWebModifier {
     void (*resetOnMicrophoneCaptureStateChanged)(ArkUINodeHandle node);
     void (*setEnableAutoFill)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableAutoFill)(ArkUINodeHandle node);
+    void (*setEnableDefaultContextMenu)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableDefaultContextMenu)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {

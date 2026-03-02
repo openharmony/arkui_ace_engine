@@ -1651,6 +1651,7 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     onAdsBlocked(callback: (details?: AdsBlockedDetails | undefined) => void): this;
     onActivateContent(callback: () => void): this;
     forceEnableZoom(forceEnableZoom: boolean): this;
+    enableDefaultContextMenu(value: boolean): this;
     backToTop(backToTop: boolean): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {

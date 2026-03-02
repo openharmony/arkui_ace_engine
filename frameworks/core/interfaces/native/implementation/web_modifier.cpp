@@ -2403,10 +2403,15 @@ void SetNativeEmbedOptionsImpl(Ark_NativePointer node,
 void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
                                      const Opt_Boolean* value)
 {
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //WebModelNG::SetEnableDefaultContextMenu(frameNode, convValue);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetEnableDefaultContextMenu(frameNode, *convValue);
+#endif // WEB_SUPPORTED
 }
 void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                     const Opt_String* tag,
@@ -3170,4 +3175,3 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
 }
 
 }
-

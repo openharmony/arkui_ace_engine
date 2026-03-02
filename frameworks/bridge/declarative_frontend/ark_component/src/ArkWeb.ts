@@ -1653,6 +1653,20 @@ class WebEnableAutoFillModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebEnableDefaultContextMenuModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableDefaultContextMenu');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableDefaultContextMenu(node);
+    } else {
+      getUINativeModule().web.setEnableDefaultContextMenu(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -2216,6 +2230,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   enableAutoFill(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebEnableAutoFillModifier.identity, WebEnableAutoFillModifier, value);
+    return this;
+  }
+  enableDefaultContextMenu(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
     return this;
   }
 }

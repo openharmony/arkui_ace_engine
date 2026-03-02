@@ -4591,6 +4591,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableAutoFill));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAutoFill"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableAutoFill));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDefaultContextMenu"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableDefaultContextMenu));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDefaultContextMenu"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableDefaultContextMenu));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif
