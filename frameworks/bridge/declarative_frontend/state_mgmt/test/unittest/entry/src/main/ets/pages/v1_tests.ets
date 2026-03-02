@@ -22,10 +22,18 @@ import { TestRunner } from '../../lib/testRunner'
 import { PageController } from '../../lib/pageController'
 import { PuSyncedPropertyOneWayTests } from '../../v1_tests/pu_synced_property_one_way_tests'
 import { PuSyncedPropertyTwoWayTests } from '../../v1_tests/pu_synced_property_two_way_tests'
+import { ObservedPropertyAbstractPUTestsV1 } from '../../v1_tests/pu_observed_property_abstract_tests_v1'
+import { PuObservedPropertyTests } from '../../v1_tests/pu_observed_property_tests_v1'
 import router from '@system.router'
 
 const storage = new LocalStorage();
-
+interface MockObject1 {
+  num: number;
+}
+interface MockObject2 {
+  key: string;
+  nested: MockObject1
+}
 @Entry(storage)
 @Component
 struct Parent {
@@ -33,7 +41,30 @@ struct Parent {
   // This is used in tests. Do not remove.
   // Add more UI elements if your test needs
   @State finalResult: string = "Pending"
+  // Basic type properties
+  @State testNumberProp: number = 42;
+  @State testStringProp: string = "hello";
+  @State testBooleanProp: boolean = true;
+  @State testObjectProp: MockObject2 = { key: "value", nested: { num: 123 } as MockObject1 } as MockObject2;
+  @State testArrayProp: Array<number> = [1, 2, 3, 4, 5];
+  @State testNullProp: null = null;
+  @State testUndefinedProp: undefined = undefined;
 
+  // Subscriber sync properties
+  @State testSyncSourceProp: number = 100;
+  @State testSyncTargetProp: number = 200;
+
+  // Delayed notification property
+  @State testDelayedProp: string = "delayed";
+
+  // Dependency management properties
+  @State testDependentProp1: number = 1;
+  @State testDependentProp2: number = 2;
+
+  // Edge case properties
+  @State testZeroProp: number = 0;
+  @State testEmptyStringProp: string = "";
+  @State testEmptyArrayProp: Array<number> = [];
   aboutToAppear() {
     setTimeout(() => {
       TestRunner.bind(this)(new CommonTestsV2('V1_common'));
@@ -43,6 +74,8 @@ struct Parent {
       TestRunner.bind(this)(new EnvironmentTestsV1('V1_environment'));
       TestRunner.bind(this)(new PuSyncedPropertyOneWayTests('V1_pu_synced_property_one_way'));
       TestRunner.bind(this)(new PuSyncedPropertyTwoWayTests('V1_pu_synced_property_two_way'));
+      TestRunner.bind(this)(new ObservedPropertyAbstractPUTestsV1('V1_pu_observed_property_abstract'));
+      TestRunner.bind(this)(new PuObservedPropertyTests('V1_pu_observed_property'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)
