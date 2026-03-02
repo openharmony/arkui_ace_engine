@@ -46,7 +46,7 @@ import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { SelectModifier } from './../SelectModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-export interface MenuItemConfiguration {
+export interface MenuItemConfiguration extends CommonConfiguration<MenuItemConfiguration> {
     enabled: boolean
     contentModifier: ContentModifier<MenuItemConfiguration>
     value: ResourceStr
