@@ -293,6 +293,7 @@ void RichEditorOverlayModifier::DrawContent(DrawingContext& drawingContext)
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
     auto contentRect = richEditorPattern->GetTextContentRect();
+    SetContentRect(contentRect);
 
     drawingContext.canvas.ClipRect(ToRSRect(contentRect), RSClipOp::INTERSECT);
     PaintCaret(drawingContext);
