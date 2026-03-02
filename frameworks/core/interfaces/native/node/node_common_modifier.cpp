@@ -128,6 +128,7 @@ constexpr Dimension ARROW_ONE_HUNDRED_PERCENT = 1.0_pct;
 constexpr int32_t API_TARGET_VERSION_MASK = 1000;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
+constexpr int32_t PASS_THROUGH_EVENT_ID = 100000;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -9155,9 +9156,75 @@ ArkUI_Int32 PostTouchEventToFrameNode(ArkUINodeHandle node, TouchEvent& touchEve
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event manager is null!");
         return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
-    bool res = postEventManager->PostEvent(frameNodePtr, touchEvent);
+    bool res = 0;
+    if (touchEvent.eventHandleId / PASS_THROUGH_EVENT_ID > 0) {
+        touchEvent.eventHandleId -= PASS_THROUGH_EVENT_ID;
+        res = postEventManager->PostTouchEventWithStrategy(frameNodePtr, std::move(touchEvent));
+    } else {
+        res = postEventManager->PostEvent(frameNodePtr, touchEvent);
+    }
     if (!res) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event fail!");
+        return ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 PostMouseEventToFrameNode(ArkUINodeHandle node, MouseEvent& mouseEvent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (!frameNode) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostMouseEventToFrameNode framenode is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto frameNodePtr = AceType::Claim<FrameNode>(frameNode);
+    if (!frameNodePtr) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostMouseEventToFrameNode framenodeptr is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto pipelineContext = frameNodePtr->GetContext();
+    if (!pipelineContext) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostMouseEventToFrameNode pipeline context is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    if (!postEventManager) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostMouseEventToFrameNode post event manager is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    bool res = postEventManager->PostMouseEventWithStrategy(frameNodePtr, std::move(mouseEvent));
+    if (!res) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostMouseEventToFrameNode post event fail!");
+        return ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 PostAxisEventToFrameNode(ArkUINodeHandle node, AxisEvent& axisEvent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (!frameNode) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostAxisEventToFrameNode framenode is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto frameNodePtr = AceType::Claim<FrameNode>(frameNode);
+    if (!frameNodePtr) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvPostAxisEventToFrameNodeent framenodeptr is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto pipelineContext = frameNodePtr->GetContext();
+    if (!pipelineContext) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostAxisEventToFrameNode pipeline context is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    if (!postEventManager) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostAxisEventToFrameNode post event manager is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    bool res = postEventManager->PostAxisEventWithStrategy(frameNodePtr, std::move(axisEvent));
+    if (!res) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostAxisEventToFrameNode post event fail!");
         return ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT;
     }
     return ERROR_CODE_NO_ERROR;
@@ -9208,6 +9275,138 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
     ArkUITouchEvent* arkUITouchEventCloned = const_cast<ArkUITouchEvent*>(arkUITouchEvent);
     NG::SetPostPointerEvent(touchEvent, arkUITouchEventCloned);
     return PostTouchEventToFrameNode(node, touchEvent);
+}
+
+ArkUI_Int32 PostTouchEventWithStrategy(
+    ArkUINodeHandle node, const ArkUITouchEvent* arkUITouchEvent, int32_t strategy)
+{
+    if (!arkUITouchEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEventWithStrategy touchevent is null!");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    TouchEvent touchEvent;
+    touchEvent.type = static_cast<TouchType>(arkUITouchEvent->action);
+    touchEvent.eventHandleId = arkUITouchEvent->eventHandleId + PASS_THROUGH_EVENT_ID;
+    if (!strategy) {
+        touchEvent.isNewReferee = true;
+    } else {
+        touchEvent.isNewReferee = false;
+    }
+    touchEvent.sourceType = static_cast<SourceType>(arkUITouchEvent->sourceType);
+    touchEvent.sourceTool = static_cast<SourceTool>(arkUITouchEvent->actionTouchPoint.toolType);
+    touchEvent.force = arkUITouchEvent->actionTouchPoint.pressure;
+    touchEvent.deviceId = arkUITouchEvent->deviceId;
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUITouchEvent->timeStamp));
+    TimeStamp time(nanoseconds);
+    touchEvent.time = time;
+    touchEvent.targetDisplayId = arkUITouchEvent->targetDisplayId;
+    ArkUITouchPoint* touchPointes = arkUITouchEvent->touchPointes;
+    auto density = PipelineBase::GetCurrentDensity();
+    for (size_t index = 0; index < arkUITouchEvent->touchPointSize; index++) {
+        TouchPoint point;
+        point.id = touchPointes[index].id;
+        point.x = touchPointes[index].nodeX;
+        point.y = touchPointes[index].nodeY;
+        point.screenX = touchPointes[index].screenX * density;
+        point.screenY = touchPointes[index].screenY * density;
+        point.globalDisplayX = touchPointes[index].globalDisplayX * density;
+        point.globalDisplayY = touchPointes[index].globalDisplayY * density;
+        point.originalId = touchPointes[index].id;
+        std::chrono::nanoseconds downNanoseconds(static_cast<int64_t>(touchPointes[index].pressedTime));
+        TimeStamp downTime(downNanoseconds);
+        point.downTime = downTime;
+        point.force = touchPointes[index].pressure;
+        touchEvent.pointers.emplace_back(point);
+    }
+    touchEvent.id = arkUITouchEvent->actionTouchPoint.id;
+    touchEvent.x = arkUITouchEvent->actionTouchPoint.nodeX;
+    touchEvent.y = arkUITouchEvent->actionTouchPoint.nodeY;
+    touchEvent.screenX = arkUITouchEvent->actionTouchPoint.screenX * density;
+    touchEvent.screenY = arkUITouchEvent->actionTouchPoint.screenY * density;
+    touchEvent.globalDisplayX = arkUITouchEvent->actionTouchPoint.globalDisplayX * density;
+    touchEvent.globalDisplayY = arkUITouchEvent->actionTouchPoint.globalDisplayY * density;
+    touchEvent.originalId = arkUITouchEvent->actionTouchPoint.id;
+    ArkUITouchEvent* arkUITouchEventCloned = const_cast<ArkUITouchEvent*>(arkUITouchEvent);
+    NG::SetPostPointerEvent(touchEvent, arkUITouchEventCloned);
+    return PostTouchEventToFrameNode(node, touchEvent);
+}
+
+ArkUI_Int32 PostMouseEventWithStrategy(
+    ArkUINodeHandle node, const ArkUIMouseEvent* arkUIMouseEvent, int32_t strategy)
+{
+    if (!arkUIMouseEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostMouseEventWithStrategy touchevent is null!");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    MouseEvent mouseEvent;
+    mouseEvent.eventHandleId = arkUIMouseEvent->eventHandleId;
+    if (!strategy) {
+        mouseEvent.isNewReferee = true;
+    } else {
+        mouseEvent.isNewReferee = false;
+    }
+    mouseEvent.sourceType = static_cast<SourceType>(arkUIMouseEvent->sourceType);
+    mouseEvent.sourceTool = static_cast<SourceTool>(arkUIMouseEvent->actionTouchPoint.toolType);
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUIMouseEvent->timeStamp));
+    TimeStamp time(nanoseconds);
+    mouseEvent.time = time;
+    mouseEvent.deviceId = arkUIMouseEvent->deviceId;
+    mouseEvent.targetDisplayId = arkUIMouseEvent->targetDisplayId;
+    mouseEvent.x = arkUIMouseEvent->actionTouchPoint.nodeX;
+    mouseEvent.y = arkUIMouseEvent->actionTouchPoint.nodeY;
+    auto density = PipelineBase::GetCurrentDensity();
+    mouseEvent.globalDisplayX = arkUIMouseEvent->actionTouchPoint.globalDisplayX * density;
+    mouseEvent.globalDisplayY = arkUIMouseEvent->actionTouchPoint.globalDisplayY * density;
+
+    mouseEvent.button = static_cast<MouseButton>(arkUIMouseEvent->button);
+    mouseEvent.action = static_cast<MouseAction>(arkUIMouseEvent->action);
+
+    mouseEvent.screenX = arkUIMouseEvent->actionTouchPoint.screenX * density;
+    mouseEvent.screenY = arkUIMouseEvent->actionTouchPoint.screenY * density;
+
+    mouseEvent.rawDeltaX = arkUIMouseEvent->rawDeltaX;
+    mouseEvent.rawDeltaY = arkUIMouseEvent->rawDeltaY;
+
+    int32_t* pressedButtons = arkUIMouseEvent->pressedButtons;
+    for (auto index = 0; index < arkUIMouseEvent->pressedButtonsLength; index++) {
+        mouseEvent.pressedButtonsArray.emplace_back(static_cast<MouseButton>(pressedButtons[index]));
+    }
+    return PostMouseEventToFrameNode(node, mouseEvent);
+}
+
+ArkUI_Int32 PostAxisEventWithStrategy(
+    ArkUINodeHandle node, const ArkUIAxisEvent* arkUIAxisEvent, int32_t strategy)
+{
+    if (!arkUIAxisEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostAxisEventWithStrategy touchevent is null!");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    AxisEvent axisEvent;
+    axisEvent.eventHandleId = arkUIAxisEvent->eventHandleId;
+    if (!strategy) {
+        axisEvent.isNewReferee = true;
+    } else {
+        axisEvent.isNewReferee = false;
+    }
+    axisEvent.sourceType = static_cast<SourceType>(arkUIAxisEvent->sourceType);
+    axisEvent.sourceTool = static_cast<SourceTool>(arkUIAxisEvent->actionTouchPoint.toolType);
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUIAxisEvent->timeStamp));
+    TimeStamp time(nanoseconds);
+    axisEvent.time = time;
+    axisEvent.deviceId = arkUIAxisEvent->deviceId;
+    axisEvent.targetDisplayId = arkUIAxisEvent->targetDisplayId;
+    axisEvent.action = static_cast<AxisAction>(arkUIAxisEvent->action);
+    axisEvent.x = arkUIAxisEvent->actionTouchPoint.nodeX;
+    axisEvent.y = arkUIAxisEvent->actionTouchPoint.nodeY;
+    auto density = PipelineBase::GetCurrentDensity();
+    axisEvent.globalDisplayX = arkUIAxisEvent->actionTouchPoint.globalDisplayX * density;
+    axisEvent.globalDisplayY = arkUIAxisEvent->actionTouchPoint.globalDisplayY * density;
+
+    axisEvent.pinchAxisScale = arkUIAxisEvent->pinchAxisScale;
+    axisEvent.scrollStep = arkUIAxisEvent->scrollStep;
+    axisEvent.horizontalAxis = arkUIAxisEvent->horizontalAxis;
+    axisEvent.verticalAxis = arkUIAxisEvent->verticalAxis;
+    return PostAxisEventToFrameNode(node, axisEvent);
 }
 
 void SetSingleHistoryEvent(std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT>& allHistoryEvents,
@@ -9323,6 +9522,77 @@ void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUIT
     arkUITouchEventCloned->subKind = arkUITouchEvent->subKind;
     SetHistoryTouchEvent(arkUITouchEventCloned, arkUITouchEvent);
     arkUITouchEventCloned->stopPropagation = arkUITouchEvent->stopPropagation;
+    arkUITouchEventCloned->eventHandleId = arkUITouchEvent->eventHandleId;
+    arkUITouchEventCloned->isNewReferee = arkUITouchEvent->isNewReferee;
+}
+
+void CreateClonedMouseEvent(ArkUIMouseEvent* arkUIMouseEventCloned, const ArkUIMouseEvent* arkUIMouseEvent)
+{
+    if (!arkUIMouseEventCloned || !arkUIMouseEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CreateClonedMouseEvent mouse is null!");
+        return;
+    }
+
+    arkUIMouseEventCloned->action = arkUIMouseEvent->action;
+    arkUIMouseEventCloned->button = arkUIMouseEvent->button;
+    arkUIMouseEventCloned->timeStamp = arkUIMouseEvent->timeStamp;
+    arkUIMouseEventCloned->actionTouchPoint = arkUIMouseEvent->actionTouchPoint;
+    arkUIMouseEventCloned->subKind = arkUIMouseEvent->subKind;
+    arkUIMouseEventCloned->sourceType = arkUIMouseEvent->sourceType;
+    arkUIMouseEventCloned->interceptResult = arkUIMouseEvent->interceptResult;
+    arkUIMouseEventCloned->rawDeltaX = arkUIMouseEvent->rawDeltaX;
+    arkUIMouseEventCloned->rawDeltaY = arkUIMouseEvent->rawDeltaY;
+    if (arkUIMouseEvent->pressedButtonsLength > 0) {
+        arkUIMouseEventCloned->pressedButtons = new ArkUI_Int32[arkUIMouseEvent->pressedButtonsLength];
+        for (int index = 0; index < arkUIMouseEvent->pressedButtonsLength; index++) {
+            arkUIMouseEventCloned->pressedButtons[index] = arkUIMouseEvent->pressedButtons[index];
+        }
+        arkUIMouseEventCloned->pressedButtonsLength = arkUIMouseEvent->pressedButtonsLength;
+    } else {
+        arkUIMouseEventCloned->pressedButtons = nullptr;
+        arkUIMouseEventCloned->pressedButtonsLength = 0;
+    }
+    arkUIMouseEventCloned->targetDisplayId = arkUIMouseEvent->targetDisplayId;
+    arkUIMouseEventCloned->targetPositionX = arkUIMouseEvent->targetPositionX;
+    arkUIMouseEventCloned->targetPositionY = arkUIMouseEvent->targetPositionY;
+    arkUIMouseEventCloned->targetGlobalPositionX = arkUIMouseEvent->targetGlobalPositionX;
+    arkUIMouseEventCloned->targetGlobalPositionY = arkUIMouseEvent->targetGlobalPositionY;
+    arkUIMouseEventCloned->width = arkUIMouseEvent->width;
+    arkUIMouseEventCloned->height = arkUIMouseEvent->height;
+    arkUIMouseEventCloned->deviceId = arkUIMouseEvent->deviceId;
+    arkUIMouseEventCloned->modifierKeyState = arkUIMouseEvent->modifierKeyState;
+    arkUIMouseEventCloned->stopPropagation = arkUIMouseEvent->stopPropagation;
+    arkUIMouseEventCloned->eventHandleId = arkUIMouseEvent->eventHandleId;
+    arkUIMouseEventCloned->isNewReferee = arkUIMouseEvent->isNewReferee;
+}
+
+void CreateClonedAxisEvent(ArkUIAxisEvent* arkUIAxisEventCloned, const ArkUIAxisEvent* arkUIAxisEvent)
+{
+    if (!arkUIAxisEventCloned || !arkUIAxisEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CreateClonedAxisEvent touchevent is null!");
+        return;
+    }
+    arkUIAxisEventCloned->action = arkUIAxisEvent->action;
+    arkUIAxisEventCloned->timeStamp = arkUIAxisEvent->timeStamp;
+    arkUIAxisEventCloned->actionTouchPoint = arkUIAxisEvent->actionTouchPoint;
+    arkUIAxisEventCloned->sourceType = arkUIAxisEvent->sourceType;
+    arkUIAxisEventCloned->horizontalAxis = arkUIAxisEvent->horizontalAxis;
+    arkUIAxisEventCloned->verticalAxis = arkUIAxisEvent->verticalAxis;
+    arkUIAxisEventCloned->targetDisplayId = arkUIAxisEvent->targetDisplayId;
+    arkUIAxisEventCloned->targetPositionX = arkUIAxisEvent->targetPositionX;
+    arkUIAxisEventCloned->targetPositionY = arkUIAxisEvent->targetPositionY;
+    arkUIAxisEventCloned->targetGlobalPositionX = arkUIAxisEvent->targetGlobalPositionX;
+    arkUIAxisEventCloned->targetGlobalPositionY = arkUIAxisEvent->targetGlobalPositionY;
+    arkUIAxisEventCloned->width = arkUIAxisEvent->width;
+    arkUIAxisEventCloned->height = arkUIAxisEvent->height;
+    arkUIAxisEventCloned->deviceId = arkUIAxisEvent->deviceId;
+    arkUIAxisEventCloned->modifierKeyState = arkUIAxisEvent->modifierKeyState;
+    arkUIAxisEventCloned->subKind = arkUIAxisEvent->subKind;
+    arkUIAxisEventCloned->propagation = arkUIAxisEvent->propagation;
+    arkUIAxisEventCloned->scrollStep = arkUIAxisEvent->scrollStep;
+    arkUIAxisEventCloned->axes = arkUIAxisEvent->axes;
+    arkUIAxisEventCloned->eventHandleId = arkUIAxisEvent->eventHandleId;
+    arkUIAxisEventCloned->isNewReferee = arkUIAxisEvent->isNewReferee;
 }
 
 void SetOnFocusExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
@@ -10991,7 +11261,12 @@ const ArkUICommonModifier* GetCommonModifier()
         .setOnAppear = SetOnAppearExt,
         .dispatchKeyEvent = DispatchKeyEvent,
         .postTouchEvent = PostTouchEvent,
+        .postTouchEventWithStrategy = PostTouchEventWithStrategy,
+        .postMouseEventWithStrategy = PostMouseEventWithStrategy,
+        .postAxisEventWithStrategy = PostAxisEventWithStrategy,
         .createClonedTouchEvent = CreateClonedTouchEvent,
+        .createClonedMouseEvent = CreateClonedMouseEvent,
+        .createClonedAxisEvent = CreateClonedAxisEvent,
         .destroyTouchEvent = DestroyTouchEvent,
         .resetEnableAnalyzer = nullptr,
         .setEnableAnalyzer = nullptr,

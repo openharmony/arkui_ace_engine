@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 
 class NGGestureRecognizer;
+class GestureReferee;
 
 enum class GestureDisposal {
     ACCEPT = 0,
@@ -100,6 +101,7 @@ public:
     void CleanGestureScopeState();
     void CleanGestureScopeStateVoluntarily();
     bool Existed(const RefPtr<NGGestureRecognizer>& recognizer);
+    void UpdateGestureReferee(size_t touchId, const WeakPtr<GestureReferee>& gestureReferee);
 private:
     std::list<WeakPtr<NGGestureRecognizer>> recognizers_;
 
@@ -149,6 +151,7 @@ public:
     void CleanGestureRefereeState(int32_t touchId);
     bool IsScopesEmpty() const;
     void SetRecognizerDelayStatus(const RecognizerDelayStatus& recognizerDelayStatus);
+    void UpdateGestureReferee(size_t touchId);
 private:
     void RecallOnAcceptGesture();
     bool CheckRecognizerInInnerContainer(const RefPtr<NGGestureRecognizer>& recognizer);

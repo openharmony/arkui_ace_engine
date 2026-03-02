@@ -47,6 +47,12 @@ class BuilderNodeCommonBase {
     __JSScopeUtil__.restoreInstanceId();
     return ret;
   }
+  public postInputEventWithStrategy(event: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+    __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+    let ret = this._JSBuilderNode.postInputEventWithStrategy(event, competitionStrategy);
+    __JSScopeUtil__.restoreInstanceId();
+    return ret;
+  }
   public dispose(): void {
     if (this.isDisposed()) {
       return;

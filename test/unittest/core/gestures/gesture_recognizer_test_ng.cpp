@@ -1810,4 +1810,61 @@ HWTEST_F(GestureRecognizerTestNg, ShouldResponseTest002, TestSize.Level1)
     clickRecognizer->ShouldResponse();
     EXPECT_NE(clickRecognizer, nullptr);
 }
+
+/**
+ * @tc.name: BatchAdjudicateTest002
+ * @tc.desc: Test BatchAdjudicate with eventImportGestureGroup_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, BatchAdjudicateTest002, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    std::vector<RefPtr<NGGestureRecognizer>> emptyRecognizers;
+    clickRecognizer->eventImportGestureGroup_ = nullptr;
+    clickRecognizer->gestureGroup_ = nullptr;
+
+    clickRecognizer->BatchAdjudicate(nullptr, GestureDisposal::ACCEPT);
+
+    auto referee = AceType::MakeRefPtr<GestureReferee>();
+    clickRecognizer->BatchAdjudicate(clickRecognizer, GestureDisposal::ACCEPT);
+    clickRecognizer->UpdateGestureReferee(AceType::WeakClaim(AceType::RawPtr(referee)));
+    clickRecognizer->BatchAdjudicate(clickRecognizer, GestureDisposal::ACCEPT);
+    EXPECT_NE(clickRecognizer, nullptr);
+
+    /**
+     * @tc.step1: Create gestureGroup.
+     * @tc.expected: GestureGroup is not nullptr.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> longPressRecognizers;
+    auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(false, true);
+    longPressRecognizers.push_back(AceType::DynamicCast<NGGestureRecognizer>(longPressRecognizer));
+    longPressRecognizers.push_back(nullptr);
+    ExclusiveRecognizer excluRecognizer(longPressRecognizers);
+    auto recognizerTest = AceType::DynamicCast<RecognizerGroup>(&excluRecognizer);
+    recognizerTest->refereeState_ = RefereeState::DETECTING;
+    PanDirection panDirection;
+    panDirection.type = PanDirection::VERTICAL;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer };
+    auto testRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    auto gestureRecognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(testRecognizer);
+    recognizerTest->UpdateGestureReferee(AceType::WeakClaim(AceType::RawPtr(referee)));
+    recognizerTest->recognizers_.push_back(gestureRecognizer);
+    recognizerTest->recognizers_.push_back(nullptr);
+    recognizerTest->RemainChildOnResetStatus();
+    /**
+     * @tc.step2: Call ForceCleanRecognizerWithGroup.
+     * @tc.expected: RecognizerTest->recognizers_.empty() is false.
+     */
+    recognizerTest->ForceCleanRecognizerWithGroup();
+    EXPECT_EQ(recognizerTest->recognizers_.empty(), false);
+
+    /**
+     * @tc.step3: Call ForceCleanRecognizerWithGroup.
+     * @tc.expected: RecognizerTest->recognizers_.empty() is true.
+     */
+    recognizerTest->remainChildOnResetStatus_ = false;
+    recognizerTest->ForceCleanRecognizerWithGroup();
+    EXPECT_EQ(recognizerTest->recognizers_.empty(), true);
+}
 } // namespace OHOS::Ace::NG

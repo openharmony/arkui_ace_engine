@@ -38,6 +38,12 @@ let ColoringStrategy;
   ColoringStrategy.CONTRAST = 'contrast';
 })(ColoringStrategy || (ColoringStrategy = {}));
 
+var CompetitionStrategy;
+(function (CompetitionStrategy) {
+    CompetitionStrategy[CompetitionStrategy["DEFAULT"] = 0] = "DEFAULT";
+    CompetitionStrategy[CompetitionStrategy["COMPETITION"] = 1] = "COMPETITION";
+})(CompetitionStrategy || (CompetitionStrategy = {}));
+
 let TextInputStyle;
 (function (TextInputStyle) {
   TextInputStyle.Default = 'Default';

@@ -226,6 +226,7 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetRawDeltaY(event.rawDeltaY);
     info.SetPressedButtons(event.pressedButtonsArray);
     info.SetIsRightButtonEventFromDoulbeTap(event.isRightButtonEventFromDoulbeTap);
+    info.SetEventHandleId(event.eventHandleId);
     // onMouseCallback_ may be overwritten in its invoke so we copy it first
     auto onMouseCallback = onMouseCallback_;
     onMouseCallback(info);

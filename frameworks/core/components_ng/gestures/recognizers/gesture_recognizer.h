@@ -434,6 +434,11 @@ public:
         return extraInfo_;
     }
 
+    WeakPtr<NG::GestureReferee> GetRefereeWithStrategy() const
+    {
+        return referee_;
+    }
+
     virtual void CleanRecognizerStateVoluntarily() {}
 
     void ResetStateVoluntarily();
@@ -454,6 +459,8 @@ public:
     void ResetResponseLinkRecognizer();
 
     virtual void CheckCurrentFingers() const = 0;
+
+    virtual void UpdateGestureReferee(const WeakPtr<NG::GestureReferee>& gestureReferee);
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -543,6 +550,7 @@ protected:
     bool isNeedResetRecognizerState_ = false;
     std::vector<Matrix4> localMatrix_ = {};
     bool preventBegin_ = false;
+    WeakPtr<NG::GestureReferee> referee_;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

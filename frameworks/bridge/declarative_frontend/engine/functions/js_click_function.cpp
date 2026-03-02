@@ -187,6 +187,7 @@ void JsClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
     obj->SetProperty<double>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
     obj->SetPropertyObject("pressedButtons", GetPressedButtons(info));
+    obj->SetProperty<int32_t>("eventHandleId", static_cast<int32_t>(info.GetEventHandleId()));
     obj->Wrap<MouseInfo>(&info);
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
