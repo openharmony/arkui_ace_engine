@@ -915,10 +915,10 @@ public:
 private:
     bool isRectEquel(OHOS::Rosen::Rect curRect) const
     {
-        return isLastRectSizeZero() || (curRect.width_ == lastRect_.width_ && curRect.height_ == lastRect_.height_ &&
+        return IsLastRectSizeZero() || (curRect.width_ == lastRect_.width_ && curRect.height_ == lastRect_.height_ &&
             curRect.posX_ == lastRect_.posX_ && curRect.posY_ == lastRect_.posY_);
     }
-    bool isLastRectSizeZero() const
+    bool IsLastRectSizeZero() const
     {
         return lastRect_.width_ == 0 && lastRect_.height_ == 0 &&
             lastRect_.posX_ == 0 && lastRect_.posY_ == 0;
