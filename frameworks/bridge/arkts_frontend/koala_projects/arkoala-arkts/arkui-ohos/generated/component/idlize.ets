@@ -5955,8 +5955,8 @@ export class UIContextAtomicServiceBar {
     }
 }
 export class UIContextGetInfo {
-    public static getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {
-        const id_casted = id as (int64)
+    public static getNavigationInfoByUniqueId(id: int32): uiObserver.NavigationInfo | undefined {
+        const id_casted = id as (int32)
         return UIContextGetInfo.getNavigationInfoByUniqueId_serialize(id_casted)
     }
     public static enableSwipeBack(enabled: boolean | undefined): void {
@@ -5964,7 +5964,7 @@ export class UIContextGetInfo {
         UIContextGetInfo.enableSwipeBack_serialize(enabled_casted)
         return
     }
-    private static getNavigationInfoByUniqueId_serialize(id: int64): uiObserver.NavigationInfo | undefined {
+    private static getNavigationInfoByUniqueId_serialize(id: int32): uiObserver.NavigationInfo | undefined {
         const retval = ArkUIGeneratedNativeModule._UIContextGetInfo_getNavigationInfoByUniqueId(id)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()

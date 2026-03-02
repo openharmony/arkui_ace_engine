@@ -6623,7 +6623,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _UIContextAtomicServiceBar_getBarRect(): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _UIContextGetInfo_getNavigationInfoByUniqueId(id: KLong): KInteropReturnBuffer
+    native static _UIContextGetInfo_getNavigationInfoByUniqueId(id: int32): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _UIContextGetInfo_enableSwipeBack(thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct

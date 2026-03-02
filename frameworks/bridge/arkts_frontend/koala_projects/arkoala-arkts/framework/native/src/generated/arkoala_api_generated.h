@@ -30840,7 +30840,7 @@ typedef struct GENERATED_ArkUIUIContextAtomicServiceBarAccessor {
 } GENERATED_ArkUIUIContextAtomicServiceBarAccessor;
 
 typedef struct GENERATED_ArkUIUIContextGetInfoAccessor {
-    Opt_uiObserver_NavigationInfo (*getNavigationInfoByUniqueId)(Ark_Int64 id);
+    Opt_uiObserver_NavigationInfo (*getNavigationInfoByUniqueId)(Ark_Int32 id);
     void (*enableSwipeBack)(const Opt_Boolean* enabled);
 } GENERATED_ArkUIUIContextGetInfoAccessor;
 

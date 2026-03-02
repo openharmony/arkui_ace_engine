@@ -1615,7 +1615,7 @@ export class UIContextImpl extends UIContext {
         return node;
     }
 
-    getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {
+    getNavigationInfoByUniqueId(id: int32): uiObserver.NavigationInfo | undefined {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let navigationInfo = UIContextGetInfo.getNavigationInfoByUniqueId(id);
         ArkUIAniModule._Common_Restore_InstanceId();
