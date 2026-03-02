@@ -603,6 +603,15 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
                 focusedDayIndex--;
             }
 
+            while (!IsDateInRange(currentMonthData.days[focusedDayIndex])
+                && IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
+                if (textDirection == TextDirection::RTL) {
+                    focusedDayIndex++;
+                } else {
+                    focusedDayIndex--;
+                }
+            }
+
             PaintMonthFocusState(focusedDayIndex);
             return true;
         }
@@ -613,11 +622,24 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
                 focusedDayIndex++;
             }
 
+            while (!IsDateInRange(currentMonthData.days[focusedDayIndex])
+                && IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
+                if (textDirection == TextDirection::RTL) {
+                    focusedDayIndex--;
+                } else {
+                    focusedDayIndex++;
+                }
+            }
+
             PaintMonthFocusState(focusedDayIndex);
             return true;
         }
         case KeyCode::KEY_DPAD_UP: {
             focusedDayIndex -= WEEK_DAYS;
+            while (!IsDateInRange(currentMonthData.days[focusedDayIndex])
+                && IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
+                focusedDayIndex -= WEEK_DAYS;
+            }
             if (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
                 focusedDay_ = currentMonthData.days[focusedDayIndex];
                 PaintCurrentMonthFocusState();
@@ -627,6 +649,10 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
         }
         case KeyCode::KEY_DPAD_DOWN: {
             focusedDayIndex += WEEK_DAYS;
+            while (!IsDateInRange(currentMonthData.days[focusedDayIndex])
+                && IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
+                focusedDayIndex += WEEK_DAYS;
+            }
             if (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
                 focusedDay_ = currentMonthData.days[focusedDayIndex];
                 PaintCurrentMonthFocusState();
@@ -673,6 +699,20 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
             break;
     }
     return false;
+}
+
+bool CalendarDialogPattern::IsDateInRange(const CalendarDay& day)
+{
+    PickerDate date;
+    date.SetYear(day.month.year);
+    date.SetMonth(day.month.month);
+    date.SetDay(day.day);
+    for (const auto& range : currentSettingData_.disabledDateRange) {
+        if (PickerDate::IsDateInRange(date, range.first, range.second)) {
+            return false;
+        }
+    }
+    return PickerDate::IsDateInRange(date, currentSettingData_.startDate, currentSettingData_.endDate);
 }
 
 void CalendarDialogPattern::PaintMonthFocusState(int32_t focusedDayIndex)

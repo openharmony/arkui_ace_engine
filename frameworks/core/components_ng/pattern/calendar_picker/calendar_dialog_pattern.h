@@ -176,6 +176,8 @@ private:
     void UpdateSwiperNodeFocusedDay(const CalendarDay& focusedDay, bool isPrev);
     void MarkMonthNodeDirty();
 
+    bool IsDateInRange(const CalendarDay& day);
+
     int32_t focusAreaID_ = 0;
     int32_t focusAreaIDWithoutWeek_ = 0;
     int32_t focusAreaChildID_ = 0;
