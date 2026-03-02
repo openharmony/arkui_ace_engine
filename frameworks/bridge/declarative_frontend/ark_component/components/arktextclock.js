@@ -390,7 +390,7 @@ class JSTextClock extends JSViewAbstract {
         component.setContentModifier(modifier);
     }
     static dateTimeOptions(dateTimeOptions) {
-        getUINativeModule().textclock.setDateTimeOptions(true, dateTimeOptions.hour);
+        getUINativeModule().textclock.setDateTimeOptions(true, dateTimeOptions);
     }
 
     static onClick(value) {
