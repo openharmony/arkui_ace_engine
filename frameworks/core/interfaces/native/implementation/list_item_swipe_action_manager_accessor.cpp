@@ -35,7 +35,7 @@ void DestroyPeerImpl(Ark_ListItemSwipeActionManager peer)
 Ark_ListItemSwipeActionManager ConstructImpl()
 {
     auto peer = PeerUtils::CreatePeer<ListItemSwipeActionManagerPeer>();
-    return {};
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
