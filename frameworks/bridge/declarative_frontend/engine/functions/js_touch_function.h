@@ -36,7 +36,7 @@ public:
     {
         JsFunction::Execute();
     }
-    void Execute(TouchEventInfo& info);
+    void Execute(EcmaVM* vm, TouchEventInfo& info);
     static JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info);
     static JSRef<JSObject> CreateJSEventInfo(TouchEventInfo& info);
 };

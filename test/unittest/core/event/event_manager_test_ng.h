@@ -60,7 +60,6 @@
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/animation/animatable_properties.h"
-#include "frameworks/core/common/event_info_manager.h"
 #include "frameworks/core/common/event_manager.h"
 #include "frameworks/core/common/font_manager.h"
 #include "frameworks/core/common/manager_interface.h"

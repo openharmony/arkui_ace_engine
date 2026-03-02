@@ -1474,27 +1474,6 @@ HWTEST_F(EventManagerTestNg, SwipeRecognizerAxisDirection001, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventInfoManagerTest001
- * @tc.desc: Test Add and Remove TouchEventInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventInfoManagerTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create EventManager.
-     * @tc.expected: eventManager is not null.
-     */
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    /**
-     * @tc.steps: step2. GetEventInfoManager.
-     * @tc.expected: eventInfoManager is not null.
-     */
-    auto eventInfoManager = eventManager->GetEventInfoManager();
-    EXPECT_NE(eventInfoManager, nullptr);
-}
-
-/**
  * @tc.name: AddHitTestInfoRecord
  * @tc.desc: Test AddHitTestInfoRecord.
  * @tc.type: FUNC
