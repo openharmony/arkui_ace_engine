@@ -14,6 +14,10 @@
  */
 
 import { EnvFactoryTests } from '../../env_tests/env_factory_tests'
+import { IEnvBreakpointTests } from '../../env_tests/i_env_breakpointTests'
+import { IEnvWindowSizeTests } from '../../env_tests/i_env_windowsizeTests'
+import { IEnvWindowAvoidAreaTests } from '../../env_tests/i_env_windowavoidareaTests'
+import { IEnvValueTests } from '../../env_tests/i_env_valueTests'
 
 import { PageController } from '../../lib/pageController'
 import { TestRunner } from '../../lib/testRunner'
@@ -30,7 +34,11 @@ struct Parent {
 
   aboutToAppear() {
     setTimeout(() => {
-      TestRunner.bind(this)(new EnvFactoryTests('env_factory11'));
+      TestRunner.bind(this)(new EnvFactoryTests('env_factory'));
+      TestRunner.bind(this)(new IEnvBreakpointTests('i_env_breakpoint'));
+      TestRunner.bind(this)(new IEnvWindowSizeTests('i_env_windowsize'));
+      TestRunner.bind(this)(new IEnvWindowAvoidAreaTests('i_env_windowavoidarea'));
+      TestRunner.bind(this)(new IEnvValueTests('i_env_value'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)
