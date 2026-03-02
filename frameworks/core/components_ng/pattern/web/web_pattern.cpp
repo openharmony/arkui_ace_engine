@@ -7127,7 +7127,7 @@ void WebPattern::OnWindowShow()
         webId, offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
     if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
-        delegate_->SetOfflineWebActiveStatus(webId, true);
+        delegate_->SetOfflineWebActiveStatus(true);
         return;
     }
     delegate_->OnRenderToForeground();
@@ -7141,7 +7141,7 @@ void WebPattern::OnWindowShow()
         ACE_SCOPED_TRACE("WebPattern::OnWindowShow WebId %d, isWindowShow %d, isVisible %d, componentVisibility_ %d",
             webId, isWindowShow_, isVisible_, static_cast<int>(componentVisibility_));
         if (offlineWebInited_ && isOfflineWebEvictFrameBuffersEnable_) {
-            delegate_->SetOfflineWebActiveStatus(webId, true);
+            delegate_->SetOfflineWebActiveStatus(true);
         }
         return;
     }
@@ -7161,7 +7161,7 @@ void WebPattern::OnWindowHide()
         webId, offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
     if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
-        delegate_->SetOfflineWebActiveStatus(webId, false);
+        delegate_->SetOfflineWebActiveStatus(false);
         return;
     }
     delegate_->OnRenderToBackground();
@@ -7170,7 +7170,7 @@ void WebPattern::OnWindowHide()
         return;
     }
     if (offlineWebInited_ && !isActive_) {
-        delegate_->SetOfflineWebActiveStatus(webId, false);
+        delegate_->SetOfflineWebActiveStatus(false);
     }
     SetActiveStatusInner(false);
     delegate_->HideWebView();

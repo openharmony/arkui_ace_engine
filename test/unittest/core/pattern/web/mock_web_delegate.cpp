@@ -730,7 +730,7 @@ void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type) {}
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue) {}
 void WebDelegate::LoadUrl() {}
 void WebDelegate::OnInactive() {}
-void WebDelegate::SetOfflineWebActiveStatus(int32_t webId, bool isActive) {}
+void WebDelegate::SetOfflineWebActiveStatus(bool isActive) {}
 void WebDelegate::OnActive() {}
 void WebDelegate::OnWebviewHide() {}
 void WebDelegate::OnWebviewShow() {}
