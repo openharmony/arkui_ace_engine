@@ -987,7 +987,8 @@ void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
     }
     symbolColors_ = Convert2VectorLinearColor(symbolColors.value());
     if (symbolColors_.has_value() && animatableSymbolColor_ &&
-        (symbolColors_ != animatableSymbolColor_->Get() || lastSymbolColors_ != animatableSymbolColor_->Get())) {
+        (CompareColorsExceptHolder(symbolColors_.value(), animatableSymbolColor_->Get()) ||
+            CompareColorsExceptHolder(lastSymbolColors_, animatableSymbolColor_->Get()))) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
         if (SystemProperties::GetTextTraceEnabled()) {
             ACE_TEXT_SCOPED_TRACE(
@@ -995,6 +996,20 @@ void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
         }
         lastSymbolColors_ = animatableSymbolColor_->Get();
     }
+}
+
+bool TextContentModifier::CompareColorsExceptHolder(
+    const LinearVector<LinearColor>& colors1, const LinearVector<LinearColor>& colors2)
+{
+    if (colors1.size() != colors2.size()) {
+        return true;
+    }
+    for (size_t i = 0; i < colors1.size(); ++i) {
+        if (!colors1[i].CompareColorExceptHolder(colors2[i])) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)

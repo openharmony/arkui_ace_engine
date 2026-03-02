@@ -204,6 +204,7 @@ private:
     void UpdateTextDecorationColorAlpha();
     void SetTextContentAlingOffsetY(float& paintOffsetY);
     void ContentChangeReport();
+    bool CompareColorsExceptHolder(const LinearVector<LinearColor>& colors1, const LinearVector<LinearColor>& colors2);
     bool HandleDrawCallback(const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern);
 
     std::optional<Dimension> fontSize_;
