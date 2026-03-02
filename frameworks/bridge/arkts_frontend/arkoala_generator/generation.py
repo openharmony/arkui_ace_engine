@@ -20,6 +20,11 @@ def main():
     node_bin_path = sys.argv[8]
 
     arkts_sdk_path = os.path.dirname(arkts_sdk_path)
+
+
+    env = os.environ.copy()
+    env["PATH"] = node_bin_path + os.pathsep + env.get("PATH", "")
+    env["PANDA_SDK_PATH"] = panda_sdk_path
     
     node = os.path.join(node_bin_path, "node")
     npm = os.path.join(node_bin_path, "npm")
@@ -29,11 +34,11 @@ def main():
     
     print(f"Running npm install in {script_dir}...")
     try:
-        node_version = subprocess.run([node, "--version"], cwd=script_dir, check=True, capture_output=True, text=True)
+        node_version = subprocess.run([node, "--version"], env=env, cwd=script_dir, check=True, capture_output=True, text=True)
         print(f"Node version: {node_version.stdout.strip()}")
-        npm_version = subprocess.run([npm, "--version"], cwd=script_dir, check=True, capture_output=True, text=True)
+        npm_version = subprocess.run([npm, "--version"], env=env, cwd=script_dir, check=True, capture_output=True, text=True)
         print(f"NPM version: {npm_version.stdout.strip()}")
-        subprocess.run([npm, "install"], cwd=script_dir, check=True, capture_output=True, text=True)
+        subprocess.run([npm, "install"], env=env, cwd=script_dir, check=True, capture_output=True, text=True)
         print("npm install completed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error: npm install failed with exit code {e.returncode}")
@@ -60,12 +65,9 @@ def main():
     ]
     
     print(f"Running command: {' '.join(cmd)}")
-    
-    env = os.environ.copy()
-    env["PANDA_SDK_PATH"] = panda_sdk_path
-    
+
     try:
-        result = subprocess.run(cmd, check=True, env=env, cwd=script_dir, capture_output=True, text=True)
+        result = subprocess.run(cmd, env=env, check=True, cwd=script_dir, capture_output=True, text=True)
         print(f"Generation completed successfully. Output: {output_dir}")
     except subprocess.CalledProcessError as e:
         print(f"Error: Generation failed with exit code {e.returncode}")
