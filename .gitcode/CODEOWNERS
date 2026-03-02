@@ -3458,6 +3458,8 @@ frameworks/core/interfaces/native/implementation/lazy_grid_layout_modifier.cpp @
 frameworks/core/interfaces/native/implementation/lazyv_grid_layout_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_group_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_item_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/list_item_swipe_action_manager_accessor.cpp @arkuiscroll
+frameworks/core/interfaces/native/implementation/list_item_swipe_action_manager_peer.h @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_scroller_accessor.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/list_scroller_peer_impl.h @arkuiscroll
