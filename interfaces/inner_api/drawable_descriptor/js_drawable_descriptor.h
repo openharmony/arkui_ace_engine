@@ -39,6 +39,7 @@ private:
         int32_t duration = -1;
         int32_t iterations = 1;
         bool autoPlay = true;
+        int32_t stopMode = 0;
         std::vector<int32_t> durations;
     };
 
@@ -46,6 +47,7 @@ private:
     static napi_value InitLayeredDrawable(napi_env env);
     static napi_value InitAnimatedDrawable(napi_env env);
     static napi_value InitPixelMapDrawable(napi_env env);
+    static napi_value InitAnimationStopMode(napi_env env, napi_value exports);
     static void ParseAnimationOptions(napi_env env, napi_value napiOptions, AnimationOptions& options);
     static napi_value DrawableConstructor(napi_env env, napi_callback_info info);
     static napi_value AnimatedConstructor(napi_env env, napi_callback_info info);

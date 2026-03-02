@@ -102,6 +102,18 @@ typedef enum {
 } DrawableDescriptor_AnimationStatus;
 
 /**
+ * @brief Defines the animation stop mode of the drawable descriptor.
+ *
+ * @since 24
+ */
+typedef enum {
+    /** animation stops at first frame. */
+    DRAWABLE_DESCRIPTOR_ANIMATION_FIRST_FRAME = 0,
+    /** animation stops at last frame. */
+    DRAWABLE_DESCRIPTOR_ANIMATION_LAST_FRAME = 1,
+} DrawableDescriptor_AnimationStopMode;
+
+/**
  * @brief Creates a DrawableDescriptor from a Pixelmap.
  *
  * @param pixelMap Indicates the pointer to a Pixelmap
@@ -247,6 +259,32 @@ int32_t OH_ArkUI_DrawableDescriptor_GetAnimationAutoPlay(
     ArkUI_DrawableDescriptor* drawableDescriptor, uint32_t* autoPlay);
 
 /**
+ * @brief Sets the stop mode of animation.
+ *
+ * @param drawableDescriptor Indicates the pointer to the drawableDescriptor.
+ * @param mode Indicates animation stop mode.
+ *             The default value is 0, which means stop at the first frame.
+ *             Value 1 means stop at the last frame.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful;
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 24
+ */
+int32_t OH_ArkUI_DrawableDescriptor_SetAnimationStopMode(
+    ArkUI_DrawableDescriptor* drawableDescriptor, DrawableDescriptor_AnimationStopMode mode);
+
+/**
+ * @brief Obtains the stop mode of animation.
+ *
+ * @param drawableDescriptor Indicates the pointer to the drawableDescriptor.
+ * @param mode Indicates animation stop mode.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful;
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 24
+ */
+int32_t OH_ArkUI_DrawableDescriptor_GetAnimationStopMode(
+    const ArkUI_DrawableDescriptor* drawableDescriptor, DrawableDescriptor_AnimationStopMode* mode);
+
+/**
  * @brief Obtains the animation controller.
  *
  * @param drawableDescriptor Indicates the pointer to the drawableDescriptor.
@@ -279,7 +317,7 @@ void OH_ArkUI_DrawableDescriptor_DisposeAnimationController(
 int32_t OH_ArkUI_DrawableDescriptor_StartAnimation(ArkUI_DrawableDescriptor_AnimationController* controller);
 
 /**
- * @brief Stops the animation and back to first frame.
+ * @brief Stops the animation and moves to the configured stop frame.
  *
  * @param controller Indicates the pointer to the animation controller.
  * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful;

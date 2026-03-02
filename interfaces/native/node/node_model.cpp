@@ -20,6 +20,7 @@
 #include "node_extened.h"
 #include "node_model_safely.h"
 #include "style_modifier.h"
+#include "frameworks/core/interfaces/drawable/drawable_api.h"
 
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
@@ -82,6 +83,34 @@ void* FindFunction(void* library, const char* name)
 #endif
 
 ArkUIFullNodeAPI* impl = nullptr;
+constexpr int32_t ANIMATION_STOP_MODE_FIRST_FRAME = 0;
+constexpr int32_t ANIMATION_STOP_MODE_LAST_FRAME = 1;
+using GetArkUIDrawableDescriptorFunc = const ArkUIDrawableDescriptor* (*)();
+
+const ArkUIDrawableDescriptor* GetArkUIDrawableModifier()
+{
+    static const ArkUIDrawableDescriptor* modifier = nullptr;
+    static bool initialized = false;
+    if (initialized) {
+        return modifier;
+    }
+    initialized = true;
+    void* module = FindModule();
+    if (!module) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
+        return nullptr;
+    }
+    auto entry = reinterpret_cast<GetArkUIDrawableDescriptorFunc>(FindFunction(module, DRAWABLE_FUNC_NAME));
+    if (!entry) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find GetArkUIDrawableDescriptor");
+        return nullptr;
+    }
+    modifier = entry();
+    if (!modifier) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "GetArkUIDrawableDescriptor returned null");
+    }
+    return modifier;
+}
 
 bool InitialFullNodeImpl(int version)
 {
@@ -1179,6 +1208,38 @@ int32_t GetAutoPlay(void* object, uint32_t* autoPlay)
         return ERROR_CODE_PARAM_INVALID;
     }
     return getFunc(object, autoPlay);
+}
+
+int32_t SetStopMode(void* object, int32_t stopMode)
+{
+    if (!object || stopMode < ANIMATION_STOP_MODE_FIRST_FRAME || stopMode > ANIMATION_STOP_MODE_LAST_FRAME) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto modifier = GetArkUIDrawableModifier();
+    if (!modifier || !modifier->setAnimatedStopMode) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find setAnimatedStopMode");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    modifier->setAnimatedStopMode(object, stopMode);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t GetStopMode(void* object, int32_t* stopMode)
+{
+    if (!object || !stopMode) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto modifier = GetArkUIDrawableModifier();
+    if (!modifier || !modifier->getAnimatedStopMode) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find getAnimatedStopMode");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto value = modifier->getAnimatedStopMode(object);
+    if (value < ANIMATION_STOP_MODE_FIRST_FRAME || value > ANIMATION_STOP_MODE_LAST_FRAME) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    *stopMode = value;
+    return ERROR_CODE_NO_ERROR;
 }
 
 int32_t CreateAnimationController(

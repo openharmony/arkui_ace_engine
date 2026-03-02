@@ -327,6 +327,10 @@ void ParseAnimatedOptions(ani_env* env, ani_object optionsAni, void* drawable)
     if (AniUtils::GetBoolParam(env, optionsAni, "autoPlay", autoPlay)) {
         modifier->setAnimatedAutoPlay(drawable, autoPlay);
     }
+    int32_t stopMode = 0;
+    if (AniUtils::GetIntByName(env, optionsAni, "stopMode", stopMode)) {
+        modifier->setAnimatedStopMode(drawable, stopMode);
+    }
 }
 
 void DrawableCreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni,
