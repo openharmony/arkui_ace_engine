@@ -1144,4 +1144,26 @@ HWTEST_F(RichEditorCaretTestNg, GetCaretOffset001, TestSize.Level0)
     EXPECT_EQ(offset2, 2);
 }
 
+/**
+ * @tc.name: UpdateEditingValue001
+ * @tc.desc: test UpdateEditingValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, UpdateEditingValue001, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TextEditingValue value;
+    value.text = "123456789";
+    TextSelection selection;
+    int32_t caretPos = value.text.length();
+    selection.baseOffset = caretPos;
+    selection.extentOffset = caretPos;
+    value.selection = selection;
+
+    richEditorPattern->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+}
 }
