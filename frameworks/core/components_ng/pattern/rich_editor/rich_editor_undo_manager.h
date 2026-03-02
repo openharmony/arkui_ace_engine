@@ -38,8 +38,7 @@ struct OptionsListHandler {
         : handleImage(std::move(handler1)), handleText(std::move(handler2)), handleSymbol(std::move(handler3)),
           handleBuilder(std::move(handler4)), onOptionsProcessed(std::move(callback)) {}
     
-    void operator()(const OptionsList& optionsList) const
-    {
+    void operator()(const OptionsList& optionsList) const {
         for (const auto& option : optionsList) {
             std::visit([&](const auto& specificOption) {
                 using T = std::decay_t<decltype(specificOption)>;
@@ -400,7 +399,5 @@ private:
     RichEditorAbstractSpanResult GetAdjustedInsertSpanInfo(int32_t insertOffset, int32_t spanIndex,
         const TextSpanOptions& options, bool isFirst);
 };
-
 }
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_UNDO_MANAGER_H

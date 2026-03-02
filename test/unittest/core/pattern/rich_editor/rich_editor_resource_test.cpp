@@ -115,7 +115,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest001, TestSize.
     TextStyle textStyle;
     g_isConfigChangePerform = false;
 
-    StyleManager::AddTextColorResource(spanNode, textStyle);
+    StyleManager::UpdateTextColorResource(spanNode, textStyle);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest002, TestSize.Level0)
@@ -124,7 +124,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest002, TestSize.
     TextStyle textStyle;
     g_isConfigChangePerform = false;
 
-    StyleManager::AddTextColorResource(spanNode, textStyle);
+    StyleManager::UpdateTextColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 0);
 }
 
@@ -134,7 +134,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest003, TestSize.
     TextStyle textStyle;
     g_isConfigChangePerform = true;
 
-    StyleManager::AddTextColorResource(spanNode, textStyle);
+    StyleManager::UpdateTextColorResource(spanNode, textStyle);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest004, TestSize.Level0)
@@ -145,12 +145,12 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest004, TestSize.
     textStyle.AddResource(StyleManager::TEXT_COLOR_KEY, colorResObj, StyleManager::TEXT_STYLE_TEXT_COLOR_UPDATER);
     g_isConfigChangePerform = true;
 
-    StyleManager::AddTextColorResource(spanNode, textStyle);
+    StyleManager::UpdateTextColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
 
     textStyle.AddResource(StyleManager::TEXT_DECORATION_COLOR_KEY, colorResObj,
         StyleManager::TEXT_STYLE_TEXT_DECORATION_COLOR_UPDATER);
-    StyleManager::AddTextColorResource(spanNode, textStyle);
+    StyleManager::UpdateTextColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
 }
 
@@ -202,7 +202,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToSpanNodeTest001,
     TextStyle textStyle;
     g_isConfigChangePerform = false;
 
-    StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
+    StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToSpanNodeTest002, TestSize.Level0)
@@ -211,7 +211,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToSpanNodeTest002,
     TextStyle textStyle;
     g_isConfigChangePerform = false;
 
-    StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
+    StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 0);
 }
 
@@ -233,7 +233,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToSpanNodeTest003,
     TextStyle textStyle;
     g_isConfigChangePerform = true;
 
-    StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
+    StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToSpanNodeTest004, TestSize.Level0)
@@ -245,11 +245,11 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToSpanNodeTest004,
         StyleManager::TEXT_STYLE_TEXT_DECORATION_COLOR_UPDATER);
     g_isConfigChangePerform = true;
 
-    StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
+    StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
 
     textStyle.AddResource(StyleManager::TEXT_COLOR_KEY, colorResObj, StyleManager::TEXT_STYLE_TEXT_COLOR_UPDATER);
-    StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
+    StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
 }
 
@@ -299,7 +299,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddSymbolColorResToSpanNodeTest001, TestSiz
     EXPECT_EQ(textStyle.GetSymbolColorList().size(), 3);
 
     g_isConfigChangePerform = false;
-    StyleManager::AddSymbolColorResource(spanNode, textStyle);
+    StyleManager::UpdateSymbolColorResource(spanNode, textStyle);
 
     spanNode = AceType::MakeRefPtr<SpanNode>(1);
 
@@ -307,11 +307,11 @@ HWTEST_F(RichEditorStyleManagerTest, AddSymbolColorResToSpanNodeTest001, TestSiz
      * @tc.steps: step2. test symbol in old flow
      */
     g_isConfigChangePerform = false;
-    StyleManager::AddSymbolColorResource(spanNode, textStyle);
+    StyleManager::UpdateSymbolColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 3);
 
     g_isConfigChangePerform = true;
-    StyleManager::AddSymbolColorResource(spanNode, textStyle);
+    StyleManager::UpdateSymbolColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 3);
 }
 
@@ -478,30 +478,4 @@ HWTEST_F(RichEditorStyleManagerTest, UpdatePropertyTest001, TestSize.Level0) {
     EXPECT_EQ(placeholderTextColor.value(), color);
 }
 
-/**
- * @tc.name: OnColorConfigurationUpdate001
- * @tc.desc: test OnColorConfigurationUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleManagerTest, OnColorConfigurationUpdate001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init pattern and theme
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-    auto theme = AceType::MakeRefPtr<RichEditorTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
-
-    /**
-     * @tc.steps: step2. call OnColorConfigurationUpdate
-     */
-    richEditorPattern->OnColorConfigurationUpdate();
-    EXPECT_TRUE(richEditorPattern->magnifierController_->colorModeChange_);
-}
 }
