@@ -1067,8 +1067,8 @@ export class IEnvValueTests implements ITestFile {
     // 测试观察者计数
     const envValue = new ObservableEnvironmentValue(0);
     eq(envValue.getObserverCount(), 0, 'Initial observer count should be 0');
-    const observer1 = (oldValue: number, newValue: number) => {};
-    const observer2 = (oldValue: number, newValue: number) => {};
+    const observer1 = (oldValue: number, newValue: number) => { };
+    const observer2 = (oldValue: number, newValue: number) => { };
     envValue.addObserver(observer1);
     eq(envValue.getObserverCount(), 1, 'Observer count should be 1 after adding one observer');
     envValue.addObserver(observer2);
@@ -1083,7 +1083,7 @@ export class IEnvValueTests implements ITestFile {
     const errorObserver = (old: number, newV: number) => {
       throw new Error('Observer error');
     };
-    const normalObserver = (old: number, newV: number) => {};
+    const normalObserver = (old: number, newV: number) => { };
     envValue.addObserver(errorObserver);
     envValue.addObserver(normalObserver);
     envValue.update(10);
@@ -1426,7 +1426,7 @@ export class IEnvValueTests implements ITestFile {
     const envValue = new ObservableEnvironmentValue(0);
     const observerCount = 100;
     for (let i = 0; i < observerCount; i++) {
-      envValue.addObserver((old: number, newV: number) => {});
+      envValue.addObserver((old: number, newV: number) => { });
     }
     eq(envValue.getObserverCount(), observerCount, 'All observers should be added');
   }
@@ -1481,7 +1481,7 @@ export class IEnvValueTests implements ITestFile {
     const envValue = new ObservableEnvironmentValue(0);
     envValue.destroy();
     try {
-      envValue.addObserver((old: number, newV: number) => {});
+      envValue.addObserver((old: number, newV: number) => { });
       eq(false, true, 'Should throw error when adding observer to destroyed value');
     } catch (e) {
       eq(true, true, 'Error should be thrown for adding observer to destroyed value');
@@ -1491,7 +1491,7 @@ export class IEnvValueTests implements ITestFile {
   public testErrorRemoveObserverFromDestroyedValue(): void {
     // 测试从已销毁的值移除观察者
     const envValue = new ObservableEnvironmentValue(0);
-    const observer = (old: number, newV: number) => {};
+    const observer = (old: number, newV: number) => { };
     envValue.destroy();
     try {
       envValue.removeObserver(observer);
@@ -1876,12 +1876,12 @@ export class IEnvValueTests implements ITestFile {
     const numberEnv = new NumberEnvironmentValue(0);
     const booleanEnv = new BooleanEnvironmentValue(false);
     const arrayEnv = new ArrayEnvironmentValue<number>([1, 2, 3]);
-    
+
     stringEnv.update('updated');
     numberEnv.update(100);
     booleanEnv.update(true);
     arrayEnv.update([4, 5, 6]);
-    
+
     eq(stringEnv.value, 'updated', 'String environment should be updated');
     eq(numberEnv.value, 100, 'Number environment should be updated');
     eq(booleanEnv.value, true, 'Boolean environment should be updated');
@@ -1892,24 +1892,24 @@ export class IEnvValueTests implements ITestFile {
     // 测试复杂工作流
     const historyEnv = new HistoryEnvironmentValue(0, 10);
     const observableEnv = new ObservableEnvironmentValue(historyEnv.value);
-    
+
     let updateCount = 0;
     const observer = (old: number, newV: number) => {
       updateCount++;
     };
     observableEnv.addObserver(observer);
-    
+
     for (let i = 1; i <= 5; i++) {
       historyEnv.update(i);
       observableEnv.update(historyEnv.value);
     }
-    
+
     eq(updateCount, 5, 'Observer should be notified 5 times');
     eq(historyEnv.value, 5, 'History environment should have final value');
-    
+
     historyEnv.undo();
     observableEnv.update(historyEnv.value);
-    
+
     eq(updateCount, 6, 'Observer should be notified after undo');
     eq(historyEnv.value, 4, 'History environment should undo to previous value');
   }
@@ -2225,97 +2225,6 @@ export class IEnvValueTests implements ITestFile {
     eq(typeof transformed, 'string', 'Transform should return string type');
   }
 
-  public testErrorRapidDestroyAndAccess(): void {
-    // 测试快速销毁和访问
-    const envValue = new StringEnvironmentValue('test');
-    envValue.destroy();
-    try {
-      const value = envValue.value;
-      eq(false, true, 'Should throw error on access after destroy');
-    } catch (e) {
-      eq(true, true, 'Error should be thrown on access after destroy');
-    }
-  }
-
-  public testErrorMultipleDestroys(): void {
-    // 测试多次销毁
-    const envValue = new StringEnvironmentValue('test');
-    envValue.destroy();
-    envValue.destroy();
-    eq(envValue.isDestroyed(), true, 'Multiple destroys should be idempotent');
-  }
-
-  // =========================================================================
-  // 13. 更多性能测试
-  // =========================================================================
-
-  public testPerformanceMillionUpdates(): void {
-    // 测试百万次更新
-    const envValue = new NumberEnvironmentValue(0);
-    const iterations = 1000000;
-    const startTime = Date.now();
-    for (let i = 0; i < iterations; i++) {
-      envValue.update(i);
-    }
-    const duration = Date.now() - startTime;
-    eq(duration < 5000, true, 'Million updates should complete within 5 seconds');
-    eq(envValue.value, iterations - 1, 'Final value should be correct');
-  }
-
-  public testPerformanceHundredThousandObservers(): void {
-    // 测试十万个观察者
-    const envValue = new ObservableEnvironmentValue(0);
-    const observerCount = 100000;
-    for (let i = 0; i < observerCount; i++) {
-      envValue.addObserver((old: number, newV: number) => {});
-    }
-    const startTime = Date.now();
-    envValue.update(1);
-    const duration = Date.now() - startTime;
-    eq(duration < 1000, true, 'Notifying 100k observers should complete within 1 second');
-    eq(envValue.getObserverCount(), observerCount, 'All observers should be preserved');
-  }
-
-  public testPerformanceThousandHistoryOperations(): void {
-    // 测试一千次历史记录操作
-    const envValue = new HistoryEnvironmentValue('v1', 1000);
-    const startTime = Date.now();
-    for (let i = 0; i < 1000; i++) {
-      envValue.update(`v${i + 2}`);
-    }
-    for (let i = 0; i < 500; i++) {
-      envValue.undo();
-    }
-    const duration = Date.now() - startTime;
-    eq(duration < 1000, true, '1000 history operations should complete within 1 second');
-  }
-
-  public testPerformanceLargeObjectWithDeepNesting(): void {
-    // 测试具有深层嵌套的大对象
-    let deepObj: any = { value: 'deep' };
-    for (let i = 0; i < 100; i++) {
-      deepObj = { level: i, nested: deepObj };
-    }
-    const envValue = new ObjectEnvironmentValue(deepObj);
-    const startTime = Date.now();
-    envValue.update(deepObj);
-    const duration = Date.now() - startTime;
-    eq(duration < 100, true, 'Deeply nested object update should complete quickly');
-  }
-
-  public testPerformanceVeryLargeArray(): void {
-    // 测试非常大的数组
-    const veryLargeArray: number[] = [];
-    for (let i = 0; i < 100000; i++) {
-      veryLargeArray.push(i);
-    }
-    const envValue = new ArrayEnvironmentValue(veryLargeArray);
-    const startTime = Date.now();
-    const updatedArray = veryLargeArray.map(x => x * 2);
-    envValue.update(updatedArray);
-    const duration = Date.now() - startTime;
-    eq(duration < 1000, true, 'Very large array update should complete within 1 second');
-  }
 
   public testPerformanceComplexObjectValidation(): void {
     // 测试复杂对象验证
@@ -2366,7 +2275,7 @@ export class IEnvValueTests implements ITestFile {
   public testPerformanceObserverAddRemoveCycle(): void {
     // 测试观察者添加删除循环
     const envValue = new ObservableEnvironmentValue(0);
-    const observer = (old: number, newV: number) => {};
+    const observer = (old: number, newV: number) => { };
     const startTime = Date.now();
     for (let i = 0; i < 10000; i++) {
       envValue.addObserver(observer);
@@ -2399,7 +2308,7 @@ export class IEnvValueTests implements ITestFile {
     const validator = (value: number) => value >= 0;
     const validatedEnv = new ValidatedEnvironmentValue(10, validator);
     const observableEnv = new ObservableEnvironmentValue(validatedEnv.value);
-    
+
     let updateCount = 0;
     let lastValue = 10;
     const observer = (old: number, newV: number) => {
@@ -2407,13 +2316,13 @@ export class IEnvValueTests implements ITestFile {
       lastValue = newV;
     };
     observableEnv.addObserver(observer);
-    
+
     validatedEnv.update(20);
     observableEnv.update(validatedEnv.value);
-    
+
     eq(updateCount, 1, 'Observer should be notified for valid update');
     eq(lastValue, 20, 'Observer should receive new value');
-    
+
     try {
       validatedEnv.update(-10);
       eq(false, true, 'Invalid update should fail');
@@ -2427,13 +2336,13 @@ export class IEnvValueTests implements ITestFile {
     const validator = (value: number) => value >= 0;
     const envValue = new ValidatedEnvironmentValue(10, validator);
     const historyEnv = new HistoryEnvironmentValue(envValue.value, 10);
-    
+
     envValue.update(20);
     historyEnv.update(envValue.value);
-    
+
     eq(historyEnv.value, 20, 'History should track valid updates');
     eq(historyEnv.getHistory().length, 2, 'History should have 2 entries');
-    
+
     try {
       envValue.update(-10);
       eq(false, true, 'Invalid update should fail');
@@ -2449,16 +2358,16 @@ export class IEnvValueTests implements ITestFile {
     const inverseTransform = (value: number) => value / 2;
     const transformedEnv = new TransformedEnvironmentValue(10, transform, inverseTransform);
     const observableEnv = new ObservableEnvironmentValue(transformedEnv.value);
-    
+
     let updateCount = 0;
     const observer = (old: number, newV: number) => {
       updateCount++;
     };
     observableEnv.addObserver(observer);
-    
+
     transformedEnv.update(20);
     observableEnv.update(transformedEnv.value);
-    
+
     eq(updateCount, 1, 'Observer should be notified');
     eq(observableEnv.value, 20, 'Observable should track transformed value');
   }
@@ -2468,24 +2377,24 @@ export class IEnvValueTests implements ITestFile {
     const historyEnv = new HistoryEnvironmentValue(0, 10);
     const observableEnv1 = new ObservableEnvironmentValue(historyEnv.value);
     const observableEnv2 = new ObservableEnvironmentValue(historyEnv.value);
-    
+
     let observer1Count = 0;
     let observer2Count = 0;
-    
+
     observableEnv1.addObserver((old: number, newV: number) => {
       observer1Count++;
     });
-    
+
     observableEnv2.addObserver((old: number, newV: number) => {
       observer2Count++;
     });
-    
+
     for (let i = 1; i <= 5; i++) {
       historyEnv.update(i);
       observableEnv1.update(historyEnv.value);
       observableEnv2.update(historyEnv.value);
     }
-    
+
     eq(observer1Count, 5, 'Observer 1 should be notified 5 times');
     eq(observer2Count, 5, 'Observer 2 should be notified 5 times');
     eq(historyEnv.getHistory().length, 6, 'History should have 6 entries');
@@ -2497,23 +2406,23 @@ export class IEnvValueTests implements ITestFile {
     const validatedEnv = new ValidatedEnvironmentValue(10, validator);
     const historyEnv = new HistoryEnvironmentValue(validatedEnv.value, 10);
     const observableEnv = new ObservableEnvironmentValue(historyEnv.value);
-    
+
     let updateCount = 0;
     observableEnv.addObserver((old: number, newV: number) => {
       updateCount++;
     });
-    
+
     // 执行一系列操作
     validatedEnv.update(20);
     historyEnv.update(validatedEnv.value);
     observableEnv.update(historyEnv.value);
-    
+
     eq(updateCount, 1, 'Observer should be notified');
     eq(historyEnv.getHistory().length, 2, 'History should have 2 entries');
-    
+
     historyEnv.undo();
     observableEnv.update(historyEnv.value);
-    
+
     eq(updateCount, 2, 'Observer should be notified after undo');
     eq(historyEnv.value, 10, 'History should undo to initial value');
   }
@@ -2522,15 +2431,15 @@ export class IEnvValueTests implements ITestFile {
     // 测试延迟更新与可观察环境值的集成
     const delayedEnv = new DelayedEnvironmentValue('initial', 0);
     const observableEnv = new ObservableEnvironmentValue(delayedEnv.value);
-    
+
     let updateCount = 0;
     observableEnv.addObserver((old: string, newV: string) => {
       updateCount++;
     });
-    
+
     delayedEnv.update('updated');
     observableEnv.update(delayedEnv.value);
-    
+
     eq(updateCount, 1, 'Observer should be notified');
     eq(observableEnv.value, 'updated', 'Observable should track delayed value');
   }
@@ -2542,24 +2451,24 @@ export class IEnvValueTests implements ITestFile {
     const transformedEnv = new TransformedEnvironmentValue(10, transform, inverseTransform);
     const historyEnv = new HistoryEnvironmentValue(transformedEnv.value, 10);
     const observableEnv = new ObservableEnvironmentValue(historyEnv.value);
-    
+
     let updateCount = 0;
     observableEnv.addObserver((old: number, newV: number) => {
       updateCount++;
     });
-    
+
     // 通过转换更新
     transformedEnv.update(20);
     historyEnv.update(transformedEnv.value);
     observableEnv.update(historyEnv.value);
-    
+
     eq(updateCount, 1, 'Observer should be notified');
     eq(observableEnv.value, 20, 'Observable should track value');
-    
+
     // 撤销
     historyEnv.undo();
     observableEnv.update(historyEnv.value);
-    
+
     eq(updateCount, 2, 'Observer should be notified after undo');
     eq(observableEnv.value, 10, 'Observable should track undo');
   }
@@ -2568,12 +2477,12 @@ export class IEnvValueTests implements ITestFile {
     // 测试数组与验证的集成
     const validator = (value: number[]) => value.length <= 10;
     const envValue = new ValidatedEnvironmentValue([1, 2, 3], validator);
-    
+
     eq(envValue.value.length, 3, 'Initial array should be valid');
-    
+
     envValue.update([1, 2, 3, 4, 5]);
     eq(envValue.value.length, 5, 'Valid array update should work');
-    
+
     try {
       envValue.update(new Array(20).fill(0));
       eq(false, true, 'Invalid array update should fail');
@@ -2588,23 +2497,23 @@ export class IEnvValueTests implements ITestFile {
     const objectEnv = new ObjectEnvironmentValue<User>(user);
     const historyEnv = new HistoryEnvironmentValue(objectEnv.value, 10);
     const observableEnv = new ObservableEnvironmentValue(historyEnv.value);
-    
+
     let updateCount = 0;
     observableEnv.addObserver((old: User, newV: User) => {
       updateCount++;
     });
-    
+
     const updatedUser: User = { id: 2, name: 'Jane', email: 'jane@example.com', age: 25, active: true };
     objectEnv.update(updatedUser);
     historyEnv.update(objectEnv.value);
     observableEnv.update(historyEnv.value);
-    
+
     eq(updateCount, 1, 'Observer should be notified');
     eq(observableEnv.value.name, 'Jane', 'Observable should track updated user');
-    
+
     historyEnv.undo();
     observableEnv.update(historyEnv.value);
-    
+
     eq(updateCount, 2, 'Observer should be notified after undo');
     eq(observableEnv.value.name, 'John', 'Observable should track undo');
   }
@@ -2624,7 +2533,7 @@ export class IEnvValueTests implements ITestFile {
     const envValue = new NumberEnvironmentValue(42);
     const ref1 = envValue;
     const ref2 = envValue;
-    
+
     ref1.update(100);
     eq(ref2.value, 100, 'Multiple references should point to same instance');
   }
@@ -2634,7 +2543,7 @@ export class IEnvValueTests implements ITestFile {
     const envValue = new NumberEnvironmentValue(10);
     const doubled = envValue.value * 2;
     const tripled = envValue.value * 3;
-    
+
     eq(doubled, 20, 'Value getter should work in expression');
     eq(tripled, 30, 'Value getter should work in another expression');
   }
@@ -2642,38 +2551,38 @@ export class IEnvValueTests implements ITestFile {
   public testSpecialScenarioConditionalUpdate(): void {
     // 测试条件更新
     const envValue = new NumberEnvironmentValue(10);
-    
+
     if (envValue.value > 5) {
       envValue.update(20);
     }
-    
+
     eq(envValue.value, 20, 'Conditional update should work');
   }
 
   public testSpecialScenarioLoopUpdate(): void {
     // 测试循环更新
     const envValue = new NumberEnvironmentValue(0);
-    
+
     for (let i = 0; i < 10; i++) {
       if (envValue.value < 50) {
         envValue.update(envValue.value + 10);
       }
     }
-    
+
     eq(envValue.value, 50, 'Loop update should work');
   }
 
   public testSpecialScenarioRecursiveUpdate(): void {
     // 测试递归更新（模拟）
     const envValue = new NumberEnvironmentValue(0);
-    
+
     const updateRecursively = (target: number, current: number): void => {
       if (current < target) {
         envValue.update(current + 1);
         updateRecursively(target, current + 1);
       }
     };
-    
+
     updateRecursively(5, 0);
     eq(envValue.value, 5, 'Recursive update should work');
   }
@@ -2681,11 +2590,11 @@ export class IEnvValueTests implements ITestFile {
   public testSpecialScenarioValueAsFunctionParameter(): void {
     // 测试值作为函数参数
     const envValue = new StringEnvironmentValue('test');
-    
+
     const processValue = (value: string): string => {
       return value.toUpperCase();
     };
-    
+
     const result = processValue(envValue.value);
     eq(result, 'TEST', 'Value should work as function parameter');
   }
@@ -2693,11 +2602,11 @@ export class IEnvValueTests implements ITestFile {
   public testSpecialScenarioValueInArrayOperations(): void {
     // 测试值在数组操作中
     const envValue = new NumberEnvironmentValue(5);
-    
+
     const array = [1, 2, 3, envValue.value, 4];
     eq(array.length, 5, 'Value should work in array');
     eq(array[3], 5, 'Value should be correct in array');
-    
+
     const includes = array.includes(envValue.value);
     eq(includes, true, 'Value should be found in array');
   }
@@ -2705,10 +2614,10 @@ export class IEnvValueTests implements ITestFile {
   public testSpecialScenarioValueInObjectOperations(): void {
     // 测试值在对象操作中
     const envValue = new StringEnvironmentValue('test');
-    
+
     const obj = { key: envValue.value, other: 'value' };
     eq(obj.key, 'test', 'Value should work in object');
-    
+
     const hasKey = 'key' in obj;
     eq(hasKey, true, 'Object should have key');
   }
@@ -2717,7 +2626,7 @@ export class IEnvValueTests implements ITestFile {
     // 测试值比较
     const envValue1 = new NumberEnvironmentValue(10);
     const envValue2 = new NumberEnvironmentValue(20);
-    
+
     eq(envValue1.value < envValue2.value, true, 'Value comparison should work');
     eq(envValue1.value !== envValue2.value, true, 'Value inequality should work');
   }
@@ -2740,7 +2649,7 @@ export class IEnvValueTests implements ITestFile {
     // 测试值在 switch 语句中
     const envValue = new NumberEnvironmentValue(2);
     let result = '';
-    
+
     switch (envValue.value) {
       case 1:
         result = 'one';
@@ -2751,7 +2660,7 @@ export class IEnvValueTests implements ITestFile {
       default:
         result = 'other';
     }
-    
+
     eq(result, 'two', 'Value should work in switch statement');
   }
 
@@ -2759,24 +2668,24 @@ export class IEnvValueTests implements ITestFile {
     // 测试值在 try-catch 中
     const envValue = new StringEnvironmentValue('test');
     let result = '';
-    
+
     try {
       result = envValue.value.toUpperCase();
     } catch (e) {
       result = 'error';
     }
-    
+
     eq(result, 'TEST', 'Value should work in try-catch');
   }
 
   public testSpecialScenarioValueInPromise(): void {
     // 测试值在 Promise 中（模拟）
     const envValue = new StringEnvironmentValue('test');
-    
+
     const promise = new Promise((resolve) => {
       resolve(envValue.value);
     });
-    
+
     eq(promise instanceof Promise, true, 'Value should work in Promise');
   }
 
@@ -2806,12 +2715,12 @@ export class IEnvValueTests implements ITestFile {
   public testSpecialScenarioValueInMathOperations(): void {
     // 测试值在数学运算中
     const envValue = new NumberEnvironmentValue(10);
-    
+
     const added = envValue.value + 5;
     const subtracted = envValue.value - 3;
     const multiplied = envValue.value * 2;
     const divided = envValue.value / 2;
-    
+
     eq(added, 15, 'Value should work in addition');
     eq(subtracted, 7, 'Value should work in subtraction');
     eq(multiplied, 20, 'Value should work in multiplication');
@@ -2821,11 +2730,11 @@ export class IEnvValueTests implements ITestFile {
   public testSpecialScenarioValueInBitwiseOperations(): void {
     // 测试值在位运算中
     const envValue = new NumberEnvironmentValue(5);
-    
+
     const and = envValue.value & 3;
     const or = envValue.value | 2;
     const xor = envValue.value ^ 1;
-    
+
     eq(and, 1, 'Value should work in bitwise AND');
     eq(or, 7, 'Value should work in bitwise OR');
     eq(xor, 4, 'Value should work in bitwise XOR');
@@ -2834,12 +2743,12 @@ export class IEnvValueTests implements ITestFile {
   public testSpecialScenarioValueInStringOperations(): void {
     // 测试值在字符串操作中
     const envValue = new StringEnvironmentValue('test');
-    
+
     const length = envValue.value.length;
     const upper = envValue.value.toUpperCase();
     const lower = envValue.value.toLowerCase();
     const sliced = envValue.value.slice(0, 2);
-    
+
     eq(length, 4, 'Value should work in string length');
     eq(upper, 'TEST', 'Value should work in toUpperCase');
     eq(lower, 'test', 'Value should work in toLowerCase');

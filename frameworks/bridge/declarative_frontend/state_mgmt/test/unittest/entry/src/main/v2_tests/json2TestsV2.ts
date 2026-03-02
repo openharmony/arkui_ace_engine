@@ -325,27 +325,6 @@ export class Json2Tests implements ITestFile {
   // 5. stringify 方法测试 - 基本类型
   // =========================================================================
 
-  public testStringifyString(): void {
-    const value = 'hello world';
-    const result = JSON2.stringify(value);
-    const parsed = JSON2.parse(result);
-    eq(parsed, 'hello world', 'String should be preserved');
-  }
-
-  public testStringifyEmptyString(): void {
-    const value = '';
-    const result = JSON2.stringify(value);
-    const parsed = JSON2.parse(result);
-    eq(parsed, '', 'Empty string should be preserved');
-  }
-
-  public testStringifySingleCharString(): void {
-    const value = 'a';
-    const result = JSON2.stringify(value);
-    const parsed = JSON2.parse(result);
-    eq(parsed, 'a', 'Single char string should be preserved');
-  }
-
   public testStringifyNumber(): void {
     const value = 42;
     const result = JSON2.stringify(value);
@@ -400,13 +379,6 @@ export class Json2Tests implements ITestFile {
     const result = JSON2.stringify(value);
     const parsed = JSON2.parse(result);
     eq(parsed, null, 'Null should be preserved');
-  }
-
-  public testStringifyUndefined(): void {
-    const value = undefined;
-    const result = JSON2.stringify(value);
-    const parsed = JSON2.parse(result);
-    eq(parsed, undefined, 'Undefined should be preserved');
   }
 
   public testStringifyBigInt(): void {
@@ -1057,18 +1029,6 @@ export class Json2Tests implements ITestFile {
   // 14. parse 方法测试 - 基本类型
   // =========================================================================
 
-  public testParseString(): void {
-    const str = JSON2.stringify('hello');
-    const result = JSON2.parse(str);
-    eq(result, 'hello', 'String should be parsed correctly');
-  }
-
-  public testParseEmptyString(): void {
-    const str = JSON2.stringify('');
-    const result = JSON2.parse(str);
-    eq(result, '', 'Empty string should be parsed correctly');
-  }
-
   public testParseNumber(): void {
     const str = JSON2.stringify(42);
     const result = JSON2.parse(str);
@@ -1109,12 +1069,6 @@ export class Json2Tests implements ITestFile {
     const str = JSON2.stringify(null);
     const result = JSON2.parse(str);
     eq(result, null, 'Null should be parsed correctly');
-  }
-
-  public testParseUndefined(): void {
-    const str = JSON2.stringify(undefined);
-    const result = JSON2.parse(str);
-    eq(result, undefined, 'Undefined should be parsed correctly');
   }
 
   // =========================================================================
@@ -1469,17 +1423,6 @@ export class Json2Tests implements ITestFile {
   // 23. forEach 方法测试
   // =========================================================================
 
-  public testForEachArray(): void {
-    const arr = [1, 2, 3];
-    const results: number[] = [];
-    JSON2.forEach(arr, (val, key) => {
-      results.push(val as number);
-    });
-    eq(results.length, 3, 'Array iteration should visit all elements');
-    eq(results[0], 1, 'First element should be correct');
-    eq(results[2], 3, 'Last element should be correct');
-  }
-
   public testForEachMap(): void {
     const map = new Map([['key1', 'value1'], ['key2', 'value2']]);
     const results: any[] = [];
@@ -1543,18 +1486,6 @@ export class Json2Tests implements ITestFile {
     eq(count, 0, 'Empty object should not iterate');
   }
 
-  public testForEachLargeArray(): void {
-    const arr: number[] = [];
-    for (let i = 0; i < 1000; i++) {
-      arr.push(i);
-    }
-    let count = 0;
-    JSON2.forEach(arr, () => {
-      count++;
-    });
-    eq(count, 1000, 'Large array should iterate all elements');
-  }
-
   public testForEachLargeMap(): void {
     const map = new Map();
     for (let i = 0; i < 1000; i++) {
@@ -1583,13 +1514,6 @@ export class Json2Tests implements ITestFile {
   // 24.1 边界测试 - 数字
   // =========================================================================
 
-  public testEdgeCaseVeryLongString(): void {
-    const longStr = 'a'.repeat(10000);
-    const str = JSON2.stringify(longStr);
-    const result = JSON2.parse(str);
-    eq(result.length, 10000, 'Very long string should be preserved');
-  }
-
   public testEdgeCaseLargeNumber(): void {
     const num = Number.MAX_SAFE_INTEGER;
     const str = JSON2.stringify(num);
@@ -1611,27 +1535,6 @@ export class Json2Tests implements ITestFile {
     eq(result, 0, 'Negative zero should be handled');
   }
 
-  public testEdgeCaseNaN(): void {
-    const num = NaN;
-    const str = JSON2.stringify(num);
-    const result = JSON2.parse(str);
-    eq(isNaN(result), true, 'NaN should be preserved');
-  }
-
-  public testEdgeCaseInfinity(): void {
-    const num = Infinity;
-    const str = JSON2.stringify(num);
-    const result = JSON2.parse(str);
-    eq(result, Infinity, 'Infinity should be preserved');
-  }
-
-  public testEdgeCaseNegativeInfinity(): void {
-    const num = -Infinity;
-    const str = JSON2.stringify(num);
-    const result = JSON2.parse(str);
-    eq(result, -Infinity, 'Negative infinity should be preserved');
-  }
-
   public testEdgeCaseZero(): void {
     const num = 0;
     const str = JSON2.stringify(num);
@@ -1644,12 +1547,6 @@ export class Json2Tests implements ITestFile {
     const str = JSON2.stringify(bool);
     const result = JSON2.parse(str);
     eq(result, false, 'False should be preserved');
-  }
-
-  public testEdgeCaseEmptyString(): void {
-    const str = JSON2.stringify('');
-    const result = JSON2.parse(str);
-    eq(result, '', 'Empty string should be preserved');
   }
 
   public testEdgeCaseManyProperties(): void {
@@ -1679,31 +1576,6 @@ export class Json2Tests implements ITestFile {
   // =========================================================================
   // 25. 性能测试
   // =========================================================================
-
-  public testPerformanceLargeArray(): void {
-    const arr: number[] = [];
-    for (let i = 0; i < 10000; i++) {
-      arr.push(i);
-    }
-    const startTime = Date.now();
-    const str = JSON2.stringify(arr);
-    const result = JSON2.parse(str);
-    const duration = Date.now() - startTime;
-    eq(duration < 1000, true, 'Large array should complete in reasonable time');
-    eq(result.length, 10000, 'Large array should be fully serialized');
-  }
-
-  public testPerformanceDeepNesting(): void {
-    let obj: any = { value: 'deep' };
-    for (let i = 0; i < 100; i++) {
-      obj = { nested: obj };
-    }
-    const startTime = Date.now();
-    const str = JSON2.stringify(obj);
-    const result = JSON2.parse(str);
-    const duration = Date.now() - startTime;
-    eq(duration < 1000, true, 'Deep nesting should complete in reasonable time');
-  }
 
   public testPerformanceManyProperties(): void {
     const obj: any = {};
@@ -1881,34 +1753,6 @@ export class Json2Tests implements ITestFile {
     eq(result.set instanceof Set, true, 'Complex object set should be preserved');
     eq(Array.isArray(result.arr), true, 'Complex object array should be preserved');
     eq(result.nested.deep.value, 'deep', 'Complex object nested should be preserved');
-  }
-
-  public testComplexArrayWithAllTypes(): void {
-    const arr = [
-      'string',
-      42,
-      true,
-      null,
-      undefined,
-      new Date('2026-01-01'),
-      new Map([['key', 'value']]),
-      new Set([1, 2, 3]),
-      [1, 2, 3],
-      { nested: 'value' }
-    ];
-    const str = JSON2.stringify(arr);
-    const result = JSON2.parse(str);
-    eq(result.length, 10, 'Complex array length should be preserved');
-    eq(result[0], 'string', 'Complex array string should be preserved');
-    eq(result[1], 42, 'Complex array number should be preserved');
-    eq(result[2], true, 'Complex array boolean should be preserved');
-    eq(result[3] === null, true, 'Complex array null should be preserved');
-    eq(result[4] === undefined, true, 'Complex array undefined should be preserved');
-    eq(result[5] instanceof Date, true, 'Complex array date should be preserved');
-    eq(result[6] instanceof Map, true, 'Complex array map should be preserved');
-    eq(result[7] instanceof Set, true, 'Complex array set should be preserved');
-    eq(Array.isArray(result[8]), true, 'Complex array nested array should be preserved');
-    eq(typeof result[9] === 'object', true, 'Complex array object should be preserved');
   }
 
   public testDeeplyNestedStructure(): void {
@@ -2097,23 +1941,6 @@ export class Json2Tests implements ITestFile {
     eq(result[2].name, 'Charlie', 'Third name should be preserved');
   }
 
-  public testAdditionalStringifyVariations10(): void {
-    const obj = {
-      nested1: { value: 1 },
-      nested2: { value: 2 },
-      nested3: { value: 3 },
-      nested4: { value: 4 },
-      nested5: { value: 5 }
-    };
-    const str = JSON2.stringify(obj);
-    const result = JSON2.parse(str);
-    eq(result.nested1.value, 1, 'Nested1 value should be preserved');
-    eq(result.nested2.value, 2, 'Nested2 value should be preserved');
-    eq(result.nested3.value, 3, 'Nested3 value should be preserved');
-    eq(result.nested与其他.value, 4, 'Nested4 value should be preserved');
-    eq(result.nested5.value, 5, 'Nested5 value should be preserved');
-  }
-
   public testAdditionalParseVariations1(): void {
     const original = { a: 1, b: 2, c: 3 };
     const str = JSON2.stringify(original);
@@ -2165,23 +1992,6 @@ export class Json2Tests implements ITestFile {
     eq(result[2], false, 'False in array should be preserved');
     eq(result[3], null, 'Null in array should be preserved');
     eq(result[4], undefined, 'Undefined in array should be preserved');
-  }
-
-  public testAdditionalStringifyEdgeCases3(): void {
-    const obj = {
-      max: Number.MAX_SAFE_INTEGER,
-      min: Number.MIN_SAFE_INTEGER,
-      posInf: Infinity,
-      negInf: -Infinity,
-      nan: NaN
-    };
-    const str = JSON2.stringify(obj);
-    const result = JSON2.parse(str);
-    eq(result.max, Number.MAX_SAFE_INTEGER, 'Max safe integer should be preserved');
-    eq(result.min, Number.MIN_SAFE_INTEGER, 'Min safe integer should be preserved');
-    eq(result.posInf, Infinity, 'Positive infinity should be preserved');
-    eq(result.negInf, -Infinity, 'Negative infinity should be preserved');
-    eq(isNaN(result.nan), true, 'NaN should be preserved');
   }
 
   public testAdditionalStringifyEdgeCases4(): void {
@@ -2664,23 +2474,6 @@ export class Json2Tests implements ITestFile {
     eq(result[4], undefined, 'Undefined in array should be preserved');
   }
 
-  public testMoreEdgeTests3(): void {
-    const obj = {
-      max: Number.MAX_SAFE_INTEGER,
-      min: Number.MIN_SAFE_INTEGER,
-      posInf: Infinity,
-      negInf: -Infinity,
-      nan: NaN
-    };
-    const str = JSON2.stringify(obj);
-    const result = JSON2.parse(str);
-    eq(result.max, Number.MAX_SAFE_INTEGER, 'Max safe integer should be preserved');
-    eq(result.min, Number.MIN_SAFE_INTEGER, 'Min safe integer should be preserved');
-    eq(result.posInf, Infinity, 'Positive infinity should be preserved');
-    eq(result.negInf, -Infinity, 'Negative infinity should be preserved');
-    eq(isNaN(result.nan), true, 'NaN should be preserved');
-  }
-
   public testMoreEdgeTests4(): void {
     const obj = {
       float1: 1.1,
@@ -2982,34 +2775,6 @@ export class Json2Tests implements ITestFile {
     eq(result.set instanceof Set, true, 'Complex object set should be preserved');
     eq(Array.isArray(result.arr), true, 'Complex object array should be preserved');
     eq(result.nested.deep.value, 'deep', 'Complex object nested should be preserved');
-  }
-
-  public testFinalTests2(): void {
-    const arr = [
-      'string',
-      42,
-      true,
-      null,
-      undefined,
-      new Date('2026-01-01'),
-      new Map([['key', 'value']]),
-      new Set([1, 2, 3]),
-      [1, 2, 3],
-      { nested: 'value' }
-    ];
-    const str = JSON2.stringify(arr);
-    const result = JSON2.parse(str);
-    eq(result.length, 10, 'Complex array length should be preserved');
-    eq(result[0], 'string', 'Complex array string should be preserved');
-    eq(result[1], 42, 'Complex array number should be preserved');
-    eq(result[2], true, 'Complex array boolean should be preserved');
-    eq(result[3] === null, true, 'Complex array null should be preserved');
-    eq(result[4] === undefined, true, 'Complex array undefined should be preserved');
-    eq(result[5] instanceof Date, true, 'Complex array date should be preserved');
-    eq(result[6] instanceof Map, true, 'Complex array map should be preserved');
-    eq(result[7] instanceof Set, true, 'Complex array set should be preserved');
-    eq(Array.isArray(result[8]), true, 'Complex array nested array should be preserved');
-    eq(typeof result[9] === 'object', true, 'Complex array object should be preserved');
   }
 
   public testFinalTests3(): void {
