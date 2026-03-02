@@ -6448,7 +6448,7 @@ bool RichEditorPattern::ProcessTextTruncationOperation(std::u16string& text, boo
         return true;
     }
     if (GetTextContentLength() - text.length() < maxLength_.value_or(INT_MAX) && text.length() == 1 &&
-        !editingValue_->unmarkText) {
+        editingValue_ && !editingValue_->unmarkText) {
         return true;
     }
 #endif
