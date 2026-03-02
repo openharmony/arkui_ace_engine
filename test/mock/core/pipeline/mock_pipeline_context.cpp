@@ -865,7 +865,7 @@ bool PipelineContext::IsCurrentInForceSplitMode() const
         return isCurrentInForceSplitMode_;
     }
     CHECK_NULL_RETURN(stageManager_, isCurrentInForceSplitMode_);
-    return stageManager->IsDisplaySplitMode();
+    return stageManager_->IsDisplaySplitMode();
 }
 
 void PipelineContext::FlushPipelineImmediately() {}
