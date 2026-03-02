@@ -336,6 +336,7 @@ RefPtr<NG::FrameNode> AccessibilityFrameNodeUtils::GetFramenodeByCondition(
             auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
             CHECK_NULL_CONTINUE(fnode);
             auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            CHECK_NULL_CONTINUE(property);
             const auto& children = std::list<RefPtr<NG::UINode>> { property->GetAccessibilityVirtualNode() };
             if (FindFrameNodeByCondition(children, nodes, frameNodeResult, condition)) {
                 return frameNodeResult;
