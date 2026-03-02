@@ -213,7 +213,9 @@ void GridCustomLayoutAlgorithm::ClearCacheForReload()
 
 void GridCustomLayoutAlgorithm::CheckForReset()
 {
-    int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
+    auto host = wrapper_->GetHostNode();
+    CHECK_NULL_VOID(host);
+    int32_t updateIdx = host->GetChildrenUpdated();
     if (info_.IsResetted() || updateIdx == 0 || (updateIdx != -1 && updateIdx <= info_.endIndex_)) {
         if (info_.lastCrossCount_ != info_.crossCount_ && info_.jumpIndex_ == EMPTY_JUMP_INDEX) {
             PrepareJumpOnReset(info_);
@@ -221,7 +223,7 @@ void GridCustomLayoutAlgorithm::CheckForReset()
         }
         ClearCacheForReload();
         reloadFlag_ = true;
-        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
+        host->ChildrenUpdatedFrom(-1);
         return;
     }
 
