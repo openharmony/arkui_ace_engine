@@ -915,8 +915,13 @@ public:
 private:
     bool isRectEquel(OHOS::Rosen::Rect curRect) const
     {
-        return curRect.width_ == lastRect_.width_ && curRect.height_ == lastRect_.height_ &&
-            curRect.posX_ == lastRect_.posX_ && curRect.posY_ == lastRect_.posY_;
+        return isLastRectSizeZero() || (curRect.width_ == lastRect_.width_ && curRect.height_ == lastRect_.height_ &&
+            curRect.posX_ == lastRect_.posX_ && curRect.posY_ == lastRect_.posY_);
+    }
+    bool isLastRectSizeZero() const
+    {
+        return lastRect_.width_ == 0 && lastRect_.height_ == 0 &&
+            lastRect_.posX_ == 0 && lastRect_.posY_ == 0;
     }
     int32_t instanceId_ = -1;
     OHOS::Rosen::Rect lastRect_ = {0, 0, 0, 0};
