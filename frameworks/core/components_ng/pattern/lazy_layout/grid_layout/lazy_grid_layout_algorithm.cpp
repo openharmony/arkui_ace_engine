@@ -20,6 +20,7 @@
 #include <iterator>
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/templates_parser.h"
@@ -551,15 +552,16 @@ void LazyGridLayoutAlgorithm::LayoutGridItems(LayoutWrapper* layoutWrapper, floa
     Alignment align = Alignment::TOP_CENTER;
 
     if (isDynamicLayout_) {
-        int32_t totalItemCount = layoutWrapper->GetTotalChildCount();
-        if (totalItemCount > 0 && lanes_ > 0) {
-            auto layoutProperty = AceType::DynamicCast<LazyGridLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            CHECK_NULL_VOID(layoutProperty);
-            needAlign = true;
+        auto layoutProperty = AceType::DynamicCast<LazyGridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        needAlign = true;
 
-            // Get alignment mode (common property, from PositionProperty)
-            align = axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
-            if (layoutProperty->GetPositionProperty()) {
+        // Get alignment mode (common property, from PositionProperty)
+        align = axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
+        if (layoutProperty->GetPositionProperty()) {
+            if (layoutProperty->GetPositionProperty()->HasLocalizedAlignment()) {
+                align = ConvertStringToAlignment(layoutProperty->GetPositionProperty()->GetLocalizedAlignmentValue());
+            } else {
                 align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
             }
         }
@@ -597,7 +599,8 @@ void LazyGridLayoutAlgorithm::SetItemOffset(RefPtr<LayoutWrapper>& wrapper, cons
 {
     auto offset = paddingOffset;
     float laneWidth = crossSize / lanes_;
-    if (layoutDirection_ == TextDirection::RTL) {
+    bool isRtl = (layoutDirection_ == TextDirection::RTL);
+    if (isRtl) {
         if (axis_ == Axis::VERTICAL) {
             auto size = wrapper->GetGeometryNode()->GetMarginFrameSize();
             float laneOffset = crossPos_[pos.laneIdx];
@@ -619,9 +622,22 @@ void LazyGridLayoutAlgorithm::SetItemOffset(RefPtr<LayoutWrapper>& wrapper, cons
         // Calculate alignment offset
         SizeF cellSize = SizeF(crossLens_[pos.laneIdx], cellHeight, axis_);
         auto childSize = wrapper->GetGeometryNode()->GetFrameSize();
-        auto alignPosition = Alignment::GetAlignPosition(cellSize, childSize, align);
-        // Apply alignment offset
-        offset = offset + alignPosition;
+        if (!isRtl) {
+            auto alignPosition = Alignment::GetAlignPosition(cellSize, childSize, align);
+            // Apply alignment offset
+            offset = offset + alignPosition;
+        } else {
+            if (align.GetHorizontal() > 0) {    // Right
+                auto alignPosition = Alignment::GetAlignPosition(cellSize, childSize, align);
+                alignPosition.SetX(0.0f);
+                offset = offset + alignPosition;
+            } else {    // Left or Center
+                auto alignPosition = Alignment::GetAlignPositionWithDirection(cellSize, childSize, align,
+                    layoutDirection_);
+                alignPosition.SetY(-alignPosition.GetY());
+                offset = offset - alignPosition;
+            }
+        }
     }
 
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
