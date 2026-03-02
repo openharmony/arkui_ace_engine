@@ -60,6 +60,7 @@ import {
   TouchType,
   UIContext,
   $r,
+  AnimateParam,
 } from '@ohos.arkui.component';
 import {
   ImageModifier, SymbolGlyphModifier, TextModifier,
@@ -246,6 +247,7 @@ export class SegmentButtonV2Item {
 
 @ObservedV2
 export class SegmentButtonV2Items extends Array<SegmentButtonV2Item> {
+  @Trace private _internal_id?: int
   constructor(length: int) {
     super(length);
   }
@@ -299,6 +301,7 @@ export struct TabSegmentButtonV2 {
   @Param buttonPadding?: LengthMetrics = undefined;
   @Param languageDirection?: Direction = undefined;
   @Param backgroundSystemMaterial?: uiMaterial.Material = undefined;
+  @Param enableStateAnimation?: boolean = true;
 
   build() {
     SimpleSegmentButtonV2({
@@ -337,7 +340,8 @@ export struct TabSegmentButtonV2 {
       buttonMinHeight: this.buttonMinHeight,
       buttonPadding: this.buttonPadding,
       languageDirection: this.languageDirection,
-      backgroundSystemMaterial: this.backgroundSystemMaterial
+      backgroundSystemMaterial: this.backgroundSystemMaterial,
+      enableStateAnimation: this.enableStateAnimation
     })
   }
 }
@@ -377,6 +381,7 @@ export struct CapsuleSegmentButtonV2 {
   @Param buttonPadding?: LengthMetrics = undefined;
   @Param languageDirection?: Direction = undefined;
   @Param backgroundSystemMaterial?: uiMaterial.Material = undefined;
+  @Param enableStateAnimation?: boolean = true;
 
   build() {
     SimpleSegmentButtonV2({
@@ -415,7 +420,8 @@ export struct CapsuleSegmentButtonV2 {
       buttonMinHeight: this.buttonMinHeight,
       buttonPadding: this.buttonPadding,
       languageDirection: this.languageDirection,
-      backgroundSystemMaterial: this.backgroundSystemMaterial
+      backgroundSystemMaterial: this.backgroundSystemMaterial,
+      enableStateAnimation: this.enableStateAnimation
     })
   }
 }
@@ -456,6 +462,7 @@ struct SimpleSegmentButtonV2 {
   @Require @Param buttonPadding?: LengthMetrics = undefined;
   @Require @Param languageDirection?: Direction = undefined;
   @Require @Param backgroundSystemMaterial?: uiMaterial.Material = undefined;
+  @Param enableStateAnimation?: boolean = true;
   @Local itemRects: Map<int, SegmentButtonV2ItemRect> = new Map<int, SegmentButtonV2ItemRect>();
   @Local itemScale: double = 1;
   @Local hoveredItemIndex: int = -1;
@@ -676,7 +683,7 @@ struct SimpleSegmentButtonV2 {
           x: this.selectedItemRect!.position.x,
           y: this.selectedItemRect!.position.y,
         } as Position)
-        .animation({ curve: curves.springMotion(0.347, 0.99) })
+        .animation(this.enableStateAnimation ? { curve: curves.springMotion(0.347, 0.99) } as AnimateParam : undefined )
         .backgroundColor(this.getItemSelectedBackgroundColor())
         .borderRadius(this.getItemBorderRadius())
         .scale({ x: this.itemScale, y: this.itemScale })
