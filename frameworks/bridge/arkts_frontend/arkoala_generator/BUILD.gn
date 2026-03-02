@@ -32,7 +32,8 @@ action("idlize_gen") {
     rebase_path("./arkui_extra_idl/"),
   ]
   external_deps = [
-    ohos_ets_libarkts_deps
+    ohos_ets_api_deps,
+    ohos_ets_libarkts_deps,
   ]
   outputs = [
     "$target_out_dir/idlize_gen",
