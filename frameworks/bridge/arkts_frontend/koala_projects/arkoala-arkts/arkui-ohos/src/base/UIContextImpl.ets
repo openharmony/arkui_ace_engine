@@ -31,8 +31,8 @@ import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, Con
     MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
     KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType, PageInfo,
     CustomKeyboardContinueFeature, Magnifier } from '@ohos/arkui/UIContext';
-import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
-    IncrementalNode } from '@koalaui/runtime';
+import { ComputableState, GlobalStateManager, memoEntry, memoEntry1,
+    IncrementalNode, GlobalUIStateManager } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { Context, PointerStyle, PixelMap } from '#external';
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from 'arkui/component/enums';
@@ -1442,6 +1442,7 @@ export class UIContextImpl extends UIContext {
     updateParallelizeItemNodeCallback_?:() => void;
     callbacks: Array<() => void>;
     isUpdateConfiguration_ = false;
+    workerThreadId_: int32  = -1;
 
     bufferSize = 4096
     buffer: KBuffer = new KBuffer(this.bufferSize)
@@ -2049,7 +2050,7 @@ export class UIContextImpl extends UIContext {
         if (this.checkThread(this.instanceId_)) {
             callback();
         } else {
-            const manager = GlobalStateManager.instance;
+            const manager = GlobalUIStateManager.getStateManagerForThread(this.workerThreadId_);
             manager.scheduleCallback(callback);
         }
     }

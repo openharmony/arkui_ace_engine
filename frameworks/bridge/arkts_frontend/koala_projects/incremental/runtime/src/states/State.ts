@@ -20,7 +20,7 @@ import {
     KoalaCallsiteKey,
     Observable,
     ObservableHandler,
-    uint32,
+    uint32
 } from '@koalaui/common'
 import { Dependency, Dependent, ScopeToStates, StateToScopes } from './Dependency'
 import { Disposable, disposeContent, disposeContentBackward } from './Disposable'
@@ -51,6 +51,25 @@ export function createStateManager(): StateManager {
 
 export const StateManagerLocal = new WorkerLocalValue<StateManager | undefined>(() => undefined)
 
+// The StateManager is globally unique and used in UI thread
+export class GlobalUIStateManager {
+    private static localManager = new containers.ConcurrentHashMap<int32, StateManager>();
+
+    // can only get from UI thread or DC thread
+    static getStateManagerForThread(workerId: int32): StateManager {
+        let current = GlobalUIStateManager.localManager.get(workerId);
+        if (!current) {
+            console.warn(`cannot get stateManager for ${workerId} thread, create a new one.`);
+            current = createStateManager();
+            GlobalUIStateManager.localManager.set(CoroutineExtras.getWorkerId(), current);
+        }
+        return current!;
+    }
+
+    static setStateManagerForThread(workerId: int32, manager: StateManager): void {
+        GlobalUIStateManager.localManager.set(workerId, manager);
+    }
+}
 /**
  * State manager, core of incremental runtime engine.
  *
