@@ -45,12 +45,18 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     if (!container) {
         LOGW("container is null. %{public}d", asyncCtx->instanceId);
+        if (asyncCtx) {
+            delete asyncCtx;
+        }
         return;
     }
 
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGW("taskExecutor is null.");
+        if (asyncCtx) {
+            delete asyncCtx;
+        }
         return;
     }
     taskExecutor->PostTask(
