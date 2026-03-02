@@ -5937,8 +5937,8 @@ void SetBindPopupImpl(Ark_NativePointer node,
             auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
             CHECK_NULL_VOID(popupParam);
             onWillDismissPopup(value.onWillDismiss, popupParam);
+            popupParam->SetIsShow(optShow.value_or(false));
             if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
-                popupParam->SetIsShow(optShow.value_or(false));
                 auto weakNode = AceType::WeakClaim(frameNode);
                 CallbackHelper(value.builder).BuildAsync([weakNode, popupParam](const RefPtr<UINode>& uiNode) {
                     auto frameNode = weakNode.Upgrade();
