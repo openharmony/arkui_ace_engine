@@ -128,12 +128,13 @@ public:
         updateSpanStyle.AddResource(key, colorResObj, updater);
     }
 
-    static void AddTextColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
+    static void UpdateTextColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
     {
         CHECK_NULL_VOID(spanNode);
         const auto& key = TEXT_COLOR_KEY;
         const auto& updater = TEXT_COLOR_UPDATER;
-        spanNode->AddResource(key, textStyle.GetResource(key), updater);
+        auto colorResObj = textStyle.GetResource(key);
+        colorResObj ? spanNode->AddResource(key, colorResObj, updater) : (void)spanNode->RemoveResource(key);
     }
 
     static void AddStrokeColorResource(TextStyle& textStyle, const RefPtr<ResourceObject>& colorResObj)
@@ -179,12 +180,13 @@ public:
         updateSpanStyle.AddResource(key, colorResObj, updater);
     }
 
-    static void AddTextDecorationColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
+    static void UpdateTextDecorationColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
     {
         CHECK_NULL_VOID(spanNode);
         const auto& key = TEXT_DECORATION_COLOR_KEY;
         const auto& updater = TEXT_DECORATION_COLOR_UPDATER;
-        spanNode->AddResource(key, textStyle.GetResource(key), updater);
+        auto colorResObj = textStyle.GetResource(key);
+        colorResObj ? spanNode->AddResource(key, colorResObj, updater) : (void)spanNode->RemoveResource(key);
     }
 
     static void AddDragBackgroundColorResource(const RefPtr<PlaceholderSpanItem>& spanItem,
@@ -217,9 +219,13 @@ public:
         }
     }
 
-    static void AddSymbolColorResource(const RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
+    static void UpdateSymbolColorResource(const RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
     {
         CHECK_NULL_VOID(spanNode);
+        for (size_t i = 0;; ++i) {
+            auto key = SYMBOL_COLOR_KEY_PREFIX + std::to_string(i);
+            CHECK_NULL_BREAK(spanNode->RemoveResource(key) != 0);
+        }
         auto& symbolColorList = textStyle.GetSymbolColorList();
         for (size_t i = 0; i < symbolColorList.size(); ++i) {
             auto updater = [i](const RefPtr<ResourceObject>& colorResObj, FontStyle& fontStyle) {

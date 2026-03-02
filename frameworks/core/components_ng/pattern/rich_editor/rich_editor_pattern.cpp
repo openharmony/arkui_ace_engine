@@ -1599,8 +1599,8 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
         spanNode->UpdateStrokeWidth(textStyle.GetStrokeWidth());
         spanNode->UpdateStrokeColor(textStyle.GetStrokeColor());
         UpdateTextBackgroundStyle(spanNode, textStyle.GetTextBackgroundStyle());
-        StyleManager::AddTextColorResource(spanNode, textStyle);
-        StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
+        StyleManager::UpdateTextColorResource(spanNode, textStyle);
+        StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
         StyleManager::UpdateStrokeColorResource(spanNode, textStyle);
     }
     UpdateUrlStyle(spanNode, options.urlAddress);
@@ -1711,7 +1711,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->UpdateSymbolEffectStrategy(options.style.value().GetEffectStrategy());
         spanNode->UpdateSymbolType(options.style.value().GetSymbolType());
         spanNode->UpdateFontFamily(options.style.value().GetFontFamilies());
-        StyleManager::AddSymbolColorResource(spanNode, options.style.value());
+        StyleManager::UpdateSymbolColorResource(spanNode, options.style.value());
     }
     bool isUndoRedo = (options.optionSource == OptionSource::UNDO_REDO);
     IF_TRUE(isUndoRedo && options.paraStyle.has_value(), UpdateParagraphStyle(spanNode, options.paraStyle.value()));
@@ -2524,7 +2524,7 @@ void RichEditorPattern::UpdateTextStyle(
     if (updateSpanStyle.updateTextColor.has_value()) {
         spanNode->UpdateTextColorWithoutCheck(textStyle.GetTextColor());
         spanNode->GetSpanItem()->useThemeFontColor = false;
-        StyleManager::AddTextColorResource(spanNode, textStyle);
+        StyleManager::UpdateTextColorResource(spanNode, textStyle);
     }
     if (updateSpanStyle.updateLineHeight.has_value()) {
         spanNode->UpdateLineHeight(textStyle.GetLineHeight());
@@ -2577,7 +2577,7 @@ void RichEditorPattern::UpdateDecoration(
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
         spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
         spanNode->GetSpanItem()->useThemeDecorationColor = false;
-        StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
+        StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
     }
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
@@ -2602,7 +2602,7 @@ void RichEditorPattern::UpdateSymbolStyle(
     }
     if (updateSpanStyle.updateSymbolColor.has_value()) {
         spanNode->UpdateSymbolColorList(updateSpanStyle.updateSymbolColor.value());
-        StyleManager::AddSymbolColorResource(spanNode, textStyle);
+        StyleManager::UpdateSymbolColorResource(spanNode, textStyle);
     }
     if (updateSpanStyle.updateSymbolRenderingStrategy.has_value()) {
         spanNode->UpdateSymbolRenderingStrategy(updateSpanStyle.updateSymbolRenderingStrategy.value());

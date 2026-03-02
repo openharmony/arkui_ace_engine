@@ -19,12 +19,14 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
+
 namespace OHOS::Ace::NG {
 
 class RichEditorContentLayoutAlgorithm : public BoxLayoutAlgorithm {
-    void Measure(LayoutWrapper* layoutWrapper) override {
-        CHECK_NULL_VOID(layoutWrapper);
+    void Measure(LayoutWrapper* layoutWrapper) override
+    {
         ACE_SCOPED_TRACE("RichEditorContentLayoutAlgorithm::Measure");
+        BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
         auto contentNode = layoutWrapper->GetHostNode();
         if (!contentNode || contentNode->GetTag() != V2::RICH_EDITOR_CONTENT_ETS_TAG) {
             TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, GetContentHost error, node=%{public}s",
@@ -35,7 +37,7 @@ class RichEditorContentLayoutAlgorithm : public BoxLayoutAlgorithm {
         if (!richEditorNode || richEditorNode->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
             TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Measure, GetHost error, node=%{public}s",
                 richEditorNode ? richEditorNode->GetTag().c_str() : "nullptr");
-            return;
+                return;
         }
         auto geometryNode = layoutWrapper->GetGeometryNode();
         auto parentGeometryNode = richEditorNode->GetGeometryNode();
@@ -43,7 +45,7 @@ class RichEditorContentLayoutAlgorithm : public BoxLayoutAlgorithm {
         geometryNode->SetFrameSize(parentGeometryNode->GetFrameSize());
     }
 
-    void Layout(LayoutWrapper* layoutWrapper) override 
+    void Layout(LayoutWrapper* layoutWrapper) override
     {
         ACE_SCOPED_TRACE("RichEditorContentLayoutAlgorithm::Layout");
     }
@@ -141,7 +143,6 @@ public:
         return weakPattern_.Upgrade();
     }
 
-private:
     WeakPtr<RichEditorPattern> weakPattern_;
     RefPtr<TextContentModifier> contentMod_ = nullptr;
     const RectF invalidRect;

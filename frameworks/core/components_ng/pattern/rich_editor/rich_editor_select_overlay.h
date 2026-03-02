@@ -59,11 +59,20 @@ public:
     bool IsBothHandlesShow();
     bool IsHandleShow();
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
+    void UpdateSelectOverlayOnAreaChanged();
     void UpdateHandleOffset();
     void UpdateFirstHandleOffset() override;
     void UpdateSecondHandleOffset() override;
-    void UpdateSelectOverlayOnAreaChanged();
     void ToggleMenu();
+    void OnHandleIsHidden() override;
+    void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+    void OnHandleMouseEvent(const MouseInfo& event) override;
+    void OnAfterSelectOverlayShow(bool isCreate) override;
+    bool IsRightButtonCustomMenuShow();
+    bool IsRegisterTouchCallback() override
+    {
+        return true;
+    }
     bool GetIsHandleMoving()
     {
         return isHandleMoving_;
@@ -80,18 +89,10 @@ public:
     {
         return needRefreshMenu_;
     }
-    void OnHandleIsHidden() override;
-    void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
-    void OnHandleMouseEvent(const MouseInfo& event) override;
-    void OnAfterSelectOverlayShow(bool isCreate) override;
-    bool IsRightButtonCustomMenuShow();
-    bool IsRegisterTouchCallback() override
-    {
-        return true;
-    }
-    RectF GetVisibleRect();
     float GetHandleHotZoneRadius();
+    RectF GetVisibleRect();
     bool IsMenuShow();
+    bool IsSingleLineChanged();
 
 protected:
     RectF GetSelectAreaFromRects(SelectRectsType pos) override;
@@ -113,6 +114,7 @@ private:
     bool recreateAfterMoveDone_ = false;
     bool handleIsHidden_ = true;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
+    bool lastSingleLine_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
 };

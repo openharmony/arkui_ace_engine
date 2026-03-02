@@ -259,10 +259,16 @@ public:
 
     float MoveTextRectHorizontal(float offset)
     {
-        if (textRect_.GetX() + offset > contentRect_.GetX()) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "MoveTextRectHorizontal, offsetIn=%{public}f, textWidth=%{public}f, "
+            "contentWidth=%{public}f", offset, textRect_.Width(), contentRect_.Width());
+        if (textRect_.Width() > contentRect_.Width()) {
+            if (offset > 0) { // move ->
+                offset = std::min(offset, contentRect_.GetX() - textRect_.GetX());
+            } else if (offset < 0) { //  <- move
+                offset = std::max(offset, contentRect_.Right() - textRect_.Right());
+            }
+        } else {
             offset = contentRect_.GetX() - textRect_.GetX();
-        } else if (textRect_.Right() + offset < contentRect_.Right()) {
-            offset = contentRect_.Right() - textRect_.Right();
         }
         scrollOffset_ = textRect_.GetX() + offset;
         textRect_.SetOffset(OffsetF(scrollOffset_, textRect_.GetY()));
