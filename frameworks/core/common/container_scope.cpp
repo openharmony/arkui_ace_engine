@@ -104,19 +104,19 @@ const std::string ContainerScope::ReasonToDescription(InstanceIdGenReason reason
 {
     switch (reason) {
         case InstanceIdGenReason::SCOPE:
-            return "instance specified by ContainerScope";
+            return "The instance is determined by the caller";
         case InstanceIdGenReason::ACTIVE:
-            return "recently active instance";
+            return "No specific instance was specified, so the most recently active instance was retrieved";
         case InstanceIdGenReason::DEFAULT:
-            return "no valid instance, using default";
+            return "No specific instance was specified, using default";
         case InstanceIdGenReason::SINGLETON:
-            return "only one instance exists";
+            return "No specific instance was specified, return the only remaining instance";
         case InstanceIdGenReason::FOREGROUND:
-            return "recently foreground instance";
+            return "No specific instance was specified, return the foreground instance";
         case InstanceIdGenReason::UNDEFINED:
-            return "no valid instance exists";
+            return "No valid instance exists";
         default:
-            return "unknown reason";
+            return "Unknown reason";
     }
 }
 

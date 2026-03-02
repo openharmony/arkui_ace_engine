@@ -62,7 +62,7 @@ static napi_value JSGetRectangleById(napi_env env, napi_callback_info info)
         // This helps developers identify which instance was requested and why it failed
         std::string message = "";
         message = AceEngine::GetEnhancedContextBNotFoundMessage(currentIdAndReason, safelyId);
-        NapiThrow(env, "UI execution context not found." + message, ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found. \n" + message, ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     delegate->GetRectangleById(key, rectangle);
