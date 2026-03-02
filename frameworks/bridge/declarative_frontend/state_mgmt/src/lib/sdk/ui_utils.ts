@@ -113,6 +113,17 @@ class UIUtilsImpl {
       ObserveV2.getObserve().flushUIUpdates();
     }
 
+    // Returns the custom component context if the target is a recognized view instance
+    public getCustomComponentContext(target: PUV2ViewBase): PUV2ViewBase | undefined {
+      if (!target || typeof target !== 'object') {
+        return undefined;
+      }
+      if (target instanceof ViewPU || target instanceof ViewV2) {
+        return target as PUV2ViewBase;
+      }
+      return undefined;
+    }
+
     public static instance(): UIUtilsImpl {
       if (UIUtilsImpl.instance_) {
         return UIUtilsImpl.instance_;

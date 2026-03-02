@@ -274,6 +274,21 @@ class UIUtils {
   }
 
   /**
+   * Get the custom component context instance from the given CustomComponent.
+   * The context provides access to component-level utilities and services
+   * bound to the specific custom component instance.
+   *
+   * @param { T } customComponent - custom component instance.
+   * @returns { Context | null } the context instance of the custom component, or null if unavailable.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   */
+  static getCustomComponentContext(customComponent) {
+    return UIUtils.uiUtilsImpl_.getCustomComponentContext(customComponent);
+  }
+
+  /**
    * Make non-observed data into observed data.
    * Support non-observed class, JSON.parse, and collection.Set, collection.Map, collection.Array.
    *

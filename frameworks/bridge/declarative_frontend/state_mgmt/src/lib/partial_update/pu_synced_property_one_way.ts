@@ -247,6 +247,19 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     }
   }
 
+  /**
+   * Resets this property's local value from its source binding.
+   * Called during reuse to resync one-way storage
+   * bindings when the component is reparented to a new owner.
+  */
+  public resetSource(): void {
+    if (this.source_ !== undefined && this.source_ !== null) {
+      if (this.resetLocalValue(this.source_.getUnmonitored(), true)) {
+          this.notifyPropertyHasChangedPU();
+      }
+    }
+  }
+
   private createSourceDependency(sourceObject: C): void {
     if (ObservedObject.IsObservedObject(sourceObject)) {
       stateMgmtConsole.debug(`${this.debugInfo()} createSourceDependency: create dependency on source ObservedObject ...`);

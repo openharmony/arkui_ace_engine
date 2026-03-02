@@ -241,6 +241,45 @@ class ObserveV2 {
     }
   }
 
+  // Queue pre-render component creation of global reuse as an idle task
+  public queuePreRenderCreation(parent: PUV2ViewBase, componentClass: new (...args: unknown[]) => PUV2ViewBase,
+      componentParams: Object, elmtId: number, pool: __ReusePool, reuseId: string,
+      extraInfo: ExtraInfo = undefined): void {
+    const createPreRenderTask = (): void => {
+      const instance = new componentClass(parent, componentParams, undefined, elmtId, () => {}, extraInfo);
+      instance.isPreRendered = true;
+
+      // Set context before rendering children
+      PUV2ViewBase.beginPreRender(pool);
+
+      // Build the full component subtree in sandboxed mode
+      // (fake element IDs, no observation bindings)
+      if ('initialRenderForPreRender' in instance && typeof instance.initialRenderForPreRender === 'function') {
+        instance.initialRenderForPreRender();
+      }
+
+      // Push to pool before endPreRender
+      if (pool && typeof pool.push === 'function') {
+          pool.push(reuseId, instance, componentClass);
+      }
+      PUV2ViewBase.endPreRender();
+    };
+    setTimeout(() => createPreRenderTask(), 5);
+  }
+
+  /**
+ * Schedules a task to run during the framework's idle phase.
+ * Falls back to synchronous execution if no idle task queue exists.
+ */
+  public queueIdleTask(task: () => void): void {
+    if (this.idleTasks_) {
+        this.idleTasks_[this.idleTasks_.end++] = [task];
+    } else {
+        // No idle task system, run immediately
+        task();
+    }
+  }
+
   private clearBindingInternal(id: number): void {
     this.id2targets_[id]?.forEach((weakRef: WeakRef<Object>) => {
       const target = weakRef.deref();
