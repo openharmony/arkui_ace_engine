@@ -20,6 +20,21 @@
 #include "core/components_ng/pattern/video/video_node.h"
 
 namespace OHOS::Ace::NG {
+void UpdateControllerBar(FrameNode* frameNode, bool controls)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, Controls, controls, frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->UpdateControllerBar();
+
+    auto fullScreenNode = videoPattern->GetFullScreenNode();
+    CHECK_NULL_VOID(fullScreenNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, Controls, controls, fullScreenNode);
+    auto fullScreenPattern = AceType::DynamicCast<VideoPattern>(fullScreenNode->GetPattern());
+    CHECK_NULL_VOID(fullScreenPattern);
+    fullScreenPattern->UpdateControllerBar();
+}
 
 void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
 {
@@ -133,12 +148,8 @@ void VideoModelNG::SetAutoPlay(bool autoPlay)
 
 void VideoModelNG::SetControls(bool controls)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, Controls, controls);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(videoPattern);
-    videoPattern->UpdateControllerBar();
+    UpdateControllerBar(frameNode, controls);
 }
 
 void VideoModelNG::SetObjectFit(ImageFit objectFit)
@@ -273,11 +284,7 @@ void VideoModelNG::SetAutoPlay(FrameNode* frameNode, bool autoPlay)
 
 void VideoModelNG::SetControls(FrameNode* frameNode, bool controls)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, Controls, controls, frameNode);
-    CHECK_NULL_VOID(frameNode);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(videoPattern);
-    videoPattern->UpdateControllerBar();
+    UpdateControllerBar(frameNode, controls);
 }
 
 void VideoModelNG::SetObjectFit(FrameNode* frameNode, ImageFit objectFit)
