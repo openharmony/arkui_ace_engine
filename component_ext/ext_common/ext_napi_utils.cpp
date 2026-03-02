@@ -313,17 +313,17 @@ bool ExtNapiUtils::ParseColorFromResource(napi_env env, napi_value value, Color&
     }
     if (colorId == ERROR_COLOR_ID) {
         uint32_t length;
-        napi_get_array_length(env, jsParams, &length);
-        auto jsonArray = JsonUtil::CreateArray(true);
-        for (uint32_t i = 0; i < length; i++) {
-            napi_value elementValue;
-            napi_get_element(env, jsParams, i, &elementValue);
-            std::string key = std::to_string(i);
-            jsonArray->Put(key.c_str(), PutJsonValue(env, elementValue, key));
+        napi_status status = napi_get_array_length(env, jsParams, &length);
+        if (status != napi_ok || length == 0) {
+            return false;
         }
-        std::string strKey = std::to_string(0);
-        std::string colorName = jsonArray->GetValue(strKey.c_str())->GetValue(strKey.c_str())->ToString();
-        colorResult = themeConstants->GetColorByName(colorName);
+        napi_value elementValue;
+        status = napi_get_element(env, jsParams, 0, &elementValue);
+        if (status != napi_ok) {
+            return false;
+        }
+        std::string stringValue = ExtNapiUtils::GetStringFromValueUtf8(env, elementValue);
+        colorResult = themeConstants->GetColorByName(stringValue);
         return true;
     }
     napi_value jsType = GetNamedProperty(env, value, "type");

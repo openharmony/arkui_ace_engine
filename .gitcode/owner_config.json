@@ -458,13 +458,13 @@
             "info": "[安全区&键盘避让相关 pangwendong]"
         },
         "Lichtschein": {
-            "info": "[布局类组件 linhu]"
+            "info": "[布局类、Video组件 linhu]"
         },
         "zju_ljz": {
             "info": "[栅格、分栏布局相关/预览 lijiazhi]"
         },
         "camlostshi": {
-            "info": "[弹性、线性布局及安全区相关 shibofan]"
+            "info": "[弹性、线性布局、Canvas及安全区相关 shibofan]"
         },
         "song-song-song": {
             "info": "[自定义布局相关 songqifan]"
@@ -551,16 +551,16 @@
             "info": "[idlize guozejun]"
         },
         "ZhangYu-Home": {
-            "info": "[逻辑&绘制组件 zhangyu]"
+            "info": "[逻辑组件&命令式框架 zhangyu]"
         },
         "keerecles": {
-            "info": "[逻辑&绘制组件 lishihao]"
+            "info": "[逻辑组件&命令式框架 lishihao]"
         },
         "sunbees": {
-            "info": "[逻辑&绘制组件 sunqinjia]"
+            "info": "[逻辑组件&命令式框架 sunqinjia]"
         },
         "sd-wu": {
-            "info": "[绘制组件 wudongsheng]"
+            "info": "[命令式框架 wudongsheng]"
         },
         "liubihao": {
             "info": "[逻辑组件 liubihao]"

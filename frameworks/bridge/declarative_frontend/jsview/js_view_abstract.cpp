@@ -54,7 +54,6 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_test_done_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -6824,15 +6823,14 @@ bool JSViewAbstract::ParseJsColorFromResourceForMaterial(
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObjectWithResIdType(jsObj, resIdNum, type);
 
-    auto ok = JSViewAbstract::ParseJsObjColorFromResource(jsObj, result, resObj, resIdNum, type);
+    auto ok = JSViewAbstract::ParseJsObjColorFromResourceForMaterial(jsObj, result, resObj, resIdNum, type);
     if (ok) {
         JSRef<JSVal> jsOpacityRatio = jsObj->GetProperty("opacityRatio");
         if (jsOpacityRatio->IsNumber()) {
+            auto placeholder = result.GetPlaceholder();
             double opacityRatio = jsOpacityRatio->ToNumber<double>();
             result = result.BlendOpacity(opacityRatio);
-        }
-        if (type == static_cast<int32_t>(ResourceType::COLOR)) {
-            result.FillColorPlaceholderIfNeed(resIdNum);
+            result.SetPlaceholder(placeholder);
         }
     }
     return ok;
@@ -6897,6 +6895,68 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     return false;
 }
 
+bool JSViewAbstract::ParseJsObjColorFromResourceForMaterial(
+    const JSRef<JSObject>& jsObj, Color& result, RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type)
+{
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (!resId->IsNumber()) {
+        return false;
+    }
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+        GetResourceObjectByBundleAndModule(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
+    if (!resourceWrapper) {
+        return false;
+    }
+
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(jsObj)) {
+            return false;
+        }
+        JSRef<JSVal> args = jsObj->GetProperty("params");
+        if (!args->IsArray()) {
+            return false;
+        }
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+        auto param = params->GetValueAt(0);
+        if (type == static_cast<int32_t>(ResourceType::STRING)) {
+            auto value = resourceWrapper->GetStringByName(param->ToString());
+            return Color::ParseColorString(value, result);
+        }
+        if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+            auto value = resourceWrapper->GetIntByName(param->ToString());
+            result = Color(ColorAlphaAdapt(value));
+            return true;
+        }
+        if (type == static_cast<int32_t>(ResourceType::COLOR)) {
+            auto paramStr = param->ToString();
+            result = resourceWrapper->GetColorByName(paramStr);
+            result.SetResourceId(static_cast<uint32_t>(UNKNOWN_RESOURCE_ID));
+            result.FillColorPlaceholderIfNeed(paramStr);
+            return true;
+        }
+        result = resourceWrapper->GetColorByName(param->ToString());
+        return true;
+    }
+
+    if (type == static_cast<int32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(static_cast<uint32_t>(resIdNum));
+        return Color::ParseColorString(value, result);
+    }
+    if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto value = resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum));
+        result = Color(ColorAlphaAdapt(value));
+        return true;
+    }
+    if (type == static_cast<int32_t>(ResourceType::COLOR)) {
+        result = resourceWrapper->GetColor(static_cast<uint32_t>(resIdNum));
+        result.SetResourceId(static_cast<uint32_t>(resIdNum));
+        result.FillColorPlaceholderIfNeed(resIdNum);
+        return true;
+    }
+    return false;
+}
+
 bool JSViewAbstract::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
 {
     if (!SystemProperties::GetResourceDecoupling() || !resObj) {
@@ -6941,7 +7001,7 @@ void JSViewAbstract::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& res
     }
     bool hasDarkRes = CheckDarkResource(resObj);
     if (localColorMode == ColorMode::DARK) {
-        if (!hasDarkRes) {
+        if (!hasDarkRes && node->GetForceDarkAllowed()) {
             color = Color(invertFunc(color.GetValue()));
         }
         resObj = nullptr;
@@ -6949,7 +7009,7 @@ void JSViewAbstract::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& res
     }
     auto colorMode = Container::CurrentColorMode();
     Color curColor = color;
-    if ((colorMode == ColorMode::DARK) && !hasDarkRes) {
+    if ((colorMode == ColorMode::DARK) && !hasDarkRes && node->GetForceDarkAllowed()) {
         color = Color(invertFunc(color.GetValue()));
     }
     if (!resObj) {
@@ -11199,8 +11259,10 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onMouse");
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<MouseInfo>(mouseInfo);
-        auto eventObj = NG::FrameNodeBridge::CreateMouseInfo(vm, infoPtr, node);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new MouseInfo(mouseInfo);
+        auto eventObj = NG::FrameNodeBridge::CreateMouseInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         func->Call(vm, func.ToLocal(), params, 1);
         mouseInfo.SetStopPropagation(infoPtr->IsStopPropagation());
@@ -11232,10 +11294,12 @@ void JSViewAbstract::JsOnAxisEvent(const JSCallbackInfo& args)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onAxis");
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<AxisInfo>(info);
-        auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, infoPtr, node);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new AxisInfo(info);
+        auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
-        ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", info.GetAction());
+        ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", infoPtr->GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
         info.SetStopPropagation(infoPtr->IsStopPropagation());
     };
@@ -11382,14 +11446,32 @@ void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
         return;
     }
 
-    auto jsOnTouchInterceptFunc = AceType::MakeRefPtr<JsTouchInterceptFunction>(JSRef<JSFunc>::Cast(info[0]));
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnTouchInterceptFunc = JSRef<JSFunc>::Cast(info[0]);
+    if (jsOnTouchInterceptFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnTouchInterceptFuncLocalHandle = jsOnTouchInterceptFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onTouchInterceptfunc = [execCtx = info.GetExecutionContext(), func = jsOnTouchInterceptFunc, node = frameNode](
-                                    TouchEventInfo& info) -> NG::HitTestMode {
+    auto onTouchInterceptfunc = [vm, execCtx = info.GetExecutionContext(),
+                                    func = panda::CopyableGlobal(vm, jsOnTouchInterceptFuncLocalHandle),
+                                    node = frameNode](TouchEventInfo& info) -> NG::HitTestMode {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, NG::HitTestMode::HTMDEFAULT);
         ACE_SCORING_EVENT("onTouchIntercept");
         PipelineContext::SetCallBackNode(node);
-        return func->Execute(info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new TouchEventInfo(info);
+        auto eventObj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        auto ret = func->Call(vm, func.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
+        info.SetPreventDefault(infoPtr->IsPreventDefault());
+        if (ret->IsNumber()) {
+            return static_cast<NG::HitTestMode>(ret->ToNumber(vm)->Value());
+        }
+        return NG::HitTestMode::HTMDEFAULT;
     };
     ViewAbstractModel::GetInstance()->SetOnTouchIntercept(std::move(onTouchInterceptfunc));
 }

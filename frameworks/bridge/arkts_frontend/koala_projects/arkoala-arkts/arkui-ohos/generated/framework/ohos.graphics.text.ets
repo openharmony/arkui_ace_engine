@@ -528,10 +528,9 @@ export class text_TextStyle_serializer {
         let fontFamiliesTmpBuf: Array<string> | undefined = undefined
         if ((fontFamiliesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontFamiliesTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let fontFamiliesTmpBufOpt: Array<string> = new Array<string>(fontFamiliesTmpBufOptLength)
-            for (let fontFamiliesTmpBufOptBufCounterI = 0; fontFamiliesTmpBufOptBufCounterI < fontFamiliesTmpBufOptLength; fontFamiliesTmpBufOptBufCounterI++) {
-                fontFamiliesTmpBufOpt[fontFamiliesTmpBufOptBufCounterI] = (valueDeserializer.readString() as string)
-            }
+            const fontFamiliesTmpBufOpt: Array<string> = new Array<string>(fontFamiliesTmpBufOptLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
             fontFamiliesTmpBuf = fontFamiliesTmpBufOpt
         }
         const fontFamiliesTmpResult: Array<string> | undefined = fontFamiliesTmpBuf
@@ -617,10 +616,9 @@ export class text_TextStyle_serializer {
         let fontFeaturesTmpBuf: Array<text.FontFeature> | undefined = undefined
         if ((fontFeaturesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontFeaturesTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let fontFeaturesTmpBufOpt: Array<text.FontFeature> = new Array<text.FontFeature>(fontFeaturesTmpBufOptLength)
-            for (let fontFeaturesTmpBufOptBufCounterI = 0; fontFeaturesTmpBufOptBufCounterI < fontFeaturesTmpBufOptLength; fontFeaturesTmpBufOptBufCounterI++) {
-                fontFeaturesTmpBufOpt[fontFeaturesTmpBufOptBufCounterI] = text_FontFeature_serializer.read(valueDeserializer)
-            }
+            const fontFeaturesTmpBufOpt: Array<text.FontFeature> = new Array<text.FontFeature>(fontFeaturesTmpBufOptLength, (arg0: int32):text.FontFeature => {
+            return text_FontFeature_serializer.read(valueDeserializer);
+        })
             fontFeaturesTmpBuf = fontFeaturesTmpBufOpt
         }
         const fontFeaturesTmpResult: Array<text.FontFeature> | undefined = fontFeaturesTmpBuf
@@ -628,10 +626,9 @@ export class text_TextStyle_serializer {
         let textShadowsTmpBuf: Array<text.TextShadow> | undefined = undefined
         if ((textShadowsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const textShadowsTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let textShadowsTmpBufOpt: Array<text.TextShadow> = new Array<text.TextShadow>(textShadowsTmpBufOptLength)
-            for (let textShadowsTmpBufOptBufCounterI = 0; textShadowsTmpBufOptBufCounterI < textShadowsTmpBufOptLength; textShadowsTmpBufOptBufCounterI++) {
-                textShadowsTmpBufOpt[textShadowsTmpBufOptBufCounterI] = text_TextShadow_serializer.read(valueDeserializer)
-            }
+            const textShadowsTmpBufOpt: Array<text.TextShadow> = new Array<text.TextShadow>(textShadowsTmpBufOptLength, (arg0: int32):text.TextShadow => {
+            return text_TextShadow_serializer.read(valueDeserializer);
+        })
             textShadowsTmpBuf = textShadowsTmpBufOpt
         }
         const textShadowsTmpResult: Array<text.TextShadow> | undefined = textShadowsTmpBuf
@@ -645,10 +642,9 @@ export class text_TextStyle_serializer {
         let fontVariationsTmpBuf: Array<text.FontVariation> | undefined = undefined
         if ((fontVariationsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const fontVariationsTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let fontVariationsTmpBufOpt: Array<text.FontVariation> = new Array<text.FontVariation>(fontVariationsTmpBufOptLength)
-            for (let fontVariationsTmpBufOptBufCounterI = 0; fontVariationsTmpBufOptBufCounterI < fontVariationsTmpBufOptLength; fontVariationsTmpBufOptBufCounterI++) {
-                fontVariationsTmpBufOpt[fontVariationsTmpBufOptBufCounterI] = text_FontVariation_serializer.read(valueDeserializer)
-            }
+            const fontVariationsTmpBufOpt: Array<text.FontVariation> = new Array<text.FontVariation>(fontVariationsTmpBufOptLength, (arg0: int32):text.FontVariation => {
+            return text_FontVariation_serializer.read(valueDeserializer);
+        })
             fontVariationsTmpBuf = fontVariationsTmpBufOpt
         }
         const fontVariationsTmpResult: Array<text.FontVariation> | undefined = fontVariationsTmpBuf

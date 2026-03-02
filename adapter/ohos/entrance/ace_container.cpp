@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+
+#include <chrono>
 
 #include "auto_fill_manager.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
@@ -36,6 +38,7 @@
 #include "adapter/ohos/entrance/high_contrast_observer.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
+#include "adapter/ohos/entrance/ui_event_tracker.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/page_viewport_config_ohos.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
@@ -417,6 +420,8 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     : instanceId_(instanceId), type_(type), aceAbility_(aceAbility), useCurrentEventRunner_(useCurrentEventRunner)
 {
     ACE_DCHECK(callback);
+    // Record container creation timestamp for enhanced error messages
+    createTime_ = GetCurrentTimestamp();
     if (useNewPipeline) {
         SetUseNewPipeline();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -442,6 +447,8 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
       isSubContainer_(isSubAceContainer)
 {
     ACE_DCHECK(callback);
+    // Record container creation timestamp for enhanced error messages
+    createTime_ = GetCurrentTimestamp();
     if (useNewPipeline) {
         SetUseNewPipeline();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -466,6 +473,8 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
       isSubContainer_(isSubAceContainer)
 {
     ACE_DCHECK(callback);
+    // Record container creation timestamp for enhanced error messages
+    createTime_ = GetCurrentTimestamp();
     if (useNewPipeline) {
         SetUseNewPipeline();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -513,6 +522,14 @@ void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
     } else {
         taskExecutorImpl->InitJsThread();
     }
+}
+
+void AceContainer::InitializeUIEventTracker()
+{
+    if (uiEventTracker_ || !taskExecutor_) {
+        return;
+    }
+    uiEventTracker_ = std::make_shared<UIEventTracker>(instanceId_, WeakPtr<TaskExecutor>(taskExecutor_));
 }
 
 bool AceContainer::IsKeyboard()
@@ -2704,8 +2721,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             front->SetJsMessageDispatcher(AceType::Claim(this));
             front->SetAssetManager(assetManager_);
         }
-    } else if (type_ != FrontendType::JS_CARD) {
-        aceView_->SetCreateTime(createTime_);
     }
     resRegister_ = aceView_->GetPlatformResRegister();
     auto uiTranslateManager = std::make_shared<UiTranslateManagerImpl>(taskExecutor_);
@@ -2776,6 +2791,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
     pipelineContext_->SetWindowModal(windowModal_);
+    InitializeUIEventTracker();
     if (uiWindow_) {
         bool isAppWindow = uiWindow_->IsAppWindow();
         bool isSystemWindow = uiWindow_->IsSystemWindow();

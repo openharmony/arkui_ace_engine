@@ -24,6 +24,11 @@ RefPtr<LayoutAlgorithm> LazyGridLayoutPattern::CreateLayoutAlgorithm()
 {
     auto layoutAlgorithm = MakeRefPtr<LazyGridLayoutAlgorithm>(layoutInfo_);
     layoutAlgorithm->SetAxis(axis_);
+    // DynamicLayout support: set flag if DynamicLayout
+    // Alignment is now obtained from common properties (PositionProperty), no need to pass separately
+    if (isDynamicLayout_) {
+        layoutAlgorithm->SetDynamicLayout(true);
+    }
     return layoutAlgorithm;
 }
 
@@ -85,6 +90,11 @@ void LazyGridLayoutPattern::ProcessIdleTask(int64_t deadline)
     layoutInfo_->deadline_.reset();
 }
 
+bool LazyGridLayoutPattern::IsDynamicLayout() const
+{
+    return isDynamicLayout_;
+}
+
 void LazyGridLayoutPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
@@ -103,7 +113,7 @@ void LazyGridLayoutPattern::OnAttachToMainTree()
             parent = parent->GetParent();
             continue;
         }
-        if (parent->GetTag() != V2::WATERFLOW_ETS_TAG) {
+        if (parent->GetTag() != V2::WATERFLOW_ETS_TAG && !isDynamicLayout_) {
             LOGF_ABORT("LazyGridLayout cannot be used under the %{public}s", parent->GetTag().c_str());
         }
         return;

@@ -4481,11 +4481,6 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, boo
     }
 }
 
-bool TextPattern::GetIsSpecialSymbol() const
-{
-    return isSpecialSymbol_;
-}
-
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
@@ -4505,25 +4500,6 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
     ProcessOverlayAfterLayout();
-    if (textLayoutAlgorithm->GetIsSpecialSymbol() && pManager_) {
-        isSpecialSymbol_ = true;
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, false);
-        auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(textLayoutProp, false);
-        auto symbolSourceInfo = textLayoutProp->GetSymbolSourceInfo();
-        std::uint32_t unicode = 0;
-        if (symbolSourceInfo) {
-            unicode = symbolSourceInfo->GetUnicode();
-        }
-        TAG_LOGI(AceLogTag::ACE_TEXT,
-            "ACE symbol TextPattern::OnDirtyLayoutWrapperSwap id:%{public}d unicode:%{public}d, paragraph info "
-            "GetMaxWidth:%{public}f  GetHeight:%{public}f GetMaxIntrinsicWidth:%{public}f "
-            "GetLongestLineWithIndent:%{public}f, GetLineCount:%{public}d contentRect:%{public}s",
-            host->GetId(), unicode, pManager_->GetMaxWidth(), pManager_->GetHeight(), pManager_->GetMaxIntrinsicWidth(),
-            pManager_->GetLongestLineWithIndent(), static_cast<int32_t>(pManager_->GetLineCount()),
-            contentRect_.ToString().c_str());
-    }
     return true;
 }
 
@@ -6873,39 +6849,42 @@ bool TextPattern::HighlightTriggerScrollableParentToScroll(const RectF& highligh
     // Convert highlight region from text local coordinate system to scroll coordinate system
     RectF highlightInScroll = highlightRect;
     highlightInScroll.SetOffset(highlightInScroll.GetOffset() + textOffset);
-    
-    float targetOffset = 0.0f;
-    
-    if (scrollAxis == Axis::VERTICAL) {
-        // Vertical scrolling: center the highlight region vertically
-        float scrollCenterY = frameRect.Height() / 2.0f;
-        float highlightCenterY = highlightInScroll.Top() + highlightInScroll.Height() / 2.0f;
-        targetOffset = highlightCenterY - scrollCenterY;
-        
-        // Ensure the highlight region is fully visible (if needed)
-        float minOffset = highlightInScroll.Bottom() - frameRect.Height();
-        float maxOffset = highlightInScroll.Top();
-        targetOffset = std::min(std::max(targetOffset, minOffset), maxOffset);
-        // Set scroll offset
-        scrollablePattern->UpdateCurrentOffset(-targetOffset, SCROLL_FROM_JUMP);
-    } else if (scrollAxis == Axis::HORIZONTAL) {
-        // Horizontal scrolling: center the highlight region horizontally
-        float scrollCenterX = frameRect.Width() / 2.0f;
-        float highlightCenterX = highlightInScroll.Left() + highlightInScroll.Width() / 2.0f;
-        targetOffset = highlightCenterX - scrollCenterX;
-        
-        float minOffset = highlightInScroll.Right() - frameRect.Width();
-        float maxOffset = highlightInScroll.Left();
-        targetOffset = std::min(std::max(targetOffset, minOffset), maxOffset);
-        
-        scrollablePattern->UpdateCurrentOffset(-targetOffset, SCROLL_FROM_JUMP);
-    }
+
+    float targetOffset = CalculateScrollTargetOffset(scrollablePattern, highlightInScroll, frameRect);
+
+    scrollablePattern->StopAnimate();
+    scrollablePattern->UpdateCurrentOffset(-targetOffset, SCROLL_FROM_JUMP);
     TAG_LOGI(AceLogTag::ACE_TEXT,
         "HighlightTriggerScrollableParentToScroll, scroll offset, id:[%{public}d] targetOffset:%{public}f "
         "highlightInScroll:%{public}s, scrollableHost id:%{public}d frameRect:%{public}s",
         host->GetId(), targetOffset, highlightInScroll.ToString().c_str(), scrollableHost->GetId(),
         frameRect.ToString().c_str());
     return true;
+}
+
+float TextPattern::CalculateScrollTargetOffset(
+    const RefPtr<ScrollablePattern>& scrollablePattern, const RectF& highlightInScroll, const RectF& frameRect)
+{
+    auto scrollAxis = scrollablePattern->GetAxis();
+    float targetOffset = 0.0f;
+
+    if (scrollAxis == Axis::VERTICAL) {
+        // Vertical scrolling: center the highlight region vertically
+        float scrollCenterY = frameRect.Height() / 2.0f;
+        float highlightCenterY = highlightInScroll.Top() + highlightInScroll.Height() / 2.0f;
+        targetOffset = highlightCenterY - scrollCenterY;
+        float minOffset = highlightInScroll.Bottom() - frameRect.Height();
+        float maxOffset = highlightInScroll.Top();
+        targetOffset = std::min(std::max(targetOffset, minOffset), maxOffset);
+    } else if (scrollAxis == Axis::HORIZONTAL) {
+        float scrollCenterX = frameRect.Width() / 2.0f;
+        float highlightCenterX = highlightInScroll.Left() + highlightInScroll.Width() / 2.0f;
+        targetOffset = highlightCenterX - scrollCenterX;
+        float minOffset = highlightInScroll.Right() - frameRect.Width();
+        float maxOffset = highlightInScroll.Left();
+        targetOffset = std::min(std::max(targetOffset, minOffset), maxOffset);
+    }
+    return targetOffset;
 }
 
 RectF TextPattern::GetHighlightRect(

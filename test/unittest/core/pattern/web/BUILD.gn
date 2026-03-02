@@ -41,6 +41,7 @@ ohos_source_set("ace_web_pattern_test_sources") {
     "$ace_root/frameworks/core/components_ng/pattern/web/web_agent_event_reporter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_context_select_overlay.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_context_menu_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_data_detector_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_dom_document.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_layout_algorithm.cpp",
@@ -91,7 +92,9 @@ ohos_source_set("ace_web_pattern_test_sources") {
     "cJSON:cjson_static",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "form_fwk:form_manager",
+    "form_fwk:form_render_info",
+    "form_fwk:form_common_info",
+    "form_fwk:form_utils",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "graphic_2d:2d_graphics",
@@ -168,6 +171,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "web_pattern_web_test_ng.cpp",
     "web_pattern_window_test_ng.cpp",
     "web_select_overlay_test.cpp",
+    "web_context_menu_overlay_test.cpp",
   ]
 
   deps = [
@@ -192,7 +196,9 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "cJSON:cjson_static",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "form_fwk:form_manager",
+    "form_fwk:form_render_info",
+    "form_fwk:form_common_info",
+    "form_fwk:form_utils",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "graphic_2d:2d_graphics",

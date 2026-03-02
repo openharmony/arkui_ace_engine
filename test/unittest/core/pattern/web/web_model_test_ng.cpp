@@ -5650,6 +5650,54 @@ HWTEST_F(WebModelTestNg, SetEnableAutoFill002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableDefaultContextMenu001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableDefaultContextMenu001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableDefaultContextMenu(false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableDefaultContextMenu(false), true);
+    webModelNG.SetEnableDefaultContextMenu(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableDefaultContextMenu(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetEnableDefaultContextMenu002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetEnableDefaultContextMenu002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetEnableDefaultContextMenu(AccessibilityManager::RawPtr(frameNode), false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableDefaultContextMenu(false), true);
+    webModelNG.SetEnableDefaultContextMenu(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableDefaultContextMenu(true), true);
+#endif
+}
+
+/**
  * @tc.name: SetOnMediaCastEnter001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

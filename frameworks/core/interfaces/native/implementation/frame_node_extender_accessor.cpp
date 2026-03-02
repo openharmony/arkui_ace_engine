@@ -488,10 +488,11 @@ Ark_Int32 GetUniqueIdImpl(Ark_FrameNode peer)
 }
 Ark_String GetNodeTypeImpl(Ark_FrameNode peer)
 {
-    // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, {});
+
+    // Thread validation for multithread support
+    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(frameNode));
     auto nodeType = frameNode->GetTag();
     return Converter::ArkValue<Ark_String>(nodeType, Converter::FC);
 }

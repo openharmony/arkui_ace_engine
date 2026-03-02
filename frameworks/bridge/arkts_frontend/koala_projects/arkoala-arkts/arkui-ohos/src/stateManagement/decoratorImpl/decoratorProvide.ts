@@ -39,7 +39,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         allowOverride: boolean,
         watchFunc?: WatchFuncType
     ) {
-        super('Provide', owningView, varName, watchFunc);
+        super('@Provide', owningView, varName, watchFunc);
         this.checkValueIsNotFunction(initValue);
         if (isDynamicObject(initValue)) {
             initValue = getObservedObject(initValue);
@@ -66,7 +66,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         owningView?: IVariableOwner,
         watchFunc?: WatchFuncType
     ) {
-        super('Provide', owningView, varName, watchFunc);
+        super('@Provide', owningView, varName, watchFunc);
         this.provideAlias_ = varName;
         this.allowOverride_ = false;
         this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, initValue);

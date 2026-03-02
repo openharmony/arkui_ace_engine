@@ -891,6 +891,20 @@ public:
         return isFakeDragging_;
     }
 
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool needSwiperChangeEnd);
+    void ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode) const;
+    void ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNode) const;
+
+    void SetCachedCountIndependent(bool independent)
+    {
+        independent_ = independent;
+    }
+
+    bool GetCachedCountIndependent()
+    {
+        return independent_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -994,6 +1008,8 @@ private:
     void OnDetachFromFrameNodeMultiThread(FrameNode* node);
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTreeMultiThread();
+
+    void ContentChangeByDetaching(PipelineContext* pipeline) override;
 
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -1545,6 +1561,7 @@ private:
     OffsetF captureFinalOffset_;
     bool isInAutoPlay_ = false;
     bool isAutoPlayAnimationRunning_ = false;
+    bool independent_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
     // Indicates whether previous frame animation is running, only used on swiper custom animation.

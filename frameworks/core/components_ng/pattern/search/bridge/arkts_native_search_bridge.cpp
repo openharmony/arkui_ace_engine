@@ -985,7 +985,7 @@ ArkUINativeModuleValue SearchBridge::SetJsCancelButton(ArkUIRuntimeCallInfo* run
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!forthArg->IsUndefined() && !forthArg->IsNull() &&
         ArkTSUtils::ParseJsColorAlphaForMaterial(vm, forthArg, color, colorObject, nodeInfo)) {
-        value.color = color.GetValue();
+        value.color = static_cast<int32_t>(color.GetValue());
         value.colorPlaceholder = static_cast<int32_t>(color.GetPlaceholder());
     } else {
         value.color = INVALID_COLOR_VALUE;

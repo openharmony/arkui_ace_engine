@@ -83,7 +83,7 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
         isFadingTop_ = isFadingBottom_;
         isFadingBottom_ = tempFadingValue;
     }
-    renderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN_WITH_BACKGROUND);
+    renderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 
     overlayRenderContext_->UpdateZIndex(INT32_MAX);
     UpdateOverlayFadingGradient();

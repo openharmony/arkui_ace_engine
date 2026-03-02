@@ -23,6 +23,7 @@ import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { CallbackTransformer } from './CallbackTransformer';
 import { KPointer, nullptr } from '@koalaui/interop';
 import { FreeRootNode } from './CallbackTransformer';
+import { LifeCycleEvent } from './component/customComponent';
 
 export function setNeedCreate(isNeedCreate: boolean): boolean {
     const temp = GlobalStateManager.instance._isNeedCreate
@@ -46,11 +47,13 @@ export function ArkComponentRoot(
                         const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
                         ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponent;
                         component.aboutToAppear();
+                        component.__getLifecycle__Internal()?.trigger(LifeCycleEvent.ON_APPEAR);
                         ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
                     });
                     return true;
                 }, (_: boolean | undefined) => {
                     scheduleCallback(() => {
+                        component.__getLifecycle__Internal()?.trigger(LifeCycleEvent.ON_DISAPPEAR);
                         component.aboutToDisappear();
                     });
                 });

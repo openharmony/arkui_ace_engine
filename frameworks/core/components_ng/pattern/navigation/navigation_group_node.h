@@ -121,6 +121,7 @@ public:
     void CreateHomeDestinationIfNeeded();
 
     void SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder);
+    void SetStaticSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder);
 
     void SetPlaceholderContentNode(const RefPtr<NG::UINode>& placeholderContentNode)
     {
@@ -385,6 +386,11 @@ public:
 
     std::string ToDumpString();
 
+    bool GetIsStaticPlaceholder() const
+    {
+        return isStaticPlaceholder_;
+    }
+
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
@@ -424,6 +430,7 @@ private:
     void LoadCompleteManagerStartCollect();
     void LoadCompleteManagerStopCollect();
     void ContentChangeReport(RefPtr<FrameNode>& keyNode);
+    RefPtr<FrameNode> GetStaticDeveloperPlaceholderNode(const RefPtr<UINode>& node);
 
     std::optional<bool> useHomeDestination_;
     RefPtr<UINode> customHomeNode_;
@@ -432,6 +439,7 @@ private:
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
     RefPtr<UINode> dragBarNode_;
+    bool isStaticPlaceholder_ = false;
     RefPtr<UINode> splitPlaceholder_;
     RefPtr<UINode> placeholderContentNode_;
     WeakPtr<NavDestinationGroupNode> parentDestinationNode_;

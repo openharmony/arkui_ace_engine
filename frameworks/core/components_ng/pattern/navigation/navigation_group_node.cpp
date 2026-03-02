@@ -639,6 +639,7 @@ void NavigationGroupNode::SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPla
     auto prevsplitPlaceholder = splitPlaceholder_;
     CHECK_NULL_VOID(placeholderContentNode_);
     CHECK_NULL_VOID(splitPlaceholder);
+    isStaticPlaceholder_ = false;
     auto splitPlaceholderFrameNode = AceType::DynamicCast<FrameNode>(splitPlaceholder);
     CHECK_NULL_VOID(splitPlaceholderFrameNode);
     auto splitPlaceholderLayoutProperty = splitPlaceholderFrameNode->GetLayoutProperty();
@@ -650,6 +651,60 @@ void NavigationGroupNode::SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPla
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
             .edges = SAFE_AREA_EDGE_ALL };
         splitPlaceholderLayoutProperty->UpdateSafeAreaExpandOpts(opts);
+    }
+    auto spllitPlaceHolderFrameNode = AceType::DynamicCast<FrameNode>(splitPlaceholder);
+    CHECK_NULL_VOID(spllitPlaceHolderFrameNode);
+    const auto& eventHub = spllitPlaceHolderFrameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(false);
+    auto focusHub = spllitPlaceHolderFrameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
+    if (!prevsplitPlaceholder) {
+        splitPlaceholder->MountToParent(placeholderContentNode_);
+    } else {
+        if (splitPlaceholder != prevsplitPlaceholder) {
+            placeholderContentNode_->ReplaceChild(prevsplitPlaceholder, splitPlaceholder);
+            placeholderContentNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        }
+    }
+    splitPlaceholder_ = splitPlaceholder;
+}
+
+RefPtr<FrameNode> NavigationGroupNode::GetStaticDeveloperPlaceholderNode(const RefPtr<UINode>& node)
+{
+    auto curNode = node;
+    while (curNode) {
+        auto tag = curNode->GetTag();
+        if (tag != "BuilderProxyNode" && tag != "DetachedFreeRoot") {
+            return AceType::DynamicCast<FrameNode>(curNode);
+        }
+        const auto& children = curNode->GetChildren();
+        if (children.empty()) {
+            return nullptr;
+        }
+        curNode = children.front();
+    }
+    return nullptr;
+}
+
+void NavigationGroupNode::SetStaticSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder)
+{
+    auto prevsplitPlaceholder = splitPlaceholder_;
+    CHECK_NULL_VOID(placeholderContentNode_);
+    CHECK_NULL_VOID(splitPlaceholder);
+    isStaticPlaceholder_ = true;
+    auto developerPlaceholder = GetStaticDeveloperPlaceholderNode(splitPlaceholder);
+    CHECK_NULL_VOID(developerPlaceholder);
+    auto developerPlaceholderProperty = developerPlaceholder->GetLayoutProperty();
+    CHECK_NULL_VOID(developerPlaceholderProperty);
+    auto&& opts = developerPlaceholderProperty->GetSafeAreaExpandOpts();
+    if (opts) {
+        developerPlaceholderProperty->UpdateSafeAreaExpandOpts(*opts);
+    } else {
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
+        developerPlaceholderProperty->UpdateSafeAreaExpandOpts(opts);
     }
     auto spllitPlaceHolderFrameNode = AceType::DynamicCast<FrameNode>(splitPlaceholder);
     CHECK_NULL_VOID(spllitPlaceHolderFrameNode);

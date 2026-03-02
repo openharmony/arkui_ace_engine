@@ -29,6 +29,7 @@ using namespace OHOS::Ace;
 
 namespace {
 const std::string INDICATOR_DEFAULT = "default";
+const std::string INDICATOR_SYSTEM = "SystemStyle";
 const std::string INDICATOR_NULL = "null";
 constexpr double FIX_ANGLE = 720.0;
 }  // namespace
@@ -43,15 +44,17 @@ ViewAbstractModel* ViewAbstractModel::GetInstance()
 // Should use CJUIModifier API later
 NG::GaugeModelNG* GetGaugeModel()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
-    if (module == nullptr) {
-        LOGF("Can't find gauge dynamic module");
-        abort();
+    static NG::GaugeModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find gauge dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::GaugeModelNG*>(module->GetModel());
     }
-    return reinterpret_cast<NG::GaugeModelNG*>(module->GetModel());
+    return cachedModel;
 }
-
-}
+} // namespace OHOS::Ace
 
 extern "C" {
 VectorColorStops FFICJCreateVectorColorStop(int64_t size)
@@ -316,9 +319,13 @@ void FfiOHOSAceFrameworkGaugeSetIndicatorV2(const char* icon, double size, int32
         GetGaugeModel()->SetIsShowIndicator(false);
         return;
     }
-    std::string bundleName;
-    std::string moduleName;
-    GetGaugeModel()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
+    if (icon == INDICATOR_SYSTEM) {
+        GetGaugeModel()->ResetIndicatorIconPath();
+    } else {
+        std::string bundleName;
+        std::string moduleName;
+        GetGaugeModel()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
+    }
 
     CalcDimension space;
     if (size < 0) {

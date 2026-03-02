@@ -198,6 +198,7 @@ std::unordered_map<int32_t, bool> SPAN_ATTRIBUTES_MAP = {
     { static_cast<int32_t>(NODE_SPAN_FONT), true },
     { static_cast<int32_t>(NODE_SPAN_FONT_WEIGHT), true },
     { static_cast<int32_t>(NODE_ALLOW_FORCE_DARK), true },
+    { static_cast<int32_t>(NODE_ID), true },
 };
 constexpr int32_t ANIMATION_DURATION_INDEX = 0;
 constexpr int32_t ANIMATION_CURVE_INDEX = 1;
@@ -10298,6 +10299,12 @@ int32_t SetSwiperCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* i
         isShown = item->value[1].i32;
     }
     GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setSwiperIsShown(node->uiNodeHandle, isShown);
+
+    ArkUI_Bool independent = DEFAULT_FALSE;
+    if (item->size == 3 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[2].i32)) {
+        independent = item->value[2].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setSwiperCachedIndependent(node->uiNodeHandle, independent);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -10308,6 +10315,7 @@ void ResetSwiperCachedCount(ArkUI_NodeHandle node)
 
     fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperCachedCount(node->uiNodeHandle);
     fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperIsShown(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperCachedIndependent(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetSwiperCachedCount(ArkUI_NodeHandle node)
@@ -10315,8 +10323,11 @@ const ArkUI_AttributeItem* GetSwiperCachedCount(ArkUI_NodeHandle node)
     ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getSwiperModifier()->getCachedCount(node->uiNodeHandle);
     ArkUI_Int32 isShown =
         GetFullImpl()->getNodeModifiers()->getSwiperModifier()->getSwiperCachedIsShown(node->uiNodeHandle);
+    ArkUI_Int32 independent =
+        GetFullImpl()->getNodeModifiers()->getSwiperModifier()->getSwiperCachedIndependent(node->uiNodeHandle);
     g_numberValues[0].i32 = value;
     g_numberValues[1].i32 = isShown;
+    g_numberValues[2].i32 = independent;
     return &g_attributeItem;
 }
 

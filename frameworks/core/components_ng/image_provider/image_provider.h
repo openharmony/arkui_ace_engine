@@ -150,11 +150,24 @@ private:
     static void MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& targetSize, const std::string& key,
         const ImageDecoderOptions& imagedecoderOptions);
 
+    // Process network image: prepare data (cache check/download) then decode
+    static void ProcessNetworkImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
+        const SizeF& size, const std::string& key, const ImageDecoderOptions& imageDecoderOptions);
+
+    // Process normal image: decode directly (data already ready)
+    static void ProcessNormalImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
+        const SizeF& size, const std::string& key, const ImageDecoderOptions& imageDecoderOptions);
+
     // helper functions to end task and callback to LoadingContexts
     static void SuccessCallback(
         const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false, int32_t containerId = 0);
     static void FailCallback(const std::string& key, const std::string& errorMsg, const ImageErrorInfo& errorInfo,
         bool sync = false, int32_t containerId = 0);
+
+    // Helper function for preparing network image data (cache check + download)
+    // Will trigger MakeCanvasImageHelper in success callback after data is ready
+    static void PrepareNetworkImageData(const RefPtr<ImageObject>& obj, const SizeF& size, const std::string& key,
+        const ImageDecoderOptions& imageDecoderOptions);
 
     struct Task {
         CancelableCallback<void()> bgTask_;

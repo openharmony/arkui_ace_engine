@@ -1131,6 +1131,12 @@ void ScrollablePattern::OnDetachFromMainTree()
     auto host = GetHost();
     // call OnDetachFromMainTreeMultiThread() by multi thread
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    if (!scrollStop_) {
+        auto parent = GetNestedScrollParent();
+        if (parent) {
+            parent->OnScrollEndRecursive(GetVelocity());
+        }
+    }
 }
 
 void ScrollablePattern::OnWindowHide()
@@ -1720,9 +1726,6 @@ void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExt
 
 void ScrollablePattern::SetFriction(double friction)
 {
-    auto host = GetHost();
-    // call ScrollPageMultiThread by multi thread
-    FREE_NODE_CHECK(host, SetFriction, friction);
     if (LessOrEqual(friction, 0.0)) {
         friction =
             Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;

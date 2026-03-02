@@ -52,10 +52,9 @@ export class ImageAnalyzerController implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._ImageAnalyzerController_getImageAnalyzerSupportTypes(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = ImageAnalyzerType.fromValue(retvalDeserializer.readInt32())
-        }
+        const buffer: Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(bufferLength, (arg0: int32):ImageAnalyzerType => {
+            return ImageAnalyzerType.fromValue(retvalDeserializer.readInt32());
+        })
         const returnResult: Array<ImageAnalyzerType> = buffer
         return returnResult
     }
@@ -121,10 +120,9 @@ export class ImageAIOptions_serializer {
         let typesTmpBuf: Array<ImageAnalyzerType> | undefined = undefined
         if ((typesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const typesTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let typesTmpBufOpt: Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(typesTmpBufOptLength)
-            for (let typesTmpBufOptBufCounterI = 0; typesTmpBufOptBufCounterI < typesTmpBufOptLength; typesTmpBufOptBufCounterI++) {
-                typesTmpBufOpt[typesTmpBufOptBufCounterI] = ImageAnalyzerType.fromValue(valueDeserializer.readInt32())
-            }
+            const typesTmpBufOpt: Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(typesTmpBufOptLength, (arg0: int32):ImageAnalyzerType => {
+            return ImageAnalyzerType.fromValue(valueDeserializer.readInt32());
+        })
             typesTmpBuf = typesTmpBufOpt
         }
         const typesTmpResult: Array<ImageAnalyzerType> | undefined = typesTmpBuf
@@ -160,10 +158,9 @@ export class ImageAnalyzerConfig_serializer {
     public static read(buffer: DeserializerBase): ImageAnalyzerConfig {
         let valueDeserializer: DeserializerBase = buffer
         const typesTmpBufLength: int32 = valueDeserializer.readInt32()
-        let typesTmpBuf: Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(typesTmpBufLength)
-        for (let typesTmpBufBufCounterI = 0; typesTmpBufBufCounterI < typesTmpBufLength; typesTmpBufBufCounterI++) {
-            typesTmpBuf[typesTmpBufBufCounterI] = ImageAnalyzerType.fromValue(valueDeserializer.readInt32())
-        }
+        const typesTmpBuf: Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(typesTmpBufLength, (arg0: int32):ImageAnalyzerType => {
+            return ImageAnalyzerType.fromValue(valueDeserializer.readInt32());
+        })
         const typesTmpResult: Array<ImageAnalyzerType> = typesTmpBuf
         let value: ImageAnalyzerConfig = ({types: typesTmpResult} as ImageAnalyzerConfig)
         return value

@@ -1213,6 +1213,18 @@ void JSSwiper::SetDisplayMode(int32_t index)
     SwiperModel::GetInstance()->SetDisplayMode(DISPLAY_MODE[index]);
 }
 
+void JSSwiper::ParseCachedCountOptions(const JSRef<JSObject>& obj)
+{
+    auto isShown = obj->GetProperty("isShown");
+    if (isShown->IsBoolean()) {
+        SwiperModel::GetInstance()->SetCachedIsShown(isShown->ToBoolean());
+    }
+    auto independent = obj->GetProperty("independent");
+    if (independent->IsBoolean()) {
+        SwiperModel::GetInstance()->SetCachedIndependent(independent->ToBoolean());
+    }
+}
+
 void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1227,7 +1239,10 @@ void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
         }
     }
     SwiperModel::GetInstance()->SetCachedCount(cachedCount);
-
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        ParseCachedCountOptions(JSRef<JSObject>::Cast(info[1]));
+        return;
+    }
     auto isShown = info.Length() > 1 && info[1]->IsBoolean() && info[1]->ToBoolean();
     SwiperModel::GetInstance()->SetCachedIsShown(isShown);
 }

@@ -26,6 +26,7 @@ import { ArkCommonMethodComponent, ArkCommonPeer, CommonMethod } from 'arkui/com
 import { memo_skip } from '@koalaui/runtime/annotations';
 import { int32 } from '@koalaui/common';
 import { IExtendableComponent } from './component/extendableComponent';
+import { LifeCycleEvent } from './component/customComponent';
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
@@ -141,6 +142,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
             remember(() => {
                 ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
                     this.onDidBuild();
+                    this.__getLifecycle__Internal()?.trigger(LifeCycleEvent.ON_BUILD);
                 })
             });
             node.setOnRecycle(() =>

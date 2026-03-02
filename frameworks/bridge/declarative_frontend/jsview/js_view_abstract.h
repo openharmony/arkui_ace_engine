@@ -441,6 +441,8 @@ public:
         const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
         RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type);
+    static bool ParseJsObjColorFromResourceForMaterial(
+        const JSRef<JSObject>& jsObj, Color& result, RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
         RefPtr<ResourceObject>& resObj);

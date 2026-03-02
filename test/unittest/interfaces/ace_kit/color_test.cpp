@@ -177,4 +177,22 @@ HWTEST_F(ColorTest, ColorTest008, TestSize.Level1)
     EXPECT_EQ(color.GetBlue(), 200);
     EXPECT_EQ(color.GetGreen(), 200);
 }
+
+/**
+ * @tc.name: ColorTestFillColorPlaceholderIfNeed001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ColorTest, ColorTestFillColorPlaceholderIfNeed001, TestSize.Level1)
+{
+    Color c1;
+    c1.FillColorPlaceholderIfNeed("sys.color.font_primary");
+    EXPECT_EQ(c1.GetPlaceholder(), ColorPlaceholder::FONT_PRIMARY);
+    Color c2;
+    c2.FillColorPlaceholderIfNeed("sys.color.brand");
+    EXPECT_EQ(c2.GetPlaceholder(), ColorPlaceholder::BRAND);
+    Color c3;
+    c3.FillColorPlaceholderIfNeed("app.color.nocolor");
+    EXPECT_EQ(c3.GetPlaceholder(), ColorPlaceholder::NONE);
+}
 } // namespace OHOS::Ace

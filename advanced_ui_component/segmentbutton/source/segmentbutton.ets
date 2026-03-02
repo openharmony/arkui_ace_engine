@@ -1275,6 +1275,7 @@ class ItemProperty {
 
 @Component
 export struct SegmentButton {
+  @Prop enableStateAnimation: boolean = false
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
   @Link @Watch('onSelectedChange') selectedIndexes: number[]
   public onItemClicked?: Callback<number>
@@ -1386,7 +1387,7 @@ export struct SegmentButton {
     }
     this.updateSelectedIndexes()
     this.setItemsSelected()
-    if (this.doSelectedChangeAnimate) {
+    if (this.doSelectedChangeAnimate  || this.enableStateAnimation) {
       this.updateAnimatedProperty(this.getSelectedChangeCurve())
     } else {
       this.updateAnimatedProperty(null)
@@ -1785,7 +1786,7 @@ export struct SegmentButton {
       this.buttonItemsSelected.forEach((selected, index) => {
         this.buttonItemProperty[index].fontColor = selected ?
           this.options.selectedFontColor ?? (this.options.type === 'tab' ?
-          segmentButtonTheme.TAB_SELECTED_FONT_COLOR : segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) :
+            segmentButtonTheme.TAB_SELECTED_FONT_COLOR : segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) :
           this.options.fontColor ?? segmentButtonTheme.FONT_COLOR
       })
     }

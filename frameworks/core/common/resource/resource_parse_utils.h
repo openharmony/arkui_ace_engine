@@ -24,6 +24,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_object.h"
+#include "ui/resource/node_info.h"
 
 namespace OHOS::Ace {
 
@@ -47,9 +48,7 @@ class ACE_FORCE_EXPORT ResourceParseUtils final : public AceType {
 
 public:
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
-        Color& color, const std::string& nodeTag);
-    static void CompleteResObjFromColorWithAllowForceDark(
-        RefPtr<ResourceObject>& resObj, Color& color, const std::string& nodeTag, bool allowForceDark);
+        Color& color, const NG::NodeInfo& nodeInfo);
     static RefPtr<ThemeConstants> GetThemeConstants(const RefPtr<ResourceObject>& resObj);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::string& result);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result);
@@ -125,6 +124,8 @@ public:
     {
         return needReload_;
     }
+
+    static NG::NodeInfo MakeNativeNodeInfo(NG::UINode* uiNode);
 
 private:
     static void InvertColorWithResource(const RefPtr<ResourceObject>& resObj, Color& result,

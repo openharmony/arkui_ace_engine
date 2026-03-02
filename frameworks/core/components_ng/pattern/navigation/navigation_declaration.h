@@ -147,6 +147,8 @@ struct BarItem {
     NavToolbarItemStatus status;
     std::optional<std::string> activeIcon;
     std::optional<std::function<void(WeakPtr<NG::FrameNode>)>> activeIconSymbol;
+    std::string bundleName = "";
+    std::string moduleName = "";
     struct resourceUpdater {
         RefPtr<ResourceObject> resObj;
         std::function<void(const RefPtr<ResourceObject>&, BarItem&)> updateFunc;

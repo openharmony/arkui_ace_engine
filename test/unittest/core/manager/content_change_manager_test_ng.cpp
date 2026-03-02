@@ -226,7 +226,7 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest002, TestSize.Level
      */
     auto contentChangeMgr = GetContentChangeManager();
     ASSERT_NE(contentChangeMgr, nullptr);
-    const float DEFAULT_TEXT_MIN_REPORT_TIME = contentChangeMgr->DEFAULT_TEXT_MIN_REPORT_TIME;
+    const float DEFAULT_COMPONENT_MIN_REPORT_TIME = contentChangeMgr->DEFAULT_COMPONENT_MIN_REPORT_TIME;
     const uint64_t NS_PER_MS = contentChangeMgr->NS_PER_MS;
 
     /**
@@ -238,8 +238,8 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest002, TestSize.Level
     contentChangeMgr->StartContentChangeReport(config);
     std::optional<ContentChangeConfig> currentConfig = contentChangeMgr->currentContentChangeConfig_;
     ASSERT_TRUE(currentConfig.has_value());
-    EXPECT_EQ(currentConfig->minReportTime, DEFAULT_TEXT_MIN_REPORT_TIME);
-    EXPECT_EQ(contentChangeMgr->textContentInterval_, DEFAULT_TEXT_MIN_REPORT_TIME * NS_PER_MS);
+    EXPECT_EQ(currentConfig->minReportTime, DEFAULT_COMPONENT_MIN_REPORT_TIME);
+    EXPECT_EQ(contentChangeMgr->componentReportInterval_, DEFAULT_COMPONENT_MIN_REPORT_TIME * NS_PER_MS);
 
     /**
      * @tc.steps: step3. call StartContentChangeReport when minReportTime is valid.
@@ -250,7 +250,7 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest002, TestSize.Level
     currentConfig = contentChangeMgr->currentContentChangeConfig_;
     ASSERT_TRUE(currentConfig.has_value());
     EXPECT_EQ(currentConfig->minReportTime, 200);
-    EXPECT_EQ(contentChangeMgr->textContentInterval_, 200 * NS_PER_MS);
+    EXPECT_EQ(contentChangeMgr->componentReportInterval_, 200 * NS_PER_MS);
 
     /**
      * @tc.steps: step4. reset.
@@ -933,11 +933,12 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest015, TestSize.Level
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
     EXPECT_FALSE(contentChangeMgr->IsScrolling());
-    contentChangeMgr->lastTextReportTime_ = GetSysTimestamp();
-    EXPECT_TRUE(GetSysTimestamp() - contentChangeMgr->lastTextReportTime_ < contentChangeMgr->textContentInterval_);
+    contentChangeMgr->lastComponentReportTime_ = GetSysTimestamp();
+    EXPECT_TRUE(GetSysTimestamp() - contentChangeMgr->lastComponentReportTime_ <
+        contentChangeMgr->componentReportInterval_);
     contentChangeMgr->StartTextAABBCollecting();
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
-    contentChangeMgr->lastTextReportTime_ = 0;
+    contentChangeMgr->lastComponentReportTime_ = 0;
 
     /**
      * @tc.steps: step3. call StartTextAABBCollecting under normal conditions.
@@ -946,7 +947,8 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest015, TestSize.Level
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
     EXPECT_FALSE(contentChangeMgr->IsScrolling());
-    EXPECT_FALSE(GetSysTimestamp() - contentChangeMgr->lastTextReportTime_ < contentChangeMgr->textContentInterval_);
+    EXPECT_FALSE(GetSysTimestamp() - contentChangeMgr->lastComponentReportTime_ <
+        contentChangeMgr->componentReportInterval_);
     contentChangeMgr->StartTextAABBCollecting();
     EXPECT_TRUE(contentChangeMgr->textCollecting_);
 
@@ -1055,7 +1057,7 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest017, TestSize.Level
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _))
         .Times(NEVER_ONCE);
     contentChangeMgr->StopTextAABBCollecting(rootRect);
-    EXPECT_EQ(contentChangeMgr->lastTextReportTime_, 0);
+    EXPECT_EQ(contentChangeMgr->lastComponentReportTime_, 0);
     EXPECT_TRUE(contentChangeMgr->textAABB_.IsEmpty());
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
 
@@ -1065,11 +1067,13 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest017, TestSize.Level
      */
     contentChangeMgr->textContentRatio_ = 0.0f;
     contentChangeMgr->textAABB_ = intersectRect;
+    contentChangeMgr->componentReportDelayTime_ = 0;
     EXPECT_FALSE(contentChangeMgr->textAABB_.IsEmpty());
+    EXPECT_FALSE(contentChangeMgr->IsInTransitionDelayWindow());
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::TEXT, ""))
         .Times(AtLeast(AT_LEAST_ONCE));
     contentChangeMgr->StopTextAABBCollecting(rootRect);
-    EXPECT_NE(contentChangeMgr->lastTextReportTime_, 0);
+    EXPECT_NE(contentChangeMgr->lastComponentReportTime_, 0);
     EXPECT_TRUE(contentChangeMgr->textAABB_.IsEmpty());
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
 
@@ -1386,6 +1390,13 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollTo\"]}");
     EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with "scrollToIndex" event.
+     * @tc.expected: returns SCROLL_TO_INDEX mask.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO_INDEX);
 }
 
 /**
@@ -1408,6 +1419,13 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollTo\", \"scrollTo\"]}");
     EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with duplicate "scrollToIndex" events.
+     * @tc.expected: returns SCROLL_TO_INDEX mask (OR operation with same value).
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollToIndex\", \"scrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO_INDEX);
 }
 
 /**
@@ -1440,6 +1458,16 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
 
     mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"SCROLLTO\"]}");
     EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step4. call GetIgnoreEventMask with invalid case for scrollToIndex.
+     * @tc.expected: returns 0 (NONE) - case sensitive.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"ScrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"SCROLLTOINDEX\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
 }
 
 /**
@@ -1469,6 +1497,20 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"\", \"scrollTo\", null, \"unknown\"]}");
     EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step4. call GetIgnoreEventMask with scrollToIndex in mixed events.
+     * @tc.expected: returns SCROLL_TO_INDEX mask.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"unknown1\", \"scrollToIndex\", \"unknown2\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO_INDEX);
+
+    /**
+     * @tc.steps: step5. call GetIgnoreEventMask with both scrollTo and scrollToIndex.
+     * @tc.expected: returns SCROLL_TO | SCROLL_TO_INDEX mask.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollTo\", \"scrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO | ContentChangeManager::SCROLL_TO_INDEX);
 }
 
 /**
@@ -1529,11 +1571,14 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
     ASSERT_NE(contentChangeMgr, nullptr);
 
     /**
-     * @tc.steps: step2. test ConvertEventStringToEnum with "scrollTo".
-     * @tc.expected: returns SCROLL_TO.
+     * @tc.steps: step2. test ConvertEventStringToEnum with "scrollTo" and "scrollToIndex".
+     * @tc.expected: returns SCROLL_TO and SCROLL_TO_INDEX respectively.
      */
     uint32_t eventType = contentChangeMgr->ConvertEventStringToEnum("scrollTo");
     EXPECT_EQ(eventType, ContentChangeManager::SCROLL_TO);
+
+    eventType = contentChangeMgr->ConvertEventStringToEnum("scrollToIndex");
+    EXPECT_EQ(eventType, ContentChangeManager::SCROLL_TO_INDEX);
 
     /**
      * @tc.steps: step3. test ConvertEventStringToEnum with unknown string.
@@ -1573,6 +1618,7 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     EXPECT_EQ(ContentChangeManager::NONE, 0);
     EXPECT_EQ(ContentChangeManager::SCROLL_TO, 1 << 0);
+    EXPECT_EQ(ContentChangeManager::SCROLL_TO_INDEX, 1 << 1);
 
     /**
      * @tc.steps: step2. verify bit operations.
@@ -1584,6 +1630,9 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
 
     mask |= ContentChangeManager::SCROLL_TO;
     EXPECT_EQ(mask, 1); // OR with same value should not change
+
+    mask |= ContentChangeManager::SCROLL_TO_INDEX;
+    EXPECT_EQ(mask, 3); // 1 | 2 = 3
 }
 
 /**

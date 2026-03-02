@@ -337,8 +337,8 @@ void ListItemPattern::SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeC
 void ListItemPattern::CloseSwipeAction(OnFinishFunc&& onFinishCallback)
 {
     auto host = GetHost();
-    FREE_NODE_CHECK(host, CloseSwipeAction, std::move(onFinishCallback));
-    onFinishEvent_ = onFinishCallback;
+    onFinishEvent_ = std::move(onFinishCallback);
+    FREE_NODE_CHECK(host, CloseSwipeAction, std::move(onFinishEvent_));
     ResetSwipeStatus(true);
 }
 

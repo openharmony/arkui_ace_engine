@@ -1135,10 +1135,9 @@ export class StyledString implements MaterializedBase {
         let buffer: Array<SpanStyle> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            let bufferOpt: Array<SpanStyle> = new Array<SpanStyle>(bufferOptLength)
-            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
-                bufferOpt[bufferOptBufCounterI] = SpanStyle_serializer.read(retvalDeserializer)
-            }
+            const bufferOpt: Array<SpanStyle> = new Array<SpanStyle>(bufferOptLength, (arg0: int32):SpanStyle => {
+            return SpanStyle_serializer.read(retvalDeserializer);
+        })
             buffer = bufferOpt
         }
         const returnResult: Array<SpanStyle> | undefined = buffer
@@ -1229,10 +1228,9 @@ export class TextShadowStyle implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._TextShadowStyle_getTextShadow(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<ShadowOptions> = new Array<ShadowOptions>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = ShadowOptions_serializer.read(retvalDeserializer)
-        }
+        const buffer: Array<ShadowOptions> = new Array<ShadowOptions>(bufferLength, (arg0: int32):ShadowOptions => {
+            return ShadowOptions_serializer.read(retvalDeserializer);
+        })
         const returnResult: Array<ShadowOptions> = buffer
         return returnResult
     }

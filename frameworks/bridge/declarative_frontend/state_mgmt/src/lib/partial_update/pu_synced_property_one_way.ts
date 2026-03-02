@@ -262,11 +262,6 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     return value true only if localCopyObservedObject_ has been changed
   */
   private resetLocalValue(newObservedObjectValue: C, needCopyObject: boolean): boolean {
-    // for interop
-    if (InteropConfigureStateMgmt.needsInterop() && newObservedObjectValue && typeof newObservedObjectValue === 'object' && isStaticProxy(newObservedObjectValue)) {
-      throw new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
-    }
-
     // note: We can not test for newObservedObjectValue == this.localCopyObservedObject_
     // here because the object might still be the same, but some property of it has changed
     // this is added for stability test: Target of target is not Object/is not callable/
@@ -406,11 +401,6 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       return obj;
     }
 
-    // for interop
-    if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(obj)) {
-      throw new Error(`deepCopyObjectInternal: Static variable assignment to @Prop${variable} is not allowed.`);
-    }
-
     let copiedObjects = new Map<Object, Object>();
 
     return getDeepCopyOfObjectRecursive(obj);
@@ -450,6 +440,29 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         copy = Array.isArray(obj) ? [] : {};
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
+      } else if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(obj)) {
+        copy = {};
+        copiedObjects.set(obj, copy);
+        const err: Error = new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
+        const toJSON: Function | undefined = globalThis.panda?.STValue?.toJSON;
+        if (typeof toJSON === 'function') {
+          const json: string = toJSON(obj);
+          if (typeof json === 'string') {
+            const jsonObj: Object = JSON.parse(json);
+            if (typeof jsonObj === 'object' && jsonObj !== null) {
+              Object.keys(jsonObj).forEach((objKey: any) => {
+                copy[objKey] = getDeepCopyOfObjectRecursive(obj[objKey]);
+              });
+            } else {
+              throw err;
+            }
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
+        return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
       } else {
         /**
          * As we define a variable called 'copy' with no initial value before this if/else branch,

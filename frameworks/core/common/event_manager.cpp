@@ -19,7 +19,6 @@
 #include "base/log/dump_log.h"
 #include "base/thread/frame_trace_adapter.h"
 #include "core/common/container.h"
-#include "core/common/event_info_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/common/xcollie/xcollieInterface.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
@@ -2038,7 +2037,6 @@ EventManager::EventManager()
     postEventRefereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();
-    eventInfoManager_ = AceType::MakeRefPtr<EventInfoManager>();
     mouseStyleManager_ = AceType::MakeRefPtr<MouseStyleManager>();
     InitCoastingAxisEventGenerator();
 
@@ -2313,11 +2311,6 @@ bool EventManager::CheckDifferentTargetDisplay(const std::vector<T>& historyEven
         targetDisplayId = iter->GetTargetDisplayId();
     }
     return true;
-}
-
-const RefPtr<EventInfoManager>& EventManager::GetEventInfoManager() const
-{
-    return eventInfoManager_;
 }
 
 bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,

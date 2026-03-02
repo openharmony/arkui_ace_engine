@@ -13,16 +13,23 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/components_ng/pattern/union_effect_container/union_effect_container_model_static.h"
+#include "core/components_ng/property/union_effect_container_options.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UnionEffectContainerModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
-    return {};
+    auto frameNode = UnionEffectContainerModelStatic::Create(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // UnionEffectContainerModifier
 namespace UnionEffectContainerInterfaceModifier {
@@ -31,15 +38,45 @@ void SetUnionEffectContainerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto convValue = options ? Converter::OptConvert<UnionEffectContainerOptions>(*options) : std::nullopt;
+    UnionEffectContainerModelStatic::SetUnionEffectContainerOptions(frameNode, convValue);
 }
 } // UnionEffectContainerInterfaceModifier
 namespace UnionEffectContainerAttributeModifier {
-void SetPointLightImpl(Ark_NativePointer node,
-                       const Ark_PointLightStyle* value)
+void SetPointLightImpl(Ark_NativePointer node, const Ark_PointLightStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+#ifdef POINT_LIGHT_ENABLE
+    auto pointLightStyle = Converter::OptConvertPtr<Converter::PointLightStyle>(value);
+    auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
+    auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
+    CHECK_NULL_VOID(themeConstants);
+    if (pointLightStyle) {
+        if (pointLightStyle->lightSource) {
+            ViewAbstractModelStatic::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
+                pointLightStyle->lightSource->y,
+                pointLightStyle->lightSource->z);
+            ViewAbstractModelStatic::SetLightIntensity(frameNode,
+                pointLightStyle->lightSource->intensity);
+            ViewAbstractModelStatic::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
+        } else {
+            ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+            ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
+            ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
+        }
+        // illuminated
+        ViewAbstractModelStatic::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
+        // bloom
+        ViewAbstractModelStatic::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+    } else {
+        ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+        ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelStatic::SetBloom(frameNode, std::nullopt, themeConstants);
+    }
+#endif
 }
 } // UnionEffectContainerAttributeModifier
 const GENERATED_ArkUIUnionEffectContainerModifier* GetUnionEffectContainerModifier()

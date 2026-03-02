@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,10 @@ public:
     virtual bool IsDataDetectorSupported() = 0;
     virtual void GetAIEntityMenu(TextDataDetectResult& textDataDetectResult) = 0;
     virtual void DataDetect(const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc) = 0;
-    virtual bool IsAskCeliaSupported() { return false; }
+    virtual bool IsAskCeliaSupported()
+    {
+        return false;
+    }
 
     virtual int8_t GetCursorPosition(const std::string& text, int8_t offset)
     {

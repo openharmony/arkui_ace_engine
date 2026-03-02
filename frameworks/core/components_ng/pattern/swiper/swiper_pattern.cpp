@@ -199,6 +199,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
         algo->SetIsFakeDragging(isFakeDragging_);
     }
     algo->SetCachedShow(IsCachedShow());
+    algo->SetCachedIndependent(independent_);
     algo->SetCurrentIndex(currentIndex_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     oldContentMainSize_ = contentMainSize_;
@@ -1683,6 +1684,7 @@ void SwiperPattern::FireAnimationStartEvent(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    ContentChangeOnTransitionStart(host);
 }
 
 void SwiperPattern::FireAnimationEndEvent(
@@ -1698,6 +1700,7 @@ void SwiperPattern::FireAnimationEndEvent(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    ContentChangeOnTransitionEnd(host);
 }
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
@@ -3520,6 +3523,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     ResetAnimationParam();
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
+    ContentChangeOnTransitionStart(GetHost());
 }
 
 void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately, bool stopLongPointAnimation)
@@ -3592,6 +3596,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
 
     isTouchDown_ = false;
     isTouchDownOnOverlong_ = false;
+    SetLazyLoadFeature(true);
     if (!CheckSwiperPanEvent(dragVelocity) || !CheckContentWillScroll(dragVelocity, mainDelta)) {
         dragVelocity = 0.0;
     }
@@ -3639,6 +3644,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
         FireWillShowEvent(pauseTargetIndex_.value_or(0));
         FireWillHideEvent(currentIndex_);
     }
+    ContentChangeOnTransitionEnd(GetHost());
 }
 
 void SwiperPattern::UpdateCurrentIndex(int32_t index)
@@ -5547,7 +5553,7 @@ int32_t SwiperPattern::GetCachedCount() const
     CHECK_NULL_RETURN(props, 1);
     auto cachedCount = props->GetCachedCount().value_or(1);
 
-    if (IsSwipeByGroup()) {
+    if (IsSwipeByGroup() && !independent_) {
         cachedCount *= GetDisplayCount();
     }
 
@@ -7979,6 +7985,13 @@ void SwiperPattern::LoadCompleteManagerStopCollect(bool needSwiperChangeEnd)
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->GetLoadCompleteManager()->StopCollect();
+    ContentChangeReport(GetHost(), needSwiperChangeEnd);
+}
+
+void SwiperPattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool needSwiperChangeEnd)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     if (IsAutoPlay()) {
@@ -7990,7 +8003,37 @@ void SwiperPattern::LoadCompleteManagerStopCollect(bool needSwiperChangeEnd)
     if (targetIndex_.has_value() && targetIndex_.value() == currentIndex_) {
         return;
     }
-    mgr->OnSwiperChangeEnd(GetHost(), hasTabsAncestor_);
+    mgr->OnSwiperChangeEnd(keyNode, hasTabsAncestor_);
+}
+
+void SwiperPattern::ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode) const
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    CHECK_NULL_VOID(keyNode);
+    mgr->OnTransitionAdded(keyNode->GetId());
+}
+
+void SwiperPattern::ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNode) const
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    CHECK_NULL_VOID(keyNode);
+    mgr->OnTransitionRemoved(keyNode->GetId());
+}
+
+void SwiperPattern::ContentChangeByDetaching(PipelineContext* pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    mgr->OnTransitionRemoved(host->GetId());
 }
 
 bool SwiperPattern::StartFakeDrag()

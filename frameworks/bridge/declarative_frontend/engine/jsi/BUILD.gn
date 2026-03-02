@@ -334,6 +334,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_utils.cpp",
       "nativeModule/ui_context_helper.cpp",
       "utils/jsi_module_loader.cpp",
+      "utils/jsi_stage_utils.cpp",
     ]
 
     if (defined(config.web_components_support) &&
@@ -392,7 +393,9 @@ template("declarative_js_engine_ark") {
           "ability_runtime:app_manager",
           "bundle_framework:appexecfwk_core",
           "form_fwk:fmskit_native",
-          "form_fwk:form_manager",
+          "form_fwk:form_render_info",
+          "form_fwk:form_common_info",
+          "form_fwk:form_utils",
           "graphic_2d:librender_service_client",
           "input:libmmi-client",
           "ipc:ipc_core",

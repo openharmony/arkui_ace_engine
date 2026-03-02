@@ -120,6 +120,7 @@ public:
         paintMethod->SetIsHover(isHover_);
         paintMethod->SetIsPressed(isPressed_);
         paintMethod->SetHoverPoint(hoverPoint_);
+        paintMethod->SetIsLongPressed(isLongPressed_);
         if (mouseClickIndex_) {
             mouseClickIndex_ = swiperPattern->GetLoopIndex(mouseClickIndex_.value());
         }

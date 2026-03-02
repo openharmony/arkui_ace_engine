@@ -16,7 +16,8 @@
 import { int32 } from '@koalaui/common';
 import { RecordData } from '@ohos.base';
 import { default as uiObserver } from '@ohos/arkui/observer';
-import { CustomComponentV2 } from './customComponent';
+import { CustomComponentV2, CustomComponentLifecycle } from './customComponent';
+import { __CustomComponentLifecycle__Internal } from './customComponentLifecycle';
 import { InteropNativeModule, SerializerBase, DeserializerBase, KPointer } from '@koalaui/interop';
 import {
     IProvideDecoratedVariable,
@@ -70,6 +71,17 @@ export interface IExtendableComponent {
 export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     static current: object | undefined = undefined;
     private activeCount_: number = 1;
+
+    // Lifecycle management
+    @JSONStringifyIgnore
+    private __lifecycle__Internal?: CustomComponentLifecycle;
+
+    __getLifecycle__Internal(): CustomComponentLifecycle {
+        if (!this.__lifecycle__Internal) {
+            this.__lifecycle__Internal = new __CustomComponentLifecycle__Internal(this as Object);
+        }
+        return this.__lifecycle__Internal!;
+    }
 
     private parent_: ExtendableComponent | undefined;
     private providedVars_: Map<string, IProvideDecoratedVariable<object>> = new Map<string, IProvideDecoratedVariable<object>>();

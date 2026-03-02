@@ -49,6 +49,7 @@ constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
+constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
 constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
@@ -114,6 +115,11 @@ bool IsDownloadByNetworkDisabled()
 bool IsRecycleImageEnabled()
 {
     return system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "false") == "true";
+}
+
+bool IsImageReleaseManageObjectEnabled()
+{
+    return system::GetBoolParameter(ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY, false);
 }
 
 bool IsSvgTraceEnabled()
@@ -735,6 +741,7 @@ std::atomic<bool> SystemProperties::debugBoundaryEnabled_(IsDebugBoundaryEnabled
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
+bool SystemProperties::imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
@@ -955,6 +962,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
         downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
         recycleImageEnabled_ = IsRecycleImageEnabled();
+        imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
         pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
         forcibleLandscapeEnabled_ = system::GetBoolParameter("const.settings.forcible_landscape_enable", false);
         softPagetransition_ = system::GetBoolParameter("const.arkui.softPagetransition", false);

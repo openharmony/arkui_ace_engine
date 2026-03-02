@@ -737,11 +737,7 @@ void SetRichEditorEditMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallba
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (isJsView) {
-        CHECK_NULL_VOID(onCreateMenuCallback || onMenuItemClickCallback || onPrepareMenuCallback);
-    } else {
-        CHECK_NULL_VOID(onCreateMenuCallback && onMenuItemClickCallback && onPrepareMenuCallback);
-    }
+    CHECK_NULL_VOID(onCreateMenuCallback && onMenuItemClickCallback && onPrepareMenuCallback);
     NG::OnCreateMenuCallback* onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
     NG::OnMenuItemClickCallback* onMenuItemClick
         = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
@@ -1381,7 +1377,8 @@ void SetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 co
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }

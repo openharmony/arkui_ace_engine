@@ -403,8 +403,14 @@ HWTEST_F(TextFieldPatternTestThree, OnBackPressed001, TestSize.Level0)
     pattern_->SetSelectionFlag(start, end, options);
     EXPECT_EQ(pattern_->isEdit_, true);
 
+    /**
+     * trigger onbackpressed
+     */
     bool ret = pattern_->OnBackPressed();
     pattern_->imeShown_ = true;
+    /**
+     * trigger onbackpressed
+     */
     ret = pattern_->OnBackPressed();
     EXPECT_EQ(ret, true);
 }

@@ -71,7 +71,7 @@ class PreviewMenuController;
 enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
-using ExternalDrawCallback = std::function<bool(float, float, float, float)>;
+using ExternalDrawCallback = std::function<bool(const ExternalDrawCallbackInfo&)>;
 struct SpanNodeInfo {
     RefPtr<UINode> node;
     RefPtr<UINode> containerSpanNode;
@@ -769,6 +769,11 @@ public:
 
     ACE_FORCE_EXPORT bool DidExceedMaxLines() const override;
 
+    bool IsOnlyFontSizeOrColorChanged()
+    {
+        return textStyle_.has_value() ? textStyle_->CheckIsFontSizeOrColorChanged() : false;
+    }
+
     std::optional<ParagraphStyle> GetExternalParagraphStyle()
     {
         return externalParagraphStyle_;
@@ -974,6 +979,10 @@ public:
     void SetExternalDrawCallback(ExternalDrawCallback&& callback)
     {
         externalDrawCallback_ = std::move(callback);
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        if (textLayoutProperty) {
+            textLayoutProperty->SetIsNewMaterial(externalDrawCallback_ != nullptr);
+        }
     }
 
     const ExternalDrawCallback& GetExternalDrawCallback()
@@ -1000,7 +1009,15 @@ public:
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
     void ResetHighLightValue();
     ACE_FORCE_EXPORT void ReportSelectedText(bool isRegister = false) override;
-    bool GetIsSpecialSymbol() const;
+    void MarkMeasured(bool isMeasured)
+    {
+        isMeasured_ = isMeasured;
+    }
+
+    bool IsMeasured() const
+    {
+        return isMeasured_;
+    }
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
@@ -1301,6 +1318,8 @@ private:
     void HighlightDisappearAnimation();
     void HighlightAppearAnimation();
     bool HighlightTriggerScrollableParentToScroll(const RectF& highlightRect);
+    float CalculateScrollTargetOffset(
+        const RefPtr<ScrollablePattern>& scrollablePattern, const RectF& highlightInScroll, const RectF& frameRect);
     const RefPtr<ScrollablePattern> FindScrollableParentWithRelativeOffset(OffsetF& offset);
     RectF GetHighlightRect(const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& paragraphsRects) const;
     std::u16string GetContentWithPlaceholderSpaceFillter() const;
@@ -1369,13 +1388,13 @@ private:
     bool isRegisteredAreaCallback_ = false;
     OffsetF gestureSelectTextPaintOffset_;
     ExternalDrawCallback externalDrawCallback_;
+    bool isMeasured_ = false;
 
     std::shared_ptr<AnimationUtils::Animation> highlightAppearAnimation_;
     std::shared_ptr<AnimationUtils::Animation> highlightDisappearAnimation_;
 
     int32_t highlightAppearAnimationId_ = 0;
     int32_t highlightDisappearAnimationId_ = 0;
-    bool isSpecialSymbol_ = false;
 
     // ----- multi thread state variables -----
     // ----- multi thread state variables end -----

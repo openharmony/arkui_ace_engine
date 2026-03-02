@@ -39,7 +39,6 @@
 #include "core/event/resample_algo.h"
 
 namespace OHOS::Ace {
-class EventInfoManager;
 namespace NG {
 class FrameNode;
 class SelectOverlayManager;
@@ -214,8 +213,6 @@ public:
         }
         return refereeNG_;
     }
-
-    const RefPtr<EventInfoManager>& GetEventInfoManager() const;
 
     RefPtr<MouseStyleManager> GetMouseStyleManager() const
     {
@@ -536,7 +533,6 @@ private:
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
-    RefPtr<EventInfoManager> eventInfoManager_;
     RefPtr<MouseStyleManager> mouseStyleManager_;
     RefPtr<CoastingAxisEventGenerator> coastingAxisEventGenerator_;
     NG::EventTreeRecord eventTree_;

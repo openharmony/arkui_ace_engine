@@ -260,10 +260,9 @@ export class FolderStackOptions_serializer {
         let upperItemsTmpBuf: Array<string> | undefined = undefined
         if ((upperItemsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const upperItemsTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let upperItemsTmpBufOpt: Array<string> = new Array<string>(upperItemsTmpBufOptLength)
-            for (let upperItemsTmpBufOptBufCounterI = 0; upperItemsTmpBufOptBufCounterI < upperItemsTmpBufOptLength; upperItemsTmpBufOptBufCounterI++) {
-                upperItemsTmpBufOpt[upperItemsTmpBufOptBufCounterI] = (valueDeserializer.readString() as string)
-            }
+            const upperItemsTmpBufOpt: Array<string> = new Array<string>(upperItemsTmpBufOptLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
             upperItemsTmpBuf = upperItemsTmpBufOpt
         }
         const upperItemsTmpResult: Array<string> | undefined = upperItemsTmpBuf

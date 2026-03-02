@@ -351,6 +351,7 @@ protected:
 
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
+    void ContentChangeByDetaching(PipelineContext* pipeline) override;
 
     bool AvoidKeyboard() const override;
     bool AvoidTop() const override

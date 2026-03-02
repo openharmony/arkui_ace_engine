@@ -72,7 +72,8 @@ void SetToggleSelectedColorPtr(ArkUINodeHandle node, ArkUI_Uint32 selectedColor,
         CHECK_NULL_VOID(frameNode);
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
@@ -109,7 +110,8 @@ void SetToggleSwitchPointColorPtr(ArkUINodeHandle node, ArkUI_Uint32 switchPoint
         CHECK_NULL_VOID(frameNode);
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
@@ -358,7 +360,8 @@ void SetToggleUnselectedColorPtr(ArkUINodeHandle node, ArkUI_Uint32 unselectedCo
         CHECK_NULL_VOID(frameNode);
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }

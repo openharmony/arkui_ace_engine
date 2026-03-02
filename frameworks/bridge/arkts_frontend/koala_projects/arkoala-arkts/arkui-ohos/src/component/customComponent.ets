@@ -145,6 +145,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.styles = styles;
         ArkThemeScopeManager.getInstance().registerThemeScopeComponent(this);
     }
+
+    __getLifecycle__Internal(): CustomComponentLifecycle {
+        return this.instance.__getLifecycle__Internal();
+    }
  
     /** @memo:intrinsic */
     callStyles(): void {
@@ -353,6 +357,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                     this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
                 });
                 reusable.aboutToReuse(new ReuseObject(param))
+                this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_REUSE, new ReuseObject(param));
                 this.switchNodeFreeze();
                 this.updateUISync();
                 return;
@@ -362,6 +367,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                     this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
                 });
                 reusable.aboutToReuse(new ReuseObject({} as Record<string, RecordData> as RecordData));
+                this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_REUSE, new ReuseObject({} as Record<string, RecordData> as RecordData));
             } else {
                 const component = this.instance as BaseCustomComponent<T_Options>;
                 const data: T_Options = initializers as T_Options;
@@ -370,6 +376,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                     this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
                 });
                 reusable.aboutToReuse(new ReuseObject(params));
+                this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_REUSE, new ReuseObject(params));
             }
             this.switchNodeFreeze();
             this.updateUISync();
@@ -380,6 +387,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             reusable.resetStateVarsOnReuse(initializers0);
             this.instance.__unfreezeWhenReuse__Internal();
             reusable.aboutToReuse();
+            this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_REUSE);
             this.switchNodeFreeze();
             this.updateUISync();
         } else {
@@ -392,6 +400,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const component = this.instance as BaseCustomComponent<T_Options>;
             ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
                 component.aboutToRecycle(); // aboutToRecycle can change variable
+                this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_RECYCLE);
             });
             this.instance.__freezeWhenRecycle__Internal();
             this.switchNodeFreeze();
@@ -730,4 +739,44 @@ export interface NavInterface {
     pagePath: string;
     pageFullPath: string;
     integratedHsp: string;
+}
+
+/**
+ * Lifecycle state enumeration for custom components
+ */
+export enum CustomComponentLifecycleState {
+    INIT = 0,          // Initial state, component not initialized
+    APPEARED = 1,       // Component has appeared (aboutToAppear called)
+    BUILT = 2,          // Component has been built and rendered
+    RECYCLED = 3,       // Component has been recycled (reusable component)
+    DISAPPEARED = 4      // Component has disappeared
+}
+
+/**
+ * Lifecycle observer interface
+ */
+export interface CustomComponentLifecycleObserver {
+    aboutToAppear(): void {};
+    onDidBuild(): void {};
+    aboutToDisappear(): void {};
+    aboutToReuse(params?: ReuseObject): void {};
+    aboutToRecycle(): void {};
+}
+
+export interface CustomComponentLifecycle {
+    getCurrentState(): CustomComponentLifecycleState;
+    addObserver(observer: CustomComponentLifecycleObserver): void;
+    removeObserver(observer: CustomComponentLifecycleObserver): void;
+    trigger(event: LifeCycleEvent, params?: ReuseObject): boolean;
+}
+
+/**
+ * Lifecycle event enumeration
+ */
+export enum LifeCycleEvent {
+    ON_APPEAR = 0,       // Triggered when component appears
+    ON_BUILD = 1,         // Triggered after component build
+    ON_RECYCLE = 2,       // Triggered when component is recycled
+    ON_REUSE = 3,         // Triggered when component is reused
+    ON_DISAPPEAR = 4      // Triggered when component disappears
 }

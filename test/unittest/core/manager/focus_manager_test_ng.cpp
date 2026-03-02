@@ -81,7 +81,7 @@ const std::vector<HandleFocusCanBeActiveTestCase> FOCUS_ACTIVE_SUPPORT_HIERARCHY
  * @tc.type: FUNC
  * @tc.author: catpoison
  */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest001, TestSize.Level1)
+HWTEST_F(FocusManagerTestNg, FocusManagerTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. construct a FocusManager
@@ -102,7 +102,7 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author: catpoison
  */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest002, TestSize.Level1)
+HWTEST_F(FocusManagerTestNg, FocusManagerTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. construct a FocusManager and a FocusView
@@ -145,7 +145,7 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest002, TestSize.Level1)
  * @tc.desc: SetRequestFocusCallback / TriggerRequestFocusCallback
  * @tc.type: FUNC
  */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest003, TestSize.Level1)
+HWTEST_F(FocusManagerTestNg, FocusManagerTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. construct a FocusManager.
@@ -173,7 +173,7 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest003, TestSize.Level1)
  * @tc.desc: FlushFocusView
  * @tc.type: FUNC
  */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest004, TestSize.Level1)
+HWTEST_F(FocusManagerTestNg, FocusManagerTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. construct a FocusManager.
@@ -206,7 +206,7 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest004, TestSize.Level1)
  * @tc.desc: GetFocusViewMap
  * @tc.type: FUNC
  */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest005, TestSize.Level1)
+HWTEST_F(FocusManagerTestNg, FocusManagerTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. construct a FocusManager.
@@ -262,7 +262,7 @@ void setFocusManagerViewStack(RefPtr<FocusManager> focusManager)
  * @tc.desc: DumpFocusManager
  * @tc.type: FUNC
  */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest006, TestSize.Level1)
+HWTEST_F(FocusManagerTestNg, FocusManagerTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. construct a FocusManager
@@ -286,7 +286,7 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest006, TestSize.Level1)
  * @tc.desc: RemoveFocusScope
  * @tc.type: FUNC
  */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest007, TestSize.Level1)
+HWTEST_F(FocusManagerTestNg, FocusManagerTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. construct a FocusManager
@@ -319,7 +319,7 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest007, TestSize.Level1)
  * @tc.desc: GetFocusScopePriorityList
  * @tc.type: FUNC
  */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest008, TestSize.Level1)
+HWTEST_F(FocusManagerTestNg, FocusManagerTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. construct a FocusManager
@@ -346,7 +346,7 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest008, TestSize.Level1)
  * @tc.desc: WindowFocusMoveEnd
  * @tc.type: FUNC
  */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest009, TestSize.Level1)
+HWTEST_F(FocusManagerTestNg, FocusManagerTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. construct a FocusManager
@@ -364,7 +364,7 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest009, TestSize.Level1)
  * @tc.desc: FocusSwitchingEnd
  * @tc.type: FUNC
  */
-HWTEST_F(FocusManagerTestNg, FocusManagerTest010, TestSize.Level1)
+HWTEST_F(FocusManagerTestNg, FocusManagerTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. construct a FocusManager

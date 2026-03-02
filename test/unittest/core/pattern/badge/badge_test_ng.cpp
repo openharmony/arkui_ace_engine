@@ -1989,6 +1989,12 @@ HWTEST_F(BadgeTestNg, BadgePatternOnColorUpdate001, TestSize.Level1)
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     auto badgeTextColor = badgeTheme->GetBadgeTextColor();
     EXPECT_EQ(layoutProperty->GetBadgeTextColor(), badgeTextColor);
+    layoutProperty->ResetBadgeFontSize();
+    pattern_->OnColorConfigurationUpdate();
+    EXPECT_FALSE(layoutProperty->GetBadgeFontSize().has_value());
+    layoutProperty->UpdateBadgeFontSize(UNDEFINED_DIMENSION);
+    pattern_->OnColorConfigurationUpdate();
+    EXPECT_EQ(layoutProperty->GetBadgeFontSize().value(), UNDEFINED_DIMENSION);
 
     layoutProperty->UpdateBadgePositionXByuser(true);
     layoutProperty->UpdateBadgePositionYByuser(true);

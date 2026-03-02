@@ -220,10 +220,9 @@ export class BreakPoints_serializer {
         let valueTmpBuf: Array<string> | undefined = undefined
         if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const valueTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let valueTmpBufOpt: Array<string> = new Array<string>(valueTmpBufOptLength)
-            for (let valueTmpBufOptBufCounterI = 0; valueTmpBufOptBufCounterI < valueTmpBufOptLength; valueTmpBufOptBufCounterI++) {
-                valueTmpBufOpt[valueTmpBufOptBufCounterI] = (valueDeserializer.readString() as string)
-            }
+            const valueTmpBufOpt: Array<string> = new Array<string>(valueTmpBufOptLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
             valueTmpBuf = valueTmpBufOpt
         }
         const valueTmpResult: Array<string> | undefined = valueTmpBuf

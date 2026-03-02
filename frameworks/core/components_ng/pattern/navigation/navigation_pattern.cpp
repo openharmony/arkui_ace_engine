@@ -1539,6 +1539,26 @@ void NavigationPattern::ProcessSameTopNavPath()
     ClearRecoveryList();
 }
 
+void NavigationPattern::UpdatePlaceholderVisibilityIfNeeded()
+{
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    if (!host->GetIsStaticPlaceholder()) {
+        return;
+    }
+    auto phNode = AceType::DynamicCast<FrameNode>(host->GetPlaceholderContentNode());
+    CHECK_NULL_VOID(phNode);
+    CHECK_NULL_VOID(navigationStack_);
+    auto navProperty = host->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navProperty);
+    bool isHideNavBar = navProperty->GetHideNavBar().value_or(false);
+    auto phProperty = phNode->GetLayoutProperty();
+    CHECK_NULL_VOID(phProperty);
+    if (navigationStack_->Empty() && navigationMode_ == NavigationMode::SPLIT && !isHideNavBar) {
+        phProperty->UpdateVisibility(VisibleType::VISIBLE);
+    }
+}
+
 void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
@@ -1549,6 +1569,8 @@ void NavigationPattern::CheckTopNavPathChange(
     if (preTopNavPath != newTopNavPath) {
         UpdateSystemBarStyleOnTopNavPathChange(newTopNavPath);
     }
+
+    UpdatePlaceholderVisibilityIfNeeded();
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (preTopNavPath == newTopNavPath) {
         ProcessSameTopNavPath();
@@ -3814,6 +3836,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     ACE_UINODE_TRACE(hostNode);
+    ContentChangeOnTransitionStart(topDestination);
     bool isNotNeedAnimation = !isAnimated;
 #if defined(ENABLE_NAV_SPLIT_MODE)
     isNotNeedAnimation = !isAnimated ||
@@ -5075,13 +5098,6 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
         return;
     }
 
-    /**
-     * During the NavDestination transition with page-level orientation, the orientation should be locked.
-     * Calling the GetPageViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
-     * the end of the locking.
-     * @see SetRequestedOrientationIfNeeded
-     */
-    enableLockOrientation_ = true;
     RefPtr<PageViewportConfig> currentConfig = nullptr;
     RefPtr<PageViewportConfig> targetConfig = nullptr;
     PageViewportConfigParams currentParams;
@@ -5093,7 +5109,13 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
         TAG_LOGE(ACE_NAVIGATION, "failed to get pageViewportConfig");
         return;
     }
-
+    /**
+     * During the NavDestination transition with page-level orientation, the orientation should be locked.
+     * Calling the GetPageViewportConfig marks the start of locking, while calling SetRequestedOrientation marks
+     * the end of the locking.
+     * @see SetRequestedOrientationIfNeeded
+     */
+    enableLockOrientation_ = true;
     auto curDisplayOrientation = container->GetCurrentDisplayOrientation();
     auto targetDisplayOrientation = targetConfig->GetOrientation();
     auto angle = CalcRotateAngleWithDisplayOrientation(curDisplayOrientation, targetDisplayOrientation);
@@ -6303,6 +6325,26 @@ void NavigationPattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnPageTransitionEnd(keyNode);
+}
+
+void NavigationPattern::ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    CHECK_NULL_VOID(keyNode);
+    mgr->OnTransitionAdded(keyNode->GetId());
+}
+
+void NavigationPattern::ContentChangeByDetaching(PipelineContext* pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    mgr->OnTransitionRemoved(host->GetId());
 }
 
 void NavigationPattern::FireNavigateChangeCallback()

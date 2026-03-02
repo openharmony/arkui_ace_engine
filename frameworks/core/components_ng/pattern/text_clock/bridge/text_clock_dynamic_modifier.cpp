@@ -430,7 +430,6 @@ void InitFontDefault(ArkUINodeHandle node)
 
 ArkUINodeHandle CreateTextClockController()
 {
-    LOGI("CreateTextClockController entry");
     auto controller = TextClockModelNG::CreateTextClock();
     CHECK_NULL_RETURN(controller, nullptr);
     controller->IncRefCount();
@@ -613,7 +612,6 @@ void InitFontDefaultImpl(ArkUINodeHandle node)
 
 ArkUINodeHandle CreateTextClockControllerImpl()
 {
-    LOGI("CreateTextClockControllerImpl entry");
     auto controller = GetTextClockImpl()->Create();
     CHECK_NULL_RETURN(controller, nullptr);
     controller->IncRefCount();

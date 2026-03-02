@@ -863,6 +863,102 @@
       "last_updated": "2026-02-07"
     },
     {
+      "name": "Layout Framework",
+      "name_cn": "布局框架",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "布局框架",
+        "layout framework",
+        "布局流程",
+        "UITaskScheduler",
+        "FrameNode",
+        "Measure",
+        "Layout",
+        "geometry sync",
+        "safe area",
+        "pipeline"
+      ],
+      "aliases": [
+        "布局系统",
+        "Layout Flow",
+        "布局机制"
+      ],
+      "file_path": "layout/Layout_Framework_Knowledge_Base.md",
+      "source_paths": {
+        "scheduler": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+        "frame_node": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.cpp",
+        "layout_wrapper": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "layout_algorithm": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_algorithm.cpp"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-26"
+    },
+    {
+      "name": "Safe Area Mechanism",
+      "name_cn": "安全区域机制",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "safe area",
+        "安全区域",
+        "safeAreaPadding",
+        "accumulatedSafeAreaExpand",
+        "expandSafeArea",
+        "ignoreLayoutSafeArea",
+        "SafeAreaManager",
+        "layout wrapper",
+        "键盘避让",
+        "刘海屏"
+      ],
+      "aliases": [
+        "SafeArea",
+        "安全区机制",
+        "安全区避让"
+      ],
+      "file_path": "layout/Safe_Area_Mechanism_Knowledge_Base.md",
+      "source_paths": {
+        "safe_area_manager": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
+        "layout_wrapper": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "layout_property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_property.cpp",
+        "js_api": "OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-26"
+    },
+    {
+      "name": "Ignore Layout Safe Area",
+      "name_cn": "忽略布局安全区机制",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "ignoreLayoutSafeArea",
+        "忽略布局安全区",
+        "PreMeasure",
+        "PostponedTaskForIgnore",
+        "FlushPostponedLayoutTask",
+        "TraverseForIgnore",
+        "延迟布局",
+        "后抛任务",
+        "MEASURE_FOR_IGNORE",
+        "LAYOUT_FOR_IGNORE"
+      ],
+      "aliases": [
+        "IgnoreLayoutSafeArea",
+        "忽略安全区布局",
+        "Ignore Safe Area"
+      ],
+      "file_path": "layout/Ignore_Layout_Safe_Area_Knowledge_Base.md",
+      "source_paths": {
+        "frame_node": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.cpp",
+        "ui_task_scheduler": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+        "layout_wrapper": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "layout_property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_property.cpp"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-26"
+    },
+    {
       "name": "Gesture",
       "name_cn": "手势系统",
       "category": "system",
@@ -1074,7 +1170,11 @@
       "name": "系统功能",
       "description": "ArkUI 系统级功能",
       "components": [
-        "Gesture & DragDrop"
+        "Gesture",
+        "DragDrop",
+        "Layout Framework",
+        "Safe Area Mechanism",
+        "Ignore Layout Safe Area"
       ]
     }
   }

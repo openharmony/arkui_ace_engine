@@ -700,7 +700,8 @@ void SetSearchDividerColor(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint3
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -2031,8 +2032,8 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         static const ArkUISearchModifier modifier = {
             .setSelectDetectorEnable = nullptr,
-            .getSelectDetectorEnable = nullptr,
             .resetSelectDetectorEnable = nullptr,
+            .getSelectDetectorEnable = nullptr,
             .setSearchPlaceholderColor = SetSearchPlaceholderColorImpl,
             .resetSearchPlaceholderColor = nullptr,
             .setSearchTextFont = SetSearchTextFontImpl,
@@ -2041,9 +2042,12 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchSelectionMenuHidden = nullptr,
             .setSearchCaretStyle = nullptr,
             .resetSearchCaretStyle = nullptr,
+            .resetSearchCaretColor = nullptr,
             .setSearchTextAlign = SetSearchTextAlignImpl,
             .resetSearchTextAlign = nullptr,
             .setSearchCancelButton = nullptr,
+            .setJsSearchCancelButton = nullptr,
+            .setJsSearchDefaultCancelButton = nullptr,
             .resetSearchCancelButton = nullptr,
             .setSearchEnableKeyboardOnFocus = nullptr,
             .resetSearchEnableKeyboardOnFocus = nullptr,
@@ -2073,10 +2077,10 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchLineHeight = nullptr,
             .setSearchHalfLeading = nullptr,
             .resetSearchHalfLeading = nullptr,
-            .setSearchFontFeature = nullptr,
-            .resetSearchFontFeature = nullptr,
             .setSearchDividerColor = nullptr,
             .resetSearchDividerColor = nullptr,
+            .setSearchFontFeature = nullptr,
+            .resetSearchFontFeature = nullptr,
             .setSearchAdaptMinFontSize = nullptr,
             .resetSearchAdaptMinFontSize = nullptr,
             .setSearchAdaptMaxFontSize = nullptr,
@@ -2109,6 +2113,7 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchOnPaste = nullptr,
             .setSearchOnChange = nullptr,
             .resetSearchOnChange = nullptr,
+            .setSearchOnChangeEvent = nullptr,
             .setSearchOnTextSelectionChange = nullptr,
             .resetSearchOnTextSelectionChange = nullptr,
             .setSearchOnContentScroll = nullptr,
@@ -2148,15 +2153,15 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchStrokeColor = nullptr,
             .setEnableAutoSpacing = nullptr,
             .resetEnableAutoSpacing = nullptr,
+            .setSearchCompressLeadingPunctuation = nullptr,
+            .resetSearchCompressLeadingPunctuation = nullptr,
+            .getSearchCompressLeadingPunctuation = nullptr,
             .setSearchMargin = nullptr,
             .resetSearchMargin = nullptr,
             .setSearchCustomKeyboard = nullptr,
             .resetSearchCustomKeyboard = nullptr,
             .setSearchOnWillAttachIME = nullptr,
             .resetSearchOnWillAttachIME = nullptr,
-            .setSearchCompressLeadingPunctuation = nullptr,
-            .getSearchCompressLeadingPunctuation = nullptr,
-            .resetSearchCompressLeadingPunctuation = nullptr,
             .setSearchDirection = nullptr,
             .getSearchDirection = nullptr,
             .resetSearchDirection = nullptr,
@@ -2177,14 +2182,10 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchInputFilter = nullptr,
             .setSearchCustomKeyboardWithBuilder = nullptr,
             .resetSearchCustomKeyboardWithBuilder = nullptr,
-            .resetSearchCaretColor = nullptr,
             .setSearchBorderRadius = nullptr,
             .setSearchBackgroundColor = nullptr,
             .resetSearchBackgroundColor = nullptr,
             .setBackBorder = SetBackBorderImpl,
-            .setJsSearchCancelButton = nullptr,
-            .setJsSearchDefaultCancelButton = nullptr,
-            .setSearchOnChangeEvent = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -2194,8 +2195,8 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISearchModifier modifier = {
         .setSelectDetectorEnable = SetSelectDetectorEnable,
-        .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
         .setSearchPlaceholderColor = SetSearchPlaceholderColor,
         .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
         .setSearchTextFont = SetSearchTextFont,
@@ -2204,9 +2205,12 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchSelectionMenuHidden = ResetSearchSelectionMenuHidden,
         .setSearchCaretStyle = SetSearchCaretStyle,
         .resetSearchCaretStyle = ResetSearchCaretStyle,
+        .resetSearchCaretColor = ResetSearchCaretColor,
         .setSearchTextAlign = SetSearchTextAlign,
         .resetSearchTextAlign = ResetSearchTextAlign,
         .setSearchCancelButton = SetSearchCancelButton,
+        .setJsSearchCancelButton = SetJsSearchCancelButton,
+        .setJsSearchDefaultCancelButton = SetJsSearchDefaultCancelButton,
         .resetSearchCancelButton = ResetSearchCancelButton,
         .setSearchEnableKeyboardOnFocus = SetSearchEnableKeyboardOnFocus,
         .resetSearchEnableKeyboardOnFocus = ResetSearchEnableKeyboardOnFocus,
@@ -2236,10 +2240,10 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchLineHeight = ResetSearchLineHeight,
         .setSearchHalfLeading = SetSearchHalfLeading,
         .resetSearchHalfLeading = ResetSearchHalfLeading,
-        .setSearchFontFeature = SetSearchFontFeature,
-        .resetSearchFontFeature = ResetSearchFontFeature,
         .setSearchDividerColor = SetSearchDividerColor,
         .resetSearchDividerColor = ResetSearchDividerColor,
+        .setSearchFontFeature = SetSearchFontFeature,
+        .resetSearchFontFeature = ResetSearchFontFeature,
         .setSearchAdaptMinFontSize = SetSearchAdaptMinFontSize,
         .resetSearchAdaptMinFontSize = ResetSearchAdaptMinFontSize,
         .setSearchAdaptMaxFontSize = SetSearchAdaptMaxFontSize,
@@ -2272,6 +2276,7 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchOnPaste = ResetSearchOnPaste,
         .setSearchOnChange = SetSearchOnChange,
         .resetSearchOnChange = ResetSearchOnChange,
+        .setSearchOnChangeEvent = SetSearchOnChangeEvent,
         .setSearchOnTextSelectionChange = SetSearchOnTextSelectionChange,
         .resetSearchOnTextSelectionChange = ResetSearchOnTextSelectionChange,
         .setSearchOnContentScroll = SetSearchOnContentScroll,
@@ -2311,15 +2316,15 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchStrokeColor = ResetSearchStrokeColor,
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
+        .setSearchCompressLeadingPunctuation = SetSearchCompressLeadingPunctuation,
+        .resetSearchCompressLeadingPunctuation = ResetSearchCompressLeadingPunctuation,
+        .getSearchCompressLeadingPunctuation = GetSearchCompressLeadingPunctuation,
         .setSearchMargin = SetSearchMargin,
         .resetSearchMargin = ResetSearchMargin,
         .setSearchCustomKeyboard = SetSearchCustomKeyboard,
         .resetSearchCustomKeyboard = ResetSearchCustomKeyboard,
         .setSearchOnWillAttachIME = SetSearchOnWillAttachIME,
         .resetSearchOnWillAttachIME = ResetSearchOnWillAttachIME,
-        .setSearchCompressLeadingPunctuation = SetSearchCompressLeadingPunctuation,
-        .getSearchCompressLeadingPunctuation = GetSearchCompressLeadingPunctuation,
-        .resetSearchCompressLeadingPunctuation = ResetSearchCompressLeadingPunctuation,
         .setSearchDirection = SetSearchDirection,
         .getSearchDirection = GetSearchDirection,
         .resetSearchDirection = ResetSearchDirection,
@@ -2340,14 +2345,10 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchInputFilter = ResetSearchInputFilter,
         .setSearchCustomKeyboardWithBuilder = SetSearchCustomKeyboardWithBuilder,
         .resetSearchCustomKeyboardWithBuilder = ResetSearchCustomKeyboardWithBuilder,
-        .resetSearchCaretColor = ResetSearchCaretColor,
         .setSearchBorderRadius = SetSearchBorderRadius,
         .setSearchBackgroundColor = SetSearchBackgroundColor,
         .resetSearchBackgroundColor = RetSetSearchBackgroundColor,
         .setBackBorder = SetBackBorder,
-        .setJsSearchCancelButton = SetJsSearchCancelButton,
-        .setJsSearchDefaultCancelButton = SetJsSearchDefaultCancelButton,
-        .setSearchOnChangeEvent = SetSearchOnChangeEvent,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2358,8 +2359,8 @@ const CJUISearchModifier* GetCJUISearchModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISearchModifier modifier = {
         .setSelectDetectorEnable = SetSelectDetectorEnable,
-        .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
         .setSearchPlaceholderColor = SetSearchPlaceholderColor,
         .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
         .setSearchTextFont = SetSearchTextFont,

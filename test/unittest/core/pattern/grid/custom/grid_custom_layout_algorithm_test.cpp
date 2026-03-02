@@ -1534,4 +1534,34 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, AdjustOffsetMaintainsPosition, TestSiz
     EXPECT_EQ(pattern_->info_.endIndex_, 17);
 }
 
+/**
+ * @tc.name: MeasureToTargetCachedItemHeight001
+ * @tc.desc: Test MeasureToTarget calculates correct itemHeight when target item is in cache range
+ *           This test verifies the fix for the issue where GetHeightInRange would include an extra
+ *           mainGap when calculating item height for items spanning multiple rows.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, MeasureToTargetCachedItemHeight001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(Get3LinesIrregularDemoOptions(30, ITEM_MAIN_SIZE));
+    model.SetRowsGap(Dimension(5));
+    CreateItemsInLazyForEach(30, [](uint32_t idx) {
+        return idx % 3 == 0 ? ITEM_MAIN_SIZE * 2 - 5 : ITEM_MAIN_SIZE - 5;
+    });
+    CreateDone();
+
+    // First, scroll down to make some items out of view
+    ScrollBy(0, ITEM_MAIN_SIZE * 2);
+    ScrollBy(0, ITEM_MAIN_SIZE * 2);
+
+    AnimateToIndexWithTicks(10, ScrollAlign::END);
+
+    // Verify the item is correctly positioned at the start
+    EXPECT_EQ(pattern_->info_.startIndex_, 3);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 2);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -ITEM_MAIN_SIZE + 5);
+}
+
 } // namespace OHOS::Ace::NG

@@ -348,4 +348,38 @@ HWTEST_F(UINodeMultiThreadTest, PostAfterAttachMainTreeTask001, TestSize.Level1)
     safeNode1->ExecuteAfterAttachMainTreeTasks();
     EXPECT_EQ(safeNode1->afterAttachMainTreeTasks_.size(), 0);
 }
+
+
+/**
+ * @tc.name: DoAddChildFreeState001
+ * @tc.desc: Test DoAddChild with parent not free and child free
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeMultiThreadTest, DoAddChildFreeState001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent and child nodes
+     */
+    auto parent = FrameNode::CreateFrameNode("unsafe", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("safe", 2, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set parent not free, child free
+     */
+    parent->SetIsFree(false);
+    child->SetIsFree(true);
+
+    /**
+     * @tc.steps: step3. add child to parent using DoAddChild
+     */
+    auto it = parent->children_.begin();
+    parent->DoAddChild(it, child, false, false);
+
+    /**
+     * @tc.expected: child should be marked not free after insertion
+     */
+    EXPECT_FALSE(child->IsFree());
+    EXPECT_EQ(parent->children_.size(), 1);
+    parent->Clean();
+}
 } // namespace OHOS::Ace::NG

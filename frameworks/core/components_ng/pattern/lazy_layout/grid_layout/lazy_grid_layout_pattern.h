@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT LazyGridLayoutPattern : public LazyLayoutPattern {
+class ACE_FORCE_EXPORT LazyGridLayoutPattern : public LazyLayoutPattern {
     DECLARE_ACE_TYPE(LazyGridLayoutPattern, LazyLayoutPattern);
 
 public:
@@ -56,6 +56,15 @@ public:
 
     void OnAttachToMainTree() override;
 
+    // 判断当前组件是否为 DynamicLayout
+    bool IsDynamicLayout() const;
+
+    // DynamicLayout 支持：设置动态布局标志
+    void SetDynamicLayoutOptions(bool isDynamic)
+    {
+        isDynamicLayout_ = isDynamic;
+    }
+
     AdjustOffset GetAdjustOffset() const override
     {
         return layoutInfo_->adjustOffset_;
@@ -78,6 +87,9 @@ private:
     int32_t itemTotalCount_ = 0;
 
     RefPtr<LazyGridLayoutInfo> layoutInfo_;
+
+    // DynamicLayout 标识
+    bool isDynamicLayout_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyGridLayoutPattern);
 };

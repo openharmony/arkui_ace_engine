@@ -679,8 +679,8 @@ void RepeatVirtualScroll2Node::PostIdleTask()
 
     context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t /*deadline*/, bool /*canUseLongPredictTask*/) {
         auto node = weak.Upgrade();
-        ACE_SCOPED_TRACE("Repeat.IdleTask, nodeId[%d]", node->GetId());
         CHECK_NULL_VOID(node);
+        ACE_SCOPED_TRACE("Repeat.IdleTask, nodeId[%d]", node->GetId());
         node->postUpdateTaskHasBeenScheduled_ = false;
         TAG_LOGD(AceLogTag::ACE_REPEAT, "Repeat(%{public}d).PostIdleTask idle task calls GetChildren",
             static_cast<int32_t>(node->GetId()));

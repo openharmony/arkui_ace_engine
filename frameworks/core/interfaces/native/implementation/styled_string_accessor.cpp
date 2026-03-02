@@ -127,9 +127,11 @@ void UpdateSpansRange(std::vector<RefPtr<SpanBase>>& styles, int32_t maxLength)
             continue;
         }
         if (style->GetStartIndex() < 0 || style->GetStartIndex() >= maxLength) {
+            auto length = style->GetLength();
             style->UpdateStartIndex(0);
+            style->UpdateEndIndex(length);
         }
-        if (style->GetEndIndex() < style->GetStartIndex() || style->GetEndIndex() >= maxLength) {
+        if (style->GetEndIndex() <= style->GetStartIndex() || style->GetEndIndex() >= maxLength) {
             style->UpdateEndIndex(maxLength);
         }
     }

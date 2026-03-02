@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("scrollable_test_ng") {
-  module_name = "ScrollingSet-ListAndListItemAndListItemGroup"
+  module_name = "ScrollingSet-Scrollable"
   type = "new"
   sources = [
     "scrollable_axis_test_ng.cpp",

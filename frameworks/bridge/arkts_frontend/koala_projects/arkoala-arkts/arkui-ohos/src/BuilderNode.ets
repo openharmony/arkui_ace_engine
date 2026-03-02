@@ -151,7 +151,7 @@ export class BuilderNode<T = undefined> {
         BuilderNodeFinalizationRegisterProxy.register<T>(this);
     }
     //@ts-ignore
-    public build(builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options?: BuildOptions): void {
+    public build(builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options: BuildOptions): void {
         this._JSBuilderNode.buildT(builder, params, options);
         this.nodePtr_ = this._JSBuilderNode.getValidNodePtr();
     }
@@ -246,11 +246,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             if (options?.type !== undefined) {
                 buildOptions.type = options.type!;
             }
-            try {
-                this.setOptions(buildOptions);
-            } catch (e) {
-                InteropNativeModule._NativeLog('BuilderNode Warning: ' + e?.message + ', ' + e?.stack);
-            }
+            this.setOptions(buildOptions);
         }
         this.__manager = createStateManager()!;
         let uiData = new ContextRecord();

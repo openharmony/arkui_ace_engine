@@ -315,7 +315,7 @@ void ProgressModifier::SetInVisibleArea(bool value)
     CHECK_NULL_VOID(inVisibleArea_ != value);
     inVisibleArea_ = value;
     if (progressStatus_->Get() != static_cast<int32_t>(ProgressStatus::LOADING)) {
-        ProcessSweepingAnimation(ProgressType(progressType_->Get()), value_->Get());
+        ProcessSweepingAnimation(ProgressType(progressType_->Get()), valueBackup_);
     } else {
         if (value) {
             StartRingLoadingAnimation();

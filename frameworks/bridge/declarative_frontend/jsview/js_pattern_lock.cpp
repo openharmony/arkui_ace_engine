@@ -38,16 +38,13 @@ void JSPatternLockControllerBinding::Reset(const JSCallbackInfo& args)
 
 void JSPatternLockControllerBinding::SetChallengeResult(const JSCallbackInfo& args)
 {
-    auto* jsController = JSRef<JSObject>::Cast(args.This())->Unwrap<JSPatternLockController>();
-    CHECK_NULL_VOID(jsController);
-    auto controller = jsController->GetController();
-    if (controller) {
+    if (controller_) {
         if (!args[0]->IsNumber()) {
             return;
         }
         int32_t value = args[0]->ToNumber<int32_t>();
         if (value >= 1 && value <= static_cast<int32_t>(CHALLENGE_RESULT.size())) {
-            controller->SetChallengeResult(CHALLENGE_RESULT[value - 1]);
+            controller_->SetChallengeResult(CHALLENGE_RESULT[value - 1]);
         }
     }
 }

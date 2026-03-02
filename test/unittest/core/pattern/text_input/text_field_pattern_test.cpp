@@ -239,6 +239,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern009, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     textFieldNode->SetParent(frameNode_);
     ASSERT_NE(textFieldNode, nullptr);
+    /**
+     * @tc.steps: step2. get pattern
+     */
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->dragStatus_ = DragStatus::ON_DROP;
@@ -260,6 +263,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern010, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
     textFieldNode->SetParent(frameNode_);
+    /**
+     * @tc.steps: step2. get pattern
+     */
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->dragStatus_ = DragStatus::DRAGGING;
@@ -1851,13 +1857,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern079, TestSize.Level0)
     ASSERT_NE(paintProperty, nullptr);
     DirtySwapConfig config;
     pattern->OnSyncGeometryNode(config);
-
+    /**
+     * @tc.steps: step3. update InputStyle::INLINE.
+     */
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
     pattern->OnSyncGeometryNode(config);
     textFieldNode->MarkModifyDone();
     pattern->OnModifyDone();
     pattern->ProcNormalInlineStateInBlurEvent();
-
+    /**
+     * @tc.steps: step4. update InputStyle::INLINE again.
+     */
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
     textFieldNode->MarkModifyDone();
     pattern->OnModifyDone();

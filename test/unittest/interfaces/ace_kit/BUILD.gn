@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -120,18 +120,15 @@ ohos_source_set("ace_kit_mock") {
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
   ]
-  deps = [ "$ace_root/test/unittest:ace_unittest_log" ]
+  deps = [
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/mock/ohos_mock/c_utils:mock_c_utils",
+    "$ace_root/test/mock/ohos_mock/napi:mock_napi",
+  ]
   external_deps = [
     "googletest:gmock",
     "googletest:gtest_main",
   ]
-  if (current_os == "ohos") {
-    external_deps += [
-      "c_utils:utils",
-      "napi:ace_napi",
-      "skia:skia_canvaskit",
-    ]
-  }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
 
@@ -143,7 +140,6 @@ ohos_unittest("ace_kit_test") {
   sources = [
     "$ace_root/interfaces/inner_api/ace_kit/src/agingadapation/aging_adapation_dialog_util.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/animation/animation_utils.cpp",
-    "$ace_root/interfaces/inner_api/ace_kit/src/napi/napi_parser.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/resource/resource_parser.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/utils/measure_utils.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/components/column.cpp",
@@ -165,6 +161,7 @@ ohos_unittest("ace_kit_test") {
     "mock/mock_ace_kit_content_modifier.cpp",
     "mock/mock_ace_kit_paint_method.cpp",
     "mock/mock_ace_kit_pattern.cpp",
+    "mock/mock_napi_parser.cpp",
   ]
 
   sources += [
@@ -218,9 +215,11 @@ ohos_unittest("ace_kit_test") {
   external_deps = [
     "googletest:gmock",
     "googletest:gtest_main",
-    "graphic_2d:2d_graphics",
-    "graphic_2d:librender_service_base",
-    "graphic_2d:librender_service_client",
-    "napi:ace_napi",
+  ]
+
+  deps += [
+    "$ace_root/test/mock/ohos_mock/c_utils:mock_c_utils",
+    "$ace_root/test/mock/ohos_mock/rosen:mock_rosen_graphic",
+    "$ace_root/test/mock/ohos_mock/napi:mock_napi",
   ]
 }

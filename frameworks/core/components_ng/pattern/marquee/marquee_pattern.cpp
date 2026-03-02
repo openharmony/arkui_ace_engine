@@ -118,6 +118,19 @@ bool MarqueePattern::OnDirtyLayoutWrapperSwap(
     return false;
 }
 
+void MarqueePattern::CreateSecondChild()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto secondChild = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(secondChild);
+    auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(secondLayoutProperty);
+    secondLayoutProperty->UpdateMaxLines(1);
+    host->AddChild(secondChild);
+}
+
 void MarqueePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -126,14 +139,19 @@ void MarqueePattern::OnModifyDone()
     auto firstChild = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(firstChild);
     UpdateTextNodeAttr(firstChild);
-
-    auto secondChild = DynamicCast<FrameNode>(host->GetLastChild());
-    auto textLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
-    if (secondChild && textLayoutProperty) {
-        if (NeedSecondChild()) {
-            UpdateTextNodeAttr(secondChild);
+    if (NeedSecondChild()) {
+        if (host->GetChildren().size() == 1) {
+            CreateSecondChild();
         }
-        textLayoutProperty->UpdateVisibility(NeedSecondChild() ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+        auto secondChild = DynamicCast<FrameNode>(host->GetLastChild());
+        CHECK_NULL_VOID(secondChild);
+        auto textLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        UpdateTextNodeAttr(secondChild);
+    } else if (host->GetChildren().size() > 1) {
+        auto secondChild = host->GetLastChild();
+        CHECK_NULL_VOID(secondChild);
+        host->RemoveChild(secondChild);
     }
 
     auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();

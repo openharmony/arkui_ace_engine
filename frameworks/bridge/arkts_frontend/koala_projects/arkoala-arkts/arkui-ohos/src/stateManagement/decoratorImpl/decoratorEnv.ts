@@ -35,18 +35,14 @@ export interface IEnvironmentValue<T> extends IEnvironmentValueBase {
     shouldAddRef(): boolean;
 }
 
-export class WindowSizeLayoutBreakpoint 
-    extends uiObserver.WindowSizeLayoutBreakpointInfo 
-    implements IEnvironmentValue<uiObserver.WindowSizeLayoutBreakpointInfo> {
+export class WindowSizeLayoutBreakpoint implements uiObserver.WindowSizeLayoutBreakpointInfo,
+    IEnvironmentValue<uiObserver.WindowSizeLayoutBreakpointInfo> {
     private widthBreakPointBackingValue: IBackingValue<WidthBreakpoint>;
     private heightBreakPointBackingValue: IBackingValue<HeightBreakpoint>;
     private uiObserver: UIObserver;
 
     constructor(context: UIContext) {
-        super();
         this.uiObserver = context.getUIObserver();
-        this.widthBreakpoint = context.getWindowWidthBreakpoint();
-        this.heightBreakpoint = context.getWindowHeightBreakpoint();
         this.widthBreakPointBackingValue = FactoryInternal.mkDecoratorValue<WidthBreakpoint>('EnvWidthBreakpoint', context.getWindowWidthBreakpoint());
         this.heightBreakPointBackingValue = FactoryInternal.mkDecoratorValue<HeightBreakpoint>('EnvHeightBreakpoint', context.getWindowHeightBreakpoint());
         this.uiObserver.onWindowSizeLayoutBreakpointChange(this.breakPointCallback);
@@ -56,17 +52,33 @@ export class WindowSizeLayoutBreakpoint
         this.set(breakPoint);
     }
 
+    get widthBreakpoint(): WidthBreakpoint {
+        const shouldAddRef = this.shouldAddRef();
+        return this.widthBreakPointBackingValue.get(shouldAddRef);
+    }
+
+    set widthBreakpoint(newValue: WidthBreakpoint) {
+        const oldWidthBreakpointValue = this.widthBreakPointBackingValue.get(false);
+        if (oldWidthBreakpointValue !== newValue) {
+            this.widthBreakPointBackingValue.setNoCheck(newValue);
+        }
+    }
+
+    get heightBreakpoint(): HeightBreakpoint {
+        const shouldAddRef = this.shouldAddRef();
+        return this.heightBreakPointBackingValue.get(shouldAddRef);
+    }
+
+    set heightBreakpoint(newValue: HeightBreakpoint) {
+        const oldHeightBreakpointValue = this.heightBreakPointBackingValue.get(false);
+        if (oldHeightBreakpointValue !== newValue) {
+            this.heightBreakPointBackingValue.setNoCheck(newValue);
+        }
+    }
+
     private set(newValue: uiObserver.WindowSizeLayoutBreakpointInfo): void {
-        const oldWidthBreakPointValue = this.widthBreakPointBackingValue.get(false);
-        const oldHeightBreakPointValue = this.heightBreakPointBackingValue.get(false);
-        if (oldWidthBreakPointValue !== newValue.widthBreakpoint) {
-            this.widthBreakpoint = newValue.widthBreakpoint;
-            this.widthBreakPointBackingValue.setNoCheck(newValue.widthBreakpoint);
-        }
-        if (oldHeightBreakPointValue !== newValue.heightBreakpoint) {
-            this.heightBreakpoint = newValue.heightBreakpoint;
-            this.heightBreakPointBackingValue.setNoCheck(newValue.heightBreakpoint);
-        }
+        this.widthBreakpoint = newValue.widthBreakpoint;
+        this.heightBreakpoint = newValue.heightBreakpoint;
     }
     
     public shouldAddRef(): boolean {

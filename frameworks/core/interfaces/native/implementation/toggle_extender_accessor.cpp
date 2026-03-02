@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components_ng/pattern/toggle/toggle_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -23,7 +23,7 @@ namespace ToggleExtenderAccessor {
 Ark_NativePointer ConstructButtonImpl(Ark_Int32 id,
                                       Ark_Int32 flags)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::BUTTON, false);
+    auto frameNode = ToggleModelStatic::CreateFrameNode(id, NG::ToggleType::BUTTON);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -31,7 +31,7 @@ Ark_NativePointer ConstructButtonImpl(Ark_Int32 id,
 Ark_NativePointer ConstructCheckboxImpl(Ark_Int32 id,
                                         Ark_Int32 flags)
 {
-    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::CHECKBOX, false);
+    auto frameNode = ToggleModelStatic::CreateFrameNode(id, NG::ToggleType::CHECKBOX);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

@@ -117,6 +117,8 @@ public:
     void GetHeight(double& height) override;
     void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed) override;
     void StopImageAnalyzer() override;
+
+    void SetPatternInstanceId(int32_t id) override;
 #ifdef PIXEL_MAP_SUPPORTED
     void TransferFromImageBitmap(const RefPtr<AceType>& pixelMap) override;
 #else

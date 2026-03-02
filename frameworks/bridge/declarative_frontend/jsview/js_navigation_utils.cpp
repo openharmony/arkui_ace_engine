@@ -250,9 +250,13 @@ void ParseBarItemsIcon(const JSRef<JSObject>& itemObject, NG::BarItem& toolBarIt
     std::string icon;
     auto itemIconObject = itemObject->GetProperty("icon");
     RefPtr<ResourceObject> itemIconResObj;
-    if (JSViewAbstract::ParseJsMedia(itemIconObject, icon, itemIconResObj)) {
-        toolBarItem.icon = icon;
-    }
+    std::string bundleName = "";
+    std::string moduleName = "";
+    int32_t resId = -1;
+    JSViewAbstract::ParseJsMediaWithBundleName(itemIconObject, icon, bundleName, moduleName, resId, itemIconResObj);
+    toolBarItem.icon = icon;
+    toolBarItem.bundleName = bundleName;
+    toolBarItem.moduleName = moduleName;
     if (itemIconResObj && SystemProperties::ConfigChangePerform()) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& itemIconResObj, NG::BarItem& toolBarItem) {
             std::string iconResult;

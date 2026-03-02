@@ -30,6 +30,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/image_provider/image_utils.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
@@ -433,6 +434,22 @@ void ImagePattern::ReportCompleteLoadEvent(const RefPtr<FrameNode>& host)
     }
 }
 
+ void ImagePattern::ReportImageSuccessInfo(const RefPtr<FrameNode>& host)
+{
+    if (imageDfxConfig_.GetSrcType() != static_cast<int32_t>(SrcType::NETWORK) && !(image_->GetPixelMap())) {
+        return;
+    }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto reportImageType =
+        imageDfxConfig_.GetSrcType() == static_cast<int32_t>(SrcType::NETWORK) ? "network" : "pixelmap";
+    mgr->OnImageChangeEnd(WeakPtr(host), reportImageType, rootNode->GetRectWithRender());
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     CHECK_NULL_VOID(loadingCtx_);
@@ -452,6 +469,7 @@ void ImagePattern::OnImageLoadSuccess()
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         return;
     }
+    ReportImageSuccessInfo(host);
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
     auto srcInfo = loadingCtx_->GetSourceInfo();
@@ -2059,7 +2077,9 @@ void ImagePattern::DumpOtherInfo()
     DumpLog::GetInstance().AddDesc(renderedImageInfo_.ToString());
     syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
     DumpLog::GetInstance().AddDesc(std::string("SystemRecycleImageEnabled:")
-                                       .append(SystemProperties::GetRecycleImageEnabled() ? "true" : "false"));
+            .append(SystemProperties::GetRecycleImageEnabled() ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc(std::string("SystemImageReleaseManageObjectEnabled:")
+            .append(SystemProperties::GetImageReleaseManageObjectEnabled() ? "true" : "false"));
     DumpLog::GetInstance().AddDesc(
         std::string("UserRecycleImageEnabled:").append(GetIsRecycleInvisibleImageMemory() ? "true" : "false"));
     isRecycledImage_ ? DumpLog::GetInstance().AddDesc("isRecycled:true")

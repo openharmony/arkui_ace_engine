@@ -479,7 +479,7 @@ bool AniUtils::GetArrayIntParam(ani_env* env, ani_ref ref, std::vector<int32_t>&
     for (size_t i = 0; i < length; i++) {
         ani_ref itemRef;
         status = env->Object_CallMethodByName_Ref(
-            static_cast<ani_object>(arrayObj), "$_get", "i:C{std.core.Object}", &itemRef, (ani_int)i);
+            static_cast<ani_object>(arrayObj), "$_get", "i:Y", &itemRef, (ani_int)i);
         if (status != ANI_OK) {
             return false;
         }
@@ -521,7 +521,7 @@ bool AniUtils::GetBoolParam(ani_env* env, ani_ref ref, bool& result)
     }
 
     ani_boolean resultValue;
-    ani_status status = env->Object_CallMethodByName_Boolean(object, "unboxed", nullptr, &resultValue);
+    ani_status status = env->Object_CallMethodByName_Boolean(object, "toBoolean", nullptr, &resultValue);
     if (status != ANI_OK) {
         return false;
     }

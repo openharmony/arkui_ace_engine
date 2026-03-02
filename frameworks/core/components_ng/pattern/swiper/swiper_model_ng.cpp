@@ -170,6 +170,31 @@ void SwiperModelNG::SetCachedIsShown(FrameNode* frameNode, bool isShown)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedIsShown, isShown, frameNode);
 }
 
+void SwiperModelNG::SetCachedIndependent(bool independent)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCachedCountIndependent(independent);
+}
+
+void SwiperModelNG::SetCachedCountIndependent(FrameNode* frameNode, bool independent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCachedCountIndependent(independent);
+}
+
+bool SwiperModelNG::GetCachedCountIndependent(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetCachedCountIndependent();
+}
+
 void SwiperModelNG::SetIsIndicatorCustomSize(bool isCustomSize)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -742,4 +742,43 @@ void Color::FillColorPlaceholderIfNeed(uint32_t resourceId)
     }
 }
 
+void Color::FillColorPlaceholderIfNeed(const std::string& name)
+{
+    // Map for special system resource name. Sort by key MUST in ascending order.
+    static const LinearMapNode<ColorPlaceholder> specialResourceNameHolderMap[] = {
+        { "sys.color.brand", ColorPlaceholder::BRAND },
+        { "sys.color.brand_font", ColorPlaceholder::BRAND_FONT },
+        { "sys.color.comp_background_emphasize", ColorPlaceholder::COMP_BACKGROUND_EMPHASIZE },
+        { "sys.color.comp_background_primary_contrary", ColorPlaceholder::COMP_BACKGROUND_PRIMARY_CONTRARY },
+        { "sys.color.comp_background_primary_contrary_secondary",
+            ColorPlaceholder::COMP_BACKGROUND_PRIMARY_CONTRARY_SECONDARY },
+        { "sys.color.comp_background_secondary", ColorPlaceholder::COMP_BACKGROUND_SECONDARY },
+        { "sys.color.comp_background_tertiary", ColorPlaceholder::COMP_BACKGROUND_TERTIARY },
+        { "sys.color.comp_divider", ColorPlaceholder::COMP_DIVIDER },
+        { "sys.color.comp_emphasize_secondary", ColorPlaceholder::COMP_EMPHASIZE_SECONDARY },
+        { "sys.color.comp_emphasize_tertiary", ColorPlaceholder::COMP_EMPHASIZE_TERTIARY },
+        { "sys.color.font_emphasize", ColorPlaceholder::FONT_EMPHASIZE },
+        { "sys.color.font_fourth", ColorPlaceholder::FONT_FOURTH },
+        { "sys.color.font_on_primary", ColorPlaceholder::FONT_ON_PRIMARY },
+        { "sys.color.font_primary", ColorPlaceholder::FONT_PRIMARY },
+        { "sys.color.font_secondary", ColorPlaceholder::FONT_SECONDARY },
+        { "sys.color.font_tertiary", ColorPlaceholder::FONT_TERTIARY },
+        { "sys.color.icon_emphasize", ColorPlaceholder::ICON_EMPHASIZE },
+        { "sys.color.icon_fourth", ColorPlaceholder::ICON_FOURTH },
+        { "sys.color.icon_primary", ColorPlaceholder::ICON_PRIMARY },
+        { "sys.color.icon_secondary", ColorPlaceholder::ICON_SECONDARY },
+        { "sys.color.icon_sub_emphasize", ColorPlaceholder::ICON_SUB_EMPHASIZE },
+        { "sys.color.icon_tertiary", ColorPlaceholder::ICON_TERTIARY },
+        { "sys.color.interactive_focus", ColorPlaceholder::INTERACTIVE_FOCUS },
+        { "sys.color.interactive_hover", ColorPlaceholder::INTERACTIVE_HOVER },
+        { "sys.color.interactive_pressed", ColorPlaceholder::INTERACTIVE_PRESSED },
+        { "sys.color.warning", ColorPlaceholder::WARNING },
+    };
+    auto index =
+        BinarySearchFindIndex(specialResourceNameHolderMap, ArraySize(specialResourceNameHolderMap), name.c_str());
+    if (index != -1) {
+        placeholder_ = specialResourceNameHolderMap[index].value;
+    }
+}
+
 } // namespace OHOS::Ace

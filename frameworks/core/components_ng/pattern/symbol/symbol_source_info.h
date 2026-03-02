@@ -40,7 +40,7 @@ public:
     bool operator!=(const SymbolSourceInfo& info) const;
 
 private:
-    std::uint32_t unicode;
+    std::uint32_t unicode = 0;
 };
 
 } // namespace OHOS::Ace::NG

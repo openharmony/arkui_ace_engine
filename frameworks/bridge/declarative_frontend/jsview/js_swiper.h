@@ -89,6 +89,7 @@ protected:
 private:
     static bool ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static void ParseDisplayCountObject(const JSRef<JSObject>& object);
+    static void ParseCachedCountOptions(const JSRef<JSObject>& obj);
 };
 
 class JSSwiperController final : public Referenced {

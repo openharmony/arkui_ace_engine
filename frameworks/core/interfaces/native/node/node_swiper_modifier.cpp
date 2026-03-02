@@ -30,6 +30,7 @@ constexpr int32_t DEFAULT_CACHED_COUNT = 1;
 constexpr int32_t DEFAULT_DISPLAY_COUNT = 1;
 constexpr bool DEFAULT_SWIPE_BY_GROUP = false;
 constexpr bool DEFAULT_CACHED_IS_SHOWN = false;
+constexpr bool DEFAULT_CACHED_INDEPENDENT = false;
 constexpr bool DEFAULT_AUTO_PLAY = false;
 constexpr bool DEFAULT_LOOP = true;
 constexpr bool DEAFULT_DISABLE_SWIPE = false;
@@ -221,7 +222,8 @@ void GetSwiperArrowResObj(FrameNode* frameNode, SwiperArrowParameters& swiperArr
             : swiperIndicatorTheme->GetSmallArrowBackgroundColor());
     RefPtr<ResourceObject> bgColorResObj;
     if (arrowInfo[ARROW_ISSET_BACKGROUND_COLOR] == "1") {
-        ResourceParseUtils::CompleteResourceObjectFromColor(bgColorResObj, backgroundColor, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            bgColorResObj, backgroundColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperArrowParameters.backgroundColor = backgroundColor;
     swiperArrowParameters.resourceBackgroundColorValueObject = bgColorResObj;
@@ -234,7 +236,8 @@ void GetSwiperArrowResObj(FrameNode* frameNode, SwiperArrowParameters& swiperArr
             : swiperIndicatorTheme->GetSmallArrowColor());
     RefPtr<ResourceObject> arrowColorResObj;
     if (arrowInfo[ARROW_ISSET_COLOR] == "1") {
-        ResourceParseUtils::CompleteResourceObjectFromColor(arrowColorResObj, arrowColor, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            arrowColorResObj, arrowColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperArrowParameters.arrowColor = arrowColor;
     swiperArrowParameters.resourceArrowColorValueObject = arrowColorResObj;
@@ -464,7 +467,8 @@ void GetSwiperIndicatorResObj(FrameNode* frameNode, SwiperParameters& swiperPara
         swiperParameters.colorVal.value_or(swiperIndicatorTheme->GetColor());
     RefPtr<ResourceObject> colorValResObj;
     if (indicator->colorValue.isSet) {
-        ResourceParseUtils::CompleteResourceObjectFromColor(colorValResObj, colorVal, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            colorValResObj, colorVal, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperParameters.colorVal = colorVal;
     swiperParameters.resourceColorValueObject = colorValResObj;
@@ -474,8 +478,8 @@ void GetSwiperIndicatorResObj(FrameNode* frameNode, SwiperParameters& swiperPara
         swiperParameters.selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor());
     RefPtr<ResourceObject> selectedColorResObj;
     if (indicator->selectedColorValue.isSet) {
-        ResourceParseUtils::CompleteResourceObjectFromColor(selectedColorResObj,
-            selectedColorVal, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            selectedColorResObj, selectedColorVal, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperParameters.selectedColorVal = selectedColorVal;
     swiperParameters.resourceSelectedColorValueObject = selectedColorResObj;
@@ -543,7 +547,8 @@ void GetSwiperDigitIndicatorResObj(FrameNode* frameNode,
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor());
     RefPtr<ResourceObject> fontColorResObj;
     if (indicator->fontColor.isSet) {
-        ResourceParseUtils::CompleteResourceObjectFromColor(fontColorResObj, fontColor, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            fontColorResObj, fontColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperDigitParameters.fontColor = fontColor;
     swiperDigitParameters.resourceFontColorValueObject = fontColorResObj;
@@ -554,8 +559,8 @@ void GetSwiperDigitIndicatorResObj(FrameNode* frameNode,
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor());
     RefPtr<ResourceObject> selectedFontColorResObj;
     if (indicator->selectedFontColor.isSet) {
-        ResourceParseUtils::CompleteResourceObjectFromColor(selectedFontColorResObj,
-            selectedFontColor, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            selectedFontColorResObj, selectedFontColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperDigitParameters.selectedFontColor = selectedFontColor;
     swiperDigitParameters.resourceSelectedFontColorValueObject = selectedFontColorResObj;
@@ -1041,6 +1046,27 @@ ArkUI_Int32 GetSwiperCachedIsShown(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(SwiperModelNG::GetCachedIsShown(frameNode));
+}
+
+void SetSwiperCachedIndependent(ArkUINodeHandle node, ArkUI_Bool independent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetCachedCountIndependent(frameNode, independent);
+}
+
+void ResetSwiperCachedIndependent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetCachedCountIndependent(frameNode, DEFAULT_CACHED_INDEPENDENT);
+}
+
+ArkUI_Int32 GetSwiperCachedIndependent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_CACHED_INDEPENDENT);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetCachedCountIndependent(frameNode));
 }
 
 void SetSwiperDisplayMode(ArkUINodeHandle node, ArkUI_Int32 displayMode)
@@ -2099,6 +2125,9 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .callSwiperIsFakeDragging = CallSwiperIsFakeDragging,
         .callSwiperShowPrevious = CallSwiperShowPrevious,
         .callSwiperShowNext = CallSwiperShowNext,
+        .setSwiperCachedIndependent = SetSwiperCachedIndependent,
+        .resetSwiperCachedIndependent = ResetSwiperCachedIndependent,
+        .getSwiperCachedIndependent = GetSwiperCachedIndependent,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

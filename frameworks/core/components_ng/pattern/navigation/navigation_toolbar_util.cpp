@@ -141,7 +141,7 @@ RefPtr<FrameNode> CreateToolbarItemIconNode(const BarItem& barItem)
         return iconNode;
     }
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ImageSourceInfo info(barItem.icon.value());
+    ImageSourceInfo info(barItem.icon.value(), barItem.bundleName, barItem.moduleName);
     auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
@@ -198,7 +198,7 @@ void UpdateBarItemPattern(const RefPtr<BarItemNode>& barItemNode, const BarItem&
         if (barItem.activeIconSymbol.has_value() && barItem.activeIconSymbol.value() != nullptr) {
             barItemPattern->SetActiveIconSymbol(barItem.activeIconSymbol.value());
         } else if (barItem.activeIcon.has_value()) {
-            ImageSourceInfo activeIconInfo(barItem.activeIcon.value());
+            ImageSourceInfo activeIconInfo(barItem.activeIcon.value(), barItem.bundleName, barItem.moduleName);
             activeIconInfo.SetFillColor(theme->GetToolbarActiveIconColor());
             barItemPattern->SetActiveIconImageSourceInfo(activeIconInfo);
         }

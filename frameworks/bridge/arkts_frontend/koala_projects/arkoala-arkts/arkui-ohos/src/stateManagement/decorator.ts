@@ -20,6 +20,7 @@ import { LocalStorage } from './storage/localStorage';
 import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
 import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
 import { IncrementalNode } from '@koalaui/runtime';
+import { CustomComponentLifecycle } from '../component/customComponent';
 
 export interface IDecoratorBaseRegistry {
     registerToOwningView(): void;
@@ -27,6 +28,7 @@ export interface IDecoratorBaseRegistry {
 
 export interface IVariableOwner {
     getUniqueId(): int;
+    __getLifecycle__Internal(): CustomComponentLifecycle;
     __isViewActive__Internal(): boolean;
     __getLocalStorage__Internal(): LocalStorage;
     __addProvide__Internal<T>(alias: string, v: IProvideDecoratedVariable<T>, allowOverride?: boolean): void;

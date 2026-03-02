@@ -632,7 +632,14 @@ HWTEST_F(SwiperIndicatorModifierTestTwoNg, DotIndicatorModifier013, TestSize.Lev
     dotIndicatorModifier.PaintBackground(context, contentProperty);
 
     /**
-     * @tc.steps: step3.Call vectorBlackPointCenterX.size is 0
+     * @tc.steps: step3.Call isLongPressed true
+     * @tc.expected: The PaintBackground executed successfuly
+     */
+    dotIndicatorModifier.isLongPressed_ = true;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
+
+    /**
+     * @tc.steps: step4.Call vectorBlackPointCenterX.size is 0
      * @tc.expected: The PaintBackground executed successfuly
      */
     vectorBlackPointCenterX.clear();

@@ -149,6 +149,17 @@ void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, floa
             break;
         }
     }
+
+    // when overScroll && out of view
+    // endMainLineIndex_ = startMainLineIndex_
+    if (endMainLineIndex_ < 0 && LessOrEqual(remainSize + mainGap, 0)) {
+        auto endLine = gridMatrix_.find(startMainLineIndex_);
+        CHECK_NULL_VOID(endLine != gridMatrix_.end());
+        CHECK_NULL_VOID(!endLine->second.empty());
+        endIndex_ = endLine->second.rbegin()->second;
+        endMainLineIndex_ = startMainLineIndex_;
+    }
+
     // last line height maybe zero
     if (NearZero(remainSize + mainGap) && endMainLineIndex_ < oldEndLine) {
         auto newEndLine = endMainLineIndex_ + 1;
@@ -315,6 +326,17 @@ float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float m
     if (options.getSizeByIndex) {
         return GetContentOffset(mainGap);
     }
+    if (startMainLineIndex_ > 0 && startMainLineIndex_ < MAX_CUMULATIVE_LINES) {
+        bool hasAllDataToStartMainLine = false;
+        auto firstLine = gridMatrix_.begin();
+        if (firstLine != gridMatrix_.end() && firstLine->first == 0 && !firstLine->second.empty()) {
+            auto firstItem = firstLine->second.begin();
+            hasAllDataToStartMainLine = firstItem->second == 0;
+        }
+        if (hasAllDataToStartMainLine) {
+            return GetStartLineOffset(mainGap);
+        }
+    }
     float prevHeight = GetContentHeight(options, startIndex_, mainGap) + mainGap;
     return prevHeight - currentOffset_;
 }
@@ -380,7 +402,6 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
     if (options.getSizeByIndex) {
         return GetContentHeight(mainGap);
     }
-
     float irregularHeight = -1.0f;
     float regularHeight = -1.0f;
     GetLineHeights(options, mainGap, regularHeight, irregularHeight);

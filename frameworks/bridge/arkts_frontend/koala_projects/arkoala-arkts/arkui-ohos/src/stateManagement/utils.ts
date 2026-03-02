@@ -20,6 +20,7 @@ import { ExtendableComponent } from '../component/extendableComponent';
 import { BusinessError } from '@ohos.base';
 import { CustomComponentV2 } from '../component/customComponent'
 import { canBeObserved as canBeObservedImpl } from './tools/stateMgmtDFX';
+import { CustomComponentV2, CustomComponentLifecycle } from '../component/customComponent';
 
 export interface ElementInfo {
     elementName: string;
@@ -85,6 +86,16 @@ export class UIUtils {
 
     static clearMonitor(monitor: IMonitorDecoratedVariable): void {
         (monitor as MonitorFunctionDecorator).unbindAllInternalValues();
+    }
+
+    /**
+     * Get lifecycle instance of IVariableOwner
+     *
+     * @param {IVariableOwner} source - Variable owner instance
+     * @returns lifecycle instance
+     */
+    static getLifecycle<T extends IVariableOwner>(customComponent: T): CustomComponentLifecycle {
+        return customComponent.__getLifecycle__Internal();
     }
 
     private static pathToArray(path?: string | string[]): string[] {

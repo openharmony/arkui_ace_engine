@@ -114,6 +114,7 @@ void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListC
         auto frameNode =  jsChildrenMainSize->GetHost();
         CHECK_NULL_VOID(frameNode);
         auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
         context->AddBuildFinishCallBack([start, deleteCount, change = std::move(newChildrenSize), weak]() {
             auto listChildrenMainSize = weak.Upgrade();
             CHECK_NULL_VOID(listChildrenMainSize);

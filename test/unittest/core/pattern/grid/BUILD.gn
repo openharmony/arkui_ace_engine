@@ -52,7 +52,7 @@ ace_unittest("grid_test_regular") {
 }
 
 ace_unittest("grid_test_ng") {
-  module_name = "ScrollingSet-GridAndGridItem"
+  module_name = "StateManagement-InComponent"
   type = "new"
   sources = COMMON_SRC
   defines = [ "TEST_IRREGULAR_GRID" ]
@@ -63,11 +63,12 @@ ace_unittest("grid_test_ng") {
     "irregular/grid_layout_range_solver_test.cpp",
     "irregular/irregular_matrics.cpp",
     "layout_info_test.cpp",
+    "grid_generated_layout_info_test.cpp",
   ]
 }
 
 ace_unittest("grid_static_test_ng") {
-  module_name = "ScrollingSet-GridAndGridItem"
+  module_name = "StateManagement-InComponent"
   type = "new"
   sources = [
     "grid_static_test_ng.cpp",

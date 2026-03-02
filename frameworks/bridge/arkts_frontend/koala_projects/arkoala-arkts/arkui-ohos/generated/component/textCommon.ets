@@ -213,10 +213,9 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         let buffer: Array<TextRange> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            let bufferOpt: Array<TextRange> = new Array<TextRange>(bufferOptLength)
-            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
-                bufferOpt[bufferOptBufCounterI] = TextRange_serializer.read(retvalDeserializer)
-            }
+            const bufferOpt: Array<TextRange> = new Array<TextRange>(bufferOptLength, (arg0: int32):TextRange => {
+            return TextRange_serializer.read(retvalDeserializer);
+        })
             buffer = bufferOpt
         }
         const returnResult: Array<TextRange> | undefined = buffer
@@ -232,10 +231,9 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         let buffer: Array<TextRange> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            let bufferOpt: Array<TextRange> = new Array<TextRange>(bufferOptLength)
-            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
-                bufferOpt[bufferOptBufCounterI] = TextRange_serializer.read(retvalDeserializer)
-            }
+            const bufferOpt: Array<TextRange> = new Array<TextRange>(bufferOptLength, (arg0: int32):TextRange => {
+            return TextRange_serializer.read(retvalDeserializer);
+        })
             buffer = bufferOpt
         }
         const returnResult: Array<TextRange> | undefined = buffer
@@ -262,10 +260,9 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         let buffer: Array<TextBox> | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            let bufferOpt: Array<TextBox> = new Array<TextBox>(bufferOptLength)
-            for (let bufferOptBufCounterI = 0; bufferOptBufCounterI < bufferOptLength; bufferOptBufCounterI++) {
-                bufferOpt[bufferOptBufCounterI] = text_TextBox_serializer.read(retvalDeserializer)
-            }
+            const bufferOpt: Array<TextBox> = new Array<TextBox>(bufferOptLength, (arg0: int32):TextBox => {
+            return text_TextBox_serializer.read(retvalDeserializer);
+        })
             buffer = bufferOpt
         }
         const returnResult: Array<TextBox> | undefined = buffer
@@ -1983,10 +1980,9 @@ export class TextDataDetectorConfig_serializer {
         let typesTmpBuf: Array<TextDataDetectorType> | null | undefined = undefined
         if ((typesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const typesTmpBufOptLength: int32 = valueDeserializer.readInt32()
-            let typesTmpBufOpt: Array<TextDataDetectorType> = new Array<TextDataDetectorType>(typesTmpBufOptLength)
-            for (let typesTmpBufOptBufCounterI = 0; typesTmpBufOptBufCounterI < typesTmpBufOptLength; typesTmpBufOptBufCounterI++) {
-                typesTmpBufOpt[typesTmpBufOptBufCounterI] = TextDataDetectorType.fromValue(valueDeserializer.readInt32())
-            }
+            const typesTmpBufOpt: Array<TextDataDetectorType> = new Array<TextDataDetectorType>(typesTmpBufOptLength, (arg0: int32):TextDataDetectorType => {
+            return TextDataDetectorType.fromValue(valueDeserializer.readInt32());
+        })
             typesTmpBuf = typesTmpBufOpt
         }
         const typesTmpResult: Array<TextDataDetectorType> | null | undefined = typesTmpBuf

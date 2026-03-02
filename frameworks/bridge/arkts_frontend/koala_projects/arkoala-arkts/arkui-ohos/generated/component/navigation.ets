@@ -1014,10 +1014,9 @@ export class NavPathStack implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getAllPathName(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<string> = new Array<string>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
-        }
+        const buffer: Array<string> = new Array<string>(bufferLength, (arg0: int32):string => {
+            return (retvalDeserializer.readString() as string);
+        })
         const returnResult: Array<string> = buffer
         return returnResult
     }
@@ -1036,15 +1035,14 @@ export class NavPathStack implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getParamByName(this.peer!.ptr, name)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<Object | null | undefined> = new Array<Object | null | undefined>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            const bufferTempBuf_runtimeType = retvalDeserializer.readInt8()!.toInt()
-            let bufferTempBuf: Object | null | undefined = undefined
+        const buffer: Array<Object | null | undefined> = new Array<Object | null | undefined>(bufferLength, (arg0: int32):Object | null | undefined => {
+            const bufferTempBuf_runtimeType = retvalDeserializer.readInt8()!.toInt();
+            let bufferTempBuf: Object | null | undefined = undefined;
             if ((bufferTempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-                bufferTempBuf = (retvalDeserializer.readObject() as object)
+                bufferTempBuf = (retvalDeserializer.readObject() as object);
             }
-            buffer[bufferBufCounterI] = bufferTempBuf
-        }
+            return bufferTempBuf;
+        })
         const returnResult: Array<Object | null | undefined> = buffer
         return returnResult
     }
@@ -1052,10 +1050,9 @@ export class NavPathStack implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getIndexByName(this.peer!.ptr, name)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<int32> = new Array<int32>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = retvalDeserializer.readInt32()
-        }
+        const buffer: Array<int32> = new Array<int32>(bufferLength, (arg0: int32):int32 => {
+            return retvalDeserializer.readInt32();
+        })
         const returnResult: Array<int32> = buffer
         return returnResult
     }
@@ -1087,10 +1084,9 @@ export class NavPathStack implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getPathStack(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        let buffer: Array<NavPathInfo> = new Array<NavPathInfo>(bufferLength)
-        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
-            buffer[bufferBufCounterI] = (NavPathInfo_serializer.read(retvalDeserializer) as NavPathInfo)
-        }
+        const buffer: Array<NavPathInfo> = new Array<NavPathInfo>(bufferLength, (arg0: int32):NavPathInfo => {
+            return (NavPathInfo_serializer.read(retvalDeserializer) as NavPathInfo);
+        })
         const returnResult: Array<NavPathInfo> = buffer
         return returnResult
     }
@@ -1446,9 +1442,9 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavigationAttribute_setEnableDragBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setDividerAttribute(value: NavigationDividerStyle | undefined): void {
+    setDividerAttribute(value: NavigationDividerStyle | null): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
+        if (value !== null) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
             NavigationDividerStyle_serializer.write(thisSerializer, valueTmpValue)
@@ -1887,7 +1883,7 @@ export interface NavigationAttribute extends CommonMethod {
     enableDragBar(value: boolean | undefined): this {
         throw new Error('Unimplemented method enableDragBar')
     }
-    divider(value: NavigationDividerStyle | undefined): this {
+    divider(value: NavigationDividerStyle | null): this {
         throw new Error('Unimplemented method divider')
     }
     enableModeChangeAnimation(value: boolean | undefined): this {
@@ -2064,8 +2060,8 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         this.getPeer()?.setEnableDragBarAttribute(value_casted)
         return this
     }
-    public divider(value: NavigationDividerStyle | undefined): this {
-        const value_casted = value as (NavigationDividerStyle | undefined)
+    public divider(value: NavigationDividerStyle | null): this {
+        const value_casted = value as (NavigationDividerStyle | null)
         this.getPeer()?.setDividerAttribute(value_casted)
         return this
     }

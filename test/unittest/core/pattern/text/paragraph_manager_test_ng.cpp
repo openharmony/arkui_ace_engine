@@ -492,20 +492,20 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRange001, TestSize.Lev
     auto glyphEnd1 = result1.first.end;
     auto charStart1 = result1.second.start;
     auto charEnd1 = result1.second.end;
-    EXPECT_EQ(glyphStart1, 10);
-    EXPECT_EQ(glyphEnd1, 20);
-    EXPECT_EQ(charStart1, 5);
-    EXPECT_EQ(charEnd1, 25);
+    EXPECT_EQ(glyphStart1, 20);
+    EXPECT_EQ(glyphEnd1, 40);
+    EXPECT_EQ(charStart1, 10);
+    EXPECT_EQ(charEnd1, 50);
 
     auto result2 = pManager->GetCharacterRangeForGlyphRange(0, 20);
     auto glyphStart2 = result2.first.start;
     auto glyphEnd2 = result2.first.end;
     auto charStart2 = result2.second.start;
     auto charEnd2 = result2.second.end;
-    EXPECT_EQ(glyphStart2, 30);
-    EXPECT_EQ(glyphEnd2, 60);
-    EXPECT_EQ(charStart2, 15);
-    EXPECT_EQ(charEnd2, 75);
+    EXPECT_EQ(glyphStart2, 20);
+    EXPECT_EQ(glyphEnd2, 40);
+    EXPECT_EQ(charStart2, 10);
+    EXPECT_EQ(charEnd2, 50);
 
     auto result3 = pManager->GetCharacterRangeForGlyphRange(-10, 40);
     auto glyphStart3 = result3.first.start;

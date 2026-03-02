@@ -184,7 +184,8 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
 {
     type_ = type;
     taskExecutor_ = taskExecutor;
-    ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::STATIC_HYBRID_DYNAMIC);
+    ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
+               type_ == FrontendType::DYNAMIC_HYBRID_STATIC);
     InitializeFrontendDelegate(taskExecutor);
 
     bool needPostJsTask = true;

@@ -336,6 +336,16 @@ public:
     std::string GetTextMarqueeOptionsString() const;
     void UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json);
 
+    void SetIsNewMaterial(bool isNewMaterial)
+    {
+        isNewMaterial_ = isNewMaterial;
+    }
+
+    bool IsNewMaterial() const
+    {
+        return isNewMaterial_;
+    }
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
@@ -356,6 +366,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutProperty);
 
     bool isLoopAnimation_ = false;
+    bool isNewMaterial_ = false;
     RefPtr<AdvancedTextLayoutProperty> advancedTextLayoutProperty_;
 };
 } // namespace OHOS::Ace::NG

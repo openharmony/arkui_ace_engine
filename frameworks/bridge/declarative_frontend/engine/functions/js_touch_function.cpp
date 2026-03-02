@@ -111,10 +111,12 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     return eventObj;
 }
 
-void JsTouchFunction::Execute(EcmaVM* vm, TouchEventInfo& info, const WeakPtr<NG::FrameNode>& node)
+void JsTouchFunction::Execute(EcmaVM* vm, TouchEventInfo& info)
 {
-    auto infoPtr = std::make_shared<TouchEventInfo>(info);
-    auto obj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr, node);
+    // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+    // It is not allowed to hold this address elsewhere.
+    auto infoPtr = new TouchEventInfo(info);
+    auto obj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr);
     JSRef<JSVal> param = JSRef<JSVal>::Make(obj);
     JsFunction::ExecuteJS(1, &param);
     info.SetStopPropagation(infoPtr->IsStopPropagation());

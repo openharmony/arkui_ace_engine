@@ -361,7 +361,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(
         return iconNode;
     }
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ImageSourceInfo info(barItem.icon.value());
+    ImageSourceInfo info(barItem.icon.value(), barItem.bundleName, barItem.moduleName);
     auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);

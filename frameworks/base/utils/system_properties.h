@@ -307,6 +307,11 @@ public:
         return recycleImageEnabled_;
     }
 
+    static bool GetImageReleaseManageObjectEnabled()
+    {
+        return imageReleaseManageObjectEnabled_;
+    }
+
     static bool GetSvgTraceEnabled()
     {
         return svgTraceEnable_;
@@ -827,6 +832,7 @@ private:
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
     static bool recycleImageEnabled_;
+    static bool imageReleaseManageObjectEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
     static bool astcEnabled_;

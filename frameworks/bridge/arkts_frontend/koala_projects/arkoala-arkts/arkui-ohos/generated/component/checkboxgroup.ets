@@ -458,10 +458,9 @@ export class CheckboxGroupResult_serializer {
     public static read(buffer: DeserializerBase): CheckboxGroupResult {
         let valueDeserializer: DeserializerBase = buffer
         const nameTmpBufLength: int32 = valueDeserializer.readInt32()
-        let nameTmpBuf: Array<string> = new Array<string>(nameTmpBufLength)
-        for (let nameTmpBufBufCounterI = 0; nameTmpBufBufCounterI < nameTmpBufLength; nameTmpBufBufCounterI++) {
-            nameTmpBuf[nameTmpBufBufCounterI] = (valueDeserializer.readString() as string)
-        }
+        const nameTmpBuf: Array<string> = new Array<string>(nameTmpBufLength, (arg0: int32):string => {
+            return (valueDeserializer.readString() as string);
+        })
         const nameTmpResult: Array<string> = nameTmpBuf
         const statusTmpResult: SelectStatus = SelectStatus.fromValue(valueDeserializer.readInt32())
         let value: CheckboxGroupResult = ({name: nameTmpResult, status: statusTmpResult} as CheckboxGroupResult)

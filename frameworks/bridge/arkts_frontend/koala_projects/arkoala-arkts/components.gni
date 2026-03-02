@@ -229,6 +229,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/contentSlot.ets",
   "arkui-preprocessed/arkui/component/counter.ets",
   "arkui-preprocessed/arkui/component/customComponent.ets",
+  "arkui-preprocessed/arkui/component/customComponentLifecycle.ets",
   "arkui-preprocessed/arkui/component/customDialogController.ets",
   "arkui-preprocessed/arkui/component/dataPanel.ets",
   "arkui-preprocessed/arkui/component/datePicker.ets",

@@ -248,6 +248,12 @@ public:
      */
     void FillColorPlaceholderIfNeed(uint32_t resourceId);
 
+    /**
+     * @param name If the name is a special value, fill the placeholder value in the color object
+     * accordingly; otherwise, the placeholder remains unchanged.
+     */
+    void FillColorPlaceholderIfNeed(const std::string& name);
+
 private:
     constexpr explicit Color(ColorParam colorValue) : colorValue_(colorValue) {}
 

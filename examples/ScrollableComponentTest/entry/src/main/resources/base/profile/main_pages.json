@@ -149,6 +149,7 @@
     "pages/grid/ItemDragWithVibrator",
     "pages/grid/GridScrollWithSelect",
     "pages/grid/GridDragAndPan",
+    "pages/grid/PageGridDragEvent",
     "pages/grid/friction/friction",
     "pages/grid/GrdiDragSample",
     "pages/grid/GridDragWithScroll",

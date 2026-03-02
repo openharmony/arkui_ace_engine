@@ -440,34 +440,33 @@ export class RectOptions_serializer {
                 radiusTmpBufOpt = (radiusTmpBufOptBufU as string | double | arkui_component_units_Resource)
             } else if (radiusTmpBufOptUnionSelector == (1).toByte()) {
                 const radiusTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
-                let radiusTmpBufOptBufU: Array<RadiusItem> = new Array<RadiusItem>(radiusTmpBufOptBufULength)
-                for (let radiusTmpBufOptBufUBufCounterI = 0; radiusTmpBufOptBufUBufCounterI < radiusTmpBufOptBufULength; radiusTmpBufOptBufUBufCounterI++) {
-                    const radiusTmpBufOptBufUTempBufValue0TempBufUnionSelector: int32 = valueDeserializer.readInt8()
-                    let radiusTmpBufOptBufUTempBufValue0TempBuf: string | double | arkui_component_units_Resource | undefined
-                    if (radiusTmpBufOptBufUTempBufValue0TempBufUnionSelector == (0).toByte()) {
-                        radiusTmpBufOptBufUTempBufValue0TempBuf = (valueDeserializer.readString() as string)
-                    } else if (radiusTmpBufOptBufUTempBufValue0TempBufUnionSelector == (1).toByte()) {
-                        radiusTmpBufOptBufUTempBufValue0TempBuf = valueDeserializer.readFloat64()
-                    } else if (radiusTmpBufOptBufUTempBufValue0TempBufUnionSelector == (2).toByte()) {
-                        radiusTmpBufOptBufUTempBufValue0TempBuf = global_resource_Resource_serializer.read(valueDeserializer)
-                    } else {
-                        throw new Error('One of the branches for radiusTmpBufOptBufUTempBufValue0TempBuf has to be chosen through deserialisation.')
-                    }
-                    const radiusTmpBufOptBufUTempBufValue0: Length = (radiusTmpBufOptBufUTempBufValue0TempBuf as string | double | arkui_component_units_Resource)
-                    const radiusTmpBufOptBufUTempBufValue1TempBufUnionSelector: int32 = valueDeserializer.readInt8()
-                    let radiusTmpBufOptBufUTempBufValue1TempBuf: string | double | arkui_component_units_Resource | undefined
-                    if (radiusTmpBufOptBufUTempBufValue1TempBufUnionSelector == (0).toByte()) {
-                        radiusTmpBufOptBufUTempBufValue1TempBuf = (valueDeserializer.readString() as string)
-                    } else if (radiusTmpBufOptBufUTempBufValue1TempBufUnionSelector == (1).toByte()) {
-                        radiusTmpBufOptBufUTempBufValue1TempBuf = valueDeserializer.readFloat64()
-                    } else if (radiusTmpBufOptBufUTempBufValue1TempBufUnionSelector == (2).toByte()) {
-                        radiusTmpBufOptBufUTempBufValue1TempBuf = global_resource_Resource_serializer.read(valueDeserializer)
-                    } else {
-                        throw new Error('One of the branches for radiusTmpBufOptBufUTempBufValue1TempBuf has to be chosen through deserialisation.')
-                    }
-                    const radiusTmpBufOptBufUTempBufValue1: Length = (radiusTmpBufOptBufUTempBufValue1TempBuf as string | double | arkui_component_units_Resource)
-                    radiusTmpBufOptBufU[radiusTmpBufOptBufUBufCounterI] = ([radiusTmpBufOptBufUTempBufValue0, radiusTmpBufOptBufUTempBufValue1] as RadiusItem)
-                }
+                const radiusTmpBufOptBufU: Array<RadiusItem> = new Array<RadiusItem>(radiusTmpBufOptBufULength, (arg0: int32):RadiusItem => {
+            const radiusTmpBufOptBufUTempBufValue0TempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let radiusTmpBufOptBufUTempBufValue0TempBuf: string | double | arkui_component_units_Resource | undefined;
+            if (radiusTmpBufOptBufUTempBufValue0TempBufUnionSelector == (0).toByte()) {
+                radiusTmpBufOptBufUTempBufValue0TempBuf = (valueDeserializer.readString() as string);
+            } else if (radiusTmpBufOptBufUTempBufValue0TempBufUnionSelector == (1).toByte()) {
+                radiusTmpBufOptBufUTempBufValue0TempBuf = valueDeserializer.readFloat64();
+            } else if (radiusTmpBufOptBufUTempBufValue0TempBufUnionSelector == (2).toByte()) {
+                radiusTmpBufOptBufUTempBufValue0TempBuf = global_resource_Resource_serializer.read(valueDeserializer);
+            } else {
+                throw new Error('One of the branches for radiusTmpBufOptBufUTempBufValue0TempBuf has to be chosen through deserialisation.');
+            }
+            const radiusTmpBufOptBufUTempBufValue0: Length = (radiusTmpBufOptBufUTempBufValue0TempBuf as string | double | arkui_component_units_Resource);
+            const radiusTmpBufOptBufUTempBufValue1TempBufUnionSelector: int32 = valueDeserializer.readInt8();
+            let radiusTmpBufOptBufUTempBufValue1TempBuf: string | double | arkui_component_units_Resource | undefined;
+            if (radiusTmpBufOptBufUTempBufValue1TempBufUnionSelector == (0).toByte()) {
+                radiusTmpBufOptBufUTempBufValue1TempBuf = (valueDeserializer.readString() as string);
+            } else if (radiusTmpBufOptBufUTempBufValue1TempBufUnionSelector == (1).toByte()) {
+                radiusTmpBufOptBufUTempBufValue1TempBuf = valueDeserializer.readFloat64();
+            } else if (radiusTmpBufOptBufUTempBufValue1TempBufUnionSelector == (2).toByte()) {
+                radiusTmpBufOptBufUTempBufValue1TempBuf = global_resource_Resource_serializer.read(valueDeserializer);
+            } else {
+                throw new Error('One of the branches for radiusTmpBufOptBufUTempBufValue1TempBuf has to be chosen through deserialisation.');
+            }
+            const radiusTmpBufOptBufUTempBufValue1: Length = (radiusTmpBufOptBufUTempBufValue1TempBuf as string | double | arkui_component_units_Resource);
+            return ([radiusTmpBufOptBufUTempBufValue0, radiusTmpBufOptBufUTempBufValue1] as RadiusItem);
+        })
                 radiusTmpBufOpt = radiusTmpBufOptBufU
             } else {
                 throw new Error('One of the branches for radiusTmpBufOpt has to be chosen through deserialisation.')

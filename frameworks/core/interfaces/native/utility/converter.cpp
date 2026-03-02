@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h" // PreviewBadge
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
+#include "core/components_ng/property/union_effect_container_options.h"
 #include "core/interfaces/native/implementation/circle_shape_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/ellipse_shape_peer.h"
@@ -3691,9 +3692,7 @@ PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
 template<>
 ACE_FORCE_EXPORT PresetFillType Convert(const Ark_ItemFillPolicy& src)
 {
-    PresetFillType dst;
-    dst = Converter::OptConvert<PresetFillType>(src.fillType.value).value_or(dst);
-    return dst;
+    return Converter::OptConvert<PresetFillType>(src.fillType.value).value_or(PresetFillType::BREAKPOINT_DEFAULT);
 }
 
 template<>
@@ -4332,5 +4331,13 @@ void AssignCast(std::optional<BlurStyleOption>& dst, const Ark_BlurStyle& src)
         blurStyleOptions.blurStyle = blurStyle.value();
         dst = blurStyleOptions;
     }
+}
+
+template<>
+void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_UnionEffectContainerOptions& src)
+{
+    dst = UnionEffectContainerOptions{};
+    auto spacing = Converter::OptConvert<float>(src.spacing);
+    dst->spacing = spacing.value_or(0.0f);
 }
 } // namespace OHOS::Ace::NG::Converter

@@ -21,9 +21,18 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/common/event_manager.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -96,6 +105,9 @@ public:
     static RefPtr<TitleBarNode> CreateTitleBarNode();
     static RefPtr<NavToolbarNode> CreateToolBarNode();
     static RefPtr<FrameNode> CreateToolBarDividerNode();
+    static RefPtr<NavigationGroupNode> CreateNavigationGroupNode();
+    static RefPtr<NavDestinationGroupNode> CreateNavDestinationGroupNode();
+    static RefPtr<NavBarNode> CreateNavBarNode();
     static void SetupLayoutPropertyWithSafeArea(const RefPtr<NavDestinationNodeBase>& node);
 };
 
@@ -146,6 +158,33 @@ RefPtr<FrameNode> NavDestinationPatternBaseTestNg::CreateToolBarDividerNode()
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto node = FrameNode::CreateFrameNode(V2::DIVIDER_ETS_TAG, nodeId, pattern);
     node->InitializePatternAndContext();
+    return node;
+}
+
+RefPtr<NavigationGroupNode> NavDestinationPatternBaseTestNg::CreateNavigationGroupNode()
+{
+    auto navNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    CHECK_NULL_RETURN(navNode, nullptr);
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navPattern, nullptr);
+    navPattern->SetNavigationStack(AceType::MakeRefPtr<NavigationStack>());
+    return navNode;
+}
+
+RefPtr<NavDestinationGroupNode> NavDestinationPatternBaseTestNg::CreateNavDestinationGroupNode()
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    return node;
+}
+
+RefPtr<NavBarNode> NavDestinationPatternBaseTestNg::CreateNavBarNode()
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<NavBarPattern>(); });
     return node;
 }
 
@@ -1611,6 +1650,385 @@ HWTEST_F(NavDestinationPatternBaseTestNg, RemoveAnimation001, TestSize.Level1)
     // The ID should still be 0 since no animations were added
     EXPECT_EQ(pattern->GetTitleBarHeight(), OPACITY_TRANSPARENT);
     EXPECT_EQ(pattern->GetToolBarHeight(), OPACITY_TRANSPARENT);
+}
+
+/**
+ * @tc.name: InitOnTouchEvent001
+ * @tc.desc: Branch: CHECK_NULL_VOID(host)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternBaseTestNg, InitOnTouchEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationPatternBase test node.
+     */
+    auto node = CreateNavDestinationNode();
+    auto pattern = node->GetPattern<NavDestinationPatternBase>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Call InitOnTouchEvent with nullptr host.
+     */
+    pattern->InitOnTouchEvent(nullptr);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitOnTouchEvent002
+ * @tc.desc: Branch: if (!forceSplitMgr->IsForceSplitSupported(false))
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternBaseTestNg, InitOnTouchEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create destination host and disable force split support.
+     */
+    auto destNode = CreateNavDestinationGroupNode();
+    ASSERT_NE(destNode, nullptr);
+    auto pattern = destNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto context = destNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto eventManager = context->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->hitTestFrameNodeListener_.clear();
+    context->GetForceSplitManager()->SetForceSplitSupported(false);
+
+    /**
+     * @tc.steps: step2. Call InitOnTouchEvent and verify no listener is registered.
+     */
+    pattern->InitOnTouchEvent(destNode);
+    EXPECT_EQ(eventManager->hitTestFrameNodeListener_.count(destNode->GetId()), 0u);
+}
+
+/**
+ * @tc.name: InitOnTouchEvent003
+ * @tc.desc: Branch: register callback when force split supported.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternBaseTestNg, InitOnTouchEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create destination host and enable force split support.
+     */
+    auto destNode = CreateNavDestinationGroupNode();
+    ASSERT_NE(destNode, nullptr);
+    auto pattern = destNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto context = destNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto eventManager = context->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->hitTestFrameNodeListener_.clear();
+    context->GetForceSplitManager()->SetForceSplitSupported(true);
+
+    /**
+     * @tc.steps: step2. Call InitOnTouchEvent and verify listener registration by node id.
+     */
+    pattern->InitOnTouchEvent(destNode);
+    EXPECT_EQ(eventManager->hitTestFrameNodeListener_.count(destNode->GetId()), 1u);
+}
+
+/**
+ * @tc.name: InitOnTouchEvent004
+ * @tc.desc: Branch in callback: if (!navPattern->IsForceSplitSuccess()) return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternBaseTestNg, InitOnTouchEvent004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build navigation + destination relation and set forceSplitSuccess to false.
+     */
+    auto navNode = CreateNavigationGroupNode();
+    auto destNode = CreateNavDestinationGroupNode();
+    ASSERT_NE(navNode, nullptr);
+    ASSERT_NE(destNode, nullptr);
+    auto destPattern = destNode->GetPattern<NavDestinationPattern>();
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(destPattern, nullptr);
+    ASSERT_NE(navPattern, nullptr);
+    destPattern->SetNavigationNode(navNode);
+    navPattern->SetIsHomeNodeTouched(std::nullopt);
+    navPattern->forceSplitSuccess_ = false;
+    navPattern->SetForceSplitUseNavBar(false);
+
+    auto context = destNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    context->GetForceSplitManager()->SetForceSplitSupported(true);
+    auto eventManager = context->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->hitTestFrameNodeListener_.clear();
+    destPattern->InitOnTouchEvent(destNode);
+
+    /**
+     * @tc.steps: step2. Trigger registered hit-test callback.
+     */
+    auto it = eventManager->hitTestFrameNodeListener_.find(destNode->GetId());
+    ASSERT_NE(it, eventManager->hitTestFrameNodeListener_.end());
+    TouchEvent info;
+    it->second(info);
+    /**
+     * @tc.steps: step3. Verify homeNodeTouched remains nullopt due to early return.
+     */
+    EXPECT_EQ(navPattern->IsHomeNodeTouched(), std::nullopt);
+}
+
+/**
+ * @tc.name: InitOnTouchEvent005
+ * @tc.desc: Branch in callback: IsForceSplitUseNavBar=true and host is NavBarNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternBaseTestNg, InitOnTouchEvent005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build navigation + NavBar relation and enable forceSplitUseNavBar.
+     */
+    auto navNode = CreateNavigationGroupNode();
+    auto navBar = CreateNavBarNode();
+    ASSERT_NE(navNode, nullptr);
+    ASSERT_NE(navBar, nullptr);
+    auto navBarPattern = navBar->GetPattern<NavBarPattern>();
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navBarPattern, nullptr);
+    ASSERT_NE(navPattern, nullptr);
+    navBarPattern->SetNavigationNode(navNode);
+    navPattern->forceSplitSuccess_ = true;
+    navPattern->SetForceSplitUseNavBar(true);
+    navPattern->SetIsHomeNodeTouched(std::nullopt);
+
+    auto context = navBar->GetContext();
+    ASSERT_NE(context, nullptr);
+    context->GetForceSplitManager()->SetForceSplitSupported(true);
+    auto eventManager = context->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->hitTestFrameNodeListener_.clear();
+    navBarPattern->InitOnTouchEvent(navBar);
+
+    /**
+     * @tc.steps: step2. Trigger registered hit-test callback.
+     */
+    auto it = eventManager->hitTestFrameNodeListener_.find(navBar->GetId());
+    ASSERT_NE(it, eventManager->hitTestFrameNodeListener_.end());
+
+    TouchEvent info;
+    it->second(info);
+    /**
+     * @tc.steps: step3. Verify homeNodeTouched becomes true for NavBar host.
+     */
+    EXPECT_EQ(navPattern->IsHomeNodeTouched(), std::optional<bool>(true));
+}
+
+/**
+ * @tc.name: InitOnTouchEvent006
+ * @tc.desc: Branch in callback: IsForceSplitUseNavBar=false and host HOME destination.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternBaseTestNg, InitOnTouchEvent006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build navigation + destination relation and set destination type to HOME.
+     */
+    auto navNode = CreateNavigationGroupNode();
+    auto destNode = CreateNavDestinationGroupNode();
+    ASSERT_NE(navNode, nullptr);
+    ASSERT_NE(destNode, nullptr);
+    auto destPattern = destNode->GetPattern<NavDestinationPattern>();
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(destPattern, nullptr);
+    ASSERT_NE(navPattern, nullptr);
+    destPattern->SetNavigationNode(navNode);
+    navPattern->forceSplitSuccess_ = true;
+    navPattern->SetForceSplitUseNavBar(false);
+    navPattern->SetIsHomeNodeTouched(std::nullopt);
+    destNode->SetNavDestinationType(NavDestinationType::HOME);
+
+    auto context = destNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    context->GetForceSplitManager()->SetForceSplitSupported(true);
+    auto eventManager = context->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->hitTestFrameNodeListener_.clear();
+    destPattern->InitOnTouchEvent(destNode);
+
+    /**
+     * @tc.steps: step2. Trigger registered hit-test callback on non-NavBar path.
+     */
+    auto it = eventManager->hitTestFrameNodeListener_.find(destNode->GetId());
+    ASSERT_NE(it, eventManager->hitTestFrameNodeListener_.end());
+
+    TouchEvent info;
+    it->second(info);
+    /**
+     * @tc.steps: step3. Verify homeNodeTouched becomes true.
+     */
+    EXPECT_EQ(navPattern->IsHomeNodeTouched(), std::optional<bool>(true));
+}
+
+/**
+ * @tc.name: InitOnTouchEvent007
+ * @tc.desc: Branch in callback: IsForceSplitUseNavBar=false and host non-HOME destination.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternBaseTestNg, InitOnTouchEvent007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build navigation + destination relation and set destination type to DETAIL.
+     */
+    auto navNode = CreateNavigationGroupNode();
+    auto destNode = CreateNavDestinationGroupNode();
+    ASSERT_NE(navNode, nullptr);
+    ASSERT_NE(destNode, nullptr);
+    auto destPattern = destNode->GetPattern<NavDestinationPattern>();
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(destPattern, nullptr);
+    ASSERT_NE(navPattern, nullptr);
+    destPattern->SetNavigationNode(navNode);
+    navPattern->forceSplitSuccess_ = true;
+    navPattern->SetForceSplitUseNavBar(false);
+    navPattern->SetIsHomeNodeTouched(std::nullopt);
+    destNode->SetNavDestinationType(NavDestinationType::DETAIL);
+
+    auto context = destNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    context->GetForceSplitManager()->SetForceSplitSupported(true);
+    auto eventManager = context->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->hitTestFrameNodeListener_.clear();
+    destPattern->InitOnTouchEvent(destNode);
+
+    /**
+     * @tc.steps: step2. Trigger registered hit-test callback on non-NavBar path.
+     */
+    auto it = eventManager->hitTestFrameNodeListener_.find(destNode->GetId());
+    ASSERT_NE(it, eventManager->hitTestFrameNodeListener_.end());
+
+    TouchEvent info;
+    it->second(info);
+    /**
+     * @tc.steps: step3. Verify homeNodeTouched becomes false.
+     */
+    EXPECT_EQ(navPattern->IsHomeNodeTouched(), std::optional<bool>(false));
+}
+
+/**
+ * @tc.name: InitOnTouchEvent008
+ * @tc.desc: Branch in callback: navNode is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternBaseTestNg, InitOnTouchEvent008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create destination host without binding navigation node.
+     */
+    auto destNode = CreateNavDestinationGroupNode();
+    ASSERT_NE(destNode, nullptr);
+    auto destPattern = destNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(destPattern, nullptr);
+
+    auto context = destNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    context->GetForceSplitManager()->SetForceSplitSupported(true);
+    auto eventManager = context->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->hitTestFrameNodeListener_.clear();
+    destPattern->InitOnTouchEvent(destNode);
+
+    /**
+     * @tc.steps: step2. Trigger registered callback and verify safe return.
+     */
+    auto it = eventManager->hitTestFrameNodeListener_.find(destNode->GetId());
+    ASSERT_NE(it, eventManager->hitTestFrameNodeListener_.end());
+
+    TouchEvent info;
+    it->second(info);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitOnTouchEvent009
+ * @tc.desc: Branch in callback: navPattern is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternBaseTestNg, InitOnTouchEvent009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build navigation host and destination host, then bind them.
+     */
+    auto fakeNavNode = CreateNavigationGroupNode();
+    auto destNode = CreateNavDestinationGroupNode();
+    ASSERT_NE(fakeNavNode, nullptr);
+    ASSERT_NE(destNode, nullptr);
+    auto destPattern = destNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(destPattern, nullptr);
+    destPattern->SetNavigationNode(fakeNavNode);
+
+    auto context = destNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    context->GetForceSplitManager()->SetForceSplitSupported(true);
+    auto eventManager = context->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->hitTestFrameNodeListener_.clear();
+    destPattern->InitOnTouchEvent(destNode);
+
+    /**
+     * @tc.steps: step2. Trigger callback after replacing host pattern with base Pattern.
+     */
+    auto it = eventManager->hitTestFrameNodeListener_.find(destNode->GetId());
+    ASSERT_NE(it, eventManager->hitTestFrameNodeListener_.end());
+
+    auto originPattern = fakeNavNode->pattern_;
+    fakeNavNode->pattern_ = AceType::MakeRefPtr<Pattern>();
+    TouchEvent info;
+    it->second(info);
+    /**
+     * @tc.steps: step3. Restore original host pattern and verify no crash.
+     */
+    fakeNavNode->pattern_ = originPattern;
+    SUCCEED();
+}
+
+/**
+ * @tc.name: InitOnTouchEvent010
+ * @tc.desc: Branch in callback: IsForceSplitUseNavBar=true and host is not NavBarNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternBaseTestNg, InitOnTouchEvent010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build navigation + destination relation with forceSplitUseNavBar enabled.
+     */
+    auto navNode = CreateNavigationGroupNode();
+    auto destNode = CreateNavDestinationGroupNode();
+    ASSERT_NE(navNode, nullptr);
+    ASSERT_NE(destNode, nullptr);
+    auto destPattern = destNode->GetPattern<NavDestinationPattern>();
+    auto navPattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(destPattern, nullptr);
+    ASSERT_NE(navPattern, nullptr);
+    destPattern->SetNavigationNode(navNode);
+    navPattern->forceSplitSuccess_ = true;
+    navPattern->SetForceSplitUseNavBar(true);
+    navPattern->SetIsHomeNodeTouched(std::nullopt);
+
+    auto context = destNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    context->GetForceSplitManager()->SetForceSplitSupported(true);
+    auto eventManager = context->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->hitTestFrameNodeListener_.clear();
+    destPattern->InitOnTouchEvent(destNode);
+
+    /**
+     * @tc.steps: step2. Trigger callback using non-NavBar host.
+     */
+    auto it = eventManager->hitTestFrameNodeListener_.find(destNode->GetId());
+    ASSERT_NE(it, eventManager->hitTestFrameNodeListener_.end());
+
+    TouchEvent info;
+    it->second(info);
+    /**
+     * @tc.steps: step3. Verify homeNodeTouched is set to false.
+     */
+    EXPECT_EQ(navPattern->IsHomeNodeTouched(), std::optional<bool>(false));
 }
 
 } // namespace OHOS::Ace::NG

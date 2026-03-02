@@ -26,8 +26,16 @@ namespace OHOS::Ace::Kit {
 
 class FrameNode;
 
-// paint x, paint y, component width, component height.
-using DrawCallback = std::function<bool(float, float, float, float)>;
+struct DrawCallbackInfo {
+    float paintX = 0.0f;
+    float paintY = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    bool isFontChanged = false;
+    float fontSize = 0.0f;
+};
+
+using DrawCallback = std::function<bool(DrawCallbackInfo)>;
 
 class ACE_FORCE_EXPORT Text : public View {
 public:

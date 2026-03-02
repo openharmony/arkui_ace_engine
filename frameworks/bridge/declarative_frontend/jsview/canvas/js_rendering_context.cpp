@@ -88,16 +88,14 @@ JSRenderingContext::JSRenderingContext()
         canvasRenderingContext2DModel->SetOnDetach(onDetach);
     } else {
         const auto* modifier = GetCanvasInnerModifier();
-        if (modifier == nullptr) {
-            LOGF("Cannot find video modifier");
-            abort();
-        }
+        CHECK_NULL_VOID(modifier);
         void* renderContext = modifier->createCanvasRenderingContextModel(false);
         if (renderContext != nullptr) {
             renderingContext2DModel_ = AceType::Claim(reinterpret_cast<RenderingContext2DModel*>(renderContext));
         }
     }
 #endif
+    renderingContext2DModel_->SetPatternInstanceId(GetInstanceId());
 }
 
 void JSRenderingContext::JSBind(BindingTarget globalObj)
