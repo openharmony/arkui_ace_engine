@@ -28,10 +28,13 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
     private readonly monitorFunction_: (m: IMonitor) => void;
     private readonly values_: MonitorValueInternal[] = new Array<MonitorValueInternal>();
     private readonly owningComponent_?: IVariableOwner;
+    public readonly functionName_?: string;
 
-    constructor(pathLambda: IMonitorPathInfo[], monitorFunction: (m: IMonitor) => void, owningView?: IVariableOwner, isSynchronous?: boolean) {
+    constructor(pathLambda: IMonitorPathInfo[], monitorFunction: (m: IMonitor) => void, owningView?: IVariableOwner, isSynchronous?: boolean,
+            functionName?: string) {
         this.monitorFunction_ = monitorFunction;
         this.owningComponent_ = owningView;
+        this.functionName_ = functionName;
         const isSync = isSynchronous ?? false;
 
         pathLambda.forEach((info: IMonitorPathInfo) => {
@@ -213,8 +216,11 @@ export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecorat
     }
 
     public getDFXInfo(): ElementInfo {
+        const functionName = this.monitor.functionName_;
+        const elementName = functionName ?
+            `@Monitor function: ${functionName}, path: ${this.path}` : `@Monitor function path: ${this.path}`;
         return {
-            elementName: `@Monitor function path: ${this.path}`,
+            elementName: elementName,
             elementId: this.id
         };
     }
