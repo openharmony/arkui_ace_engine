@@ -2085,6 +2085,7 @@ void TabBarPattern::HandleTouchUp(int32_t index)
     PlayPressAnimation(index, Color::TRANSPARENT, AnimationType::PRESS);
     if (hoverIndex_.has_value()) {
         PlayPressAnimation(hoverIndex_.value(), GetSubTabBarHoverColor(hoverIndex_.value()), AnimationType::HOVER);
+        PlayPressAnimation(index, Color::TRANSPARENT, AnimationType::HOVER);
     }
 }
 
