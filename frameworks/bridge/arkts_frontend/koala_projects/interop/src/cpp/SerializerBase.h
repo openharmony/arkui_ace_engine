@@ -112,9 +112,9 @@ public:
     inline void check(int more) {
         if (position + more > dataLength) {
             if (ownData) {
-                constexpr auto NUM_2 { 2 };
-                constexpr auto NUM_3 { 3 };
-                this->resize((position + more) * NUM_3 / NUM_2 + NUM_2);
+                constexpr auto GROWTH_FACTOR_DENOMINATOR { 2 };
+                constexpr auto GROWTH_FACTOR_NUMERATOR { 3 };
+                this->resize((position + more) * GROWTH_FACTOR_NUMERATOR / GROWTH_FACTOR_DENOMINATOR + GROWTH_FACTOR_DENOMINATOR);
             } else {
                 INTEROP_FATAL("Buffer overrun: %d > %d\n", position + more, dataLength);
             }
