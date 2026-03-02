@@ -725,42 +725,6 @@ HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_021, TestSize.Leve
 }
 
 /**
- * @tc.name: NavigationPatternTestOne_022
- * @tc.desc: Test Navigation Function
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_022, TestSize.Level1)
-{
-    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
-    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    MockPipelineContext::TearDown();
-    navigationPattern->AddToDumpManager();
-    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
-}
-
-/**
- * @tc.name: NavigationPatternTestOne_023
- * @tc.desc: Test Navigation Function
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_023, TestSize.Level1)
-{
-    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
-    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    MockPipelineContext::TearDown();
-    navigationPattern->RemoveFromDumpManager();
-    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
-}
-
-/**
  * @tc.name: NavigationPatternTestOne_024
  * @tc.desc: Test Navigation Function
  * @tc.type: FUNC
@@ -1735,12 +1699,11 @@ HWTEST_F(NavigationPatternTestTwoNg, DealTransitionVisibility005, TestSize.Level
 }
 
 /**
- * @tc.name: AddToDumpManager001
- * @tc.desc: Branch: if (!node || !context) = true
- *           Condition: !node = true
+ * @tc.name: AttachToManager001
+ * @tc.desc: Test AttachToManager adds navigation to targetNavigationMap_
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestTwoNg, AddToDumpManager001, TestSize.Level1)
+HWTEST_F(NavigationPatternTestTwoNg, AttachToManager001, TestSize.Level1)
 {
     NavigationPatternTestTwoNg::SetUpTestSuite();
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -1749,142 +1712,67 @@ HWTEST_F(NavigationPatternTestTwoNg, AddToDumpManager001, TestSize.Level1)
     ASSERT_NE(navigationPattern, nullptr);
     auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
     navigationPattern->SetNavigationStack(navigationStack);
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationMgr = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    navigationMgr->targetNavigationMap_.clear();
+
+    navigationPattern->AttachToManager();
+    EXPECT_EQ(navigationMgr->targetNavigationMap_.size(), 1);
+    NavigationPatternTestTwoNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: DetachFromManager001
+ * @tc.desc: Test DetachFromManager removes navigation from targetNavigationMap_
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, DetachFromManager001, TestSize.Level1)
+{
+    NavigationPatternTestTwoNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationMgr = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    navigationMgr->targetNavigationMap_.clear();
+
+    navigationPattern->AttachToManager();
+    EXPECT_EQ(navigationMgr->targetNavigationMap_.size(), 1);
+    navigationPattern->DetachFromManager();
+    EXPECT_EQ(navigationMgr->targetNavigationMap_.size(), 0);
+    NavigationPatternTestTwoNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: AttachToManager002
+ * @tc.desc: Branch: node is null (frameNode_ is nullptr), early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, AttachToManager002, TestSize.Level1)
+{
+    NavigationPatternTestTwoNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationMgr = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    navigationMgr->targetNavigationMap_.clear();
+
     navigationPattern->frameNode_ = nullptr;
-    auto pipelineContext = navigationNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto navigationMgr = pipelineContext->GetNavigationManager();
-    ASSERT_NE(navigationMgr, nullptr);
-    navigationMgr->dumpMap_.clear();
-
-    navigationPattern->AddToDumpManager();
-    EXPECT_EQ(navigationMgr->dumpMap_.size(), 0);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: AddToDumpManager002
- * @tc.desc: Branch: if (!node || !context) = true
- *           Condition: !node = false, !context = true
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, AddToDumpManager002, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
-    auto pipelineContext = navigationNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto navigationMgr = pipelineContext->GetNavigationManager();
-    ASSERT_NE(navigationMgr, nullptr);
-    navigationMgr->dumpMap_.clear();
-    auto pipeline = MockPipelineContext::pipeline_;
-    MockPipelineContext::pipeline_ = nullptr;
-
-    navigationPattern->AddToDumpManager();
-    EXPECT_EQ(navigationMgr->dumpMap_.size(), 0);
-    MockPipelineContext::pipeline_ = pipeline;
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: AddToDumpManager003
- * @tc.desc: Branch: if (!node || !context) = false
- *           Condition: !node = false, !context = false
- *           Branch: if (!mgr) = true
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, AddToDumpManager003, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
-    auto pipelineContext = navigationNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto navigationMgr = pipelineContext->GetNavigationManager();
-    ASSERT_NE(navigationMgr, nullptr);
-    navigationMgr->dumpMap_.clear();
-    pipelineContext->navigationMgr_ = nullptr;
-
-    navigationPattern->AddToDumpManager();
-    EXPECT_EQ(navigationMgr->dumpMap_.size(), 0);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: AddToDumpManager004
- * @tc.desc: Branch: if (!mgr) = false
- *           Branch: if (!pattern) = false
- *           Branch: if (!stack) = false
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, AddToDumpManager004, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        navigationNodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
-    auto pipelineContext = navigationNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto navigationMgr = pipelineContext->GetNavigationManager();
-    ASSERT_NE(navigationMgr, nullptr);
-    navigationMgr->dumpMap_.clear();
-    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG);
-    customNode->children_.emplace_back(navigationNode);
-
-    navigationPattern->AddToDumpManager();
-    auto dump = navigationMgr->dumpMap_.find(
-        NavigationManager::DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth()));
-    ASSERT_NE(dump, navigationMgr->dumpMap_.end());
-    ASSERT_NE(dump->second, nullptr);
-    dump->second(0);
-    EXPECT_NE(navigationPattern, nullptr);
-    EXPECT_NE(navigationPattern->GetNavigationStack(), nullptr);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: AddToDumpManager005
- * @tc.desc: Branch: if (!pattern) = false
- *           Branch: if (!stack) = true
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, AddToDumpManager005, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        navigationNodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto pipelineContext = navigationNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto navigationMgr = pipelineContext->GetNavigationManager();
-    ASSERT_NE(navigationMgr, nullptr);
-    navigationMgr->dumpMap_.clear();
-    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), V2::TEXT_ETS_TAG);
-    customNode->children_.emplace_back(navigationNode);
-
-    navigationPattern->AddToDumpManager();
-    auto dump = navigationMgr->dumpMap_.find(
-        NavigationManager::DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth()));
-    ASSERT_NE(dump, navigationMgr->dumpMap_.end());
-    ASSERT_NE(dump->second, nullptr);
-    dump->second(0);
-    EXPECT_EQ(navigationPattern->GetNavigationStack(), nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->AttachToManager();
+    EXPECT_EQ(navigationMgr->targetNavigationMap_.size(), 0);
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 

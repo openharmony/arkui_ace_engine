@@ -1200,13 +1200,11 @@ HWTEST_F(NavigationPatternTestThreeNg, CloseLongPressDialog002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RemoveFromDumpManager001
- * @tc.desc: Branch: if (!node || !context) = false
- *           Condition: !node = false, !context = false
- *           Branch: if (mgr) = true
+ * @tc.name: AttachToManager001
+ * @tc.desc: Test AttachToManager adds navigation to targetNavigationMap_
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager001, TestSize.Level1)
+HWTEST_F(NavigationPatternTestThreeNg, AttachToManager001, TestSize.Level1)
 {
     NavigationPatternTestThreeNg::SetUpTestSuite();
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -1218,21 +1216,20 @@ HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager001, TestSize.Level1
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
     auto mgr = context->GetNavigationManager();
-    auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode, callback);
+    ASSERT_NE(mgr, nullptr);
+    mgr->targetNavigationMap_.clear();
 
-    navigationPattern->RemoveFromDumpManager();
-    EXPECT_EQ(mgr->dumpMap_.size(), 0);
+    navigationPattern->AttachToManager();
+    EXPECT_EQ(mgr->targetNavigationMap_.size(), 1);
     NavigationPatternTestThreeNg::TearDownTestSuite();
 }
 
 /**
- * @tc.name: RemoveFromDumpManager002
- * @tc.desc: Branch: if (!node || !context) = true
- *           Condition: !node = true
+ * @tc.name: DetachFromManager001
+ * @tc.desc: Test DetachFromManager removes navigation from targetNavigationMap_
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager002, TestSize.Level1)
+HWTEST_F(NavigationPatternTestThreeNg, DetachFromManager001, TestSize.Level1)
 {
     NavigationPatternTestThreeNg::SetUpTestSuite();
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -1244,67 +1241,40 @@ HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager002, TestSize.Level1
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
     auto mgr = context->GetNavigationManager();
-    auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode, callback);
+    ASSERT_NE(mgr, nullptr);
+    mgr->targetNavigationMap_.clear();
+
+    navigationPattern->AttachToManager();
+    EXPECT_EQ(mgr->targetNavigationMap_.size(), 1);
+    navigationPattern->DetachFromManager();
+    EXPECT_EQ(mgr->targetNavigationMap_.size(), 0);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: DetachFromManager002
+ * @tc.desc: Branch: node is null (frameNode_ is nullptr), early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, DetachFromManager002, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgr = context->GetNavigationManager();
+    ASSERT_NE(mgr, nullptr);
+    mgr->targetNavigationMap_.clear();
+    mgr->AttachNavigation(navigationNode);
+
     navigationPattern->frameNode_ = nullptr;
-
-    navigationPattern->RemoveFromDumpManager();
-    EXPECT_EQ(mgr->dumpMap_.size(), 1);
-    NavigationPatternTestThreeNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: RemoveFromDumpManager003
- * @tc.desc: Branch: if (!node || !context) = true
- *           Condition: !node = false, !context = true
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager003, TestSize.Level1)
-{
-    NavigationPatternTestThreeNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto mgr = context->GetNavigationManager();
-    auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode, callback);
-    MockPipelineContext::pipeline_ = nullptr;
-
-    navigationPattern->RemoveFromDumpManager();
-    EXPECT_EQ(mgr->dumpMap_.size(), 1);
-    NavigationPatternTestThreeNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: RemoveFromDumpManager004
- * @tc.desc: Branch: if (!node || !context) = false
- *           Condition: !node = false, !context = false
- *           Branch: if (mgr) = false
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager004, TestSize.Level1)
-{
-    NavigationPatternTestThreeNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto mgr = context->GetNavigationManager();
-    auto callback = [](int depth) {};
-    mgr->AddNavigationDumpCallback(navigationNode, callback);
-    context->navigationMgr_ = nullptr;
-
-    navigationPattern->RemoveFromDumpManager();
-    EXPECT_EQ(mgr->dumpMap_.size(), 1);
+    navigationPattern->DetachFromManager();
+    EXPECT_EQ(mgr->targetNavigationMap_.size(), 1);
     NavigationPatternTestThreeNg::TearDownTestSuite();
 }
 

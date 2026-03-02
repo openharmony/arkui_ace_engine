@@ -387,8 +387,8 @@ public:
     void AttachNavigationStackToParent();
     void DetachNavigationStackFromParent();
 
-    void AddToDumpManager();
-    void RemoveFromDumpManager();
+    void AttachToManager();
+    void DetachFromManager();
 
     void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode, NavDestinationLifecycle lifecycle,
         NavDestLifecycleReason reason = NavDestinationActiveReason::TRANSITION);
