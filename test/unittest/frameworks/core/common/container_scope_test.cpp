@@ -424,43 +424,48 @@ HWTEST_F(ContainerScopeTest, ContainerScopeTest011, TestSize.Level1)
      * @tc.steps: step1. Test SCOPE reason description
      * @tc.expected: Returns correct description for SCOPE
      */
-    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::SCOPE), "instance specified by ContainerScope");
+    EXPECT_EQ(
+        ContainerScope::ReasonToDescription(InstanceIdGenReason::SCOPE), "The instance is determined by the caller");
 
     /**
      * @tc.steps: step2. Test ACTIVE reason description
      * @tc.expected: Returns correct description for ACTIVE
      */
-    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::ACTIVE), "recently active instance");
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::ACTIVE),
+        "No specific instance was specified, so the most recently active instance was retrieved");
 
     /**
      * @tc.steps: step3. Test DEFAULT reason description
      * @tc.expected: Returns correct description for DEFAULT
      */
-    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::DEFAULT), "no valid instance, using default");
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::DEFAULT),
+        "No specific instance was specified, using default");
 
     /**
      * @tc.steps: step4. Test SINGLETON reason description
      * @tc.expected: Returns correct description for SINGLETON
      */
-    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::SINGLETON), "only one instance exists");
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::SINGLETON),
+        "No specific instance was specified, return the only remaining instance");
 
     /**
      * @tc.steps: step5. Test FOREGROUND reason description
      * @tc.expected: Returns correct description for FOREGROUND
      */
-    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::FOREGROUND), "recently foreground instance");
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::FOREGROUND),
+        "No specific instance was specified, return the foreground instance");
 
     /**
      * @tc.steps: step6. Test UNDEFINED reason description
      * @tc.expected: Returns correct description for UNDEFINED
      */
-    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::UNDEFINED), "no valid instance exists");
+    EXPECT_EQ(ContainerScope::ReasonToDescription(InstanceIdGenReason::UNDEFINED), "No valid instance exists");
 
     /**
      * @tc.steps: step7. Test invalid enum value (out of range)
-     * @tc.expected: Returns "unknown reason"
+     * @tc.expected: Returns "Unknown reason"
      */
-    EXPECT_EQ(ContainerScope::ReasonToDescription(static_cast<InstanceIdGenReason>(999)), "unknown reason");
+    EXPECT_EQ(ContainerScope::ReasonToDescription(static_cast<InstanceIdGenReason>(999)), "Unknown reason");
 }
 
 } // namespace OHOS::Ace
