@@ -464,9 +464,9 @@ class ObservableArray<T> extends Array<T> {
         return super.join(sep)
     }
 
-    override toLocaleString(): string {
+    override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         this.handler?.onAccess()
-        return super.toLocaleString()
+        return super.toLocaleString(locales, options)
     }
 
     override toSpliced(start: int, delete: int, ...items: FixedArray<T>): Array<T> {
@@ -766,9 +766,9 @@ class ObservableDate extends Date {
         return super.toLocaleTimeString()
     }
 
-    override toLocaleString(): string {
+    override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         this.handler?.onAccess()
-        return super.toLocaleString()
+        return super.toLocaleString(locales, options)
     }
 
     override toLocaleDateString(): string {
