@@ -1392,6 +1392,8 @@ public:
         return xComponentDisplayConstraintEnabled_;
     }
 
+    bool IsCurrentInForceSplitMode() const override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
