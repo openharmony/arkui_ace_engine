@@ -4773,6 +4773,20 @@ typedef enum {
     NODE_TEXT_AREA_FALLBACK_LINE_SPACING = 8042,
 
     /**
+     * @brief Whether to enable horizontal scrolling when text is wider than the view.
+     * The default value is false, and text will be wrapped by the view.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether enable the feature, true means enable this feature, false means disable. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether enable the feature. \n
+     *
+     * @since 24
+     */
+    NODE_TEXT_AREA_HORIZONTAL_SCROLLING = 8043,
+
+    /**
      * @brief Writing direction of the text.
      * This attribute can be set, reset, and obtained as required through APIs.
      *

@@ -230,6 +230,7 @@ private:
         LayoutWrapper* layoutWrapper, LayoutConstraintF& contentConstraint, SizeF& maxIdealSize);
     double GetMaxIndent(LayoutWrapper* layoutWrapper, double width);
     bool HasCalcMinWidthVersion11OrLarger(LayoutWrapper* layoutWrapper, const LayoutConstraintF& contentConstraint);
+    bool IsHorizontalScrollEnabled(LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

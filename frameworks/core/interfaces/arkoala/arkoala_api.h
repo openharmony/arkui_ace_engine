@@ -5564,6 +5564,9 @@ struct ArkUITextAreaModifier {
     void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
+    void (*setHorizontalScrolling)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetHorizontalScrolling)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getHorizontalScrolling)(ArkUINodeHandle node);
     void (*setTextAreaStyle)(ArkUINodeHandle node, ArkUI_Int32 style);
     void (*resetTextAreaStyle)(ArkUINodeHandle node);
     void (*setTextAreaSelectionMenuHidden)(ArkUINodeHandle node, ArkUI_Uint32 contextMenuHidden);

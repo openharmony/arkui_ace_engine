@@ -94,6 +94,9 @@ class SpanString;
 }
 
 namespace OHOS::Ace::NG {
+inline constexpr Dimension AUTO_SCROLL_HOT_ZONE_HEIGHT = 58.0_vp;
+inline constexpr Dimension AUTO_SCROLL_HOT_ZONE_WIDTH = 26.0_vp;
+inline constexpr Dimension MOUSE_SCROLL_BAR_REGION_WIDTH = 8.0_vp;
 
 enum class FocuseIndex { TEXT = 0, CANCEL, UNIT, VOICE };
 
@@ -269,6 +272,7 @@ struct ContentScroller {
     float stepOffset = 0.0f;
     Offset localOffset;
     std::optional<Offset> hotAreaOffset;
+    Axis axis = Axis::NONE;
 
     void OnBeforeScrollingCallback(const Offset& localOffset)
     {
@@ -290,6 +294,8 @@ struct RelatedLPXInfo {
     bool hasLPXPadding = false;
     bool initTextRectWithLPX = false;
 };
+
+class TextFieldFreeScroller;
 
 class ACE_FORCE_EXPORT TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
@@ -528,7 +534,7 @@ public:
         selectController_->UpdateCaretIndex(caretPosition);
     }
     void UpdateCaretPositionByTouch(const Offset& offset);
-    bool IsReachedBoundary(float offset);
+    bool IsReachedBoundary(float offset, Axis axis);
 
     virtual int32_t GetRequestKeyboardId();
 
@@ -904,6 +910,7 @@ public:
     void UpdateEditingValueToRecord(int32_t beforeCaretPosition = -1);
 
     void UpdateScrollBarOffset() override;
+    void UpdateScrollBarOffsetWithAxis(Axis axis);
 
     bool UpdateCurrentOffset(float offset, int32_t source) override
     {
@@ -911,7 +918,13 @@ public:
         return true;
     }
 
-    void PlayScrollBarAppearAnimation();
+    void PlayScrollBarAppearAnimation(Axis axis);
+
+    void PlayScrollBarAppearAnimation()
+    {
+        PlayScrollBarAppearAnimation(Axis::VERTICAL);
+        PlayScrollBarAppearAnimation(Axis::HORIZONTAL);
+    }
 
     void ScheduleDisappearDelayTask();
 
@@ -1764,7 +1777,8 @@ public:
     void AfterLayoutProcessCleanResponse(
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
     void StopContentScroll();
-    void UpdateContentScroller(const Offset& localOffset, float delay = 0.0f, bool enableScrollOutside = true);
+    void UpdateContentScroller(
+        const Offset& localOffset, bool hasHotArea = true, float delay = 0.0f, bool enableScrollOutside = true);
     Offset AdjustAutoScrollOffset(const Offset& offset);
     void SetIsInitTextRect(bool isInitTextRect)
     {
@@ -1915,6 +1929,32 @@ public:
     {
         return hasUserAccessibilityText_;
     }
+    bool IsScrollEnabled() const;
+    void StopScrolling();
+    void SetHorizontalScrolling(bool isHorizontalScrolling)
+    {
+        isHorizontalScrolling_ = isHorizontalScrolling;
+    }
+
+    bool GetHorizontalScrolling() const
+    {
+        return isHorizontalScrolling_;
+    }
+
+    bool IsHorizontalScrollEnabled() const
+    {
+        return isHorizontalScrolling_ && IsTextArea() && !IsNormalInlineState() && !IsShowVoiceButtonMode();
+    }
+
+    bool IsFreeScrollEnabled() const
+    {
+        return IsHorizontalScrollEnabled() && freeScroller_ != nullptr;
+    }
+
+    const RefPtr<TextFieldFreeScroller>& GetFreeScroller() const
+    {
+        return freeScroller_;
+    }
 
 protected:
     virtual void InitDragEvent();
@@ -2015,7 +2055,12 @@ private:
     void OnTextInputScroll(float offset);
     void OnTextAreaScroll(float offset);
     bool OnScrollCallback(float offset, int32_t source) override;
+    bool OnScrollWithAxisCallback(float offset, int32_t source, Axis axis);
     void OnScrollEndCallback() override;
+    void OnScrollEndCallbackWithAxis(Axis axis);
+    void CalculateScrollDestination(int32_t start, int32_t end, float& destX, float& destY);
+    void PerformScrollToPosition(float destX, float destY);
+    void UpdateOverlayHandleOffsetAfterScroll();
     bool CheckSelectAreaVisible();
     void InitMouseEvent();
     void InitCancelButtonMouseEvent();
@@ -2029,6 +2074,7 @@ private:
     void ChangeMouseState(const Offset location, int32_t frameId);
     void FreeMouseStyleHoldNode(const Offset location);
     void HandleMouseEvent(MouseInfo& info);
+    bool HandleMouseEventByScrollBar(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
     void UpdateShiftFlag(const KeyEvent& keyEvent) override;
     void UpdateCaretByClick(const Offset& localOffset);
@@ -2124,7 +2170,7 @@ private:
     void FilterExistText();
     void UpdateErrorTextMargin();
     void UpdateSelectController();
-    void UpdateHandlesOffsetOnScroll(float offset);
+    void UpdateHandlesOffsetOnScroll(float offset, bool isVertical);
     void CloseHandleAndSelect() override;
     bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
     bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
@@ -2183,6 +2229,9 @@ private:
     void DoProcessAutoFill(RequestAutoFillReason autoFillReason, SourceType sourceType = SourceType::NONE);
     void KeyboardContentTypeToInputType();
     void ProcessScroll();
+    bool HandleHorizontalScroll();
+    void RemoveOverlayModifier();
+    void HandleFreeScrollWithMouseLeft();
     void ProcessCounter();
     void HandleParentGlobalOffsetChange();
     HintToTypeWrap GetHintType();
@@ -2234,7 +2283,7 @@ private:
     void PauseContentScroll();
     void ScheduleContentScroll(float delay);
     void UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset);
-    std::optional<float> CalcAutoScrollStepOffset(const Offset& localOffset);
+    std::optional<float> CalcAutoScrollStepOffset(const Offset& localOffset, Axis axis);
     void SetDragMovingScrollback();
     float CalcScrollSpeed(float hotAreaStart, float hotAreaEnd, float point);
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
@@ -2514,6 +2563,9 @@ private:
     std::string placeholderColorInfo_;
     bool needResetFocusColor_ = true;
     bool hasUserAccessibilityText_ = false;
+    bool isHorizontalScrolling_ = false;
+    friend class TextFieldFreeScroller;
+    RefPtr<TextFieldFreeScroller> freeScroller_;
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;

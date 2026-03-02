@@ -331,6 +331,11 @@ void TextFieldModelStatic::SetTextDirection(FrameNode* frameNode, const std::opt
         TextFieldLayoutProperty, TextDirection, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
 }
 
+void TextFieldModelStatic::SetHorizontalScrolling(FrameNode* frameNode, const std::optional<bool>& valueOpt)
+{
+    TextFieldModelNG::SetHorizontalScrolling(frameNode, valueOpt.value_or(false));
+}
+
 void TextFieldModelStatic::SetTextColor(FrameNode* frameNode, const std::optional<Color>& colorOpt)
 {
     if (colorOpt) {
