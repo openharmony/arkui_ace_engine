@@ -26,13 +26,13 @@ ace_unittest("accessibility_property_test_ng") {
 }
 
 ace_unittest("accessibility_property_testtwo_ng") {
-  module_name = "TextSet-Text"
+  module_name = "Accessibility-AccessibilityProperties"
   type = "new"
   sources = [ "accessibility_property_testtwo_ng.cpp" ]
 }
 
 ace_unittest("accessibility_property_test_three_ng") {
-  module_name = "TextSet-Text"
+  module_name = "Accessibility-AccessibilityProperties"
   type = "new"
   sources = [ "accessibility_property_test_three_ng.cpp" ]
 }

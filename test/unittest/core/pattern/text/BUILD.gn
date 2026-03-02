@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("text_test_ng") {
-  module_name = "ImageSet-Image"
+  module_name = "TextSet-Text"
   type = "new"
   sources = [
     "paragraph_manager_test_ng.cpp",
@@ -42,7 +42,7 @@ ace_unittest("text_test_ng") {
 }
 
 ace_unittest("text_test_ng_addition") {
-  module_name = "FormAndSelection-Select"
+  module_name = "TextSet-Text"
   type = "new"
   sources = [
     "text_base.cpp",
@@ -63,7 +63,7 @@ ace_unittest("text_test_ng_addition") {
 }
 
 ace_unittest("span_test_ng") {
-  module_name = "Gesture-BasicAndCombinationGesture"
+  module_name = "TextSet-Span"
   type = "new"
   sources = [
     "span_accessibility_test_ng.cpp",
@@ -79,7 +79,7 @@ ace_unittest("span_test_ng") {
 }
 
 ace_unittest("text_test_nullptr") {
-  module_name = "TextSet-Span"
+  module_name = "TextSet-TextSelection"
   type = "new"
   sources = [
     "text_base.cpp",
