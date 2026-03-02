@@ -73,6 +73,12 @@ public:
                blue_ == color.GetBlue() && placeholder_ == color.placeholder_;
     }
 
+    bool CompareColorExceptHolder(const LinearColor& color) const
+    {
+        return alpha_ == color.GetAlpha() && red_ == color.GetRed() && green_ == color.GetGreen() &&
+               blue_ == color.GetBlue();
+    }
+
     LinearColor& operator+=(const LinearColor& color) {
         alpha_ = alpha_ + color.GetAlpha();
         red_ = red_ + color.GetRed();

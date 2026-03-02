@@ -1174,6 +1174,9 @@ HWTEST_F(TextTestNgSix, UpdateSymbolTextStyle001, TestSize.Level1)
  */
 HWTEST_F(TextTestNgSix, UpdateSymbolTextStyle002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode, initialize text layout algorithm.
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
@@ -1182,22 +1185,35 @@ HWTEST_F(TextTestNgSix, UpdateSymbolTextStyle002, TestSize.Level1)
     auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     ASSERT_NE(textLayoutAlgorithm, nullptr);
 
+    /**
+     * @tc.steps: step2. Set symbol source info with default symbol ID.
+     */
     auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(DEFAULT_SYMBOL_ID));
 
+    /**
+     * @tc.steps: step3. Test UpdateSymbolTextStyle with SYSTEM symbol type.
+     * @tc.expected: UpdateSymbolTextStyle returns true for SYSTEM symbol type.
+     */
     TextStyle textStyle;
     ParagraphStyle paragraphStyle;
     textStyle.SetSymbolType(SymbolType::SYSTEM);
-
     EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
         textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), true);
 
+    /**
+     * @tc.steps: step4. Test UpdateSymbolTextStyle with CUSTOM symbol type without font families.
+     * @tc.expected: UpdateSymbolTextStyle returns false for CUSTOM symbol type without font families.
+     */
     textStyle.SetSymbolType(SymbolType::CUSTOM);
-
     EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
         textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), false);
 
+    /**
+     * @tc.steps: step5. Test UpdateSymbolTextStyle with CUSTOM symbol type and custom font families.
+     * @tc.expected: UpdateSymbolTextStyle returns true for CUSTOM symbol type with font families.
+     */
     std::vector<std::string> fontFamilies;
     fontFamilies.push_back(SYMBOL_FONT_FAMILY);
     textStyle.SetFontFamilies(fontFamilies);
