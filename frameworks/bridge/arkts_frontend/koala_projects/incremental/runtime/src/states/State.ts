@@ -30,6 +30,7 @@ import { RuntimeProfiler } from '../common/RuntimeProfiler'
 import { IncrementalNode } from '../tree/IncrementalNode'
 import { ReadonlyTreeNode } from '../tree/ReadonlyTreeNode'
 import { ReadableState, StateContext as StateContextBase, IncrementalScope } from 'arkui.incremental.runtime.state';
+import { GlobalStateManager } from '@koalaui/runtime'
 
 export const CONTEXT_ROOT_SCOPE = 'ohos.koala.context.root.scope'
 export const CONTEXT_ROOT_NODE = 'ohos.koala.context.root.node'
@@ -307,6 +308,7 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
     get value(): Value {
         this.onAccess()
         const manager = this.manager
+        this.checkUIThreadAccess()
         if (!manager || manager.frozen) { return this.snapshot }
         if (manager.current?.nodeRef) { return this.snapshot }
         return this.current(manager.journal)
@@ -445,6 +447,16 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
             });
         }
         return nodes;
+    }
+
+    checkUIThreadAccess(): void {
+        const manager = this.manager
+        if (manager && manager.isDebugMode) {
+            const local = GlobalStateManager.GetLocalManager();
+            if (manager !== local) {
+                throw new Error('Used a state variable that was created externally');
+            }
+        }
     }
 }
 
