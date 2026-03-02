@@ -621,18 +621,18 @@ PositionWithAffinity RichEditorModelNG::GetCharacterPositionAtCoordinate(FrameNo
 std::pair<TextRange, TextRange> RichEditorModelNG::GetGlyphRangeForCharacterRange(
     FrameNode* frameNode, int32_t start, int32_t end)
 {
-    CHECK_NULL_RETURN(frameNode, (std::pair<TextRange, TextRange>()));
+    CHECK_NULL_RETURN(frameNode, {});
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
-    CHECK_NULL_RETURN(pattern, (std::pair<TextRange, TextRange>()));
+    CHECK_NULL_RETURN(pattern, {});
     return pattern->GetGlyphRangeForCharacterRange(start, end);
 }
 
 std::pair<TextRange, TextRange> RichEditorModelNG::GetCharacterRangeForGlyphRange(
     FrameNode* frameNode, int32_t start, int32_t end)
 {
-    CHECK_NULL_RETURN(frameNode, (std::pair<TextRange, TextRange>()));
+    CHECK_NULL_RETURN(frameNode, {});
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
-    CHECK_NULL_RETURN(pattern, (std::pair<TextRange, TextRange>()));
+    CHECK_NULL_RETURN(pattern, {});
     return pattern->GetCharacterRangeForGlyphRange(start, end);
 }
 

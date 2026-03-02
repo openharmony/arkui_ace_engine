@@ -1599,14 +1599,14 @@ void GetRichEditorGlyphRangeForCharacterRange(
     ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
 {
 #ifndef PREVIEW
+    CHECK_NULL_VOID(range);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::pair<OHOS::Ace::TextRange, OHOS::Ace::TextRange> textRect =
-        RichEditorModelNG::GetGlyphRangeForCharacterRange(frameNode, start, end);
-    range->glyphStart = textRect.first.start;
-    range->glyphEnd = textRect.first.end;
-    range->charStart = textRect.second.start;
-    range->charEnd = textRect.second.end;
+    auto [glyphRange, charRange] = RichEditorModelNG::GetGlyphRangeForCharacterRange(frameNode, start, end);
+    range->glyphStart = glyphRange.start;
+    range->glyphEnd = glyphRange.end;
+    range->charStart = charRange.start;
+    range->charEnd = charRange.end;
 #else
 #endif
 }
@@ -1615,14 +1615,14 @@ void GetRichEditorCharacterRangeForGlyphRange(
     ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
 {
 #ifndef PREVIEW
+    CHECK_NULL_VOID(range);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::pair<OHOS::Ace::TextRange, OHOS::Ace::TextRange> textRect =
-        RichEditorModelNG::GetCharacterRangeForGlyphRange(frameNode, start, end);
-    range->charStart = textRect.first.start;
-    range->charEnd = textRect.first.end;
-    range->glyphStart = textRect.second.start;
-    range->glyphEnd = textRect.second.end;
+    auto [charRange, glyphRange] = RichEditorModelNG::GetCharacterRangeForGlyphRange(frameNode, start, end);
+    range->glyphStart = glyphRange.start;
+    range->glyphEnd = glyphRange.end;
+    range->charStart = charRange.start;
+    range->charEnd = charRange.end;
 #else
 #endif
 }

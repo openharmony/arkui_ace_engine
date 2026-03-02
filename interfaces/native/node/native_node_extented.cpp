@@ -1962,13 +1962,9 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange(ArkUI_
         fullImpl->getNodeModifiers()->getTextModifier()->getGlyphRangeForCharacterRange(
             node->uiNodeHandle, start, end, &range);
     }
-    ArkUI_Boundary* glyphRange = new ArkUI_Boundary();
-    glyphRange->leftIndex = range.glyphStart;
-    glyphRange->rightIndex = range.glyphEnd;
+    ArkUI_Boundary* glyphRange = new (std::nothrow) ArkUI_Boundary(range.glyphStart, range.glyphEnd);
     *outGlyphRange = reinterpret_cast<OH_Drawing_Range*>(glyphRange);
-    ArkUI_Boundary* actualCharRange = new ArkUI_Boundary();
-    actualCharRange->leftIndex = range.charStart;
-    actualCharRange->rightIndex = range.charEnd;
+    ArkUI_Boundary* actualCharRange = new (std::nothrow) ArkUI_Boundary(range.charStart, range.charEnd);
     *outActualCharRange = reinterpret_cast<OH_Drawing_Range*>(actualCharRange);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1990,13 +1986,9 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_
         fullImpl->getNodeModifiers()->getTextModifier()->getCharacterRangeForGlyphRange(
             node->uiNodeHandle, start, end, &range);
     }
-    ArkUI_Boundary* charRange = new ArkUI_Boundary();
-    charRange->leftIndex = range.charStart;
-    charRange->rightIndex = range.charEnd;
+    ArkUI_Boundary* charRange = new (std::nothrow) ArkUI_Boundary(range.charStart, range.charEnd);
     *outCharRange = reinterpret_cast<OH_Drawing_Range*>(charRange);
-    ArkUI_Boundary* actualGlyphRange = new ArkUI_Boundary();
-    actualGlyphRange->leftIndex = range.glyphStart;
-    actualGlyphRange->rightIndex = range.glyphEnd;
+    ArkUI_Boundary* actualGlyphRange = new (std::nothrow) ArkUI_Boundary(range.glyphStart, range.glyphEnd);
     *outActualGlyphRange = reinterpret_cast<OH_Drawing_Range*>(actualGlyphRange);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
