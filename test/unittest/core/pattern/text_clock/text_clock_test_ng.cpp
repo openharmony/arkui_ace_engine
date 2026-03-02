@@ -18,7 +18,9 @@
 #include <sys/time.h>
 
 #include "gtest/gtest.h"
+
 #include "base/i18n/time_format.h"
+
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -912,7 +914,6 @@ HWTEST_F(TextClockTestNG, TextClockTest014, TestSize.Level0)
     MockPipelineContext::TearDown();
 }
 
-
 /**
  * @tc.name: TextClockLayoutPropertyTest001
  * @tc.desc: Test all the properties of textClock.
@@ -1412,21 +1413,21 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest009, TestSize.Level0)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
- HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest010, TestSize.Level0)
- {
+HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest010, TestSize.Level0)
+{
     /**
      * @tc.steps: step1. create textClock frameNode.
      */
-     TestProperty testProperty;
-     testProperty.format = std::make_optional(CLOCK_FORMAT);
-     testProperty.hoursWest = std::make_optional(HOURS_WEST);
-     RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
-     ASSERT_NE(frameNode, nullptr);
- 
-     /**
-      * @tc.steps: step2. get pattern and layoutProperty.
-      * @tc.expected: step2.
-      */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     ASSERT_NE(pattern, nullptr);
     auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
