@@ -1357,7 +1357,7 @@ GestureEventFunc GestureEventHub::GetClickEvent()
 
 bool GestureEventHub::IsLongClickable() const
 {
-    return longPressEventActuator_ != nullptr;
+    return longPressEventActuator_ != nullptr && !longPressEventActuator_->IsEventEmpty();
 }
 
 void GestureEventHub::SetRedirectClick(bool redirectClick)
