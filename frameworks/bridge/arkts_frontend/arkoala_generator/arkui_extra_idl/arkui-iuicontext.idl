@@ -1,0 +1,42 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.component.idlize;
+import arkui.component.common.KeyEvent as KeyEvent;
+import arkui.component.Scroller as Scroller;
+import ohos.arkui.UIContext;
+
+[Entity=Class]
+interface Magnifier {
+    constructor();
+    void bind(String id);
+    void show(f64 x, f64 y);
+    void unbind();
+};
+
+[Entity=Class]
+interface IUIContext {
+    static void freezeUINode(String id , boolean isFrozen );
+    static void freezeUINode(i32 id , boolean isFrozen );
+    static boolean dispatchKeyEvent((i32 or String) node, KeyEvent event);
+    static async void openBindSheet(pointer bindSheetContent, optional SheetOptions sheetOptions, optional i32 targetId);
+    static async void updateBindSheet(pointer bindSheetContent, SheetOptions sheetOptions, optional boolean partialUpdate);
+    static async void closeBindSheet(pointer bindSheetContent);
+    static void bindTabsToScrollable(TabsController tabsController, Scroller scroller);
+    static void unbindTabsFromScrollable(TabsController tabsController, Scroller scroller);
+    static void bindTabsToNestedScrollable(TabsController tabsController, Scroller parentScroller, Scroller scrollerchildScroller);
+    static void unbindTabsFromNestedScrollable(TabsController tabsController, Scroller parentScroller, Scroller childScroller);
+    static void setCustomKeyboardContinueFeature(CustomKeyboardContinueFeature feature);
+    static Magnifier getMagnifier();
+};

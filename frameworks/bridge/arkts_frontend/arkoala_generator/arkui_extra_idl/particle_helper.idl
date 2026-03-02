@@ -1,0 +1,212 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.component.idlize;
+import arkui.component.units.ResourceStr as ResourceStr;
+import arkui.component.units.Dimension as Dimension;
+import arkui.component.units.ResourceColor as ResourceColor;
+import arkui.component.common.CommonMethod as CommonMethod;
+import arkui.component.common.AttributeModifier as AttributeModifier;
+import arkui.component.common.ICurve as ICurve;
+import arkui.component.enums.Curve as Curve;
+import arkui.component.particle;
+import arkui.Graphics.LengthMetrics as LengthMetrics;
+
+interface SizeNumberInner {
+    attribute number width;
+    attribute number height;
+};
+interface SizeF64Inner {
+    attribute f64 width;
+    attribute f64 height;
+};
+interface PositionNumberInner {
+    attribute number x;
+    attribute number y;
+};
+interface PositionF64Inner {
+    attribute f64 x;
+    attribute f64 y;
+};
+interface PositionLengthMetricsInner {
+    attribute LengthMetrics x;
+    attribute LengthMetrics y;
+};
+interface Vector2F64 {
+    attribute f64 x;
+    attribute f64 y;
+};
+[Entity=Tuple, Synthetic]
+interface Tuple_ResourceColor_ResourceColor {
+    attribute ResourceColor value0;
+    attribute ResourceColor value1;
+};
+[Entity=Tuple, Synthetic]
+interface Tuple_Double_Double {
+    attribute f64 value0;
+    attribute f64 value1;
+};
+interface ParticlePropertyAnimationNumberInner {
+    attribute number from;
+    attribute number to;
+    attribute i32 startMillis;
+    attribute i32 endMillis;
+    [Optional]
+    attribute (Curve or ICurve) curve;
+};
+interface ParticlePropertyAnimationColorInner {
+    attribute ResourceColor from;
+    attribute ResourceColor to;
+    attribute i32 startMillis;
+    attribute i32 endMillis;
+    [Optional]
+    attribute (Curve or ICurve) curve;
+};
+typedef (undefined or Tuple_Double_Double or sequence<ParticlePropertyAnimationNumberInner>) ParticlePropertyUpdaterConfigsInner;
+interface ParticleUpdaterOptionsInner {
+    attribute ParticleUpdater type;
+    attribute ParticlePropertyUpdaterConfigsInner config;
+};
+interface ParticlePropertyOptionsInner {
+    attribute Tuple_Double_Double range;
+    [Optional]
+    attribute ParticleUpdaterOptionsInner updater;
+};
+interface ParticleColorUpdaterOptionsInner {
+    attribute ParticleUpdater type;
+    attribute ParticleColorPropertyUpdaterConfigsInner config;
+};
+typedef (undefined or ParticleColorOptions or sequence<ParticlePropertyAnimationColorInner>) ParticleColorPropertyUpdaterConfigsInner;
+interface AccelerationOptionsInner {
+    [Optional]
+    attribute ParticlePropertyOptionsInner speed;
+    [Optional]
+    attribute ParticlePropertyOptionsInner angle;
+};
+interface ParticleOptionsInner {
+    attribute EmitterOptionsInner emitter;
+    [Optional]
+    attribute ParticleColorPropertyOptionsInner color;
+    [Optional]
+    attribute ParticlePropertyOptionsInner opacity;
+    [Optional]
+    attribute ParticlePropertyOptionsInner scale;
+    [Optional]
+    attribute VelocityOptions velocity;
+    [Optional]
+    attribute AccelerationOptionsInner acceleration;
+    [Optional]
+    attribute ParticlePropertyOptionsInner spin;
+};
+interface ParticleAnnulusRegionInner {
+    [Optional]
+    attribute PositionLengthMetricsInner center;
+    attribute LengthMetrics outerRadius;
+    attribute LengthMetrics innerRadius;
+    [Optional]
+    attribute f64 startAngle;
+    [Optional]
+    attribute f64 endAngle;
+};
+interface EmitterPropertyInner {
+    attribute i32 index;
+    [Optional]
+    attribute i32 emitRate;
+    [Optional]
+    attribute PositionF64Inner position;
+    [Optional]
+    attribute SizeF64Inner size;
+    [Optional]
+    attribute ParticleAnnulusRegionInner annulusRegion;
+};
+interface EmitterOptionsInner {
+    attribute EmitterParticleOptions particle;
+    [Optional]
+    attribute i32 emitRate;
+    [Optional]
+    attribute ParticleEmitterShape shape;
+    [Optional]
+    attribute Tuple_Dimension_Dimension position;
+    [Optional]
+    attribute Tuple_Dimension_Dimension size;
+    [Optional]
+    attribute ParticleAnnulusRegionInner annulusRegion;
+};
+interface ParticleColorPropertyOptionsInner {
+    attribute Tuple_ResourceColor_ResourceColor range;
+    [Optional]
+    attribute DistributionType distributionType;
+    [Optional]
+    attribute ParticleColorUpdaterOptionsInner updater;
+};
+interface ParticlesInner {
+    attribute sequence<ParticleOptionsInner> particles;
+};
+interface DisturbanceFieldOptionsInner {
+    [Optional]
+    attribute f64 strength;
+    [Optional]
+    attribute DisturbanceFieldShape shape;
+    [Optional]
+    attribute SizeF64Inner size;
+    [Optional]
+    attribute PositionF64Inner position;
+    [Optional]
+    attribute i32 feather;
+    [Optional]
+    attribute f64 noiseScale;
+    [Optional]
+    attribute f64 noiseFrequency;
+    [Optional]
+    attribute f64 noiseAmplitude;
+};
+interface FieldRegionInner {
+  [Optional]
+  attribute DisturbanceFieldShape shape;
+  [Optional]
+  attribute PositionF64Inner position;
+  [Optional]
+  attribute SizeF64Inner size;
+};
+
+interface RippleFieldOptionsInner {
+  [Optional]
+  attribute f64 amplitude;
+  [Optional]
+  attribute f64 wavelength;
+  [Optional]
+  attribute f64 waveSpeed;
+  [Optional]
+  attribute f64 attenuation;
+  [Optional]
+  attribute PositionF64Inner center;
+  [Optional]
+  attribute FieldRegionInner region;
+};
+
+interface VelocityFieldOptionsInner {
+  [Optional]
+  attribute Vector2F64 velocity;
+  [Optional]
+  attribute FieldRegionInner region;
+};
+[Entity=Class]
+interface ParticleHelper {
+    static void SetDisturbanceFields(pointer node, (sequence<DisturbanceFieldOptionsInner> or undefined) disturbanceFields);
+    static void SetEmitterProperty(pointer node, (sequence<EmitterPropertyInner> or undefined) emitter);
+    static pointer ParticleConstruct(i32 id, i32 flags);
+    static void SetParticleOptions(pointer node, ParticlesInner particles);
+    static void SetRippleFields(pointer node, (sequence<RippleFieldOptionsInner> or undefined) rippleFields);
+    static void SetVelocityFields(pointer node, (sequence<VelocityFieldOptionsInner> or undefined) velocityFields);
+};

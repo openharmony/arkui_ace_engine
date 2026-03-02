@@ -1,0 +1,117 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.component.idlize;
+
+import arkui.component.common;
+import arkui.component.enums.EventQueryType as EventQueryType;
+import ohos.arkui.UIContext;
+import arkui.Graphics;
+import arkui.FrameNode;
+import arkui.RenderNode;
+import arkui.FrameNode.InteractionEventBindingInfo as InteractionEventBindingInfo;
+import arkui.FrameNode.UIStatesChangeHandler as UIStatesChangeHandler;
+
+[Entity=Interface]
+interface NodeEdgesLengthMetrics {
+    attribute (LengthMetrics or undefined) top;
+    attribute (LengthMetrics or undefined) left;
+    attribute (LengthMetrics or undefined) bottom;
+    attribute (LengthMetrics or undefined) right;
+};
+
+[Entity=Interface]
+interface SizeTLengthMetrics {
+    attribute LengthMetrics width;
+    attribute LengthMetrics height;
+};
+
+[Entity=Class]
+interface FrameNodeExtender {
+  static pointer constructorFrameNode(boolean supportMultiThread);
+  static pointer getDestroy();
+  static void destroyPeer(FrameNode peer);
+  static boolean isModifiable(pointer peer);
+  static i32 appendChild(FrameNode peer, FrameNode child);
+  static i32 insertChildAfter(pointer peer, pointer child, pointer sibling);
+  static void removeChild(FrameNode peer, FrameNode child);
+  static void clearChildren(FrameNode peer);
+  static pointer getChild(FrameNode peer, i32 index, number expandMode);
+  static pointer getFirstChild(FrameNode peer);
+  static pointer getNextSibling(FrameNode peer);
+  static pointer getPreviousSibling(FrameNode peer);
+  static pointer getParent(FrameNode peer);
+  static i32 getChildrenCount(FrameNode peer);
+  static void dispose(FrameNode peer);
+  static Vector2 getPositionToWindow(FrameNode peer);
+  static Vector2 getPositionToParent(FrameNode peer);
+  static Size getMeasuredSize(FrameNode peer);
+  static Vector2 getLayoutPosition(FrameNode peer);
+  static String getId(FrameNode peer);
+  static i32 getUniqueId(FrameNode peer);
+  static String getNodeType(FrameNode peer);
+  static f64 getOpacity(FrameNode peer);
+  static boolean isVisible(FrameNode peer);
+  static boolean isClipToFrame(FrameNode peer);
+  static boolean isAttached(FrameNode peer);
+  static String getInspectorInfo(FrameNode peer);
+  static void invalidate(FrameNode peer);
+  static void disposeTree(FrameNode peer);
+  static void addSupportedUIStates(FrameNode peer, i32 uiStates, UIStatesChangeHandler statesChangeHandler, boolean excludeInner);
+  static void removeSupportedUIStates(FrameNode peer, i32 uiStates);
+  static boolean setCrossLanguageOptions(FrameNode peer, boolean options);
+  static boolean getCrossLanguageOptions(FrameNode peer);
+  static void setMeasuredSize(FrameNode peer, Size size);
+  static void setLayoutPosition(FrameNode peer, Vector2 position);
+  static void measure(FrameNode peer, LayoutConstraint constraint);
+  static void layout(FrameNode peer, Vector2 position);
+  static void setNeedsLayout(FrameNode peer);
+  static Vector2 getPositionToScreen(FrameNode peer);
+  static Vector2 getGlobalPositionOnDisplay(FrameNode peer);
+  static Vector2 getPositionToWindowWithTransform(FrameNode peer);
+  static Vector2 getPositionToParentWithTransform(FrameNode peer);
+  static Vector2 getPositionToScreenWithTransform(FrameNode peer);
+  static NodeEdgesLengthMetrics getUserConfigBorderWidth(FrameNode peer);
+  static NodeEdgesLengthMetrics getUserConfigPadding(FrameNode peer);
+  static NodeEdgesLengthMetrics getUserConfigMargin(FrameNode peer);
+  static SizeTLengthMetrics getUserConfigSize(FrameNode peer);
+  static pointer getFrameNodeByKey(String name);
+  static number getIdByFrameNode(pointer node);
+  static i32 moveTo(FrameNode peer, FrameNode targetParent, i32 index);
+  static i32 getFirstChildIndexWithoutExpand(FrameNode peer);
+  static i32 getLastChildIndexWithoutExpand(FrameNode peer);
+  static pointer getAttachedFrameNodeById(String id);
+  static pointer getFrameNodeById(number id);
+  static pointer getFrameNodeByUniqueId(i32 id);
+  static void reuse(FrameNode peer);
+  static void recycle(FrameNode peer);
+  static boolean createAnimation(FrameNode peer, AnimationPropertyType property, (sequence<f64> or undefined) startValue, sequence<f64> endValue, AnimateParam param);
+  static boolean cancelAnimations(FrameNode peer, sequence<AnimationPropertyType> properties);
+  static sequence<f64> getNodePropertyValue(FrameNode peer, AnimationPropertyType property);
+  static pointer getFrameNodePtr(FrameNode node);
+  static pointer createTypedFrameNode(String type, boolean supportMultiThread);
+  static pointer createByRawPtr(pointer ptr);
+  static pointer unWrapRawPtr(pointer ptr);
+  static UICommonEvent getCommonEvent(FrameNode peer);
+  static sequence<f64> convertPoint(FrameNode peer, FrameNode node, NodePosition vector2);
+  static pointer getRenderNode(pointer peer);
+  static i32 adoptChild(FrameNode peer, FrameNode child);
+  static i32 removeAdoptedChild(FrameNode peer, FrameNode child);
+  static InteractionEventBindingInfo getInteractionEventBindingInfo(FrameNode peer, EventQueryType eventType);
+  static boolean isOnRenderTree(FrameNode peer);
+  static boolean isOnMainTree(FrameNode peer);
+  static sequence<f64> convertPositionToWindow(FrameNode peer, NodePosition positionByLocal);
+  static sequence<f64> convertPositionFromWindow(FrameNode peer, NodePosition positionByWindow);
+  static void applyAttributesFinish(FrameNode peer);
+};

@@ -1,0 +1,192 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.component.idlize;
+
+import arkui.component.builder;
+import arkui.component.customDialogController;
+import arkui.component.common.PopupCommonOptions as PopupCommonOptions;
+import arkui.component.common.MenuOptions as MenuOptions;
+import ohos.arkui.UIContext;
+import arkui.component.alertDialog.AlertDialogParamWithConfirm as AlertDialogParamWithConfirm;
+import arkui.component.alertDialog.AlertDialogParamWithButtons as AlertDialogParamWithButtons;
+import arkui.component.alertDialog.AlertDialogParamWithOptions as AlertDialogParamWithOptions;
+import arkui.component.actionSheet.ActionSheetOptions as ActionSheetOptions;
+import arkui.component.common.Rectangle as Rectangle;
+import arkui.component.common.AnimateParam as AnimateParam;
+import arkui.component.common.Callback as Callback;
+import arkui.component.common.ShadowOptions as ShadowOptions;
+import arkui.component.common.ShadowStyle as ShadowStyle;
+import arkui.component.common.KeyboardAvoidMode as KeyboardAvoidMode;
+import arkui.component.common.BlurStyle as BlurStyle;
+import arkui.component.common.HoverModeAreaType as HoverModeAreaType;
+import arkui.component.common.DismissReason as DismissReason;
+import arkui.component.common.BackgroundBlurStyleOptions as BackgroundBlurStyleOptions;
+import arkui.component.common.BackgroundEffectOptions as BackgroundEffectOptions;
+import arkui.component.builder.CustomBuilder as CustomBuilder;
+import arkui.component.alertDialog.DialogAlignment as DialogAlignment;
+import arkui.component.units.Offset as Offset;
+import arkui.component.units.ResourceColor as ResourceColor;
+import arkui.component.units.Dimension as Dimension;
+import arkui.component.units.BorderRadiuses as BorderRadiuses;
+import arkui.component.units.EdgeWidths as EdgeWidths;
+import arkui.component.units.EdgeColors as EdgeColors;
+import arkui.component.units.EdgeStyles as EdgeStyles;
+import arkui.component.enums.BorderStyle as BorderStyle;
+import arkui.Graphics.LengthMetrics as LengthMetrics;
+import ohos.promptAction.LevelMode as LevelMode;
+import ohos.promptAction.ImmersiveMode as ImmersiveMode;
+import ohos.promptAction.promptAction.CommonState as PromptActionCommonState;
+import arkui.component.actionSheet.DismissDialogAction as DismissDialogAction;
+
+[Entity=Interface]
+interface CustomDialogBuildOptions {
+  [Optional]
+  attribute CustomDialogController controller;
+};
+
+[Entity=Interface]
+interface CustomDialogControllerBuilder {
+  attribute CustomDialogBuildOptions buildOptions;
+  attribute CustomBuilder build;
+};
+
+[Entity=Class]
+interface PromptActionExtender {
+  static async void openPopup(pointer content, TargetInfo target, optional PopupCommonOptions options);
+  static async void updatePopup(pointer content, PopupCommonOptions options, optional boolean partialUpdate);
+  static async void closePopup(pointer content);
+  static async void openMenu(pointer content, TargetInfo target, optional MenuOptions options);
+  static async void updateMenu(pointer content, MenuOptions options, optional boolean partialUpdate);
+  static async void closeMenu(pointer content);
+};
+
+[Entity=Class]
+interface AlertDialog {
+  static void show((AlertDialogParamWithConfirm or AlertDialogParamWithButtons or AlertDialogParamWithOptions) options);
+};
+
+[Entity=Class]
+interface ContextMenu {
+  static void close();
+};
+
+[Entity=Class]
+interface LevelOrderExtender {
+  static LevelOrderExtender clamp(number order);
+  number getOrder();
+};
+
+[Entity=Class]
+interface ActionSheet {
+  static void show(ActionSheetOptions options);
+};
+
+[Synthetic]
+callback Callback_Void = void ();
+[Synthetic]
+callback Callback_DismissDialogAction_Void = void (DismissDialogAction value0);
+
+interface CustomDialogControllerOptionsExtender {
+  attribute CustomBuilder builder;
+  [Optional]
+  attribute Callback_Void cancel;
+  [Optional]
+  attribute boolean autoCancel;
+  [Optional]
+  attribute DialogAlignment alignment;
+  [Optional]
+  attribute Offset offset;
+  [Optional]
+  attribute boolean customStyle;
+  [Optional]
+  attribute i32 gridCount;
+  [Optional]
+  attribute ResourceColor maskColor;
+  [Optional]
+  attribute Rectangle maskRect;
+  [Optional]
+  attribute AnimateParam openAnimation;
+  [Optional]
+  attribute AnimateParam closeAnimation;
+  [Optional]
+  attribute boolean showInSubWindow;
+  [Optional]
+  attribute ResourceColor backgroundColor;
+  [Optional]
+  attribute (Dimension or BorderRadiuses) cornerRadius;
+  [Optional]
+  attribute boolean isModal;
+  [Optional]
+  attribute Callback_DismissDialogAction_Void onWillDismiss;
+  [Optional]
+  attribute Dimension width;
+  [Optional]
+  attribute Dimension height;
+  [Optional]
+  attribute (Dimension or EdgeWidths) borderWidth;
+  [Optional]
+  attribute (ResourceColor or EdgeColors) borderColor;
+  [Optional]
+  attribute (BorderStyle or EdgeStyles) borderStyle;
+  [Optional]
+  attribute (ShadowOptions or ShadowStyle) shadow;
+  [Optional]
+  attribute BlurStyle backgroundBlurStyle;
+  [Optional]
+  attribute BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+  [Optional]
+  attribute BackgroundEffectOptions backgroundEffect;
+  [Optional]
+  attribute KeyboardAvoidMode keyboardAvoidMode;
+  [Optional]
+  attribute boolean enableHoverMode;
+  [Optional]
+  attribute HoverModeAreaType hoverModeArea;
+  [Optional]
+  attribute Callback_Void onDidAppear;
+  [Optional]
+  attribute Callback_Void onDidDisappear;
+  [Optional]
+  attribute Callback_Void onWillAppear;
+  [Optional]
+  attribute Callback_Void onWillDisappear;
+  [Optional]
+  attribute LengthMetrics keyboardAvoidDistance;
+  [Optional]
+  attribute LevelMode levelMode;
+  [Optional]
+  attribute i32 levelUniqueId;
+  [Optional]
+  attribute ImmersiveMode immersiveMode;
+  [Optional]
+  attribute LevelOrderExtender levelOrderExtender;
+  [Optional]
+  attribute boolean focusable;
+};
+
+interface CustomDialogControllerExternalOptionsExtender {
+  [Optional]
+  attribute boolean customStyle;
+};
+
+[Entity=Class]
+interface CustomDialogControllerExtender {
+  constructor(CustomDialogControllerOptionsExtender value);
+  void open();
+  void close();
+  void setOwnerView(pointer content);
+  CustomDialogControllerExternalOptionsExtender getExternalOptions();
+  PromptActionCommonState getState();
+};

@@ -1,13 +1,27 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import subprocess
 import sys
 import glob
 import os
+import time
 
 def main():
-    if len(sys.argv) != 9:
-        print("Usage: python generation.py <path-to-arkts12-sdk> <directory-to-install-generated-files> <arkgen-options-file> <scraper-options-file> <etsgen-options-file> <arkgen-interop-types> <panda-sdk-path> <node-bin-path>")
-        print("Example: python generation.py /path/to/sdk /path/to/output /path/to/arkgen.json /path/to/scraper.json /path/to/etsgen.json /path/to/interop-types /path/to/panda-sdk /path/to/node/bin")
+    if len(sys.argv) != 10:
+        print("Usage: python generation.py <path-to-arkts12-sdk> <directory-to-install-generated-files> <arkgen-options-file> <scraper-options-file> <etsgen-options-file> <arkgen-interop-types> <panda-sdk-path> <node-bin-path> <idl-pattern>")
+        print("Example: python generation.py /path/to/sdk /path/to/output /path/to/arkgen.json /path/to/scraper.json /path/to/etsgen.json /path/to/interop-types /path/to/panda-sdk /path/to/node/bin node_modules/@idlizer/interfaces/interfaces/arkui-extra/")
         sys.exit(1)
     
     arkts_sdk_path = sys.argv[1]
@@ -18,6 +32,7 @@ def main():
     arkgen_interop_types = sys.argv[6]
     panda_sdk_path = sys.argv[7]
     node_bin_path = sys.argv[8]
+    idl_pattern = sys.argv[9]
 
     arkts_sdk_path = os.path.dirname(arkts_sdk_path)
 
@@ -31,13 +46,11 @@ def main():
     npx = os.path.join(node_bin_path, "npx")
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    
+
+    start_time = time.time()
+
     print(f"Running npm install in {script_dir}...")
     try:
-        node_version = subprocess.run([node, "--version"], env=env, cwd=script_dir, check=True, capture_output=True, text=True)
-        print(f"Node version: {node_version.stdout.strip()}")
-        npm_version = subprocess.run([npm, "--version"], env=env, cwd=script_dir, check=True, capture_output=True, text=True)
-        print(f"NPM version: {npm_version.stdout.strip()}")
         subprocess.run([npm, "install"], env=env, cwd=script_dir, check=True, capture_output=True, text=True)
         print("npm install completed successfully.")
     except subprocess.CalledProcessError as e:
@@ -48,8 +61,6 @@ def main():
     except FileNotFoundError:
         print("Error: 'npm' command not found. Please ensure Node.js and npm are installed and in PATH.")
         sys.exit(1)
-    
-    idl_pattern = "node_modules/@idlizer/interfaces/interfaces/arkui-extra/"
     
     cmd = [
         npx, "@idlizer/runner", "m3", arkts_sdk_path,
@@ -68,7 +79,11 @@ def main():
 
     try:
         result = subprocess.run(cmd, env=env, check=True, cwd=script_dir, capture_output=True, text=True)
+        elapsed_time = time.time() - start_time
+        seconds = int(elapsed_time)
+        milliseconds = int((elapsed_time - seconds) * 1000)
         print(f"Generation completed successfully. Output: {output_dir}")
+        print(f"Total time: {seconds} s {milliseconds} ms")
     except subprocess.CalledProcessError as e:
         print(f"Error: Generation failed with exit code {e.returncode}")
         print("STDOUT:", e.stdout)

@@ -1,13 +1,16 @@
 {
     "target": [
         "arkui.component",
-        "arkui.AttributeUpdater",
-        "ohos.arkui.ArcList",
-        "ohos.arkui.ArcScrollBar"
+        "arkui.AttributeUpdater"
+    ],
+    "banned": [
+        "ohos.inputMethod",
+        "ohos.request"
     ],
     "main": {
         "additionalPackages": [
             "arkui.component.idlize",
+            "arkui.component.navigator",
             "api.internal.component.ets",
             "arkui.stateManagement.internal",
             "arkui.AttributeUpdaterFlag",
@@ -16,14 +19,5 @@
     },
     "tsLikePackages": {
         "arkui": "@ohos.arkui.component"
-    },
-    "rewriteArkConfigPath": {
-        "@ohos.base": ["./framework/ohos.base"],
-        "arkui.SymbolGlyphModifier": ["./SymbolGlyphModifier"],
-        "arkui.TextModifier": ["./TextModifier"],
-        "arkui.component.enums": ["./component/enums"],
-        "arkui.component.image": ["./component/image"],
-        "arkui.component.navDestination": ["./component/navDestination"],
-        "arkui.component.navigation": ["./component/navigation"]
     }
 }

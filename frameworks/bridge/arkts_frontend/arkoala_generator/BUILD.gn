@@ -29,6 +29,7 @@ action("idlize_gen") {
     rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/koala_projects/interop/src/cpp/interop-types.h"),
     rebase_path("${ace_root}/frameworks/bridge/arkts_frontend/arkoala_generator/node_modules/@koalaui/libarkts/sdk"),
     rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+    rebase_path("./arkui_extra_idl/"),
   ]
   external_deps = [
     ohos_ets_libarkts_deps
