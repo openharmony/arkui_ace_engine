@@ -488,6 +488,10 @@ void TextTimerPattern::UpdateFontSize(const Dimension& value, bool isFirstLoad)
 void TextTimerPattern::OnColorModeChange(uint32_t colorMode)
 {
     Pattern::OnColorModeChange(colorMode);
+    if (UseContentModifier()) {
+        // If contentModifier is used, the color mode change is perceived by the components inside the contentModifier.
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -514,7 +518,8 @@ void TextTimerPattern::UpdateFontFamily(const std::vector<std::string>& fontFami
 
 void TextTimerPattern::OnColorConfigurationUpdate()
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || UseContentModifier()) {
+        // If contentModifier is used, the color mode change is perceived by the components inside the contentModifier.
         return;
     }
 
