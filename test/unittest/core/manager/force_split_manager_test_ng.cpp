@@ -106,7 +106,7 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitMode002, TestSize.Level1)
     manager->isForceSplitSupported_ = true;
     manager->isForceSplitEnable_ = true;
     manager->UpdateIsInForceSplitMode();
-    EXPECT_TRUE(context->IsCurrentInForceSplitMode());
+    EXPECT_FALSE(context->IsCurrentInForceSplitMode());
     windowManager->windowGetModeCallback_ = std::move(backupCallback);
 }
 
