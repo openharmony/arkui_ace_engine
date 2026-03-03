@@ -71,6 +71,8 @@ struct MouseEvent final : public PointerEvent {
     TimeStamp pressedTime;
     bool isRightButtonEventFromDoulbeTap = false;
     bool isFalsifyCancel = false;
+    int32_t eventHandleId = 0;
+    bool isNewReferee = false;
 
     int32_t GetEventIdentity() const
     {
@@ -159,6 +161,8 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.pressedTime = pressedTime;
         mouseEvent.convertInfo = convertInfo;
         mouseEvent.isRightButtonEventFromDoulbeTap = isRightButtonEventFromDoulbeTap;
+        mouseEvent.eventHandleId = eventHandleId;
+        mouseEvent.isNewReferee = isNewReferee;
         // Only set postEventNodeId when the event supports passThrough
         if (passThrough) {
             mouseEvent.postEventNodeId = postEventNodeId;
@@ -224,6 +228,8 @@ struct MouseEvent final : public PointerEvent {
         event.pointers.emplace_back(std::move(point));
         event.pressedKeyCodes_ = pressedKeyCodes_;
         event.passThrough = passThrough;
+        event.eventHandleId = eventHandleId;
+        event.isNewReferee = isNewReferee;
         if (passThrough) {
             event.postEventNodeId = postEventNodeId;
         }

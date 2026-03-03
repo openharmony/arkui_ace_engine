@@ -10958,7 +10958,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo* 
         "propagation", "getHorizontalAxisValue", "getVerticalAxisValue", "getPinchAxisScaleValue", "target",
         "timestamp", "source", "pressure", "tiltX", "tiltY", "sourceTool", "deviceId", "getModifierKeyState",
         "axisVertical", "axisHorizontal", "axisPinch", "globalDisplayX", "globalDisplayY", "targetDisplayId",
-        "hasAxis" };
+        "eventHandleId", "hasAxis" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetAction())),
         panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
@@ -10985,6 +10985,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo* 
         panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
         panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density),
         panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()),
+        panda::NumberRef::New(vm, infoPtr->GetEventHandleId()),
         panda::FunctionRef::New(vm, ArkTSUtils::JsHasAxis) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);

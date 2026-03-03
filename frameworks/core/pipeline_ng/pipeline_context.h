@@ -222,6 +222,7 @@ public:
     void OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
     void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
+
     void DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;

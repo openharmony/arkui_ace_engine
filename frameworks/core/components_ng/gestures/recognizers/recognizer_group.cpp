@@ -33,6 +33,17 @@ void RecognizerGroup::OnBeginGestureReferee(int32_t touchId, int32_t originalId,
     }
 }
 
+void RecognizerGroup::UpdateGestureReferee(const WeakPtr<GestureReferee>& gestureReferee)
+{
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->UpdateGestureReferee(gestureReferee);
+        }
+    }
+    referee_ = gestureReferee;
+}
+
+
 RefPtr<Gesture> RecognizerGroup::CreateGestureFromRecognizer() const
 {
     GestureMode mode = GetGestureMode();

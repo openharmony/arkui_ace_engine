@@ -360,6 +360,8 @@ struct ArkUITouchEvent {
     ArkUI_Float32 height;
     ArkUI_Int64 deviceId;
     ArkUI_Uint64 modifierKeyState;
+    ArkUI_Int32 eventHandleId;
+    ArkUI_Bool isNewReferee;
 
     /**
      * @brief Prevents events from bubbling further to the parent node for processing.
@@ -403,6 +405,8 @@ struct ArkUIMouseEvent {
     ArkUI_Float32 height;
     ArkUI_Int64 deviceId;
     ArkUI_Uint64 modifierKeyState;
+    ArkUI_Int32 eventHandleId;
+    ArkUI_Bool isNewReferee;
     /**
      * @brief Prevents events from bubbling further to the parent node for processing.
      *
@@ -431,6 +435,8 @@ struct ArkUIAxisEvent {
     ArkUI_Uint64 modifierKeyState;
     ArkUI_Int64 deviceId;
     ArkUI_Uint32 axes;
+    ArkUI_Int32 eventHandleId;
+    ArkUI_Bool isNewReferee;
 };
 
 struct ArkUICoastingAxisEvent {
@@ -3298,7 +3304,15 @@ struct ArkUICommonModifier {
     void (*setOnAppear)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
     void (*dispatchKeyEvent)(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent);
     ArkUI_Int32 (*postTouchEvent)(ArkUINodeHandle node, const ArkUITouchEvent* arkUItouchEvent);
+    ArkUI_Int32 (*postTouchEventWithStrategy)(ArkUINodeHandle node, const ArkUITouchEvent* arkUITouchEvent,
+        ArkUI_Int32 strategy);
+    ArkUI_Int32 (*postMouseEventWithStrategy)(ArkUINodeHandle node, const ArkUIMouseEvent* arkUIMouseEvent,
+        ArkUI_Int32 strategy);
+    ArkUI_Int32 (*postAxisEventWithStrategy)(ArkUINodeHandle node, const ArkUIAxisEvent* arkUIAxisEvent,
+        ArkUI_Int32 strategy);
     void (*createClonedTouchEvent)(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent);
+    void (*createClonedMouseEvent)(ArkUIMouseEvent* arkUIMouseEventCloned, const ArkUIMouseEvent* arkUIMouseEvent);
+    void (*createClonedAxisEvent)(ArkUIAxisEvent* arkUIAxisEventCloned, const ArkUIAxisEvent* arkUIAxisEvent);
     void (*destroyTouchEvent)(ArkUITouchEvent* arkUITouchEvent);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);

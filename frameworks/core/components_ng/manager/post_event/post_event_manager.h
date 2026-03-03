@@ -57,8 +57,11 @@ public:
 
     bool PostEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent& touchEvent);
     bool PostTouchEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent&& touchEvent);
+    bool PostTouchEventWithStrategy(const RefPtr<NG::UINode>& uiNode, TouchEvent&& touchEvent);
     bool PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEvent&& mouseEvent);
+    bool PostMouseEventWithStrategy(const RefPtr<NG::UINode>& uiNode, MouseEvent&& mouseEvent);
     bool PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent&& axisEvent);
+    bool PostAxisEventWithStrategy(const RefPtr<NG::UINode>& uiNode, AxisEvent&& axisEvent);
     void SetPassThroughResult(bool passThroughResult);
     RefPtr<FrameNode> GetPostTargetNode();
 
@@ -79,8 +82,8 @@ private:
 
     // Helper methods for CheckMouseEvent
     MouseEventState CollectMouseEventState(const RefPtr<NG::UINode>& targetNode, int32_t id);
-    bool HandleMousePressEvent(const MouseEventState& state, const RefPtr<NG::UINode>& targetNode, int32_t id,
-        const int32_t instanceId);
+    bool HandleMousePressEvent(const MouseEventState& state, const RefPtr<NG::UINode>& targetNode,
+        const MouseEvent& mouseEvent, const int32_t instanceId);
     bool HandleMouseReleaseEvent(const MouseEventState& state, int32_t id);
     bool HandleMouseWindowEnterEvent(const MouseEventState& state, const RefPtr<NG::UINode>& targetNode, int32_t id,
         const int32_t instanceId);
@@ -92,6 +95,9 @@ private:
 
     bool HaveReceiveDownEvent(const RefPtr<NG::UINode>& targetNode, int32_t id);
     bool HaveReceiveUpOrCancelEvent(const RefPtr<NG::UINode>& targetNode, int32_t id);
+    void PostTouchCancelEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent);
+    void PostAxisCancelEvent(const RefPtr<NG::UINode>& targetNode, const AxisEvent& axisEvent);
+    void PostMouseCancelEvent(const RefPtr<NG::UINode>& targetNode, const MouseEvent& mouseEvent);
     std::list<PostEventAction> postEventAction_;
     std::list<PostEventAction> postInputEventAction_;
     std::list<PostMouseEventAction> postMouseEventWindowAction_;

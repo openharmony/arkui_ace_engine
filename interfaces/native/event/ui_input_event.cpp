@@ -3689,6 +3689,345 @@ int32_t OH_ArkUI_AxisEvent_GetScrollStep(const ArkUI_UIInputEvent* event)
     RETURN_RET_WITH_STATUS_CHECK(scroll_step_value, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
+ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetActionType(const ArkUI_UIInputEvent* event, int32_t type)
+{
+    const int32_t supportedScenario = S_NODE_TOUCH_EVENT | S_NODE_ON_MOUSE | S_NODE_ON_AXIS;
+    CheckSupportedScenarioAndResetEventStatus(supportedScenario, event);
+    if (!event) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!touchEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            touchEvent->action = OHOS::Ace::NodeModel::ConvertToOriginTouchActionType(type);
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        case C_MOUSE_EVENT_ID: {
+            auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            mouseEvent->action = OHOS::Ace::NodeModel::ConvertToCMouseActionType(type);
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        case C_AXIS_EVENT_ID: {
+            auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            axisEvent->action = OHOS::Ace::NodeModel::ConvertToCAxisActionType(type);
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        default:
+            return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+}
+
+ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetSourceType(const ArkUI_UIInputEvent* event, int32_t sourceType)
+{
+    if (!event) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    
+    if (sourceType < UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN || sourceType > UI_INPUT_EVENT_SOURCE_TYPE_JOYSTICK) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(const_cast<void*>(event->inputEvent));
+            if (!touchEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            touchEvent->sourceType = sourceType;
+            break;
+        }
+        case C_MOUSE_EVENT_ID: {
+            auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(const_cast<void*>(event->inputEvent));
+            if (!mouseEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            mouseEvent->sourceType = sourceType;
+            break;
+        }
+        case C_AXIS_EVENT_ID: {
+            auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(const_cast<void*>(event->inputEvent));
+            if (!axisEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            axisEvent->sourceType = sourceType;
+            break;
+        }
+        default:
+            return ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+    }
+    
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetToolType(const ArkUI_UIInputEvent* event, int32_t toolType)
+{
+    if (!event) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    
+    if (toolType < UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN || toolType > UI_INPUT_EVENT_TOOL_TYPE_JOYSTICK) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(const_cast<void*>(event->inputEvent));
+            if (!touchEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            touchEvent->actionTouchPoint.toolType = toolType;
+            break;
+        }
+        case C_MOUSE_EVENT_ID: {
+            auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(const_cast<void*>(event->inputEvent));
+            if (!mouseEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            mouseEvent->actionTouchPoint.toolType = toolType;
+            break;
+        }
+        case C_AXIS_EVENT_ID: {
+            auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(const_cast<void*>(event->inputEvent));
+            if (!axisEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            axisEvent->actionTouchPoint.toolType = toolType;
+            break;
+        }
+        default:
+            return ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+    }
+    
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_PointerEvent_CreateClonedPointerEvent(
+    const ArkUI_UIInputEvent* event, ArkUI_UIInputEvent** clonedEvent)
+{
+    if (!event) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!clonedEvent) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (event->eventTypeId) {
+        case TOUCH_EVENT_ID:
+        case C_TOUCH_EVENT_ID: {
+            auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!touchEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+            if (!fullImpl) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
+            currentEvent->inputType = event->inputType;
+            currentEvent->eventTypeId = event->eventTypeId;
+            ArkUITouchEvent* touchEventCloned = new ArkUITouchEvent();
+            fullImpl->getNodeModifiers()->getCommonModifier()->createClonedTouchEvent(touchEventCloned, touchEvent);
+            currentEvent->inputEvent = touchEventCloned;
+            currentEvent->isCloned = true;
+            *clonedEvent = currentEvent;
+            break;
+        }
+        case C_MOUSE_EVENT_ID: {
+            auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+            if (!fullImpl) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
+            currentEvent->inputType = event->inputType;
+            currentEvent->eventTypeId = event->eventTypeId;
+            ArkUIMouseEvent* mouseEventCloned = new ArkUIMouseEvent();
+            fullImpl->getNodeModifiers()->getCommonModifier()->createClonedMouseEvent(mouseEventCloned, mouseEvent);
+            currentEvent->inputEvent = mouseEventCloned;
+            currentEvent->isCloned = true;
+            *clonedEvent = currentEvent;
+            break;
+        }
+        case C_AXIS_EVENT_ID: {
+            auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+            if (!fullImpl) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
+            currentEvent->inputType = event->inputType;
+            currentEvent->eventTypeId = event->eventTypeId;
+            ArkUIAxisEvent* axisEventCloned = new ArkUIAxisEvent();
+            fullImpl->getNodeModifiers()->getCommonModifier()->createClonedAxisEvent(axisEventCloned, axisEvent);
+            currentEvent->inputEvent = axisEventCloned;
+            currentEvent->isCloned = true;
+            *clonedEvent = currentEvent;
+            break;
+        }
+        default: {
+            return ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+        }
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_PointerEvent_CreatePointerEvent(ArkUI_UIInputEvent** event, ArkUI_UIInputEvent_Type type)
+{
+    switch (type) {
+        case ARKUI_UIINPUTEVENT_TYPE_TOUCH: {
+            ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
+            ArkUITouchEvent* touchEvent = new ArkUITouchEvent();
+            currentEvent->inputEvent = touchEvent;
+            *event = currentEvent;
+            break;
+        }
+        case ARKUI_UIINPUTEVENT_TYPE_MOUSE: {
+            ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
+            ArkUIMouseEvent* mouseEvent = new ArkUIMouseEvent();
+            currentEvent->inputEvent = mouseEvent;
+            *event = currentEvent;
+            break;
+        }
+        case ARKUI_UIINPUTEVENT_TYPE_AXIS: {
+            ArkUI_UIInputEvent* currentEvent = new ArkUI_UIInputEvent();
+            ArkUIAxisEvent* axisEvent = new ArkUIAxisEvent();
+            currentEvent->inputEvent = axisEvent;
+            *event = currentEvent;
+            break;
+        }
+        default: {
+            return ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+        }
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_PointerEvent_DestroyClonedPointerEvent(const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (touchEvent) {
+                auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+                fullImpl->getNodeModifiers()->getCommonModifier()->destroyTouchEvent(touchEvent);
+            }
+            break;
+        }
+        case C_MOUSE_EVENT_ID: {
+            auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (mouseEvent) {
+                if (mouseEvent->pressedButtons) {
+                    delete mouseEvent->pressedButtons;
+                    mouseEvent->pressedButtons = nullptr;
+                }
+                delete mouseEvent;
+                mouseEvent = nullptr;
+            }
+            break;
+        }
+        case C_AXIS_EVENT_ID: {
+            auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (axisEvent) {
+                delete axisEvent;
+                axisEvent = nullptr;
+            }
+            break;
+        }
+        default: {
+            return ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+        }
+    }
+    delete event;
+    event = nullptr;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_PointerEvent_PostClonedEventWithStrategy(ArkUI_NodeHandle node,
+    const ArkUI_UIInputEvent* event, ArkUI_CompetitionStrategy strategy)
+{
+    if (!event) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!node) {
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    if (!event->isCloned) {
+        return ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT;
+    }
+    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!fullImpl) {
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    int32_t competitionStrategy = 0;
+    if (strategy == ArkUI_CompetitionStrategy::COMPETITION) {
+        competitionStrategy = 1;
+    }
+
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!touchEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            fullImpl->getNodeModifiers()->getCommonModifier()->postTouchEventWithStrategy(
+                node->uiNodeHandle, touchEvent, competitionStrategy);
+            break;
+        }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            fullImpl->getNodeModifiers()->getCommonModifier()->postMouseEventWithStrategy(
+                node->uiNodeHandle, mouseEvent, competitionStrategy);
+            break;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            fullImpl->getNodeModifiers()->getCommonModifier()->postAxisEventWithStrategy(
+                node->uiNodeHandle, axisEvent, competitionStrategy);
+            break;
+        }
+        default: {
+            return ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+        }
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 int32_t OH_ArkUI_PointerEvent_CreateClonedEvent(const ArkUI_UIInputEvent* event, ArkUI_UIInputEvent** clonedEvent)
 {
     CheckSupportedScenarioAndResetEventStatus(S_NODE_TOUCH_EVENT, event);

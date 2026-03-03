@@ -328,6 +328,12 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
     }
 
     auto referee = GetCurrentGestureReferee(recognizer);
+    if (recognizer) {
+        auto refereeWithStrategy = recognizer->GetRefereeWithStrategy().Upgrade();
+        if (refereeWithStrategy) {
+            referee = refereeWithStrategy;
+        }
+    }
     if (!referee) {
         recognizer->OnRejected();
         return;
@@ -605,6 +611,11 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
             responseInfo.c_str()));
     }
     return result;
+}
+
+void NGGestureRecognizer::UpdateGestureReferee(const WeakPtr<GestureReferee>& gestureReferee)
+{
+    referee_ = gestureReferee;
 }
 
 void NGGestureRecognizer::SetResponseLinkRecognizers(const ResponseLinkResult& responseLinkResult)

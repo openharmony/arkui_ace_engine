@@ -59,6 +59,8 @@ AxisEvent AxisEvent::CloneWith(float scale) const
         axisEvent.scrollStep = scrollStep;
         axisEvent.axes = axes;
         axisEvent.passThrough = passThrough;
+        axisEvent.eventHandleId = eventHandleId;
+        axisEvent.isNewReferee = isNewReferee;
         // Only set postEventNodeId when the event supports passThrough
         if (passThrough) {
             axisEvent.postEventNodeId = postEventNodeId;
@@ -365,6 +367,7 @@ bool AxisEventTarget::HandleAxisEvent(const AxisEvent& event)
     info.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     info.SetSourceTool(event.sourceTool);
     info.SetStopPropagation(true);
+    info.SetEventHandleId(event.eventHandleId);
     onAxisCallback_(info);
     return info.IsStopPropagation();
 }

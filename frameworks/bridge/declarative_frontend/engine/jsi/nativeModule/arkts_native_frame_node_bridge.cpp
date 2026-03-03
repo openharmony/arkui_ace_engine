@@ -1145,6 +1145,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
         panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
+    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "eventHandleId"),
+        panda::NumberRef::New(vm, infoPtr->GetEventHandleId()));
     eventObj->SetNativePointerFieldCount(vm, 1);
     eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
         (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO);
@@ -1547,6 +1549,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo* 
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(infoPtr->GetSourceTool()))));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, *infoPtr));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "eventHandleId"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetEventHandleId())));
     auto pressedButtonArr = panda::ArrayRef::New(vm);
     uint32_t idx = 0;
     for (const auto& button : infoPtr->GetPressedButtons()) {

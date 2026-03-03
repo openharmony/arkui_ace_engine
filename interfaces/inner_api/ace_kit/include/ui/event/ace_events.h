@@ -270,6 +270,16 @@ public:
     {
         return convertInfo.second;
     }
+
+    void SetEventHandleId(int32_t eventHandleId)
+    {
+        eventHandleId_ = eventHandleId;
+    }
+
+    int32_t GetEventHandleId()
+    {
+        return eventHandleId_;
+    }
 protected:
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
@@ -296,6 +306,7 @@ protected:
     float horizontalAxis_ = 0.0;
     float verticalAxis_ = 0.0;
     float pinchAxisScale_ = 0.0;
+    int32_t eventHandleId_ = 0;
     ConvertInfo convertInfo = { UIInputEventType::NONE, UIInputEventType::NONE };
 };
 
