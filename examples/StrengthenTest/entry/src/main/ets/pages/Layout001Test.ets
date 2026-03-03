@@ -509,7 +509,7 @@ export struct Layout001Test {
         Row({ verticalAlign: VerticalAlign.Center }) {
           Text('Center').width(60).height(30).backgroundColor(Color.Red).textAlign(TextAlign.Center)
           Text('Center').width(60).height(50).backgroundColor(Color.Green).textAlign(TextAlign.Center)
-          Text('Center').width(60).height(70).backgroundColor(Color.Blue).textAlign(TextAlign.Center的后)
+          Text('Center').width(60).height(70).backgroundColor(Color.Blue).textAlign(TextAlign.Center)
         }.width('100%').height(80)
       }.width('100%').margin({ top: 20 } as LocalizedMargin)
 
