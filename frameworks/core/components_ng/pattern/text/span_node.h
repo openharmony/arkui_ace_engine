@@ -600,7 +600,7 @@ public:
         return resourceMgr_;
     }
 
-    void ParseResToObject(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value);
+    bool ParseResToObject(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value);
 
     virtual void UnregisterResource(const std::string& key)
     {
@@ -887,6 +887,9 @@ public:
             RequestTextFlushDirty();
         }
     }
+
+    void SetDefaultFontColor(const RefPtr<PropertyValueBase>& value);
+    void OnAllowForceDarkUpdate(uint32_t colorMode) override;
 
 protected:
     void DumpInfo() override;

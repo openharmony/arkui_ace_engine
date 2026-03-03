@@ -581,38 +581,40 @@ const std::unordered_map<std::string, SpanItem::SpanResourceUpdater>& SpanItem::
     return resMap_;
 }
 
-void BaseSpan::ParseResToObject(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> valueBase)
+bool BaseSpan::ParseResToObject(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> valueBase)
 {
+    bool parseState = false;
     if (valueBase->GetValueType() == ValueType::STRING) {
         std::string value;
-        ResourceParseUtils::ParseResString(resObj, value);
+        parseState = ResourceParseUtils::ParseResString(resObj, value);
         valueBase->SetValue(value);
     } else if (valueBase->GetValueType() == ValueType::U16STRING) {
         std::u16string value;
-        ResourceParseUtils::ParseResString(resObj, value);
+        parseState = ResourceParseUtils::ParseResString(resObj, value);
         valueBase->SetValue(value);
     } else if (valueBase->GetValueType() == ValueType::FONT_WEIGHT) {
         std::string fontWeightStr;
-        ResourceParseUtils::ParseResString(resObj, fontWeightStr);
+        parseState = ResourceParseUtils::ParseResString(resObj, fontWeightStr);
         auto value = Framework::ConvertStrToFontWeight(fontWeightStr);
         valueBase->SetValue(value);
     } else if (valueBase->GetValueType() == ValueType::COLOR) {
         Color value;
-        ResourceParseUtils::ParseResColor(resObj, value);
+        parseState = ResourceParseUtils::ParseResColor(resObj, value);
         valueBase->SetValue(value);
     } else if (valueBase->GetValueType() == ValueType::DOUBLE) {
         double value;
-        ResourceParseUtils::ParseResDouble(resObj, value);
+        parseState = ResourceParseUtils::ParseResDouble(resObj, value);
         valueBase->SetValue(value);
     } else if (valueBase->GetValueType() == ValueType::CALDIMENSION) {
         CalcDimension value;
-        ResourceParseUtils::ParseResDimensionNG(resObj, value, DimensionUnit::FP, false);
+        parseState = ResourceParseUtils::ParseResDimensionNG(resObj, value, DimensionUnit::FP, false);
         valueBase->SetValue(value);
     } else if (valueBase->GetValueType() == ValueType::VECTOR_STRING) {
         std::vector<std::string> value;
-        ResourceParseUtils::ParseResFontFamilies(resObj, value);
+        parseState = ResourceParseUtils::ParseResFontFamilies(resObj, value);
         valueBase->SetValue(value);
     }
+    return parseState;
 }
 
 void SpanNode::UnregisterResource(const std::string& key)
@@ -676,7 +678,10 @@ void SpanNode::UpdateProperty(std::string key, const RefPtr<ResourceObject>& res
     } else if constexpr(std::is_same_v<T, FontWeight>) {
         value->SetValueType(ValueType::FONT_WEIGHT);
     }
-    ParseResToObject(resObj, value);
+    bool parseState = ParseResToObject(resObj, value);
+    if (!parseState && key == "fontColor") {
+        SetDefaultFontColor(value);
+    }
     UpdatePropertyImpl(key, value);
 }
 
@@ -710,6 +715,24 @@ void SpanNode::UpdatePropertyImpl(
     auto it = span_handlers.find(key);
     if (it != span_handlers.end()) {
         it->second(GetId(), value);
+    }
+}
+
+void SpanNode::SetDefaultFontColor(const RefPtr<PropertyValueBase>& value)
+{
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto defaultTextColor = theme->GetTextStyle().GetTextColor();
+    value->SetValue(defaultTextColor);
+}
+
+void SpanNode::OnAllowForceDarkUpdate(uint32_t colorMode)
+{
+    auto resourceMgr = GetResourceManager();
+    if (resourceMgr) {
+        resourceMgr->ReloadResources();
     }
 }
 
