@@ -329,7 +329,7 @@ HWTEST_F(JsAccessibilityManagerTestThree, ConvertAceAction005, TestSize.Level1)
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
-    Accessibility::ActionType result = jsAccessibilityAccessManager->ConvertAceAction(static_cast<AceAction>(999));
+    Accessibility::ActionType result = jsAccessibilityManager->ConvertAceAction(static_cast<AceAction>(999));
     EXPECT_EQ(result, Accessibility::ActionType::ACCESSIBILITY_ACTION_INVALID);
 
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-end ConvertAceAction005";
@@ -413,7 +413,7 @@ HWTEST_F(JsAccessibilityManagerTestThree, UnsubscribeStateObserver001, TestSize.
     jsAccessibilityManager->SetPipelineContext(context);
 
     uint32_t eventType = AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED;
-    jsAccessibilityManager->SubscribeStateObserver(event eventType);
+    jsAccessibilityManager->SubscribeStateObserver(eventType);
     bool result = jsAccessibilityManager->UnsubscribeStateObserver(eventType);
 
     SUCCEED();
@@ -749,7 +749,7 @@ HWTEST_F(JsAccessibilityManagerTestThree, ClearCurrentFocus001, TestSize.Level1)
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
     auto context = MockPipelineContext::GetCurrentContext();
-    jsAccessibilityManager->->SetPipelineContext(context);
+    jsAccessibilityManager->SetPipelineContext(context);
 
     bool result = jsAccessibilityManager->ClearCurrentFocus();
 
