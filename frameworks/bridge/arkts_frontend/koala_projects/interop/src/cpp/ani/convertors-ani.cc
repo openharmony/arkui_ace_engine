@@ -126,10 +126,10 @@ std::vector<std::string> AniExports::getModules() {
 
 const std::vector<std::tuple<std::string, std::string, void*, int>>& AniExports::getMethods(const std::string& module) {
     auto it = implementations.find(module);
-    if (it == implementations.end()) {
-        InteropLogFatal("Module %{public}s is not registered", module.c_str());
+    if (it != implementations.end()) {
+        return it->second;
     }
-    return it->second;
+    InteropLogFatal("Module %{public}s is not registered", module.c_str());
 }
 
 void AniExports::addMethod(const char* module, const char *name, const char *type, void *impl, int flags) {
