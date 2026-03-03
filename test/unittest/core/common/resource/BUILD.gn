@@ -18,3 +18,11 @@ ace_unittest("resource_manager_test") {
   type = "new"
   sources = [ "resource_manager_test.cpp" ]
 }
+
+ace_unittest("resource_parse_utils_test_ng") {
+  module_name = "Resource-ResourceParse"
+  type = "new"
+  sources = [
+    "resource_parse_utils_test_ng.cpp"
+  ]
+}

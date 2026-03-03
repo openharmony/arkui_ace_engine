@@ -3735,6 +3735,8 @@ test/unittest/interfaces/form_render/ @form_framework
 test/unittest/frameworks/core/common/ace_engine_test.cpp @arkui_framework_xnode
 test/unittest/frameworks/core/common/container_scope_test.cpp @arkui_framework_xnode
 test/unittest/frameworks/core/common/BUILD.gn @arkui_framework_xnode
+test/mock/core/common/mock_resource_wrapper.h @arkui_framework_resource
+test/unittest/core/common/resource/resource_parse_utils_test_ng.cpp @arkui_framework_resource
 
 [Generated source]
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/ @arkui-idlize
