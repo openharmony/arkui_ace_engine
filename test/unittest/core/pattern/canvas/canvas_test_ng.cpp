@@ -130,6 +130,10 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest001, TestSize.Level1)
  */
 HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
 {
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -146,7 +150,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     bool needReset;
 
     /**
-     * @tc.steps: step1. needReset = false; dirtyPixelGridRoundSize_ = { 0, 0 }
+     * @tc.steps: step2. needReset = false; dirtyPixelGridRoundSize_ = { 0, 0 }
      */
     needReset = false;
     pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
@@ -157,7 +161,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     EXPECT_FALSE(contentModifier1->needResetSurface_);
 
     /**
-     * @tc.steps: step2. needReset = false; dirtyPixelGridRoundSize_ = { 1, 1 };
+     * @tc.steps: step3. needReset = false; dirtyPixelGridRoundSize_ = { 1, 1 };
      */
     needReset = false;
     config.frameSizeChange = false;
@@ -170,7 +174,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     EXPECT_FALSE(contentModifier2->needResetSurface_);
 
     /**
-     * @tc.steps: step3. needReset = true; dirtyPixelGridRoundSize_ = { 1, 1 };
+     * @tc.steps: step4. needReset = true; dirtyPixelGridRoundSize_ = { 1, 1 };
      */
     needReset = false;
     config.frameSizeChange = true;
@@ -183,7 +187,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     EXPECT_FALSE(contentModifier3->needResetSurface_);
 
     /**
-     * @tc.steps: step4. needReset = true; config.frameSizeChange = false; config.contentSizeChange = false;
+     * @tc.steps: step5. needReset = true; config.frameSizeChange = false; config.contentSizeChange = false;
      */
     needReset = true;
     config.frameSizeChange = false;
@@ -196,7 +200,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     EXPECT_FALSE(contentModifier4->needResetSurface_);
 
     /**
-     * @tc.steps: step5. needReset = true; config.frameSizeChange = true; config.contentSizeChange = false;
+     * @tc.steps: step6. needReset = true; config.frameSizeChange = true; config.contentSizeChange = false;
      */
     needReset = true;
     config.frameSizeChange = true;
@@ -209,7 +213,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     EXPECT_TRUE(contentModifier5->needResetSurface_);
 
     /**
-     * @tc.steps: step6. needReset = true; config.frameSizeChange = false; config.contentSizeChange = true;
+     * @tc.steps: step7. needReset = true; config.frameSizeChange = false; config.contentSizeChange = true;
      */
     needReset = true;
     config.frameSizeChange = false;
