@@ -858,7 +858,7 @@ void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
     }
 }
 
-bool PipelineContext::IsCurrentInForceSplitMode() const
+bool PipelineContext::IsDisplayInForceSplitMode() const
 {
     CHECK_NULL_VOID(forceSplitMgr_, isCurrentInForceSplitMode_);
     if (!forceSplitMgr_->IsRouterForceSplit()) {
