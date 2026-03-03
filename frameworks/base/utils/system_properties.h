@@ -312,6 +312,11 @@ public:
         return imageReleaseManageObjectEnabled_;
     }
 
+    static bool GetImageAutoResizeEnabled()
+    {
+        return autoResizeEnabled_;
+    }
+
     static bool GetSvgTraceEnabled()
     {
         return svgTraceEnable_;
@@ -815,6 +820,7 @@ private:
     static int32_t mcc_;
     static int32_t mnc_;
     static ScreenShape screenShape_;
+    static bool autoResizeEnabled_;
 
     static std::atomic<bool> unZipHap_;
     static bool rosenBackendEnabled_;

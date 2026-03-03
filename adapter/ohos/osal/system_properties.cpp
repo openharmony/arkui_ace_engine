@@ -50,6 +50,7 @@ constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
 constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
+constexpr char ENABLE_IMAGE_AUTO_RESIZE_KEY[] = "persist.ace.image.autoresize.enabled";
 constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
@@ -804,6 +805,7 @@ bool SystemProperties::prebuildInMultiFrameEnabled_ = IsPrebuildInMultiFrameEnab
 bool SystemProperties::isOpenYuvDecode_ = false;
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
+bool SystemProperties::autoResizeEnabled_ = false;
 
 std::once_flag SystemProperties::getSysPropertiesFlag_;
 
@@ -988,6 +990,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         previewStatus_ = system::GetIntParameter<int32_t>("const.arkui.previewStatus", -1);
         isPCMode_ = system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
         isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
+        autoResizeEnabled_ = system::GetBoolParameter(ENABLE_IMAGE_AUTO_RESIZE_KEY, false);
         isOpenYuvDecode_ = ReadIsOpenYuvDecode();
 
         // watch animation scale
