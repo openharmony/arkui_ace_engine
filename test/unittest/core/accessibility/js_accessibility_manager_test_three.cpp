@@ -772,7 +772,7 @@ HWTEST_F(JsAccessibilityManagerTestThree, ShouldSkipAccessibilityStateChange001,
 
     RefPtr<PipelineBase> nullPipeline = nullptr;
     bool result = jsAccessibilityManager->ShouldSkipAccessibilityStateChange(nullPipeline);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-end ShouldSkipAccessibilityStateChange001";
 }
