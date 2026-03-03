@@ -544,6 +544,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/typedNode/ArkXComponentNode.ets",
   "arkui-preprocessed/arkui/stateManagement/interop/interopBackingValue.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
+  "arkui-preprocessed/arkui/base/ArkUIObjectFinalizationRegisterProxy.ets",
 ]
 
 arkui_path_keys = [
@@ -599,6 +600,7 @@ arkui_path_keys = [
   "@ohos.arkui.ArcScrollBar",
   "@ohos.arkui.ArcSwiper",
   "#arktheme",
+  "arkui/base/ArkUIObjectFinalizationRegisterProxy",
 ]
 
 arkui_path_values = [
@@ -654,4 +656,5 @@ arkui_path_values = [
   "arkui-preprocessed/@ohos.arkui.ArcScrollBar.ets",
   "arkui-preprocessed/@ohos.arkui.ArcSwiper.ets",
   "arkui-preprocessed/arkui/theme",
+  "arkui-preprocessed/arkui/base/ArkUIObjectFinalizationRegisterProxy.ets",
 ]

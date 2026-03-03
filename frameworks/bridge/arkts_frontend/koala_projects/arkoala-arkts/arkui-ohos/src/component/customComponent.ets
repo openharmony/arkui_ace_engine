@@ -38,6 +38,7 @@ import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
 import { transferTypeName } from '../stateManagement/storage/persistenceV2';
 import { ArkCustomComponentRootPeer } from './staticComponents';
+import { ArkUIObjectFinalizationRegisterProxy } from '../base/ArkUIObjectFinalizationRegisterProxy';
 /** @custom_components_common_method_imports */
 
 export class ReuseObject {
@@ -245,6 +246,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         }
     }
     aboutToBeDeletedInternal(): void {
+        if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_ && this.instance instanceof BaseCustomComponent) {
+            ArkUIObjectFinalizationRegisterProxy.call(new WeakRef<object>(this.instance),
+                `${Type.of(this.instance)}[${this.getUniqueId()}] is in process of destruction`);
+        }
         this.instance.__clearStateVariables__Internal();
     }
     onDidBuild(): void {
