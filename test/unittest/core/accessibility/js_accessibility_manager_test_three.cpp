@@ -305,7 +305,8 @@ HWTEST_F(JsAccessibilityManagerTestThree, ConvertAceAction004, TestSize.Level1)
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
-    Accessibility::ActionType result = jsAccessibilityManager->ConvertAceAction(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+    Accessibility::ActionType result =
+        jsAccessibilityManager->ConvertAceAction(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
     EXPECT_EQ(result, Accessibility::ActionType::ACCESSIBILITY_ACTION_NEXT_TEXT);
 
     result = jsAccessibilityManager->ConvertAceAction(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
