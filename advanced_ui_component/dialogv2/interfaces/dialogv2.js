@@ -2452,6 +2452,14 @@ class CustomDialogContentComponent extends ViewV2 {
       bottom: { 'id': -1, 'type': 10002, params: ['sys.float.alert_button_bottom_padding_horizontal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
     };
   }
+  getButtonLabelStyle(buttonOptions) {
+    return {
+      maxLines: 1,
+      maxFontSize: this.buttonMaxFontSize,
+      minFontSize: this.buttonMinFontSize,
+      textAlign: buttonOptions?.textAlign ?? TextAlign.Start
+    };
+  }
   buildSingleButton(index, parent = null) {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
@@ -2462,7 +2470,7 @@ class CustomDialogContentComponent extends ViewV2 {
             __Button__setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, this.isAllFocusFalse, this.getDialogController());
             Button.role(this.buttons?.[index].role ?? ButtonRole.NORMAL);
             Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-            Button.labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize });
+            Button.labelStyle(this.getButtonLabelStyle(this.buttons?.[index]));
           }, Button);
           Button.pop();
         });
@@ -2475,7 +2483,7 @@ class CustomDialogContentComponent extends ViewV2 {
             Button.backgroundColor(this.buttons?.[index].background?.color);
             Button.fontColor(this.buttons?.[index].fontColor?.color);
             Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-            Button.labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize });
+            Button.labelStyle(this.getButtonLabelStyle(this.buttons?.[index]));
           }, Button);
           Button.pop();
         });
@@ -2487,7 +2495,7 @@ class CustomDialogContentComponent extends ViewV2 {
             __Button__setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, this.isAllFocusFalse, this.getDialogController());
             Button.backgroundColor(this.buttons?.[index].background?.color);
             Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-            Button.labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize });
+            Button.labelStyle(this.getButtonLabelStyle(this.buttons?.[index]));
           }, Button);
           Button.pop();
         });
@@ -2499,7 +2507,7 @@ class CustomDialogContentComponent extends ViewV2 {
             __Button__setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, this.isAllFocusFalse, this.getDialogController());
             Button.fontColor(this.buttons?.[index]?.fontColor?.color);
             Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-            Button.labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize });
+            Button.labelStyle(this.getButtonLabelStyle(this.buttons?.[index]));
           }, Button);
           Button.pop();
         });

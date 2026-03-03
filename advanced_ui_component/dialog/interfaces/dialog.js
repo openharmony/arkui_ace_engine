@@ -3765,7 +3765,15 @@ class CustomDialogContentComponent extends ViewPU {
             },
         };
     }
-
+    getButtonLabelStyle(buttonOptions) {
+        return {
+            maxLines: 1,
+            overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
+            maxFontSize: this.buttonMaxFontSize,
+            minFontSize: this.buttonMinFontSize,
+            textAlign: buttonOptions.textAlign ?? TextAlign.Start
+        };
+    }
     buildSingleButton(buttonOptions, parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -3777,12 +3785,7 @@ class CustomDialogContentComponent extends ViewPU {
                             this.controller);
                         Button.role(buttonOptions.role ?? ButtonRole.NORMAL);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-                        Button.labelStyle({
-                            maxLines: 1,
-                            overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-                            maxFontSize: this.buttonMaxFontSize,
-                            minFontSize: this.buttonMinFontSize
-                        });
+                        Button.labelStyle(this.getButtonLabelStyle(buttonOptions));
                     }, Button);
                     Button.pop();
                 });
@@ -3795,12 +3798,7 @@ class CustomDialogContentComponent extends ViewPU {
                         Button.backgroundColor(buttonOptions.background);
                         Button.fontColor(buttonOptions.fontColor);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-                        Button.labelStyle({
-                            maxLines: 1,
-                            overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-                            maxFontSize: this.buttonMaxFontSize,
-                            minFontSize: this.buttonMinFontSize
-                        });
+                        Button.labelStyle(this.getButtonLabelStyle(buttonOptions));
                     }, Button);
                     Button.pop();
                 });
@@ -3812,12 +3810,7 @@ class CustomDialogContentComponent extends ViewPU {
                             this.controller);
                         Button.backgroundColor(buttonOptions.background);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-                        Button.labelStyle({
-                            maxLines: 1,
-                            overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-                            maxFontSize: this.buttonMaxFontSize,
-                            minFontSize: this.buttonMinFontSize
-                        });
+                        Button.labelStyle(this.getButtonLabelStyle(buttonOptions));
                     }, Button);
                     Button.pop();
                 });
@@ -3829,12 +3822,7 @@ class CustomDialogContentComponent extends ViewPU {
                             this.controller);
                         Button.fontColor(buttonOptions.fontColor);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
-                        Button.labelStyle({
-                            maxLines: 1,
-                            overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-                            maxFontSize: this.buttonMaxFontSize,
-                            minFontSize: this.buttonMinFontSize
-                        });
+                        Button.labelStyle(this.getButtonLabelStyle(buttonOptions));
                     }, Button);
                     Button.pop();
                 });
