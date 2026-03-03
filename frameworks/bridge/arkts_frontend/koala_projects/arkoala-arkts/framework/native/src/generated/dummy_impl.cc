@@ -46626,6 +46626,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SaveImageImpl(Ark_WebContextMenuResult peer)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("saveImage(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // WebContextMenuResultAccessor
     namespace WebKeyboardControllerAccessor {
     void DestroyPeerImpl(Ark_WebKeyboardController peer)
@@ -51326,6 +51335,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebContextMenuResultAccessor::UndoImpl,
             WebContextMenuResultAccessor::PasteAndMatchStyleImpl,
             WebContextMenuResultAccessor::RequestPasswordAutoFillImpl,
+            WebContextMenuResultAccessor::SaveImageImpl,
         };
         return &WebContextMenuResultAccessorImpl;
     }

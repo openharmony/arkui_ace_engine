@@ -2080,6 +2080,7 @@ public:
         JSClass<JSContextMenuResult>::CustomMethod("pasteAndMatchStyle", &JSContextMenuResult::PasteAndMatchStyle);
         JSClass<JSContextMenuResult>::CustomMethod("requestPasswordAutoFill",
             &JSContextMenuResult::RequestPasswordAutoFill);
+        JSClass<JSContextMenuResult>::CustomMethod("saveImage", &JSContextMenuResult::SaveImage);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -2160,6 +2161,13 @@ public:
     {
         if (result_) {
             result_->RequestPasswordAutoFill();
+        }
+    }
+
+    void SaveImage(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->SaveImage();
         }
     }
 

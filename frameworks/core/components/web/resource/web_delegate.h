@@ -324,6 +324,7 @@ public:
 
     void Cancel() const override;
     void CopyImage() const override;
+    void SaveImage() const override;
     void Copy() const override;
     void Paste() const override;
     void Cut() const override;

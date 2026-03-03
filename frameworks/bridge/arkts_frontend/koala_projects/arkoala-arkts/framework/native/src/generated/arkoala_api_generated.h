@@ -31022,6 +31022,7 @@ typedef struct GENERATED_ArkUIWebContextMenuResultAccessor {
     void (*undo)(Ark_WebContextMenuResult peer);
     void (*pasteAndMatchStyle)(Ark_WebContextMenuResult peer);
     void (*requestPasswordAutoFill)(Ark_WebContextMenuResult peer);
+    void (*saveImage)(Ark_WebContextMenuResult peer);
 } GENERATED_ArkUIWebContextMenuResultAccessor;
 
 typedef struct GENERATED_ArkUIWebKeyboardControllerAccessor {

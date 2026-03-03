@@ -399,6 +399,8 @@ void ContextMenuResultOhos::Paste() const {}
 void ContextMenuResultOhos::Cut() const {}
 void ContextMenuResultOhos::RequestPasswordAutoFill() const {}
 void ContextMenuResultOhos::SelectAll() const {}
+void ContextMenuResultOhos::SaveImage() const {}
+
 void WebWindowNewHandlerOhos::SetWebController(int32_t id) {}
 bool WebWindowNewHandlerOhos::IsFrist() const
 {
