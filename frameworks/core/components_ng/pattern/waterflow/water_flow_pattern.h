@@ -251,6 +251,7 @@ private:
     void TriggerPostLayoutEvents();
 
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
+    double GetTopEdgeEffectPos() const;
     SizeF GetContentSize() const;
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;

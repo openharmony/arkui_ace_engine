@@ -646,7 +646,7 @@ void WaterFlowPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scr
     scrollEffect->SetTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
-        return pattern->layoutInfo_->TopFinalPos();
+        return pattern->GetTopEdgeEffectPos();
     });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
@@ -656,8 +656,19 @@ void WaterFlowPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scr
     scrollEffect->SetInitTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, 0.0);
-        return pattern->layoutInfo_->TopFinalPos();
+        return pattern->GetTopEdgeEffectPos();
     });
+}
+
+// In sliding window mode, TopFinalPos() can be slightly negative at the bottom of the list
+// even without top overscroll. Clamp to 1.0 (> NearEqual threshold) to avoid
+// false top-overscroll detection in StartSpringMotion.
+double WaterFlowPattern::GetTopEdgeEffectPos() const
+{
+    if (layoutInfo_->offsetEnd_ && !layoutInfo_->itemStart_) {
+        return std::max(static_cast<double>(layoutInfo_->TopFinalPos()), 1.0);
+    }
+    return layoutInfo_->TopFinalPos();
 }
 
 void WaterFlowPattern::MarkDirtyNodeSelf()
