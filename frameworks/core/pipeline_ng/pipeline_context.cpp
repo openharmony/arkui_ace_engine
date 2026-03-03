@@ -7607,7 +7607,7 @@ void PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const
     root->Put("appInfo", std::move(appInfo));
 }
 
-bool PipelineContext::IsCurrentInForceSplitMode() const
+bool PipelineContext::IsDisplayInForceSplitMode() const
 {
     CHECK_NULL_RETURN(forceSplitMgr_, isCurrentInForceSplitMode_);
     if (!forceSplitMgr_->IsRouterForceSplit()) {
