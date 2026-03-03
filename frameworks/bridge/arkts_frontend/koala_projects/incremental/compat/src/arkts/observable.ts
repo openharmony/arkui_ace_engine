@@ -365,7 +365,7 @@ class ObservableArray<T> extends Array<T> {
         return super.unshift(...items)
     }
 
-    override keys(): IterableIterator<Number> {
+    override keys(): IterableIterator<int> {
         this.handler?.onAccess()
         return super.keys()
     }
@@ -509,7 +509,7 @@ class ObservableArray<T> extends Array<T> {
         return super.values()
     }
 
-    override entries(): IterableIterator<[number, T]> {
+    override entries(): IterableIterator<[int, T]> {
         this.handler?.onAccess()
         return super.entries()
     }

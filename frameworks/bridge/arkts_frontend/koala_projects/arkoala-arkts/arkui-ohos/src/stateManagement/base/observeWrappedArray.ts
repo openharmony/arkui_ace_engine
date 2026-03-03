@@ -378,7 +378,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     /**
      * Returns an iterator over all indices
      */
-    public override keys(): IterableIterator<Number> {
+    public override keys(): IterableIterator<int> {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.keys();
     }
@@ -927,7 +927,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     /**
      * Returns an iterable of key, value pairs for every entry in the array
      */
-    public override entries(): IterableIterator<[number, T]> {
+    public override entries(): IterableIterator<[int, T]> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
