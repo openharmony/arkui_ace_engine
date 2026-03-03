@@ -75,6 +75,7 @@ constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_anima
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
 constexpr int32_t FOLD_TYPE_TWO = 2;
 constexpr int32_t FOLD_TYPE_FOUR = 4;
+constexpr int32_t FOLD_TYPE_SEVEN = 7;
 constexpr float DEFAULT_SCROLL_COEFFICEIENT = 2.0f;
 
 bool IsOpIncEnabled()
@@ -1353,7 +1354,7 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
         auto index = foldTypeProp.find_first_of(',');
         auto foldScreenTypeStr = foldTypeProp.substr(0, index);
         auto type = StringUtils::StringToInt(foldScreenTypeStr);
-        if (type == FOLD_TYPE_FOUR) {
+        if (type == FOLD_TYPE_FOUR || type == FOLD_TYPE_SEVEN) {
             type = FOLD_TYPE_TWO;
         }
         foldScreenType_ = static_cast<FoldScreenType>(type);
