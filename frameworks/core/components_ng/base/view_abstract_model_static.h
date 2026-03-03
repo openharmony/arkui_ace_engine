@@ -209,7 +209,7 @@ public:
         const NG::MenuParam& menuParam);
 
     static void BindContentCover(FrameNode* targetNode, bool isShow,
-        std::function<void(const std::string&)>&& callback, std::function<RefPtr<UINode>()>&& buildFunc,
+        std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
         NG::ModalStyle& modalStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
         const NG::ContentCoverParam& contentCoverParam);

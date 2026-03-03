@@ -6922,13 +6922,26 @@ void RosenRenderContext::OnTransitionOutFinish()
         breakPointParent->MarkNeedSyncRenderTree();
         breakPointParent->RebuildRenderContextTree();
     }
-    if (isModalRootNode_ && breakPointParent->GetChildren().empty()) {
-        auto grandParent = breakPointParent->GetParent();
+    auto modalNode = GetModalNode(breakPointParent);
+    if (isModalRootNode_ && modalNode && modalNode->GetChildren().empty()) {
+        auto grandParent = modalNode->GetParent();
         CHECK_NULL_VOID(grandParent);
         grandParent->RemoveChild(breakPointParent);
         grandParent->RebuildRenderContextTree();
     }
     FireTransitionUserCallback(false);
+}
+
+RefPtr<UINode> RosenRenderContext::GetModalNode(const RefPtr<UINode>& breakPointParent)
+{
+    auto parent = breakPointParent;
+    while (parent) {
+        if (parent->GetTag() == V2::MODAL_PAGE_TAG) {
+            return parent;
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
 }
 
 void RosenRenderContext::FireTransitionUserCallback(bool isTransitionIn)

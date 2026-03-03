@@ -676,6 +676,7 @@ protected:
     bool HasValidBgImageResizable();
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
+    RefPtr<UINode> GetModalNode(const RefPtr<UINode>& breakPointParent);
     void RemoveDefaultTransition();
     void FireTransitionUserCallback(bool isTransitionIn);
     void PostTransitionUserOutCallback();

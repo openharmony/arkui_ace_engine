@@ -198,7 +198,7 @@ public:
     {
         return dismissDialogId_;
     }
-
+    RefPtr<FrameNode> GetFirstFrameNodeOfModalBuilder(const RefPtr<FrameNode>& topModalNode) const;
     void RemoveDialogFromMapForcefully(const RefPtr<FrameNode>& node);
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false,

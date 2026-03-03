@@ -2494,4 +2494,21 @@ HWTEST_F(RosenRenderContextTest, IsOnRenderTreeTest001, TestSize.Level1)
     auto isOnRenderTree = rosenRenderContext->IsOnRenderTree();
     EXPECT_EQ(isOnRenderTree, false);
 }
+
+/**
+ * @tc.name: GetModalNode001
+ * @tc.desc: Test GetModalNode Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, GetModalNode001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+
+    auto modalNode = FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto resultNode = rosenRenderContext->GetModalNode(modalNode);
+    EXPECT_EQ(resultNode, modalNode);
+}
 } // namespace OHOS::Ace::NG

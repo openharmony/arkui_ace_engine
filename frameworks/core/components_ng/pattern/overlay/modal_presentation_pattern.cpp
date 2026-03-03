@@ -59,15 +59,17 @@ void ModalPresentationPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto builder = AceType::DynamicCast<FrameNode>(host->GetChildByIndex(0));
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    auto builder = overlay->GetFirstFrameNodeOfModalBuilder(host);
     CHECK_NULL_VOID(builder);
     auto modalNodeLayoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(modalNodeLayoutProperty);
     auto builderLayoutProperty = builder->GetLayoutProperty();
     CHECK_NULL_VOID(builderLayoutProperty);
     if (GetEnableSafeArea()) {
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         auto inset = context->GetSafeAreaWithoutProcess();
         NG::CalcLength safeAreaPaddingTop(inset.top_.Length());
         NG::CalcLength safeAreaPaddingBottom(inset.bottom_.Length());
