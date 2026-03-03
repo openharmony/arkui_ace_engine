@@ -1781,6 +1781,11 @@ void ListPattern::OnAnimateStop()
     scrollTarget_.reset();
 }
 
+int32_t ListPattern::GetFirstIndex() const
+{
+    return startIndex_;
+}
+
 void ListPattern::ScrollTo(float position)
 {
     StopAnimate();
