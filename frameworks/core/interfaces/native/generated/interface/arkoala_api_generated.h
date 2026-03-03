@@ -1389,6 +1389,8 @@ typedef struct ButtonTriggerClickCallback ButtonTriggerClickCallback;
 typedef struct Opt_ButtonTriggerClickCallback Opt_ButtonTriggerClickCallback;
 typedef struct Callback_AccessibilityActionInterceptResult_Void Callback_AccessibilityActionInterceptResult_Void;
 typedef struct Opt_Callback_AccessibilityActionInterceptResult_Void Opt_Callback_AccessibilityActionInterceptResult_Void;
+typedef struct Callback_ArcSwiperContentTransitionProxy Callback_ArcSwiperContentTransitionProxy;
+typedef struct Opt_Callback_ArcSwiperContentTransitionProxy Opt_Callback_ArcSwiperContentTransitionProxy;
 typedef struct Callback_Area_Area_Void Callback_Area_Area_Void;
 typedef struct Opt_Callback_Area_Area_Void Opt_Callback_Area_Area_Void;
 typedef struct Callback_Array_I32_Void Callback_Array_I32_Void;
@@ -2105,6 +2107,14 @@ typedef struct Ark_AnimationNumberRange Ark_AnimationNumberRange;
 typedef struct Opt_AnimationNumberRange Opt_AnimationNumberRange;
 typedef struct Ark_ArcScrollBarOptions Ark_ArcScrollBarOptions;
 typedef struct Opt_ArcScrollBarOptions Opt_ArcScrollBarOptions;
+typedef struct Ark_ArcSwiperContentAnimatedTransition Ark_ArcSwiperContentAnimatedTransition;
+typedef struct Opt_ArcSwiperContentAnimatedTransition Opt_ArcSwiperContentAnimatedTransition;
+typedef struct ArcSwiperContentTransitionProxyPeer ArcSwiperContentTransitionProxyPeer;
+typedef struct ArcSwiperContentTransitionProxyPeer* Ark_ArcSwiperContentTransitionProxy;
+typedef struct Opt_ArcSwiperContentTransitionProxy Opt_ArcSwiperContentTransitionProxy;
+typedef struct ArcSwiperContentTransitionProxyInnerPeer ArcSwiperContentTransitionProxyInnerPeer;
+typedef struct ArcSwiperContentTransitionProxyInnerPeer* Ark_ArcSwiperContentTransitionProxyInner;
+typedef struct Opt_ArcSwiperContentTransitionProxyInner Opt_ArcSwiperContentTransitionProxyInner;
 typedef struct Ark_ArkListOptions Ark_ArkListOptions;
 typedef struct Opt_ArkListOptions Opt_ArkListOptions;
 typedef struct Ark_ASTCResource Ark_ASTCResource;
@@ -10999,6 +11009,16 @@ typedef struct Opt_Callback_AccessibilityActionInterceptResult_Void {
     Ark_Tag tag;
     Callback_AccessibilityActionInterceptResult_Void value;
 } Opt_Callback_AccessibilityActionInterceptResult_Void;
+typedef struct Callback_ArcSwiperContentTransitionProxy {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_ArcSwiperContentTransitionProxy data);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ArcSwiperContentTransitionProxy data);
+} Callback_ArcSwiperContentTransitionProxy;
+typedef struct Opt_Callback_ArcSwiperContentTransitionProxy {
+    Ark_Tag tag;
+    Callback_ArcSwiperContentTransitionProxy value;
+} Opt_Callback_ArcSwiperContentTransitionProxy;
 typedef struct Callback_Area_Area_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14573,6 +14593,24 @@ typedef struct Opt_ArcScrollBarOptions {
     Ark_Tag tag;
     Ark_ArcScrollBarOptions value;
 } Opt_ArcScrollBarOptions;
+typedef struct Ark_ArcSwiperContentAnimatedTransition {
+    /* kind: Interface */
+    Opt_Int32 timeout;
+    Callback_ArcSwiperContentTransitionProxy transition;
+} Ark_ArcSwiperContentAnimatedTransition;
+typedef struct Opt_ArcSwiperContentAnimatedTransition {
+    Ark_Tag tag;
+    Ark_ArcSwiperContentAnimatedTransition value;
+} Opt_ArcSwiperContentAnimatedTransition;
+typedef struct Opt_ArcSwiperContentTransitionProxy {
+    Ark_Tag tag;
+    Ark_ArcSwiperContentTransitionProxy value;
+} Opt_ArcSwiperContentTransitionProxy;
+
+typedef struct Opt_ArcSwiperContentTransitionProxyInner {
+    Ark_Tag tag;
+    Ark_ArcSwiperContentTransitionProxyInner value;
+} Opt_ArcSwiperContentTransitionProxyInner;
 typedef struct Ark_ArkListOptions {
     /* kind: Interface */
     Opt_Int32 initialIndex;
@@ -27406,6 +27444,25 @@ typedef struct GENERATED_ArkUIArcScrollBarExtenderAccessor {
                                    const Ark_ArcScrollBarOptions* options);
 } GENERATED_ArkUIArcScrollBarExtenderAccessor;
 
+typedef struct GENERATED_ArkUIArcSwiperContentTransitionProxyInnerAccessor {
+    void (*destroyPeer)(Ark_ArcSwiperContentTransitionProxyInner peer);
+    Ark_ArcSwiperContentTransitionProxyInner (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*finishTransition)(Ark_ArcSwiperContentTransitionProxyInner peer);
+    Ark_Int32 (*getSelectedIndex)(Ark_ArcSwiperContentTransitionProxyInner peer);
+    void (*setSelectedIndex)(Ark_ArcSwiperContentTransitionProxyInner peer,
+                             Ark_Int32 selectedIndex);
+    Ark_Int32 (*getIndex)(Ark_ArcSwiperContentTransitionProxyInner peer);
+    void (*setIndex)(Ark_ArcSwiperContentTransitionProxyInner peer,
+                     Ark_Int32 index);
+    Ark_Float64 (*getPosition)(Ark_ArcSwiperContentTransitionProxyInner peer);
+    void (*setPosition)(Ark_ArcSwiperContentTransitionProxyInner peer,
+                        Ark_Float64 position);
+    Ark_Float64 (*getMainAxisLength)(Ark_ArcSwiperContentTransitionProxyInner peer);
+    void (*setMainAxisLength)(Ark_ArcSwiperContentTransitionProxyInner peer,
+                              Ark_Float64 mainAxisLength);
+} GENERATED_ArkUIArcSwiperContentTransitionProxyInnerAccessor;
+
 typedef struct GENERATED_ArkUIArcSwiperControllerHelperAccessor {
     void (*destroyPeer)(Ark_ArcSwiperControllerHelper peer);
     Ark_ArcSwiperControllerHelper (*construct)();
@@ -27444,7 +27501,7 @@ typedef struct GENERATED_ArkUIArcSwiperExtenderAccessor {
     void (*effectMode)(Ark_NativePointer node,
                        const Opt_EdgeEffect* edgeEffect);
     void (*customContentTransition)(Ark_NativePointer node,
-                                    const Opt_SwiperContentAnimatedTransition* transition);
+                                    const Opt_ArcSwiperContentAnimatedTransition* transition);
     void (*disableTransitionAnimation)(Ark_NativePointer node,
                                        const Opt_Boolean* disabled);
 } GENERATED_ArkUIArcSwiperExtenderAccessor;
@@ -31274,6 +31331,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIArcListExtenderAccessor* (*getArcListExtenderAccessor)();
     const GENERATED_ArkUIArcListItemExtenderAccessor* (*getArcListItemExtenderAccessor)();
     const GENERATED_ArkUIArcScrollBarExtenderAccessor* (*getArcScrollBarExtenderAccessor)();
+    const GENERATED_ArkUIArcSwiperContentTransitionProxyInnerAccessor* (*getArcSwiperContentTransitionProxyInnerAccessor)();
     const GENERATED_ArkUIArcSwiperControllerHelperAccessor* (*getArcSwiperControllerHelperAccessor)();
     const GENERATED_ArkUIArcSwiperExtenderAccessor* (*getArcSwiperExtenderAccessor)();
     const GENERATED_ArkUIAxisEventAccessor* (*getAxisEventAccessor)();

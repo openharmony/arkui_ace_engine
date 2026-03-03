@@ -3525,6 +3525,28 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ArcScrollBarExtender_setArcScrollBarOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _ArcSwiperContentTransitionProxyInner_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _ArcSwiperContentTransitionProxyInner_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _ArcSwiperContentTransitionProxyInner_finishTransition(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperContentTransitionProxyInner_getSelectedIndex(ptr: KPointer): KInt
+    @ani.unsafe.Direct
+    native static _ArcSwiperContentTransitionProxyInner_setSelectedIndex(ptr: KPointer, selectedIndex: KInt): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperContentTransitionProxyInner_getIndex(ptr: KPointer): KInt
+    @ani.unsafe.Direct
+    native static _ArcSwiperContentTransitionProxyInner_setIndex(ptr: KPointer, index: KInt): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperContentTransitionProxyInner_getPosition(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _ArcSwiperContentTransitionProxyInner_setPosition(ptr: KPointer, position: KDouble): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperContentTransitionProxyInner_getMainAxisLength(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _ArcSwiperContentTransitionProxyInner_setMainAxisLength(ptr: KPointer, mainAxisLength: KDouble): void
+    @ani.unsafe.Direct
     native static _ArcSwiperControllerHelper_construct(): KPointer
     @ani.unsafe.Direct
     native static _ArcSwiperControllerHelper_getFinalizer(): KPointer

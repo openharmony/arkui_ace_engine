@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_IMPL_ARC_SWIPER_CONTROLLER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_IMPL_ARC_SWIPER_CONTROLLER_PEER_IMPL_H
 
+#include "base/utils/utils.h"
 #include "core/components/swiper/swiper_controller.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
