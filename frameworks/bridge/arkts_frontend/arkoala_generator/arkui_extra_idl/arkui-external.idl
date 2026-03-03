@@ -1,0 +1,133 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.component.idlize;
+
+import arkui.component.units;
+import ohos.graphics.text.text;
+import arkui.component.enums;
+import ohos.multimedia.image.image;
+import ohos.font;
+
+[Entity=Interface]
+interface WebHeader {
+    attribute String headerKey;
+    attribute String headerValue;
+};
+
+/**
+ * The componentSnapshot API declaration , part for M2 app
+ */
+[Entity=Interface]
+interface SnapshotOptions {
+    [Optional]
+    attribute number scale;
+    [Optional]
+    attribute boolean waitUntilRenderFinished;
+};
+[Async, Synthetic]
+callback AsyncCallback_image_PixelMap_Void = void (PixelMap result);
+
+[Entity=Class]
+interface GlobalScope_ohos_arkui_componentSnapshot { // TODO WTF? Why GlobalScope in the name?
+    static void get(String id, AsyncCallback_image_PixelMap_Void callback, optional SnapshotOptions options);
+};
+
+/**
+ * The performanceMonitor API declaration, part for M2 app
+ */
+dictionary PerfMonitorActionType {
+
+    number LAST_DOWN = 0;
+    number LAST_UP = 1;
+    number FIRST_MOVE = 2;
+
+};
+dictionary PerfMonitorSourceType {
+
+    number PERF_TOUCH_EVENT = 0;
+    number PERF_MOUSE_EVENT = 1;
+    number PERF_TOUCHPAD_EVENT = 2;
+    number PERF_JOYSTICK_EVENT = 3;
+    number PERF_KEY_EVENT = 4;
+
+};
+[Entity=Class]
+interface GlobalScope_ohos_arkui_performanceMonitor {
+    static void begin(String scene, PerfMonitorActionType startInputType, optional String note);
+    static void end(String scene);
+    static void recordInputEventTime(PerfMonitorActionType actionType, PerfMonitorSourceType sourceType, i64 time);
+};
+
+/**
+ * The common shapes API declarations
+ */
+[Entity=Class]
+interface CommonShape {
+    CommonShape offset(Position offset);
+    CommonShape fill(ResourceColor color);
+    CommonShape position(Position position);
+};
+[Entity=Class]
+interface BaseShape {
+    BaseShape width(Length width);
+    BaseShape height(Length height);
+    BaseShape size(SizeOptions size);
+};
+
+[Entity=Class]
+interface GlobalScope_ohos_font {
+    static void registerFont(font.FontOptions options);
+    static sequence<String> getSystemFontList();
+    static font.FontInfo getFontByName(String fontName);
+    static font.UIFontConfig getUIFontConfig();
+};
+
+[Entity=Class]
+interface GlobalScope_ohos_measure_utils {
+    static f64 measureText(MeasureOptions options);
+    static SizeOptions measureTextSize(MeasureOptions options);
+};
+
+/**
+ * The SymbolEffect,ReplaceSymbolEffect,ScaleSymbolEffect API declaration, part for M2 app
+ */
+
+[Entity=Interface]
+interface IndicatorStyle {
+    [Optional] attribute Length height;
+    [Optional] attribute Length width;
+    [Optional] attribute Length borderRadius;
+    [Optional] attribute Length marginTop;
+    [Optional] attribute ResourceColor color;
+    [Optional, Deprecated] attribute ResourceColor selectedColor;
+    [Optional, Deprecated] attribute Length left;
+    [Optional, Deprecated] attribute Length top;
+    [Optional, Deprecated] attribute Length right;
+    [Optional, Deprecated] attribute Length bottom;
+    [Optional, Deprecated] attribute Length size;
+    [Optional, Deprecated] attribute boolean mask;
+};
+
+[TypeParameters="T"]
+interface BusinessErrorInterface {
+    attribute String name;
+    attribute String message;
+    [Optional]
+    attribute String stack;
+    attribute i32 code;
+    attribute T data;
+};
+
+callback PageMapNodeBuilder = pointer (pointer parentNode, String name, (Object or idlize.stdlib.Null or undefined) param);

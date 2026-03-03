@@ -1,0 +1,74 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package arkui.component.idlize;
+
+import arkui.component.common;
+import arkui.component.enums;
+import arkui.component.dataPanel;
+import arkui.component.swiper.SwiperAnimationEvent as SwiperAnimationEvent;
+import arkui.component.swiper.OnSwiperAnimationStartCallback as OnSwiperAnimationStartCallback;
+import arkui.component.units;
+
+callback Callback_I32_Void = void (i32 index);
+
+interface ArcDotIndicatorInner {
+    [Optional]
+    attribute ArcDirectionInner _arcDirection;
+    [Optional]
+    attribute ResourceColor _itemColor;
+    [Optional]
+    attribute ResourceColor _selectedItemColor;
+    [Optional]
+    attribute ResourceColor _backgroundColor;
+    [Optional]
+    attribute LinearGradient _maskColor;
+};
+[Entity=Class]
+interface ArcSwiperControllerHelper {
+    constructor();
+    static void showNext(pointer node);
+    static void showPrevious(pointer node);
+    static void finishAnimation(pointer node, optional VoidCallback callback_);
+};
+
+dictionary ArcDirectionInner {
+    number THREE_CLOCK_DIRECTION = 0;
+    number SIX_CLOCK_DIRECTION = 1;
+    number NINE_CLOCK_DIRECTION = 2;
+};
+
+callback AnimationStartHandler =  void (i32 index, i32 targetIndex, SwiperAnimationEvent extraInfo);
+callback AnimationEndHandler = void (i32 index, SwiperAnimationEvent extraInfo);
+callback GestureSwipeHandler = void (i32 index, SwiperAnimationEvent extraInfo);
+
+[Entity=Class]
+interface ArcSwiperExtender {
+    static pointer arcSwiperConstruct(i32 id, i32 flags);
+    static void setConstructInfo(pointer node, (ArcSwiperControllerHelper or undefined) controller);
+    static void index(pointer node, (i32 or undefined) value);
+    static void indicator(pointer node, (ArcDotIndicatorInner or boolean or undefined) style);
+    static void duration(pointer node, (i32 or undefined) duration);
+    static void vertical(pointer node, (boolean or undefined) isVertical);
+    static void disableSwipe(pointer node, (boolean or undefined) disabled);
+    static void digitalCrownSensitivity(pointer node, (CrownSensitivity or undefined) sensitivity);
+    static void onChange(pointer node, (Callback_I32_Void or undefined) handler);
+    static void onAnimationStart(pointer node, (AnimationStartHandler or undefined) handler);
+    static void onAnimationEnd(pointer node, (AnimationEndHandler or undefined) handler);
+    static void onGestureSwipe(pointer node, (GestureSwipeHandler or undefined) handler);
+    static void effectMode(pointer node, (EdgeEffect or undefined) edgeEffect);
+    static void customContentTransition(pointer node, (SwiperContentAnimatedTransition or undefined) transition);
+    static void disableTransitionAnimation(pointer node, (boolean or undefined) disabled);
+};
