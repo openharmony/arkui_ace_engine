@@ -306,6 +306,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowScale, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ParagraphSpacing, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeTrailingSpace, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OrphanCharOptimization, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CompressLeadingPunctuation, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextContentAlign, TextContentAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDirection, TextDirection);
@@ -353,6 +354,8 @@ ACE_FORCE_EXPORT void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
 
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
     const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
+void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme);
 
 ACE_FORCE_EXPORT std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
 ACE_FORCE_EXPORT std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);

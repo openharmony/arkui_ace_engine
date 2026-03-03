@@ -133,6 +133,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     textStyle.SetLineHeightMultiply(textLayoutProperty->GetLineHeightMultiply());
     textStyle.SetMinimumLineHeight(textLayoutProperty->GetMinimumLineHeight());
     textStyle.SetMaximumLineHeight(textLayoutProperty->GetMaximumLineHeight());
+    textStyle.SetOrphanCharOptimization(textLayoutProperty->GetOrphanCharOptimizationValue(false));
     textStyle.SetIncludeFontPadding(textLayoutProperty->GetIncludeFontPaddingValue(false));
     textStyle.SetFallbackLineSpacing(textLayoutProperty->GetFallbackLineSpacingValue(false));
     // Determines whether a foreground color is set or inherited.

@@ -1424,6 +1424,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
     JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
     JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
+    JSClass<JSText>::StaticMethod("orphanCharOptimization", &JSText::SetOrphanCharOptimization);
     JSClass<JSText>::StaticMethod("editMenuOptions", &JSText::EditMenuOptions);
     JSClass<JSText>::StaticMethod("responseRegion", &JSText::JsResponseRegion);
     JSClass<JSText>::StaticMethod("halfLeading", &JSText::SetHalfLeading);
@@ -1733,6 +1734,18 @@ void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)
     };
 
     TextModel::GetInstance()->SetOnMarqueeStateChange(std::move(onMarqueeStateChange));
+}
+
+void JSText::SetOrphanCharOptimization(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    bool isOrphanChar = false;
+    if (info[0]->IsBoolean()) {
+        isOrphanChar = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetOrphanCharOptimization(isOrphanChar);
 }
 
 void JSText::EditMenuOptions(const JSCallbackInfo& info)

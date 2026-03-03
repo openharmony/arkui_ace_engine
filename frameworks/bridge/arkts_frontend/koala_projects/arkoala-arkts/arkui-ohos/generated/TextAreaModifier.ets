@@ -118,6 +118,7 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
     public _compressLeadingPunctuation_0_0value?: boolean | undefined
     public _selectedDragPreviewStyle_0_0value?: SelectedDragPreviewStyle | undefined
     public _textDirection_0_0value?: TextDirection | undefined
+    public _orphanCharOptimization_0_0value?: boolean | undefined
     public _voiceButton_0_0value?: VoiceButtonOptions | undefined
     public _horizontalScrolling_0_0value?: boolean | undefined
     public _inputFilter_0_0value?: ResourceStr | undefined
@@ -1405,6 +1406,24 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
             }
         }
+        if (flagArray[74] != 0)
+        {
+            switch (flagArray[74]) {
+                case 1: {
+                    peer.setOrphanCharOptimizationAttribute((this._orphanCharOptimization_0_0value as boolean | undefined));
+                    flagArray[74] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[74] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[74] = 0;
+                    peer.setOrphanCharOptimizationAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: TextAreaModifier): void {
         super.mergeModifier(modifier)
@@ -2310,6 +2329,19 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
                 }
             }
         }
+        if (flagArray[74] != 0)
+        {
+            switch (flagArray[74]) {
+                case 1:
+                case 3: {
+                    this.orphanCharOptimization(modifier._orphanCharOptimization_0_0value);
+                    break;
+                }
+                default: {
+                    this.orphanCharOptimization((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     placeholderColor(value: ResourceColor | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -3053,6 +3085,18 @@ export class TextAreaModifier extends CommonMethodModifier implements TextAreaAt
             this._state.fireChange()
         } else {
             this._flagArray[73] = 3
+        }
+        return this
+    }
+    orphanCharOptimization(value: boolean | undefined): this {
+        if (((this._flagArray[74]) == (0)) || ((this._orphanCharOptimization_0_0value) !== (value)))
+        {
+            this._flagArray[74] = 1
+            this._orphanCharOptimization_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[74] = 3
         }
         return this
     }

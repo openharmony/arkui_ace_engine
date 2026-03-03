@@ -818,6 +818,11 @@ void TextFieldModelStatic::SetCompressLeadingPunctuation(FrameNode* frameNode, c
     TextFieldModelNG::SetCompressLeadingPunctuation(frameNode, enable.value_or(false));
 }
 
+void TextFieldModelStatic::SetOrphanCharOptimization(FrameNode* frameNode, const std::optional<bool>& valueOpt)
+{
+    TextFieldModelNG::SetOrphanCharOptimization(frameNode, valueOpt.value_or(false));
+}
+
 void TextFieldModelStatic::SetDefaultCancelIcon(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);

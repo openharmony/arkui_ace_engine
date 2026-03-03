@@ -146,6 +146,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("strokeColor", &JSTextField::SetStrokeColor);
     JSClass<JSTextInput>::StaticMethod("enableAutoSpacing", &JSTextField::SetEnableAutoSpacing);
     JSClass<JSTextInput>::StaticMethod("onWillAttachIME", &JSTextField::SetOnWillAttachIME);
+    JSClass<JSTextInput>::StaticMethod("orphanCharOptimization", &JSTextField::SetOrphanCharOptimization);
     JSClass<JSTextInput>::StaticMethod("compressLeadingPunctuation", &JSTextField::SetCompressLeadingPunctuation);
     JSClass<JSTextInput>::StaticMethod("includeFontPadding", &JSTextField::SetIncludeFontPadding);
     JSClass<JSTextInput>::StaticMethod("fallbackLineSpacing", &JSTextField::SetFallbackLineSpacing);

@@ -6834,6 +6834,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Opt_TextDirection* value)
     {
     }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+    }
     void SetFontImpl(Ark_NativePointer node,
                      const Opt_arkui_component_units_Font* fontValue,
                      const Opt_FontSettingOptions* options)
@@ -7142,6 +7146,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetTextDirectionImpl(Ark_NativePointer node,
                               const Opt_TextDirection* value)
+    {
+    }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
     {
     }
     void SetVoiceButtonImpl(Ark_NativePointer node,
@@ -7584,6 +7592,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetShowCounterImpl(Ark_NativePointer node,
                             const Opt_Boolean* value,
                             const Opt_InputCounterOptions* options)
+    {
+    }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
     {
     }
     } // TextInputAttributeModifier
@@ -10655,6 +10667,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetLineSpacingImpl,
             TextAttributeModifier::SetSelectionImpl,
             TextAttributeModifier::SetBindSelectionMenuImpl,
+            TextAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUITextModifierImpl;
     }
@@ -10738,6 +10751,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAreaAttributeModifier::SetMaxLinesImpl,
             TextAreaAttributeModifier::SetCustomKeyboardImpl,
             TextAreaAttributeModifier::SetLineSpacingImpl,
+            TextAreaAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUITextAreaModifierImpl;
     }
@@ -10850,6 +10864,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetInputFilterImpl,
             TextInputAttributeModifier::SetCustomKeyboardImpl,
             TextInputAttributeModifier::SetShowCounterImpl,
+            TextInputAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUITextInputModifierImpl;
     }

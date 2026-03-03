@@ -1787,6 +1787,79 @@ HWTEST_F(TextFieldUXTest, TextAreaMaxLines002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OrphanCharOptimizationTest001
+ * @tc.desc: Test the enable or disable the OrphanCharOptimization attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OrphanCharOptimizationTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: Create Text filed node with default text and placeholder
+    */
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    /**
+    * @tc.expected: Get OrphanCharOptimization Value
+    */
+    bool defaultValue = true;
+    EXPECT_EQ(TextFieldModelNG::GetOrphanCharOptimization(AceType::RawPtr(frameNode_)), false);
+    EXPECT_EQ(layoutProperty_->GetOrphanCharOptimizationValue(defaultValue), true);
+}
+
+/**
+ * @tc.name: OrphanCharOptimizationTest002
+ * @tc.desc: Test the enable or disable the OrphanCharOptimization attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OrphanCharOptimizationTest002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: Create Text filed node with default text and placeholder
+    */
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    bool value = true;
+    TextFieldModelNG model;
+    model.SetOrphanCharOptimization(value);
+    model.SetOrphanCharOptimization(AceType::RawPtr(frameNode_), value);
+    /**
+    * @tc.expected: Get OrphanCharOptimization Value
+    */
+    bool defaultValue = false;
+    EXPECT_EQ(TextFieldModelNG::GetOrphanCharOptimization(AceType::RawPtr(frameNode_)), value);
+    EXPECT_EQ(layoutProperty_->GetOrphanCharOptimizationValue(defaultValue), value);
+}
+
+/**
+ * @tc.name: OrphanCharOptimizationTest002
+ * @tc.desc: Test the enable or disable the OrphanCharOptimization attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OrphanCharOptimizationTest003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: Create Text filed node with default text and placeholder
+    */
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    bool value = false;
+    TextFieldModelNG model;
+    model.SetOrphanCharOptimization(value);
+    model.SetOrphanCharOptimization(AceType::RawPtr(frameNode_), value);
+    /**
+    * @tc.expected: Get OrphanCharOptimization Value
+    */
+    bool defaultValue = true;
+    EXPECT_EQ(TextFieldModelNG::GetOrphanCharOptimization(AceType::RawPtr(frameNode_)), value);
+    EXPECT_EQ(layoutProperty_->GetOrphanCharOptimizationValue(defaultValue), value);
+}
+
+/**
  * @tc.name: TextAreaScrollBarColorTest001
  * @tc.desc: Test the enable or disable the TextAreaScrollBarColor attribute.
  * @tc.type: FUNC

@@ -109,6 +109,7 @@ public:
     void SetFallbackLineSpacing(bool enabled) override;
     void SetLineThicknessScale(float value) override;
     void SetOptimizeTrailingSpace(bool trim) override;
+    void SetOrphanCharOptimization(bool isOrphanChar) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
     void SetGradientShaderStyle(NG::Gradient& gradient) override;
     void SetColorShaderStyle(const Color& value) override;
@@ -264,6 +265,8 @@ public:
     static void SetLineThicknessScale(FrameNode* frameNode, float value);
     static void SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim);
     static bool GetOptimizeTrailingSpace(FrameNode* frameNode);
+    static void SetOrphanCharOptimization(FrameNode* frameNode, bool isOrphanChar);
+    static bool GetOrphanCharOptimization(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
     static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);

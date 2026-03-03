@@ -2717,6 +2717,27 @@ void TextAreaDeleteBackward(ArkUINodeHandle node)
     TextFieldModelNG::DeleteBackward(frameNode);
 }
 
+void SetTextAreaOrphanCharOptimization(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOrphanCharOptimization(frameNode, value);
+}
+
+ArkUI_Int32 GetTextAreaOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetOrphanCharOptimization(frameNode));
+}
+
+void ResetTextAreaOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOrphanCharOptimization(frameNode, false);
+}
+
 void SetTextAreaCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool trim)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3029,6 +3050,9 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setTextAreaOnWillAttachIME = SetTextAreaOnWillAttachIME,
         .resetTextAreaOnWillAttachIME = ResetTextAreaOnWillAttachIME,
         .textAreaDeleteBackward = TextAreaDeleteBackward,
+        .setTextAreaOrphanCharOptimization = SetTextAreaOrphanCharOptimization,
+        .getTextAreaOrphanCharOptimization = GetTextAreaOrphanCharOptimization,
+        .resetTextAreaOrphanCharOptimization = ResetTextAreaOrphanCharOptimization,
         .setTextAreaCompressLeadingPunctuation = SetTextAreaCompressLeadingPunctuation,
         .getTextAreaCompressLeadingPunctuation = GetTextAreaCompressLeadingPunctuation,
         .resetTextAreaCompressLeadingPunctuation = ResetTextAreaCompressLeadingPunctuation,

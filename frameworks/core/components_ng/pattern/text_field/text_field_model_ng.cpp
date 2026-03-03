@@ -2808,6 +2808,26 @@ bool TextFieldModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
     return value;
 }
 
+void TextFieldModelNG::SetOrphanCharOptimization(bool isOrphanChar)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OrphanCharOptimization, isOrphanChar);
+}
+
+void TextFieldModelNG::SetOrphanCharOptimization(FrameNode* frameNode, bool isOrphanChar)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OrphanCharOptimization, isOrphanChar, frameNode);
+}
+
+bool TextFieldModelNG::GetOrphanCharOptimization(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, OrphanCharOptimization,
+        value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetCompressLeadingPunctuation(bool enabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CompressLeadingPunctuation, enabled);

@@ -3888,6 +3888,9 @@ struct ArkUITextModifier {
     void (*setTextOptimizeTrailingSpace)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextOptimizeTrailingSpace)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextOptimizeTrailingSpace)(ArkUINodeHandle node);
+    void (*setTextOrphanCharOptimization)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getTextOrphanCharOptimization)(ArkUINodeHandle node);
+    void (*resetTextOrphanCharOptimization)(ArkUINodeHandle node);
     void (*setTextCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextCompressLeadingPunctuation)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextCompressLeadingPunctuation)(ArkUINodeHandle node);
@@ -5772,6 +5775,9 @@ struct ArkUITextAreaModifier {
     ArkUI_Uint32 (*getTextAreaStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*setTextAreaOrphanCharOptimization)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getTextAreaOrphanCharOptimization)(ArkUINodeHandle node);
+    void (*resetTextAreaOrphanCharOptimization)(ArkUINodeHandle node);
     void (*setTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextAreaCompressLeadingPunctuation)(ArkUINodeHandle node);
@@ -6043,6 +6049,9 @@ struct ArkUITextInputModifier {
     ArkUI_Uint32 (*getTextInputStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);
+    void (*setTextInputOrphanCharOptimization)(ArkUINodeHandle node, ArkUI_Bool isOrphanChar);
+    ArkUI_Int32 (*getTextInputOrphanCharOptimization)(ArkUINodeHandle node);
+    void (*resetTextInputOrphanCharOptimization)(ArkUINodeHandle node);
     void (*setTextInputCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextInputCompressLeadingPunctuation)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextInputCompressLeadingPunctuation)(ArkUINodeHandle node);

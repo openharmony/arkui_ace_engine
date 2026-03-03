@@ -1403,6 +1403,18 @@ export class ArkTextInputPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextInputAttribute_setShowCounter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOrphanCharOptimizationAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextInputAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum InputType {
     Normal = 0,
@@ -1740,6 +1752,9 @@ export interface TextInputAttribute extends CommonMethod {
     }
     showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
         throw new Error('Unimplemented method showCounter')
+    }
+    orphanCharOptimization(value: boolean | undefined): this {
+        throw new Error('Unimplemented method orphanCharOptimization')
     }
     attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -2177,6 +2192,11 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
         const value_casted = value as (boolean | undefined)
         const options_casted = options as (InputCounterOptions | undefined)
         this.getPeer()?.setShowCounterAttribute(value_casted, options_casted)
+        return this
+    }
+    public orphanCharOptimization(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<TextInputAttribute> | AttributeModifier<CommonMethod> | undefined): this {

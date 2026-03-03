@@ -1203,6 +1203,14 @@ void SetShowCounterImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetCounterTextColor(frameNode, counterOptions->counterTextColor);
     TextFieldModelStatic::SetCounterTextOverflowColor(frameNode, counterOptions->counterTextOverflowColor);
 }
+void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextFieldModelStatic::SetOrphanCharOptimization(frameNode, convValue);
+}
 } // TextInputAttributeModifier
 const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
 {
@@ -1293,6 +1301,7 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SetInputFilterImpl,
         TextInputAttributeModifier::SetCustomKeyboardImpl,
         TextInputAttributeModifier::SetShowCounterImpl,
+        TextInputAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUITextInputModifierImpl;
 }

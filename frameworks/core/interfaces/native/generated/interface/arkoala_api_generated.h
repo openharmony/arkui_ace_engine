@@ -26512,6 +26512,8 @@ typedef struct GENERATED_ArkUITextModifier {
                                  const Opt_CustomNodeBuilder* content,
                                  const Opt_TextResponseType* responseType,
                                  const Opt_SelectionMenuOptions* options);
+    void (*setOrphanCharOptimization)(Ark_NativePointer node,
+                                      const Opt_Boolean* value);
 } GENERATED_ArkUITextModifier;
 
 typedef struct GENERATED_ArkUITextAreaModifier {
@@ -26672,6 +26674,8 @@ typedef struct GENERATED_ArkUITextAreaModifier {
     void (*setLineSpacing)(Ark_NativePointer node,
                            const Opt_LengthMetrics* value,
                            const Opt_LineSpacingOptions* options);
+    void (*setOrphanCharOptimization)(Ark_NativePointer node,
+                                      const Opt_Boolean* value);
 } GENERATED_ArkUITextAreaModifier;
 
 typedef struct GENERATED_ArkUITextClockModifier {
@@ -26877,6 +26881,8 @@ typedef struct GENERATED_ArkUITextInputModifier {
     void (*setShowCounter)(Ark_NativePointer node,
                            const Opt_Boolean* value,
                            const Opt_InputCounterOptions* options);
+    void (*setOrphanCharOptimization)(Ark_NativePointer node,
+                                      const Opt_Boolean* value);
 } GENERATED_ArkUITextInputModifier;
 
 typedef struct GENERATED_ArkUITextPickerModifier {

@@ -988,6 +988,23 @@ class TextOnMarqueeStateChangeModifier extends ModifierWithKey<(state: MarqueeSt
   }
 }
 
+class TextOrphanCharOptimizationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOrphanCharOptimization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().text.setOrphanCharOptimization(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1380,6 +1397,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   onMarqueeStateChange(callback: (state: MarqueeState) => void): this {
     modifierWithKey(
       this._modifiersWithKeys, TextOnMarqueeStateChangeModifier.identity, TextOnMarqueeStateChangeModifier, callback);
+    return this;
+  }
+  orphanCharOptimization(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextOrphanCharOptimizationModifier.identity,
+      TextOrphanCharOptimizationModifier, value);
     return this;
   }
   enableAutoSpacing(value: boolean): this {

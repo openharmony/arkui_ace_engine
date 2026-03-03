@@ -15995,6 +15995,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOrphanCharOptimization(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetFontImpl(Ark_NativePointer node,
                      const Opt_arkui_component_units_Font* fontValue,
                      const Opt_FontSettingOptions* options)
@@ -16836,6 +16848,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setTextDirection(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOrphanCharOptimization(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -18036,6 +18060,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, value);
         out.append(", ");
         WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOrphanCharOptimizationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOrphanCharOptimization(");
+        WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -23067,6 +23102,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetLineSpacingImpl,
             TextAttributeModifier::SetSelectionImpl,
             TextAttributeModifier::SetBindSelectionMenuImpl,
+            TextAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUITextModifierImpl;
     }
@@ -23150,6 +23186,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAreaAttributeModifier::SetMaxLinesImpl,
             TextAreaAttributeModifier::SetCustomKeyboardImpl,
             TextAreaAttributeModifier::SetLineSpacingImpl,
+            TextAreaAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUITextAreaModifierImpl;
     }
@@ -23262,6 +23299,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetInputFilterImpl,
             TextInputAttributeModifier::SetCustomKeyboardImpl,
             TextInputAttributeModifier::SetShowCounterImpl,
+            TextInputAttributeModifier::SetOrphanCharOptimizationImpl,
         };
         return &ArkUITextInputModifierImpl;
     }

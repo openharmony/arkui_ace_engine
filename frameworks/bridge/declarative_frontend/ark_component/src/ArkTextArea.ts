@@ -1508,6 +1508,23 @@ class TextAreaEnableAutoSpacingModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextAreaOrphanCharOptimizationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaOrphanCharOptimization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().textArea.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1995,6 +2012,11 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   enableAutoSpacing(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoSpacingModifier.identity, TextAreaEnableAutoSpacingModifier, value);
+    return this;
+  }
+  orphanCharOptimization(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOrphanCharOptimizationModifier.identity,
+      TextAreaOrphanCharOptimizationModifier, value);
     return this;
   }
   includeFontPadding(value: boolean): this {

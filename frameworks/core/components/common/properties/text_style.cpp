@@ -83,6 +83,7 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            propWordSpacing_.value == rhs.propWordSpacing_.value && propEllipsisMode_ == rhs.propEllipsisMode_ &&
            propLineBreakStrategy_ == rhs.propLineBreakStrategy_ &&
            propTextBackgroundStyle_ == rhs.propTextBackgroundStyle_ &&
+           propOrphanCharOptimization_ == rhs.propOrphanCharOptimization_ &&
            propCompressLeadingPunctuation_ == rhs.propCompressLeadingPunctuation_ &&
            propIncludeFontPadding_ == rhs.propIncludeFontPadding_ &&
            propFallbackLineSpacing_ == rhs.propFallbackLineSpacing_ &&
