@@ -16,17 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UEC_UI_EXTENSION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UEC_UI_EXTENSION_PATTERN_H
 
-#include <cstdint>
-#include <functional>
 #include <list>
 #include <memory>
-#include <optional>
-#include <vector>
 
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
@@ -37,7 +32,6 @@
 #include "core/event/crown_event.h"
 #endif
 #include "core/event/mouse_event.h"
-#include "core/event/touch_event.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
 
 #define UIEXT_LOGD(fmt, ...)                                                                                      \
