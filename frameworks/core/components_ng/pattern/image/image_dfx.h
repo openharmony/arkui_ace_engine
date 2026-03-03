@@ -156,6 +156,7 @@ struct RenderedImageInfo {
     AllocatorType allocatorType = AllocatorType::DEFAULT;
     std::string pixelMapId;
     std::string srcInfo;
+    std::string dstRectInfo;
 
     std::string ToString() const
     {
@@ -185,6 +186,8 @@ struct RenderedImageInfo {
             .append(std::to_string(static_cast<int>(allocatorType)))
             .append(", Pixel Map ID: ")
             .append(pixelMapId)
+            .append(", Dst Rect: ")
+            .append(dstRectInfo)
             .append(" }");
         return result;
     }

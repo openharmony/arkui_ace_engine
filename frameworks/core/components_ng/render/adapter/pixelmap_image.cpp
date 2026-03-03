@@ -231,7 +231,7 @@ bool PixelMapImage::StretchImageWithLattice(
     }
     recordingCanvas.AttachBrush(brush);
     auto dfxConfig = GetImageDfxConfig();
-    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
+    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap, dstRect);
     recordingCanvas.DrawImageLattice(rsImage.get(), *lattice, dstRect, filterMode);
     recordingCanvas.DetachBrush();
     return true;
@@ -277,7 +277,7 @@ bool PixelMapImage::StretchImageWithSlice(
     CHECK_NULL_RETURN(rsImage, false);
     recordingCanvas.AttachBrush(brush);
     auto dfxConfig = GetImageDfxConfig();
-    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
+    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap, dstRect);
     recordingCanvas.DrawImageNine(rsImage.get(), rsCenterRect, dstRect, filterMode, &brush);
     recordingCanvas.DetachBrush();
     return true;
@@ -286,6 +286,14 @@ bool PixelMapImage::StretchImageWithSlice(
 bool PixelMapImage::CheckIfNeedForStretching(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
+    // Check if dstRect is valid (width and height must be positive)
+    if (LessOrEqual(dstRect.GetWidth(), 0.0f) || LessOrEqual(dstRect.GetHeight(), 0.0f)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "CheckIfNeedForStretching: dstRect is invalid (size <= 0.0f), dstRect=%{public}s",
+            dstRect.ToString().c_str());
+        return false;
+    }
+
     const auto& config = GetPaintConfig();
 
     if (config.frameCount_ == 1 && config.resizableLattice_ &&
@@ -299,10 +307,10 @@ bool PixelMapImage::CheckIfNeedForStretching(
     return false;
 }
 
-void PixelMapImage::NotifyDrawCompletion(const std::string& srcInfo, const RefPtr<PixelMap>& pixmap)
+void PixelMapImage::NotifyDrawCompletion(
+    const std::string& srcInfo, const RefPtr<PixelMap>& pixmap, const RSRect& dstRect)
 {
-    FireDrawCompleteCallback(RenderedImageInfo{
-        .renderSuccess = true,
+    FireDrawCompleteCallback(RenderedImageInfo { .renderSuccess = true,
         .width = pixmap->GetWidth(),
         .height = pixmap->GetHeight(),
         .rowStride = pixmap->GetRowStride(),
@@ -313,8 +321,8 @@ void PixelMapImage::NotifyDrawCompletion(const std::string& srcInfo, const RefPt
         .pixelFormat = pixmap->GetPixelFormat(),
         .allocatorType = pixmap->GetAllocatorType(),
         .pixelMapId = pixmap->GetId(),
-        .srcInfo = srcInfo
-    });
+        .srcInfo = srcInfo,
+        .dstRectInfo = dstRect.ToString() });
 }
 
 void PixelMapImage::DrawToRSCanvas(
@@ -360,7 +368,7 @@ void PixelMapImage::DrawToRSCanvas(
             GetDynamicModeString(config.dynamicMode).c_str());
         pixmap->SavePixelMapToFile(dfxConfig.ToStringWithoutSrc() + "_ToRS_");
     }
-    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
+    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap, dstRect);
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 }
