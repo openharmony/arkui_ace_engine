@@ -130,11 +130,30 @@ void SetCheckboxHeight(ArkUINodeHandle node, float value, int unit)
     CheckBoxModelNG::SetHeight(frameNode, height);
 }
 
-void SetMark(ArkUINodeHandle node, uint32_t color, float sizeValue, int sizeUnit, float widthValue, int widthUnit)
+void SetMarkColor(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxModelNG::SetCheckMarkColor(frameNode, Color(color));
+    Color result = Color(color);
+    CheckBoxModelNG::SetCheckMarkColor(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = GetFrameNode(node);
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result,
+                ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::STROKE_COLOR, resObj);
+    }
+}
+
+void SetMark(ArkUINodeHandle node, float sizeValue, int sizeUnit, float widthValue, int widthUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
 
     Dimension size = Dimension(static_cast<double>(sizeValue), static_cast<OHOS::Ace::DimensionUnit>(sizeUnit));
     CheckBoxModelNG::SetCheckMarkSize(frameNode, size);
@@ -419,11 +438,24 @@ void ResetCheckboxMarkColor(ArkUINodeHandle node)
     CheckBoxModelNG::ResetCheckMarkColor(frameNode);
 }
 
-void SetCheckboxMarkColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetCheckboxMarkColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxModelNG::SetCheckMarkColor(frameNode, Color(color));
+    Color result = Color(color);
+    CheckBoxModelNG::SetCheckMarkColor(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = GetFrameNode(node);
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result,
+                ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::STROKE_COLOR, resObj);
+    }
 }
 
 void SetCheckboxCheckMarkSize(ArkUINodeHandle node, ArkUI_Float32 sizeValue, ArkUI_Int32 sizeUnit)
@@ -657,6 +689,7 @@ const ArkUICheckboxModifier* GetCheckboxDynamicModifier()
             .setCheckboxWidth = nullptr,
             .setCheckboxHeight = nullptr,
             .setMark = nullptr,
+            .setMarkColor = nullptr,
             .setCheckboxPadding = nullptr,
             .setCheckboxResponseRegion = SetCheckboxResponseRegionImpl,
             .setCheckboxOnChange = SetCheckboxOnChangeImpl,
@@ -706,6 +739,7 @@ const ArkUICheckboxModifier* GetCheckboxDynamicModifier()
         .setCheckboxWidth = SetCheckboxWidth,
         .setCheckboxHeight = SetCheckboxHeight,
         .setMark = SetMark,
+        .setMarkColor = SetMarkColor,
         .setCheckboxPadding = SetCheckboxPadding,
         .setCheckboxResponseRegion = SetCheckboxResponseRegion,
         .setCheckboxOnChange = SetCheckboxOnChange,
@@ -757,6 +791,7 @@ const CJUICheckboxModifier* GetCJUICheckboxModifier()
         .setCheckboxWidth = SetCheckboxWidth,
         .setCheckboxHeight = SetCheckboxHeight,
         .setMark = SetMark,
+        .setMarkColor = SetMarkColor,
         .setCheckboxPadding = SetCheckboxPadding,
         .setCheckboxResponseRegion = SetCheckboxResponseRegion,
         .resetSelect = ResetSelect,
