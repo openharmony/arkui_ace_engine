@@ -672,6 +672,10 @@ OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper
     auto pattern = host->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, contentOffset);
     IF_TRUE(!richTextRect_.has_value(), richTextRect_ = std::make_optional<RectF>());
+    auto textRect = pattern->GetTextRect();
+    bool isTextRectValid = (textRect != RectF(0, 0, 0, 0));
+    // For the first frame, the component's content area is used directly as the layout content area.
+    CHECK_NULL_RETURN(isTextRectValid, contentOffset);
     auto offsetX = isSingleLineMode_ ? pattern->GetTextRect().GetX() : contentOffset.GetX();
     auto offsetY = pattern->GetTextRect().GetY();
     richTextRect_->SetOffset({ offsetX, offsetY });
