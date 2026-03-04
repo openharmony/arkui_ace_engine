@@ -860,11 +860,11 @@ void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 
 bool PipelineContext::IsDisplayInForceSplitMode() const
 {
-    CHECK_NULL_VOID(forceSplitMgr_, isCurrentInForceSplitMode_);
+    CHECK_NULL_RETURN(forceSplitMgr_, isCurrentInForceSplitMode_);
     if (!forceSplitMgr_->IsRouterForceSplit()) {
         return isCurrentInForceSplitMode_;
     }
-    CHECK_NULL_VOID(stageManager_, isCurrentInForceSplitMode_);
+    CHECK_NULL_RETURN(stageManager_, isCurrentInForceSplitMode_);
     return stageManager->IsDisplaySplitMode();
 }
 
