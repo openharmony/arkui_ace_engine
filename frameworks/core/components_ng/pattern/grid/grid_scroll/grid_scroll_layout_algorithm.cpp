@@ -1679,7 +1679,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         info_.endIndex_ = currentIndex;
         currentIndex++;
         doneFillLine = true;
-        if (!reverse && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if (HaveToMeasureInNextFrame(reverse, layoutWrapper)) {
             measureInNextFrame_ = true;
             break;
         }
@@ -2650,5 +2650,10 @@ float GridScrollLayoutAlgorithm::GetContentHeight(LayoutWrapper* layoutWrapper)
         return info_.GetContentHeight(options.value(), info_.childrenCount_, mainGap_);
     }
     return info_.GetContentHeight(mainGap_);
+}
+
+bool GridScrollLayoutAlgorithm::HaveToMeasureInNextFrame(bool reverse, LayoutWrapper* layoutWrapper) const
+{
+    return !reverse && !syncLoad_ && layoutWrapper->ReachResponseDeadline() && info_.endIndex_ >= moveToEndLineIndex_;
 }
 } // namespace OHOS::Ace::NG
