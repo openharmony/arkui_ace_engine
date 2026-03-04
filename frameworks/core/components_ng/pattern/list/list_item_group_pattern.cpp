@@ -103,6 +103,10 @@ void ListItemGroupPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("laneGutter:" + std::to_string(laneGutter_));
     DumpLog::GetInstance().AddDesc("startHeaderPos:" + std::to_string(startHeaderPos_));
     DumpLog::GetInstance().AddDesc("endFooterPos:" + std::to_string(endFooterPos_));
+    auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->DumpInfo();
+    }
 }
 
 RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
@@ -870,6 +874,11 @@ void ListItemGroupPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("laneGutter", laneGutter_);
     json->Put("startHeaderPos", startHeaderPos_);
     json->Put("endFooterPos", endFooterPos_);
+    auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty) {
+        layoutProperty->DumpInfo(json);
+    }
 }
 
 ScopeFocusAlgorithm ListItemGroupPattern::GetScopeFocusAlgorithm()
