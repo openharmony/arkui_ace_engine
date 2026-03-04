@@ -49,6 +49,7 @@ constexpr Dimension SCROLL_MIN_HEIGHT_SUITOLD = 100.0_vp;
 constexpr int32_t TEXT_ALIGN_CONTENT_CENTER = 1;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
 constexpr int32_t ROW_CHILD_INDEX = 0;
+constexpr int32_t ONE_PX = 1;
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -65,6 +66,11 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(dialogProp);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
+    auto navigationManager = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    auto existForceSplitNav = navigationManager->GetExistForceSplitNav();
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    CHECK_NULL_VOID(forceSplitMgr);
     NG::RectF floatButtons;
     dialogPattern->GetWindowButtonRect(floatButtons);
     floatButtonsHeight_ = floatButtons.Height();
@@ -83,7 +89,9 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isModal_ && !isShowInSubWindow_;
     auto enableHoverMode = dialogProp->GetEnableHoverMode().value_or(false);
     hoverModeArea_ = dialogProp->GetHoverModeArea().value_or(HoverModeAreaType::BOTTOM_SCREEN);
-    needAdaptForceSplitMode_ = pipeline->IsCurrentInForceSplitMode() && !IsEmbeddedDialog(hostNode);
+    needAdaptForceSplitMode_ = pipeline->IsCurrentInForceSplitMode() && !IsEmbeddedDialog(hostNode) &&
+                                (forceSplitMgr->IsForceSplitSupported(true) ||
+                                (forceSplitMgr->IsForceSplitSupported(false) && existForceSplitNav.first));
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
@@ -142,6 +150,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (needAdaptForceSplitMode_) {
         childLayoutConstraint.percentReference.SetWidth(childLayoutConstraint.percentReference.Width() / HALF);
         childLayoutConstraint.maxSize.SetWidth(childLayoutConstraint.maxSize.Width() / HALF);
+        childLayoutConstraint.minSize.SetWidth(ONE_PX);
+        childLayoutConstraint.minSize.SetHeight(ONE_PX);
     }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     CHECK_NULL_VOID(!children.empty());
