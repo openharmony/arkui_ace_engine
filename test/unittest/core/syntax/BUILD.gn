@@ -85,11 +85,15 @@ ace_unittest("syntax_arkoala_test_ng") {
   module_name = "RenderControl-Sta"
   type = "new"
   sources = [
+    "arkoala_condition_scope_test_ng_ai.cpp",
     "arkoala_for_each_test_ng.cpp",
+    "arkoala_for_each_test_ng_ai.cpp",
     "arkoala_if_else_test_ng.cpp",
     "arkoala_lazy_test_ng.cpp",
+    "arkoala_lazy_test_ng_ai.cpp",
     "arkoala_lazy_two_test_ng.cpp",
     "arkoala_lazy_test_ng_advanced.cpp",
+    "arkoala_mixed_test_ng_ai.cpp",
   ]
 }
 
