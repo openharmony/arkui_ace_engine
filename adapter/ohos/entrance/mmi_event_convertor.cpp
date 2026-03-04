@@ -990,8 +990,8 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         TAG_LOGD(AceLogTag::ACE_DRAG, "Transmits the authentication information.");
         event.signature = pointerEvent->GetSignature();
         event.dragEventData = { .timestampMs = pointerEvent->GetDistributeEventTime(),
-            .coordinateX = pointerItem.GetDisplayXPos(),
-            .coordinateY = pointerItem.GetDisplayYPos() };
+            .coordinateX = pointerItem.GetGlobalX(),
+            .coordinateY = pointerItem.GetGlobalY() };
     }
 }
 
