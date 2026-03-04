@@ -19,6 +19,7 @@ ace_unittest("lazy_for_each_syntax_test_ng") {
   sources = [
     "lazy_for_each_syntax_test_ng.cpp",
     "lazy_for_each_syntax_test_ng_2.cpp",
+    "lazy_for_each_test_ng_ai.cpp",
   ]
 }
 
@@ -35,7 +36,10 @@ ace_unittest("lazy_for_each_builder_syntax_test_ng") {
 ace_unittest("for_each_syntax_test_ng") {
   module_name = "RenderControl-ForEach"
   type = "new"
-  sources = [ "for_each_syntax_test_ng.cpp" ]
+  sources = [
+    "for_each_syntax_test_ng.cpp",
+    "for_each_test_ng_ai.cpp",
+  ]
 }
 
 ace_unittest("if_else_syntax_test_ng") {
