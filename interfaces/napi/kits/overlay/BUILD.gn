@@ -26,7 +26,7 @@ template("napi_overlay_static") {
 
     sources = [ "js_overlay.cpp" ]
 
-    deps = []
+    deps = [ "$ace_root/frameworks/core:ace_container_scope" ]
     external_deps = []
     if (platform != "" && is_arkui_x) {
       deps += [ "${crossplatform_plugin_root}/libs/napi:napi_$platform" ]
