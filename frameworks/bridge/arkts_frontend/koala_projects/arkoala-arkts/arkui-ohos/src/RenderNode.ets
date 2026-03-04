@@ -323,6 +323,9 @@ export class RenderNode implements MaterializedBase {
         const retval  = RenderNodeExtender.constructorRenderNode(id)
         return retval
     }
+    constructor() {
+        this(undefined);
+    }
     constructor(type?: string) {
         this.type = type;
         if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {

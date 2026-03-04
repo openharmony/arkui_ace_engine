@@ -251,6 +251,9 @@ export class FrameNode implements MaterializedBase {
         }
         return this._gestureEvent as UIGestureEvent;
     }
+    constructor(uiContext: UIContext, options?: FrameNodeOptions) {
+        this(uiContext, options, undefined, undefined);
+    }
     constructor(uiContext?: UIContext, options?: FrameNodeOptions, type?: string, ptr?: KPointer) {
         if ((uiContext) !== (undefined)) {
             this.uiContext = uiContext as UIContextImpl;
