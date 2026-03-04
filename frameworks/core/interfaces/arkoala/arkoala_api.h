@@ -2260,9 +2260,9 @@ struct ArkVelocityFieldOptions {
 };
 
 struct ArkUICheckboxSettingData {
-    ArkUIOptionalInt selectColor;
-    ArkUIOptionalInt unselectedColor;
-    ArkUIOptionalInt strokeColor;
+    ArkUIOptionalUint selectColor;
+    ArkUIOptionalUint unselectedColor;
+    ArkUIOptionalUint strokeColor;
 };
 
 typedef struct {
