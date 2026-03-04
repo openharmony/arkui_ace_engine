@@ -1324,15 +1324,12 @@ export class ArkUIGeneratedNativeModule {
     native static _NavDestinationAttribute_setPreferredOrientation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavDestinationAttribute_setEnableNavigationIndicator(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
     native static _NavDestinationAttribute_setTitle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavDestinationAttribute_setHideTitleBar1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavDestinationAttribute_setBackButtonIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
     native static _NavDestinationAttribute_setMenus(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
     native static _NavDestinationAttribute_setToolbarConfiguration(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavDestinationAttribute_setHideToolBar(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -1390,13 +1387,10 @@ export class ArkUIGeneratedNativeModule {
     native static _NavigationAttribute_setEnableVisibilityLifecycleWithContentCover(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setBackButtonIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
     native static _NavigationAttribute_setTitle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setHideTitleBar1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
     native static _NavigationAttribute_setMenus(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
     native static _NavigationAttribute_setToolbarConfiguration(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setHideToolBar1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -6009,10 +6003,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _RouterExtender_getParams(): KInteropReturnBuffer
     native static _RouterExtender_pushNamedRoute0(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
     native static _RouterExtender_pushNamedRoute1(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     native static _RouterExtender_replaceNamedRoute0(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
     native static _RouterExtender_replaceNamedRoute1(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _RouterExtender_createDynamic(thisArray: KSerializerBuffer, thisLength: KInt): KPointer

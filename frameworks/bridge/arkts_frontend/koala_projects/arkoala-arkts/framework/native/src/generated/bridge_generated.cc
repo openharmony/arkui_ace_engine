@@ -11084,7 +11084,7 @@ void impl_NavDestinationAttribute_setTitle(Ark_NativePointer thisPtr, KSerialize
         Opt_NavigationTitleOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavDestinationModifier()->setTitle(self, static_cast<Opt_Union_String_CustomNodeBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource*>(&valueValueTemp), static_cast<Opt_NavigationTitleOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavDestinationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavDestinationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavDestinationAttribute_setHideTitleBar1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11202,7 +11202,7 @@ void impl_NavDestinationAttribute_setMenus(Ark_NativePointer thisPtr, KSerialize
         Opt_NavigationMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavDestinationModifier()->setMenus(self, static_cast<Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder*>(&itemsValueTemp), static_cast<Opt_NavigationMenuOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavDestinationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavDestinationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavDestinationAttribute_setToolbarConfiguration(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11241,7 +11241,7 @@ void impl_NavDestinationAttribute_setToolbarConfiguration(Ark_NativePointer this
         Opt_NavigationToolbarOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavDestinationModifier()->setToolbarConfiguration(self, static_cast<Opt_Union_Array_ToolbarItem_CustomNodeBuilder*>(&toolbarParamValueTemp), static_cast<Opt_NavigationToolbarOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavDestinationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavDestinationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavDestinationAttribute_setHideToolBar(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11814,7 +11814,7 @@ void impl_NavigationAttribute_setTitle(Ark_NativePointer thisPtr, KSerializerBuf
         Opt_NavigationTitleOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavigationModifier()->setTitle(self, static_cast<Opt_Union_ResourceStr_CustomNodeBuilder_NavigationCommonTitle_NavigationCustomTitle*>(&valueValueTemp), static_cast<Opt_NavigationTitleOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavigationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setHideTitleBar1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11873,7 +11873,7 @@ void impl_NavigationAttribute_setMenus(Ark_NativePointer thisPtr, KSerializerBuf
         Opt_NavigationMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavigationModifier()->setMenus(self, static_cast<Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder*>(&itemsValueTemp), static_cast<Opt_NavigationMenuOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavigationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setToolbarConfiguration(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11912,7 +11912,7 @@ void impl_NavigationAttribute_setToolbarConfiguration(Ark_NativePointer thisPtr,
         Opt_NavigationToolbarOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavigationModifier()->setToolbarConfiguration(self, static_cast<Opt_Union_Array_ToolbarItem_CustomNodeBuilder*>(&valueValueTemp), static_cast<Opt_NavigationToolbarOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavigationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setHideToolBar1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -39657,7 +39657,7 @@ void impl_RouterExtender_pushNamedRoute1(Ark_NativePointer jsView, KSerializerBu
         Opt_Router_BusinessError_Void callback_ValueTemp = callback_ValueTempTmpBuf;;
         GetAccessors()->getRouterExtenderAccessor()->pushNamedRoute1(jsView, static_cast<Ark_PageRouterOptions*>(&optionsValueTemp), static_cast<Opt_RouterFinishCallback*>(&finishCallbackValueTemp), static_cast<Opt_Router_BusinessError_Void*>(&callback_ValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(RouterExtender_pushNamedRoute1, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(RouterExtender_pushNamedRoute1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RouterExtender_replaceNamedRoute0(KVMContext vmContext, Ark_NativePointer jsView, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_PageRouterOptions optionsValueTemp = PageRouterOptions_serializer::read(thisDeserializer);;
@@ -39691,7 +39691,7 @@ void impl_RouterExtender_replaceNamedRoute1(Ark_NativePointer jsView, KSerialize
         Opt_Router_BusinessError_Void callback_ValueTemp = callback_ValueTempTmpBuf;;
         GetAccessors()->getRouterExtenderAccessor()->replaceNamedRoute1(jsView, static_cast<Ark_PageRouterOptions*>(&optionsValueTemp), static_cast<Opt_RouterFinishCallback*>(&finishCallbackValueTemp), static_cast<Opt_Router_BusinessError_Void*>(&callback_ValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(RouterExtender_replaceNamedRoute1, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(RouterExtender_replaceNamedRoute1, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_RouterExtender_createDynamic(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_RouterOptionsInner optionsValueTemp = RouterOptionsInner_serializer::read(thisDeserializer);;
