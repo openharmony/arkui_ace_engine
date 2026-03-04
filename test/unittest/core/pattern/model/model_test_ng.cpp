@@ -61,6 +61,11 @@ class TestSceneAdapter : public Render3D::ISceneAdapter {
     {
         return std::make_shared<Render3D::TextureLayer>(key_++);
     }
+
+    void OnWindowChange(float renderWidth, float renderHeight) override
+    {
+        return;
+    }
     void OnWindowChange(const Render3D::WindowChangeInfo& windowChangeInfo)
     {
         return;
