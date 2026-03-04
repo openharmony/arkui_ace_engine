@@ -903,8 +903,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             return;
         }
     }
+
+    GestureEvent info = GetGestureEventInfo();
     if (callback && *callback && IsEnabled() && (!gestureInfo_ || !gestureInfo_->GetDisposeTag())) {
-        GestureEvent info = GetGestureEventInfo();
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         HandleCallbackReports(info, type, PanGestureState::BEFORE);
@@ -912,6 +913,8 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         callbackFunction(info);
         HandleCallbackReports(info, type, PanGestureState::AFTER);
     }
+    HandleReports(info, type);
+
     if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
         localMatrix_.clear();
     }
@@ -922,8 +925,6 @@ void PanRecognizer::HandleCallbackReports(
 {
     if (panGestureState == PanGestureState::BEFORE) {
         HandleGestureAccept(info, type, GestureListenerType::PAN);
-    } else if (panGestureState == PanGestureState::AFTER) {
-        HandleReports(info, type);
     }
     HandlePanGestureAccept(info, panGestureState, type);
 }
