@@ -1239,6 +1239,9 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest010, Tes
     ASSERT_NE(property, nullptr);
     property->UpdateHasCustomPermissionForSecComp(true);
     SaveButtonModelNG sc;
+    sc.SetText("");
+    EXPECT_EQ(property->GetTextContent().value_or(""), "");
+
     sc.SetText(CUSTOMIZE_TEXT);
 
     EXPECT_EQ(property->GetTextContent().value_or(""), CUSTOMIZE_TEXT);
