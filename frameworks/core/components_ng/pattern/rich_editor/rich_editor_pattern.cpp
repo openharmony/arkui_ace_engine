@@ -11407,6 +11407,10 @@ bool RichEditorPattern::SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanIt
         MountImageNode(imageSpan);
     }
     spanItemList = RichEditorLayoutAlgorithm::ConstructParagraphSpans(spans, isSingleLineMode_);
+    if (!isShowPlaceholder_) {
+        // On initial placeholder display, reset richTextRect offset with contentRect.
+        richTextRect_.SetOffset(contentRect_.GetOffset());
+    }
     isShowPlaceholder_ = true;
     return true;
 }
