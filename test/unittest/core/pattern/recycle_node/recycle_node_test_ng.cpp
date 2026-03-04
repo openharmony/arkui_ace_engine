@@ -75,4 +75,39 @@ HWTEST_F(RecycleNodeTestNG, RecycleNodeTestNG001, TestSize.Level1)
     EXPECT_EQ(customNode2, nullptr);
     recycleNode2.Reset();
 }
+
+/**
+ * @tc.name: RecycleNodeTestNg002
+ * @tc.desc: destructor RecycleNode with custom node that has children
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(RecycleNodeTestNG, RecycleNodeTestNG002, TestSize.Level1)
+{
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    int32_t childNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    int32_t grandChildNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    
+    /**
+     * @tc.steps: step1. Create RecycleNode with custom node that has a child.
+     * @tc.expected: expect recycle custom node and detach from main tree.
+     */
+    auto recycleNode = RecycleDummyNode::CreateRecycleDummyNode(nodeId);
+    std::string childNodeName = "childNode";
+    auto childCustomNode = CustomNode::CreateCustomNode(childNodeId, childNodeName);
+    
+    std::string grandChildNodeName = "grandChildNode";
+    auto grandChildCustomNode = CustomNode::CreateCustomNode(grandChildNodeId, grandChildNodeName);
+    
+    childCustomNode->AddChild(grandChildCustomNode);
+    EXPECT_EQ(childCustomNode->TotalChildCount(), 1);
+    
+    auto mockRecycleFunc = [childCustomNode](RefPtr<CustomNodeBase> node) { EXPECT_EQ(childCustomNode, node); };
+    childCustomNode->SetRecycleFunction(std::move(mockRecycleFunc));
+    
+    recycleNode->AddChild(childCustomNode);
+    EXPECT_EQ(recycleNode->TotalChildCount(), 1);
+    
+    recycleNode.Reset();
+}
 } // namespace OHOS::Ace::NG
