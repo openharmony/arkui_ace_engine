@@ -261,4 +261,26 @@ HWTEST_F(GridSyncLoadTestNg, SyncLoad005, TestSize.Level1)
     EXPECT_EQ(pattern_->info_.startIndex_, targetIndex);
     EXPECT_EQ(pattern_->info_.endIndex_, targetIndex + 7);
 }
+
+/**
+ * @tc.name: ScrollToIndex(Auto)001
+ * @tc.desc: Test GridScrollLayoutAlgorithm::ScrollToIndexAuto When SyncLoad_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridSyncLoadTestNg, ScrollToIndexAuto001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetSyncLoad(false);
+    CreateGridItems(30);
+    CreateDone();
+    MockPipelineContext::GetCurrent()->SetResponseTime(1);
+    ScrollToIndex(20, false, ScrollAlign::AUTO);
+    MockPipelineContext::GetCurrent()->SetResponseTime(INT32_MAX);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 3);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 6);
+    EXPECT_EQ(pattern_->info_.startIndex_, 9);
+    EXPECT_EQ(pattern_->info_.endIndex_, 20);
+}
 } // namespace OHOS::Ace::NG
