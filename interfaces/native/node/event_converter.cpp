@@ -38,6 +38,7 @@ constexpr int32_t ORIGIN_MOUSE_ACTION_PRESS = 1;
 constexpr int32_t ORIGIN_MOUSE_ACTION_RELEASE = 2;
 constexpr int32_t ORIGIN_MOUSE_ACTION_MOVE = 3;
 constexpr int32_t ORIGIN_MOUSE_ACTION_CANCEL = 13;
+constexpr int32_t ORIGIN_MOUSE_BUTTON_NONE = 0;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_LEFT = 1;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_RIGHT = 2;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_MIDDLE = 4;
@@ -60,11 +61,9 @@ void ConvertToOriginEvent(const ArkUITouchEvent& origin, ArkUI_NodeTouchEvent& e
         case static_cast<int32_t>(TouchType::DOWN):
             event.action = NODE_ACTION_DOWN;
             break;
-        // TouchType::UP
         case static_cast<int32_t>(TouchType::UP):
             event.action = NODE_ACTION_UP;
             break;
-            // TouchType::MOVE
         case static_cast<int32_t>(TouchType::MOVE):
             event.action = NODE_ACTION_MOVE;
             break;
@@ -975,6 +974,51 @@ int32_t ConvertToCInputEventToolType(int32_t originSourceToolType)
     return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
 }
 
+int32_t ConvertToOriginInputEventToolType(int32_t toolType)
+{
+    switch (toolType) {
+        case UI_INPUT_EVENT_TOOL_TYPE_FINGER:
+            return static_cast<int32_t>(ORIGIN_INPUT_EVENT_TOOL_TYPE_FINGER);
+        case UI_INPUT_EVENT_TOOL_TYPE_PEN:
+            return static_cast<int32_t>(ORIGIN_INPUT_EVENT_TOOL_TYPE_PEN);
+        case UI_INPUT_EVENT_TOOL_TYPE_MOUSE:
+            return static_cast<int32_t>(ORIGIN_INPUT_EVENT_TOOL_TYPE_MOUSE);
+        case UI_INPUT_EVENT_TOOL_TYPE_TOUCHPAD:
+            return static_cast<int32_t>(ORIGIN_INPUT_EVENT_TOOL_TYPE_TOUCHPAD);
+        case UI_INPUT_EVENT_TOOL_TYPE_JOYSTICK:
+            return static_cast<int32_t>(ORIGIN_INPUT_EVENT_TOOL_TYPE_JOYSTICK);
+        default:
+            break;
+    }
+    return static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_UNKNOWN);
+}
+
+uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status)
+{
+    uint64_t modifierKeysState = 0;
+    // check ctrl
+    if ((std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_CTRL_LEFT) != std::end(status)) ||
+        (std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_CTRL_RIGHT) != std::end(status))) {
+        modifierKeysState |= ARKUI_MODIFIER_KEY_CTRL;
+    }
+    // check alt
+    if ((std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_ALT_LEFT) != std::end(status)) ||
+        (std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_ALT_RIGHT) != std::end(status))) {
+        modifierKeysState |= ARKUI_MODIFIER_KEY_ALT;
+    }
+    // check shift
+    if ((std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_SHIFT_LEFT) != std::end(status)) ||
+        (std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_SHIFT_RIGHT) != std::end(status))) {
+        modifierKeysState |= ARKUI_MODIFIER_KEY_SHIFT;
+    }
+    // check fn
+    if (std::find(status.begin(), status.end(), OHOS::Ace::KeyCode::KEY_FN) != std::end(status)) {
+        modifierKeysState |= ARKUI_MODIFIER_KEY_FN;
+    }
+
+    return modifierKeysState;
+}
+
 int32_t ConvertToCMouseActionType(int32_t originActionType)
 {
     switch (originActionType) {
@@ -1009,6 +1053,25 @@ int32_t ConvertToCMouseEventButtonType(int32_t originButtonType)
             break;
     }
     return static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_NONE);
+}
+
+int32_t ConvertToOriginMouseButtonType(int32_t buttonType)
+{
+    switch (buttonType) {
+        case UI_MOUSE_EVENT_BUTTON_LEFT:
+            return static_cast<int32_t>(ORIGIN_MOUSE_BUTTON_LEFT);
+        case UI_MOUSE_EVENT_BUTTON_RIGHT:
+            return static_cast<int32_t>(ORIGIN_MOUSE_BUTTON_RIGHT);
+        case UI_MOUSE_EVENT_BUTTON_MIDDLE:
+            return static_cast<int32_t>(ORIGIN_MOUSE_BUTTON_MIDDLE);
+        case UI_MOUSE_EVENT_BUTTON_BACK:
+            return static_cast<int32_t>(ORIGIN_MOUSE_BUTTON_BACK);
+        case UI_MOUSE_EVENT_BUTTON_FORWARD:
+            return static_cast<int32_t>(ORIGIN_MOUSE_BUTTON_FORWARD);
+        default:
+            break;
+    }
+    return static_cast<int32_t>(ORIGIN_MOUSE_BUTTON_NONE);
 }
 
 int32_t ConvertToCAxisActionType(int32_t originActionType)
