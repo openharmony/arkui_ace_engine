@@ -518,8 +518,11 @@ void CounterModelNG::CreateCounterModelNG()
     CHECK_NULL_VOID(pipeline);
     auto counterTheme = pipeline->GetTheme<CounterTheme>();
     CHECK_NULL_VOID(counterTheme);
-    counterNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(counterTheme->GetWidth()), CalcLength(counterTheme->GetHeight())));
+    if (!counterNode->GetLayoutProperty()->HasFixedWidth(false) &&
+        !counterNode->GetLayoutProperty()->HasFixedHeight(false)) {
+        counterNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(counterTheme->GetWidth()), CalcLength(counterTheme->GetHeight())));
+    }
     counterNode->GetRenderContext()->SetClipToFrame(true);
     counterNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
 
