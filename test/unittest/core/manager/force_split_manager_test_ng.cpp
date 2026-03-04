@@ -77,6 +77,7 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitMode001, TestSize.Level1)
     context->SetIsCurrentInForceSplitMode(false);
     manager->isForceSplitSupported_ = false;
     manager->UpdateIsInForceSplitMode();
+    //expect false
     EXPECT_FALSE(context->IsCurrentInForceSplitMode());
 }
 
