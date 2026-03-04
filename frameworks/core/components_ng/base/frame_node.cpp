@@ -6034,6 +6034,11 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
     UpdateBackground();
 
+    // update corner mark position on size change.
+    if (config.frameSizeChange && cornerMarkNode_) {
+        CornerMark::UpdateCornerMarkNodePosition(Claim(this));
+    }
+
     // update focus state
     UpdateFocusState();
 
