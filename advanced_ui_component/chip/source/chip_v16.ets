@@ -661,6 +661,12 @@ export struct ChipComponent {
           .accessibilityText(this.getCloseIconAccessibilityText())
           .accessibilityDescription(this.getCloseIconAccessibilityDescription())
           .accessibilityLevel(this.getCloseIconAccessibilityLevel())
+          .responseRegion({
+            x: $r('sys.float.chip_touch_hot_zone_x'),
+            y: $r('sys.float.chip_touch_hot_zone_y'),
+            width: $r('sys.float.chip_touch_hot_zone_width'),
+            height: $r('sys.float.chip_touch_hot_zone_height')
+          })
           .onClick(() => {
             if (!this.isChipEnabled()) {
               return;
