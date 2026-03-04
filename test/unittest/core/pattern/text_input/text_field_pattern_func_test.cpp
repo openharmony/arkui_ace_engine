@@ -326,6 +326,12 @@ HWTEST_F(TextFieldPatternFuncTest, KeyboardPatternFunc01, TestSize.Level1)
     std::unique_ptr<JsonValue> ret = jsonValue.GetChild();
     pattern->DumpInfo(ret);
     EXPECT_EQ(pattern->keyboardHeight_, 0.0f);
+
+    /**
+     *   trigger DumpSimplifyInfo
+     **/
+    std::shared_ptr<JsonValue> json = std::make_shared<JsonValue>();
+    pattern->DumpSimplifyInfo(json);
 }
 
 /**

@@ -9119,6 +9119,11 @@ void TextFieldPattern::DumpInfo()
     DumpAdvanceInfo();
 }
 
+void TextFieldPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    json->Put("content", IsInPasswordMode() ? "" : GetTextValue().c_str());
+}
+
 void TextFieldPattern::DumpFontInfo(const RefPtr<TextFieldLayoutProperty>& layoutProperty)
 {
     auto& dumpLog = DumpLog::GetInstance();
