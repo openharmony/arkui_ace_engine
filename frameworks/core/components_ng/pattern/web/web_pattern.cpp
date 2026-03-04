@@ -6398,12 +6398,27 @@ CursorStyleInfo WebPattern::GetAndUpdateCursorStyleInfo(
                 cursorType_ = type;
             }
             nweb_cursorInfo_.reset();
+            custom_cursorImg_.reset();
             if (type == OHOS::NWeb::CursorType::CT_CUSTOM) {
-                nweb_cursorInfo_ = info;
+                ProcessCustomCursor(info);
             }
             break;
     }
     return std::make_tuple(type, info);
+}
+
+void WebPattern::ProcessCustomCursor(std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
+{
+    if (!info) {
+        return;
+    }
+    nweb_cursorInfo_ = info;
+    uint64_t len = nweb_cursorInfo_->GetWidth() * nweb_cursorInfo_->GetHeight() * 4;
+    custom_cursorImg_ = std::make_unique<uint8_t[]>(len);
+    auto res = memcpy_s(custom_cursorImg_.get(), len, nweb_cursorInfo_->GetBuff(), len);
+    if (res != EOK) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "OnCursorChange memcpy_s failed errorcode is %{public}d", res);
+    }
 }
 
 void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type)
@@ -6444,7 +6459,7 @@ void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb
     if (info) {
         x = info->GetX();
         y = info->GetY();
-        buff = info->GetBuff();
+        buff = custom_cursorImg_.get();
         width = info->GetWidth();
         height = info->GetHeight();
     }
