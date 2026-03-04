@@ -131,7 +131,7 @@ export const defaultTheme: PopupTheme = {
     fontWeight: FontWeight.Medium,
     hoverColor: $r('sys.color.ohos_id_color_hover'),
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
-    responseRegion: 32
+    responseRegion: $r('sys.float.popup_button_response_region')
   },
   message: {
     fontSize: $r('sys.float.ohos_id_text_size_body2'),
@@ -167,7 +167,7 @@ export const defaultTheme: PopupTheme = {
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
     symbolSize: '18vp',
     accessibilityMessage: $r('sys.string.off_used_for_accessibility_text'),
-    responseRegion: 36
+    responseRegion: $r('sys.float.popup_close_button_response_region')
   },
 };
 
@@ -504,7 +504,7 @@ export struct PopupComponent {
   }
 
   private getBtnResponseRegion(actualWidth: number, actualHeight: number, minSizeVp: number): Rectangle | undefined {
-    if (actualWidth === 0 || actualHeight === 0) {
+    if (actualWidth === 0 || actualHeight === 0 || minSizeVp <= 0) {
       return undefined;
     }
 
@@ -529,12 +529,14 @@ export struct PopupComponent {
   }
 
   private getCloseBtnResponseRegion(): Rectangle | undefined {
+    let responseRegionValue = this.toVp(this.theme.closeButton.responseRegion);
     return this.getBtnResponseRegion(this.theme.closeButton.size.width as number,
-      this.theme.closeButton.size.height as number, this.theme.closeButton.responseRegion as number)
+      this.theme.closeButton.size.height as number, responseRegionValue)
   }
 
   private getNormalBtnResponseRegion(height: number): Rectangle | undefined {
-    return this.getBtnResponseRegion(-1, height, this.theme.button.responseRegion as number)
+    let responseRegionValue = this.toVp(this.theme.button.responseRegion);
+    return this.getBtnResponseRegion(-1, height, responseRegionValue)
   }
 
 
