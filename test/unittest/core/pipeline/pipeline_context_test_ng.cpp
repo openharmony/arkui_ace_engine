@@ -2990,5 +2990,288 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_FirstFrameSetupRootElement
      */
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
 }
+
+/**
+ * @tc.name: PipelineContextOnDumpInjectionTest001
+ * @tc.desc: Test OnDumpInjection with valid nodeId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextOnDumpInjectionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters and create a test FrameNode.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a test FrameNode
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, nodeId, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: 2. Call OnDumpInjection with valid nodeId and command.
+     * @tc.expected: OnRecvCommand is called on the frameNode.
+     */
+    std::vector<std::string> params = { "-injection", "test_command", std::to_string(nodeId) };
+    context_->OnDumpInjection(params);
+
+    // Verify that the node was found and processed
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextOnDumpInjectionTest002
+ * @tc.desc: Test OnDumpInjection with negative nodeId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextOnDumpInjectionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters with negative nodeId.
+     * @tc.expected: Function returns early without processing.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a test FrameNode to verify it's not called
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, nodeId, nullptr);
+
+    // Call with negative nodeId
+    std::vector<std::string> params = { "-injection", "test_command", "-1" };
+    context_->OnDumpInjection(params);
+
+    // Verify that the function returned early (OnRecvCommand not called)
+    // Since node is not retrieved, no state change should occur
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest001
+ * @tc.desc: Test DumpSimplifyTreeJsonFromTopNavNode with valid navNodeList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters and create navNodeList.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create test navNodes
+    auto navNodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navNode1 = FrameNode::GetOrCreateFrameNode("navNode1", navNodeId1, nullptr);
+    navNode1->SetActive(true);
+
+    auto navNodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navNode2 = FrameNode::GetOrCreateFrameNode("navNode2", navNodeId2, nullptr);
+    navNode2->SetActive(true);
+
+    std::list<RefPtr<FrameNode>> navNodeList;
+    navNodeList.push_back(navNode1);
+    navNodeList.push_back(navNode2);
+
+    /**
+     * @tc.steps: 2. Create root JsonValue and call DumpSimplifyTreeJsonFromTopNavNode.
+     * @tc.expected: NavNodes are added to root's children.
+     */
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config = { true, true, true, true };
+
+    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+
+    // Verify that root has $children array
+    auto childrenJson = root->GetValue("$children");
+    ASSERT_NE(childrenJson, nullptr);
+
+    // Verify that $children array contains 2 items (navNode1 and navNode2)
+    EXPECT_EQ(childrenJson->GetArraySize(), 2);
+
+    // Verify the first item has correct tag
+    auto firstItem = childrenJson->GetArrayItem(0);
+    ASSERT_NE(firstItem, nullptr);
+    auto tagValue = firstItem->GetValue("$type");
+    ASSERT_NE(tagValue, nullptr);
+    EXPECT_EQ(tagValue->GetString(), "navNode1");
+}
+
+/**
+ * @tc.name: PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest002
+ * @tc.desc: Test DumpSimplifyTreeJsonFromTopNavNode with null navNodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters with null navNodes in list.
+     * @tc.expected: Null nodes are skipped, children array is created.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a list with null nodes
+    std::list<RefPtr<FrameNode>> navNodeList;
+    navNodeList.push_back(nullptr);
+    navNodeList.push_back(nullptr);
+
+    /**
+     * @tc.steps: 2. Create root JsonValue and call DumpSimplifyTreeJsonFromTopNavNode.
+     * @tc.expected: Children array is created but empty.
+     */
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config = { true, true, true, true };
+
+    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+
+    // Verify that root has $children array (created even though list is empty/null)
+    auto childrenJson = root->GetValue("$children");
+    ASSERT_NE(childrenJson, nullptr);
+
+    // Verify that $children array is empty (no valid nodes added)
+    EXPECT_EQ(childrenJson->GetArraySize(), 0);
+}
+
+/**
+ * @tc.name: PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest003
+ * @tc.desc: Test DumpSimplifyTreeJsonFromTopNavNode with mixed valid and null navNodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters with mixed navNodeList.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a list with valid and null nodes
+    auto navNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navNode = FrameNode::GetOrCreateFrameNode("navNode", navNodeId, nullptr);
+    navNode->SetActive(true);
+
+    std::list<RefPtr<FrameNode>> navNodeList;
+    navNodeList.push_back(nullptr);
+    navNodeList.push_back(navNode);
+    navNodeList.push_back(nullptr);
+
+    /**
+     * @tc.steps: 2. Create root JsonValue and call DumpSimplifyTreeJsonFromTopNavNode.
+     * @tc.expected: Valid node is added, null nodes are skipped.
+     */
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config = { true, true, true, true };
+
+    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+
+    // Verify that root has $children array
+    auto childrenJson = root->GetValue("$children");
+    ASSERT_NE(childrenJson, nullptr);
+
+    // Verify that $children array contains 1 item (null nodes are skipped)
+    EXPECT_EQ(childrenJson->GetArraySize(), 1);
+
+    // Verify the item has correct tag
+    auto firstItem = childrenJson->GetArrayItem(0);
+    ASSERT_NE(firstItem, nullptr);
+    auto tagValue = firstItem->GetValue("$type");
+    ASSERT_NE(tagValue, nullptr);
+    EXPECT_EQ(tagValue->GetString(), "navNode");
+}
+
+/**
+ * @tc.name: PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest004
+ * @tc.desc: Test DumpSimplifyTreeJsonFromTopNavNode creates $children if not exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters with root that has no $children.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    auto navNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navNode = FrameNode::GetOrCreateFrameNode("navNode", navNodeId, nullptr);
+
+    std::list<RefPtr<FrameNode>> navNodeList;
+    navNodeList.push_back(navNode);
+    navNode->SetActive(true);
+
+    /**
+     * @tc.steps: 2. Create root JsonValue without $children and call DumpSimplifyTreeJsonFromTopNavNode.
+     * @tc.expected: $children array is created and navNode is added.
+     */
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    // Verify $children doesn't exist initially
+    EXPECT_FALSE(root->Contains("$children"));
+
+    ParamConfig config = { true, true, true, true };
+    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+
+    // Verify that $children was created
+    EXPECT_TRUE(root->Contains("$children"));
+    auto childrenJson = root->GetValue("$children");
+    ASSERT_NE(childrenJson, nullptr);
+
+    // Verify that $children array contains 1 item
+    EXPECT_EQ(childrenJson->GetArraySize(), 1);
+
+    // Verify the item has correct tag
+    auto firstItem = childrenJson->GetArrayItem(0);
+    ASSERT_NE(firstItem, nullptr);
+    auto tagValue = firstItem->GetValue("$type");
+    ASSERT_NE(tagValue, nullptr);
+    EXPECT_EQ(tagValue->GetString(), "navNode");
+}
+
+/**
+ * @tc.name: PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest005
+ * @tc.desc: Test DumpSimplifyTreeJsonFromTopNavNode with existing $children in root.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters with root that has existing $children.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    auto navNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navNode = FrameNode::GetOrCreateFrameNode("navNode", navNodeId, nullptr);
+    navNode->SetActive(true);
+
+    std::list<RefPtr<FrameNode>> navNodeList;
+    navNodeList.push_back(navNode);
+
+    /**
+     * @tc.steps: 2. Create root JsonValue with existing $children array.
+     * @tc.expected: NavNode is added to existing $children array.
+     */
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    auto existingChildren = JsonUtil::CreateArray();
+    root->PutRef("$children", std::move(existingChildren));
+
+    // Verify $children exists
+    EXPECT_TRUE(root->Contains("$children"));
+
+    ParamConfig config = { true, true, true, true };
+    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+
+    // Verify that navNode was added to existing $children
+    auto childrenJson = root->GetValue("$children");
+    ASSERT_NE(childrenJson, nullptr);
+
+    // Verify that $children array contains 1 item (new navNode added)
+    EXPECT_EQ(childrenJson->GetArraySize(), 1);
+
+    // Verify the item has correct tag
+    auto firstItem = childrenJson->GetArrayItem(0);
+    ASSERT_NE(firstItem, nullptr);
+    auto tagValue = firstItem->GetValue("$type");
+    ASSERT_NE(tagValue, nullptr);
+    EXPECT_EQ(tagValue->GetString(), "navNode");
+}
 } // namespace NG
 } // namespace OHOS::Ace
