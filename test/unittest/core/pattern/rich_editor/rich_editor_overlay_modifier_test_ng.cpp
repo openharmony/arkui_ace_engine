@@ -89,8 +89,14 @@ HWTEST_F(RichEditorOverlayModifierTestNg, GetOverlayModifier001, TestSize.Level2
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. set nullptr
+     */
     richEditorPattern->overlayMod_ = nullptr;
     EXPECT_FALSE(static_cast<bool>(richEditorPattern->GetOverlayModifier()));
+    /**
+     * @tc.steps: step2. create overlay modifier
+     */
     richEditorPattern->CreateRichEditorOverlayModifier();
     EXPECT_TRUE(static_cast<bool>(richEditorPattern->GetOverlayModifier()));
 }
