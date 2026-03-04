@@ -3191,6 +3191,13 @@ void TabBarPattern::TabBarClickEvent(int32_t index) const
     CHECK_NULL_VOID(host);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
+    auto tabsId = tabsNode->GetId();
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetTabsId(tabsId);
+    eventHub->ReportComponentChangeEvent("onTabBarClick", index);
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
     auto tabBarClickEvent = tabsPattern->GetTabBarClickEvent();
@@ -3433,6 +3440,22 @@ void TabBarPattern::UpdateAnimationDuration()
     }
     SetAnimationDuration(duration.value());
     swiperPaintProperty->UpdateDuration(duration.value());
+}
+ 
+void TabBarPattern::ChangeIndex(int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto totalChildCount = host->TotalChildCount();
+    int32_t totalCount = static_cast<int32_t>(totalChildCount) - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    if (NonPositive(totalCount)) {
+        return;
+    }
+    if (index < 0 || index >= totalCount) {
+        index = 0;
+    }
+
+    HandleClick(SourceType::NONE, index);
 }
 
 void TabBarPattern::DumpAdvanceInfo()

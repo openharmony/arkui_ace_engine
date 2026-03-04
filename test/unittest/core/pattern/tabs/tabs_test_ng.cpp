@@ -905,6 +905,141 @@ HWTEST_F(TabsTestNg, TabContentCreatePaddingWithResourceObj001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTargetIndexTest001
+ * @tc.desc: test GetTargetIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, GetTargetIndexTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create tabs and set parameters.
+     */
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(pattern_, nullptr);
+    std::list<std::string> commands = { { R"({"cmd":"changeIndex","params":})" },
+        { "" },
+        { R"({"cmd":"change"})" },
+        { R"({"params":"111111111"})" },
+        { R"({"cmd":"changeIndex","params":{}})" },
+        { R"({"cmd":"changeIndex","params":{"index":""}})" } };
+
+    int32_t targetIndex = 0;
+    for (const auto& command : commands) {
+        bool ret = pattern_->GetTargetIndex(command, targetIndex);
+        EXPECT_EQ(ret, false);
+    }
+}
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create tabs and set parameters.
+     */
+    int32_t currentIndex = 0;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (tabInfo != nullptr) {
+            currentIndex = tabInfo->GetIndex();
+        }
+    };
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(1);
+    TabsModelNG model = CreateTabs();
+    model.SetOnChange(std::move(event));
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(tabBarPattern_, nullptr);
+    std::map<std::string, int32_t> commands = { { R"({"cmd":"changeIndex","params":{"index":"2"}})", 2 },
+        { R"({"cmd":"changeIndex","params":{"index":"100"}})", 0 },
+        { R"({"cmd":"changeIndex","params":{"index":"-10"}})", 0 },
+        { R"({"cmd":"changeIndex","params":{"index":"1"}})", 1 } };
+
+    for (const auto& command : commands) {
+        bool ret = pattern_->OnInjectionEvent(command.first);
+        ASSERT_NE(ret, false);
+        EXPECT_EQ(tabBarPattern_->jumpIndex_, command.second);
+    }
+}
+
+/**
+ * @tc.name: FireAnimationEndOnForceEvent001
+ * @tc.desc: Test FireAnimationEndOnForceEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, FireAnimationEndOnForceEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get SwiperEventHub.
+     */
+    auto onGestureSwipe = [](int32_t index, const AnimationCallbackInfo& info) {};
+    TabsModelNG model = CreateTabs();
+    model.SetOnGestureSwipe(std::move(onGestureSwipe));
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(swiperNode_, nullptr);
+    auto eventHub = swiperNode_->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_NE(frameNode_, nullptr);
+    eventHub->SetTabsId(frameNode_->GetId());
+    AnimationStartEventPtr nullEvent = nullptr;
+    eventHub->AddAnimationStartEvent(nullEvent);
+    eventHub->FireAnimationStartEvent(0, 1, {});
+    ASSERT_EQ(eventHub->aniStartCalledCount_, 1);
+    /**
+     * @tc.steps: step2. call FireAnimationEndOnForceEvent.
+     */
+    eventHub->FireAnimationEndOnForceEvent(1, {
+                                                  .currentOffset = 1.23f,
+                                                  .targetOffset = -4.56f,
+                                                  .velocity = 78.9f,
+                                              });
+    ASSERT_EQ(eventHub->aniStartCalledCount_, 0);
+}
+
+/**
+ * @tc.name: SetOnTabBarClickTest001
+ * @tc.desc: Test Tabs SetOnTabBarClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetOnTabBarClickTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create tabs and set parameters.
+     */
+    int32_t currentIndex = 0;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (tabInfo != nullptr) {
+            currentIndex = tabInfo->GetIndex();
+        }
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnTabBarClick(std::move(event));
+    ASSERT_NE(tabBarPattern_, nullptr);
+    tabBarPattern_->ChangeIndex(1);
+    /**
+     * @tc.steps: step3. Test SetOnTabBarClick function.
+     * @tc.expected:pattern_->onTabBarClickEvent_ not null.
+     */
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_NE(pattern_->onTabBarClickEvent_, nullptr);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    HandleClick(1);
+    EXPECT_EQ(currentIndex, 1);
+}
+
+/**
  * @tc.name: OnColorConfigurationUpdate001
  * @tc.desc: OnColorConfigurationUpdate
  * @tc.type: FUNC
