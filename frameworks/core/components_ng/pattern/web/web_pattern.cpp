@@ -4217,6 +4217,7 @@ void WebPattern::OnAttachContext(PipelineContext *context)
         }
     }
 
+    RemoveOfflineWebWindowStateChangedCallbackIfNeed(pipelineContext, nodeId);
     pipelineContext->AddWindowStateChangedCallback(nodeId);
     pipelineContext->AddWindowSizeChangeCallback(nodeId);
     pipelineContext->AddOnAreaChangeNode(nodeId);
@@ -4772,6 +4773,7 @@ void WebPattern::InitInOfflineMode()
     if (isOfflineWebEvictFrameBuffersEnable_) {
         pipelineContext->AddWindowStateChangedCallback(host->GetId());
         offlineWebNodeId_ = host->GetId();
+        offlineWebPipelineContext_ = AceType::WeakClaim(pipelineContext);
         NodeStatus nodeStatus = host->GetNodeStatus();
         if (nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
             delegate_->SetIsOfflineWebComponent();
@@ -10212,6 +10214,7 @@ void WebPattern::CleanupWebPatternResource()
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->RemoveWindowStateChangedCallback(offlineWebNodeId_);
+        offlineWebPipelineContext_.Reset();
     }
 }
 
@@ -10376,6 +10379,22 @@ bool WebPattern::ConvertMouseToTouchByWhiteList(MouseInfo& mouseInfo, TouchEvent
 bool WebPattern::IsConvertByWhiteList()
 {
     return EventInfoConvertor::IfNeedMouseTransform();
+}
+
+void WebPattern::RemoveOfflineWebWindowStateChangedCallbackIfNeed(const RefPtr<PipelineContext>& context, int32_t nodeId)
+{
+    if (!offlineWebInited_) {
+        return;
+    }
+    CHECK_NULL_VOID(context);
+    auto newInstanceId = context->GetInstanceId();
+    auto pipeline = offlineWebPipelineContext_.Upgrade();
+    if (pipeline && pipeline->GetInstanceId() != newInstanceId) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Context instance id old: %{public}d, new: %{public}d, nodeId: %{public}d",
+            pipeline->GetInstanceId(), newInstanceId, nodeId);
+        pipeline->RemoveWindowStateChangedCallback(nodeId);
+        offlineWebPipelineContext_ = AceType::WeakClaim(AceType::RawPtr(context));
+    }
 }
 
 } // namespace OHOS::Ace::NG
