@@ -365,6 +365,7 @@ public:
     void OnSurfaceCallbackModeChange(SurfaceCallbackMode mode);
     void EnableSecure(bool isSecure);
     void HdrBrightness(float hdrBrightness);
+    void HdrBrightness(float hdrBrightness, HdrType hdrType);
     void EnableTransparentLayer(bool isTransparentLayer);
     RenderFit GetSurfaceRenderFit() const;
     bool GetEnableAnalyzer();
@@ -418,6 +419,7 @@ protected:
     std::string surfaceId_;
     bool isOnTree_ = false;
     float hdrBrightness_ = 1.0f;
+    HdrType hdrType_ = HdrType::DEFAULT;
     bool isTransparentLayer_ = false;
     bool isEnableSecure_ = false;
     bool isSurfaceLock_ = false;

@@ -2440,6 +2440,17 @@ void XComponentPattern::HdrBrightness(float hdrBrightness)
     hdrBrightness_ = std::clamp(hdrBrightness, 0.0f, 1.0f);
 }
 
+void XComponentPattern::HdrBrightness(float hdrBrightness, HdrType hdrType)
+{
+    if (type_ != XComponentType::SURFACE) {
+        return;
+    }
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->SetHDRBrightness(std::clamp(hdrBrightness, 0.0f, 1.0f), static_cast<uint32_t>(hdrType));
+    hdrBrightness_ = std::clamp(hdrBrightness, 0.0f, 1.0f);
+    hdrType_ = hdrType;
+}
+
 void XComponentPattern::EnableTransparentLayer(bool isTransparentLayer)
 {
     if (type_ != XComponentType::SURFACE) {

@@ -2060,6 +2060,16 @@ void AssignCast(std::optional<SwipeActionState>& dst, const Ark_SwipeActionState
 }
 
 template<>
+void AssignCast(std::optional<HdrType>& dst, const Ark_HdrType& src)
+{
+    switch (src) {
+        case ARK_HDR_TYPE_DEFAULT: dst = HdrType::DEFAULT; break;
+        case ARK_HDR_TYPE_AIHDR: dst = HdrType::AIHDR; break;
+        default: LOGE("Unexpected enum value in Ark_HdrType: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src)
 {
     switch (src) {

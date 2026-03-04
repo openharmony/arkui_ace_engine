@@ -42,6 +42,10 @@ export class XComponentControllerInternal {
         return new XComponentController(MaterializedBaseTag.NOP, ptr)
     }
 }
+export enum HdrType {
+ 	DEFAULT = 0,
+ 	AIHDR = 1,
+}
 export class XComponentController implements MaterializedBase {
     public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
@@ -352,7 +356,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._XComponentAttribute_setEnableTransparentLayer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setHdrBrightnessAttribute(value: double | undefined): void {
+    setHdrBrightness0Attribute(value: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -361,7 +365,26 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._XComponentAttribute_setHdrBrightness(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._XComponentAttribute_setHdrBrightness0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setHdrBrightness1Attribute(brightness: double | undefined, type?: HdrType): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (brightness !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const brightnessTmpValue  = brightness!
+            thisSerializer.writeFloat64(brightnessTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (type !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const typeTmpValue = (type as HdrType)
+            thisSerializer.writeInt32(typeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._XComponentAttribute_setHdrBrightness1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -410,8 +433,11 @@ export interface XComponentAttribute extends CommonMethod {
     hdrBrightness(value: double | undefined): this {
         throw new Error('Unimplemented method hdrBrightness')
     }
+    hdrBrightness(brightness: double | undefined, type?: HdrType): this {
+        throw new Error("Unimplemented method hdrBrightness")
+    }
     attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error('Unimplemented method attributeModifier')
+        throw new Error("Unimplemented method attributeModifier")
     }
 }
 export interface XComponentParameters {
@@ -458,8 +484,20 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public hdrBrightness(value: double | undefined): this {
-        const value_casted = value as (double | undefined)
-        this.getPeer()?.setHdrBrightnessAttribute(value_casted)
+        if (this.checkPriority("hdrBrightness")) {
+            const value_casted = value as (double | undefined)
+            this.getPeer()?.setHdrBrightness0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public hdrBrightness(brightness: double | undefined, type?: HdrType): this {
+        if (this.checkPriority("hdrBrightness")) {
+            const brightness_casted = brightness as (double | undefined)
+            const type_casted = type as (HdrType | undefined)
+            this.getPeer()?.setHdrBrightness1Attribute(brightness_casted, type_casted)
+            return this
+        }
         return this
     }
     public attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {

@@ -28126,7 +28126,7 @@ void impl_XComponentAttribute_setEnableTransparentLayer(Ark_NativePointer thisPt
         GetNodeModifiers()->getXComponentModifier()->setEnableTransparentLayer(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(XComponentAttribute_setEnableTransparentLayer, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_XComponentAttribute_setHdrBrightness(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_XComponentAttribute_setHdrBrightness0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -28136,10 +28136,29 @@ void impl_XComponentAttribute_setHdrBrightness(Ark_NativePointer thisPtr, KSeria
             valueValueTempTmpBuf.value = thisDeserializer.readFloat64();
         }
         Opt_Float64 valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getXComponentModifier()->setHdrBrightness(self, static_cast<Opt_Float64*>(&valueValueTemp));
+        GetNodeModifiers()->getXComponentModifier()->setHdrBrightness0(self, static_cast<Opt_Float64*>(&valueValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(XComponentAttribute_setHdrBrightness, Ark_NativePointer, KSerializerBuffer, int32_t)
-
+KOALA_INTEROP_DIRECT_V3(XComponentAttribute_setHdrBrightness0, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_XComponentAttribute_setHdrBrightness1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto brightnessValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 brightnessValueTempTmpBuf = {};
+        brightnessValueTempTmpBuf.tag = brightnessValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((brightnessValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            brightnessValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 brightnessValueTemp = brightnessValueTempTmpBuf;;
+        const auto typeValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_HdrType typeValueTempTmpBuf = {};
+        typeValueTempTmpBuf.tag = typeValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((typeValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            typeValueTempTmpBuf.value = static_cast<Ark_HdrType>(thisDeserializer.readInt32());
+        }
+        Opt_HdrType typeValueTemp = typeValueTempTmpBuf;;
+        GetNodeModifiers()->getXComponentModifier()->setHdrBrightness1(self, static_cast<Opt_Float64*>(&brightnessValueTemp), static_cast<Opt_HdrType*>(&typeValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(XComponentAttribute_setHdrBrightness1, Ark_NativePointer, KSerializerBuffer, int32_t)
 // Accessors
 
 Ark_NativePointer impl_AccessibilityHoverEvent_construct() {

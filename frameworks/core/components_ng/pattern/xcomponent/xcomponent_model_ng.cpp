@@ -309,6 +309,15 @@ void XComponentModelNG::HdrBrightness(float hdrBrightness)
     xcPattern->HdrBrightness(hdrBrightness);
 }
 
+void XComponentModelNG::HdrBrightness(float hdrBrightness, HdrType hdrType)
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->HdrBrightness(hdrBrightness, hdrType);
+}
+
 void XComponentModelNG::EnableTransparentLayer(bool isTransparentLayer)
 {
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -583,6 +592,14 @@ void XComponentModelNG::HdrBrightness(FrameNode* frameNode, float hdrBrightness)
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     xcPattern->HdrBrightness(hdrBrightness);
+}
+
+void XComponentModelNG::HdrBrightness(FrameNode* frameNode, float hdrBrightness, HdrType hdrType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->HdrBrightness(hdrBrightness, hdrType);
 }
 
 void XComponentModelNG::EnableTransparentLayer(FrameNode* frameNode, bool enable)

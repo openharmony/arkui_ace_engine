@@ -797,6 +797,11 @@ enum class XComponentNodeType {
     CNODE,
 };
 
+enum class HdrType {
+    DEFAULT = 0,
+    AIHDR = 1,
+};
+
 enum class RenderMode { ASYNC_RENDER = 0, SYNC_RENDER };
 
 inline constexpr uint32_t STATE_NORMAL = 0;
