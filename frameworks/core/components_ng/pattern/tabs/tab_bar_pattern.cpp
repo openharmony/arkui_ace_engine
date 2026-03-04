@@ -386,6 +386,7 @@ void TabBarPattern::SetTabBarOpacity(float opacity)
 void FindTextAndImageNode(
     const RefPtr<FrameNode>& columnNode, RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& imageNode)
 {
+    CHECK_NULL_VOID(columnNode);
     if (columnNode->GetTag() == V2::TEXT_ETS_TAG) {
         textNode = columnNode;
     } else if (columnNode->GetTag() == V2::IMAGE_ETS_TAG || columnNode->GetTag() == V2::SYMBOL_ETS_TAG) {
