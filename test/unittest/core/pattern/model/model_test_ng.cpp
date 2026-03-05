@@ -638,4 +638,28 @@ HWTEST_F(ModelTestNg, ModelViewNgTest013, TestSize.Level1)
     EXPECT_EQ(modelPaintProperty->GetModelCustomRenderValue(), desc);
     ModelViewNG::AddCustomRender(frameNode.GetRawPtr(), desc);
 }
+
+/**
+ * @tc.name: ModelViewNgTest014
+ * @tc.desc: static path, test UpdateRenderSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ModelTestNg, ModelViewNgTest014, TestSize.Level1)
+{
+    // Create FrameNode in static way
+    auto frameNode = ModelViewNG::CreateFrameNode(testKey++);
+    ASSERT_NE(frameNode, nullptr);
+    // Get ModelPaintProperty
+    auto modelPaintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
+    ASSERT_NE(modelPaintProperty, nullptr);
+
+    ModelViewNG::SetRenderHeight(frameNode.GetRawPtr(), std::nullopt);
+    ASSERT_EQ(modelPaintProperty->GetRenderHeightValue(), 1.0f);
+
+    Dimension dimension(100.0f);
+    ModelViewNG::SetRenderHeight(frameNode.GetRawPtr(), dimension);
+    ASSERT_EQ(modelPaintProperty->GetRenderHeightValue(), 100.0f);
+
+    modelAdapter->UpdateRenderSize(modelPaintProperty);
+}
 } // namespace OHOS::Ace::NG
