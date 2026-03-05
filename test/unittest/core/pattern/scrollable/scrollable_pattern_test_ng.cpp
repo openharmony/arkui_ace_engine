@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
@@ -31,18 +32,6 @@ using namespace testing::ext;
 
 class ScrollablePatternTestNg : public TestNG {
 public:
-};
-
-class MockNestableScrollContainer : public NestableScrollContainer {
-    DECLARE_ACE_TYPE(MockNestableScrollContainer, NestableScrollContainer);
-
-public:
-    MOCK_METHOD(OHOS::Ace::Axis, GetAxis, (), (const, override));
-    MOCK_METHOD(ScrollResult, HandleScroll, (float, int32_t, NestedState, float), (override));
-    MOCK_METHOD(bool, HandleScrollVelocity, (float, const RefPtr<NestableScrollContainer>&), (override));
-    MOCK_METHOD(void, OnScrollStartRecursive, (WeakPtr<NestableScrollContainer>, float, float), (override));
-    MOCK_METHOD(void, OnScrollEndRecursive, (const std::optional<float>&), (override));
-    MOCK_METHOD(void, OnScrollDragEndRecursive, (), (override));
 };
 
 /**
