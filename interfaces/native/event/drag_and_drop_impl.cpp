@@ -179,7 +179,12 @@ void OH_ArkUI_DragAction_Dispose(ArkUI_DragAction* dragAction)
     if (!dragAction) {
         return;
     }
-    delete reinterpret_cast<ArkUIDragAction*>(dragAction);
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    if (dragActions && dragActions->pixelmapNativeList) {
+        delete[] reinterpret_cast<OH_PixelmapNative**>(dragActions->pixelmapNativeList);
+        dragActions->pixelmapNativeList = nullptr;
+    }
+    delete dragActions;
     dragAction = nullptr;
 }
 
@@ -219,7 +224,22 @@ int32_t OH_ArkUI_DragAction_SetPixelMaps(ArkUI_DragAction* dragAction, OH_Pixelm
     if (count < size || size < 0) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    dragActions->pixelmapNativeList = reinterpret_cast<void**>(pixelmapArray);
+    if (dragActions->pixelmapNativeList) {
+        delete[] reinterpret_cast<OH_PixelmapNative**>(dragActions->pixelmapNativeList);
+        dragActions->pixelmapNativeList = nullptr;
+    }
+
+    // Allocate new array and copy pointers
+    auto* copiedArray = new OH_PixelmapNative* [size];
+    if (!copiedArray) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+
+    for (int32_t index = 0; index < size; index++) {
+        copiedArray[index] = pixelmapArray[index];
+    }
+
+    dragActions->pixelmapNativeList = reinterpret_cast<void**>(copiedArray);
     dragActions->size = size;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
