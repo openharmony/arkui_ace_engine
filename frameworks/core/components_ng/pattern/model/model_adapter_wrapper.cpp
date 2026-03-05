@@ -480,8 +480,8 @@ void ModelAdapterWrapper::UpdateBackgroundColor(const RefPtr<ModelPaintProperty>
 
 void ModelAdapterWrapper::UpdateRenderSize(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
-    auto renderWidth = modelPaintProperty->GetRenderWidth().value_or(0.0f);
-    auto renderHeight = modelPaintProperty->GetRenderHeight().value_or(0.0f);
+    auto renderWidth = modelPaintProperty->GetRenderWidth().value_or(1.0f);
+    auto renderHeight = modelPaintProperty->GetRenderHeight().value_or(1.0f);
     needsSyncPaint_ = true;
 #if defined(KIT_3D_ENABLE)
     if (sceneAdapter_) {
