@@ -1453,7 +1453,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchEnterKeyType(ArkUIRuntimeCallInfo*
         int32_t value = secondArg->Int32Value(vm);
         GetArkUINodeModifiers()->getSearchModifier()->setSearchEnterKeyType(nativeNode, value);
     } else if (isJsView && secondArg->IsUndefined()) {
-        GetArkUINodeModifiers()->getSearchModifier()->resetSearchType(nativeNode);
+        GetArkUINodeModifiers()->getSearchModifier()->resetSearchEnterKeyType(nativeNode);
     } else if (isJsView && !secondArg->IsNumber()) {
         return panda::JSValueRef::Undefined(vm);
     } else {
