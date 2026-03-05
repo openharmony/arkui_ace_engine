@@ -418,7 +418,7 @@ public:
 
     bool IsFullPageNavigation() const
     {
-        return isFullPageNavigation_.value_or(false);
+        return isFullPageNavigation_;
     }
 
     bool IsTopNavDestination(const RefPtr<UINode>& node) const;
@@ -872,7 +872,7 @@ private:
     RectF dragRect_;
     RectF dragBarRect_;
     WeakPtr<FrameNode> pageNode_;
-    std::optional<bool> isFullPageNavigation_;
+    bool isFullPageNavigation_ = false;
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
     bool addByNavRouter_ = false;
