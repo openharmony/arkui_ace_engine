@@ -5389,6 +5389,12 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
         editingValue_ = value;
 #ifdef ANDROID_PLATFORM
         if (value->appendText.empty()) {
+            // update cursor position only
+            if (value->selection.IsValid() && value->selection.GetStart() == value->selection.GetEnd() &&
+                !value->text.empty()) {
+                TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateEditingValue set caret to %{public}d", value->selection.GetEnd());
+                SetCaretOffset(value->selection.GetEnd());
+            }
             return;
         }
 #endif
