@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/pattern/waterflow/water_flow_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -584,6 +585,11 @@ void WaterFlowPattern::OnSectionChanged(int32_t start)
     } else {
         layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
     }
+}
+
+int32_t WaterFlowPattern::GetFirstIndex() const
+{
+    return layoutInfo_ ? layoutInfo_->startIndex_ : -1;
 }
 
 void WaterFlowPattern::ResetSections()
