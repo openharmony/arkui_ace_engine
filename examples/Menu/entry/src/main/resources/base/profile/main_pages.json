@@ -37,6 +37,11 @@
     "pages/Examples/MenuTestLevel0_19",
     "pages/Examples/MenuTestLevel0_20",
     "pages/Examples/MenuTestLevel0_21",
+    "pages/Examples/MenuTestLevel0_22",
+    "pages/Examples/MenuTestLevel0_23",
+    "pages/Examples/MenuTestLevel0_25",
+    "pages/Examples/MenuTestLevel0_26",
+    "pages/Examples/MenuTestLevel0_8",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",
