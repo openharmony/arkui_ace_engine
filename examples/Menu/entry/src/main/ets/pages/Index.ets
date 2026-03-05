@@ -18,6 +18,7 @@ struct RotationIndex {
     {title: 'Dock',url:'pages/Dock/Index'},
     {title: 'MenuUX',url:'pages/MenuUX/Index'},
     {title: 'MenuPlacement',url:'pages/MenuPlacement/Index'},
+    {title: 'Menu小型化验证',url:'pages/Menu1_1/Index'},
   ]
 
   build() {
