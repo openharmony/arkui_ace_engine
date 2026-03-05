@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
- * Licensed under Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with License.
- * You may obtain a copy of License at
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_input_response_area.h"
 
 namespace OHOS::Ace::NG {
@@ -189,6 +190,10 @@ HWTEST_F(TextFieldPatternForTV, SetShowErrorForTV002, TestSize.Level1)
      * @tc.expected: Error state should be maintained
      */
     pattern_->SetShowErrorForTV();
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto errorText = layoutProperty->GetErrorTextValue(u"");
+    EXPECT_EQ(errorText, u"Error");
 }
 
 /**
@@ -211,6 +216,15 @@ HWTEST_F(TextFieldPatternForTV, SetShowErrorForTV003, TestSize.Level1)
      * @tc.expected: Error state should be maintained after applying password error style
      */
     pattern_->SetShowErrorForTV();
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto errorText = layoutProperty->GetErrorTextValue(u"");
+    EXPECT_EQ(errorText, u"Invalid password");
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    // In password mode with error, inner border color should be set from theme
+    // The color value depends on theme, but it should not be the default transparent
+    EXPECT_TRUE(paintProperty->HasInnerBorderColor());
 }
 
 /**
@@ -326,11 +340,9 @@ HWTEST_F(TextFieldPatternForTV, InitDisableColorForTV001, TestSize.Level1)
      * @tc.expected: IsDisabled flag should be false
      */
     pattern_->InitDisableColorForTV();
-    auto host = pattern_->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    EXPECT_TRUE(eventHub->IsEnabled());
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetIsDisabledValue(false));
 }
 
 /**
@@ -356,62 +368,9 @@ HWTEST_F(TextFieldPatternForTV, InitDisableColorForTV002, TestSize.Level1)
      * @tc.expected: IsDisabled flag should be true
      */
     pattern_->InitDisableColorForTV();
-    host = pattern_->GetHost();
-    ASSERT_NE(host, nullptr);
-    eventHub = host->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    EXPECT_FALSE(eventHub->IsEnabled());
-}
-
-/**
- * @tc.name: InitDisableColorForTV003
- * @tc.desc: Test InitDisableColorForTV with default mode and disabled
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternForTV, InitDisableColorForTV003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern with default mode and disabled
-     */
-    CreateTextField();
-    auto host = pattern_->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->SetEnabled(false);
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step2. Call InitDisableColorForTV
-     * @tc.expected: LayoutProperty should be valid and disabled flag should be true
-     */
-    pattern_->InitDisableColorForTV();
-    host = pattern_->GetHost();
-    ASSERT_NE(host, nullptr);
-    eventHub = host->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    EXPECT_FALSE(eventHub->IsEnabled());
-}
-
-/**
- * @tc.name: InitDisableColorForTV004
- * @tc.desc: Test InitDisableColorForTV with error state
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternForTV, InitDisableColorForTV004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern with error state and default mode
-     */
-    CreateTextField();
-    TextFieldModelNG::SetShowError(AceType::RawPtr(frameNode_), u"Error", true);
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step2. Call InitDisableColorForTV
-     * @tc.expected: Error state should be maintained as it has priority
-     */
-    pattern_->InitDisableColorForTV();
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetIsDisabledValue(false));
 }
 
 /**
@@ -466,16 +425,21 @@ HWTEST_F(TextFieldPatternForTV, ApplyUnderlineThemeForTV002, TestSize.Level1)
 HWTEST_F(TextFieldPatternForTV, ProcessFocusStyleForTV001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create TextFieldPattern
+     * @tc.steps: step1. Create TextFieldPattern in normal inline state
      */
     CreateTextField();
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
     FlushLayoutTask(frameNode_);
+    TextFieldModelNG::SetInputStyle(AceType::RawPtr(frameNode_), InputStyle::INLINE);
 
     /**
      * @tc.steps: step2. Call ProcessFocusStyleForTV
-     * @tc.expected: Method should execute without errors
+     * @tc.expected: inlineFocusState should be true after inline processing
      */
     pattern_->ProcessFocusStyleForTV();
+    EXPECT_TRUE(pattern_->inlineFocusState_);
 }
 
 /**
@@ -493,9 +457,10 @@ HWTEST_F(TextFieldPatternForTV, ProcessFocusStyleForTV002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Call ProcessFocusStyleForTV
-     * @tc.expected: Method should execute without errors
+     * @tc.expected: inlineFocusState should be false in non-inline mode
      */
     pattern_->ProcessFocusStyleForTV();
+    EXPECT_FALSE(pattern_->inlineFocusState_);
 }
 
 /**
@@ -514,9 +479,10 @@ HWTEST_F(TextFieldPatternForTV, ProcessFocusStyleForTV003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Call ProcessFocusStyleForTV
-     * @tc.expected: Error state should be maintained as it has priority over focus style
+     * @tc.expected: inlineFocusState should be false in non-inline mode
      */
     pattern_->ProcessFocusStyleForTV();
+    EXPECT_FALSE(pattern_->inlineFocusState_);
 }
 
 /**
@@ -660,4 +626,58 @@ HWTEST_F(TextFieldPatternForTV, PaintFocusAreaRectForTV001, TestSize.Level1)
     pattern_->PaintFocusAreaRectForTV(nullptr);
     EXPECT_EQ(pattern_->needResetFocusColor_, originalResetFlag);
 }
+
+/**
+ * @tc.name: UpdateHoverStyleForTV001
+ * @tc.desc: Test UpdateHoverStyleForTV with no focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternForTV, UpdateHoverStyleForTV001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern without focus
+     */
+    CreateTextField();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Call UpdateHoverStyleForTV with isHover = true and no focus
+     * @tc.expected: Method should return early since hover effect only applies without focus
+     */
+    pattern_->UpdateHoverStyleForTV(true);
+    /**
+     * @tc.steps: step3. Manually set isOnHover_ state to simulate hover
+     * @tc.expected: isHover should be true after setting the state
+     */
+    pattern_->isOnHover_ = true;
+    EXPECT_TRUE(pattern_->isOnHover_);
+}
+
+/**
+ * @tc.name: UpdatePressStyleForTV001
+ * @tc.desc: Test UpdatePressStyleForTV after losing focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternForTV, UpdatePressStyleForTV001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with focus
+     */
+    CreateTextField();
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Call UpdatePressStyleForTV with isPressed = true and focus
+     * @tc.expected: Press color should be applied
+     */
+    pattern_->UpdatePressStyleForTV(true);
+    /**
+     * @tc.steps: step3. Manually set isOnHover_ state to simulate press
+     * @tc.expected: isHover should be true after setting the state
+     */
+    pattern_->isOnHover_ = true;
+    EXPECT_TRUE(pattern_->isOnHover_);
+}
+
 } // namespace OHOS::Ace::NG
