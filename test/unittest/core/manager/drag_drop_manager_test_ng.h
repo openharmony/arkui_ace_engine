@@ -86,6 +86,7 @@ const SizeF FRAME_SIZE(GLOBAL_X * 10.0f, GLOBAL_Y * 10.0f);
 constexpr int32_t DRAGGED_INDEX = 0;
 const DragType DRAG_TYPE_GRID = DragType::GRID;
 const DragType DRAG_TYPE_LIST = DragType::LIST;
+constexpr int32_t DEFAULT_INSTANCE_ID = 0;
 } // namespace
 
 class DragDropManagerTestNg : public testing::Test {

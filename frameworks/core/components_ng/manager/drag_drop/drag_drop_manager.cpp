@@ -2662,7 +2662,10 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     CHECK_NULL_VOID(gestureHub);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    DragDropGlobalController::GetInstance().SetStartDragVsyncTime(pipeline->GetVsyncTime());
+    auto vsyncPipeline = ShouldSkipDragMoveOutForSubwindow() ? PipelineContext::GetMainPipelineContext() : pipeline;
+    if (vsyncPipeline) {
+        DragDropGlobalController::GetInstance().SetStartDragVsyncTime(vsyncPipeline->GetVsyncTime());
+    }
     bool isDragStartPending = DragDropGlobalController::GetInstance().GetAsyncDragCallback() != nullptr;
     if (!(GetDragPreviewInfo(overlayManager, info_, gestureHub, data)) ||
         (!IsNeedDisplayInSubwindow() && !data.isMenuShow && !isDragWithContextMenu_ && !isDragStartPending)) {
