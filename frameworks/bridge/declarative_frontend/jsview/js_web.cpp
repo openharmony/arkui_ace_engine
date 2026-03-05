@@ -4305,37 +4305,39 @@ void WrapAISessionCallback(const JSRef<JSObject>& option, const std::string& fun
             JSRef<JSVal>::Make(ToJSValue(params)),
             JSRef<JSVal>::Make(std::static_pointer_cast<ArkJSValue>(adapter)->GetValue(runtime))
         };
-        JSRef<JSVal> result = func->Call(option, 3, argv);
+        JSRef<JSVal> result = func->Call(option, ArraySize(argv), argv);
         return result->ToBoolean();
     };
 }
 
 void JSWeb::AISessionOptions(const JSCallbackInfo& args)
 {
-    if (args[0]->IsArray()) {
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
-        for (size_t i = 0; i < array->Length(); i++) {
-            JSRef<JSVal> val = array->GetValueAt(i);
-            if (val->IsObject()) {
-                JSRef<JSObject> option = JSRef<JSObject>::Cast(val);
-                JSRef<JSVal> aiSessionType = option->GetProperty("aiSessionType");
-                uint32_t type = 0;
-                if (aiSessionType->IsNumber()) {
-                    type = aiSessionType->ToNumber<uint32_t>();
-                }
-                if (type == 0 || type > MAX_AI_SESSION_TYPE) {
-                    continue;
-                }
-                AISessionCallback onCreateAISession = nullptr;
-                WrapAISessionCallback(option, "onCreateAISession", onCreateAISession);
-                AISessionCallback onExecuteAIAction = nullptr;
-                WrapAISessionCallback(option, "onExecuteAIAction", onExecuteAIAction);
-                AISessionCallback onDestroyAISession = nullptr;
-                WrapAISessionCallback(option, "onDestroyAISession", onDestroyAISession);
-                WebModel::GetInstance()->SetAISessionOptions(type - 1,
-                    std::move(onCreateAISession), std::move(onExecuteAIAction), std::move(onDestroyAISession));
-            }
+    if (!args[0]->IsArray()) {
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> val = array->GetValueAt(i);
+        if (!val->IsObject()) {
+            continue;
         }
+        JSRef<JSObject> option = JSRef<JSObject>::Cast(val);
+        JSRef<JSVal> aiSessionType = option->GetProperty("aiSessionType");
+        uint32_t type = 0;
+        if (aiSessionType->IsNumber()) {
+            type = aiSessionType->ToNumber<uint32_t>();
+        }
+        if (type == 0 || type > MAX_AI_SESSION_TYPE) {
+            continue;
+        }
+        AISessionCallback onCreateAISession = nullptr;
+        WrapAISessionCallback(option, "onCreateAISession", onCreateAISession);
+        AISessionCallback onExecuteAIAction = nullptr;
+        WrapAISessionCallback(option, "onExecuteAIAction", onExecuteAIAction);
+        AISessionCallback onDestroyAISession = nullptr;
+        WrapAISessionCallback(option, "onDestroyAISession", onDestroyAISession);
+        WebModel::GetInstance()->SetAISessionOptions(type - 1,
+            std::move(onCreateAISession), std::move(onExecuteAIAction), std::move(onDestroyAISession));
     }
 }
 
