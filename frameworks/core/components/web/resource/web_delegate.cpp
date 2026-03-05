@@ -8949,6 +8949,64 @@ void WebDelegate::ReportEventJson(const std::string& jsonString)
     reporter->AddEvent(jsonString);
 }
 
+void WebDelegate::OnCreateAISession(WebAgentClientImpl::AISessionType type, const std::string& id,
+    const std::string& params, const std::function<void(uint32_t, const std::string&)>&& callback)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), type, id, params, callback, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto reporter = webPattern->GetAgentEventReporter();
+        CHECK_NULL_VOID(reporter);
+        auto propOnCreateAISessionEvent = reporter->GetOnCreateAISession(type);
+        CHECK_NULL_VOID(propOnCreateAISessionEvent);
+        result = propOnCreateAISessionEvent(id, params, std::move(callback));
+    }, "ArkUIWebCreateAISession");
+
+    if (!result) {
+        callback(1, "default AI session create is not supported");
+    }
+}
+
+void WebDelegate::OnExecuteAIAction(WebAgentClientImpl::AISessionType type, const std::string& id,
+    const std::string& params, const std::function<void(uint32_t, const std::string&)>&& callback)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    auto jsTaskExecutor = SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostTask([weak = WeakClaim(this), type, id, params, callback = std::move(callback)]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto reporter = webPattern->GetAgentEventReporter();
+        CHECK_NULL_VOID(reporter);
+        auto propOnExecuteAIActionEvent = reporter->GetOnExecuteAIAction(type);
+        CHECK_NULL_VOID(propOnExecuteAIActionEvent);
+        propOnExecuteAIActionEvent(id, params, std::move(callback));
+    }, "ArkUIWebExecuteAIAction");
+}
+
+void WebDelegate::OnDestroyAISession(WebAgentClientImpl::AISessionType type, const std::string& id)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    auto jsTaskExecutor = SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostTask([weak = WeakClaim(this), type, id]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto reporter = webPattern->GetAgentEventReporter();
+        CHECK_NULL_VOID(reporter);
+        auto propOnDestroyAISessionEvent = reporter->GetOnDestroyAISession(type);
+        CHECK_NULL_VOID(propOnDestroyAISessionEvent);
+        propOnDestroyAISessionEvent(id, "", nullptr);
+    }, "ArkUIWebDestroyAISession");
+}
+
 void WebDelegate::NotifyForNextTouchEvent()
 {
     ACE_DCHECK(nweb_ != nullptr);

@@ -56,6 +56,7 @@ public:
     static void OnErrorReceive(const JSCallbackInfo& args);
     static void OnHttpErrorReceive(const JSCallbackInfo& args);
     static void OnFileSelectorShow(const JSCallbackInfo& args);
+    static void AISessionOptions(const JSCallbackInfo& args);
     static void OnInterceptRequest(const JSCallbackInfo& args);
     static void OnOverrideErrorPage(const JSCallbackInfo& args);
     static void OnUrlLoadIntercept(const JSCallbackInfo& args);

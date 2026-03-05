@@ -1505,6 +1505,24 @@ let FileSelectorMode;
   FileSelectorMode[FileSelectorMode.FileSaveMode = 3] = 'FileSaveMode';
 })(FileSelectorMode || (FileSelectorMode = {}));
 
+let AISessionType;
+(function (AISessionType) {
+  AISessionType[AISessionType.TRANSLATOR = 1] = 'TRANSLATOR';
+  AISessionType[AISessionType.LANGUAGE_DETECTOR = 2] = 'LANGUAGE_DETECTOR';
+  AISessionType[AISessionType.SUMMARIZER = 3] = 'SUMMARIZER';
+  AISessionType[AISessionType.WRITER = 4] = 'WRITER';
+  AISessionType[AISessionType.REWRITER = 5] = 'REWRITER';
+  AISessionType[AISessionType.PROMPT = 6] = 'PROMPT';
+  AISessionType[AISessionType.PROOFREADER = 7] = 'PROOFREADER';
+})(AISessionType || (AISessionType = {}));
+
+let AISessionResultType;
+(function (AISessionResultType) {
+  AISessionResultType[AISessionResultType.SUCCESS = 0] = 'SUCCESS';
+  AISessionResultType[AISessionResultType.FAILURE = 1] = 'FAILURE';
+  AISessionResultType[AISessionResultType.RUNNING = 2] = 'RUNNING';
+})(AISessionResultType || (AISessionResultType = {}));
+
 let ProtectedResourceType;
 (function (ProtectedResourceType) {
   ProtectedResourceType.MidiSysex = 'TYPE_MIDI_SYSEX';

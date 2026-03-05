@@ -51,6 +51,29 @@ public:
     void AIPostTask(const std::function<void()>& task, TaskExecutor::TaskType taskType, const std::string& name,
         uint32_t delay = 0);
 
+    void SetAISessionOptions(uint32_t type, const AISessionCallback&& onCreateAISession,
+        const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)
+    {
+        onCreateAISessionArray[type] = std::move(onCreateAISession);
+        onExecuteAIActionArray[type] = std::move(onExecuteAIAction);
+        onDestroyAISessionArray[type] = std::move(onDestroyAISession);
+    }
+
+    AISessionCallback GetOnCreateAISession(uint32_t type)
+    {
+        return onCreateAISessionArray[type];
+    }
+
+    AISessionCallback GetOnExecuteAIAction(uint32_t type)
+    {
+        return onExecuteAIActionArray[type];
+    }
+
+    AISessionCallback GetOnDestroyAISession(uint32_t type)
+    {
+        return onDestroyAISessionArray[type];
+    }
+
     enum class WebEventType { Unknown, Tap, LongPress, ScrollStart, ScrollEnd, PinchEnd };
 
     WebEventType ParseEventType(const std::string& str);
@@ -63,6 +86,9 @@ public:
 
 private:
     WeakPtr<Pattern> pattern_;
+    AISessionCallback onCreateAISessionArray[8] = { nullptr };
+    AISessionCallback onExecuteAIActionArray[8] = { nullptr };
+    AISessionCallback onDestroyAISessionArray[8] = { nullptr };
 
 protected:
     virtual RectF ConvertToWindow(const RectF& rect, bool addComponentOffset = true);

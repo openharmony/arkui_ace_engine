@@ -39,6 +39,7 @@ using ScriptRegexItems = std::map<std::string, std::vector<std::pair<std::string
 using ScriptItemsByOrder = std::vector<std::string>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
 using OnKeyEventCallback = std::function<void(KeyEventInfo& keyEventInfo)>;
+using AISessionCallback = std::function<bool(const std::string&, const std::string&, const std::function<void(uint32_t, const std::string&)>&&)>;
 
 enum MixedModeContent {
     MIXED_CONTENT_ALWAYS_ALLOW = 0,

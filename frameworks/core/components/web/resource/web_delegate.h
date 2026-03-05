@@ -1383,6 +1383,11 @@ public:
     int GetSelectEndIndex() const;
 
     void ReportEventJson(const std::string& jsonString);
+    void OnCreateAISession(WebAgentClientImpl::AISessionType type, const std::string& id,
+        const std::string& params, const std::function<void(uint32_t, const std::string&)>&& callback);
+    void OnExecuteAIAction(WebAgentClientImpl::AISessionType type, const std::string& id,
+        const std::string& params, const std::function<void(uint32_t, const std::string&)>&& callback);
+    void OnDestroyAISession(WebAgentClientImpl::AISessionType type, const std::string& id);
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnCameraCaptureStateChanged(int originalState, int newState);

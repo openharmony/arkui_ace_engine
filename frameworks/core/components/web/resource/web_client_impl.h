@@ -94,6 +94,14 @@ public:
 
     void ReportEventJson(const std::string& json) override;
 
+    void OnCreateAISession(AISessionType type, const std::string& id, const std::string& params,
+        std::shared_ptr<NWeb::NWebStringVectorValueCallback> callback) override;
+
+    void OnExecuteAIAction(AISessionType type, const std::string& id, const std::string& params,
+        std::shared_ptr<NWeb::NWebStringVectorValueCallback> callback) override;
+
+    void OnDestroyAISession(AISessionType type, const std::string& id) override;
+
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;
