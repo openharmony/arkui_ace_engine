@@ -20,7 +20,7 @@ import { NavigationRouterMap, NavDestinationBuilder } from "#handwritten"
 import { InteropNativeModule } from '@koalaui/interop'
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { ArkStructBase } from '../ArkStructBase';
-import { ArkUIAniModule } from 'arkui.ani';
+import { ArkUIAniModule, ArkUIAniCustomNodeModule } from 'arkui.ani';
 import { ConstraintSizeOptions } from './units';
 import { ContextRecord } from 'arkui/base/UIContextImpl';
 import { ExtendableComponent, IExtendableComponent } from './extendableComponent';
@@ -118,8 +118,29 @@ export interface PageLifeCycle {
 }
 
 export interface LayoutCallbacks {
-    onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {}
+    onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
+        try{
+            const currentComponent = this as Any as (ExtendableComponent | undefined)
+            const peerNode = currentComponent?.__getPeerNode__Internal();
+            if (peerNode) {
+                ArkUIAniCustomNodeModule._CustomNode_CallDefaultLayout(peerNode!.peer.ptr)
+            }
+            }
+        catch(e) {
+            console.log("sqf: customComponent onPlaceChildren err",e)
+        }
+    }
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
+        try{
+            const currentComponent = this as Any as (ExtendableComponent | undefined)
+            const peerNode = currentComponent?.__getPeerNode__Internal();
+            if (peerNode) {
+                return ArkUIAniCustomNodeModule._CustomNode_CallDefaultMeasure(peerNode!.peer.ptr) as SizeResult
+            }
+            }
+        catch(e) {
+            console.log("sqf: customComponent onMeasureSize err",e)
+        }
         return {width: 0, height: 0} as SizeResult
     }
 }

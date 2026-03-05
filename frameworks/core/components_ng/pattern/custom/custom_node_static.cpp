@@ -67,4 +67,31 @@ CustomMeasureLayoutNode* CustomNodeStatic::ConstructCustomNode(int32_t id,
     }
     return AceType::RawPtr(customNode);
 }
+
+SizeF CustomNodeStatic::DidDefaultMeasure(const RefPtr<OHOS::Ace::NG::CustomMeasureLayoutNode>& frameNode)
+{
+    auto layoutWrapper = AceType::DynamicCast<OHOS::Ace::NG::LayoutWrapper>(frameNode);
+        // use normal measure step.
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    int32_t index = 0;
+    frameNode->FireOnUpdateParam(AceType::RawPtr(layoutWrapper));
+    for (auto&& child : children) {
+        child->Measure(layoutConstraint);
+        auto size = child->GetGeometryNode()->GetFrameSize();
+        frameNode->UpdateSize(index, size);
+        index++;
+    }
+    NG::BoxLayoutAlgorithm::PerformMeasureSelf(AceType::RawPtr(layoutWrapper));
+    return frameNode->GetGeometryNode()->GetFrameSize(); //add check null
+}
+
+void CustomNodeStatic::DidDefaultLayout(const RefPtr<OHOS::Ace::NG::CustomMeasureLayoutNode>& frameNode)
+{
+    auto layoutWrapper = AceType::DynamicCast<OHOS::Ace::NG::LayoutWrapper>(frameNode);
+    NG::BoxLayoutAlgorithm::PerformLayout(AceType::RawPtr(layoutWrapper));
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Layout();
+    }
+}
 } // namespace OHOS::Ace::NG
