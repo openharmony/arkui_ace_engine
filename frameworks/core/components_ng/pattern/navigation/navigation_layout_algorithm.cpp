@@ -29,6 +29,7 @@ namespace {
 constexpr NavigationMode INITIAL_MODE = NavigationMode::AUTO;
 constexpr int32_t MODE_SWITCH_ANIMATION_DURATION = 500; // ms
 const RefPtr<CubicCurve> MODE_SWITCH_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
+constexpr float AUTO_WITH_ASPECT_RATIO_THRESHOLD = 1.2f;
 constexpr Dimension DIVIDER_DRAG_BAR_WIDTH = 12.0_vp;
 constexpr Dimension DIVIDER_DRAG_BAR_HEIGHT = 48.0_vp;
 constexpr Dimension DRAG_BAR_ITEM_WIDTH = 2.0_vp;
@@ -556,6 +557,17 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     }
     if (usrNavigationMode == NavigationMode::AUTO) {
         if (frameSize.Width() >= CalculateNavigationWidth(hostNode)) {
+            usrNavigationMode = NavigationMode::SPLIT;
+            auto targetNode = hostNode->GetNavBarOrHomeDestinationNode();
+            if (targetNode) {
+                targetNode->SetJSViewActive(true);
+            }
+        } else {
+            usrNavigationMode = NavigationMode::STACK;
+        }
+    } else if (usrNavigationMode == NavigationMode::AUTO_WITH_ASPECT_RATIO) {
+        if (frameSize.Width() >= CalculateNavigationWidth(hostNode) &&
+            frameSize.Height() / frameSize.Width() <= AUTO_WITH_ASPECT_RATIO_THRESHOLD) {
             usrNavigationMode = NavigationMode::SPLIT;
             auto targetNode = hostNode->GetNavBarOrHomeDestinationNode();
             if (targetNode) {

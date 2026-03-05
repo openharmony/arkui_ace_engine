@@ -5506,7 +5506,7 @@ bool NavigationPattern::IsRealStackDisplay()
     if (userNavMode == NavigationMode::STACK || hideNavBar || navigationMode_ == NavigationMode::STACK) {
         return true;
     }
-    if (navigationMode_ == NavigationMode::AUTO) {
+    if (navigationMode_ == NavigationMode::AUTO || navigationMode_ == NavigationMode::AUTO_WITH_ASPECT_RATIO) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "treat as stack display before firstTime layout.");
         return true;
     }
@@ -6387,7 +6387,8 @@ void NavigationPattern::FireNavigateChangeCallback()
 void NavigationPattern::FireChangeCallbackAfterLayout()
 {
     // page not change or navigation is measured, not need to add callback
-    if (!isChanged_ || (navigationMode_ != NavigationMode::AUTO)) {
+    if (!isChanged_ || (navigationMode_ != NavigationMode::AUTO &&
+        navigationMode_ != NavigationMode::AUTO_WITH_ASPECT_RATIO)) {
         return;
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
