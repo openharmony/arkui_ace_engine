@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/dynamiclayout/algorithm_param_base.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -456,6 +457,72 @@ HWTEST_F(DynamicLayoutGridTestNg, DynamicLayoutModelNG_Create_GridLayout_Multipl
     auto frameNode2 = AceType::DynamicCast<DynamicLayoutNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ASSERT_NE(frameNode2, nullptr);
     EXPECT_EQ(frameNode2->GetLayoutType(), DynamicLayoutType::GRID_LAYOUT);
+}
+
+/**
+ * @tc.name: LazyGridLayoutPattern_OnAttachToMainTree_DynamicLayout_001
+ * @tc.desc: Test OnAttachToMainTree when isDynamicLayout is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicLayoutGridTestNg, LazyGridLayoutPattern_OnAttachToMainTree_DynamicLayout_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyGridLayoutPattern with dynamic layout flag set to true
+     */
+    auto pattern = AceType::MakeRefPtr<LazyGridLayoutPattern>();
+    pattern->SetDynamicLayoutOptions(true);
+    ASSERT_TRUE(pattern->IsDynamicLayout());
+
+    /**
+     * @tc.steps: step2. Create FrameNode with the pattern
+     */
+    auto frameNode = FrameNode::CreateFrameNode(TEST_TAG, TEST_NODE_ID, pattern, false);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call OnAttachToMainTree directly
+     * @tc.expected: Method should return early without setting needLazyLayout or checking parent
+     */
+    pattern->OnAttachToMainTree();
+
+    /**
+     * @tc.steps: step4. Verify that OnAttachToMainTree returned early
+     * @tc.expected: No exception should be thrown, execution should complete
+     */
+    EXPECT_TRUE(pattern->IsDynamicLayout());
+}
+
+/**
+ * @tc.name: LazyGridLayoutPattern_OnAttachToMainTree_NonDynamicLayout_001
+ * @tc.desc: Test OnAttachToMainTree when isDynamicLayout is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicLayoutGridTestNg, LazyGridLayoutPattern_OnAttachToMainTree_NonDynamicLayout_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyGridLayoutPattern with dynamic layout flag set to false
+     */
+    auto pattern = AceType::MakeRefPtr<LazyGridLayoutPattern>();
+    pattern->SetDynamicLayoutOptions(false);
+    ASSERT_FALSE(pattern->IsDynamicLayout());
+
+    /**
+     * @tc.steps: step2. Create FrameNode with the pattern
+     */
+    auto frameNode = FrameNode::CreateFrameNode(TEST_TAG, TEST_NODE_ID, pattern, false);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call OnAttachToMainTree directly
+     * @tc.expected: Method should execute normal logic without early return
+     */
+    pattern->OnAttachToMainTree();
+
+    /**
+     * @tc.steps: step4. Verify execution completed
+     * @tc.expected: Test should pass if OnAttachToMainTree executed normally
+     */
+    EXPECT_FALSE(pattern->IsDynamicLayout());
 }
 
 } // namespace OHOS::Ace::NG

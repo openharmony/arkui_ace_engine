@@ -97,6 +97,9 @@ bool LazyGridLayoutPattern::IsDynamicLayout() const
 
 void LazyGridLayoutPattern::OnAttachToMainTree()
 {
+    if (isDynamicLayout_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetNeedLazyLayout(true);
@@ -113,7 +116,7 @@ void LazyGridLayoutPattern::OnAttachToMainTree()
             parent = parent->GetParent();
             continue;
         }
-        if (parent->GetTag() != V2::WATERFLOW_ETS_TAG && !isDynamicLayout_) {
+        if (parent->GetTag() != V2::WATERFLOW_ETS_TAG) {
             LOGF_ABORT("LazyGridLayout cannot be used under the %{public}s", parent->GetTag().c_str());
         }
         return;
