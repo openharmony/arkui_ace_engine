@@ -810,15 +810,18 @@ void SwiperPattern::PostIdleTaskToCleanTabContent()
     }
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddPredictTask([weak = WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
+    pipelineContext->AddPredictTask([weak = WeakClaim(this), weakContext = WeakClaim(pipelineContext)](
+        int64_t deadline, bool canUseLongPredictTask) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        auto pipeline = weakContext.Upgrade();
+        bool isOnShow = !pipeline || pipeline->GetOnShow();
 
         std::set<int32_t> itemsHasClean;
         for (const auto& index : pattern->itemsNeedClean_) {
-            if (GetSysTimestamp() > deadline) {
+            if (GetSysTimestamp() > deadline && isOnShow) {
                 break;
             }
             itemsHasClean.insert(index);
