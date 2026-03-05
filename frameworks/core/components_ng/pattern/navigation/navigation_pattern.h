@@ -274,8 +274,12 @@ public:
 
     void SetInitNavBarWidth(const Dimension& initNavBarWidth)
     {
-        realNavBarWidth_ = static_cast<float>(initNavBarWidth.ConvertToPx());
         initNavBarWidthValue_ = initNavBarWidth;
+    }
+
+    void SetRealNavBarWidthValue(float navBarWidth)
+    {
+        realNavBarWidth_ = navBarWidth;
     }
 
     Dimension GetInitNavBarWidth() const
@@ -626,6 +630,14 @@ public:
     {
         return newSize != navigationSize_;
     }
+    bool GetIsNavBarWidthChange() const
+    {
+        return isNavBarWidthChange_;
+    }
+    void SetIsNavBarWidthChange(bool isChange)
+    {
+        isNavBarWidthChange_ = isChange;
+    }
 
     void FireNavigateChangeCallback();
 
@@ -888,6 +900,7 @@ private:
     bool userSetMinContentFlag_ = false;
     bool userSetNavBarWidthFlag_ = false;
     bool isChanged_ = false; // check navigation top page is change
+    bool isNavBarWidthChange_ = false;
     Dimension initNavBarWidthValue_ = DEFAULT_NAV_BAR_WIDTH;
     Dimension minNavBarWidthValue_ = 0.0_vp;
     Dimension maxNavBarWidthValue_ = 0.0_vp;
