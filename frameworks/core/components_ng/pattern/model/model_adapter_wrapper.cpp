@@ -210,6 +210,10 @@ void ModelAdapterWrapper::OnPaint3D(const RefPtr<ModelPaintProperty>& modelPaint
         UpdateBackgroundColor(modelPaintProperty);
     }
 
+    if (modelPaintProperty->NeedsRenderHeightSetup() || modelPaintProperty->NeedsRenderWidthSetup()) {
+        UpdateRenderSize(modelPaintProperty);
+    }
+
     DrawFrame();
 }
 
@@ -472,5 +476,28 @@ void ModelAdapterWrapper::UpdateBackgroundColor(const RefPtr<ModelPaintProperty>
     CHECK_NULL_VOID(textureLayer_);
     uint32_t backgroundColor = modelPaintProperty->GetBackgroundColor().value_or(0x00000000);
     textureLayer_->SetBackgroundColor(backgroundColor);
+}
+
+void ModelAdapterWrapper::UpdateRenderSize(const RefPtr<ModelPaintProperty>& modelPaintProperty)
+{
+    auto renderWidth = modelPaintProperty->GetRenderWidth().value_or(1.0f);
+    auto renderHeight = modelPaintProperty->GetRenderHeight().value_or(1.0f);
+    needsSyncPaint_ = true;
+#if defined(KIT_3D_ENABLE)
+    if (sceneAdapter_) {
+        sceneAdapter_->OnWindowChange(renderWidth, renderHeight);
+        return;
+    }
+#endif
+    CHECK_NULL_VOID(textureLayer_);
+    textureLayer_->SetRenderScale(renderWidth, renderHeight);
+    const auto textureInfo = textureLayer_->GetTextureInfo();
+    Render3D::GraphicsTask::GetInstance().PushAsyncMessage([weak = WeakClaim(this), textureInfo] {
+        auto adapter = weak.Upgrade();
+        CHECK_NULL_VOID(adapter);
+        CHECK_NULL_VOID(adapter->widgetAdapter_);
+
+        adapter->widgetAdapter_->OnWindowChange(textureInfo);
+    });
 }
 } // namespace OHOS::Ace::NG
