@@ -11735,6 +11735,58 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         CHECK_NULL_VOID(frameNode);
     }
     } // ArcScrollBarExtenderAccessor
+    namespace ArcSwiperContentTransitionProxyInnerAccessor {
+    void DestroyPeerImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+        auto peerImpl = reinterpret_cast<ArcSwiperContentTransitionProxyInnerPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_ArcSwiperContentTransitionProxyInner ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void FinishTransitionImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+    }
+    Ark_Int32 GetSelectedIndexImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+        return {};
+    }
+    void SetSelectedIndexImpl(Ark_ArcSwiperContentTransitionProxyInner peer,
+                              Ark_Int32 selectedIndex)
+    {
+    }
+    Ark_Int32 GetIndexImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+        return {};
+    }
+    void SetIndexImpl(Ark_ArcSwiperContentTransitionProxyInner peer,
+                      Ark_Int32 index)
+    {
+    }
+    Ark_Float64 GetPositionImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+        return {};
+    }
+    void SetPositionImpl(Ark_ArcSwiperContentTransitionProxyInner peer,
+                         Ark_Float64 position)
+    {
+    }
+    Ark_Float64 GetMainAxisLengthImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+        return {};
+    }
+    void SetMainAxisLengthImpl(Ark_ArcSwiperContentTransitionProxyInner peer,
+                               Ark_Float64 mainAxisLength)
+    {
+    }
+    } // ArcSwiperContentTransitionProxyInnerAccessor
     namespace ArcSwiperControllerHelperAccessor {
     void DestroyPeerImpl(Ark_ArcSwiperControllerHelper peer)
     {
@@ -11847,7 +11899,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         CHECK_NULL_VOID(frameNode);
     }
     void CustomContentTransitionImpl(Ark_NativePointer node,
-                                     const Opt_SwiperContentAnimatedTransition* transition)
+                                     const Opt_ArcSwiperContentAnimatedTransition* transition)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -21159,6 +21211,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &ArcScrollBarExtenderAccessorImpl;
     }
 
+    const GENERATED_ArkUIArcSwiperContentTransitionProxyInnerAccessor* GetArcSwiperContentTransitionProxyInnerAccessor()
+    {
+        static const GENERATED_ArkUIArcSwiperContentTransitionProxyInnerAccessor ArcSwiperContentTransitionProxyInnerAccessorImpl {
+            ArcSwiperContentTransitionProxyInnerAccessor::DestroyPeerImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::ConstructImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::GetFinalizerImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::FinishTransitionImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::GetSelectedIndexImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::SetSelectedIndexImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::GetIndexImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::SetIndexImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::GetPositionImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::SetPositionImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::GetMainAxisLengthImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::SetMainAxisLengthImpl,
+        };
+        return &ArcSwiperContentTransitionProxyInnerAccessorImpl;
+    }
+
+    struct ArcSwiperContentTransitionProxyInnerPeer {
+        virtual ~ArcSwiperContentTransitionProxyInnerPeer() = default;
+    };
+
     const GENERATED_ArkUIArcSwiperControllerHelperAccessor* GetArcSwiperControllerHelperAccessor()
     {
         static const GENERATED_ArkUIArcSwiperControllerHelperAccessor ArcSwiperControllerHelperAccessorImpl {
@@ -25087,6 +25162,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetArcListExtenderAccessor,
             GetArcListItemExtenderAccessor,
             GetArcScrollBarExtenderAccessor,
+            GetArcSwiperContentTransitionProxyInnerAccessor,
             GetArcSwiperControllerHelperAccessor,
             GetArcSwiperExtenderAccessor,
             GetAxisEventAccessor,

@@ -204,6 +204,7 @@ const GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor* GetArcAlphabetIndexerEx
 const GENERATED_ArkUIArcListExtenderAccessor* GetArcListExtenderAccessor();
 const GENERATED_ArkUIArcListItemExtenderAccessor* GetArcListItemExtenderAccessor();
 const GENERATED_ArkUIArcScrollBarExtenderAccessor* GetArcScrollBarExtenderAccessor();
+const GENERATED_ArkUIArcSwiperContentTransitionProxyInnerAccessor* GetArcSwiperContentTransitionProxyInnerAccessor();
 const GENERATED_ArkUIArcSwiperControllerHelperAccessor* GetArcSwiperControllerHelperAccessor();
 const GENERATED_ArkUIArcSwiperExtenderAccessor* GetArcSwiperExtenderAccessor();
 const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor();
@@ -549,6 +550,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetArcListExtenderAccessor,
         GetArcListItemExtenderAccessor,
         GetArcScrollBarExtenderAccessor,
+        GetArcSwiperContentTransitionProxyInnerAccessor,
         GetArcSwiperControllerHelperAccessor,
         GetArcSwiperExtenderAccessor,
         GetAxisEventAccessor,

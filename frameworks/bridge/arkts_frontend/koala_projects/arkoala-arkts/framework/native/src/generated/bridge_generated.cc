@@ -28887,6 +28887,59 @@ void impl_ArcScrollBarExtender_setArcScrollBarOptions(Ark_NativePointer node, KS
         GetAccessors()->getArcScrollBarExtenderAccessor()->setArcScrollBarOptions(node, static_cast<Ark_ArcScrollBarOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ArcScrollBarExtender_setArcScrollBarOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_ArcSwiperContentTransitionProxyInner_construct() {
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(ArcSwiperContentTransitionProxyInner_construct, Ark_NativePointer)
+Ark_NativePointer impl_ArcSwiperContentTransitionProxyInner_getFinalizer() {
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(ArcSwiperContentTransitionProxyInner_getFinalizer, Ark_NativePointer)
+void impl_ArcSwiperContentTransitionProxyInner_finishTransition(Ark_NativePointer thisPtr) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->finishTransition(self);
+}
+KOALA_INTEROP_DIRECT_V1(ArcSwiperContentTransitionProxyInner_finishTransition, Ark_NativePointer)
+KInt impl_ArcSwiperContentTransitionProxyInner_getSelectedIndex(Ark_NativePointer thisPtr) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->getSelectedIndex(self);
+}
+KOALA_INTEROP_DIRECT_1(ArcSwiperContentTransitionProxyInner_getSelectedIndex, KInt, Ark_NativePointer)
+void impl_ArcSwiperContentTransitionProxyInner_setSelectedIndex(Ark_NativePointer thisPtr, Ark_Int32 selectedIndex) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->setSelectedIndex(self, selectedIndex);
+}
+KOALA_INTEROP_DIRECT_V2(ArcSwiperContentTransitionProxyInner_setSelectedIndex, Ark_NativePointer, Ark_Int32)
+KInt impl_ArcSwiperContentTransitionProxyInner_getIndex(Ark_NativePointer thisPtr) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->getIndex(self);
+}
+KOALA_INTEROP_DIRECT_1(ArcSwiperContentTransitionProxyInner_getIndex, KInt, Ark_NativePointer)
+void impl_ArcSwiperContentTransitionProxyInner_setIndex(Ark_NativePointer thisPtr, Ark_Int32 index) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->setIndex(self, index);
+}
+KOALA_INTEROP_DIRECT_V2(ArcSwiperContentTransitionProxyInner_setIndex, Ark_NativePointer, Ark_Int32)
+KDouble impl_ArcSwiperContentTransitionProxyInner_getPosition(Ark_NativePointer thisPtr) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->getPosition(self);
+}
+KOALA_INTEROP_DIRECT_1(ArcSwiperContentTransitionProxyInner_getPosition, KDouble, Ark_NativePointer)
+void impl_ArcSwiperContentTransitionProxyInner_setPosition(Ark_NativePointer thisPtr, KDouble position) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->setPosition(self, position);
+}
+KOALA_INTEROP_DIRECT_V2(ArcSwiperContentTransitionProxyInner_setPosition, Ark_NativePointer, KDouble)
+KDouble impl_ArcSwiperContentTransitionProxyInner_getMainAxisLength(Ark_NativePointer thisPtr) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->getMainAxisLength(self);
+}
+KOALA_INTEROP_DIRECT_1(ArcSwiperContentTransitionProxyInner_getMainAxisLength, KDouble, Ark_NativePointer)
+void impl_ArcSwiperContentTransitionProxyInner_setMainAxisLength(Ark_NativePointer thisPtr, KDouble mainAxisLength) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->setMainAxisLength(self, mainAxisLength);
+}
+KOALA_INTEROP_DIRECT_V2(ArcSwiperContentTransitionProxyInner_setMainAxisLength, Ark_NativePointer, KDouble)
 Ark_NativePointer impl_ArcSwiperControllerHelper_construct() {
         return GetAccessors()->getArcSwiperControllerHelperAccessor()->construct();
 }
@@ -29078,13 +29131,13 @@ KOALA_INTEROP_DIRECT_V3(ArcSwiperExtender_effectMode, Ark_NativePointer, KSerial
 void impl_ArcSwiperExtender_customContentTransition(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto transitionValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_SwiperContentAnimatedTransition transitionValueTempTmpBuf = {};
+        Opt_ArcSwiperContentAnimatedTransition transitionValueTempTmpBuf = {};
         transitionValueTempTmpBuf.tag = transitionValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((transitionValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            transitionValueTempTmpBuf.value = SwiperContentAnimatedTransition_serializer::read(thisDeserializer);
+            transitionValueTempTmpBuf.value = ArcSwiperContentAnimatedTransition_serializer::read(thisDeserializer);
         }
-        Opt_SwiperContentAnimatedTransition transitionValueTemp = transitionValueTempTmpBuf;;
-        GetAccessors()->getArcSwiperExtenderAccessor()->customContentTransition(node, static_cast<Opt_SwiperContentAnimatedTransition*>(&transitionValueTemp));
+        Opt_ArcSwiperContentAnimatedTransition transitionValueTemp = transitionValueTempTmpBuf;;
+        GetAccessors()->getArcSwiperExtenderAccessor()->customContentTransition(node, static_cast<Opt_ArcSwiperContentAnimatedTransition*>(&transitionValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ArcSwiperExtender_customContentTransition, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ArcSwiperExtender_disableTransitionAnimation(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {

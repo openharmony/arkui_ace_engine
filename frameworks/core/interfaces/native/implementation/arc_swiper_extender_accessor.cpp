@@ -19,7 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/implementation/swiper_content_transition_proxy_peer.h"
+#include "core/interfaces/native/implementation/arc_swiper_content_transition_proxy_peer.h"
 #include "core/interfaces/native/implementation/arc_swiper_controller_peer.h"
 
 namespace OHOS::Ace::NG {
@@ -45,7 +45,10 @@ namespace {
 SwiperArcDotParameters ProcessDotParameters(FrameNode* frameNode, const Ark_ArcDotIndicatorInner& src)
 {
     SwiperArcDotParameters arcDotParam;
-    auto pipeline = frameNode->GetContext()->GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(frameNode, arcDotParam);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, arcDotParam);
+    auto pipeline = context->GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, arcDotParam);
     auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(swiperIndicatorTheme, arcDotParam);
@@ -81,7 +84,10 @@ SwiperArcDotParameters ProcessDotParameters(FrameNode* frameNode, const Ark_ArcD
 SwiperArcDotParameters ProcessDefaultDotParameters(FrameNode* frameNode)
 {
     SwiperArcDotParameters arcDotParam;
-    auto pipeline = frameNode->GetContext()->GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(frameNode, arcDotParam);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, arcDotParam);
+    auto pipeline = context->GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, arcDotParam);
     auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_RETURN(swiperIndicatorTheme, arcDotParam);
@@ -301,7 +307,7 @@ void EffectModeImpl(Ark_NativePointer node,
     SwiperModelStatic::SetEdgeEffect(frameNode, *edgeEffOpt);
 }
 void CustomContentTransitionImpl(Ark_NativePointer node,
-                                 const Opt_SwiperContentAnimatedTransition* transition)
+                                 const Opt_ArcSwiperContentAnimatedTransition* transition)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -315,7 +321,7 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
 
     transitionInfo.transition =
         [arkCallback = CallbackHelper(optValue->transition)](const RefPtr<SwiperContentTransitionProxy>& proxy) {
-        auto peer = new SwiperContentTransitionProxyPeer();
+        auto peer = PeerUtils::CreatePeer<ArcSwiperContentTransitionProxyInnerPeer>();
         CHECK_NULL_VOID(peer);
         peer->SetHandler(proxy);
         arkCallback.InvokeSync(peer);
