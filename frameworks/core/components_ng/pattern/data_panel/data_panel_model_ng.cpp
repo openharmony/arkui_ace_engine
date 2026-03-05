@@ -99,6 +99,7 @@ void DataPanelModelNG::SetValueColors(const std::vector<Gradient>& valueColors)
 void DataPanelModelNG::SetTrackBackground(const Color& trackBackgroundColor)
 {
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, trackBackgroundColor);
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, true);
 }
 
 void DataPanelModelNG::ResetTrackBackground()
@@ -150,6 +151,7 @@ void DataPanelModelNG::SetCloseEffect(FrameNode* frameNode, bool isClose)
 void DataPanelModelNG::SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, trackBackgroundColor, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, true, frameNode);
 }
 
 void DataPanelModelNG::ResetTrackBackground(FrameNode* frameNode)
@@ -220,6 +222,8 @@ void DataPanelModelNG::SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCal
 void HandleTrackBackgroundColor(
     const RefPtr<ResourceObject>& resObj, const RefPtr<DataPanelPattern>& pattern, const std::string& key)
 {
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
                             const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto pattern = weak.Upgrade();
@@ -240,6 +244,8 @@ void HandleTrackBackgroundColor(
 void HandleStrokeWidth(
     const RefPtr<ResourceObject>& resObj, const RefPtr<DataPanelPattern>& pattern, const std::string& key)
 {
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
                             const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto pattern = weak.Upgrade();
@@ -277,21 +283,23 @@ void DataPanelModelNG::CreateWithResourceObj(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<DataPanelPattern>();
     CHECK_NULL_VOID(pattern);
-    std::string key = "dataPanel." + std::to_string(static_cast<int>(jsResourceType));
-    pattern->RemoveResObj(key);
-    if (resObj) {
-        switch (jsResourceType) {
-            case DataPanelResourceType::TRACK_BACKGROUND_COLOR: {
-                HandleTrackBackgroundColor(resObj, pattern, key);
-                break;
-            }
-            case DataPanelResourceType::STROKE_WIDTH: {
-                HandleStrokeWidth(resObj, pattern, key);
-                break;
-            }
-            default:
-                break;
+    switch (jsResourceType) {
+        case DataPanelResourceType::TRACK_BACKGROUND_COLOR: {
+            HandleTrackBackgroundColor(resObj, pattern, "dataPanel.TrackBackgroudColor");
+            break;
         }
+        case DataPanelResourceType::STROKE_WIDTH: {
+            HandleStrokeWidth(resObj, pattern, "dataPanel.StrokeWidth");
+            break;
+        }
+        case DataPanelResourceType::VALUE_COLORS: {
+            if (!resObj) {
+                pattern->RemoveResObj("datapanel.ValueColors");
+            }
+            break;
+        }
+        default:
+            break;
     }
 }
 
