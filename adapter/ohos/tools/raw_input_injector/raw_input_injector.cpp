@@ -18,6 +18,7 @@
 #include <iostream>
 #include <thread>
 
+#include "key_event.h"
 #include "string_ex.h"
 
 namespace OHOS {
@@ -47,13 +48,19 @@ bool RawInputInjector::ExecuteInject(int32_t argc, char* argv[])
 
     // alway return true if the parse successfully
     bool ret = true;
-    if (!CheckCommandQueue()) {
-        std::cout << "the commands queue can not be handled" << std::endl;
-        return ret;
-    }
+    if (isKeyMode_) {
+        if (!ExecuteKeyQueue()) {
+            std::cout << "execute key commands failed" << std::endl;
+        }
+    } else {
+        if (!CheckCommandQueue()) {
+            std::cout << "the commands queue can not be handled" << std::endl;
+            return ret;
+        }
 
-    if (!ExecuteQueue()) {
-        std::cout << "execute commands failed" << std::endl;
+        if (!ExecuteQueue()) {
+            std::cout << "execute commands failed" << std::endl;
+        }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEPTIME));
     return ret;
@@ -112,10 +119,201 @@ bool RawInputInjector::ParseAndPackCommandQueue(int32_t argc, char* argv[])
         case 'T':
             ParseAndPackCommandForTouch(argc, argv);
             break;
+        case 'K':
+            isKeyMode_ = true;
+            ParseAndPackCommandForKey(argc, argv);
+            break;
         default:
             break;
     }
 
+    return true;
+}
+
+void RawInputInjector::PushValidKeyCommand(KeyCommand& currentCmd, bool& hasPendingCmd)
+{
+    if (!hasPendingCmd) {
+        return;
+    }
+    if ((currentCmd.type == 'd' || currentCmd.type == 'u') && currentCmd.keyCode != DEFAULT_KEY_CODE) {
+        keyCommands_.push_back(currentCmd);
+    } else if (currentCmd.type == 'w' && currentCmd.waitTime > 0) {
+        keyCommands_.push_back(currentCmd);
+    }
+    hasPendingCmd = false;
+}
+
+bool RawInputInjector::HandleKeyCommand(int32_t opt, KeyCommand& currentCmd, bool& hasPendingCmd)
+{
+    PushValidKeyCommand(currentCmd, hasPendingCmd);
+    currentCmd = KeyCommand();
+    currentCmd.type = opt;
+    hasPendingCmd = true;
+    return true;
+}
+
+bool RawInputInjector::HandleKeyWaitCommand(int32_t argc, char* argv[], KeyCommand& currentCmd, bool& hasPendingCmd)
+{
+    PushValidKeyCommand(currentCmd, hasPendingCmd);
+    currentCmd = KeyCommand();
+    currentCmd.type = 'w';
+    std::string waitStr = GetParamFromCurrentPosAndMoveOn(argc, argv);
+    if (waitStr.empty()) {
+        return false;
+    }
+    if (currentCmd.waitTime != DEFAULT_KEY_WAIT_TIME) {
+        return true;
+    }
+    if (!StrToInt(waitStr, currentCmd.waitTime)) {
+        return false;
+    }
+    hasPendingCmd = true;
+    return true;
+}
+
+bool RawInputInjector::HandleKeyCode(int32_t argc, char* argv[], KeyCommand& currentCmd, bool hasPendingCmd)
+{
+    if (hasPendingCmd && (currentCmd.type == 'd' || currentCmd.type == 'u')) {
+        std::string codeStr = GetParamFromCurrentPosAndMoveOn(argc, argv);
+        if (codeStr.empty()) {
+            return false;
+        }
+        if (currentCmd.keyCode != DEFAULT_KEY_CODE) {
+            return true;
+        }
+        if (!StrToInt(codeStr, currentCmd.keyCode)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool RawInputInjector::HandleKeyPressedCode(int32_t argc, char* argv[], KeyCommand& currentCmd, bool hasPendingCmd)
+{
+    if (hasPendingCmd && (currentCmd.type == 'd' || currentCmd.type == 'u')) {
+        std::string pStr;
+        while ((pStr = GetParamFromCurrentPosAndMoveOn(argc, argv)) != "") {
+            if (currentCmd.pressedKeysState) {
+                continue;
+            }
+            int32_t pCode = 0;
+            if (StrToInt(pStr, pCode)) {
+                currentCmd.pressedKeys.push_back(pCode);
+            } else {
+                return false;
+            }
+        }
+    }
+    currentCmd.pressedKeysState = true;
+    return true;
+}
+
+bool RawInputInjector::HandleKeyMetaCode(int32_t argc, char* argv[], KeyCommand& currentCmd, bool hasPendingCmd)
+{
+    if (hasPendingCmd && (currentCmd.type == 'd' || currentCmd.type == 'u')) {
+        std::string mStr = GetParamFromCurrentPosAndMoveOn(argc, argv);
+        if (mStr.empty()) {
+            return false;
+        }
+        if (currentCmd.metaState) {
+            return true;
+        }
+        int32_t mCode = 0;
+        if (StrToInt(mStr, mCode)) {
+            currentCmd.metaState = mCode;
+            if (mCode == 1) {
+                currentCmd.pressedKeys.push_back(MMI::KeyEvent::KEYCODE_META_LEFT);
+            }
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool RawInputInjector::ParseAndPackCommandForKey(int32_t argc, char* argv[])
+{
+    int32_t opt = 0;
+    KeyCommand currentCmd;
+    bool hasPendingCmd = false;
+    bool packRet = true;
+
+    while ((opt = GetOptFromCurrentPosAndMoveOn(argc, argv)) != -1) {
+        switch (opt) {
+            case 'd':
+            case 'u':
+                packRet = HandleKeyCommand(opt, currentCmd, hasPendingCmd);
+                break;
+            case 'w':
+                packRet = HandleKeyWaitCommand(argc, argv, currentCmd, hasPendingCmd);
+                break;
+            case 'c':
+                packRet = HandleKeyCode(argc, argv, currentCmd, hasPendingCmd);
+                break;
+            case 'p':
+                packRet = HandleKeyPressedCode(argc, argv, currentCmd, hasPendingCmd);
+                break;
+            case 'm':
+                packRet = HandleKeyMetaCode(argc, argv, currentCmd, hasPendingCmd);
+                break;
+            default:
+                std::cout << "unrecognized key option: -" << static_cast<char>(opt) << std::endl;
+                return false;
+        }
+
+        if (!packRet) {
+            std::cout << "pack single command failed for -" << static_cast<char>(opt) << std::endl;
+            return false;
+        }
+    }
+    PushValidKeyCommand(currentCmd, hasPendingCmd);
+    return true;
+}
+
+void RawInputInjector::DumpKeyCommands()
+{
+    if (!InjectorUtils::IsDebugOn()) {
+        return;
+    }
+    std::cout << "Key commands queue:" << std::endl;
+    int32_t index = 1;
+    for (const auto& cmd : keyCommands_) {
+        std::cout << "[" << index++ << "] - type: ";
+        if (cmd.type == 'd') {
+            std::cout << "key down, keyCode: " << cmd.keyCode;
+        } else if (cmd.type == 'u') {
+            std::cout << "key up, keyCode: " << cmd.keyCode;
+        } else if (cmd.type == 'w') {
+            std::cout << "wait, waitTime: " << cmd.waitTime;
+        }
+
+        if ((cmd.type == 'd' || cmd.type == 'u') && !cmd.pressedKeys.empty()) {
+            std::cout << ", pressedKeys: [";
+            for (size_t i = 0; i < cmd.pressedKeys.size(); ++i) {
+                std::cout << cmd.pressedKeys[i] << (i == cmd.pressedKeys.size() - 1 ? "" : ", ");
+            }
+            std::cout << "]";
+        }
+        std::cout << std::endl;
+    }
+}
+
+bool RawInputInjector::ExecuteKeyQueue()
+{
+    if (keyCommands_.empty()) {
+        return false;
+    }
+
+    DumpKeyCommands();
+
+    std::vector<int32_t> globalDownKeys;
+    for (const auto& cmd : keyCommands_) {
+        if (cmd.type == 'w') {
+            std::this_thread::sleep_for(std::chrono::milliseconds(cmd.waitTime));
+            continue;
+        }
+        InjectingExecutor::InjectKeyEvent(cmd.type, cmd.keyCode, cmd.pressedKeys, globalDownKeys);
+    }
     return true;
 }
 
