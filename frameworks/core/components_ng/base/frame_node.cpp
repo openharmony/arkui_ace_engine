@@ -1173,6 +1173,15 @@ void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         json->Put("visible", "false");
     }
+    CHECK_NULL_VOID(renderContext_);
+    auto& opacity = renderContext_->GetOpacity();
+    if (opacity.has_value() && !NearEqual(opacity.value(), 1.0f)) {
+        json->Put("opacity", opacity.value());
+    }
+    auto& backgroundColor = renderContext_->GetBackgroundColor();
+    if (backgroundColor.has_value()) {
+        json->Put("backgroundColor", backgroundColor.value().ColorToString().c_str());
+    }
 }
 
 void FrameNode::DumpSimplifyCommonInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
