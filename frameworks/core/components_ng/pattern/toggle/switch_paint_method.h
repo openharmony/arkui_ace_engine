@@ -118,7 +118,15 @@ public:
             switchModifier_->SetInactiveColor(paintProperty->GetUnselectedColor().value());
         }
         if (paintProperty->HasSelectedColor()) {
-            switchModifier_->SetUserActiveColor(paintProperty->GetSelectedColor().value());
+            if (SystemProperties::ConfigChangePerform()) {
+                if (!paintProperty->GetSelectedColorSetByUserValue(false)) {
+                    switchModifier_->SetUserActiveColor(switchTheme->GetActiveColor());
+                } else {
+                    switchModifier_->SetUserActiveColor(paintProperty->GetSelectedColor().value());
+                }
+            } else {
+                switchModifier_->SetUserActiveColor(paintProperty->GetSelectedColor().value());
+            }
         } else {
             switchModifier_->SetUserActiveColor(switchTheme->GetActiveColor());
         }
