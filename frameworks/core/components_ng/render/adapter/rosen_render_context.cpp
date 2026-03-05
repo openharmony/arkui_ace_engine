@@ -4976,7 +4976,7 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
             } else {
                 if (SystemProperties::GetMultiInstanceEnabled()) {
                     auto parentNode = newNode->GetParent();
-                    if (parentNode) {
+                    if (parentNode && !parentNode->IsTextureExportNode()) {
                         parentNode->RemoveChild(newNode);
                     }
                     auto context = rsNode_->GetRSUIContext();
