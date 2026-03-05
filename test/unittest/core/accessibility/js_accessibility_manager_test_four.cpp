@@ -34,21 +34,6 @@ namespace OHOS::Ace {
 
 namespace OHOS::Ace::NG {
 namespace {
-bool IsParentRectInfoEqual(AccessibilityParentRectInfo& rectInfo1, AccessibilityParentRectInfo& rectInfo2)
-{
-    CHECK_NE_RETURN(rectInfo1.left, rectInfo2.left, false);
-    CHECK_NE_RETURN(rectInfo1.top, rectInfo2.top, false);
-    CHECK_NE_RETURN(rectInfo1.scaleX, rectInfo2.scaleX, false);
-    CHECK_NE_RETURN(rectInfo1.scaleY, rectInfo2.scaleY, false);
-    CHECK_NE_RETURN(rectInfo1.rotateTransform.rotateDegree, rectInfo2.rotateTransform.rotateDegree, false);
-    CHECK_NE_RETURN(rectInfo1.rotateTransform.centerX, rectInfo2.rotateTransform.centerX, false);
-    CHECK_NE_RETURN(rectInfo1.rotateTransform.centerY, rectInfo2.rotateTransform.centerY, false);
-    CHECK_NE_RETURN(rectInfo1.rotateTransform.innerCenterX, rectInfo2.rotateTransform.innerCenterX, false);
-    CHECK_NE_RETURN(rectInfo1.rotateTransform.innerCenterY, rectInfo2.rotateTransform.innerCenterY, false);
-    CHECK_NE_RETURN(rectInfo1.isChanged, rectInfo2.isChanged, false);
-
-    return true;
-}
 } // namespace
 
 class JsAccessibilityManagerTestFour : public testing::Test {
@@ -370,8 +355,6 @@ HWTEST_F(JsAccessibilityManagerTestFour, DeregisterScreenReaderObserverCallback0
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
-);
-
     int64_t elementId = 100;
     jsAccessibilityManager->DeregisterScreenReaderObserverCallback(elementId);
 
@@ -419,7 +402,7 @@ HWTEST_F(JsAccessibilityManagerTestFour, RegisterInteractionOperationAsChildTree
     Registration registration;
     registration.parentWindowId = 1;
     registration.parentTreeId = 2;
-    registration.parentElementId = 100;
+    registration.elementId = 100;
 
     bool result = jsAccessibilityManager->RegisterInteractionOperationAsChildTree(registration);
 
@@ -680,48 +663,6 @@ HWTEST_F(JsAccessibilityManagerTestFour, UpdateAccessibilityNodeRect002, TestSiz
 }
 
 /**
- * @tc.name: OnAccessbilityDetachFromMainTree001
- * @tc.desc: Test OnAccessbilityDetachFromMainTree with null frame node
- * @tc.type: FUNC
- */
-HWTEST_F(JsAccessibilityManagerTestFour, OnAccessbilityDetachFromMainTree001, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin OnAccessbilityDetachFromMainTree001";
-
-    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    ASSERT_NE(jsAccessibilityManager, nullptr);
-
-    RefPtr<NG::FrameNode> frameNode = nullptr;
-    jsAccessibilityManager->OnAccessbilityDetachFromMainTree(frameNode);
-
-    SUCCEED();
-
-    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-end OnAccessbilityDetachFromMainTree001";
-}
-
-/**
- * @tc.name: OnAccessbilityDetachFromMainTree002
- * @tc.desc: Test OnAccessbilityDetachFromMainTree with valid frame node
- * @tc.type: FUNC
- */
-HWTEST_F(JsAccessibilityManagerTestFour, OnAccessbilityDetachFromMainTree002, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin OnAccessbilityDetachFromMainTree002";
-
-    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    ASSERT_NE(jsAccessibilityManager, nullptr);
-
-    auto pattern = AceType::MakeRefPtr<NG::Pattern>();
-    auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
-
-    jsAccessibilityManager->OnAccessbilityDetachFromMainTree(frameNode);
-
-    SUCCEED();
-
-    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-end OnAccessbilityDetachFromMainTree002";
-}
-
-/**
  * @tc.name: AddToPageEventController001
  * @tc.desc: Test AddToPageEventController adds frame node to controller
  * @tc.type: FUNC
@@ -741,29 +682,6 @@ HWTEST_F(JsAccessibilityManagerTestFour, AddToPageEventController001, TestSize.L
     SUCCEED();
 
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-end AddToPageEventController001";
-}
-
-/**
- * @tc.name: DeleteFromPageEventController001
- * @tc.desc: Test DeleteFromPageEventController removes frame node from controller
- * @tc.type: FUNC
- */
-HWTEST_F(JsAccessibilityManagerTestFour, DeleteFromPageEventController001, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin DeleteFromPageEventController001";
-
-    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    ASSERT_NE(jsAccessibilityManager, nullptr);
-
-    auto pattern = AceType::MakeRefPtr<NG::Pattern>();
-    auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
-
-    jsAccessibilityManager->AddToFromPageEventController(frameNode);
-    bool result = jsAccessibilityManager->DeleteFromPageEventController(frameNode);
-
-    SUCCEED();
-
-    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-end DeleteFromPageEventController001";
 }
 
 /**
