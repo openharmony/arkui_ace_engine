@@ -85,8 +85,9 @@ ani_object NativeCustomComponent::CustomNodeCallDefaultMeasure(
     ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
     auto uiNode = AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
+    CHECK_NULL_RETURN(uiNode, AniUtils::GetUndefined(env));
     auto frameNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(uiNode);
- 
+    CHECK_NULL_RETURN(frameNode, AniUtils::GetUndefined(env));
     auto frameSize = NG::CustomNodeStatic::DidDefaultMeasure(frameNode);
     return AniMeasureLayoutParamNG::GenMeasureResult(env, frameSize);
 }
@@ -95,8 +96,9 @@ void NativeCustomComponent::CustomNodeCallDefaultLayout(
     ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
     auto uiNode = AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
+    CHECK_NULL_VOID(uiNode);
     auto frameNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(uiNode);
- 
+    CHECK_NULL_VOID(frameNode);
     NG::CustomNodeStatic::DidDefaultLayout(frameNode);
     return ;
 }
@@ -248,7 +250,6 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
         NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
         layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     };
-
 
     ani_method onPlaceChildrenMethod;
     std::function<void(NG::LayoutWrapper* layoutWrapper)> onPlaceChildren = nullptr;
