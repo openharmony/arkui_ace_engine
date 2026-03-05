@@ -460,6 +460,7 @@ public:
     }
 
     SheetType GetSheetType() const;
+    bool IsWidthMDandHeightSM();
     bool IsPhoneInLandScape();
     bool IsShowCloseIcon();
     void InitSheetMode();

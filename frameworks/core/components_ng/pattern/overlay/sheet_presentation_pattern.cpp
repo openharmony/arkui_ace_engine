@@ -123,6 +123,22 @@ void SheetPresentationPattern::OnModifyDone()
     InitFoldCreaseRegion();
 }
 
+bool SheetPresentationPattern::IsWidthMDandHeightSM()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, false);
+    auto width = windowManager->GetWidthBreakpointCallback();
+    auto height = windowManager->GetHeightBreakpointCallback();
+    if (width == WidthBreakpoint::WIDTH_MD && height == HeightBreakpoint::HEIGHT_SM) {
+        return true;
+    }
+    return false;
+}
+
 // check device is phone, fold status, and device in landscape
 bool SheetPresentationPattern::IsPhoneInLandScape()
 {

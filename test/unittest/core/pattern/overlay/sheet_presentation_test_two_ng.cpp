@@ -199,6 +199,52 @@ HWTEST_F(SheetPresentationTestTwoNg, SetSheetType001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsWidthMDandHeightSM001
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::IsWidthMDandHeightSM function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsWidthMDandHeightSM001, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto host = sheetPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    ASSERT_NE(windowManager, nullptr);
+
+    windowManager->SetHeightBreakpointCallback(
+        []() -> HeightBreakpoint {
+        return HeightBreakpoint::HEIGHT_MD;
+    });
+    windowManager->SetWidthBreakpointCallback(
+        []() -> WidthBreakpoint {
+        return WidthBreakpoint::WIDTH_SM;
+    });
+
+    bool retFirst = sheetPattern->IsWidthMDandHeightSM();
+    EXPECT_FALSE(retFirst);
+
+    windowManager->SetHeightBreakpointCallback(
+        []() -> HeightBreakpoint {
+        return HeightBreakpoint::HEIGHT_SM;
+    });
+    windowManager->SetWidthBreakpointCallback(
+        []() -> WidthBreakpoint {
+        return WidthBreakpoint::WIDTH_MD;
+    });
+
+    bool retSecond = sheetPattern->IsWidthMDandHeightSM();
+    EXPECT_TRUE(retSecond);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: IsPhoneInLandScape001
  * @tc.desc: Increase the coverage of SheetPresentationPattern::IsPhoneInLandScape function.
  * @tc.type: FUNC
