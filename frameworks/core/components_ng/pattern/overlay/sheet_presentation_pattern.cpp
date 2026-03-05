@@ -26,6 +26,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/window.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -4048,6 +4049,40 @@ void SheetPresentationPattern::UpdateSheetType()
     }
 }
 
+std::optional<Dimension> SheetPresentationPattern::GetSheetMiniDeviceMarginWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, std::nullopt);
+    auto width = windowManager->GetWidthBreakpointCallback();
+    // margin { X, Y }
+    if (width == WidthBreakpoint::WIDTH_XS || width == WidthBreakpoint::WIDTH_SM) {
+        return std::make_optional<Dimension>(16.0f, DimensionUnit::VP);
+    }
+    if (width == WidthBreakpoint::WIDTH_MD) {
+        return std::make_optional<Dimension>(24.0f, DimensionUnit::VP);
+    }
+    if (width == WidthBreakpoint::WIDTH_LG || width == WidthBreakpoint::WIDTH_XL) {
+        return std::make_optional<Dimension>(32.0f, DimensionUnit::VP);
+    }
+    return std::nullopt;
+}
+
+std::optional<Dimension> SheetPresentationPattern::GetSheetMiniDeviceMarginHeight()
+{
+    return std::make_optional<Dimension>(32.0f, DimensionUnit::VP);
+}
+
+void SheetPresentationPattern::InitSheetObjectDragEvent(RefPtr<SheetObject> sheetObject)
+{
+    auto sheetMinimizeObject = AceType::DynamicCast<SheetMinimizeObject>(sheetObject);
+    CHECK_NULL_VOID(sheetMinimizeObject);
+    sheetMinimizeObject->InitDragDropEvent();
+}
+
 void SheetPresentationPattern::InitSheetObject()
 {
     ACE_UINODE_TRACE(GetHost());
@@ -4063,6 +4098,7 @@ void SheetPresentationPattern::InitSheetObject()
         sheetObject_ = AceType::MakeRefPtr<SheetObject>(sheetType_);
     }
     sheetObject_->BindPattern(WeakClaim(this));
+    InitSheetObjectDragEvent(sheetObject_);
     // Don't process information here, such as events, etc
     // Because here only the SheetStyle is updated to the layoutProperty, but the properties are not parsed,
     // and the data is not updated to the pattern.
@@ -4115,6 +4151,7 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
 
     SetSheetObject(sheetObject);
     sheetObject_->BindPattern(WeakClaim(this));
+    InitSheetObjectDragEvent(sheetObject_);
     FireOnTypeDidChange();
     // start init new sheet data
     InitPanEvent();
