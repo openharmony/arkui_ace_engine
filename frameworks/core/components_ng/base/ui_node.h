@@ -174,6 +174,9 @@ public:
         return isStaticNode_;
     }
 
+    void NeedSetInActiveAfterTransitionOut(bool needSetInActive);
+    void SetInActiveAfterTransitionOut();
+
     // Only for the currently loaded children, do not expand.
     void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
@@ -1444,6 +1447,7 @@ private:
     WeakPtr<UINode> layoutChildrenParent_;
     bool isObservedByLayoutChildren_ = false;
     static std::atomic_int32_t count_;
+    bool needSetInActiveAfterTransitionOut_ = false;
 
     bool isStaticNode_ = false;
     bool uiNodeGcEnable_ = false;

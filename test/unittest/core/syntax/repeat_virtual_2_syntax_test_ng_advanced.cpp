@@ -77,7 +77,7 @@ public:
     }
 };
 
-auto g_onGetRid4Index = [](uint32_t index) -> std::pair<RIDType, uint32_t> {
+auto g_onGetRid4Index = [](uint32_t index, bool inAnimation) -> std::pair<RIDType, uint32_t> {
     return { index, index };
 };
 
