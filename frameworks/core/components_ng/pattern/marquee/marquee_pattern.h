@@ -145,6 +145,7 @@ private:
 
     void StartMarqueeAnimation();
     void StopMarqueeAnimation(bool stopAndStart);
+    void ChangeSecondChildVisibility(bool stopAndStart);
     void UpdateTextTranslateXY(float offsetX, bool cancel = false, bool isFirstTextNode = true);
     void PropertyCancelAnimationFinish();
     bool OnlyPlayStatusChange();
