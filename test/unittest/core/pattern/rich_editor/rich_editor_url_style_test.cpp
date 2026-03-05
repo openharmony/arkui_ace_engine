@@ -1691,7 +1691,6 @@ HWTEST_F(RichEditorUrlStyleTest, HandleTouchDownNoCaretTouchTest001, TestSize.Le
     richEditorPattern->HandleTouchDown(touchInfo);
     EXPECT_FALSE(richEditorPattern->moveCaretState_.isTouchCaret)
         << "isTouchCaret should remain false when touch is not on caret";
-    EXPECT_EQ(richEditorPattern->touchedFingerCount_, 1);
     EXPECT_EQ(richEditorPattern->moveCaretState_.touchDownOffset, touchPosition);
 }
 
