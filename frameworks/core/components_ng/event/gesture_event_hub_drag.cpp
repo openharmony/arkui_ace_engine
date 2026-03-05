@@ -1480,6 +1480,7 @@ void GestureEventHub::SetMouseDragGatherPixelMaps()
             continue;
         }
         dragDropManager->PushGatherPixelMap(itemPreviewPixelMap);
+        gestureHub->SetDragPreviewPixelMap(nullptr);
         cnt++;
         if (cnt > 1) {
             break;
