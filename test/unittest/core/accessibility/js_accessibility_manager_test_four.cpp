@@ -68,6 +68,8 @@ void JsAccessibilityManagerTestFour::TearDownTestCase()
  */
 HWTEST_F(JsAccessibilityManagerTestFour, JsAccessibilityManager001, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin JsAccessibilityManager001";
+
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
@@ -81,6 +83,10 @@ HWTEST_F(JsAccessibilityManagerTestFour, JsAccessibilityManager001, TestSize.Lev
     auto rootNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto result = jsAccessibilityManager->GetNextFocusNodeByManager(currentNode, rootNode);
     EXPECT_EQ(result, nullptr);
+
+    SUCCEED();
+
+    GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-end JsAccessibilityManager001";
 }
 
 /**
@@ -92,9 +98,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, EraseDefaultFocusNode001, TestSize.Leve
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin EraseDefaultFocusNode001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test EraseDefaultFocusNode
+     */
     auto pattern = AceType::MakeRefPtr<NG::Pattern>();
     auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
 
@@ -115,9 +127,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, GetDefaultFocusList001, TestSize.Level1
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin GetDefaultFocusList001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetDefaultFocusList
+     */
     auto& focusList = jsAccessibilityManager->GetDefaultFocusList();
 
     SUCCEED();
@@ -134,9 +152,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, UpdateElementInfoTreeId001, TestSize.Le
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin UpdateElementInfoTreeId001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test UpdateElementInfoTreeId
+     */
     AccessibilityElementInfo elementInfo;
     elementInfo.SetAccessibilityId(100);
 
@@ -156,9 +180,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, UpdateElementInfosTreeId001, TestSize.L
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin UpdateElementInfosTreeId001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test UpdateElementInfosTreeId
+     */
     std::list<AccessibilityElementInfo> infos;
     AccessibilityElementInfo elementInfo1;
     elementInfo1.SetAccessibilityId(100);
@@ -184,9 +214,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, SetWebPatternBySurfaceId001, TestSize.L
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin SetWebPatternBySurfaceId001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test SetWebPatternBySurfaceId
+     */
     std::string surfaceId = "test_surface_123";
     WeakPtr<NG::WebPattern> webPattern;
 
@@ -206,9 +242,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, GetWebPatternBySurfaceId001, TestSize.L
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin GetWebPatternBySurfaceId001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetWebPatternBySurfaceId
+     */
     std::string surfaceId = "test_surface_123";
     WeakPtr<NG::WebPattern> webPattern = jsAccessibilityManager->GetWebPatternBySurfaceId(surfaceId);
 
@@ -226,9 +268,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, RemoveWebPatternBySurfaceId001, TestSiz
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin RemoveWebPatternBySurfaceId001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test RemoveWebPatternBySurfaceId
+     */
     std::string surfaceId = "test_surface_123";
     jsAccessibilityManager->RemoveWebPatternBySurfaceId(surfaceId);
 
@@ -246,9 +294,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, RegisterAccessibilityChildTreeCallback0
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin RegisterAccessibilityChildTreeCallback001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test RegisterAccessibilityChildTreeCallback
+     */
     int64_t elementId = 100;
     std::shared_ptr<AccessibilityChildTreeCallback> callback = nullptr;
 
@@ -268,9 +322,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, DeregisterAccessibilityChildTreeCallbac
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin DeregisterAccessibilityChildTreeCallback001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test DeregisterAccessibilityChildTreeCallback
+     */
     int64_t elementId = 100;
     jsAccessibilityManager->DeregisterAccessibilityChildTreeCallback(elementId);
 
@@ -288,9 +348,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, RegisterAccessibilitySAObserverCallback
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin RegisterAccessibilitySAObserverCallback001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test RegisterAccessibilitySAObserverCallback
+     */
     int64_t elementId = 100;
     std::shared_ptr<AccessibilitySAObserverCallback> callback = nullptr;
 
@@ -310,9 +376,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, DeregisterAccessibilitySAObserverCallba
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin DeregisterAccessibilitySAObserverCallback001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test DeregisterAccessibilitySAObserverCallback
+     */
     int64_t elementId = 100;
     jsAccessibilityManager->DeregisterAccessibilitySAObserverCallback(elementId);
 
