@@ -2179,7 +2179,11 @@ export class NavigationTransitionProxy_serializer {
 export class NavPathInfo_serializer {
     public static write(buffer: SerializerBase, value: NavPathInfo): void {
         let valueSerializer: SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
+
+        // instructive change start
+        const ptr = NavPathInfo.construct(value.name, value.param, value.onPop, value.isEntry);
+        valueSerializer.writePointer(ptr)
+        // instructive change end
     }
     public static read(buffer: DeserializerBase): NavPathInfo {
         let valueDeserializer: DeserializerBase = buffer
