@@ -660,13 +660,12 @@ HWTEST_F(RichEditorTouchTestNg, TestTouchedFingerCount, TestSize.Level0)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto& fingerCount = richEditorPattern->touchedFingerCount_;
-    fingerCount = 0;
+    auto& touchedFingers = richEditorPattern->touchedFingers_;
     TouchLocationInfo touchLocationInfo(0);
     richEditorPattern->HandleTouchDown(touchLocationInfo);
-    EXPECT_NE(fingerCount, 0);
+    EXPECT_EQ(touchedFingers.size(), 0);
     richEditorPattern->HandleTouchUp();
-    EXPECT_EQ(fingerCount, 0);
+    EXPECT_EQ(touchedFingers.size(), 0);
 }
 
 /**

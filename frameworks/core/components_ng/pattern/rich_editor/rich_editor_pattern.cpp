@@ -4238,7 +4238,7 @@ TextAlign RichEditorPattern::GetTextAlignByDirection()
 
 void RichEditorPattern::HandleLongPress(GestureEvent& info)
 {
-    if (touchedFingerCount_ == 0) {
+    if (touchedFingers_.empty()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "no finger touched, skip long press event");
         return;
     }
@@ -8248,8 +8248,29 @@ void RichEditorPattern::InitPanEvent()
     });
 }
 
+void RichEditorPattern::HandleTouchedFingersCount(TouchEventInfo& info)
+{
+    const auto& touchInfos = info.GetChangedTouches();
+    for (const auto& touchInfo : touchInfos) {
+        TouchType type = touchInfo.GetTouchType();
+        CHECK_NULL_CONTINUE(type == TouchType::DOWN || type == TouchType::UP || type == TouchType::CANCEL);
+        int32_t fingerId = touchInfo.GetFingerId();
+
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "TouchType=%{public}zu, fingerId=%{public}d", type, fingerId);
+        if (type == TouchType::DOWN) {
+            touchedFingers_.insert(fingerId);
+            continue;
+        }
+
+        if (type == TouchType::UP || type == TouchType::CANCEL) {
+            touchedFingers_.erase(fingerId);
+        }
+    }
+}
+
 void RichEditorPattern::HandleTouchEvent(TouchEventInfo& info)
 {
+    HandleTouchedFingersCount(info);
     CHECK_NULL_VOID(!selectOverlay_->IsTouchAtHandle(info));
     CHECK_NULL_VOID(!info.GetTouches().empty());
     HandleUserTouchEvent(info);
@@ -8302,7 +8323,7 @@ void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
 {
     auto sourceTool = info.GetSourceTool();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Touch down longPressState=[%{public}d, %{public}d], source=%{public}d,"
-        "fingers=%{public}d", previewLongPress_, editingLongPress_, sourceTool, ++touchedFingerCount_);
+        "fingers=%{public}zu", previewLongPress_, editingLongPress_, sourceTool, touchedFingers_.size());
     globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     moveCaretState_.Reset();
     ResetTouchSelectState();
@@ -8318,8 +8339,8 @@ void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
 void RichEditorPattern::HandleTouchUp()
 {
     bool isHandleMoving = IsHandleMoving();
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleTouchUp, fingers=%{public}d, isHandleMoving=%{public}d",
-        --touchedFingerCount_, isHandleMoving);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleTouchUp, fingers=%{public}zu, isHandleMoving=%{public}d",
+        touchedFingers_.size(), isHandleMoving);
     HandleTouchUpAfterLongPress();
     ResetTouchAndMoveCaretState();
     ResetTouchSelectState();

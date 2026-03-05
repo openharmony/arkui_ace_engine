@@ -1923,6 +1923,7 @@ private:
 #endif
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     void ReportComponentChangeEvent();
+    void HandleTouchedFingersCount(TouchEventInfo& info);
     // hostOverlayMod_ is the overlay modifier of rich editor,
     // while overlayMod_ is the overlay modifier of rich editor content node.
     RefPtr<TextOverlayModifier> hostOverlayMod_;
@@ -2077,7 +2078,7 @@ private:
     bool requestFocusBySingleClick_ = false;
     // record caret bottom position relative to window when keyboard avoid
     std::optional<float> lastCaretPos_ = std::nullopt;
-    int32_t touchedFingerCount_ = 0;
+    std::unordered_set<int32_t> touchedFingers_;
     bool isSingleLineMode_ = false;
 
 #if defined(CROSS_PLATFORM)
