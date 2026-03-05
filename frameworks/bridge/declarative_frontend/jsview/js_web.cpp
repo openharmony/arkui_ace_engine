@@ -5235,7 +5235,10 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
         return JSRef<JSVal>();
     }
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
+    auto napi_status = napi_open_handle_scope(env, &scope);
+    if (napi_status != napi_ok) {
+        return JSRef<JSVal>();
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("isAlert", eventInfo.IsAlert());
     obj->SetProperty("isUserTrigger", eventInfo.IsUserTrigger());
@@ -5251,6 +5254,15 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
 
 JSRef<JSVal> WindowNewExtEventToJSValue(const WebWindowNewExtEvent& eventInfo)
 {
+    napi_env env = GetNapiEnv();
+    if (!env) {
+        return JSRef<JSVal>();
+    }
+    napi_handle_scope scope = nullptr;
+    auto napi_status = napi_open_handle_scope(env, &scope);
+    if (napi_status != napi_ok) {
+        return JSRef<JSVal>();
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("isAlert", eventInfo.IsAlert());
     obj->SetProperty("isUserTrigger", eventInfo.IsUserTrigger());
@@ -5268,6 +5280,7 @@ JSRef<JSVal> WindowNewExtEventToJSValue(const WebWindowNewExtEvent& eventInfo)
 
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(handlerObj), static_cast<void*>(handler.GetRawPtr()));
     obj->SetPropertyObject("handler", handlerObj);
+    napi_close_handle_scope(env, scope);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -5380,15 +5393,26 @@ void JSWeb::OnWindowNew(const JSCallbackInfo& args)
         auto webNode = node.Upgrade();
         CHECK_NULL_VOID(webNode);
         ContainerScope scope(webNode->GetInstanceId());
+        napi_env env = GetNapiEnv();
+        if (!env) {
+            return;
+        }
+        napi_handle_scope napi_scope = nullptr;
+        auto napi_status = napi_open_handle_scope(env, &napi_scope);
+        if (napi_status != napi_ok) {
+            return;
+        }
         auto pipelineContext = PipelineContext::GetCurrentContext();
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewEvent>(info.get());
         if (!func || !HandleWindowNewEvent(eventInfo)) {
+            napi_close_handle_scope(env, napi_scope);
             return;
         }
         func->Execute(*eventInfo);
+        napi_close_handle_scope(env, napi_scope);
     };
     WebModel::GetInstance()->SetWindowNewEvent(jsCallback);
 }
@@ -5408,15 +5432,26 @@ void JSWeb::OnWindowNewExt(const JSCallbackInfo& args)
         auto webNode = node.Upgrade();
         CHECK_NULL_VOID(webNode);
         ContainerScope scope(webNode->GetInstanceId());
+        napi_env env = GetNapiEnv();
+        if (!env) {
+            return;
+        }
+        napi_handle_scope napi_scope = nullptr;
+        auto napi_status = napi_open_handle_scope(env, &napi_scope);
+        if (napi_status != napi_ok) {
+            return;
+        }
         auto pipelineContext = PipelineContext::GetCurrentContext();
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewExtEvent>(info.get());
         if (!func || !HandleWindowNewExtEvent(eventInfo)) {
+            napi_close_handle_scope(env, napi_scope);
             return;
         }
         func->Execute(*eventInfo);
+        napi_close_handle_scope(env, napi_scope);
     };
     WebModel::GetInstance()->SetWindowNewExtEvent(jsCallback);
 }
