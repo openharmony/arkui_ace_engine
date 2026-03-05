@@ -1035,14 +1035,15 @@ export class NavPathStack implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getParamByName(this.peer!.ptr, name)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength: int32 = retvalDeserializer.readInt32()
-        const buffer: Array<Object | null | undefined> = new Array<Object | null | undefined>(bufferLength, (arg0: int32):Object | null | undefined => {
-            const bufferTempBuf_runtimeType = retvalDeserializer.readInt8()!.toInt();
-            let bufferTempBuf: Object | null | undefined = undefined;
+        let buffer : Array<Object | null | undefined> = Array.create<Object | null | undefined>(bufferLength, undefined)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            const bufferTempBuf_runtimeType  = retvalDeserializer.readInt8().toInt()
+            let bufferTempBuf : Object | null | undefined = undefined
             if ((bufferTempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
                 bufferTempBuf = (retvalDeserializer.readObject() as object);
             }
-            return bufferTempBuf;
-        })
+            buffer[bufferBufCounterI] = bufferTempBuf
+        }
         const returnResult: Array<Object | null | undefined> = buffer
         return returnResult
     }
