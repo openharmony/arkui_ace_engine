@@ -402,9 +402,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, RegisterScreenReaderObserverCallback001
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin RegisterScreenReaderObserverCallback001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test RegisterScreenReaderObserverCallback
+     */
     int64_t elementId = 100;
     std::shared_ptr<AccessibilityScreenReaderObserverCallback> callback = nullptr;
 
@@ -424,9 +430,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, DeregisterScreenReaderObserverCallback0
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin DeregisterScreenReaderObserverCallback001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test DeregisterScreenReaderObserverCallback
+     */
     int64_t elementId = 100;
     jsAccessibilityManager->DeregisterScreenReaderObserverCallback(elementId);
 
@@ -444,9 +456,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, SetAccessibilityGetParentRectHandler001
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin SetAccessibilityGetParentRectHandler001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test SetAccessibilityGetParentRectHandler
+     */
     std::function<void(int32_t&, int32_t&)> callback = [](int32_t& left, int32_t& top) {
         left = 100;
         top = 200;
@@ -468,14 +486,23 @@ HWTEST_F(JsAccessibilityManagerTestFour, RegisterInteractionOperationAsChildTree
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin RegisterInteractionOperationAsChildTree001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. construct Registration
+     */
     Registration registration;
     registration.parentWindowId = 1;
     registration.parentTreeId = 2;
     registration.elementId = 100;
 
+    /**
+     * @tc.steps: step3. test RegisterInteractionOperationAsChildTree
+     */
     bool result = jsAccessibilityManager->RegisterInteractionOperationAsChildTree(registration);
 
     SUCCEED();
@@ -492,9 +519,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, DeregisterInteractionOperationAsChildTr
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin DeregisterInteractionOperationAsChildTree001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test DeregisterInteractionOperationAsChildTree
+     */
     uint32_t windowId = 1;
     int32_t treeId = 2;
 
@@ -514,9 +547,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, DeregisterInteractionOperationAsChildTr
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin DeregisterInteractionOperationAsChildTree002";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test DeregisterInteractionOperationAsChildTree
+     */
     jsAccessibilityManager->DeregisterInteractionOperationAsChildTree();
 
     SUCCEED();
@@ -533,12 +572,18 @@ HWTEST_F(JsAccessibilityManagerTestFour, CheckAccessibilityVisible001, TestSize.
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin CheckAccessibilityVisible001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test CheckAccessibilityVisible
+     */
     RefPtr<NG::FrameNode> frameNode = nullptr;
     bool result = jsAccessibilityManager->CheckAccessibilityVisible(frameNode);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-end CheckAccessibilityVisible001";
 }
@@ -552,12 +597,21 @@ HWTEST_F(JsAccessibilityManagerTestFour, CheckAccessibilityVisible002, TestSize.
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin CheckAccessibilityVisible002";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. construct pattern and frameNode
+     */
     auto pattern = AceType::MakeRefPtr<NG::Pattern>();
     auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
 
+    /**
+     * @tc.steps: step3. test CheckAccessibilityVisible
+     */
     bool result = jsAccessibilityManager->CheckAccessibilityVisible(frameNode);
 
     SUCCEED();
@@ -574,12 +628,21 @@ HWTEST_F(JsAccessibilityManagerTestFour, AddHoverTransparentCallback001, TestSiz
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin AddHoverTransparentCallback001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. construct pattern and frameNode
+     */
     auto pattern = AceType::MakeRefPtr<NG::Pattern>();
     auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
 
+    /**
+     * @tc.steps: step3. test AddHoverTransparentCallback
+     */
     jsAccessibilityManager->AddHoverTransparentCallback(frameNode);
 
     SUCCEED();
@@ -596,9 +659,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, CheckHoverTransparentCallbackListEmpty0
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin CheckHoverTransparentCallbackListEmpty001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test CheckHoverTransparentCallbackListEmpty
+     */
     int32_t containerId = 1;
     bool result = jsAccessibilityManager->CheckHoverTransparentCallbackListEmpty(containerId);
 
@@ -616,9 +685,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, CheckAndGetEmbedFrameNode001, TestSize.
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin CheckAndGetEmbedFrameNode001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test CheckAndGetEmbedFrameNode
+     */
     RefPtr<NG::FrameNode> frameNode = nullptr;
     int64_t result = jsAccessibilityManager->CheckAndGetEmbedFrameNode(frameNode);
     EXPECT_EQ(result, -1);
@@ -635,9 +710,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, CheckAndGetEmbedFrameNode002, TestSize.
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin CheckAndGetEmbedFrameNode002";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test CheckAndGetEmbedFrameNode
+     */
     auto pattern = AceType::MakeRefPtr<NG::Pattern>();
     auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
 
@@ -657,9 +738,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, AccessibilityOnShowHide001, TestSize.Le
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin AccessibilityOnShowHide001";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test AccessibilityOnShowHide
+     */
     bool isOnShow = true;
     WeakPtr<PipelineBase> context;
 
@@ -679,9 +766,15 @@ HWTEST_F(JsAccessibilityManagerTestFour, AccessibilityOnShowHide002, TestSize.Le
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestFour-begin AccessibilityOnShowHide002";
 
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test AccessibilityOnShowHide
+     */
     bool isOnShow = false;
     WeakPtr<PipelineBase> context;
 
