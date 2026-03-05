@@ -9003,7 +9003,7 @@ void WebDelegate::OnDestroyAISession(WebAgentClientImpl::AISessionType type, con
         CHECK_NULL_VOID(reporter);
         auto propOnDestroyAISessionEvent = reporter->GetOnDestroyAISession(type);
         CHECK_NULL_VOID(propOnDestroyAISessionEvent);
-        propOnDestroyAISessionEvent(id, "", nullptr);
+        propOnDestroyAISessionEvent(id, "", [](uint32_t, const std::string&) {});
     }, "ArkUIWebDestroyAISession");
 }
 

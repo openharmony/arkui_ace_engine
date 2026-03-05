@@ -54,6 +54,9 @@ public:
     void SetAISessionOptions(uint32_t type, const AISessionCallback&& onCreateAISession,
         const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)
     {
+        if (type > 7) {
+            return;
+        }
         onCreateAISessionArray[type] = std::move(onCreateAISession);
         onExecuteAIActionArray[type] = std::move(onExecuteAIAction);
         onDestroyAISessionArray[type] = std::move(onDestroyAISession);
@@ -84,11 +87,13 @@ public:
 
     constexpr static int32_t LONG_PRESS_TIMEOUT_MS = 550;
 
+    constexpr static size_t MAX_AI_SESSION_TYPE = 8;
+
 private:
     WeakPtr<Pattern> pattern_;
-    AISessionCallback onCreateAISessionArray[8] = { nullptr };
-    AISessionCallback onExecuteAIActionArray[8] = { nullptr };
-    AISessionCallback onDestroyAISessionArray[8] = { nullptr };
+    AISessionCallback onCreateAISessionArray[MAX_AI_SESSION_TYPE] = { nullptr };
+    AISessionCallback onExecuteAIActionArray[MAX_AI_SESSION_TYPE] = { nullptr };
+    AISessionCallback onDestroyAISessionArray[MAX_AI_SESSION_TYPE] = { nullptr };
 
 protected:
     virtual RectF ConvertToWindow(const RectF& rect, bool addComponentOffset = true);

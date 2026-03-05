@@ -4321,6 +4321,9 @@ void JSWeb::AISessionOptions(const JSCallbackInfo& args)
                 if (aiSessionType->IsNumber()) {
                     type = aiSessionType->ToNumber<uint32_t>();
                 }
+                if (type > 7) {
+                    continue;
+                }
                 AISessionCallback onCreateAISession = nullptr;
                 WrapAISessionCallback(option, "onCreateAISession", onCreateAISession);
                 AISessionCallback onExecuteAIAction = nullptr;
