@@ -2819,7 +2819,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     
     // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回true
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
-    context_->touchOptimizer_->slideAccepted_ = false; // 这将导致NeedTpFlushVsync返回true
+    context_->touchOptimizer_->slideAccept_ = false; // 这将导致NeedTpFlushVsync返回true
 
     // 创建触摸事件
     TouchEvent touchEvent;
@@ -2835,7 +2835,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     EXPECT_FALSE(context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_);
     // 重置状态
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
-    context_->touchOptimizer_->slideAccepted_ = true;
+    context_->touchOptimizer_->slideAccept_ = false;
 }
 
 /**

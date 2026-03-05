@@ -35,7 +35,7 @@ ResSchedTouchOptimizer::~ResSchedTouchOptimizer()
 }
 
 
-void ResSchedTouchOptimizer::SetSlideAccepted(bool accept)
+void ResSchedTouchOptimizer::SetSlideAccept(bool accept)
 {
 }
 
@@ -114,7 +114,7 @@ void ResSchedTouchOptimizer::DispatchPointSelect(bool hasResamplePoint, TouchEve
     resultPoint = hasResamplePoint ? resamplePoint : tpPoint;
 }
 
-void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
+void ResSchedTouchOptimizer::EndTpFlushVsync()
 {
     lastTpFlush_ = false;
     vsyncPeriod_ = 0;

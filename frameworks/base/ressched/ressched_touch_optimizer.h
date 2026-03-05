@@ -26,7 +26,7 @@ public:
     ~ResSchedTouchOptimizer();
 
     // basic getter and setters
-    void SetSlideAccepted(bool accept);
+    void SetSlideAccept(bool accept);
     void SetLastTpFlush(bool lastTpFlush);
     void SetSlideDirection(int32_t direction);
     void SetLastVsyncTimeStamp(uint64_t lastVsyncTimeStamp);
@@ -53,7 +53,9 @@ public:
     uint64_t FineTuneTimeStampDuringTpFlushPeriod(uint64_t timeStamp);
     void FineTuneTimeStampWhenFirstFrameAfterTpFlushPeriod(const int32_t pointId,
         std::unordered_map<int32_t, std::vector<TouchEvent>>& historyPointsById);
-    void EndTpFlushVsyncPeriod();
+    
+    void EndTpFlushVsync();
+
 private:
     // RVS Dispatch funcs
     void RVSPointReset(const int32_t pointId, const int32_t info);
@@ -88,8 +90,8 @@ private:
     std::once_flag rvsOnceFlag_;
     std::atomic_bool rvsEnable_ = false;
 
-    // Default value is true, set to false when pan recognizer down, set to true when accept
-    std::atomic_bool slideAccepted_ = true;
+    // Default value is false, set to true when pan recognizer accept, reset to false after use
+    std::atomic_bool slideAccept_ = false;
     // Whether the last frame drawing was triggered by TP
     std::atomic_bool lastTpFlush_ = false;
 

@@ -392,7 +392,7 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsync002, TestSize.Level1)
 {
     optimizer_->rvsEnable_ = true;
     optimizer_->hisAvgPointTimeStamp_ = 1000;
-    optimizer_->slideAccepted_ = false;
+    optimizer_->slideAccept_ = false;
     optimizer_->isTpFlushFrameDisplayPeriod_ = true;
     
     TouchEvent touchEvent;
@@ -402,7 +402,7 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsync002, TestSize.Level1)
     EXPECT_TRUE(optimizer_->NeedTpFlushVsync(touchEvent));
     
     // Test the transition to first frame after TP flush
-    optimizer_->slideAccepted_ = true;
+    optimizer_->slideAccept_ = true;
     optimizer_->isTpFlushFrameDisplayPeriod_ = true;
     optimizer_->lastTpFlush_ = false;
     optimizer_->NeedTpFlushVsyncInner(touchEvent); // Call inner function to set up state
@@ -443,7 +443,7 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsyncInner002, TestSize.Level
 {
     optimizer_->rvsEnable_ = true;
     optimizer_->hisAvgPointTimeStamp_ = 1000;
-    optimizer_->slideAccepted_ = false;
+    optimizer_->slideAccept_ = false;
     
     TouchEvent touchEvent;
     touchEvent.sourceTool = SourceTool::FINGER;
@@ -452,7 +452,7 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsyncInner002, TestSize.Level
     EXPECT_TRUE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
     
     // Test when slide is accepted
-    optimizer_->slideAccepted_ = true;
+    optimizer_->slideAccept_ = true;
     EXPECT_FALSE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
 }
 
@@ -465,7 +465,7 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsyncInner003, TestSize.Level
 {
     optimizer_->rvsEnable_ = true;
     optimizer_->hisAvgPointTimeStamp_ = 1000;
-    optimizer_->slideAccepted_ = true;
+    optimizer_->slideAccept_ = true;
     optimizer_->lastTpFlush_ = true;
     optimizer_->vsyncFlushed_ = true;
 
@@ -485,7 +485,7 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsyncInner004, TestSize.Level
 {
     optimizer_->rvsEnable_ = true;
     optimizer_->hisAvgPointTimeStamp_ = 1000;
-    optimizer_->slideAccepted_ = true;
+    optimizer_->slideAccept_ = true;
     optimizer_->lastTpFlush_ = false;
     
     TouchEvent touchEvent;
