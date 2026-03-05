@@ -86,6 +86,8 @@ constexpr int32_t CREDENTIAL_UKEY = 4;
 const char* CAPABILITY_NOT_SUPPORTED_ERROR_MSG = "Capability not supported.";
 const char* HUKS_CRYPTO_EXTENSION_CAPABILITY = "SystemCapability.Security.Huks.CryptoExtension";
 
+constexpr uint32_t MAX_AI_SESSION_TYPE = 7;
+
 bool g_huksCryptoExtensionAbility = false;
 
 void EraseSpace(std::string& data)
@@ -4321,7 +4323,7 @@ void JSWeb::AISessionOptions(const JSCallbackInfo& args)
                 if (aiSessionType->IsNumber()) {
                     type = aiSessionType->ToNumber<uint32_t>();
                 }
-                if (type > 7) {
+                if (type == 0 || type > MAX_AI_SESSION_TYPE) {
                     continue;
                 }
                 AISessionCallback onCreateAISession = nullptr;
@@ -4330,8 +4332,8 @@ void JSWeb::AISessionOptions(const JSCallbackInfo& args)
                 WrapAISessionCallback(option, "onExecuteAIAction", onExecuteAIAction);
                 AISessionCallback onDestroyAISession = nullptr;
                 WrapAISessionCallback(option, "onDestroyAISession", onDestroyAISession);
-                WebModel::GetInstance()->SetAISessionOptions(
-                    type, std::move(onCreateAISession), std::move(onExecuteAIAction), std::move(onDestroyAISession));
+                WebModel::GetInstance()->SetAISessionOptions(type - 1,
+                    std::move(onCreateAISession), std::move(onExecuteAIAction), std::move(onDestroyAISession));
             }
         }
     }
