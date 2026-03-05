@@ -653,6 +653,13 @@ HWTEST_F(ModelTestNg, ModelViewNgTest014, TestSize.Level1)
     auto modelPaintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
     ASSERT_NE(modelPaintProperty, nullptr);
 
+    // Get ModelPattern
+    auto modelPattern = frameNode->GetPattern<ModelPattern>();
+    ASSERT_NE(modelPattern, nullptr);
+    // Get Adapter
+    auto modelAdapter = modelPattern->modelAdapter_;
+    ASSERT_NE(modelAdapter, nullptr);
+
     ModelViewNG::SetRenderHeight(frameNode.GetRawPtr(), std::nullopt);
     ASSERT_EQ(modelPaintProperty->GetRenderHeightValue(), 1.0f);
 
