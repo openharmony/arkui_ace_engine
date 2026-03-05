@@ -109,6 +109,15 @@ public:
         appIconId_ = id;
     }
 
+    void SetDialogSupportSplit(bool dialogSupportSplit)
+    {
+        dialogSuppotSplit_ = dialogSupportSplit;
+    }
+
+    bool GetDialogSupportSplit()
+    {
+        return dialogSuppotSplit_;
+    }
 private:
     void OnForceSplitEnableChange();
     void RegisterSurfaceChangeCallbackIfNeeded();
@@ -119,6 +128,7 @@ private:
     bool isForceSplitSupported_ = false;
     bool isForceSplitEnable_ = false;
     bool isRouter_ = false;
+    bool dialogSuppotSplit_ = true;
     std::set<std::string> fullScreenPages_;
     std::string homePageName_;
     std::string relatedPageName_;

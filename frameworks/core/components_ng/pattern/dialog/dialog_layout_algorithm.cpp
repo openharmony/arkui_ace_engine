@@ -91,7 +91,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     hoverModeArea_ = dialogProp->GetHoverModeArea().value_or(HoverModeAreaType::BOTTOM_SCREEN);
     needAdaptForceSplitMode_ = pipeline->IsCurrentInForceSplitMode() && !IsEmbeddedDialog(hostNode) &&
                                 (forceSplitMgr->IsForceSplitSupported(true) ||
-                                (forceSplitMgr->IsForceSplitSupported(false) && existForceSplitNav.first));
+                                (forceSplitMgr->IsForceSplitSupported(false) && existForceSplitNav.first)) &&
+                                    (forceSplitMgr->GetDialogSupportSplit());
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
