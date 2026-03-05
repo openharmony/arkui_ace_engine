@@ -425,6 +425,11 @@
       "name": "toastPositionTest",
       "pageSourceFile": "src/main/ets/pages/components/toast/toastPositionTest.ets",
       "buildFunction": "ToastPositionBuilder"
+    },
+    {
+      "name": "ActionSheetAdvanced",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/actionSheetAdvanced.ets",
+      "buildFunction": "ActionSheetAdvancedBuilder"
     }
   ]
 }
