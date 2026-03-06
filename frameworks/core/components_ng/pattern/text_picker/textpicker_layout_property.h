@@ -90,16 +90,13 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        json->PutExtAttr("defaultPickerItemHeight",
-            GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str(), filter);
-        json->PutExtAttr("gradientHeight", GetGradientHeightValue(Dimension(0)).ToString().c_str(), filter);
-        json->PutExtAttr("selected", std::to_string(GetSelectedValue(0)).c_str(), filter);
-        json->PutExtAttr("value", GetValueValue("").c_str(), filter);
         Color defaultDisappearColor = Color::BLACK;
         Color defaultNormalColor = Color::BLACK;
         Color defaultSelectColor = Color::BLACK;
         Color defaultSelectedBgColor = Color(0x0C182431);
         Dimension defaultSelectedBorderRadius = 24.0_vp;
+        Dimension defaultGradientHeight = 36.0_vp;
+        ItemDivider defaultDivider;
         auto pipeline = PipelineBase::GetCurrentContext();
         auto frameNode = GetHost();
         if (pipeline && frameNode) {
@@ -110,19 +107,23 @@ public:
                 defaultSelectColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
                 defaultSelectedBgColor = pickerTheme->GetSelectedBackgroundColor();
                 defaultSelectedBorderRadius = *pickerTheme->GetSelectedBorderRadius().radiusTopLeft;
+                defaultGradientHeight = pickerTheme->GetGradientHeight();
+                defaultDivider.strokeWidth = pickerTheme->GetDividerThickness();
+                defaultDivider.color = pickerTheme->GetDividerColor();
             }
         }
-        if (propDivider_.has_value()) {
-            auto divider = JsonUtil::Create(true);
-            divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
-            divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
-            divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
-            divider->Put("color", propDivider_.value().color.ColorToString().c_str());
-            json->PutExtAttr("divider", divider, filter);
-        } else {
-            auto divider = JsonUtil::Create(true);
-            json->PutExtAttr("divider", divider, filter);
-        }
+        json->PutExtAttr("defaultPickerItemHeight",
+            GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str(), filter);
+        json->PutExtAttr("gradientHeight", GetGradientHeightValue(defaultGradientHeight).ToString().c_str(), filter);
+        json->PutExtAttr("selected", std::to_string(GetSelectedValue(0)).c_str(), filter);
+        json->PutExtAttr("value", GetValueValue("").c_str(), filter);
+        auto dividerValue = GetDividerValue(defaultDivider);
+        auto divider = JsonUtil::Create(true);
+        divider->Put("strokeWidth", dividerValue.strokeWidth.ToString().c_str());
+        divider->Put("startMargin", dividerValue.startMargin.ToString().c_str());
+        divider->Put("endMargin", dividerValue.endMargin.ToString().c_str());
+        divider->Put("color", dividerValue.color.ColorToString().c_str());
+        json->PutExtAttr("divider", divider, filter);
 
         auto jsonArraySelected = JsonUtil::CreateArray(true);
         auto arraySelected = CloneSelecteds().value_or(std::vector<uint32_t>());
@@ -185,7 +186,7 @@ public:
         selectedTextStyle->Put("overflow",
             V2::ConvertWrapTextOverflowToString(GetSelectedTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
-        auto canLoop = GetCanLoopValue();
+        auto canLoop = GetCanLoopValue(true);
         json->PutExtAttr("canLoop", canLoop ? "true" : "false", filter);
 
         auto isDisableTextStyleAnimation = GetDisableTextStyleAnimation().value_or(false);
