@@ -157,11 +157,11 @@ void WebAgentClientImpl::OnCreateAISession(AISessionType type, const std::string
     ContainerScope scope(delegate->GetInstanceId());
     const auto wrappedCallback = [id, callback = std::move(callback)](uint32_t state, const std::string& content) {
         if (state == 0) {
-            callback->OnReceiveValue({ "SUCCESS", content });
+            callback->OnReceiveValue({ "0", content });
         } else if (state == 1) {
             TAG_LOGE(AceLogTag::ACE_WEB, "OnCreateAISession failed: id: %{public}s, content: %{public}s",
                 id.c_str(), content.c_str());
-            callback->OnReceiveValue({ "FAILURE", content });
+            callback->OnReceiveValue({ "1", content });
         }
     };
     delegate->OnCreateAISession(type, id, params, std::move(wrappedCallback));
@@ -176,13 +176,13 @@ void WebAgentClientImpl::OnExecuteAIAction(AISessionType type, const std::string
     ContainerScope scope(delegate->GetInstanceId());
     const auto wrappedCallback = [id, callback = std::move(callback)](uint32_t state, const std::string& content) {
         if (state == 0) {
-            callback->OnReceiveValue({ "SUCCESS", content });
+            callback->OnReceiveValue({ "0", content });
         } else if (state == 1) {
             TAG_LOGE(AceLogTag::ACE_WEB, "OnExecuteAIAction failed: id: %{public}s, content: %{public}s",
                 id.c_str(), content.c_str());
-            callback->OnReceiveValue({ "FAILURE", content });
+            callback->OnReceiveValue({ "1", content });
         } else {
-            callback->OnReceiveValue({ "RUNNING", content });
+            callback->OnReceiveValue({ "2", content });
         }
     };
     delegate->OnExecuteAIAction(type, id, params, std::move(wrappedCallback));
