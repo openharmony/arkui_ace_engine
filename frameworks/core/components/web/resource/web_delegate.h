@@ -1156,6 +1156,7 @@ public:
         const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
     void NotifyAutoFillViewData(const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type);
     void AutofillCancel(const std::string& fillContent);
+    void DoFillAutoFillData(uint32_t delayMs = 0);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     void UpdateOptimizeParserBudgetEnabled(const bool enable);
@@ -1788,6 +1789,11 @@ private:
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
     bool enableFollowSystemFontWeight_ = false;
+
+    // autofill sync state
+    std::string pendingAutoFillJsonStr_;
+    OHOS::NWeb::NWebAutoFillTriggerType pendingAutoFillType_;
+    bool hasPendingAutoFill_ = false;
 
     // data detector js state
     bool initDataDetectorJS_ = false;
