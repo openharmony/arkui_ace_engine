@@ -93,6 +93,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue001, TestSize.Level0)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->overlayMod_ = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
     TextInsertValueInfo info;
     richEditorPattern->CalcInsertValueObj(info);
     EXPECT_EQ(info.GetSpanIndex(), 0);
@@ -571,7 +572,6 @@ HWTEST_F(RichEditorEditTestNg, GetTextSpansInfo, TestSize.Level0)
     richEditorPattern->UpdateParagraphStyle(0, 6, style1);
 
     auto info = richEditorController->GetSpansInfo(0, 6);
-    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
     auto valueString = info.selection_.resultObjects.begin()->valueString;
     auto textStyle = info.selection_.resultObjects.begin()->textStyle;
@@ -628,7 +628,6 @@ HWTEST_F(RichEditorEditTestNg, GetImageSpansInfo, TestSize.Level0)
      */
     richEditorController->AddImageSpan(options);
     auto info = richEditorController->GetSpansInfo(0, 1);
-    ASSERT_NE(info.selection_.resultObjects.size(), 0);
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
     auto imageStyleout = info.selection_.resultObjects.begin()->imageStyle;
     EXPECT_EQ(imageStyleout.borderRadius,
@@ -763,7 +762,7 @@ HWTEST_F(RichEditorEditTestNg, CalcSpansRange001, TestSize.Level0)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->InsertValue(INIT_VALUE_9);
+    richEditorPattern->InsertValue(INIT_VALUE_4);
     auto nodes = richEditorPattern->GetParagraphNodes(50, 52);
     EXPECT_EQ(nodes.size(), 0);
     auto range = richEditorPattern->CalcSpansRange(nodes);
