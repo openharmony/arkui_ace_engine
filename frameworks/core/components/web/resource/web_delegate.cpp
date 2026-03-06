@@ -4855,20 +4855,19 @@ void WebDelegate::LoadUrl()
 
 void WebDelegate::OnInactive()
 {
-    int webId = GetWebId();
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", webId);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), webId]() {
+        [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
             if (delegate->nweb_) {
-                OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(webId, false);
+                OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(delegate->nweb_->GetWebId(), false);
                 delegate->nweb_->OnPause();
             }
         },
@@ -4877,20 +4876,19 @@ void WebDelegate::OnInactive()
 
 void WebDelegate::OnActive()
 {
-    int webId = GetWebId();
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnActive, webId:%{public}d", webId);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnActive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), webId]() {
+        [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
             if (delegate->nweb_) {
-                OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(webId, true);
+                OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(delegate->nweb_->GetWebId(), true);
                 delegate->nweb_->OnContinue();
             }
         },
@@ -9967,7 +9965,7 @@ void WebDelegate::OnMicrophoneCaptureStateChanged(int originalState, int newStat
         TaskExecutor::TaskType::JS, "ArkUIWebMicrophoneCaptureStateChanged");
 }
 
-void WebDelegate::SetOfflineWebActiveStatus(int32_t webId, bool isActive)
+void WebDelegate::SetOfflineWebActiveStatus(bool isActive)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::SetOfflineWebActiveStatus");
     auto context = context_.Upgrade();
@@ -9975,15 +9973,16 @@ void WebDelegate::SetOfflineWebActiveStatus(int32_t webId, bool isActive)
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), webId, isActive]() {
+        [weak = WeakClaim(this), isActive]() {
             auto delegate = weak.Upgrade();
             if (!delegate || !delegate->nweb_) {
                 TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::SetOfflineWebActiveStatus delegate is nullptr");
                 return;
             }
+            int32_t webId = delegate->nweb_->GetWebId();
             if (isActive && OHOS::NWeb::NWebHelper::Instance().GetNWebActiveStatus(webId)) {
                 delegate->nweb_->OnContinue();
-            } else if (!isActive) {
+            } else if (!isActive && OHOS::NWeb::NWebHelper::Instance().IsNWebInActiveStatusMap(webId)) {
                 delegate->nweb_->OnPause();
             }
         },
