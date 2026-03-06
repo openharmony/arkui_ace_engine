@@ -318,7 +318,6 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_003, TestSize.Level1)
     webPattern->OnContextMenuShow(eventInfo);
 
     EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("text"));
-    EXPECT_CALL(*mockMenuParam, HasImageContents).Times(1).WillOnce(Return(false));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -362,7 +361,6 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_004, TestSize.Level1)
     webPattern->OnContextMenuShow(eventInfo);
 
     EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(*mockMenuParam, HasImageContents).Times(1).WillOnce(Return(false));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -370,7 +368,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_004, TestSize.Level1)
     EXPECT_FALSE(selectMenuInfo.showCut);
     EXPECT_FALSE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
-    EXPECT_TRUE(selectMenuInfo.showCopyAll);
+    EXPECT_FALSE(selectMenuInfo.showCopyAll);
 }
 
 /**
@@ -405,7 +403,6 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_005, TestSize.Level1)
     webPattern->OnContextMenuShow(eventInfo);
 
     EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("Hello"));
-    EXPECT_CALL(*mockMenuParam, HasImageContents).Times(1).WillOnce(Return(true));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -413,7 +410,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_005, TestSize.Level1)
     EXPECT_FALSE(selectMenuInfo.showCut);
     EXPECT_TRUE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
-    EXPECT_TRUE(selectMenuInfo.showCopyAll);
+    EXPECT_FALSE(selectMenuInfo.showCopyAll);
 }
 
 /**
@@ -552,7 +549,6 @@ HWTEST_F(WebContextMenuOverlayTest, OnMenuItemAction_002, TestSize.Level1)
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
     EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("text"));
-    EXPECT_CALL(*mockMenuParam, HasImageContents).Times(1).WillOnce(Return(false));
     overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
 
     OptionMenuActionId actionId = OptionMenuActionId::COPY;
@@ -1250,7 +1246,6 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_006, TestSize.Level1)
     webPattern->OnContextMenuShow(eventInfo);
 
     EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("text"));
-    EXPECT_CALL(*mockMenuParam, HasImageContents).Times(1).WillOnce(Return(false));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1296,7 +1291,6 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_007, TestSize.Level1)
     webPattern->OnContextMenuShow(eventInfo);
 
     EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(*mockMenuParam, HasImageContents).Times(1).WillOnce(Return(false));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1338,7 +1332,6 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_008, TestSize.Level1)
     webPattern->OnContextMenuShow(eventInfo);
 
     EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(*mockMenuParam, HasImageContents).Times(1).WillOnce(Return(false));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1346,7 +1339,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_008, TestSize.Level1)
     EXPECT_FALSE(selectMenuInfo.showCut);
     EXPECT_TRUE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
-    EXPECT_TRUE(selectMenuInfo.showCopyAll);
+    EXPECT_FALSE(selectMenuInfo.showCopyAll);
 }
 
 /**
@@ -1373,14 +1366,13 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_009, TestSize.Level1)
     mockMenuParam->SetIsEditable(false);
     mockMenuParam->SetLinkUrl("");
     mockMenuParam->SetMediaType(static_cast<int>(
-        OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_VIDEO));
+        OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE));
 
     RefPtr<ContextMenuResult> menuResult = nullptr;
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
     EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(*mockMenuParam, HasImageContents).Times(1).WillOnce(Return(false));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1388,7 +1380,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_009, TestSize.Level1)
     EXPECT_FALSE(selectMenuInfo.showCut);
     EXPECT_FALSE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
-    EXPECT_TRUE(selectMenuInfo.showCopyAll);
+    EXPECT_FALSE(selectMenuInfo.showCopyAll);
 }
 
 /**
@@ -1422,7 +1414,6 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_010, TestSize.Level1)
     webPattern->OnContextMenuShow(eventInfo);
 
     EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(*mockMenuParam, HasImageContents).Times(1).WillOnce(Return(false));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1430,7 +1421,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_010, TestSize.Level1)
     EXPECT_FALSE(selectMenuInfo.showCut);
     EXPECT_FALSE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
-    EXPECT_TRUE(selectMenuInfo.showCopyAll);
+    EXPECT_FALSE(selectMenuInfo.showCopyAll);
 }
 
 /**
@@ -1467,7 +1458,6 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_011, TestSize.Level1)
     webPattern->OnContextMenuShow(eventInfo);
 
     EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("text"));
-    EXPECT_CALL(*mockMenuParam, HasImageContents).Times(1).WillOnce(Return(false));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1580,7 +1570,6 @@ HWTEST_F(WebContextMenuOverlayTest, OnMenuItemAction_003_Updated, TestSize.Level
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
     EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(*mockMenuParam, HasImageContents).Times(1).WillOnce(Return(false));
     overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
 
     OptionMenuActionId actionId = OptionMenuActionId::COPY;

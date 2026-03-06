@@ -64,6 +64,7 @@ public:
     std::vector<MenuOptionsParam> BuildMenuOptions(const std::vector<NG::MenuItemParam>& menuItemList);
     void SetElementType(const WebElementType& type) { elementType_ = type; }
     void SetResponseType(const ResponseType& type) { responseType_ = type; }
+    void CalculateMenuOffset(SelectOverlayInfo& menuInfo);
 
 private:
     bool hasText_ = false;

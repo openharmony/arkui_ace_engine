@@ -212,6 +212,8 @@ void WebContextMenuOverlay::CalculateMenuOffset(SelectOverlayInfo& selectInfo)
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
+    // Check whether the current window is in container modal mode and floating state, and whether the page offset
+    // relative to the window needs to be added.
     auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (!isContainerModal) {
