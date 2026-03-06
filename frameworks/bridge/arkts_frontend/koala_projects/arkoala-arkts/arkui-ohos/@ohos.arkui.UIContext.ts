@@ -628,7 +628,7 @@ export class UIContext {
     getFrameNodeByUniqueId(id: int): FrameNode | null {
         throw Error("getFrameNodeByUniqueId not implemented in UIContext!")
     }
-    getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {
+    getNavigationInfoByUniqueId(id: int): uiObserver.NavigationInfo | undefined {
         throw Error("getNavigationInfoByUniqueId not implemented in UIContext!")
     }
     getHostContext(): Context | undefined {

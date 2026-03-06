@@ -816,8 +816,12 @@ void StringUndoManager::ProcessDragUndo(const UndoRedoRecord& record)
             pattern->InsertValueOperation(opts.value, nullptr, OperationType::UNDO);
             insertOffset += static_cast<int32_t>(opts.value.length());
         },
-        [&](const SymbolSpanOptions&) { insertOffset += SYMBOL_SPAN_LENGTH; },
-        [&](const BuilderSpanOptions&) { insertOffset++; }
+        [&](const SymbolSpanOptions&) {
+            insertOffset += SYMBOL_SPAN_LENGTH;
+        },
+        [&](const BuilderSpanOptions&) {
+            insertOffset++;
+        }
     );
     handler(record.optionsListAfter.value_or(OptionsList{}));
 }
@@ -828,12 +832,18 @@ void StringUndoManager::ProcessDragRedo(const UndoRedoRecord& record)
     CHECK_NULL_VOID(pattern);
     auto deleteStart = record.rangeBefore.start;
     OptionsListHandler handler(
-        [&](const ImageSpanOptions&) { pattern->DeleteForward(deleteStart, IMAGE_SPAN_LENGTH); },
+        [&](const ImageSpanOptions&) {
+            pattern->DeleteForward(deleteStart, IMAGE_SPAN_LENGTH);
+        },
         [&](const TextSpanOptions& opts) {
             pattern->DeleteForward(deleteStart, static_cast<int32_t>(opts.value.length()));
         },
-        [&](const SymbolSpanOptions&) { deleteStart += SYMBOL_SPAN_LENGTH; },
-        [&](const BuilderSpanOptions&) { deleteStart++; }
+        [&](const SymbolSpanOptions&) {
+            deleteStart += SYMBOL_SPAN_LENGTH;
+        },
+        [&](const BuilderSpanOptions&) {
+            deleteStart++;
+        }
     );
     handler(record.optionsListBefore.value_or(OptionsList{}));
 }
@@ -858,10 +868,18 @@ void StringUndoManager::ProcessDragDeleteRecord(UndoRedoRecord& record)
         optionsList.push_back(opts);
     };
     OptionsListHandler handler(
-        [&](const ImageSpanOptions& opts) { handleTextOrImage(IMAGE_CONTENT, opts.offset); },
-        [&](const TextSpanOptions& opts) { handleTextOrImage(opts.value, opts.offset); },
-        [&](const SymbolSpanOptions& opts) { handleSymbolOrBuilder(opts); },
-        [&](const BuilderSpanOptions& opts) { handleSymbolOrBuilder(opts); }
+        [&](const ImageSpanOptions& opts) {
+            handleTextOrImage(IMAGE_CONTENT, opts.offset);
+        },
+        [&](const TextSpanOptions& opts) {
+            handleTextOrImage(opts.value, opts.offset);
+        },
+        [&](const SymbolSpanOptions& opts) {
+            handleSymbolOrBuilder(opts);
+        },
+        [&](const BuilderSpanOptions& opts) {
+            handleSymbolOrBuilder(opts);
+        }
     );
     handler(record.optionsListBefore.value_or(OptionsList{}));
     IF_TRUE(textSpanOptions.has_value(), optionsList.push_back(textSpanOptions.value()));
@@ -917,7 +935,7 @@ bool StringUndoManager::BeforeUndoDrag(const UndoRedoRecord& record)
         [&](const BuilderSpanOptions& opts) {
             auto retInfo = GetResultByBuilderSpanOptions(opts, spanIndex);
             changeValue.SetRichEditorReplacedImageSpans(retInfo);
-            insertOffset++;
+            insertOffset ++;
         },
         [&]() {
             spanIndex++;
@@ -950,7 +968,9 @@ bool StringUndoManager::BeforeRedoDrag(const UndoRedoRecord& record)
             auto retInfo = GetResultByBuilderSpanOptions(opts, spanIndex);
             changeValue.SetRichEditorReplacedImageSpans(retInfo);
         },
-        [&]() { spanIndex++; }
+        [&]() {
+            spanIndex++;
+        }
     );
     handler(record.optionsListAfter.value_or(OptionsList{}));
     return eventHub->FireOnWillChange(changeValue);

@@ -68,7 +68,7 @@ public:
             propColor_.value_or(qrCodeTheme->GetQrcodeColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("backgroundColor",
             propBackgroundColor_.value_or(qrCodeTheme->GetBackgroundColor()).ColorToString().c_str(), filter);
-        json->PutExtAttr("opacity", propOpacity_.value_or(1.0f), filter);
+        json->PutExtAttr("contentOpacity", propOpacity_.value_or(1.0f), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_RENDER);

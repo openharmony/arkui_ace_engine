@@ -15,7 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("text_picker_test_ng") {
   type = "new"
-  module_name = "Layout-Stack"
+  module_name = "PickerSet-TextPicker"
   sources = [
     "text_picker_layout_algorithm_test_ng.cpp",
     "text_picker_model_test_ng.cpp",

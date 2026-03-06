@@ -877,14 +877,6 @@ public:
         return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
     }
 
-    bool IsFloatingWindowStatus() const override
-    {
-        CHECK_NULL_RETURN(uiWindow_, false);
-        auto windowStatus = Rosen::WindowStatus::WINDOW_STATUS_UNDEFINED;
-        uiWindow_->GetWindowStatus(windowStatus);
-        return windowStatus == Rosen::WindowStatus::WINDOW_STATUS_FLOATING;
-    }
-
     void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
     {
         singleHandTransform_ = singleHandTransform;

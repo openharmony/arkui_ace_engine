@@ -866,7 +866,7 @@ void NavigationPattern::TryRestoreSystemBarStyle(const RefPtr<WindowManager>& wi
 
 void NavigationPattern::UpdateSystemBarStyleOnPageVisibilityChange(bool show)
 {
-    if (!isFullPageNavigation_.value_or(false)) {
+    if (!isFullPageNavigation_) {
         return;
     }
 
@@ -4812,7 +4812,7 @@ void NavigationPattern::SetMouseStyle(MouseFormat format)
 
 void NavigationPattern::OnAvoidInfoChange(const ContainerModalAvoidInfo& info)
 {
-    if (!isFullPageNavigation_.value_or(false)) {
+    if (!isFullPageNavigation_) {
         return;
     }
     MarkAllNavDestinationDirtyIfNeeded(GetHost(), true);
@@ -5164,7 +5164,7 @@ bool NavigationPattern::IsPageLevelConfigEnabled(bool considerSize)
     if (!IsRealStackDisplay()) {
         return false;
     }
-    if (considerSize && !isFullPageNavigation_.value_or(false)) {
+    if (considerSize && !isFullPageNavigation_) {
         return false;
     }
     if (pageNode_.Upgrade() == nullptr) {
@@ -5330,7 +5330,7 @@ void NavigationPattern::UpdatePageLevelConfigForSizeChanged()
         return;
     }
     if (runningTransitionCount_ > 0) {
-        if (isFullPageNavigation_.value_or(false)) {
+        if (isFullPageNavigation_) {
             return;
         }
         // full page -> partial page
@@ -5369,7 +5369,7 @@ void NavigationPattern::UpdatePageLevelConfigForSizeChangedWhenNoAnimation()
     auto statusBarConfig = lastNode->GetStatusBarConfig();
     std::optional<bool> enableStatusBar;
     std::optional<bool> statusBarAnimated;
-    if (isFullPageNavigation_.value_or(false) && statusBarConfig.has_value()) {
+    if (isFullPageNavigation_ && statusBarConfig.has_value()) {
         enableStatusBar = statusBarConfig.value().first;
         statusBarAnimated = statusBarConfig.value().second;
     }
@@ -5377,7 +5377,7 @@ void NavigationPattern::UpdatePageLevelConfigForSizeChangedWhenNoAnimation()
 
     auto navIndicatorConfig = lastNode->GetNavigationIndicatorConfig();
     std::optional<bool> enableNavIndicator;
-    if (isFullPageNavigation_.value_or(false) && navIndicatorConfig.has_value()) {
+    if (isFullPageNavigation_ && navIndicatorConfig.has_value()) {
         enableNavIndicator = navIndicatorConfig.value();
     }
     mgr->SetWindowSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, enableNavIndicator, std::nullopt);
@@ -6350,7 +6350,7 @@ void NavigationPattern::ContentChangeByDetaching(PipelineContext* pipeline)
 void NavigationPattern::FireNavigateChangeCallback()
 {
     // only fire full page navigation
-    if (!isFullPageNavigation_.value_or(false)) {
+    if (!isFullPageNavigation_) {
         return;
     }
     CHECK_NULL_VOID(navigationStack_);
@@ -6387,7 +6387,7 @@ void NavigationPattern::FireNavigateChangeCallback()
 void NavigationPattern::FireChangeCallbackAfterLayout()
 {
     // page not change or navigation is measured, not need to add callback
-    if (!isChanged_ || (isFullPageNavigation_.has_value())) {
+    if (!isChanged_ || (navigationMode_ != NavigationMode::AUTO)) {
         return;
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());

@@ -365,7 +365,7 @@ class ObservableArray<T> extends Array<T> {
         return super.unshift(...items)
     }
 
-    override keys(): IterableIterator<Number> {
+    override keys(): IterableIterator<int> {
         this.handler?.onAccess()
         return super.keys()
     }
@@ -464,9 +464,9 @@ class ObservableArray<T> extends Array<T> {
         return super.join(sep)
     }
 
-    override toLocaleString(): string {
+    override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         this.handler?.onAccess()
-        return super.toLocaleString()
+        return super.toLocaleString(locales, options)
     }
 
     override toSpliced(start: int, delete: int, ...items: FixedArray<T>): Array<T> {
@@ -509,7 +509,7 @@ class ObservableArray<T> extends Array<T> {
         return super.values()
     }
 
-    override entries(): IterableIterator<[number, T]> {
+    override entries(): IterableIterator<[int, T]> {
         this.handler?.onAccess()
         return super.entries()
     }
@@ -766,9 +766,9 @@ class ObservableDate extends Date {
         return super.toLocaleTimeString()
     }
 
-    override toLocaleString(): string {
+    override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         this.handler?.onAccess()
-        return super.toLocaleString()
+        return super.toLocaleString(locales, options)
     }
 
     override toLocaleDateString(): string {

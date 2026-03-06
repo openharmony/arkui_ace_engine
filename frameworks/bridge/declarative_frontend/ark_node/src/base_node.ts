@@ -27,6 +27,11 @@ enum NodeRenderType {
   RENDER_TYPE_TEXTURE,
 }
 
+enum CompetitionStrategy {
+  DEFAULT = 0,
+  COMPETITION,
+}
+
 declare interface RenderOptions {
   selfIdealSize?: Size,
   type?: NodeRenderType,
@@ -44,6 +49,7 @@ declare class __JSBaseNode__ {
   finishUpdateFunc(): void;
   postTouchEvent(touchEvent: TouchEvent): boolean;
   postInputEvent(event: InputEventType): boolean;
+  postInputEventWithStrategy(event: InputEventType, competitionStrategy?: CompetitionStrategy): boolean;
   disposeNode(): void;
   updateStart(): void;
   updateEnd(): void;
@@ -90,6 +96,9 @@ abstract class BaseNode extends ViewBuildNodeBase {
   }
   postInputEvent(event: InputEventType): boolean {
     return this.builderBaseNode_.postInputEvent(event);
+  }
+  postInputEventWithStrategy(event: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+    return this.builderBaseNode_.postInputEventWithStrategy(event, competitionStrategy);
   }
   disposeNode(): void {
     return this.builderBaseNode_.disposeNode();

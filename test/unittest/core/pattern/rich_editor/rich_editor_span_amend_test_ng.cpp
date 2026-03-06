@@ -351,9 +351,16 @@ HWTEST_F(RichEditorSpanAmendTestNg, SetPlaceHolderStyledString, TestSize.Level1)
     ASSERT_NE(spanString, nullptr);
     richEditorController->SetPlaceholderStyledString(spanString);
     EXPECT_NE(richEditorPattern->styledPlaceholder_, nullptr);
+    richEditorPattern->isShowPlaceholder_ = true;
+    richEditorPattern->richTextRect_ = RectF(50, 50, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
     std::vector<std::list<RefPtr<SpanItem>>> spans;
     richEditorPattern->SetPlaceholder(spans);
     EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(50.0f, 50.0f));
+    richEditorPattern->isShowPlaceholder_ = false;
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(0, 0));
 }
 
 } // namespace OHOS::Ace::NG

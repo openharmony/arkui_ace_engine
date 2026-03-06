@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/log/dump_log.h"
 
 namespace OHOS::Ace::NG {
 std::string ScrollablePaintProperty::ContentClipToStr() const
@@ -35,6 +36,92 @@ std::string ScrollablePaintProperty::ContentClipToStr() const
             return "ContentClipMode.SAFE_AREA";
         default:
             return "";
+    }
+}
+
+void ScrollablePaintProperty::DumpInfo()
+{
+    auto scrollBarMode = GetScrollBarMode().value_or(DisplayMode::OFF);
+    if (scrollBarMode == DisplayMode::OFF) {
+        DumpLog::GetInstance().AddDesc("innerScrollBarState: OFF");
+    } else if (scrollBarMode == DisplayMode::AUTO) {
+        DumpLog::GetInstance().AddDesc("innerScrollBarState: AUTO");
+    } else if (scrollBarMode == DisplayMode::ON) {
+        DumpLog::GetInstance().AddDesc("innerScrollBarState: ON");
+    }
+    auto scrollBarWidth = GetScrollBarWidth();
+    scrollBarWidth.has_value() ? DumpLog::GetInstance().AddDesc(std::string("scrollBarWidth: ")
+        .append(scrollBarWidth.value().ToString()))
+        : DumpLog::GetInstance().AddDesc("scrollBarWidth: None");
+    auto scrollBarColor = GetScrollBarColor();
+    scrollBarColor.has_value() ? DumpLog::GetInstance().AddDesc(std::string("scrollBarColor: ")
+        .append(scrollBarColor.value().ColorToString()))
+        : DumpLog::GetInstance().AddDesc("scrollBarColor: None");
+    auto scrollBarMargin = GetScrollBarMargin();
+    scrollBarMargin.has_value() ? DumpLog::GetInstance().AddDesc(std::string("scrollBarMargin: ")
+        .append(scrollBarMargin.value().ToString()))
+        : DumpLog::GetInstance().AddDesc("scrollBarMargin: None");
+    auto fadingEdge = GetFadingEdge();
+    fadingEdge.has_value() ? DumpLog::GetInstance().AddDesc(std::string("fadingEdge: ")
+        .append(fadingEdge.value() ? "true" : "false"))
+        : DumpLog::GetInstance().AddDesc("fadingEdge: None");
+    auto fadingEdgeLength = GetFadingEdgeLength();
+    fadingEdgeLength.has_value() ? DumpLog::GetInstance().AddDesc(std::string("fadingEdgeLength: ")
+        .append(fadingEdgeLength.value().ToString()))
+        : DumpLog::GetInstance().AddDesc("fadingEdgeLength: None");
+    auto clipContent = GetContentClip();
+    clipContent.has_value() ? DumpLog::GetInstance().AddDesc(std::string("clipContent: ").append(
+        clipContent.value().first == ContentClipMode::CONTENT_ONLY ? "CONTENT_ONLY" :
+        clipContent.value().first == ContentClipMode::BOUNDARY ? "BOUNDARY" :
+        clipContent.value().first == ContentClipMode::CUSTOM ? "CUSTOM" :
+        clipContent.value().first == ContentClipMode::SAFE_AREA ? "SAFE_AREA" : "DEFAULT"))
+        : DumpLog::GetInstance().AddDesc("clipContent: None");
+}
+
+void ScrollablePaintProperty::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto scrollBarMode = GetScrollBarMode().value_or(DisplayMode::OFF);
+    if (scrollBarMode == DisplayMode::OFF) {
+        json->Put("innerScrollBarState", "OFF");
+    } else if (scrollBarMode == DisplayMode::AUTO) {
+        json->Put("innerScrollBarState", "AUTO");
+    } else if (scrollBarMode == DisplayMode::ON) {
+        json->Put("innerScrollBarState", "ON");
+    }
+    auto scrollBarWidth = GetScrollBarWidth();
+    json->Put("scrollBarWidth", scrollBarWidth.has_value() ? scrollBarWidth.value().ToString().c_str() : "None");
+    auto scrollBarColor = GetScrollBarColor();
+    json->Put("scrollBarColor", scrollBarColor.has_value() ? scrollBarColor.value().ColorToString().c_str() : "None");
+    auto scrollBarMargin = GetScrollBarMargin();
+    json->Put("scrollBarMargin",
+        scrollBarMargin.has_value() ? scrollBarMargin.value().ToString().c_str() : "None");
+    auto fadingEdge = GetFadingEdge();
+    json->Put("fadingEdge", fadingEdge.has_value() ? (fadingEdge.value() ? "true" : "false") : "None");
+    auto fadingEdgeLength = GetFadingEdgeLength();
+    json->Put("fadingEdgeLength", fadingEdgeLength.has_value() ? fadingEdgeLength.value().ToString().c_str() : "None");
+    auto clipContent = GetContentClip();
+    if (clipContent.has_value()) {
+        const char* clipMode = "DEFAULT";
+        switch (clipContent.value().first) {
+            case ContentClipMode::CONTENT_ONLY:
+                clipMode = "CONTENT_ONLY_ONLY";
+                break;
+            case ContentClipMode::BOUNDARY:
+                clipMode = "BOUNDARY";
+                break;
+            case ContentClipMode::SAFE_AREA:
+                clipMode = "SAFE_AREA";
+                break;
+            case ContentClipMode::CUSTOM:
+                clipMode = "CUSTOM";
+                break;
+            case ContentClipMode::DEFAULT:
+                clipMode = "DEFAULT";
+                break;
+        }
+        json->Put("clipContent", clipMode);
+    } else {
+        json->Put("clipContent", "None");
     }
 }
 

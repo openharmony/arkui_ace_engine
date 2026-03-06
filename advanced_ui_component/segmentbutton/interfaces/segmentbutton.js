@@ -2242,6 +2242,11 @@ export class SegmentButton extends ViewPU {
     if (typeof paramsLambda === 'function') {
       this.paramsGenerator_ = paramsLambda;
     }
+    this.__enableStateAnimation = new SynchedPropertySimpleOneWayPU(
+      params.enableStateAnimation,
+      this,
+      'enableStateAnimation'
+    );
     this.__options = new SynchedPropertyNesedObjectPU(params.options, this, 'options');
     this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(params.selectedIndexes, this, 'selectedIndexes');
     this.onItemClicked = undefined;
@@ -2348,6 +2353,9 @@ export class SegmentButton extends ViewPU {
     this.finalizeConstruction();
   }
   setInitiallyProvidedValue(params) {
+    if (params.enableStateAnimation === undefined) {
+      this.__enableStateAnimation.set(false);
+    }
     this.__options.set(params.options);
     if (params.onItemClicked !== undefined) {
       this.onItemClicked = params.onItemClicked;
@@ -2414,10 +2422,12 @@ export class SegmentButton extends ViewPU {
     }
   }
   updateStateVars(params) {
+    this.__enableStateAnimation.reset(params.enableStateAnimation);
     this.__options.set(params.options);
     this.__maxFontScale.reset(params.maxFontScale);
   }
   purgeVariableDependenciesOnElmtId(rmElmtId) {
+    this.__enableStateAnimation.purgeDependencyOnElmtId(rmElmtId);
     this.__options.purgeDependencyOnElmtId(rmElmtId);
     this.__selectedIndexes.purgeDependencyOnElmtId(rmElmtId);
     this.__maxFontScale.purgeDependencyOnElmtId(rmElmtId);
@@ -2436,6 +2446,7 @@ export class SegmentButton extends ViewPU {
     this.__shouldMirror.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
+    this.__enableStateAnimation.aboutToBeDeleted();
     this.__options.aboutToBeDeleted();
     this.__selectedIndexes.aboutToBeDeleted();
     this.__maxFontScale.aboutToBeDeleted();
@@ -2454,6 +2465,12 @@ export class SegmentButton extends ViewPU {
     this.__shouldMirror.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
+  }
+  get enableStateAnimation() {
+    return this.__enableStateAnimation.get();
+  }
+  set enableStateAnimation(newValue) {
+    this.__enableStateAnimation.set(newValue);
   }
   get options() {
     return this.__options.get();
@@ -2612,7 +2629,7 @@ export class SegmentButton extends ViewPU {
     }
     this.updateSelectedIndexes();
     this.setItemsSelected();
-    if (this.doSelectedChangeAnimate) {
+    if (this.doSelectedChangeAnimate || this.enableStateAnimation) {
       this.updateAnimatedProperty(this.getSelectedChangeCurve());
     } else {
       this.updateAnimatedProperty(null);

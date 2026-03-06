@@ -67,6 +67,9 @@ struct ACE_FORCE_EXPORT AxisEvent final : public PointerEvent {
     uint32_t axes = 0;
     bool isFalsifyCancel = false;
 
+    int32_t eventHandleId = 0;
+    bool isNewReferee = false;
+
     AxisEvent()
     {
         eventType = UIInputEventType::AXIS;

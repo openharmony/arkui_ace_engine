@@ -82,6 +82,11 @@ void RequestPasswordAutoFillImpl(Ark_WebContextMenuResult peer)
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->RequestPasswordAutoFill();
 }
+void SaveImageImpl(Ark_WebContextMenuResult peer)
+{
+    CHECK_NULL_VOID(peer && peer->handler);
+    peer->handler->SaveImage();
+}
 } // WebContextMenuResultAccessor
 const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccessor()
 {
@@ -99,6 +104,7 @@ const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccess
         WebContextMenuResultAccessor::UndoImpl,
         WebContextMenuResultAccessor::PasteAndMatchStyleImpl,
         WebContextMenuResultAccessor::RequestPasswordAutoFillImpl,
+        WebContextMenuResultAccessor::SaveImageImpl,
     };
     return &WebContextMenuResultAccessorImpl;
 }

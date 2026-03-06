@@ -36,12 +36,12 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_paint_method.h"
 #include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
-#include "core/components/theme/app_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1198,5 +1198,85 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw003, TestSize.Level0)
     qrCodeModifier->SetQRCodeSize(100.0f);
     qrCodeModifier->onDraw(context);
     EXPECT_EQ(qrCodeModifier->color_->Get(), Color::RED);
+}
+
+/**
+ * @tc.name: QRCodePaintPropertyToJsonValue001
+ * @tc.desc: Test QRCodePaintProperty ToJsonValue with default values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodePaintPropertyToJsonValue001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create QRCode and get frameNode.
+     */
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(qrcodePaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ToJsonValue.
+     * @tc.expected: Check the json output.
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    qrcodePaintProperty->ToJsonValue(json, filter);
+
+    GTEST_LOG_(INFO) << json->ToString();
+    /**
+     * @tc.steps: step3. Verify the default values.
+     * @tc.expected: value should be CREATE_VALUE, color and backgroundColor from theme, contentOpacity should be 1.0.
+     */
+    EXPECT_EQ(json->GetString("value"), CREATE_VALUE);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+    ASSERT_NE(qrCodeTheme, nullptr);
+    EXPECT_EQ(json->GetString("color"), qrCodeTheme->GetQrcodeColor().ColorToString());
+    EXPECT_EQ(json->GetString("backgroundColor"), qrCodeTheme->GetBackgroundColor().ColorToString());
+    EXPECT_EQ(json->GetDouble("contentOpacity"), 1.0);
+}
+
+/**
+ * @tc.name: QRCodePaintPropertyToJsonValue002
+ * @tc.desc: Test QRCodePaintProperty ToJsonValue with custom values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodePaintPropertyToJsonValue002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create QRCode and set custom values.
+     */
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    qrCodeModelNG.SetQRCodeColor(QR_CODE_COLOR_VALUE);
+    qrCodeModelNG.SetQRBackgroundColor(QR_CODE_BACKGROUND_COLOR_VALUE);
+    qrCodeModelNG.SetContentOpacity(0.5);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(qrcodePaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ToJsonValue.
+     * @tc.expected: Check the json output.
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    qrcodePaintProperty->ToJsonValue(json, filter);
+
+    GTEST_LOG_(INFO) << json->ToString();
+    /**
+     * @tc.steps: step3. Verify the custom values.
+     * @tc.expected: value should be CREATE_VALUE, color should be QR_CODE_COLOR_VALUE, backgroundColor should be
+     * QR_CODE_BACKGROUND_COLOR_VALUE, contentOpacity should be 0.5.
+     */
+    EXPECT_EQ(json->GetString("value"), CREATE_VALUE);
+    EXPECT_EQ(json->GetString("color"), QR_CODE_COLOR_VALUE.ColorToString());
+    EXPECT_EQ(json->GetString("backgroundColor"), QR_CODE_BACKGROUND_COLOR_VALUE.ColorToString());
+    EXPECT_EQ(json->GetDouble("contentOpacity"), 0.5);
 }
 } // namespace OHOS::Ace::NG

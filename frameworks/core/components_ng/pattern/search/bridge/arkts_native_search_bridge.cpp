@@ -2478,11 +2478,13 @@ ArkUINativeModuleValue SearchBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const ChangeValueInfo&)> callback =
-        [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](const ChangeValueInfo& changeValueInfo) {
+    std::function<void(const ChangeValueInfo&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+        isJsView, func = panda::CopyableGlobal(vm, func)](const ChangeValueInfo& changeValueInfo) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            auto weakFrameNode = weak.Upgrade();
+            CHECK_NULL_VOID(weakFrameNode);
+            PipelineContext::SetCallBackNode(weakFrameNode);
             auto eventObject = CommonBridge::CreateChangeValueInfoObj(vm, changeValueInfo);
             auto contentObj = eventObject->Get(vm, "content");
             auto previewTextObj = eventObject->Get(vm, "previewText");

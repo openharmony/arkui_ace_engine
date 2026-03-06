@@ -93,6 +93,16 @@ struct LoadAsyncContext {
     int32_t errorCode = 0;
 };
 
+struct JsEnumInt {
+    std::string_view enumName;
+    int32_t enumInt;  
+};
+
+const std::vector<struct JsEnumInt> g_animationStopMode = {
+    { "FIRST_FRAME", 0 },
+    { "LAST_FRAME", 1 },
+};
+
 const ArkUIDrawableDescriptor* GetArkUIDrawableModifier()
 {
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
@@ -1014,21 +1024,26 @@ void JsDrawableDescriptor::ParseAnimationOptions(napi_env env, napi_value napiOp
     napi_value napiDuration;
     napi_value napiIterations;
     napi_value napiAutoPlay;
+    napi_value napiStopMode;
     napi_value napiFrameDurations;
     int32_t duration = -1;
     int32_t iterations = 1;
+    int32_t stopMode = 0;
     bool autoPlay = true;
     std::vector<int32_t> durations;
     napi_get_named_property(env, napiOptions, "duration", &napiDuration);
     napi_get_named_property(env, napiOptions, "iterations", &napiIterations);
     napi_get_named_property(env, napiOptions, "autoPlay", &napiAutoPlay);
+    napi_get_named_property(env, napiOptions, "stopMode", &napiStopMode);
     napi_get_named_property(env, napiOptions, "frameDurations", &napiFrameDurations);
     napi_get_value_int32(env, napiDuration, &duration);
     napi_get_value_int32(env, napiIterations, &iterations);
+    napi_get_value_int32(env, napiStopMode, &stopMode);
     napi_get_value_bool(env, napiAutoPlay, &autoPlay);
     options.autoPlay = autoPlay;
     options.duration = duration;
     options.iterations = iterations;
+    options.stopMode = stopMode;
     bool isArray;
     napi_status status = napi_is_array(env, napiFrameDurations, &isArray);
     if (status != napi_ok || !isArray) {
@@ -1115,6 +1130,7 @@ napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback
     modifier->setAnimatedTotalDuration(animatedDrawable, options.duration);
     modifier->setAnimatedIterations(animatedDrawable, options.iterations);
     modifier->setAnimatedAutoPlay(animatedDrawable, options.autoPlay);
+    modifier->setAnimatedStopMode(animatedDrawable, options.stopMode);
     // wrap to napi_value
     auto napi_status = napi_wrap(env, thisVar, animatedDrawable, NewDestructor, nullptr, nullptr);
     if (napi_status != napi_ok) {
@@ -1355,6 +1371,38 @@ napi_value JsDrawableDescriptor::InitAnimatedDrawable(napi_env env)
     return cons;
 }
 
+napi_value JsDrawableDescriptor::InitAnimationStopMode(napi_env env, napi_value exports)
+{
+    const char* enumClassName = "AnimationStopMode";
+    auto vecSize = g_animationStopMode.size();
+    std::vector<napi_value> value(vecSize);
+    std::vector<napi_property_descriptor> property(vecSize);
+    for (size_t index = 0; index < vecSize; ++index) {
+        napi_create_int32(env, g_animationStopMode[index].enumInt, &value[index]);
+        property[index] = napi_property_descriptor DECLARE_NAPI_STATIC_PROPERTY(
+            g_animationStopMode[index].enumName.data(), value[index]);
+    }
+
+    auto napiConstructor = [](napi_env env, napi_callback_info info) {
+        napi_value jsThis = nullptr;
+        napi_get_cb_info(env, info, nullptr, nullptr, &jsThis, nullptr);
+        return jsThis;
+    };
+
+    napi_value result = nullptr;
+    napi_status napiStatus = napi_define_class(
+        env, enumClassName, NAPI_AUTO_LENGTH, napiConstructor, nullptr, property.size(), property.data(), &result);
+    if (napiStatus != napi_ok) {
+        return nullptr;
+    }
+
+    napiStatus = napi_set_named_property(env, exports, enumClassName, result);
+    if (napiStatus != napi_ok) {
+        return nullptr;
+    }
+    return exports;
+}
+
 napi_value JsDrawableDescriptor::Export(napi_env env, napi_value exports)
 {
     napi_value cons = InitDrawable(env);
@@ -1365,6 +1413,7 @@ napi_value JsDrawableDescriptor::Export(napi_env env, napi_value exports)
     NAPI_CALL(env, napi_set_named_property(env, exports, LAYERED_DRAWABLE_DESCRIPTOR_NAME, cons));
     cons = InitAnimatedDrawable(env);
     NAPI_CALL(env, napi_set_named_property(env, exports, ANIMATED_DRAWABLE_DESCRIPTOR_NAME, cons));
+    InitAnimationStopMode(env, exports);
 
     napi_property_descriptor createTransferDesc[] = { DECLARE_NAPI_FUNCTION(
         "__createTransfer__", CreateDrawableDescriptorTransfer) };

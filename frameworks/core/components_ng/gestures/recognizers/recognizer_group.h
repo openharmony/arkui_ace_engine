@@ -59,6 +59,7 @@ public:
     void OnFlushTouchEventsEnd() override;
     virtual RefereeState CheckStates(size_t touchId);
     void ForceReject();
+    void UpdateGestureReferee(const WeakPtr<GestureReferee>& gestureReferee) override;
 
     void RemainChildOnResetStatus()
     {

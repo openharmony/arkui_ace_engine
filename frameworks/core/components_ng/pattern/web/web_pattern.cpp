@@ -707,6 +707,9 @@ void WebPattern::CloseContextSelectionMenu()
     if (contextSelectOverlay_ && contextSelectOverlay_->IsCurrentMenuVisibile()) {
         contextSelectOverlay_->CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
     }
+    if (contextMenuOverlay_ && contextMenuOverlay_->IsCurrentMenuVisibile()) {
+        contextMenuOverlay_->CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
+    }
 }
 
 void WebPattern::RemovePreviewMenuNode()
@@ -1276,6 +1279,15 @@ void WebPattern::UninitMenuLifeCycleCallback()
     overlayManager->UnRegisterMenuLifeCycleCallback(host->GetId());
 }
 
+void WebPattern::ShowDefaultContextMenu()
+{
+    if (!contextMenuOverlay_) {
+        contextMenuOverlay_ = AceType::MakeRefPtr<WebContextMenuOverlay>(WeakClaim(this));
+    }
+    CHECK_NULL_VOID(contextMenuOverlay_);
+    contextMenuOverlay_->ProcessOverlay({ .animation = true });
+}
+
 void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext, bool result)
 {
     TAG_LOGI(AceLogTag::ACE_WEB,
@@ -1340,6 +1352,10 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
         contextSelectOverlay_->SetElementType(WebElementType::NONE);
         contextSelectOverlay_->SetResponseType(ResponseType::RIGHT_CLICK);
         ShowContextSelectOverlay(RectF(), RectF());
+        return;
+    }
+    if (!result && isEnableDefaultContextMenu_) {
+        ShowDefaultContextMenu();
         return;
     }
     CHECK_NULL_VOID(result);
@@ -3422,14 +3438,19 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
     EnableSecurityLayer(false);
 }
 
+bool WebPattern::IsContextMenuShow()
+{
+    return (contextSelectOverlay_ && contextSelectOverlay_->IsCurrentMenuVisibile()) ||
+           (contextMenuOverlay_ && contextMenuOverlay_->IsCurrentMenuVisibile());
+}
+
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 {
-    if (contextSelectOverlay_ && contextSelectOverlay_->IsCurrentMenuVisibile() &&
-        keyEvent.code == KeyCode::KEY_ESCAPE && keyEvent.action == KeyAction::DOWN) {
+    if (IsContextMenuShow() && keyEvent.code == KeyCode::KEY_ESCAPE && keyEvent.action == KeyAction::DOWN) {
         bool isKeyNull = !(keyEvent.HasKey(KeyCode::KEY_ALT_LEFT) || keyEvent.HasKey(KeyCode::KEY_ALT_RIGHT) ||
-            keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT) ||
-            keyEvent.HasKey(KeyCode::KEY_CTRL_LEFT) || keyEvent.HasKey(KeyCode::KEY_CTRL_RIGHT) ||
-            keyEvent.HasKey(KeyCode::KEY_META_LEFT) || keyEvent.HasKey(KeyCode::KEY_META_RIGHT));
+                           keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT) ||
+                           keyEvent.HasKey(KeyCode::KEY_CTRL_LEFT) || keyEvent.HasKey(KeyCode::KEY_CTRL_RIGHT) ||
+                           keyEvent.HasKey(KeyCode::KEY_META_LEFT) || keyEvent.HasKey(KeyCode::KEY_META_RIGHT));
         if (isKeyNull) {
             TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern Handle Escape");
             CloseContextSelectionMenu();
@@ -5531,6 +5552,11 @@ void WebPattern::OnEnableAutoFillUpdate(bool isEnabled)
     }
 }
 
+void WebPattern::OnEnableDefaultContextMenuUpdate(bool isEnabled)
+{
+    isEnableDefaultContextMenu_ = isEnabled;
+}
+
 void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
     const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
@@ -7101,7 +7127,7 @@ void WebPattern::OnWindowShow()
         webId, offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
     if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
-        delegate_->SetOfflineWebActiveStatus(webId, true);
+        delegate_->SetOfflineWebActiveStatus(true);
         return;
     }
     delegate_->OnRenderToForeground();
@@ -7115,7 +7141,7 @@ void WebPattern::OnWindowShow()
         ACE_SCOPED_TRACE("WebPattern::OnWindowShow WebId %d, isWindowShow %d, isVisible %d, componentVisibility_ %d",
             webId, isWindowShow_, isVisible_, static_cast<int>(componentVisibility_));
         if (offlineWebInited_ && isOfflineWebEvictFrameBuffersEnable_) {
-            delegate_->SetOfflineWebActiveStatus(webId, true);
+            delegate_->SetOfflineWebActiveStatus(true);
         }
         return;
     }
@@ -7135,7 +7161,7 @@ void WebPattern::OnWindowHide()
         webId, offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
     if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
-        delegate_->SetOfflineWebActiveStatus(webId, false);
+        delegate_->SetOfflineWebActiveStatus(false);
         return;
     }
     delegate_->OnRenderToBackground();
@@ -7144,7 +7170,7 @@ void WebPattern::OnWindowHide()
         return;
     }
     if (offlineWebInited_ && !isActive_) {
-        delegate_->SetOfflineWebActiveStatus(webId, false);
+        delegate_->SetOfflineWebActiveStatus(false);
     }
     SetActiveStatusInner(false);
     delegate_->HideWebView();
@@ -7194,6 +7220,9 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
 {
     if (contextSelectOverlay_ && contextSelectOverlay_->SelectOverlayIsOn()) {
         contextSelectOverlay_->UpdateMenuOnWindowSizeChanged(type);
+    }
+    if (contextMenuOverlay_ && contextMenuOverlay_->SelectOverlayIsOn()) {
+        contextMenuOverlay_->UpdateMenuOnWindowSizeChanged(type);
     }
     CHECK_NULL_VOID(delegate_);
     TAG_LOGD(AceLogTag::ACE_WEB, "WindowSizeChangeReason type: %{public}d ", type);

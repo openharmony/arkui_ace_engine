@@ -1381,6 +1381,222 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest028, TestSize.Lev
 }
 
 /**
+ * @tc.name: CalendarDialogPatternTest029
+ * @tc.desc: Test infinite loop protection with all dates disabled - KEY_DPAD_LEFT
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest029, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+
+    auto entryNode = AceType::DynamicCast<FrameNode>(element);
+    settingData.entryNode = entryNode;
+
+    PickerDate startDate(2000, 1, 1);
+    PickerDate endDate(2000, 1, 31);
+    settingData.startDate = startDate;
+    settingData.endDate = endDate;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->focusedDay_.day = 15;
+    dialogPattern->focusedDay_.month.year = 2000;
+    dialogPattern->focusedDay_.month.month = 1;
+
+    KeyEvent keyEventLeft(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
+    auto result = dialogPattern->HandleCalendarNodeKeyEvent(keyEventLeft);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest030
+ * @tc.desc: Test infinite loop protection with all dates disabled - KEY_DPAD_RIGHT
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest030, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+
+    auto entryNode = AceType::DynamicCast<FrameNode>(element);
+    settingData.entryNode = entryNode;
+
+    PickerDate startDate(2000, 1, 1);
+    PickerDate endDate(2000, 1, 31);
+    settingData.startDate = startDate;
+    settingData.endDate = endDate;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->focusedDay_.day = 15;
+    dialogPattern->focusedDay_.month.year = 2000;
+    dialogPattern->focusedDay_.month.month = 1;
+
+    KeyEvent keyEventRight(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
+    auto result = dialogPattern->HandleCalendarNodeKeyEvent(keyEventRight);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest031
+ * @tc.desc: Test infinite loop protection with all dates disabled - KEY_DPAD_UP
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest031, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+
+    auto entryNode = AceType::DynamicCast<FrameNode>(element);
+    settingData.entryNode = entryNode;
+
+    PickerDate startDate(2000, 1, 1);
+    PickerDate endDate(2000, 1, 31);
+    settingData.startDate = startDate;
+    settingData.endDate = endDate;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->focusedDay_.day = 15;
+    dialogPattern->focusedDay_.month.year = 2000;
+    dialogPattern->focusedDay_.month.month = 1;
+
+    KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
+    auto result = dialogPattern->HandleCalendarNodeKeyEvent(keyEventUp);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest032
+ * @tc.desc: Test infinite loop protection with all dates disabled - KEY_DPAD_DOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest032, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+
+    auto entryNode = AceType::DynamicCast<FrameNode>(element);
+    settingData.entryNode = entryNode;
+
+    PickerDate startDate(2000, 1, 1);
+    PickerDate endDate(2000, 1, 31);
+    settingData.startDate = startDate;
+    settingData.endDate = endDate;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->focusedDay_.day = 15;
+    dialogPattern->focusedDay_.month.year = 2000;
+    dialogPattern->focusedDay_.month.month = 1;
+
+    KeyEvent keyEventDown(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
+    auto result = dialogPattern->HandleCalendarNodeKeyEvent(keyEventDown);
+    EXPECT_TRUE(result);
+}
+
+/**
  * @tc.name: CalendarDialogViewTest0050
  * @tc.desc: Show Function Test
  * @tc.type: FUNC

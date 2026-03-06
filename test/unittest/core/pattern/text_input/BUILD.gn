@@ -72,7 +72,7 @@ ace_unittest("text_field_test_ng") {
 }
 
 ace_unittest("text_input_pattern_test") {
-  module_name = "TextSet-Text"
+  module_name = "TextSet-TextInput"
   type = "new"
   sources = [
     "$ace_root/test/mock/core/common/mock_font_manager.cpp",
@@ -89,6 +89,7 @@ ace_unittest("text_input_pattern_test") {
     "text_field_pattern_testthree.cpp",
     "text_field_pattern_testtwo.cpp",
     "text_input_base.cpp",
+    "text_field_pattern_for_tv.cpp",
   ]
   cflags = [ "-fno-access-control" ]
 

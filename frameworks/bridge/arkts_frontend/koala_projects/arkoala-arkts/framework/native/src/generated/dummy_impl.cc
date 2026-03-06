@@ -24633,6 +24633,136 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // ArcScrollBarExtenderAccessor
+    namespace ArcSwiperContentTransitionProxyInnerAccessor {
+    void DestroyPeerImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_ArcSwiperContentTransitionProxyInner ConstructImpl()
+    {
+        if (!needGroupedLog(1)) {
+            return reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(100);
+        }
+        string out("new ArcSwiperContentTransitionProxyInner(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1)) {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void FinishTransitionImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("finishTransition(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_Int32 GetSelectedIndexImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("getSelectedIndex(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    void SetSelectedIndexImpl(Ark_ArcSwiperContentTransitionProxyInner peer,
+                              Ark_Int32 selectedIndex)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setSelectedIndex(");
+        WriteToString(&out, selectedIndex);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_Int32 GetIndexImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("getIndex(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    void SetIndexImpl(Ark_ArcSwiperContentTransitionProxyInner peer,
+                      Ark_Int32 index)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setIndex(");
+        WriteToString(&out, index);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_Float64 GetPositionImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("getPosition(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    void SetPositionImpl(Ark_ArcSwiperContentTransitionProxyInner peer,
+                         Ark_Float64 position)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setPosition(");
+        WriteToString(&out, position);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_Float64 GetMainAxisLengthImpl(Ark_ArcSwiperContentTransitionProxyInner peer)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("getMainAxisLength(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    void SetMainAxisLengthImpl(Ark_ArcSwiperContentTransitionProxyInner peer,
+                               Ark_Float64 mainAxisLength)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setMainAxisLength(");
+        WriteToString(&out, mainAxisLength);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // ArcSwiperContentTransitionProxyInnerAccessor
     namespace ArcSwiperControllerHelperAccessor {
     void DestroyPeerImpl(Ark_ArcSwiperControllerHelper peer)
     {
@@ -24872,7 +25002,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void CustomContentTransitionImpl(Ark_NativePointer node,
-                                     const Opt_SwiperContentAnimatedTransition* transition)
+                                     const Opt_ArcSwiperContentAnimatedTransition* transition)
     {
         if (!needGroupedLog(1)) {
             return;
@@ -45436,7 +45566,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // UIContextAtomicServiceBarAccessor
     namespace UIContextGetInfoAccessor {
-    Opt_uiObserver_NavigationInfo GetNavigationInfoByUniqueIdImpl(Ark_Int64 id)
+    Opt_uiObserver_NavigationInfo GetNavigationInfoByUniqueIdImpl(Ark_Int32 id)
     {
         if (!needGroupedLog(1)) {
             return { .tag=INTEROP_TAG_UNDEFINED };
@@ -46626,6 +46756,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SaveImageImpl(Ark_WebContextMenuResult peer)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("saveImage(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // WebContextMenuResultAccessor
     namespace WebKeyboardControllerAccessor {
     void DestroyPeerImpl(Ark_WebKeyboardController peer)
@@ -47554,6 +47693,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &ArcScrollBarExtenderAccessorImpl;
     }
+
+    const GENERATED_ArkUIArcSwiperContentTransitionProxyInnerAccessor* GetArcSwiperContentTransitionProxyInnerAccessor()
+    {
+        static const GENERATED_ArkUIArcSwiperContentTransitionProxyInnerAccessor ArcSwiperContentTransitionProxyInnerAccessorImpl {
+            ArcSwiperContentTransitionProxyInnerAccessor::DestroyPeerImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::ConstructImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::GetFinalizerImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::FinishTransitionImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::GetSelectedIndexImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::SetSelectedIndexImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::GetIndexImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::SetIndexImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::GetPositionImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::SetPositionImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::GetMainAxisLengthImpl,
+            ArcSwiperContentTransitionProxyInnerAccessor::SetMainAxisLengthImpl,
+        };
+        return &ArcSwiperContentTransitionProxyInnerAccessorImpl;
+    }
+
+    struct ArcSwiperContentTransitionProxyInnerPeer {
+        virtual ~ArcSwiperContentTransitionProxyInnerPeer() = default;
+    };
 
     const GENERATED_ArkUIArcSwiperControllerHelperAccessor* GetArcSwiperControllerHelperAccessor()
     {
@@ -51326,6 +51488,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebContextMenuResultAccessor::UndoImpl,
             WebContextMenuResultAccessor::PasteAndMatchStyleImpl,
             WebContextMenuResultAccessor::RequestPasswordAutoFillImpl,
+            WebContextMenuResultAccessor::SaveImageImpl,
         };
         return &WebContextMenuResultAccessorImpl;
     }
@@ -51482,6 +51645,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetArcListExtenderAccessor,
             GetArcListItemExtenderAccessor,
             GetArcScrollBarExtenderAccessor,
+            GetArcSwiperContentTransitionProxyInnerAccessor,
             GetArcSwiperControllerHelperAccessor,
             GetArcSwiperExtenderAccessor,
             GetAxisEventAccessor,

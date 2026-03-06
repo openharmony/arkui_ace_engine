@@ -502,6 +502,8 @@ public:
         return listSnapSpeed_;
     }
 
+    int32_t GetFirstIndex() const override;
+
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

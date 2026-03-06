@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "checkbox_model.h"
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/checkable/checkable_theme.h"
@@ -403,6 +404,11 @@ void CheckBoxModelNG::ResetComponentColor(FrameNode* frameNode, const CheckBoxCo
             color = theme->GetInactiveColor();
             ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color, frameNode);
             break;
+        case CheckBoxColorType::STROKE_COLOR:
+            ResetCheckMarkColor(frameNode);
+            color = theme->GetPointColor();
+            ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColor, color, frameNode);
+            break;
         default:
             break;
     }
@@ -417,6 +423,9 @@ void CheckBoxModelNG::UpdateComponentColor(FrameNode* frameNode, const CheckBoxC
             break;
         case CheckBoxColorType::UN_SELECTED_COLOR:
             SetUnSelectedColor(frameNode, color);
+            break;
+        case CheckBoxColorType::STROKE_COLOR:
+            SetCheckMarkColor(frameNode, color);
             break;
         default:
             break;

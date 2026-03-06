@@ -1295,6 +1295,9 @@ HWTEST_F(CheckBoxGroupTwoTestNG, UpdateComponentColor, TestSize.Level1)
     checkBoxGroupModelNG.UpdateComponentColor(frameNode, CheckBoxGroupColorType::UN_SELECTED_COLOR, Color::RED);
     ret = paintProperty->GetCheckBoxGroupUnSelectedColor();
     EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+    checkBoxGroupModelNG.UpdateComponentColor(frameNode, CheckBoxGroupColorType::STROKE_COLOR, Color::RED);
+    ret = paintProperty->GetCheckBoxGroupCheckMarkColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
 }
 
 /**
@@ -1334,6 +1337,9 @@ HWTEST_F(CheckBoxGroupTwoTestNG, ResetComponentColor, TestSize.Level1)
     checkBoxGroupModelNG.ResetComponentColor(frameNode, CheckBoxGroupColorType::UN_SELECTED_COLOR);
     ret = paintProperty->GetCheckBoxGroupUnSelectedColor();
     EXPECT_EQ(ret.value_or(Color::BLACK), theme->GetInactiveColor());
+    checkBoxGroupModelNG.ResetComponentColor(frameNode, CheckBoxGroupColorType::STROKE_COLOR);
+    ret = paintProperty->GetCheckBoxGroupCheckMarkColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), theme->GetPointColor());
 }
 
 /**

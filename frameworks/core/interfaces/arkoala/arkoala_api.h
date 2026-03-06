@@ -360,6 +360,8 @@ struct ArkUITouchEvent {
     ArkUI_Float32 height;
     ArkUI_Int64 deviceId;
     ArkUI_Uint64 modifierKeyState;
+    ArkUI_Int32 eventHandleId;
+    ArkUI_Bool isNewReferee;
 
     /**
      * @brief Prevents events from bubbling further to the parent node for processing.
@@ -403,6 +405,8 @@ struct ArkUIMouseEvent {
     ArkUI_Float32 height;
     ArkUI_Int64 deviceId;
     ArkUI_Uint64 modifierKeyState;
+    ArkUI_Int32 eventHandleId;
+    ArkUI_Bool isNewReferee;
     /**
      * @brief Prevents events from bubbling further to the parent node for processing.
      *
@@ -431,6 +435,8 @@ struct ArkUIAxisEvent {
     ArkUI_Uint64 modifierKeyState;
     ArkUI_Int64 deviceId;
     ArkUI_Uint32 axes;
+    ArkUI_Int32 eventHandleId;
+    ArkUI_Bool isNewReferee;
 };
 
 struct ArkUICoastingAxisEvent {
@@ -2254,9 +2260,9 @@ struct ArkVelocityFieldOptions {
 };
 
 struct ArkUICheckboxSettingData {
-    ArkUIOptionalInt selectColor;
-    ArkUIOptionalInt unselectedColor;
-    ArkUIOptionalInt strokeColor;
+    ArkUIOptionalUint selectColor;
+    ArkUIOptionalUint unselectedColor;
+    ArkUIOptionalUint strokeColor;
 };
 
 typedef struct {
@@ -3298,7 +3304,15 @@ struct ArkUICommonModifier {
     void (*setOnAppear)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
     void (*dispatchKeyEvent)(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent);
     ArkUI_Int32 (*postTouchEvent)(ArkUINodeHandle node, const ArkUITouchEvent* arkUItouchEvent);
+    ArkUI_Int32 (*postTouchEventWithStrategy)(ArkUINodeHandle node, const ArkUITouchEvent* arkUITouchEvent,
+        ArkUI_Int32 strategy);
+    ArkUI_Int32 (*postMouseEventWithStrategy)(ArkUINodeHandle node, const ArkUIMouseEvent* arkUIMouseEvent,
+        ArkUI_Int32 strategy);
+    ArkUI_Int32 (*postAxisEventWithStrategy)(ArkUINodeHandle node, const ArkUIAxisEvent* arkUIAxisEvent,
+        ArkUI_Int32 strategy);
     void (*createClonedTouchEvent)(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent);
+    void (*createClonedMouseEvent)(ArkUIMouseEvent* arkUIMouseEventCloned, const ArkUIMouseEvent* arkUIMouseEvent);
+    void (*createClonedAxisEvent)(ArkUIAxisEvent* arkUIAxisEventCloned, const ArkUIAxisEvent* arkUIAxisEvent);
     void (*destroyTouchEvent)(ArkUITouchEvent* arkUITouchEvent);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
@@ -6098,6 +6112,8 @@ struct ArkUIWebModifier {
     void (*resetOnMicrophoneCaptureStateChanged)(ArkUINodeHandle node);
     void (*setEnableAutoFill)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableAutoFill)(ArkUINodeHandle node);
+    void (*setEnableDefaultContextMenu)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableDefaultContextMenu)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {
@@ -6142,8 +6158,9 @@ struct ArkUICheckboxModifier {
     void (*setUnSelectedColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setCheckboxWidth)(ArkUINodeHandle node, ArkUI_Float32 widthVal, ArkUI_Int32 widthUnit);
     void (*setCheckboxHeight)(ArkUINodeHandle node, ArkUI_Float32 heightVal, ArkUI_Int32 heightUnit);
-    void (*setMark)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 sizeValue, ArkUI_Int32 sizeUnit,
-        ArkUI_Float32 widthValue, ArkUI_Int32 widthUnit);
+    void (*setMarkColor)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
+    void (*setMark)(ArkUINodeHandle node, ArkUI_Float32 sizeValue, ArkUI_Int32 sizeUnit, ArkUI_Float32 widthValue,
+        ArkUI_Int32 widthUnit);
     void (*setCheckboxPadding)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
     void (*setCheckboxResponseRegion)(
@@ -6181,7 +6198,7 @@ struct ArkUICheckboxModifier {
     void (*createCheckbox)(ArkUI_CharPtr namePtr, ArkUI_CharPtr groupPtr);
     void (*setCheckboxBuilder)(ArkUINodeHandle node, void* builder);
     void (*resetCheckboxMarkColor)(ArkUINodeHandle node);
-    void (*setCheckboxMarkColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setCheckboxMarkColor)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setCheckMarkSize)(ArkUINodeHandle node, ArkUI_Float32 sizeValue, ArkUI_Int32 sizeUnit);
     void (*setCheckMarkWidth)(ArkUINodeHandle node, ArkUI_Float32 widthValue, ArkUI_Int32 widthUnit);
     void (*setCheckboxChangeEvent)(ArkUINodeHandle node, void* callback);
@@ -6201,8 +6218,8 @@ struct ArkUICheckboxGroupModifier {
     void (*setCheckboxGroupHeight)(
         ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
     void (*resetCheckboxGroupHeight)(ArkUINodeHandle node);
-    void (*setCheckboxGroupMark)(
-        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue);
+    void (*setCheckboxGroupMark)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr,
+        ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue);
     void (*resetCheckboxGroupMark)(ArkUINodeHandle node);
     void (*setCheckboxGroupStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCheckboxGroupStyle)(ArkUINodeHandle node);
@@ -6222,7 +6239,7 @@ struct ArkUICheckboxGroupModifier {
     void (*setCheckboxGroupUnSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
 
     void (*createCheckboxGroup)(ArkUI_CharPtr groupNamePtr);
-    void (*setCheckMarkColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setCheckMarkColor)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*resetCheckMarkColor)(ArkUINodeHandle node);
     void (*setCheckMarkSize)(ArkUINodeHandle node, ArkUI_Float32 sizeValue, ArkUI_Int32 unit);
     void (*setCheckMarkWidth)(ArkUINodeHandle node, ArkUI_Float32 widthValue, ArkUI_Int32 unit);

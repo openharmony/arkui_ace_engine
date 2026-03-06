@@ -312,6 +312,7 @@ void MarqueePattern::OnDoubleAnimationFinish(bool isFirst)
 void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
 {
     TAG_LOGD(AceLogTag::ACE_MARQUEE, "Stop Marquee Animation.");
+    ChangeSecondChildVisibility(stopAndStart);
     animationId_++;
     secondAnimationId_ ++;
     if (animation_) {
@@ -341,6 +342,23 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
     }
     if (stopAndStart) {
         StartMarqueeAnimation();
+    }
+}
+
+void MarqueePattern::ChangeSecondChildVisibility(bool stopAndStart)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetChildren().size() > 1) {
+        auto secondChild = DynamicCast<FrameNode>(host->GetLastChild());
+        CHECK_NULL_VOID(secondChild);
+        auto textLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        auto preVisibility = textLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
+        textLayoutProperty->UpdateVisibility(IsRunMarquee() ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+        if (!stopAndStart && preVisibility == VisibleType::INVISIBLE) {
+            UpdateTextTranslateXY(GetSecondChildStart(), false, false);
+        }
     }
 }
 

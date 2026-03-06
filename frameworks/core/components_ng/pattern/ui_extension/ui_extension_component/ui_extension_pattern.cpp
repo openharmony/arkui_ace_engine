@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 
+#include <atomic>
+#include <future>
 #include <optional>
 
 #include "adapter/ohos/entrance/ace_container.h"
@@ -85,6 +87,50 @@ bool StartWith(const std::string &source, const std::string &prefix)
     }
 
     return source.find(prefix) == 0;
+}
+
+void ParseDumpInfoToJson(const std::shared_ptr<JsonValue>& json, const std::vector<std::string>& dumpInfo,
+    const std::shared_ptr<std::atomic_bool>& taskValid)
+{
+    for (const auto& dumpStr : dumpInfo) {
+        if (!taskValid->load(std::memory_order_acquire)) {
+            return;
+        }
+        size_t pos = dumpStr.find("UINodeCount:");
+        if (pos == std::string::npos) {
+            continue;
+        }
+        size_t start = dumpStr.find("\n", pos);
+        if (start == std::string::npos) {
+            continue;
+        }
+        std::string filteredData = dumpStr.substr(start + 1);
+        filteredData.erase(filteredData.find_last_not_of("\n") + 1);
+        auto childJson = JsonUtil::ParseJsonString(filteredData);
+        if (childJson && taskValid->load(std::memory_order_acquire)) {
+            json->Put("$child-uec", childJson);
+        }
+        return;
+    }
+}
+
+void ExecuteNotifyDumpTask(const std::shared_ptr<JsonValue>& json, const std::vector<std::string>& params,
+    const RefPtr<SessionWrapper>& sessionWrapper, const std::shared_ptr<std::promise<void>>& promise,
+    const std::shared_ptr<std::atomic_bool>& taskValid)
+{
+    auto notifyOnExit = [&promise]() { promise->set_value(); };
+    if (!taskValid->load(std::memory_order_acquire)) {
+        notifyOnExit();
+        return;
+    }
+    std::vector<std::string> dumpInfo;
+    sessionWrapper->NotifyUieDump(params, dumpInfo);
+    if (!taskValid->load(std::memory_order_acquire)) {
+        notifyOnExit();
+        return;
+    }
+    ParseDumpInfoToJson(json, dumpInfo, taskValid);
+    notifyOnExit();
 }
 }
 UIExtensionPattern::UIExtensionPattern(
@@ -616,7 +662,7 @@ void UIExtensionPattern::OnConnect()
     FireOnRemoteReadyCallback();
     bool isFocusedAfterCallback = focusHub && focusHub->IsCurrentFocus();
     if ((usage_ == UIExtensionUsage::MODAL) && focusHub && isModalRequestFocus_) {
-        focusHub->RequestFocusImmediately();
+        focusHub->RequestFocusImmediatelyFromModalUEC();
     }
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
@@ -1313,7 +1359,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     focusState_ = pipeline->IsWindowFocused();
     if (focusState_ && !focusHub->IsCurrentFocus()) {
         canFocusSendToUIExtension_ = false;
-        ret = focusHub->RequestFocusImmediately();
+        ret = focusHub->RequestFocusImmediatelyFromModalUEC();
         if (!ret) {
             canFocusSendToUIExtension_ = true;
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
@@ -1351,7 +1397,7 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
     if (info.GetAction() == MouseAction::PRESS) {
         auto hub = host->GetFocusHub();
         CHECK_NULL_VOID(hub);
-        hub->RequestFocusImmediately();
+        hub->RequestFocusImmediatelyFromModalUEC();
         SetForceProcessOnKeyEventInternal(true);
     }
     DispatchPointerEvent(pointerEvent);
@@ -2081,6 +2127,7 @@ void UIExtensionPattern::DumpOthers()
 
 void UIExtensionPattern::AddExtraInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
 {
+    ACE_SCOPED_TRACE("UIExtensionPattern::AddExtraInfoWithParamConfig");
     CHECK_EQUAL_VOID(config.withUIExtension, false);
     CHECK_NULL_VOID(sessionWrapper_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2093,17 +2140,8 @@ void UIExtensionPattern::AddExtraInfoWithParamConfig(std::shared_ptr<JsonValue>&
     params.push_back(config.cacheNodes ? "1" : "0");
     params.push_back(config.withWeb ? "1" : "0");
     params.push_back(config.withUIExtension ? "1" : "0");
-    // Use -nouie to choose not dump extra uie info
-    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
-        UIEXT_LOGI("Not Support Dump Extra UIE Info");
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto dumpNodeIter = std::find(params.begin(), params.end(), std::to_string(host->GetId()));
-    if (dumpNodeIter != params.end()) {
-        params.erase(dumpNodeIter);
-    }
     if (!container->IsUIExtensionWindow()) {
         params.push_back(PID_FLAG);
     }
@@ -2115,42 +2153,41 @@ void UIExtensionPattern::AddExtraInfoWithParamConfig(std::shared_ptr<JsonValue>&
 void UIExtensionPattern::ExecuteDumpTask(
     std::shared_ptr<JsonValue>& json, const std::vector<std::string>& params, const RefPtr<FrameNode>& host)
 {
+    ACE_SCOPED_TRACE("UIExtensionPattern::ExecuteDumpTask");
     const int32_t GET_INSPECTOR_TREE_TIMEOUT_TIME = 900;
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    taskExecutor->PostSyncTaskTimeout(
-        [json, params, weakThis = WeakClaim(this)]() {
-            auto pattern = weakThis.Upgrade();
-            if (!pattern || !pattern->sessionWrapper_) {
-                return;
-            }
-            std::vector<std::string> dumpInfo;
-            pattern->sessionWrapper_->NotifyUieDump(params, dumpInfo);
+    // Capture sessionWrapper_ on the calling thread to avoid cross-thread data race
+    // when the lambda runs on the background thread.
+    auto sessionWrapper = sessionWrapper_;
 
-            for (size_t i = 0; i < dumpInfo.size(); i++) {
-                std::string dumpStr = dumpInfo[i];
-                size_t pos = dumpStr.find("UINodeCount:");
-                if (pos == std::string::npos) {
-                    continue;
-                }
-                size_t start = dumpStr.find("\n", pos);
-                if (start == std::string::npos) {
-                    continue;
-                }
-                start++;
-                std::string filteredData = dumpStr.substr(start);
-                filteredData.erase(filteredData.find_last_not_of("\n") + 1);
-                auto childJson = JsonUtil::ParseJsonString(filteredData);
-                if (childJson) {
-                    json->Put("$child-uec", childJson);
-                }
-                break;
-            }
-        },
-        TaskExecutor::TaskType::UI, GET_INSPECTOR_TREE_TIMEOUT_TIME, "UiSessionGetInspectorTree");
+    // PostSyncTaskTimeout explicitly rejects TaskType::BACKGROUND, so use PostTask
+    // with a promise/future pair to run the IPC call (NotifyUieDump) on the background
+    // thread and wait for the result with a timeout on the calling thread.
+    if (!sessionWrapper) {
+        return;
+    }
+
+    auto taskValid = std::make_shared<std::atomic_bool>(true);
+    CHECK_NULL_VOID(taskValid);
+    auto promise = std::make_shared<std::promise<void>>();
+    CHECK_NULL_VOID(promise);
+    auto future = promise->get_future();
+    auto postResult = taskExecutor->PostTask([json, params, sessionWrapper, promise, taskValid]() {
+        ExecuteNotifyDumpTask(json, params, sessionWrapper, promise, taskValid);
+    }, TaskExecutor::TaskType::BACKGROUND, "UiSessionGetInspectorTree");
+    if (!postResult) {
+        taskValid->store(false, std::memory_order_release);
+        return;
+    }
+
+    auto result = future.wait_for(std::chrono::milliseconds(GET_INSPECTOR_TREE_TIMEOUT_TIME));
+    if (result == std::future_status::timeout) {
+        taskValid->store(false, std::memory_order_release);
+    }
 }
 
 void UIExtensionPattern::RegisterEventProxyFlagCallback()

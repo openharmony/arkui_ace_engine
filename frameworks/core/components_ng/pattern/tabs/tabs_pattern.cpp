@@ -147,6 +147,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         onChangeEvent_ = std::make_shared<ChangeEventWithPreIndex>(changeEvent);
         auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
+        auto tabsId = tabsNode->GetId();
+        eventHub->SetTabsId(tabsId);
         eventHub->AddOnChangeEventWithPreIndex(onChangeEvent_);
     }
 }
@@ -384,6 +386,8 @@ void TabsPattern::SetAnimationEndEvent(AnimationEndEvent&& event)
         CHECK_NULL_VOID(swiperNode);
         auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
+        auto tabsId = host->GetId();
+        eventHub->SetTabsId(tabsId);
         animationEndEvent_ = std::make_shared<AnimationEndEvent>(std::move(event));
         eventHub->AddAnimationEndEvent(animationEndEvent_);
     }
@@ -1080,6 +1084,52 @@ void TabsPattern::UpdateTabBarOverlap(const RefPtr<TabsLayoutProperty>& tabsLayo
     }
 }
 
+bool TabsPattern::GetTargetIndex(const std::string& command, int32_t& targetIndex)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || !json->IsValid() || !json->IsObject()) {
+        return false;
+    }
+    auto cmdValue = json->GetString("cmd");
+    if (cmdValue != "changeIndex") {
+        TAG_LOGW(AceLogTag::ACE_TABS, "Invalid command");
+        return false;
+    }
+
+    auto paramJson = json->GetValue("params");
+    if (!paramJson || !paramJson->IsObject()) {
+        return false;
+    }
+    if (!paramJson->Contains("index") || !paramJson->GetValue("index")->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_TABS, "Invalid or missing index parameter");
+        return false;
+    }
+    auto originIndex = paramJson->GetString("index");
+    if (!StringUtils::IsNumber(originIndex)) {
+        return false;
+    }
+    targetIndex = StringUtils::StringToInt(originIndex);
+    return true;
+}
+
+int32_t TabsPattern::OnInjectionEvent(const std::string& command)
+{
+    int32_t targetIndex = 0;
+    if (!GetTargetIndex(command, targetIndex)) {
+        return RET_FAILED;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_RETURN(tabsNode, RET_FAILED);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_RETURN(tabBarNode, RET_FAILED);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_RETURN(tabBarPattern, RET_FAILED);
+    tabBarPattern->ChangeIndex(targetIndex);
+    return RET_SUCCESS;
+}
+ 	 
 void TabsPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("isBindonContentDidScroll: ")

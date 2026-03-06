@@ -1,0 +1,274 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.component.idlize;
+
+import arkui.component.units;
+import arkui.component.common;
+import arkui.Graphics.Frame as Frame;
+import global.resource.Resource as Resource; 
+import ohos.arkui.observer.default as observer;
+import arkui.component.gesture.GestureEvent as GestureEvent;
+
+callback Callback_RangeUpdate = void (i32 start, i32 end, i32 cacheStart, i32 cacheEnd, boolean isLoop);
+callback Callback_CreateItem = pointer (i32 index);
+callback Callback_OnMoveFromTo = void (i32 from, i32 to);
+
+[Entity=Class]
+interface ForEachOps {
+    static void SyncOnMoveOps(pointer node, sequence<pointer> additionalChild,
+        (OnMoveHandler or undefined) onMoveOps, (ItemDragEventHandler or undefined) onMoveDragEventOps);
+};
+
+[Entity=Class]
+interface LazyForEachOps {
+    // provide necessary info and callbacks to the ScrollView in the backend
+    static void NotifyChange(pointer node, i32 startIndex, i32 endIndex, i32 count);
+    static void Sync(pointer node, i32 totalCount, Callback_CreateItem creator, Callback_RangeUpdate updater);
+    static void SyncOnMoveOps(pointer node, Callback_OnMoveFromTo onMoveFromToOps,
+        (OnMoveHandler or undefined) onMoveOps, (ItemDragEventHandler or undefined) onMoveDragEventOps);
+};
+
+[Entity=Class]
+interface LengthMetricsCustom {
+    attribute number unit;
+    attribute number value;
+};
+
+[Entity=Class]
+interface UIContextGetInfo {
+    static (observer.NavigationInfo or undefined) getNavigationInfoByUniqueId(i64 id);
+    static void enableSwipeBack((boolean or undefined) enabled);
+};
+
+callback Callback_Long_Void = void (i64 value);
+
+[Entity=Class]
+interface SystemOps {
+    static pointer StartFrame();
+    static void EndFrame(pointer root);
+    static void syncInstanceId(i32 instanceId);
+    static void restoreInstanceId();
+    static i32 getResourceId(String bundleName, String moduleName, sequence<String> params);
+    static void resourceManagerReset();
+    static void setFrameCallback(Callback_Long_Void onFrameCallback, Callback_Long_Void onIdleCallback, i64 delayTime);
+    static sequence<number> colorMetricsResourceColor(Resource color);
+    static sequence<number> blendColorByColorMetrics(number color, number overlayColor);
+    static LengthMetricsCustom resourceToLengthMetrics(Resource res);
+    static pointer createResourceObject(Resource resource);
+};
+
+callback GestureEventHandler = void (GestureEvent event);
+
+[Entity=Class]
+interface GestureOps {
+    static pointer createTapGesture(number fingers, number count, f64 distanceThreshold, boolean isFingerCountLimited);
+    static pointer createLongPressGesture(number fingers, boolean repeat, number duration, boolean isFingerCountLimited);
+    static pointer createPanGesture(number fingers, PanDirection direction, number distance, boolean isFingerCountLimited);
+    static pointer createPanGestureWithPanGestureOptions(pointer panGestureOptions);
+    static pointer createPinchGesture(number fingers, number distance, boolean isFingerCountLimited);
+    static pointer createRotationGesture(number fingers, number angle, boolean isFingerCountLimited);
+    static pointer createSwipeGesture(number fingers, SwipeDirection direction, number speed, boolean isFingerCountLimited);
+    static pointer createGestureGroup(GestureMode mode);
+    static void setOnAction(pointer gesture, GestureEventHandler onAction);
+    static void setOnActionStart(pointer gesture, GestureEventHandler onActionStart);
+    static void setOnActionUpdate(pointer gesture, GestureEventHandler onActionUpdate);
+    static void setOnActionEnd(pointer gesture, GestureEventHandler onActionEnd);
+    static void setOnActionCancel(pointer gesture, GestureEventHandler onActionCancel);
+    static void setOnCancel(pointer gesture, Callback_Void onCancel);
+    static void setGestureTag(pointer gesture, String tag);
+    static void setAllowedTypes(pointer gesture, sequence<SourceTool> types);
+    static void addGestureToNode(pointer node, number priority, GestureMask mask, pointer gesture, boolean isModifier);
+    static void addGestureToGroup(pointer group, pointer gesture);
+    static void removeGestureByTag(pointer node, String tag);
+    static void clearGestures(pointer node);
+    static number getGestureEventType(pointer event);
+    static boolean isScrollableComponent(pointer event);
+};
+
+[Entity=Class]
+interface FocusController {
+    static void requestFocus(String key);
+};
+
+[Entity=Interface]
+interface CustomColors {
+    [Optional] attribute ResourceColor brand;
+    [Optional] attribute ResourceColor warning;
+    [Optional] attribute ResourceColor alert;
+    [Optional] attribute ResourceColor confirm;
+    [Optional] attribute ResourceColor fontPrimary;
+    [Optional] attribute ResourceColor fontSecondary;
+    [Optional] attribute ResourceColor fontTertiary;
+    [Optional] attribute ResourceColor fontFourth;
+    [Optional] attribute ResourceColor fontEmphasize;
+    [Optional] attribute ResourceColor fontOnPrimary;
+    [Optional] attribute ResourceColor fontOnSecondary;
+    [Optional] attribute ResourceColor fontOnTertiary;
+    [Optional] attribute ResourceColor fontOnFourth;
+    [Optional] attribute ResourceColor iconPrimary;
+    [Optional] attribute ResourceColor iconSecondary;
+    [Optional] attribute ResourceColor iconTertiary;
+    [Optional] attribute ResourceColor iconFourth;
+    [Optional] attribute ResourceColor iconEmphasize;
+    [Optional] attribute ResourceColor iconSubEmphasize;
+    [Optional] attribute ResourceColor iconOnPrimary;
+    [Optional] attribute ResourceColor iconOnSecondary;
+    [Optional] attribute ResourceColor iconOnTertiary;
+    [Optional] attribute ResourceColor iconOnFourth;
+    [Optional] attribute ResourceColor backgroundPrimary;
+    [Optional] attribute ResourceColor backgroundSecondary;
+    [Optional] attribute ResourceColor backgroundTertiary;
+    [Optional] attribute ResourceColor backgroundFourth;
+    [Optional] attribute ResourceColor backgroundEmphasize;
+    [Optional] attribute ResourceColor compForegroundPrimary;
+    [Optional] attribute ResourceColor compBackgroundPrimary;
+    [Optional] attribute ResourceColor compBackgroundPrimaryTran;
+    [Optional] attribute ResourceColor compBackgroundPrimaryContrary;
+    [Optional] attribute ResourceColor compBackgroundGray;
+    [Optional] attribute ResourceColor compBackgroundSecondary;
+    [Optional] attribute ResourceColor compBackgroundTertiary;
+    [Optional] attribute ResourceColor compBackgroundEmphasize;
+    [Optional] attribute ResourceColor compBackgroundNeutral;
+    [Optional] attribute ResourceColor compEmphasizeSecondary;
+    [Optional] attribute ResourceColor compEmphasizeTertiary;
+    [Optional] attribute ResourceColor compDivider;
+    [Optional] attribute ResourceColor compCommonContrary;
+    [Optional] attribute ResourceColor compBackgroundFocus;
+    [Optional] attribute ResourceColor compFocusedPrimary;
+    [Optional] attribute ResourceColor compFocusedSecondary;
+    [Optional] attribute ResourceColor compFocusedTertiary;
+    [Optional] attribute ResourceColor interactiveHover;
+    [Optional] attribute ResourceColor interactivePressed;
+    [Optional] attribute ResourceColor interactiveFocus;
+    [Optional] attribute ResourceColor interactiveActive;
+    [Optional] attribute ResourceColor interactiveSelect;
+    [Optional] attribute ResourceColor interactiveClick;
+};
+
+[Entity=Interface]
+interface WorkerOptions {
+    [Optional] attribute String type;
+    [Optional] attribute String name;
+    [Optional] attribute boolean shared;
+};
+
+[Entity=Interface]
+interface Event {
+    readonly attribute String type;
+    readonly attribute i64 timeStamp;
+};
+
+[Entity=Interface]
+interface ErrorEvent: Event {
+    readonly attribute String message;
+    readonly attribute String filename;
+    readonly attribute number lineno;
+    readonly attribute number colno;
+    readonly attribute Object error;
+};
+
+[Entity=Interface]
+interface MessageEvents: Event {
+    readonly attribute any data;
+};
+
+callback WorkerEventListener = void (Event event);
+
+[Entity=Interface]
+interface PostMessageOptions {
+    [Optional] attribute sequence<Object> transfer;
+};
+
+callback RestrictedWorker_onexit_Callback = void (number code);
+callback RestrictedWorker_onerror_Callback = void (ErrorEvent ev);
+callback RestrictedWorker_onmessage_Callback = void (MessageEvents event);
+
+[Entity=Class]
+interface RestrictedWorker {
+    constructor(String scriptURL, optional WorkerOptions options);
+    [Optional] attribute RestrictedWorker_onexit_Callback onexit;
+    [Optional] attribute RestrictedWorker_onerror_Callback onerror;
+    [Optional] attribute RestrictedWorker_onmessage_Callback onmessage;
+    [Optional] attribute RestrictedWorker_onmessage_Callback onmessageerror;
+    [Throws] void postMessage(Object message, sequence<buffer> transfer);
+    [Throws] void postMessage(Object message, optional PostMessageOptions options);
+    [Throws] void postMessageWithSharedSendable(Object message, optional sequence<buffer> transfer);
+    [Throws] void on(String Type, WorkerEventListener listener);
+    [Throws] void once(String Type, WorkerEventListener listener);
+    [Throws] void off(String Type, optional WorkerEventListener listener);
+    [Throws] void terminate();
+    [Throws] void addEventListener(String Type, WorkerEventListener listener);
+    [Throws] boolean dispatchEvent(Event event);
+    [Throws] void removeEventListener(String Type, optional WorkerEventListener callback_);
+    [Throws] void removeAllListener();
+    [Throws] void registerGlobalCallObject(String instanceName, Object globalCallObject);
+    [Throws] void unregisterGlobalCallObject(optional String instanceName);
+};
+callback Callback_StateStylesChange = void (i32 currentState);
+
+[Entity=Class]
+interface StateStylesOps {
+    static void onStateStyleChange(pointer node, Callback_StateStylesChange stateStyleChange, i32 allState);
+};
+
+[Entity=Class]
+interface UIContextAtomicServiceBar {
+    static Frame getBarRect();
+};
+
+[Entity=Class]
+interface BuilderNodeOptions {
+    [Optional] attribute  Size selfIdealSize;
+    [Optional] attribute  number type;
+    [Optional] attribute  String surfaceId;
+};
+
+[Entity=Class]
+interface BuilderNodeOps {
+    constructor();
+    void create(Callback_Void buildFunc);
+    void disposeNode();
+    void setUpdateConfigurationCallback(Callback_Void configurationUpdateFunc);
+    void setOptions(BuilderNodeOptions options);
+    boolean postTouchEvent(TouchEvent event);
+    boolean postInputEvent(optional InputEventType event);
+    pointer setRootFrameNodeInBuilderNode(pointer node);
+};
+typedef InputEventType = (TouchEvent or MouseEvent or AxisEvent);
+
+[Entity=Class]
+interface NodeContainerOps {
+    static pointer nodeContainerOpsConstruct(i32 id, i32 flags);
+    static void nodeContainerSetNodeContainerOptions(pointer ptr, pointer controller);
+    static void addNodeContainerRootNode(pointer self, pointer child);
+    static void setAboutToAppear(pointer self, Callback_Void value);
+    static void setAboutToDisappear(pointer self, Callback_Void value);
+    static void setAboutToResize(pointer self, Callback_Size_Void value);
+    static void setOnAttach(pointer self, Callback_Void value);
+    static void setOnDetach(pointer self, Callback_Void value);
+    static void setOnTouchEvent(pointer self, optional Callback_TouchEvent_Void value);
+    static void setOnDestoryEvent(pointer self, Callback_OnDestory_Void value);
+};
+callback Callback_Size_Void = void (Size size);
+callback Callback_OnDestory_Void = void (i64 nodeId);
+
+[Entity=Class]
+interface ThemeOps {
+    static void sendThemeToNative(sequence<ResourceColor> colorArray, sequence<ResourceColor> darkColorArray, i32 elmtId, boolean darkSetStatus);
+    static void setDefaultTheme(sequence<ResourceColor> colorArray, boolean isDark);
+    static void createAndBindTheme(i32 themeScopeId, i32 themeId, sequence<ResourceColor> colorArray, sequence<ResourceColor> darkColorArray, ThemeColorMode colorMode, Callback_Void onThemeScopeDestroy, boolean darkSetStatus);
+    static void applyThemeScopeIdToNode(pointer ptr, i32 themeScopeId);
+};
+

@@ -24,7 +24,8 @@ import {
     IStateMgmtFactory,
     IVariableOwner,
     ConsumeOptions,
-    IObservedObject
+    IObservedObject,
+    MakeMonitorOptions
 } from '../decorator';
 import {
     IStateDecoratedVariable,
@@ -597,6 +598,20 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         owningView?: IVariableOwner
     ): IMonitorDecoratedVariable {
         return new MonitorFunctionDecorator(pathLambda, monitorFunction, owningView);
+    }
+
+    makeMonitor(
+        pathInfos: Array<IMonitorPathInfo>,
+        monitorCallback: (m: IMonitor) => void,
+        options?: MakeMonitorOptions
+    ): IMonitorDecoratedVariable {
+        return new MonitorFunctionDecorator(
+            pathInfos,
+            monitorCallback,
+            options?.owner,
+            undefined,
+            options?.functionName
+        );
     }
 
     makeEnv<T>(

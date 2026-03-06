@@ -40,7 +40,9 @@ link_abc_files("arkoala_abc") {
 
 ohos_prebuilt_etc("arkoala_abc_prebuild") {
   source = "$target_out_dir/arkoala.abc"
-  deps = [ ":arkoala_abc" ]
+  deps = [
+    ":arkoala_abc"
+  ]
   module_install_dir = "framework"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part

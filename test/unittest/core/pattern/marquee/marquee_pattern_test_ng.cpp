@@ -412,4 +412,110 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_OnModifyDone004, TestSize.Level1)
 
     EXPECT_EQ(frameNode->GetChildren().size(), 1);
 }
+
+/**
+ * @tc.name: MarqueePattern_ChangeSecondChildVisibility001
+ * @tc.desc: Test ChangeSecondChildVisibility with no second child
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_ChangeSecondChildVisibility001, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    
+    marqueeModel->ChangeSecondChildVisibility(false);
+    
+    EXPECT_EQ(frameNode->GetChildren().size(), 0);
+}
+
+/**
+ * @tc.name: MarqueePattern_ChangeSecondChildVisibility002
+ * @tc.desc: Test ChangeSecondChildVisibility with single child
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_ChangeSecondChildVisibility002, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto textFrameNode = FrameNode::CreateFrameNode("Text", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    frameNode->AddChild(textFrameNode);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    
+    EXPECT_EQ(frameNode->GetChildren().size(), 1);
+    
+    marqueeModel->ChangeSecondChildVisibility(false);
+    
+    EXPECT_EQ(frameNode->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: MarqueePattern_ChangeSecondChildVisibility003
+ * @tc.desc: Test ChangeSecondChildVisibility with two children and IsRunMarquee returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_ChangeSecondChildVisibility003, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto textFrameNode1 = FrameNode::CreateFrameNode("Text1", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    auto textFrameNode2 = FrameNode::CreateFrameNode("Text2", 3, AceType::MakeRefPtr<TextPattern>(), false);
+    frameNode->AddChild(textFrameNode1);
+    frameNode->AddChild(textFrameNode2);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    
+    EXPECT_EQ(frameNode->GetChildren().size(), 2);
+    
+    auto secondChild = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    auto textLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    RefPtr<GeometryNode> geo1 = AceType::MakeRefPtr<GeometryNode>();
+    geo1->SetFrameSize(SizeF(100, 50));
+    frameNode->SetGeometryNode(geo1);
+    RefPtr<GeometryNode> geo2 = AceType::MakeRefPtr<GeometryNode>();
+    geo2->SetFrameSize(SizeF(50, 50));
+    textFrameNode1->SetGeometryNode(geo2);
+    marqueeModel->ChangeSecondChildVisibility(false);
+    
+    EXPECT_TRUE(textLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: MarqueePattern_ChangeSecondChildVisibility004
+ * @tc.desc: Test ChangeSecondChildVisibility with stopAndStart = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_ChangeSecondChildVisibility004, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto textFrameNode1 = FrameNode::CreateFrameNode("Text1", 2, AceType::MakeRefPtr<TextPattern>(), false);
+    auto textFrameNode2 = FrameNode::CreateFrameNode("Text2", 3, AceType::MakeRefPtr<TextPattern>(), false);
+    frameNode->AddChild(textFrameNode1);
+    frameNode->AddChild(textFrameNode2);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    
+    auto secondChild = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    auto textLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+
+    RefPtr<GeometryNode> geo1 = AceType::MakeRefPtr<GeometryNode>();
+    geo1->SetFrameSize(SizeF(50, 50));
+    frameNode->SetGeometryNode(geo1);
+    RefPtr<GeometryNode> geo2 = AceType::MakeRefPtr<GeometryNode>();
+    geo2->SetFrameSize(SizeF(100, 50));
+    textFrameNode1->SetGeometryNode(geo1);
+    
+    marqueeModel->ChangeSecondChildVisibility(true);
+    
+    EXPECT_TRUE(textLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE);
+}
 } // namespace OHOS::Ace::NG

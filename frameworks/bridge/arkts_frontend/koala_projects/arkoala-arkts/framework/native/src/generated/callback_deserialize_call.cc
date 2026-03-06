@@ -332,6 +332,24 @@ void deserializeAndCallSyncCallback_AccessibilityActionInterceptResult_Void(Ark_
         thisDeserializer.readInt32());
     callSyncMethod(vmContext, resourceId, value);
 }
+void deserializeAndCallCallback_ArcSwiperContentTransitionProxy(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ArcSwiperContentTransitionProxy data)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_ARCSWIPERCONTENTTRANSITIONPROXY))));
+    thisDeserializer.readPointer();
+    Ark_ArcSwiperContentTransitionProxy data = static_cast<Ark_ArcSwiperContentTransitionProxy>(ArcSwiperContentTransitionProxy_serializer::read(thisDeserializer));
+    call(resourceId, data);
+}
+void deserializeAndCallSyncCallback_ArcSwiperContentTransitionProxy(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ArcSwiperContentTransitionProxy data)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_ARCSWIPERCONTENTTRANSITIONPROXY))));
+    Ark_ArcSwiperContentTransitionProxy data = static_cast<Ark_ArcSwiperContentTransitionProxy>(ArcSwiperContentTransitionProxy_serializer::read(thisDeserializer));
+    callSyncMethod(vmContext, resourceId, data);
+}
 void deserializeAndCallCallback_Area_Area_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -12227,6 +12245,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         return deserializeAndCallButtonTriggerClickCallback(thisArray, thisLength);
     case KIND_CALLBACK_ACCESSIBILITYACTIONINTERCEPTRESULT_VOID:
         return deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(thisArray, thisLength);
+    case KIND_CALLBACK_ARCSWIPERCONTENTTRANSITIONPROXY:
+        return deserializeAndCallCallback_ArcSwiperContentTransitionProxy(thisArray, thisLength);
     case KIND_CALLBACK_AREA_AREA_VOID:
         return deserializeAndCallCallback_Area_Area_Void(thisArray, thisLength);
     case KIND_CALLBACK_ARRAY_I32_VOID:
@@ -12950,6 +12970,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         return deserializeAndCallSyncButtonTriggerClickCallback(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_ACCESSIBILITYACTIONINTERCEPTRESULT_VOID:
         return deserializeAndCallSyncCallback_AccessibilityActionInterceptResult_Void(vmContext, thisArray, thisLength);
+    case KIND_CALLBACK_ARCSWIPERCONTENTTRANSITIONPROXY:
+        return deserializeAndCallSyncCallback_ArcSwiperContentTransitionProxy(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_AREA_AREA_VOID:
         return deserializeAndCallSyncCallback_Area_Area_Void(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_ARRAY_I32_VOID:

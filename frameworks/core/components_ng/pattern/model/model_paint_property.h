@@ -90,6 +90,8 @@ public:
         paintProperty->needsModelBackgroundSetup_ = CloneNeedsModelBackgroundSetup();
         paintProperty->needsModelCameraMoveSetup_ = CloneNeedsModelCameraMoveSetup();
         paintProperty->needsBackgroundColorSetup_ = CloneNeedsBackgroundColorSetup();
+        paintProperty->needsRenderHeightSetup_ = CloneNeedsRenderHeightSetup();
+        paintProperty->needsRenderWidthSetup_ = CloneNeedsRenderWidthSetup();
 
         return paintProperty;
     }
@@ -108,6 +110,8 @@ public:
         UpdateNeedsModelBackgroundSetup(false);
         UpdateNeedsModelCameraMoveSetup(false);
         UpdateNeedsBackgroundColorSetup(false);
+        UpdateNeedsRenderHeightSetup(false);
+        UpdateNeedsRenderWidthSetup(false);
     }
 
     void Reset() override

@@ -14,7 +14,9 @@
  */
 
 import { CommonTestsV2 } from '../../v2_tests/commonTestsV2'
+import { V2ViewTestsV2 } from '../../v2_tests/v2ViewTestsV2'
 import { DataCoderTestsV2 } from '../../v2_tests/dataCoderTestsV2'
+import { V2EnvTests } from '../../v2_tests/envTestsV2'
 import { Json2Tests } from '../../v2_tests/json2TestsV2'
 import { MonitorTestsV2 } from '../../v2_tests/monitorTestsV2'
 import { SyncMonitorTestsV2 } from '../../v2_tests/monitorTestsV2'
@@ -23,6 +25,7 @@ import { RecycleTestsV2 } from '../../v2_tests/recycleTestsV2'
 import { PersistenceV2TestsV2 } from '../../v2_tests/persistenceV2TestsV2.ets'
 import { PuLifecycleTestsV2 } from '../../v2_tests/puLifecycleTestsV2'
 import { Puv2ViewBaseTestsV2 } from '../../v2_tests/puv2ViewBaseTestsV2'
+import { Puv2ViewBuildNodeBaseTestsV2 } from '../../v2_tests/puv2ViewBuildNodeBaseTestsV2'
 import { PuUINodeRegistryProxyTestsV2 } from '../../v2_tests/puUINodeRegistryProxyTestsV2'
 import { PuViewTestsV2 } from '../../v2_tests/puViewTestsV2'
 import { PuRecycleManagerTestsV2 } from '../../v2_tests/puRecycleManagerTestsV2'
@@ -32,6 +35,12 @@ import { PageController } from '../../lib/pageController'
 import { TestRunner } from '../../lib/testRunner'
 import { V2ViewTests } from '../../v2_tests/v2ViewTests'
 import { RecyclePoolV2Tests } from '../../v2_tests/recyclePoolV2Tests'
+import { InteropTestsV2 } from '../../v2_tests/interopTestsV2'
+import { InteropModuleDeepTestsV2 } from '../../v2_tests/interopModuleDeepTestsV2'
+import { InteropStorageDeepTestsV2 } from '../../v2_tests/interopStorageDeepTestsV2'
+import { InteropBuilderDeepTestsV2 } from '../../v2_tests/interopBuilderDeepTestsV2'
+import { V2DecoratorsTestsV2 } from '../../v2_tests/v2DecoratorsTestsV2'
+import { V2MakeObservedTestsV2 } from '../../v2_tests/v2MakeObservedTestsV2'
 
 import router from '@system.router'
 
@@ -46,7 +55,9 @@ struct Parent {
   aboutToAppear() {
     setTimeout(() => {
       TestRunner.bind(this)(new CommonTestsV2('V2_common'));
+      TestRunner.bind(this)(new V2ViewTestsV2('V2_v2View'));
       TestRunner.bind(this)(new DataCoderTestsV2('V2_dataCoder'));
+      TestRunner.bind(this)(new V2EnvTests('V2_env'));
       TestRunner.bind(this)(new Json2Tests('json2'));
       TestRunner.bind(this)(new MonitorTestsV2('V2_monitor'));
       TestRunner.bind(this)(new SyncMonitorTestsV2('V2_syncmonitor'));
@@ -55,6 +66,7 @@ struct Parent {
       TestRunner.bind(this)(new PersistenceV2TestsV2('V2_PersistenceV2TestsV2'));
       TestRunner.bind(this)(new PuLifecycleTestsV2('V2_puLifecycle'));
       TestRunner.bind(this)(new Puv2ViewBaseTestsV2('V2_puv2ViewBase'));
+      TestRunner.bind(this)(new Puv2ViewBuildNodeBaseTestsV2('V2_puv2ViewBuildNodeBase'));
       TestRunner.bind(this)(new PuUINodeRegistryProxyTestsV2('V2_puUINodeRegistryProxy'));
       TestRunner.bind(this)(new PuViewTestsV2('V2_puView'));
       TestRunner.bind(this)(new PuRecycleManagerTestsV2('V2_puRecycleManager'));
@@ -62,6 +74,12 @@ struct Parent {
       TestRunner.bind(this)(new PuBuilderBindingTestsV2('V2_puBuilderBinding'));
       TestRunner.bind(this)(new V2ViewTests('V2_v2View'));
       TestRunner.bind(this)(new RecyclePoolV2Tests('V2_recyclePool'));
+      TestRunner.bind(this)(new InteropTestsV2('V2_interop'));
+      TestRunner.bind(this)(new InteropModuleDeepTestsV2('V2_interop_module_deep'));
+      TestRunner.bind(this)(new InteropStorageDeepTestsV2('V2_interop_storage_deep'));
+      TestRunner.bind(this)(new InteropBuilderDeepTestsV2('V2_interop_builder_deep'));
+      TestRunner.bind(this)(new V2DecoratorsTestsV2('V2_v2Decorators'));
+      TestRunner.bind(this)(new V2MakeObservedTestsV2('V2_v2MakeObserved'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)

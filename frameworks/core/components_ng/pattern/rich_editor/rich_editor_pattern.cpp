@@ -143,6 +143,20 @@ const std::string EDITOR_BLUR_EVENT = "blur";
 const std::string EDITOR_FOCUS_EVENT = "focus";
 const static std::regex REMOVE_SPACE_CHARS{SPACE_CHARS};
 const auto URL_SPAN_FILTER = [](const RefPtr<SpanItem>& span){ return (span->urlOnRelease); };
+
+std::list<RefPtr<FrameNode>> GetDragImageChildren(const RefPtr<FrameNode>& contentHost)
+{
+    std::list<RefPtr<FrameNode>> imageChildren;
+    CHECK_NULL_RETURN(contentHost, imageChildren);
+    for (const auto& child : contentHost->GetChildren()) {
+        auto node = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(node);
+        if (auto& tag = node->GetTag(); tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            imageChildren.emplace_back(node);
+        }
+    }
+    return imageChildren;
+}
 } // namespace
 
 RichEditorPattern::RichEditorPattern(bool isStyledStringMode) :
@@ -1585,8 +1599,8 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
         spanNode->UpdateStrokeWidth(textStyle.GetStrokeWidth());
         spanNode->UpdateStrokeColor(textStyle.GetStrokeColor());
         UpdateTextBackgroundStyle(spanNode, textStyle.GetTextBackgroundStyle());
-        StyleManager::AddTextColorResource(spanNode, textStyle);
-        StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
+        StyleManager::UpdateTextColorResource(spanNode, textStyle);
+        StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
         StyleManager::UpdateStrokeColorResource(spanNode, textStyle);
     }
     UpdateUrlStyle(spanNode, options.urlAddress);
@@ -1697,7 +1711,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->UpdateSymbolEffectStrategy(options.style.value().GetEffectStrategy());
         spanNode->UpdateSymbolType(options.style.value().GetSymbolType());
         spanNode->UpdateFontFamily(options.style.value().GetFontFamilies());
-        StyleManager::AddSymbolColorResource(spanNode, options.style.value());
+        StyleManager::UpdateSymbolColorResource(spanNode, options.style.value());
     }
     bool isUndoRedo = (options.optionSource == OptionSource::UNDO_REDO);
     IF_TRUE(isUndoRedo && options.paraStyle.has_value(), UpdateParagraphStyle(spanNode, options.paraStyle.value()));
@@ -2510,7 +2524,7 @@ void RichEditorPattern::UpdateTextStyle(
     if (updateSpanStyle.updateTextColor.has_value()) {
         spanNode->UpdateTextColorWithoutCheck(textStyle.GetTextColor());
         spanNode->GetSpanItem()->useThemeFontColor = false;
-        StyleManager::AddTextColorResource(spanNode, textStyle);
+        StyleManager::UpdateTextColorResource(spanNode, textStyle);
     }
     if (updateSpanStyle.updateLineHeight.has_value()) {
         spanNode->UpdateLineHeight(textStyle.GetLineHeight());
@@ -2563,7 +2577,7 @@ void RichEditorPattern::UpdateDecoration(
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
         spanNode->UpdateTextDecorationColorWithoutCheck(textStyle.GetTextDecorationColor());
         spanNode->GetSpanItem()->useThemeDecorationColor = false;
-        StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
+        StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
     }
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
@@ -2588,7 +2602,7 @@ void RichEditorPattern::UpdateSymbolStyle(
     }
     if (updateSpanStyle.updateSymbolColor.has_value()) {
         spanNode->UpdateSymbolColorList(updateSpanStyle.updateSymbolColor.value());
-        StyleManager::AddSymbolColorResource(spanNode, textStyle);
+        StyleManager::UpdateSymbolColorResource(spanNode, textStyle);
     }
     if (updateSpanStyle.updateSymbolRenderingStrategy.has_value()) {
         spanNode->UpdateSymbolRenderingStrategy(updateSpanStyle.updateSymbolRenderingStrategy.value());
@@ -4224,7 +4238,7 @@ TextAlign RichEditorPattern::GetTextAlignByDirection()
 
 void RichEditorPattern::HandleLongPress(GestureEvent& info)
 {
-    if (touchedFingerCount_ == 0) {
+    if (touchedFingers_.empty()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "no finger touched, skip long press event");
         return;
     }
@@ -5375,6 +5389,12 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
         editingValue_ = value;
 #ifdef ANDROID_PLATFORM
         if (value->appendText.empty()) {
+            // update cursor position only
+            if (value->selection.IsValid() && value->selection.GetStart() == value->selection.GetEnd() &&
+                !value->text.empty()) {
+                TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateEditingValue set caret to %{public}d", value->selection.GetEnd());
+                SetCaretOffset(value->selection.GetEnd());
+            }
             return;
         }
 #endif
@@ -6434,7 +6454,7 @@ bool RichEditorPattern::ProcessTextTruncationOperation(std::u16string& text, boo
         return true;
     }
     if (GetTextContentLength() - text.length() < maxLength_.value_or(INT_MAX) && text.length() == 1 &&
-        !editingValue_->unmarkText) {
+        editingValue_ && !editingValue_->unmarkText) {
         return true;
     }
 #endif
@@ -8228,8 +8248,29 @@ void RichEditorPattern::InitPanEvent()
     });
 }
 
+void RichEditorPattern::HandleTouchedFingersCount(TouchEventInfo& info)
+{
+    const auto& touchInfos = info.GetChangedTouches();
+    for (const auto& touchInfo : touchInfos) {
+        TouchType type = touchInfo.GetTouchType();
+        CHECK_NULL_CONTINUE(type == TouchType::DOWN || type == TouchType::UP || type == TouchType::CANCEL);
+        int32_t fingerId = touchInfo.GetFingerId();
+
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "TouchType=%{public}zu, fingerId=%{public}d", type, fingerId);
+        if (type == TouchType::DOWN) {
+            touchedFingers_.insert(fingerId);
+            continue;
+        }
+
+        if (type == TouchType::UP || type == TouchType::CANCEL) {
+            touchedFingers_.erase(fingerId);
+        }
+    }
+}
+
 void RichEditorPattern::HandleTouchEvent(TouchEventInfo& info)
 {
+    HandleTouchedFingersCount(info);
     CHECK_NULL_VOID(!selectOverlay_->IsTouchAtHandle(info));
     CHECK_NULL_VOID(!info.GetTouches().empty());
     HandleUserTouchEvent(info);
@@ -8282,7 +8323,7 @@ void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
 {
     auto sourceTool = info.GetSourceTool();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Touch down longPressState=[%{public}d, %{public}d], source=%{public}d,"
-        "fingers=%{public}d", previewLongPress_, editingLongPress_, sourceTool, ++touchedFingerCount_);
+        "fingers=%{public}zu", previewLongPress_, editingLongPress_, sourceTool, touchedFingers_.size());
     globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     moveCaretState_.Reset();
     ResetTouchSelectState();
@@ -8298,8 +8339,8 @@ void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
 void RichEditorPattern::HandleTouchUp()
 {
     bool isHandleMoving = IsHandleMoving();
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleTouchUp, fingers=%{public}d, isHandleMoving=%{public}d",
-        --touchedFingerCount_, isHandleMoving);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleTouchUp, fingers=%{public}zu, isHandleMoving=%{public}d",
+        touchedFingers_.size(), isHandleMoving);
     HandleTouchUpAfterLongPress();
     ResetTouchAndMoveCaretState();
     ResetTouchSelectState();
@@ -9577,16 +9618,9 @@ void RichEditorPattern::CreateDragNode()
     auto contentHost = GetContentHost();
     CHECK_NULL_VOID(host && contentHost);
     ACE_UINODE_TRACE(host);
-    auto children = contentHost->GetChildren();
-    std::list<RefPtr<FrameNode>> imageChildren;
-    for (const auto& child : children) {
-        auto node = DynamicCast<FrameNode>(child);
-        CHECK_NULL_CONTINUE(node);
-        if (auto& tag = node->GetTag(); tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            imageChildren.emplace_back(node);
-        }
-    }
+    auto imageChildren = GetDragImageChildren(contentHost);
     TextDragInfo info;
+    bool hasDragBackgroundColor = false;
     info.maxSelectedWidth = GetMaxSelectedWidth();
     info.handleColor = GetCaretColor();
     info.selectedBackgroundColor = GetSelectedBackgroundColor();
@@ -9605,14 +9639,19 @@ void RichEditorPattern::CreateDragNode()
         if (placeholderSpanItem) {
             info.dragBackgroundColor = placeholderSpanItem->dragBackgroundColor_;
             info.isDragShadowNeeded = placeholderSpanItem->isDragShadowNeeded_;
+            hasDragBackgroundColor = info.dragBackgroundColor.has_value();
         }
+    }
+    if (!hasDragBackgroundColor) {
+        auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+        hasDragBackgroundColor = layoutProperty && layoutProperty->HasSelectedDragPreviewStyle();
     }
     if (!info.dragBackgroundColor.has_value()) {
         info.dragBackgroundColor = GetSelectedDragPreviewStyleColor();
     }
     dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
     CHECK_NULL_VOID(dragNode_);
-    InitDragShadow(host, dragNode_, info.isDragShadowNeeded, info.dragBackgroundColor.has_value());
+    InitDragShadow(host, dragNode_, info.isDragShadowNeeded, hasDragBackgroundColor);
     FrameNode::ProcessOffscreenNode(dragNode_);
 }
 
@@ -11395,6 +11434,10 @@ bool RichEditorPattern::SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanIt
         MountImageNode(imageSpan);
     }
     spanItemList = RichEditorLayoutAlgorithm::ConstructParagraphSpans(spans, isSingleLineMode_);
+    if (!isShowPlaceholder_) {
+        // On initial placeholder display, reset richTextRect offset with contentRect.
+        richTextRect_.SetOffset(contentRect_.GetOffset());
+    }
     isShowPlaceholder_ = true;
     return true;
 }

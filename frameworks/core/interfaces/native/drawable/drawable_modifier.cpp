@@ -341,6 +341,28 @@ void SetAnimatedAutoPlay(void* object, bool autoPlay)
     drawable->SetAutoPlay(autoPlay);
 }
 
+void SetAnimatedStopMode(void* object, int32_t stopMode)
+{
+    if (object == nullptr) {
+        return;
+    }
+    if (stopMode < static_cast<int32_t>(OHOS::Ace::AnimatedDrawableDescriptor::AnimationStopMode::FIRST_FRAME) ||
+        stopMode > static_cast<int32_t>(OHOS::Ace::AnimatedDrawableDescriptor::AnimationStopMode::LAST_FRAME)) {
+        return;
+    }
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    drawable->SetStopMode(static_cast<OHOS::Ace::AnimatedDrawableDescriptor::AnimationStopMode>(stopMode));
+}
+
+int32_t GetAnimatedStopMode(void* object)
+{
+    if (object == nullptr) {
+        return -1;
+    }
+    auto* drawable = static_cast<OHOS::Ace::AnimatedDrawableDescriptor*>(object);
+    return static_cast<int32_t>(drawable->GetStopMode());
+}
+
 void SetAnimatedDurations(void* object, const void* durationsVec)
 {
     if (object == nullptr || durationsVec == nullptr) {
@@ -508,7 +530,9 @@ const ArkUIDrawableDescriptor* GetArkUIDrawableDescriptor()
         .stopAnimated = OHOS::Ace::StopAnimated,
         .pauseAnimated = OHOS::Ace::PauseAnimated,
         .resumeAnimated = OHOS::Ace::ResumeAnimated,
-        .getAnimatedStatus = OHOS::Ace::GetAnimatedStatus
+        .getAnimatedStatus = OHOS::Ace::GetAnimatedStatus,
+        .setAnimatedStopMode = OHOS::Ace::SetAnimatedStopMode,
+        .getAnimatedStopMode = OHOS::Ace::GetAnimatedStopMode
     };
     return &impl;
 }

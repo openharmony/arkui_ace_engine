@@ -1,4 +1,4 @@
-# 一、前置知识
+# 一、前置知识<a name="前置知识"></a>
 ## 1.BUILD.gn基础结构
 - 静态库：static_library("目标名")
 - 动态库：ohos_shared_library("目标名")
@@ -40,7 +40,7 @@ ohos_shared_library("libtransform_interaction_ext")
 ## 1). 依赖的头文件
 foundation/arkui/ace_engine/interfaces/inner_api/ace_kit/include/ui/event/input_compatible_policy.h
 
-## 2). 如何实现cpp文件？
+## 2). 如何实现cpp文件？<a name="如何实现cpp文件"></a>
 ### InputCompatiblePolicy类为抽象类
 1. 创建.cpp文件
 2. 定义一个继承InputCompatiblePolicy的具体类，并实现头文件中声明的纯虚函数
@@ -56,6 +56,14 @@ public:
     }
 };
 ```
+source 参数的类型是 InputCompatibleSource 枚举，用于指定需要检查的输入源类型
+ - InputCompatibleSource::LEFT_PRESS为左键按压事件
+ - InputCompatibleSource::SCROLL_AXIS_EVENT为滚轴滚动事件
+
+IsInputCompatibleConvertingNeeded 函数返回值表示指定类型的输入事件是否需要进行兼容性转换
+ - true表示指定类型的输入事件需要进行兼容性转换
+ - false表示指定类型的输入事件不需要进行兼容性转换
+
 3. 使用 extern "C" 导出必要符号，确保C链接，避免C++名称修饰
 ```
 extern "C" ACE_FORCE_EXPORT Kit::InputCompatiblePolicy* GetInputCompatiblePolicyInstance()
@@ -67,8 +75,8 @@ extern "C" ACE_FORCE_EXPORT Kit::InputCompatiblePolicy* GetInputCompatiblePolicy
 ```
 
 # 三、如何编译出.so文件？
-1. [编写对应cpp文件](#三如何实现cpp文件)
-2. [编写动态库的BUILD.gn构建脚本](#一编写buildgn文件)
+1. [编写对应cpp文件](#如何实现cpp文件)
+2. [编写动态库的BUILD.gn构建脚本](#前置知识)
 3. 将动态库加入目标 Kit 的依赖
    在对应位置的BUILD.gn文件中，在deps列表添加该动态库，格式为 "路径:目标名"
 ```

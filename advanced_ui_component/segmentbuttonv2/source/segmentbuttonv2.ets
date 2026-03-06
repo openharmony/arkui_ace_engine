@@ -293,6 +293,8 @@ export struct TabSegmentButtonV2 {
   languageDirection?: Direction = undefined;
   @Param
   backgroundSystemMaterial?: uiMaterial.Material = undefined;
+  @Param
+  enableStateAnimation?: boolean = false
 
   build() {
     SimpleSegmentButtonV2({
@@ -331,7 +333,8 @@ export struct TabSegmentButtonV2 {
       buttonMinHeight: this.buttonMinHeight,
       buttonPadding: this.buttonPadding,
       languageDirection: this.languageDirection,
-      backgroundSystemMaterial: this.backgroundSystemMaterial
+      backgroundSystemMaterial: this.backgroundSystemMaterial,
+      enableStateAnimation: this.enableStateAnimation
     })
   }
 }
@@ -406,6 +409,8 @@ export struct CapsuleSegmentButtonV2 {
   languageDirection?: Direction = undefined;
   @Param
   backgroundSystemMaterial?: uiMaterial.Material = undefined;
+  @Param
+  enableStateAnimation?: boolean = false
 
   build() {
     SimpleSegmentButtonV2({
@@ -444,7 +449,8 @@ export struct CapsuleSegmentButtonV2 {
       buttonMinHeight: this.buttonMinHeight,
       buttonPadding: this.buttonPadding,
       languageDirection: this.languageDirection,
-      backgroundSystemMaterial: this.backgroundSystemMaterial
+      backgroundSystemMaterial: this.backgroundSystemMaterial,
+      enableStateAnimation: this.enableStateAnimation
     })
   }
 }
@@ -566,6 +572,7 @@ struct SimpleSegmentButtonV2 {
   private panStartGlobalX: number = 0;
   private panStartIndex: number = -1;
   private focusGroupId: string = GroupIdGenerator.getInstance().generate();
+  @Param enableStateAnimation?: boolean = false
 
   @Computed
   get normalizedSelectedIndex(): number {
@@ -772,6 +779,8 @@ struct SimpleSegmentButtonV2 {
           x: this.selectedItemRect.position.x,
           y: this.selectedItemRect.position.y,
         })
+        .animation(this.enableStateAnimation ?
+          { curve: curves.springMotion(0.347, 0.99) } : undefined)
         .backgroundColor(this.getItemSelectedBackgroundColor())
         .borderRadius(this.getItemBorderRadius())
         .scale({ x: this.itemScale, y: this.itemScale })
@@ -955,6 +964,7 @@ struct SimpleSegmentButtonV2 {
     ) {
       return;
     }
+
     this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
       this.$selectedIndex?.(selectedIndex);
     });

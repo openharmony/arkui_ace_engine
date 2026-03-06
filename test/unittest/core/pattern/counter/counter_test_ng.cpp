@@ -386,7 +386,7 @@ HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTestNg001, TestSize.Level0)
     CounterModelNG model;
     model.Create();
     GetInstance();
-    
+
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto counterPattern = AceType::DynamicCast<CounterPattern>(frameNode->GetPattern());
@@ -770,8 +770,8 @@ HWTEST_F(CounterTestNg, CounterModelNGUpdatesHeightForAllChildrenTest001, TestSi
     ASSERT_NE(addTextLayoutProperty, nullptr);
 
     int32_t contentId = counterPattern->GetContentId();
-    auto contentNode = AceType::DynamicCast<FrameNode>(
-        frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
+    auto contentNode =
+        AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
     ASSERT_NE(contentNode, nullptr);
     auto contentLayoutProperty = contentNode->GetLayoutProperty();
     ASSERT_NE(contentLayoutProperty, nullptr);

@@ -252,7 +252,7 @@ void AnimatedDrawableDescriptor::CreateAnimator(int32_t nodeId)
     auto iterations = GetIterations();
     animator->SetDuration(totalDuration);
     animator->SetIteration(iterations);
-    animator->SetFillMode(FillMode::BACKWARDS);
+    animator->SetFillMode(ToFillMode());
     auto pictureAnimation = std::vector<PictureInfo>();
     for (uint32_t index = 0; index < GetFrameCount(); ++index) {
         pictureAnimation.emplace_back(
@@ -264,7 +264,9 @@ void AnimatedDrawableDescriptor::CreateAnimator(int32_t nodeId)
             [weak, nodeId]() {
                 auto drawable = weak.Upgrade();
                 CHECK_NULL_VOID(drawable);
-                drawable->FlushUpdateCallbacksByNodeId(0, nodeId);
+                auto stopAtLastFrame = drawable->GetStopMode() == AnimationStopMode::LAST_FRAME;
+                auto stopFrameIndex = stopAtLastFrame ? static_cast<int32_t>(drawable->GetFrameCount()) - 1 : 0;
+                drawable->FlushUpdateCallbacksByNodeId(stopFrameIndex, nodeId);
             },
             "FlushOnFinishEventByNodeId");
     });
@@ -277,6 +279,11 @@ void AnimatedDrawableDescriptor::CreateAnimator(int32_t nodeId)
             },
             "FlushUpdateCallbacksByNodeId");
     });
+}
+
+FillMode AnimatedDrawableDescriptor::ToFillMode() const
+{
+    return stopMode_ == AnimationStopMode::LAST_FRAME ? FillMode::FORWARDS : FillMode::BACKWARDS;
 }
 
 void AnimatedDrawableDescriptor::RegisterUpdateCallback(int32_t nodeId, const UpdateCallback&& callback)

@@ -115,6 +115,8 @@ struct TouchEvent final : public PointerEvent {
     bool isPassThroughMode = false;
     int32_t xReverse = 0;
     int32_t yReverse = 0;
+    int32_t eventHandleId = 0;
+    bool isNewReferee = false;
     TouchEvent()
     {
         eventType = UIInputEventType::TOUCH;

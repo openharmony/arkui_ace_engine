@@ -119,7 +119,7 @@ public:
     RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RichEditorParagraphManager* paragraphs,
         LRUMap<uint64_t, RefPtr<Paragraph>>* paraMapPtr,
         std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder,
-        const AISpanLayoutInfo& aiSpanLayoutInfo);
+        AISpanLayoutInfo aiSpanLayoutInfo);
     RichEditorLayoutAlgorithm(const RefPtr<RichEditorPattern>& pattern);
     ~RichEditorLayoutAlgorithm() override = default;
 
@@ -167,6 +167,7 @@ private:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     ParagraphStyle GetEditorParagraphStyle(
         const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const;
+    RefPtr<SpanItem> GetFirstTextSpanItem() const;
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
     void UpdateRichTextRect(const SizeF& textSize, LayoutWrapper* layoutWrapper);
     RefPtr<RichEditorPattern> GetRichEditorPattern(LayoutWrapper* layoutWrapper);
@@ -184,7 +185,9 @@ private:
         const SizeF& textSize, LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
     void UpdateMaxSizeByLayoutPolicy(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         SizeF& maxSize);
-    void ReLayoutParagraphByLayoutPolicy(LayoutWrapper* layoutWrapper, float maxWidth);
+    void ReLayoutParagraphByLayoutPolicy(LayoutWrapper* layoutWrapper, float maxWidth, float maxMeasureWidth);
+    bool IsWidthAdaptive(LayoutWrapper* layoutWrapper);
+    bool IsWidthFix(LayoutWrapper* layoutWrapper);
     void ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, std::vector<TextStyle>& textStyles,
         std::list<RefPtr<SpanItem>>& group, bool& needReLayout, bool& needReLayoutParagraph,
         std::optional<TextStyle>& firstValidTextStyle);
@@ -209,6 +212,7 @@ private:
     RichEditorParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
     std::optional<RectF> richTextRect_;
+    std::optional<TextStyle> typingTextStyle_;
     LRUMap<uint64_t, RefPtr<Paragraph>>* const paraMapPtr_;
     std::unique_ptr<StyleManager>& styleManager_;
     bool needShowPlaceholder_ = false;

@@ -1750,6 +1750,7 @@ public:
 
     virtual void Cancel() const = 0;
     virtual void CopyImage() const = 0;
+    virtual void SaveImage() const = 0;
     virtual void Copy() const = 0;
     virtual void Paste() const = 0;
     virtual void Cut() const = 0;

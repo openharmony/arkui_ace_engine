@@ -294,7 +294,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupSelectAll(ArkUIRunti
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> selectAllArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> changeEventVal;
+    Local<JSValueRef> changeEventVal = panda::JSValueRef::Undefined(vm);
     bool isJsView = IsJsView(nodeArg, vm);
     if (isJsView) {
         if (selectAllArg->IsObject(vm)) {
@@ -404,7 +404,12 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupMark(ArkUIRuntimeCal
     CHECK_NULL_RETURN(theme, panda::NativePointerRef::New(vm, nullptr));
 
     Color strokeColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, strokeColor)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto frameNode = IsJsView(firstArg, vm)
+        ? reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode())
+        : nativeNode;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(frameNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, strokeColor, colorResObj, nodeInfo)) {
         strokeColor = theme->GetPointColor();
     }
 
@@ -419,9 +424,9 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupMark(ArkUIRuntimeCal
         (strokeWidth.Unit() == DimensionUnit::PERCENT) || (strokeWidth.ConvertToVp() < 0)) {
         strokeWidth = theme->GetCheckStroke();
     }
-
+    auto colorRawPtr = AceType::RawPtr(colorResObj);
     GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupMark(
-        nativeNode, strokeColor.GetValue(), size.Value(), strokeWidth.Value());
+        nativeNode, strokeColor.GetValue(), colorRawPtr, size.Value(), strokeWidth.Value());
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -674,7 +679,9 @@ ArkUINativeModuleValue CheckboxGroupBridge::JsMark(ArkUIRuntimeCallInfo* runtime
     if (!ArkTSUtils::ParseJsColorAlpha(vm, strokeColorValue, strokeColor, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckMarkColor(nullptr);
     } else {
-        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckMarkColor(nullptr, strokeColor.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckMarkColor(frameNode, strokeColor.GetValue(),
+            colorRawPtr);
     }
 
     auto sizeValue = markObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "size"));

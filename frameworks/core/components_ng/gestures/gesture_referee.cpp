@@ -232,6 +232,16 @@ bool GestureScope::IsAnySucceedRecognizerExist()
     return false;
 }
 
+void GestureScope::UpdateGestureReferee(size_t touchId, const WeakPtr<GestureReferee>& gestureReferee)
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer) {
+            recognizer->UpdateGestureReferee(gestureReferee);
+        }
+    }
+}
+
 void GestureScope::ForceCleanGestureScope()
 {
     for (const auto& weak : recognizers_) {
@@ -314,6 +324,19 @@ void GestureReferee::CleanGestureStateVoluntarily(size_t touchId)
         const auto& scope = iter->second;
         CHECK_NULL_VOID(scope);
         scope->CleanGestureScopeStateVoluntarily();
+    }
+}
+
+void GestureReferee::UpdateGestureReferee(size_t touchId)
+{
+    RefPtr<GestureScope> scope;
+    const auto iter = gestureScopes_.find(touchId);
+    if (iter == gestureScopes_.end()) {
+        return;
+    }
+    scope = iter->second;
+    if (scope) {
+        scope->UpdateGestureReferee(touchId, AceType::WeakClaim(this));
     }
 }
 

@@ -34,7 +34,8 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     auto node = GetAttachedNode().Upgrade();
     if (node) {
         NG::PointF localPoint(event.x, event.y);
-        NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+        NG::NGGestureRecognizer::Transform(
+            localPoint, GetAttachedNode(), false, isPostEventResult_ || event.passThrough);
         auto localX = static_cast<float>(localPoint.GetX());
         auto localY = static_cast<float>(localPoint.GetY());
         hoverInfo.SetLocalLocation(Offset(localX, localY));
@@ -226,6 +227,7 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetRawDeltaY(event.rawDeltaY);
     info.SetPressedButtons(event.pressedButtonsArray);
     info.SetIsRightButtonEventFromDoulbeTap(event.isRightButtonEventFromDoulbeTap);
+    info.SetEventHandleId(event.eventHandleId);
     // onMouseCallback_ may be overwritten in its invoke so we copy it first
     auto onMouseCallback = onMouseCallback_;
     onMouseCallback(info);

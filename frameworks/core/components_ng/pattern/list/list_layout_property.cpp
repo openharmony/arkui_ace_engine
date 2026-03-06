@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "base/log/dump_log.h"
+
 #include "core/components_ng/pattern/list/list_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -39,6 +41,51 @@ void ListLayoutProperty::SetListItemFillPolicy(std::unique_ptr<JsonValue>& json,
             json->PutExtAttr("itemFillPolicy", "PresetFillType::BREAKPOINT_DEFAULT", filter);
         }
     }
+}
+
+void ListLayoutProperty::DumpInfo()
+{
+    auto listItemAlign = propListItemAlign_.value_or(V2::ListItemAlign::START);
+    DumpLog::GetInstance().AddDesc("alignListItem:" + std::to_string(static_cast<int32_t>(listItemAlign)));
+    if (propDivider_.has_value()) {
+        auto& div = propDivider_.value();
+        DumpLog::GetInstance().AddDesc("divider.strokeWidth:" + div.strokeWidth.ToString());
+        DumpLog::GetInstance().AddDesc("divider.startMargin:" + div.startMargin.ToString());
+        DumpLog::GetInstance().AddDesc("divider.endMargin:" + div.endMargin.ToString());
+        DumpLog::GetInstance().AddDesc("divider.color:" + div.color.ColorToString());
+    } else {
+        DumpLog::GetInstance().AddDesc("divider: None");
+    }
+    auto stickyStyle = propStickyStyle_.value_or(V2::StickyStyle::NONE);
+    DumpLog::GetInstance().AddDesc(
+        "sticky:" + std::to_string(static_cast<uint32_t>(stickyStyle)));
+    auto scrollSnapAlign = propScrollSnapAlign_.value_or(ScrollSnapAlign::NONE);
+    DumpLog::GetInstance().AddDesc(
+        "scrollSnapAlign:" + std::to_string(static_cast<int32_t>(scrollSnapAlign)));
+    propSyncLoad_.value_or(false) ? DumpLog::GetInstance().AddDesc("syncLoad:true")
+                                 : DumpLog::GetInstance().AddDesc("syncLoad:false");
+}
+
+void ListLayoutProperty::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto listItemAlign = propListItemAlign_.value_or(V2::ListItemAlign::START);
+    json->Put("alignListItem", std::to_string(static_cast<int32_t>(listItemAlign)).c_str());
+    if (propDivider_.has_value()) {
+        auto& div = propDivider_.value();
+        std::unique_ptr<JsonValue> dividerJson = JsonUtil::Create(true);
+        dividerJson->Put("strokeWidth", div.strokeWidth.ToString().c_str());
+        dividerJson->Put("startMargin", div.startMargin.ToString().c_str());
+        dividerJson->Put("endMargin", div.endMargin.ToString().c_str());
+        dividerJson->Put("color", div.color.ColorToString().c_str());
+        json->Put("divider", dividerJson);
+    } else {
+        json->Put("divider", "None");
+    }
+    auto stickyStyle = propStickyStyle_.value_or(V2::StickyStyle::NONE);
+    json->Put("sticky", std::to_string(static_cast<uint32_t>(stickyStyle)).c_str());
+    auto scrollSnapAlign = propScrollSnapAlign_.value_or(ScrollSnapAlign::NONE);
+    json->Put("scrollSnapAlign", std::to_string(static_cast<int32_t>(scrollSnapAlign)).c_str());
+    json->Put("syncLoad", propSyncLoad_.value_or(false));
 }
 
 void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

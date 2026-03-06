@@ -34,7 +34,9 @@ import { ScrollState, UIListEvent, UIListEventInternal } from './list'
 import { SwipeActionOptions_serializer, SwipeActionOptions } from './listItem'
 import { ArcScrollBarOptions_serializer } from './../framework/ohos.arkui.ArcScrollBar'
 import { ArcScrollBarOptions } from '@ohos.arkui.ArcScrollBar'
-import { SwiperContentAnimatedTransition_serializer, SwiperAnimationEvent, SwiperContentAnimatedTransition } from './swiper'
+import { ArcSwiperContentAnimatedTransition_serializer } from './../framework/ohos.arkui.ArcSwiper'
+import { ArcSwiperContentAnimatedTransition } from '@ohos.arkui.ArcSwiper'
+import { SwiperAnimationEvent } from './swiper'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { ImageAnalyzerConfig_serializer, ImageAnalyzerConfig } from './imageCommon'
@@ -970,6 +972,114 @@ export class ArcScrollBarExtender {
         thisSerializer.release()
     }
 }
+export interface ArcSwiperContentTransitionProxyInner {
+    selectedIndex: int32
+    index: int32
+    position: double
+    mainAxisLength: double
+    finishTransition(): void
+}
+export class ArcSwiperContentTransitionProxyInnerInternal implements MaterializedBase,ArcSwiperContentTransitionProxyInner {
+    public peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    public selectedIndex: int32
+    public index: int32
+    public position: double
+    public mainAxisLength: double
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, ArcSwiperContentTransitionProxyInnerInternal.getFinalizer())
+        this.selectedIndex = this.getSelectedIndex()
+        this.index = this.getIndex()
+        this.position = this.getPosition()
+        this.mainAxisLength = this.getMainAxisLength()
+    }
+    constructor() {
+        this(MaterializedBaseTag.NOP, ArcSwiperContentTransitionProxyInnerInternal.construct())
+        this.selectedIndex = this.getSelectedIndex()
+        this.index = this.getIndex()
+        this.position = this.getPosition()
+        this.mainAxisLength = this.getMainAxisLength()
+    }
+    static construct(): KPointer {
+        const retval = ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): ArcSwiperContentTransitionProxyInnerInternal {
+        return new ArcSwiperContentTransitionProxyInnerInternal(MaterializedBaseTag.NOP, ptr)
+    }
+    public finishTransition(): void {
+        this.finishTransition_serialize()
+        return
+    }
+    private getSelectedIndex(): int32 {
+        return this.getSelectedIndex_serialize()
+    }
+    private setSelectedIndex(selectedIndex: int32): void {
+        const selectedIndex_casted = selectedIndex as (int32)
+        this.setSelectedIndex_serialize(selectedIndex_casted)
+        return
+    }
+    private getIndex(): int32 {
+        return this.getIndex_serialize()
+    }
+    private setIndex(index: int32): void {
+        const index_casted = index as (int32)
+        this.setIndex_serialize(index_casted)
+        return
+    }
+    private getPosition(): double {
+        return this.getPosition_serialize()
+    }
+    private setPosition(position: double): void {
+        const position_casted = position as (double)
+        this.setPosition_serialize(position_casted)
+        return
+    }
+    private getMainAxisLength(): double {
+        return this.getMainAxisLength_serialize()
+    }
+    private setMainAxisLength(mainAxisLength: double): void {
+        const mainAxisLength_casted = mainAxisLength as (double)
+        this.setMainAxisLength_serialize(mainAxisLength_casted)
+        return
+    }
+    private finishTransition_serialize(): void {
+        ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_finishTransition(this.peer!.ptr)
+    }
+    private getSelectedIndex_serialize(): int32 {
+        const retval = ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_getSelectedIndex(this.peer!.ptr)
+        return retval
+    }
+    private setSelectedIndex_serialize(selectedIndex: int32): void {
+        ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_setSelectedIndex(this.peer!.ptr, selectedIndex)
+    }
+    private getIndex_serialize(): int32 {
+        const retval = ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_getIndex(this.peer!.ptr)
+        return retval
+    }
+    private setIndex_serialize(index: int32): void {
+        ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_setIndex(this.peer!.ptr, index)
+    }
+    private getPosition_serialize(): double {
+        const retval = ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_getPosition(this.peer!.ptr)
+        return retval
+    }
+    private setPosition_serialize(position: double): void {
+        ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_setPosition(this.peer!.ptr, position)
+    }
+    private getMainAxisLength_serialize(): double {
+        const retval = ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_getMainAxisLength(this.peer!.ptr)
+        return retval
+    }
+    private setMainAxisLength_serialize(mainAxisLength: double): void {
+        ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_setMainAxisLength(this.peer!.ptr, mainAxisLength)
+    }
+}
 export class ArcSwiperControllerHelperInternal {
     public static fromPtr(ptr: KPointer): ArcSwiperControllerHelper {
         return new ArcSwiperControllerHelper(MaterializedBaseTag.NOP, ptr)
@@ -1106,9 +1216,9 @@ export class ArcSwiperExtender {
         ArcSwiperExtender.effectMode_serialize(node_casted, edgeEffect_casted)
         return
     }
-    public static customContentTransition(node: KPointer, transition: SwiperContentAnimatedTransition | undefined): void {
+    public static customContentTransition(node: KPointer, transition: ArcSwiperContentAnimatedTransition | undefined): void {
         const node_casted = node as (KPointer)
-        const transition_casted = transition as (SwiperContentAnimatedTransition | undefined)
+        const transition_casted = transition as (ArcSwiperContentAnimatedTransition | undefined)
         ArcSwiperExtender.customContentTransition_serialize(node_casted, transition_casted)
         return
     }
@@ -1274,12 +1384,12 @@ export class ArcSwiperExtender {
         ArkUIGeneratedNativeModule._ArcSwiperExtender_effectMode(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private static customContentTransition_serialize(node: KPointer, transition: SwiperContentAnimatedTransition | undefined): void {
+    private static customContentTransition_serialize(node: KPointer, transition: ArcSwiperContentAnimatedTransition | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (transition !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const transitionTmpValue = transition!
-            SwiperContentAnimatedTransition_serializer.write(thisSerializer, transitionTmpValue)
+            ArcSwiperContentAnimatedTransition_serializer.write(thisSerializer, transitionTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5955,8 +6065,8 @@ export class UIContextAtomicServiceBar {
     }
 }
 export class UIContextGetInfo {
-    public static getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {
-        const id_casted = id as (int64)
+    public static getNavigationInfoByUniqueId(id: int32): uiObserver.NavigationInfo | undefined {
+        const id_casted = id as (int32)
         return UIContextGetInfo.getNavigationInfoByUniqueId_serialize(id_casted)
     }
     public static enableSwipeBack(enabled: boolean | undefined): void {
@@ -5964,7 +6074,7 @@ export class UIContextGetInfo {
         UIContextGetInfo.enableSwipeBack_serialize(enabled_casted)
         return
     }
-    private static getNavigationInfoByUniqueId_serialize(id: int64): uiObserver.NavigationInfo | undefined {
+    private static getNavigationInfoByUniqueId_serialize(id: int32): uiObserver.NavigationInfo | undefined {
         const retval = ArkUIGeneratedNativeModule._UIContextGetInfo_getNavigationInfoByUniqueId(id)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
@@ -6806,6 +6916,17 @@ export class ArkCustomLayoutRootComponent extends ComponentBase implements Custo
 }
 export function getRectangleById(id: string): ComponentInfo {
     return GlobalScope.getRectangleById(id)
+}
+export class ArcSwiperContentTransitionProxyInner_serializer {
+    public static write(buffer: SerializerBase, value: ArcSwiperContentTransitionProxyInner): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ArcSwiperContentTransitionProxyInner {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return ArcSwiperContentTransitionProxyInnerInternal.fromPtr(ptr)
+    }
 }
 export class ArcSwiperControllerHelper_serializer {
     public static write(buffer: SerializerBase, value: ArcSwiperControllerHelper): void {

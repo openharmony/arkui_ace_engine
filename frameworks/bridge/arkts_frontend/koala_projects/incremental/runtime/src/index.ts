@@ -158,6 +158,7 @@ export {
     MutableState,
     StateManager,
     ValueTracker,
+    GlobalUIStateManager,
 } from './states/State'
 
 export {

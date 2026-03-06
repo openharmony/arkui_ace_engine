@@ -378,7 +378,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     /**
      * Returns an iterator over all indices
      */
-    public override keys(): IterableIterator<Number> {
+    public override keys(): IterableIterator<int> {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.keys();
     }
@@ -766,33 +766,11 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param options
      * @returns string representation
      */
-    public override toLocaleString(locales: Object, options: Object): string {
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         return this.store_.toLocaleString(locales, options);
-    }
-
-    /**
-     * Returns a locale string representing the specified array and its elements.
-     *
-     * @param options
-     * @returns string representation
-     */
-    public override toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object());
-    }
-
-    /**
-     * Returns a locale string representing the specified array and its elements.
-     *
-     * @returns string representation
-     */
-    public override toLocaleString(): string {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        }
-        return this.store_.toLocaleString();
     }
 
     /**
@@ -949,7 +927,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     /**
      * Returns an iterable of key, value pairs for every entry in the array
      */
-    public override entries(): IterableIterator<[number, T]> {
+    public override entries(): IterableIterator<[int, T]> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }

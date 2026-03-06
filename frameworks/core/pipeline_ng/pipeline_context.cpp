@@ -145,6 +145,20 @@ int32_t GetDepthFromParams(const std::vector<std::string>& params)
     return depth;
 }
 
+ParamConfig ParseDumpParamConfig(const std::vector<std::string>& params)
+{
+    ParamConfig config;
+    if (params.size() < SIMPLIFYTREE_WITH_PARAMCONFIG) {
+        return config;
+    }
+    config.interactionInfo = (params[2] == "1");
+    config.accessibilityInfo = (params[3] == "1");
+    config.cacheNodes = (params[4] == "1");
+    config.withWeb = (params[5] == "1");
+    config.withUIExtension = (params.size() > SIMPLIFYTREE_WITH_PARAMCONFIG) && (params[6] == "1");
+    return config;
+}
+
 class TestAICaller : public AICallerHelper {
 public:
     TestAICaller() = default;
@@ -4115,8 +4129,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() >= SIMPLIFYTREE_WITH_PARAMCONFIG) {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
-        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, params[1] == "1",
-            { params[2] == "1", params[3] == "1", params[4] == "1", params[5] == "1", params[6] == "1" });
+        auto config = ParseDumpParamConfig(params);
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, params[1] == "1", config);
         DumpLog::GetInstance().Print(root->ToString());
 #ifndef IS_RELEASE_VERSION
     } else if (params[0] == "-contentChange") {
@@ -4847,6 +4861,13 @@ bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncR
     CHECK_NULL_RETURN(rootNode, false);
     auto focusHub = rootNode->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
+
+    auto focusManager = focusHub->GetFocusManager();
+    if (focusManager && focusManager->IsModalFocusViewStackValid()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "ModalFocusViewStack is not empty, intercept focus request.");
+        return false;
+    }
+
     auto currentFocusChecked = focusHub->RequestFocusImmediatelyById(targetNodeId, isSyncRequest);
     if (!isSubPipeline_ || currentFocusChecked) {
         return currentFocusChecked;

@@ -1020,9 +1020,9 @@ HWTEST_F(CanvasRenderContextTest, CanvasModelNGTest010, TestSize.Level1)
 {
     CanvasModelNG model;
     model.Create();
-
     // Should not crash with valid frameNode
     model.DetachRenderContext();
+
     SUCCEED();
 }
 
@@ -1049,11 +1049,10 @@ HWTEST_F(CanvasRenderContextTest, CanvasModelNGTest012, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
-
     ASSERT_NE(frameNode, nullptr);
-
     // Should not crash with valid frameNode
     CanvasModelNG::SetOnReady(AceType::RawPtr(frameNode), []() {});
+
     SUCCEED();
 }
 
@@ -1067,6 +1066,7 @@ HWTEST_F(CanvasRenderContextTest, CanvasModelNGTest013, TestSize.Level1)
     // Should not crash with null frameNode
     CanvasModelNG::EnableAnalyzer(nullptr, true);
     CanvasModelNG::EnableAnalyzer(nullptr, false);
+
     SUCCEED();
 }
 
@@ -1141,12 +1141,11 @@ HWTEST_F(CanvasRenderContextTest, CanvasModelNGTest017, TestSize.Level1)
 HWTEST_F(CanvasRenderContextTest, CanvasModelNGTest018, TestSize.Level1)
 {
     CanvasModelNG model;
-
     // Clear any existing frameNode from stack
     ViewStackProcessor::GetInstance()->ClearStack();
-
     // Should not crash when no frameNode on stack
     model.SetOnReady([](bool ready, CanvasUnit unit) {});
+
     SUCCEED();
 }
 
@@ -1159,7 +1158,6 @@ HWTEST_F(CanvasRenderContextTest, CanvasModelNGTest019, TestSize.Level1)
 {
     CanvasModelNG model;
     model.Create();
-
     bool callbackCalled = false;
     model.SetOnReady([&callbackCalled](bool ready, CanvasUnit unit) { callbackCalled = true; });
 
@@ -1174,13 +1172,13 @@ HWTEST_F(CanvasRenderContextTest, CanvasModelNGTest019, TestSize.Level1)
 HWTEST_F(CanvasRenderContextTest, CanvasModelNGTest020, TestSize.Level1)
 {
     CanvasModelNG model;
-
     // Clear any existing frameNode from stack
     ViewStackProcessor::GetInstance()->ClearStack();
 
     // Should not crash when no frameNode on stack
     model.SetImmediateRender(true);
     model.SetImmediateRender(false);
+
     SUCCEED();
 }
 
@@ -1197,6 +1195,7 @@ HWTEST_F(CanvasRenderContextTest, CanvasModelNGTest021, TestSize.Level1)
     // Should not crash with valid frameNode
     model.SetImmediateRender(true);
     model.SetImmediateRender(false);
+
     SUCCEED();
 }
 

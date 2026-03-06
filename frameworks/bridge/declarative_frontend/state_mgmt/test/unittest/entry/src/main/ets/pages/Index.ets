@@ -37,6 +37,7 @@ struct Parent {
     // Start after 200 ms to allow UI to start.
     setTimeout(() => {
       PageController.registerPages([
+        'pages/env_tests',
         'pages/v1_tests',
         'pages/v2_tests',
         'pages/repeat_tests',

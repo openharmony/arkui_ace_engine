@@ -15,6 +15,11 @@
  * all definitions in this file are framework internal
 */
 
+class ActiveRangeInfo {
+    start: number = -1;
+    end: number = -1;
+}
+
 class __RepeatImpl<T> {
     private arr_: Array<T>;
     private itemGenFuncs_: { [type: string]: RepeatItemGenFunc<T> };
@@ -98,7 +103,18 @@ class __RepeatImpl<T> {
 
         // C++: mv children_ aside to tempchildren_
         RepeatNative.startRender();
+        let activeRange = RepeatNative.getActiveRange();
+        let implicitAnimationOpen = RepeatNative.isImplicitAnimationOpen();
+        let allowAnimation_ = RepeatNative.isAllowAnimation();
 
+        // In animation, reuse need meet the following rules:
+        // 1. When implicit animation is open, the node with same key can not be reused if the node move from outside
+        //    the active range to inside the active range.
+        // 2. When implicit animation is open, the node with different key can not be reused.
+        // 3. When implicit animation is close, the node with same key can not be reused if the node move from outside
+        //    the active range to inside the active range and the original animation has not finished.
+        // 4. When implicit animation is close, the node with different key can not be reused if the original animation
+        //    has not finished.
         let index = 0;
         this.key2Item_.forEach((itemInfo, key) => {
             const item = this.arr_[index];
@@ -108,6 +124,15 @@ class __RepeatImpl<T> {
                 // case #1 retained array item
                 // moved from oldIndex to index
                 const oldIndex = oldItemInfo.index;
+                if (allowAnimation_ &&
+                    this.isIndexInActiveRange(index, activeRange) && !this.isIndexInActiveRange(oldIndex, activeRange) &&
+                    (implicitAnimationOpen || (!implicitAnimationOpen && RepeatNative.isChildInAnimation(oldItemInfo.index)))) { /* rule 1, 3 */
+                    itemInfo.repeatItem = this.mkRepeatItem_(item, index);
+                    this.initialRenderItem(key, itemInfo.repeatItem);
+                    this.afterAddChild();
+                    index++;
+                    return;
+                }
                 itemInfo.repeatItem = oldItemInfo!.repeatItem!;
                 stateMgmtConsole.debug(`__RepeatImpl: retained: key ${key} ${oldIndex}->${index}`);
                 itemInfo.repeatItem.updateIndex(index);
@@ -120,6 +145,14 @@ class __RepeatImpl<T> {
                 // new array item, there is an deleted array items whose
                 // UINode children cab re-used
                 const oldItemInfo = deletedKeysAndIndex.pop();
+                if (allowAnimation_ && (implicitAnimationOpen || /* rule 2 */
+                    (!implicitAnimationOpen && RepeatNative.isChildInAnimation(oldItemInfo.index)))) { /* rule 4 */
+                    itemInfo.repeatItem = this.mkRepeatItem_(item, index);
+                    this.initialRenderItem(key, itemInfo.repeatItem);
+                    this.afterAddChild();
+                    index++;
+                    return;
+                }
                 const reuseKey = oldItemInfo!.key;
                 const oldKeyIndex = oldItemInfo!.index;
                 const oldRepeatItem = oldItemInfo!.repeatItem!;
@@ -165,6 +198,10 @@ class __RepeatImpl<T> {
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         stateMgmtConsole.debug(`__RepeatImpl: reRender elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
+    }
+
+    private isIndexInActiveRange(index: number, activeRange: ActiveRangeInfo): boolean {
+        return index >= activeRange.start && index <= activeRange.end;
     }
 
     private afterAddChild(): void {

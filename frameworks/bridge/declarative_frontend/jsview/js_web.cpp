@@ -2080,6 +2080,7 @@ public:
         JSClass<JSContextMenuResult>::CustomMethod("pasteAndMatchStyle", &JSContextMenuResult::PasteAndMatchStyle);
         JSClass<JSContextMenuResult>::CustomMethod("requestPasswordAutoFill",
             &JSContextMenuResult::RequestPasswordAutoFill);
+        JSClass<JSContextMenuResult>::CustomMethod("saveImage", &JSContextMenuResult::SaveImage);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -2160,6 +2161,13 @@ public:
     {
         if (result_) {
             result_->RequestPasswordAutoFill();
+        }
+    }
+
+    void SaveImage(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->SaveImage();
         }
     }
 
@@ -2487,6 +2495,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
     JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
     JSClass<JSWeb>::StaticMethod("onVerifyPin", &JSWeb::OnVerifyPinRequest);
+    JSClass<JSWeb>::StaticMethod("enableDefaultContextMenu", &JSWeb::EnableDefaultContextMenu);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -7652,6 +7661,15 @@ void JSWeb::EnableAutoFill(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetEnableAutoFill(isEnabled);
+}
+
+void JSWeb::EnableDefaultContextMenu(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableDefaultContextMenu(isEnabled);
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)

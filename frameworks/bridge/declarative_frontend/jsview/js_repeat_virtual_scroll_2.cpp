@@ -76,9 +76,9 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
         return;
     }
     auto onGetRid4Index = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onGetRid4IndexFunc)](
-                              int32_t forIndex) -> std::pair<uint32_t, uint32_t> {
+                              int32_t forIndex, bool isImplicitAnimationOpen) -> std::pair<uint32_t, uint32_t> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, std::pair<uint32_t, uint32_t>(0, 0));
-        auto params = ConvertToJSValues(forIndex);
+        auto params = ConvertToJSValues(forIndex, isImplicitAnimationOpen);
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), params.size(), params.data());
         // convert js-array to std::pair
         if (!jsVal->IsArray() || JSRef<JSArray>::Cast(jsVal)->Length() != 2) {
@@ -361,6 +361,62 @@ void JSRepeatVirtualScroll2::SetCreateByTemplate(const JSCallbackInfo& info)
     RepeatVirtualScroll2Model::GetInstance()->SetCreateByTemplate(info[0]->ToBoolean());
 }
 
+void JSRepeatVirtualScroll2::IsAllowAnimation(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::IsAllowAnimation - invalid parameter ERROR");
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::IsAllowAnimation");
+    auto repeatElmtId = info[0]->ToNumber<int32_t>();
+    auto result = RepeatVirtualScroll2Model::GetInstance()->IsAllowAnimation(repeatElmtId);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+void JSRepeatVirtualScroll2::IsImplicitAnimationOpen(const JSCallbackInfo& info)
+{
+    auto result = RepeatVirtualScroll2Model::GetInstance()->IsImplicitAnimationOpen();
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+void JSRepeatVirtualScroll2::IsChildInAnimation(const JSCallbackInfo& info)
+{
+    enum IsChildInAnimationParam {
+        ELMTID = 0,
+        RID = 1,
+        PARAM_SIZE = 2,
+    };
+    if ((info.Length() < IsChildInAnimationParam::PARAM_SIZE) || !info[IsChildInAnimationParam::ELMTID]->IsNumber() ||
+        !info[IsChildInAnimationParam::RID]->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::IsChildInAnimation - invalid parameter ERROR");
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::IsChildInAnimation");
+    auto repeatElmtId = info[IsChildInAnimationParam::ELMTID]->ToNumber<int32_t>();
+    auto rid = info[IsChildInAnimationParam::RID]->ToNumber<uint32_t>();
+    auto result = RepeatVirtualScroll2Model::GetInstance()->IsChildInAnimation(repeatElmtId, rid);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+void JSRepeatVirtualScroll2::IsChildOnMainTree(const JSCallbackInfo& info)
+{
+    enum IsChildOnMainTreeParam {
+        ELMTID = 0,
+        RID = 1,
+        PARAM_SIZE = 2,
+    };
+    if ((info.Length() < IsChildOnMainTreeParam::PARAM_SIZE) || !info[IsChildOnMainTreeParam::ELMTID]->IsNumber() ||
+        !info[IsChildOnMainTreeParam::RID]->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::IsChildOnMainTree - invalid parameter ERROR");
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll2::IsChildOnMainTree");
+    auto repeatElmtId = info[IsChildOnMainTreeParam::ELMTID]->ToNumber<int32_t>();
+    auto rid = info[IsChildOnMainTreeParam::RID]->ToNumber<uint32_t>();
+    auto result = RepeatVirtualScroll2Model::GetInstance()->IsChildOnMainTree(repeatElmtId, rid);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
 void JSRepeatVirtualScroll2::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRepeatVirtualScroll2>::Declare("RepeatVirtualScroll2Native");
@@ -377,6 +433,11 @@ void JSRepeatVirtualScroll2::JSBind(BindingTarget globalObj)
 
     JSClass<JSRepeatVirtualScroll2>::StaticMethod("onMove", &JSRepeatVirtualScroll2::OnMove);
     JSClass<JSRepeatVirtualScroll2>::StaticMethod("setCreateByTemplate", &JSRepeatVirtualScroll2::SetCreateByTemplate);
+    JSClass<JSRepeatVirtualScroll2>::StaticMethod("isAllowAnimation", &JSRepeatVirtualScroll2::IsAllowAnimation);
+    JSClass<JSRepeatVirtualScroll2>::StaticMethod(
+        "isImplicitAnimationOpen", &JSRepeatVirtualScroll2::IsImplicitAnimationOpen);
+    JSClass<JSRepeatVirtualScroll2>::StaticMethod("isChildInAnimation", &JSRepeatVirtualScroll2::IsChildInAnimation);
+    JSClass<JSRepeatVirtualScroll2>::StaticMethod("isChildOnMainTree", &JSRepeatVirtualScroll2::IsChildOnMainTree);
     JSClass<JSRepeatVirtualScroll2>::Bind<>(globalObj);
 }
 

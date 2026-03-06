@@ -11084,7 +11084,7 @@ void impl_NavDestinationAttribute_setTitle(Ark_NativePointer thisPtr, KSerialize
         Opt_NavigationTitleOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavDestinationModifier()->setTitle(self, static_cast<Opt_Union_String_CustomNodeBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource*>(&valueValueTemp), static_cast<Opt_NavigationTitleOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavDestinationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavDestinationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavDestinationAttribute_setHideTitleBar1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11202,7 +11202,7 @@ void impl_NavDestinationAttribute_setMenus(Ark_NativePointer thisPtr, KSerialize
         Opt_NavigationMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavDestinationModifier()->setMenus(self, static_cast<Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder*>(&itemsValueTemp), static_cast<Opt_NavigationMenuOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavDestinationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavDestinationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavDestinationAttribute_setToolbarConfiguration(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11241,7 +11241,7 @@ void impl_NavDestinationAttribute_setToolbarConfiguration(Ark_NativePointer this
         Opt_NavigationToolbarOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavDestinationModifier()->setToolbarConfiguration(self, static_cast<Opt_Union_Array_ToolbarItem_CustomNodeBuilder*>(&toolbarParamValueTemp), static_cast<Opt_NavigationToolbarOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavDestinationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavDestinationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavDestinationAttribute_setHideToolBar(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11814,7 +11814,7 @@ void impl_NavigationAttribute_setTitle(Ark_NativePointer thisPtr, KSerializerBuf
         Opt_NavigationTitleOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavigationModifier()->setTitle(self, static_cast<Opt_Union_ResourceStr_CustomNodeBuilder_NavigationCommonTitle_NavigationCustomTitle*>(&valueValueTemp), static_cast<Opt_NavigationTitleOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavigationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setHideTitleBar1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11873,7 +11873,7 @@ void impl_NavigationAttribute_setMenus(Ark_NativePointer thisPtr, KSerializerBuf
         Opt_NavigationMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavigationModifier()->setMenus(self, static_cast<Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder*>(&itemsValueTemp), static_cast<Opt_NavigationMenuOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavigationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setToolbarConfiguration(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11912,7 +11912,7 @@ void impl_NavigationAttribute_setToolbarConfiguration(Ark_NativePointer thisPtr,
         Opt_NavigationToolbarOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavigationModifier()->setToolbarConfiguration(self, static_cast<Opt_Union_Array_ToolbarItem_CustomNodeBuilder*>(&valueValueTemp), static_cast<Opt_NavigationToolbarOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavigationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setHideToolBar1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -28887,6 +28887,59 @@ void impl_ArcScrollBarExtender_setArcScrollBarOptions(Ark_NativePointer node, KS
         GetAccessors()->getArcScrollBarExtenderAccessor()->setArcScrollBarOptions(node, static_cast<Ark_ArcScrollBarOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ArcScrollBarExtender_setArcScrollBarOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_ArcSwiperContentTransitionProxyInner_construct() {
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->construct();
+}
+KOALA_INTEROP_DIRECT_0(ArcSwiperContentTransitionProxyInner_construct, Ark_NativePointer)
+Ark_NativePointer impl_ArcSwiperContentTransitionProxyInner_getFinalizer() {
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(ArcSwiperContentTransitionProxyInner_getFinalizer, Ark_NativePointer)
+void impl_ArcSwiperContentTransitionProxyInner_finishTransition(Ark_NativePointer thisPtr) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->finishTransition(self);
+}
+KOALA_INTEROP_DIRECT_V1(ArcSwiperContentTransitionProxyInner_finishTransition, Ark_NativePointer)
+KInt impl_ArcSwiperContentTransitionProxyInner_getSelectedIndex(Ark_NativePointer thisPtr) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->getSelectedIndex(self);
+}
+KOALA_INTEROP_DIRECT_1(ArcSwiperContentTransitionProxyInner_getSelectedIndex, KInt, Ark_NativePointer)
+void impl_ArcSwiperContentTransitionProxyInner_setSelectedIndex(Ark_NativePointer thisPtr, Ark_Int32 selectedIndex) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->setSelectedIndex(self, selectedIndex);
+}
+KOALA_INTEROP_DIRECT_V2(ArcSwiperContentTransitionProxyInner_setSelectedIndex, Ark_NativePointer, Ark_Int32)
+KInt impl_ArcSwiperContentTransitionProxyInner_getIndex(Ark_NativePointer thisPtr) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->getIndex(self);
+}
+KOALA_INTEROP_DIRECT_1(ArcSwiperContentTransitionProxyInner_getIndex, KInt, Ark_NativePointer)
+void impl_ArcSwiperContentTransitionProxyInner_setIndex(Ark_NativePointer thisPtr, Ark_Int32 index) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->setIndex(self, index);
+}
+KOALA_INTEROP_DIRECT_V2(ArcSwiperContentTransitionProxyInner_setIndex, Ark_NativePointer, Ark_Int32)
+KDouble impl_ArcSwiperContentTransitionProxyInner_getPosition(Ark_NativePointer thisPtr) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->getPosition(self);
+}
+KOALA_INTEROP_DIRECT_1(ArcSwiperContentTransitionProxyInner_getPosition, KDouble, Ark_NativePointer)
+void impl_ArcSwiperContentTransitionProxyInner_setPosition(Ark_NativePointer thisPtr, KDouble position) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->setPosition(self, position);
+}
+KOALA_INTEROP_DIRECT_V2(ArcSwiperContentTransitionProxyInner_setPosition, Ark_NativePointer, KDouble)
+KDouble impl_ArcSwiperContentTransitionProxyInner_getMainAxisLength(Ark_NativePointer thisPtr) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        return GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->getMainAxisLength(self);
+}
+KOALA_INTEROP_DIRECT_1(ArcSwiperContentTransitionProxyInner_getMainAxisLength, KDouble, Ark_NativePointer)
+void impl_ArcSwiperContentTransitionProxyInner_setMainAxisLength(Ark_NativePointer thisPtr, KDouble mainAxisLength) {
+        Ark_ArcSwiperContentTransitionProxyInner self = reinterpret_cast<Ark_ArcSwiperContentTransitionProxyInner>(thisPtr);
+        GetAccessors()->getArcSwiperContentTransitionProxyInnerAccessor()->setMainAxisLength(self, mainAxisLength);
+}
+KOALA_INTEROP_DIRECT_V2(ArcSwiperContentTransitionProxyInner_setMainAxisLength, Ark_NativePointer, KDouble)
 Ark_NativePointer impl_ArcSwiperControllerHelper_construct() {
         return GetAccessors()->getArcSwiperControllerHelperAccessor()->construct();
 }
@@ -29078,13 +29131,13 @@ KOALA_INTEROP_DIRECT_V3(ArcSwiperExtender_effectMode, Ark_NativePointer, KSerial
 void impl_ArcSwiperExtender_customContentTransition(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto transitionValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_SwiperContentAnimatedTransition transitionValueTempTmpBuf = {};
+        Opt_ArcSwiperContentAnimatedTransition transitionValueTempTmpBuf = {};
         transitionValueTempTmpBuf.tag = transitionValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((transitionValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            transitionValueTempTmpBuf.value = SwiperContentAnimatedTransition_serializer::read(thisDeserializer);
+            transitionValueTempTmpBuf.value = ArcSwiperContentAnimatedTransition_serializer::read(thisDeserializer);
         }
-        Opt_SwiperContentAnimatedTransition transitionValueTemp = transitionValueTempTmpBuf;;
-        GetAccessors()->getArcSwiperExtenderAccessor()->customContentTransition(node, static_cast<Opt_SwiperContentAnimatedTransition*>(&transitionValueTemp));
+        Opt_ArcSwiperContentAnimatedTransition transitionValueTemp = transitionValueTempTmpBuf;;
+        GetAccessors()->getArcSwiperExtenderAccessor()->customContentTransition(node, static_cast<Opt_ArcSwiperContentAnimatedTransition*>(&transitionValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ArcSwiperExtender_customContentTransition, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ArcSwiperExtender_disableTransitionAnimation(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -39657,7 +39710,7 @@ void impl_RouterExtender_pushNamedRoute1(Ark_NativePointer jsView, KSerializerBu
         Opt_Router_BusinessError_Void callback_ValueTemp = callback_ValueTempTmpBuf;;
         GetAccessors()->getRouterExtenderAccessor()->pushNamedRoute1(jsView, static_cast<Ark_PageRouterOptions*>(&optionsValueTemp), static_cast<Opt_RouterFinishCallback*>(&finishCallbackValueTemp), static_cast<Opt_Router_BusinessError_Void*>(&callback_ValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(RouterExtender_pushNamedRoute1, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(RouterExtender_pushNamedRoute1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RouterExtender_replaceNamedRoute0(KVMContext vmContext, Ark_NativePointer jsView, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_PageRouterOptions optionsValueTemp = PageRouterOptions_serializer::read(thisDeserializer);;
@@ -39691,7 +39744,7 @@ void impl_RouterExtender_replaceNamedRoute1(Ark_NativePointer jsView, KSerialize
         Opt_Router_BusinessError_Void callback_ValueTemp = callback_ValueTempTmpBuf;;
         GetAccessors()->getRouterExtenderAccessor()->replaceNamedRoute1(jsView, static_cast<Ark_PageRouterOptions*>(&optionsValueTemp), static_cast<Opt_RouterFinishCallback*>(&finishCallbackValueTemp), static_cast<Opt_Router_BusinessError_Void*>(&callback_ValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(RouterExtender_replaceNamedRoute1, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(RouterExtender_replaceNamedRoute1, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_RouterExtender_createDynamic(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_RouterOptionsInner optionsValueTemp = RouterOptionsInner_serializer::read(thisDeserializer);;
@@ -42662,7 +42715,7 @@ KInteropReturnBuffer impl_UIContextAtomicServiceBar_getBarRect() {
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_0(UIContextAtomicServiceBar_getBarRect, KInteropReturnBuffer)
-KInteropReturnBuffer impl_UIContextGetInfo_getNavigationInfoByUniqueId(KLong id) {
+KInteropReturnBuffer impl_UIContextGetInfo_getNavigationInfoByUniqueId(Ark_Int32 id) {
         const auto &retValue = GetAccessors()->getUIContextGetInfoAccessor()->getNavigationInfoByUniqueId(id);
         SerializerBase _retSerializer {};
         if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
@@ -42674,7 +42727,7 @@ KInteropReturnBuffer impl_UIContextGetInfo_getNavigationInfoByUniqueId(KLong id)
         }
         return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_1(UIContextGetInfo_getNavigationInfoByUniqueId, KInteropReturnBuffer, KLong)
+KOALA_INTEROP_1(UIContextGetInfo_getNavigationInfoByUniqueId, KInteropReturnBuffer, Ark_Int32)
 void impl_UIContextGetInfo_enableSwipeBack(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto enabledValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -43363,6 +43416,11 @@ void impl_WebContextMenuResult_requestPasswordAutoFill(Ark_NativePointer thisPtr
         GetAccessors()->getWebContextMenuResultAccessor()->requestPasswordAutoFill(self);
 }
 KOALA_INTEROP_DIRECT_V1(WebContextMenuResult_requestPasswordAutoFill, Ark_NativePointer)
+void impl_WebContextMenuResult_saveImage(Ark_NativePointer thisPtr) {
+        Ark_WebContextMenuResult self = reinterpret_cast<Ark_WebContextMenuResult>(thisPtr);
+        GetAccessors()->getWebContextMenuResultAccessor()->saveImage(self);
+}
+KOALA_INTEROP_DIRECT_V1(WebContextMenuResult_saveImage, Ark_NativePointer)
 Ark_NativePointer impl_WebKeyboardController_construct() {
         return GetAccessors()->getWebKeyboardControllerAccessor()->construct();
 }

@@ -86,13 +86,13 @@ constexpr size_t MAX_DESTROYED_CACHE_SIZE = 10;
 
 std::string UIContextCacheInfo::ToString() const
 {
-    std::stringstream ss;
-    ss << "DestroyedUIContextCacheInfo: "
-       << "instanceId[" << instanceId_ << "], "
-       << "createTime[" << ConvertTimestampToStr(createTime_) << "], "
-       << "destroyTime[" << ConvertTimestampToStr(destroyTime_) << "], "
-       << "windowInfo: [id: " << windowId_ << ", windowName: " << windowName_ << "]";
-    return ss.str();
+    std::stringstream info;
+    info << "DestroyedUIContextCacheInfo: "
+         << "instanceInfo: [instanceId:" << instanceId_ << ", "
+         << "createTime: " << ConvertTimestampToStr(createTime_) << ", "
+         << "destroyTime: " << ConvertTimestampToStr(destroyTime_) << "], "
+         << "windowInfo: [windowId: " << windowId_ << ", windowName: " << windowName_ << "]";
+    return info.str();
 }
 
 AceEngine::AceEngine()
@@ -327,9 +327,9 @@ std::string AceEngine::GetDestroyedUIContextInfo(int32_t instanceId) const
 std::string AceEngine::GetEnhancedContextBNotFoundMessage(InstanceIdGenReason reason, int32_t instanceId)
 {
     std::string message = "";
-    message += "instanceId=" + std::to_string(instanceId);
-    message += ", reason=" + ContainerScope::ReasonToDescription(reason);
-    message += ", " + AceEngine::Get().GetDestroyedUIContextInfo(instanceId);
+    message += "InstanceId: " + std::to_string(instanceId) + ",\n";
+    message += "Reason to get the instance: " + ContainerScope::ReasonToDescription(reason) + ",\n";
+    message += AceEngine::Get().GetDestroyedUIContextInfo(instanceId);
     return message;
 }
 } // namespace OHOS::Ace

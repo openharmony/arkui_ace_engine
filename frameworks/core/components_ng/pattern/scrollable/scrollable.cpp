@@ -746,8 +746,8 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
         }
     }
 #endif
-    auto mainDelta = info.GetMainDelta() + prevRemainDelta_;
-    lastMainDelta_ = mainDelta;
+    lastMainDelta_ = info.GetMainDelta();
+    auto mainDelta = lastMainDelta_ + prevRemainDelta_;
     auto prevMainDelta = isReverseCallback_ && isReverseCallback_() ? -mainDelta : mainDelta;
     mainDelta = Round(prevMainDelta);
     prevRemainDelta_ = prevMainDelta - mainDelta;

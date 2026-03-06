@@ -54,6 +54,15 @@ export struct PopupIndex {
     { name: 'SoftKeyboardLevel00Test', path: 'SoftKeyboardLevel00Test' },
     { name: 'SoftKeyboardLevel01Test', path: 'SoftKeyboardLevel01Test' },
     { name: 'SoftKeyboardLevel02Test', path: 'SoftKeyboardLevel02Test' },
+    { name: 'SoftKeyboardLevel03Test', path: 'SoftKeyboardLevel03Test' },
+    { name: 'SoftKeyboardLevel04Test', path: 'SoftKeyboardLevel04Test' },
+    { name: 'SoftKeyboardLevel05Test', path: 'SoftKeyboardLevel05Test' },
+    { name: 'SoftKeyboardLevel06Test', path: 'SoftKeyboardLevel06Test' },
+    { name: 'SoftKeyboardLevel07Test', path: 'SoftKeyboardLevel07Test' },
+    { name: 'SoftKeyboardLevel08Test', path: 'SoftKeyboardLevel08Test' },
+    { name: 'SoftKeyboardLevel09Test', path: 'SoftKeyboardLevel09Test' },
+    { name: 'SoftKeyboardLevel010Test', path: 'SoftKeyboardLevel010Test' },
+    { name: 'SoftKeyboardLevel011Test', path: 'SoftKeyboardLevel011Test' },
   ]
 
   build() {

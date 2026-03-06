@@ -41,6 +41,7 @@ ohos_source_set("ace_web_pattern_test_sources") {
     "$ace_root/frameworks/core/components_ng/pattern/web/web_agent_event_reporter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_context_select_overlay.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_context_menu_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_data_detector_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_dom_document.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_layout_algorithm.cpp",
@@ -170,6 +171,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "web_pattern_web_test_ng.cpp",
     "web_pattern_window_test_ng.cpp",
     "web_select_overlay_test.cpp",
+    "web_context_menu_overlay_test.cpp",
   ]
 
   deps = [

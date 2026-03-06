@@ -1006,6 +1006,86 @@ HWTEST_F(GridScrollerTestNg, OnInjectionEventTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnInjectionEventTest004
+ * @tc.desc: Test CreateWithResourceObjScrollBarColor in GridModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, OnInjectionEventTest004, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone();
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    std::string command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":20})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.currentOffset_, -20);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 0);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":-10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.currentOffset_, -10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 0);
+
+    command = R"({"cmd":"scrolloffset","eventId":123123,"offset":10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.currentOffset_, -10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 0);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123)";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.currentOffset_, -10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 0);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 6);
+}
+
+/**
+ * @tc.name: OnInjectionEventTest005
+ * @tc.desc: Test CreateWithResourceObjScrollBarColor in GridModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, OnInjectionEventTest005, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone();
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    std::string command = R"()";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 0);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":-20})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 0);
+}
+
+/**
  * @tc.name: ReportComponentChangeEventTest001
  * @tc.desc: ReportComponentChangeEventTest
  * @tc.type: FUNC

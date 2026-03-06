@@ -135,6 +135,8 @@ const std::vector<std::string> CANONICALENCODINGNAMES = {
 #define VISIBLERATIO_LENGTH 4
 #define VISIBLERATIO_FLOAT_TO_INT 100
 
+std::vector<std::string> LISTEN_ATTRIBUTES = {"densityDPI", "densityPixels", "xDPI", "yDPI", "width", "height"};
+
 static bool IsDeviceTabletOr2in1()
 {
     return OHOS::system::GetDeviceType() == "tablet" || OHOS::system::GetDeviceType() == "2in1";
@@ -783,6 +785,14 @@ void ContextMenuResultOhos::CopyImage() const
     }
 }
 
+void ContextMenuResultOhos::SaveImage() const
+{
+    RETURN_IF_CALLING_FROM_M114();
+    if (callback_) {
+        callback_->Continue(CI_IMAGE_SAVE, EF_NONE);
+    }
+}
+
 void ContextMenuResultOhos::Copy() const
 {
     if (callback_) {
@@ -1109,6 +1119,7 @@ WebDelegate::~WebDelegate()
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
         OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
     }
+    UnRegisterDisplayInfoChange();
     if (nweb_) {
         nweb_->OnDestroy();
     }
@@ -3360,6 +3371,70 @@ void WebDelegate::SetPartitionPoints(std::vector<float>& partition)
         }
     }
 }
+
+void WebDelegate::UpdateWebLtpoInfo()
+{
+    if (nweb_) {
+        nweb_->UpdateWebLtpoInfo();
+    }
+}
+
+class LtpoDisplayInfoListener : public OHOS::Rosen::DisplayManager::IDisplayAttributeListener {
+public:
+    explicit LtpoDisplayInfoListener(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
+    ~LtpoDisplayInfoListener() = default;
+    void OnAttributeChange(Rosen::DisplayId dId, const std::vector<std::string>& attributes) override
+    {
+        std::string changedAttributes;
+        for (const auto &s : attributes) {
+            changedAttributes += s + ";";
+        }
+        auto delegate = delegate_.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_WEB, "Ltpo info changed, changedAttributes:%{public}s", changedAttributes.c_str());
+        if (delegate) {
+            delegate->UpdateWebLtpoInfo();
+        }
+    }
+private:
+    WeakPtr<WebDelegate> delegate_;
+};
+
+void WebDelegate::RegisterDisplayInfoChange()
+{
+    if (displayListener_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DisplayInfoChange is already registed.");
+        return;
+    }
+    displayListener_ = sptr<LtpoDisplayInfoListener>::MakeSptr(WeakClaim(this));
+    if (!displayListener_) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "displayListener_ is null.");
+        return;
+    }
+    auto ret = OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayAttributeListener(LISTEN_ATTRIBUTES,
+        displayListener_);
+    if (ret != OHOS::Rosen::DMError::DM_OK) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DisplayInfoChange register fail, error: %{public}d", static_cast<int>(ret));
+        displayListener_ = nullptr;
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DisplayInfoChange register success.");
+    }
+}
+
+void WebDelegate::UnRegisterDisplayInfoChange()
+{
+    if (displayListener_ == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "displayListener_ is null.");
+        return;
+    }
+    auto ret = OHOS::Rosen::DisplayManager::GetInstance().UnRegisterDisplayAttributeListener(displayListener_);
+    if (ret != OHOS::Rosen::DMError::DM_OK) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DisplayInfoChange unregister fail, error: %{public}d", static_cast<int>(ret));
+        displayListener_ = nullptr;
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DisplayInfoChange unregister success.");
+    }
+}
+
 void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 {
     if (!GetWebOptimizationValue()) {
@@ -3644,6 +3719,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetFocusWindowId(foucus_window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
+            delegate->RegisterDisplayInfoChange();
             delegate->nweb_->SetDrawMode(renderMode);
             delegate->nweb_->SetFitContentMode(layoutMode);
             delegate->RegisterConfigObserver();
@@ -4855,20 +4931,19 @@ void WebDelegate::LoadUrl()
 
 void WebDelegate::OnInactive()
 {
-    int webId = GetWebId();
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", webId);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), webId]() {
+        [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
             if (delegate->nweb_) {
-                OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(webId, false);
+                OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(delegate->nweb_->GetWebId(), false);
                 delegate->nweb_->OnPause();
             }
         },
@@ -4877,20 +4952,19 @@ void WebDelegate::OnInactive()
 
 void WebDelegate::OnActive()
 {
-    int webId = GetWebId();
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnActive, webId:%{public}d", webId);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnActive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), webId]() {
+        [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
             if (delegate->nweb_) {
-                OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(webId, true);
+                OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(delegate->nweb_->GetWebId(), true);
                 delegate->nweb_->OnContinue();
             }
         },
@@ -6373,15 +6447,17 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         CHECK_NULL_VOID(eventInfo);
         auto contextMenuParam = eventInfo->GetParam();
         CHECK_NULL_VOID(contextMenuParam);
-        if (!contextMenuParam->IsAILink()) {
-            auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
-            CHECK_NULL_VOID(propOnContextMenuShowEvent);
+        auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
+        if (propOnContextMenuShowEvent && !contextMenuParam->IsAILink()) {
             result = propOnContextMenuShowEvent(info);
-        } else {
+        } else if (contextMenuParam->IsAILink()) {
             result = true;
         }
         if (!delegate->richtextData_) {
             webPattern->OnContextMenuShow(info, false, result);
+        }
+        if (webPattern->IsEnableDefaultContextMenu()) {
+            result = true;
         }
         return;
 #else
@@ -6399,15 +6475,17 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
             CHECK_NULL_VOID(eventInfo);
             auto contextMenuParam = eventInfo->GetParam();
             CHECK_NULL_VOID(contextMenuParam);
-            if (!contextMenuParam->IsAILink()) {
-                auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
-                CHECK_NULL_VOID(propOnContextMenuShowEvent);
+            auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
+            if (propOnContextMenuShowEvent && !contextMenuParam->IsAILink()) {
                 result = propOnContextMenuShowEvent(info);
-            } else {
+            } else if (contextMenuParam->IsAILink()) {
                 result = true;
             }
             if (!delegate->richtextData_) {
                 webPattern->OnContextMenuShow(info, false, result);
+            }
+            if (webPattern->IsEnableDefaultContextMenu()) {
+                result = true;
             }
             return;
         }
@@ -9977,7 +10055,7 @@ void WebDelegate::OnMicrophoneCaptureStateChanged(int originalState, int newStat
         TaskExecutor::TaskType::JS, "ArkUIWebMicrophoneCaptureStateChanged");
 }
 
-void WebDelegate::SetOfflineWebActiveStatus(int32_t webId, bool isActive)
+void WebDelegate::SetOfflineWebActiveStatus(bool isActive)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::SetOfflineWebActiveStatus");
     auto context = context_.Upgrade();
@@ -9985,15 +10063,16 @@ void WebDelegate::SetOfflineWebActiveStatus(int32_t webId, bool isActive)
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), webId, isActive]() {
+        [weak = WeakClaim(this), isActive]() {
             auto delegate = weak.Upgrade();
             if (!delegate || !delegate->nweb_) {
                 TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::SetOfflineWebActiveStatus delegate is nullptr");
                 return;
             }
+            int32_t webId = delegate->nweb_->GetWebId();
             if (isActive && OHOS::NWeb::NWebHelper::Instance().GetNWebActiveStatus(webId)) {
                 delegate->nweb_->OnContinue();
-            } else if (!isActive) {
+            } else if (!isActive && OHOS::NWeb::NWebHelper::Instance().IsNWebInActiveStatusMap(webId)) {
                 delegate->nweb_->OnPause();
             }
         },

@@ -1,0 +1,31 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package api.internal.component.ets;
+
+callback TextFieldValueCallback = void (ResourceStr value);
+[Entity=Class]
+interface TextFieldOps {
+    static pointer registerTextFieldValueCallback(pointer node, ResourceStr value, TextFieldValueCallback callback);
+    static pointer textFieldOpsSetWidth(pointer node, optional (Length or LayoutPolicy) value);
+    static pointer textFieldOpsSetHeight(pointer node, optional (Length or LayoutPolicy) value);
+    static pointer textFieldOpsSetPadding(pointer node, optional (Padding or Length or LocalizedPadding) value);
+    static pointer textFieldOpsSetMargin(pointer node, optional (Padding or Length or LocalizedPadding) value);
+    static pointer textFieldOpsSetBorder(pointer node, optional BorderOptions value);
+    static pointer textFieldOpsSetBorderWidth(pointer node, optional (Length or EdgeWidths or LocalizedEdgeWidths) value);
+    static pointer textFieldOpsSetBorderColor(pointer node, optional (ResourceColor or EdgeColors or LocalizedEdgeColors) value);
+    static pointer textFieldOpsSetBorderStyle(pointer node, optional (BorderStyle or EdgeStyles) value);
+    static pointer textFieldOpsSetBorderRadius(pointer node, optional (Length or BorderRadiuses or LocalizedBorderRadiuses) value);
+    static pointer textFieldOpsSetBackgroundColor(pointer node, optional ResourceColor value);
+};

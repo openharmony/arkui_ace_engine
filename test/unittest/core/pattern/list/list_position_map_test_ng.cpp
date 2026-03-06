@@ -121,7 +121,7 @@ HWTEST_F(ListPositionMapTestNg, CalculateUINode003, TestSize.Level1)
     ASSERT_NE(listNode, nullptr);
     auto node = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, listItemGroupPattern);
     ASSERT_NE(node, nullptr);
-    std::function<std::pair<RIDType, uint32_t>(IndexType)> onGetRid4Index = [](int32_t index) {
+    std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index = [](int32_t index, bool inAnimation) {
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};

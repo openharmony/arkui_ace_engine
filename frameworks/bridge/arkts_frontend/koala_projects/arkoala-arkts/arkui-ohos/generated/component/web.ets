@@ -1031,6 +1031,10 @@ export class WebContextMenuResult implements MaterializedBase {
         this.requestPasswordAutoFill_serialize()
         return
     }
+    public saveImage(): void {
+        this.saveImage_serialize()
+        return
+    }
     private closeContextMenu_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_closeContextMenu(this.peer!.ptr)
     }
@@ -1060,6 +1064,9 @@ export class WebContextMenuResult implements MaterializedBase {
     }
     private requestPasswordAutoFill_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_requestPasswordAutoFill(this.peer!.ptr)
+    }
+    private saveImage_serialize(): void {
+        ArkUIGeneratedNativeModule._WebContextMenuResult_saveImage(this.peer!.ptr)
     }
 }
 export class WebKeyboardControllerInternal {

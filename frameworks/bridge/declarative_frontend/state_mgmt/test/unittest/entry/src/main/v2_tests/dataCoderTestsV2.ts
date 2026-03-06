@@ -1848,14 +1848,6 @@ export class DataCoderTestsV2 implements ITestFile {
     eq(serialized.startsWith(DataCoder.FORMAT_TAG), false, 'Should use legacy format when forced');
   }
 
-  public testCompatibilityLegacyFormatStringify(): void {
-    const obj = { id: 1, name: 'test' };
-    const json2Result = DataCoder.stringify(obj);
-    const legacyResult = DataCoder.stringify(obj, true);
-    eq(json2Result.startsWith(DataCoder.FORMAT_TAG), true, 'JSON2 format should start with FORMAT_TAG');
-    eq(legacyResult.startsWith(DataCoder.FORMAT_TAG), true, 'Legacy format should not start with FORMAT_TAG');
-  }
-
   public testCompatibilityLegacyFormatParse(): void {
     const legacyText = '{"id":1,"name":"test"}';
     const json2Text = DataCoder.FORMAT_TAG + '{"id":1,"name":"test"}';

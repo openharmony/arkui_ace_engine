@@ -1138,6 +1138,28 @@ HWTEST_F(JsAccessibilityManagerTest, SingleHandTransformTest001, TestSize.Level1
 }
 
 /**
+ * @tc.name: DumpProcessEventParametersTest001
+ * @tc.desc: test DumpProcessEventParameters with no param
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpProcessEventParametersTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test DumpProcessEventParameters with no param
+     */
+    std::vector<std::string> params;
+    AccessibilityEvent accessibilityEvent;
+    bool ret = jsAccessibilityManager->DumpProcessEventParameters(accessibilityEvent, params);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: JsAccessibilityManager020
  * @tc.desc: dump event test  DumpProcessEventParameters
  * @tc.type: FUNC
@@ -1146,6 +1168,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager020, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
     auto context = NG::PipelineContext::GetCurrentContext();
     jsAccessibilityManager->SetPipelineContext(context);
     jsAccessibilityManager->Register(true);
@@ -1191,6 +1214,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager0201, TestSize.Level1
 {
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
     auto context = NG::PipelineContext::GetCurrentContext();
     jsAccessibilityManager->SetPipelineContext(context);
     jsAccessibilityManager->Register(true);
@@ -2912,6 +2936,9 @@ HWTEST_F(JsAccessibilityManagerTest, SendEventToAccessibilityWithNode004, TestSi
  */
 HWTEST_F(JsAccessibilityManagerTest, GetTreeId001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto frameNode = FrameNode::CreateFrameNode(
         "framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode, nullptr);
@@ -2919,6 +2946,9 @@ HWTEST_F(JsAccessibilityManagerTest, GetTreeId001, TestSize.Level1)
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetTreeId
+     */
     int32_t treeId = 666;
     jsAccessibilityManager->treeId_ = treeId;
     int32_t result = jsAccessibilityManager->GetTreeId();
@@ -2936,6 +2966,9 @@ HWTEST_F(JsAccessibilityManagerTest, GetTreeId001, TestSize.Level1)
  */
 HWTEST_F(JsAccessibilityManagerTest, GetTransformDegreeRelativeToWindow001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto frameNode = FrameNode::CreateFrameNode(
         "framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode, nullptr);
@@ -2943,6 +2976,9 @@ HWTEST_F(JsAccessibilityManagerTest, GetTransformDegreeRelativeToWindow001, Test
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetTransformDegreeRelativeToWindow
+     */
     int32_t result = jsAccessibilityManager->GetTransformDegreeRelativeToWindow(frameNode, false);
     EXPECT_EQ(result, 0);
 }
@@ -3086,8 +3122,15 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager045, TestSize.Level1)
  */
 HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager046, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     std::vector<std::string> params;
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+
+    /**
+     * @tc.steps: step2. test OnDumpInfoNG
+     */
     params.push_back("-inspector");
     params.push_back("--specific-search");
     params.push_back("1");

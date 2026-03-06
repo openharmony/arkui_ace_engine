@@ -1,0 +1,1252 @@
+{
+    "$schema": "./schema.json",
+    "TypePrefix": "Ark_",
+    "LibraryPrefix": "",
+    "OptionalPrefix": "Opt_",
+    "GenerateUnused": false,
+    "ApiKind": 10,
+    "ApiVersion": 9999,
+    "dumpSerialized": false,
+    "ignoreMaterialized": [
+        "AnimatableArithmetic",
+        "CrownEvent",
+        "CustomLayoutRoot",
+        "DynamicNode",
+        "GestureHandler",
+        "LongPressGestureHandler",
+        "PanGestureHandler",
+        "PinchGestureHandler",
+        "RotationGestureHandler",
+        "SwipeGestureHandler",
+        "TapGestureHandler",
+        "UIGestureEvent",
+        "TouchTestInfo",
+        "TouchResult",
+        "SectionOptions",
+        "LengthMetrics",
+        "ColorMetrics"
+    ],
+    "ignoreGenerics": [
+        "arkui.component.common.AttributeModifier",
+        "arkui.component.common.ContentModifier",
+        "arkui.component.ContentModifier"
+    ],
+    "transformOnSerialize": [
+        {
+            "from": "ohos.base.BusinessError",
+            "to": "arkui.component.idlize.BusinessErrorInterface"
+        },
+        {
+            "from": "arkui.component.builder.PageMapBuilder",
+            "to": "arkui.component.idlize.PageMapNodeBuilder"
+        },
+        {
+            "from": "arkui.component.builder.CustomBuilderT",
+            "to": "arkui.component.idlize.CustomNodeBuilderT"
+        },
+        {
+            "from": "arkui.component.waterFlow.WaterFlowSections",
+            "to": "arkui.component.idlize.WaterFlowSectionsInterface"
+        },
+        {
+            "from": "arkui.Graphics.ColorMetrics",
+            "to": "arkui.component.idlize.ColorMetricsExt"
+        }
+    ],
+    "forceMaterialized": [
+        "arkui.component.gesture.extra.TapGestureInterface",
+        "arkui.component.gesture.extra.LongPressGestureInterface",
+        "arkui.component.gesture.extra.PanGestureInterface",
+        "arkui.component.gesture.extra.SwipeGestureInterface",
+        "arkui.component.gesture.extra.PinchGestureInterface",
+        "arkui.component.gesture.extra.RotationGestureInterface",
+        "arkui.component.gesture.extra.GestureGroupInterface",
+        "application.BaseContext.BaseContext",
+        "arkui.component.common.ClickEvent",
+        "arkui.component.common.AccessibilityHoverEvent",
+        "arkui.component.common.BaseEvent",
+        "arkui.component.gesture.BaseGestureEvent",
+        "arkui.component.common.FocusAxisEvent",
+        "arkui.component.gesture.GestureEvent",
+        "arkui.component.common.HoverEvent",
+        "arkui.component.common.KeyEvent",
+        "arkui.component.gesture.LongPressGestureEvent",
+        "arkui.component.common.MouseEvent",
+        "arkui.component.gesture.PanGestureEvent",
+        "arkui.component.gesture.PinchGestureEvent",
+        "arkui.component.gesture.RotationGestureEvent",
+        "arkui.component.gesture.SwipeGestureEvent",
+        "arkui.component.gesture.TapGestureEvent",
+        "arkui.ComponentContent.ComponentContent",
+        "arkui.ComponentContent.ComponentContentBase",
+        "ohos.animator.AnimatorOptions",
+        "ohos.animator.AnimatorResult",
+        "ohos.animator.SimpleAnimatorOptions",
+        "ohos.animator.Animator",
+        "ohos.app.ability.Ability.Ability",
+        "ohos.app.ability.AbilityConstant.LaunchParam",
+        "ohos.app.ability.AbilityConstant.LastExitDetailInfo",
+        "ohos.app.ability.AbilityLifecycleCallback.AbilityLifecycleCallback",
+        "ohos.app.ability.ApplicationStateChangeCallback.ApplicationStateChangeCallback",
+        "ohos.app.ability.AtomicServiceOptions.AtomicServiceOptions",
+        "ohos.app.ability.Configuration.Configuration",
+        "ohos.app.ability.EnvironmentCallback.EnvironmentCallback",
+        "ohos.app.ability.InteropAbilityLifecycleCallback.InteropAbilityLifecycleCallback",
+        "ohos.app.ability.OpenLinkOptions.OpenLinkOptions",
+        "ohos.app.ability.StartOptions.StartOptions",
+        "ohos.app.ability.UIAbility.Caller",
+        "ohos.app.ability.UIAbility.Callee",
+        "ohos.app.ability.UIAbility.UIAbility",
+        "ohos.app.ability.Want.Want",
+        "ohos.app.ability.appManager.KeepAliveBundleInfo",
+        "ohos.data.unifiedDataChannel.Options",
+        "ohos.data.unifiedDataChannel.ProgressInfo",
+        "ohos.data.unifiedDataChannel.GetDataParams",
+        "ohos.data.unifiedDataChannel.UnifiedData",
+        "ohos.data.unifiedDataChannel.Summary",
+        "ohos.data.unifiedDataChannel.UnifiedRecord",
+        "ohos.data.unifiedDataChannel.Text",
+        "ohos.data.unifiedDataChannel.PlainText",
+        "ohos.data.unifiedDataChannel.Hyperlink",
+        "ohos.data.unifiedDataChannel.HTML",
+        "ohos.data.unifiedDataChannel.File",
+        "ohos.data.unifiedDataChannel.Image",
+        "ohos.data.unifiedDataChannel.Video",
+        "ohos.data.unifiedDataChannel.Audio",
+        "ohos.data.unifiedDataChannel.Folder",
+        "ohos.data.unifiedDataChannel.SystemDefinedRecord",
+        "ohos.data.unifiedDataChannel.SystemDefinedForm",
+        "ohos.data.unifiedDataChannel.SystemDefinedAppItem",
+        "ohos.data.unifiedDataChannel.SystemDefinedPixelMap",
+        "ohos.data.unifiedDataChannel.ApplicationDefinedRecord",
+        "ohos.graphics.colorSpaceManager.ColorSpacePrimaries",
+        "ohos.graphics.colorSpaceManager.ColorSpaceManager",
+        "ohos.graphics.common2D.Color",
+        "ohos.graphics.common2D.Rect",
+        "ohos.graphics.common2D.Point",
+        "ohos.graphics.drawing.FontMetrics",
+        "ohos.graphics.drawing.RoundRect",
+        "ohos.graphics.drawing.PathIterator",
+        "ohos.graphics.drawing.Path",
+        "ohos.graphics.drawing.SamplingOptions",
+        "ohos.graphics.drawing.Canvas",
+        "ohos.graphics.drawing.Typeface",
+        "ohos.graphics.drawing.Font",
+        "ohos.graphics.drawing.Lattice",
+        "ohos.graphics.drawing.ColorFilter",
+        "ohos.graphics.drawing.Pen",
+        "ohos.graphics.drawing.Brush",
+        "ohos.graphics.drawing.Matrix",
+        "ohos.graphics.drawing.Region",
+        "ohos.graphics.uiEffect.uiEffect.Blender",
+        "ohos.graphics.uiEffect.uiEffect.BrightnessBlender",
+        "ohos.graphics.uiEffect.uiEffect.HdrBrightnessBlender",
+        "ohos.inputMethod.ExtraConfig.InputMethodExtraConfig",
+        "ohos.multimedia.image.Size",
+        "ohos.multimedia.image.Region",
+        "ohos.multimedia.image.PositionArea",
+        "ohos.multimedia.image.ImageInfo",
+        "ohos.multimedia.image.PackingOption",
+        "ohos.multimedia.image.PackingOptionsForSequence",
+        "ohos.multimedia.image.ImagePropertyOptions",
+        "ohos.multimedia.image.DecodingOptions",
+        "ohos.multimedia.image.Component",
+        "ohos.multimedia.image.InitializationOptions",
+        "ohos.multimedia.image.SourceOptions",
+        "ohos.multimedia.image.HdrStaticMetadata",
+        "ohos.multimedia.image.GainmapChannel",
+        "ohos.multimedia.image.HdrGainmapMetadata",
+        "ohos.multimedia.image.PixelMap",
+        "ohos.multimedia.image.Picture",
+        "ohos.multimedia.image.AuxiliaryPicture",
+        "ohos.multimedia.image.Metadata",
+        "ohos.multimedia.image.DecodingOptionsForPicture",
+        "ohos.multimedia.image.AuxiliaryPictureInfo",
+        "ohos.multimedia.image.ImageSource",
+        "ohos.multimedia.image.ImagePacker",
+        "ohos.multimedia.image.Image",
+        "ohos.multimedia.image.ImageReceiver",
+        "ohos.multimedia.image.ImageCreator",
+        "ohos.multimodalInput.pointer.CursorConfig",
+        "ohos.print.PrintTask",
+        "ohos.print.PrintDocumentAdapter",
+        "ohos.print.PrintAttributes",
+        "ohos.print.PrintPageRange",
+        "ohos.print.PrintMargin",
+        "ohos.print.PrinterRange",
+        "ohos.print.PreviewAttribute",
+        "ohos.print.PrintResolution",
+        "ohos.print.PrintPageSize",
+        "ohos.print.PrinterCapability",
+        "ohos.print.PrinterInfo",
+        "ohos.print.PrintJob",
+        "ohos.print.PrinterExtensionInfo",
+        "ohos.print.PrinterInformation",
+        "ohos.print.PrinterCapabilities",
+        "ohos.print.PrinterPreferences",
+        "ohos.resourceManager.ResourceManager",
+        "ohos.resourceManager.Configuration",
+        "ohos.resourceManager.DeviceCapability",
+        "ohos.router.router.RouterOptions",
+        "ohos.router.router.RouterState",
+        "ohos.router.EnableAlertOptions",
+        "ohos.router.router.NamedRouterOptions",
+        "ohos.rpc.Parcelable",
+        "ohos.rpc.RequestResult",
+        "ohos.rpc.IRemoteBroker",
+        "ohos.rpc.DeathRecipient",
+        "ohos.rpc.MessageSequence",
+        "ohos.rpc.IRemoteObject",
+        "ohos.rpc.MessageOption",
+        "ohos.rpc.RemoteObject",
+        "ohos.rpc.RemoteProxy",
+        "ohos.rpc.IPCSkeleton",
+        "ohos.rpc.Ashmem",
+        "ohos.security.cert.DataBlob",
+        "ohos.security.cert.DataArray",
+        "ohos.security.cert.EncodingBlob",
+        "ohos.security.cert.CertChainData",
+        "ohos.security.cert.X509Cert",
+        "ohos.security.cert.CertExtension",
+        "ohos.security.cert.X509CRLEntry",
+        "ohos.security.cert.X509CRL",
+        "ohos.security.cert.CertChainValidator",
+        "ohos.security.cert.GeneralName",
+        "ohos.security.cert.X509CertMatchParameters",
+        "ohos.security.cert.X509CRLMatchParameters",
+        "ohos.security.cert.CertCRLCollection",
+        "ohos.security.cert.X509CertChain",
+        "ohos.security.cert.Pkcs12Data",
+        "ohos.security.cert.Pkcs12ParsingConfig",
+        "ohos.security.cert.X500DistinguishedName",
+        "ohos.security.cert.X509TrustAnchor",
+        "ohos.security.cert.RevocationCheckParameter",
+        "ohos.security.cert.CertChainValidationParameters",
+        "ohos.security.cert.CertChainValidationResult",
+        "ohos.security.cert.CertChainBuildParameters",
+        "ohos.security.cert.CertChainBuildResult",
+        "ohos.security.cert.PrivateKeyInfo",
+        "ohos.security.cert.CmsSignerConfig",
+        "ohos.security.cert.CmsGeneratorOptions",
+        "ohos.security.cert.CmsGenerator",
+        "ohos.security.cert.CsrAttribute",
+        "ohos.security.cert.CsrGenerationConfig",
+        "ohos.security.cryptoFramework.DataBlob",
+        "ohos.security.cryptoFramework.ParamsSpec",
+        "ohos.security.cryptoFramework.IvParamsSpec",
+        "ohos.security.cryptoFramework.GcmParamsSpec",
+        "ohos.security.cryptoFramework.CcmParamsSpec",
+        "ohos.security.cryptoFramework.KeyEncodingConfig",
+        "ohos.security.cryptoFramework.Key",
+        "ohos.security.cryptoFramework.SymKey",
+        "ohos.security.cryptoFramework.PriKey",
+        "ohos.security.cryptoFramework.PubKey",
+        "ohos.security.cryptoFramework.KeyPair",
+        "ohos.security.cryptoFramework.Random",
+        "ohos.security.cryptoFramework.AsyKeyGenerator",
+        "ohos.security.cryptoFramework.SymKeyGenerator",
+        "ohos.security.cryptoFramework.MacSpec",
+        "ohos.security.cryptoFramework.HmacSpec",
+        "ohos.security.cryptoFramework.CmacSpec",
+        "ohos.security.cryptoFramework.Mac",
+        "ohos.security.cryptoFramework.Md",
+        "ohos.security.cryptoFramework.Cipher",
+        "ohos.security.cryptoFramework.Sign",
+        "ohos.security.cryptoFramework.Verify",
+        "ohos.security.cryptoFramework.KeyAgreement",
+        "ohos.security.cryptoFramework.AsyKeySpec",
+        "ohos.security.cryptoFramework.DSACommonParamsSpec",
+        "ohos.security.cryptoFramework.DSAPubKeySpec",
+        "ohos.security.cryptoFramework.DSAKeyPairSpec",
+        "ohos.security.cryptoFramework.ECField",
+        "ohos.security.cryptoFramework.ECFieldFp",
+        "ohos.security.cryptoFramework.Point",
+        "ohos.security.cryptoFramework.ECCCommonParamsSpec",
+        "ohos.security.cryptoFramework.ECCPriKeySpec",
+        "ohos.security.cryptoFramework.ECCPubKeySpec",
+        "ohos.security.cryptoFramework.ECCKeyPairSpec",
+        "ohos.security.cryptoFramework.DHCommonParamsSpec",
+        "ohos.security.cryptoFramework.DHPriKeySpec",
+        "ohos.security.cryptoFramework.DHPubKeySpec",
+        "ohos.security.cryptoFramework.DHKeyPairSpec",
+        "ohos.security.cryptoFramework.ED25519PriKeySpec",
+        "ohos.security.cryptoFramework.ED25519PubKeySpec",
+        "ohos.security.cryptoFramework.ED25519KeyPairSpec",
+        "ohos.security.cryptoFramework.X25519PriKeySpec",
+        "ohos.security.cryptoFramework.X25519PubKeySpec",
+        "ohos.security.cryptoFramework.X25519KeyPairSpec",
+        "ohos.security.cryptoFramework.RSACommonParamsSpec",
+        "ohos.security.cryptoFramework.RSAPubKeySpec",
+        "ohos.security.cryptoFramework.RSAKeyPairSpec",
+        "ohos.security.cryptoFramework.AsyKeyGeneratorBySpec",
+        "ohos.security.cryptoFramework.KdfSpec",
+        "ohos.security.cryptoFramework.PBKDF2Spec",
+        "ohos.security.cryptoFramework.HKDFSpec",
+        "ohos.security.cryptoFramework.ScryptSpec",
+        "ohos.security.cryptoFramework.Kdf",
+        "ohos.security.cryptoFramework.SM2CipherTextSpec",
+        "ohos.security.cryptoFramework.EccSignatureSpec",
+        "ohos.security.cryptoFramework.ECCKeyUtil",
+        "ohos.security.cryptoFramework.DHKeyUtil",
+        "ohos.security.cryptoFramework.SM2CryptoUtil",
+        "ohos.security.cryptoFramework.SignatureUtils",
+        "ohos.telephony.observer.SimStateData",
+        "ohos.telephony.observer.CallStateInfo",
+        "ohos.telephony.observer.DataConnectionStateInfo",
+        "ohos.telephony.observer.ObserverOptions",
+        "ohos.web.webview.WebHeader",
+        "ohos.web.webview.HitTestValue",
+        "ohos.web.webview.WebCustomScheme",
+        "ohos.web.webview.PdfConfiguration",
+        "ohos.web.webview.WebStorageOrigin",
+        "ohos.web.webview.RequestInfo",
+        "ohos.web.webview.ScrollOffset",
+        "ohos.web.webview.WebMessagePort",
+        "ohos.web.webview.HistoryItem",
+        "ohos.web.webview.BackForwardList",
+        "ohos.web.webview.SnapshotInfo",
+        "ohos.web.webview.SnapshotResult",
+        "ohos.web.webview.CacheOptions",
+        "ohos.web.webview.OfflineResourceMap",
+        "ohos.web.webview.NativeMediaPlayerHandler",
+        "ohos.web.webview.NativeMediaPlayerBridge",
+        "ohos.web.webview.RectEvent",
+        "ohos.web.webview.MediaInfo",
+        "ohos.web.webview.PdfData",
+        "ohos.web.webview.WebStorage",
+        "ohos.web.webview.WebDataBase",
+        "ohos.web.webview.GeolocationPermissions",
+        "ohos.web.webview.WebCookieManager",
+        "ohos.web.webview.WebMessageExt",
+        "ohos.web.webview.JsMessageExt",
+        "ohos.web.webview.WebviewController",
+        "ohos.web.webview.WebDownloadItem",
+        "ohos.web.webview.WebDownloadDelegate",
+        "ohos.web.webview.WebDownloadManager",
+        "ohos.web.webview.WebHttpBodyStream",
+        "ohos.web.webview.WebSchemeHandlerRequest",
+        "ohos.web.webview.WebSchemeHandlerResponse",
+        "ohos.web.webview.WebResourceHandler",
+        "ohos.web.webview.WebSchemeHandler",
+        "ohos.web.webview.MediaSourceInfo",
+        "ohos.web.webview.NativeMediaPlayerSurfaceInfo",
+        "ohos.web.webview.AdsBlockManager",
+        "ohos.web.webview.BackForwardCacheSupportedFeatures",
+        "ohos.web.webview.BackForwardCacheOptions",
+        "ohos.web.webview.ProxyConfig",
+        "ohos.web.webview.ProxyRule",
+        "ohos.web.webview.ProxyController",
+        "ohos.window.SystemBarProperties",
+        "ohos.window.SystemBarStyle",
+        "ohos.window.SystemBarRegionTint",
+        "ohos.window.SystemBarTintState",
+        "ohos.window.Rect",
+        "ohos.window.AvoidArea",
+        "ohos.window.Size",
+        "ohos.window.WindowDensityInfo",
+        "ohos.window.WindowProperties",
+        "ohos.window.DecorButtonStyle",
+        "ohos.window.ScaleOptions",
+        "ohos.window.RotateOptions",
+        "ohos.window.TranslateOptions",
+        "ohos.window.TransitionContext",
+        "ohos.window.TransitionController",
+        "ohos.window.Configuration",
+        "ohos.window.WindowLimits",
+        "ohos.window.TitleButtonRect",
+        "ohos.window.RectChangeOptions",
+        "ohos.window.AvoidAreaOptions",
+        "ohos.window.MoveConfiguration",
+        "ohos.window.KeyboardInfo",
+        "ohos.window.Window",
+        "ohos.window.SubWindowOptions",
+        "ohos.window.WindowStage",
+        "ohos.window.SystemWindowOptions",
+        "ohos.window.ExtensionWindowConfig",
+        "ohos.window.RotationChangeInfo",
+        "ohos.window.RotationChangeResult",
+        "ability.abilityResult.AbilityResult",
+        "ability.connectOptions.ConnectOptions",
+        "application.AbilityStartCallback.AbilityStartCallback",
+        "application.ApplicationContext.ApplicationContext",
+        "application.BaseContext.BaseContext",
+        "application.Context.Context",
+        "application.EventHub.EventHub",
+        "application.ExtensionContext.ExtensionContext",
+        "application.ProcessInformation.ProcessInformation",
+        "application.UIAbilityContext.UIAbilityContext",
+        "bundleManager.AbilityInfo.AbilityInfo",
+        "bundleManager.AbilityInfo.WindowSize",
+        "bundleManager.ApplicationInfo.ApplicationInfo",
+        "bundleManager.ApplicationInfo.ModuleMetadata",
+        "bundleManager.ApplicationInfo.MultiAppMode",
+        "bundleManager.ApplicationInfo.PreinstalledApplicationInfo",
+        "bundleManager.ElementName.ElementName",
+        "bundleManager.ExtensionAbilityInfo.ExtensionAbilityInfo",
+        "bundleManager.HapModuleInfo.HapModuleInfo",
+        "bundleManager.HapModuleInfo.Dependency",
+        "bundleManager.HapModuleInfo.PreloadItem",
+        "bundleManager.HapModuleInfo.RouterItem",
+        "bundleManager.HapModuleInfo.DataItem",
+        "bundleManager.Metadata.Metadata",
+        "bundleManager.Skill.Skill",
+        "bundleManager.Skill.SkillUri",
+        "global.rawFileDescriptor.RawFileDescriptor",
+        "ohos.arkui.componentSnapshot.SnapshotRegion",
+        "ohos.arkui.componentSnapshot.LocalizedSnapshotRegion",
+        "ohos.arkui.componentSnapshot.SnapshotOptions",
+        "ohos.arkui.componentUtils.ComponentInfo",
+        "ohos.arkui.componentUtils.Size",
+        "ohos.arkui.componentUtils.Offset",
+        "ohos.arkui.componentUtils.TranslateResult",
+        "ohos.arkui.componentUtils.ScaleResult",
+        "ohos.arkui.componentUtils.RotateResult",
+        "ohos.arkui.dragController.DragAndDropInfo",
+        "ohos.arkui.dragController.DragAction",
+        "ohos.arkui.dragController.DragInfo",
+        "ohos.arkui.dragController.AnimationOptions",
+        "ohos.arkui.dragController.DragEventParam",
+        "ohos.arkui.dragController.DragPreview",
+        "ohos.arkui.drawableDescriptor.AnimationOptions",
+        "ohos.arkui.drawableDescriptor.DrawableDescriptor",
+        "ohos.arkui.drawableDescriptor.LayeredDrawableDescriptor",
+        "ohos.arkui.drawableDescriptor.PixelMapDrawableDescriptor",
+        "ohos.arkui.drawableDescriptor.AnimatedDrawableDescriptor",
+        "ohos.arkui.inspector.ComponentObserver",
+        "ohos.arkui.observer.NavDestinationInfo",
+        "ohos.arkui.observer.NavigationInfo",
+        "ohos.arkui.observer.ScrollEventInfo",
+        "ohos.arkui.observer.TabContentInfo",
+        "ohos.arkui.observer.ObserverOptions",
+        "ohos.arkui.observer.NavDestinationSwitchInfo",
+        "ohos.arkui.observer.NavDestinationSwitchObserverOptions",
+        "ohos.arkui.observer.RouterPageInfo",
+        "ohos.arkui.observer.DensityInfo",
+        "ohos.arkui.Parallelize.ParallelOption",
+        "ohos.arkui.Parallelize.UIParallelAttribute",
+        "ohos.arkui.Prefetcher.IDataSourcePrefetching",
+        "ohos.arkui.Prefetcher.IPrefetcher",
+        "ohos.arkui.Prefetcher.BasicPrefetcher",
+        "ohos.arkui.UIContext.PageInfo",
+        "ohos.arkui.UIContext.OverlayManagerOptions",
+        "ohos.arkui.UIContext.GestureTriggerInfo",
+        "ohos.arkui.UIContext.GestureObserverConfigs",
+        "ohos.arkui.UIContext.AtomicServiceBar",
+        "ohos.arkui.UIContext.Font",
+        "ohos.arkui.UIContext.MediaQuery",
+        "ohos.arkui.UIContext.UIInspector",
+        "ohos.arkui.UIContext.Router",
+        "ohos.arkui.UIContext.PromptAction",
+        "ohos.arkui.UIContext.UIObserver",
+        "ohos.arkui.UIContext.ComponentUtils",
+        "ohos.arkui.UIContext.OverlayManager",
+        "ohos.arkui.UIContext.DynamicSyncScene",
+        "ohos.arkui.UIContext.SwiperDynamicSyncScene",
+        "ohos.arkui.UIContext.MarqueeDynamicSyncScene",
+        "ohos.arkui.UIContext.DragController",
+        "ohos.arkui.UIContext.MeasureUtils",
+        "ohos.arkui.UIContext.FocusController",
+        "ohos.arkui.UIContext.CursorController",
+        "ohos.arkui.UIContext.ContextMenuController",
+        "ohos.arkui.UIContext.FrameCallback",
+        "ohos.arkui.UIContext.ComponentSnapshot",
+        "ohos.arkui.UIContext.UIContext",
+        "ohos.arkui.UIContext.TextMenuController",
+        "ohos.arkui.UIContext.ContentCoverController",
+        "ohos.arkui.uiExtension.WindowProxy",
+        "ohos.arkui.uiExtension.AvoidAreaInfo",
+        "ohos.arkui.uiExtension.WindowProxyProperties"
+    ],
+    "forceCallback": {
+        "EditMenuOptions": [],
+        "XComponentController": [
+            "onSurfaceCreated",
+            "onSurfaceChanged",
+            "onSurfaceDestroyed"
+        ],
+        "DrawModifier": [
+            "drawBehind",
+            "drawContent",
+            "drawFront"
+        ],
+        "CustomSpan": [
+            "onMeasure",
+            "onDraw"
+        ],
+        "LeadingMarginSpan": [
+            "onDraw",
+            "getLeadingMargin"
+        ]
+    },
+    "forceResource": [
+        "ChildrenMainSize",
+        "PeerNode",
+        "ExtendableComponent",
+        "LifeCycle",
+        "ContentModifier",
+        "UserDataSpan",
+        "Gesture",
+        "GestureGroup",
+        "TapGesture",
+        "LongPressGesture",
+        "PanGesture",
+        "PinchGesture",
+        "RotationGesture",
+        "SwipeGesture",
+        "GestureGroup",
+        "GestureHandler",
+        "LongPressGestureHandler",
+        "PanGestureHandler",
+        "PinchGestureHandler",
+        "TapGestureHandler",
+        "RotationGestureHandler",
+        "SwipeGestureHandler"
+    ],
+    "boundProperties": {
+        "Checkbox": [
+            "select"
+        ],
+        "CheckboxGroup": [
+            "selectAll"
+        ],
+        "DatePicker": [
+            "selected"
+        ],
+        "TimePicker": [
+            "selected"
+        ],
+        "MenuItem": [
+            "selected"
+        ],
+        "Panel": [
+            "mode"
+        ],
+        "Radio": [
+            "checked"
+        ],
+        "Rating": [
+            "rating"
+        ],
+        "Search": [
+            "value"
+        ],
+        "SideBarContainer": [
+            "showSideBar"
+        ],
+        "Slider": [
+            "value"
+        ],
+        "Stepper": [
+            "index"
+        ],
+        "Swiper": [
+            "index"
+        ],
+        "Tabs": [
+            "index"
+        ],
+        "TextArea": [
+            "text"
+        ],
+        "TextInput": [
+            "text"
+        ],
+        "TextPicker": [
+            "selected",
+            "value"
+        ],
+        "Toggle": [
+            "isOn"
+        ],
+        "AlphabetIndexer": [
+            "selected"
+        ],
+        "Select": [
+            "selected",
+            "value"
+        ],
+        "BindSheet": [
+            "isShow"
+        ],
+        "BindContentCover": [
+            "isShow"
+        ],
+        "Refresh": [
+            "refreshing"
+        ],
+        "GridItem": [
+            "selected"
+        ],
+        "ListItem": [
+            "selected"
+        ]
+    },
+    "rootComponents": [
+        "Root",
+        "ComponentRoot",
+        "CustomBuilderRoot",
+        "CommonMethod",
+        "SecurityComponentMethod",
+        "CommonTransition",
+        "CalendarAttribute",
+        "ContainerSpanAttribute",
+        "CustomLayoutRoot",
+        "SymbolSpanAttribute",
+        "SpanAttribute"
+    ],
+    "standaloneComponents": [
+        "TextPickerDialog",
+        "TimePickerDialog",
+        "AlertDialog",
+        "CanvasPattern",
+        "WithThemeAttribute",
+        "ToolBarItemAttribute",
+        "IfAttribute"
+    ],
+    "parameterized": [
+        "Indicator",
+        "AttributeModifier",
+        "AnimationRange",
+        "SizeT",
+        "PositionT",
+        "Record"
+    ],
+    "builderClasses": [
+        "SubTabBarStyle",
+        "BottomTabBarStyle"
+    ],
+    "components": {
+        "customNodeTypes": [
+            "CustomNode"
+        ],
+        "handWritten": [
+            "CustomDialogControllerOptions",
+            "CustomDialogControllerExternalOptions",
+            "CustomDialogController",
+            "EmbeddedComponentAttribute",
+            "EmbeddedComponent",
+            "EmbeddedComponentImpl",
+            "NodeContainerAttribute",
+            "NodeContainer",
+            "NodeContainerImpl",
+            "Initializer",
+            "PeerNode",
+            "LifeCycle",
+            "ExtendableComponent",
+            "LocalStorage",
+            "SyncedPropertyOneWay",
+            "SubscribedAbstractProperty",
+            "SyncedPropertyTwoWay",
+            "AttributeModifier",
+            "AttributeUpdater",
+            "AbstractProperty",
+            "SubscribaleAbstract",
+            "IPropertySubscriber",
+            "ISinglePropertyChangeSubscriber",
+            "ISinglePropertyChangeSubscriber",
+            "PageTransitionEnterInterface",
+            "PageTransitionExitInterface",
+            "CommonTransition",
+            "wrapBuilder",
+            "DrawModifier",
+            "ContentModifier",
+            "CustomStyles",
+            "applyStyles",
+            "UIGestureEvent",
+            "GestureModifier",
+            "ItemGeneratorFunc",
+            "KeyGeneratorFunc",
+            "WrappedBuilder",
+            "TabContent",
+            "Toggle",
+            "ListItem",
+            "ImageData",
+            "Gesture",
+            "TapGesture",
+            "LongPressGesture",
+            "PanGesture",
+            "PinchGesture",
+            "RotationGesture",
+            "SwipeGesture",
+            "GestureGroup",
+            "GestureHandler",
+            "LongPressGestureHandler",
+            "PanGestureHandler",
+            "PinchGestureHandler",
+            "TapGestureHandler",
+            "RotationGestureHandler",
+            "SwipeGestureHandler",
+            "GestureType",
+            "DrawModifier",
+            "Badge",
+            "ChildrenMainSize",
+            "WaterFlowSections",
+            "IfAttribute",
+            "IfInterface",
+            "WithTheme",
+            "SaveButton",
+            "PasteButton"
+        ],
+        "ignoreEntry": [
+            "Optional",
+            "AppStorage",
+            "DataChangeListener",
+            "DisturbanceFieldOptions",
+            "EntryOptions",
+            "Environment",
+            "GestureGroupHandler",
+            "IDataSource",
+            "LazyForEachInterface",
+            "LocalStorage",
+            "PersistentStorage",
+            "PositionT",
+            "SizeT",
+            "Storage",
+            "SubscribedAbstractProperty",
+            "SyncedPropertyOneWay",
+            "SyncedPropertyTwoWay",
+            "IMonitorValue"
+        ],
+        "ignoreEntryJava": [
+            "AnimationRange",
+            "EventTargetInfo",
+            "GestureRecognizer",
+            "GestureRecognizerJudgeBeginCallback",
+            "Matrix2D",
+            "ScrollAnimationOptions",
+            "SheetDismiss",
+            "SubTabBarStyle",
+            "TextPickerDialog",
+            "Dimension",
+            "ScaleSymbolEffect",
+            "ReplaceSymbolEffect",
+            "BaseShape",
+            "RectShape",
+            "EllipseShape",
+            "CircleShape",
+            "BusinessError",
+            "Error",
+            "ErrorCallback",
+            "getRectangleById",
+            "edgeColors",
+            "edgeWidths",
+            "borderRadiuses"
+        ],
+        "ignoreComponents": [
+            "Particle",
+            "ForEach",
+            "LazyForEach",
+            "ContentSlot",
+            "If"
+        ],
+        "ignorePeerMethod": [
+            "attributeModifier"
+        ],
+        "ignoreMethodArkts": [
+            "testTupleNumberStringEnum",
+            "testTupleOptional",
+            "testTupleUnion"
+        ],
+        "invalidAttributes": [
+            "ScrollableCommonMethod"
+        ],
+        "replaceThrowErrorReturn": [
+            "NavPathStack"
+        ]
+    },
+    "hooks": {
+        "DragEvent": {
+            "startDataLoading": {
+                "hookName": "hookDragEventStartDataLoading",
+                "replaceImplementation": true
+            },
+            "getSummary": {
+                "hookName": "hookDragEventGetSummary",
+                "replaceImplementation": true
+            },
+            "setDataLoadParams": {
+                "hookName": "hookDragEventSetDataLoadParams",
+                "replaceImplementation": true
+            },
+            "enableInternalDropAnimation": {
+                "hookName": "hookEnableInternalDropAnimation",
+                "replaceImplementation": true
+            },
+            "getGetModifierKeyState": {
+                "hookName": "hookDragEventGetModifierKeyState",
+                "replaceImplementation": true
+            }
+        },
+        "KeyEvent": {
+            "getGetModifierKeyState": {
+                "hookName": "hookKeyEventGetModifierKeyState",
+                "replaceImplementation": true
+            }
+        },
+        "BaseEvent": {
+            "getGetModifierKeyState": {
+                "hookName": "hookBaseEventGetModifierKeyState",
+                "replaceImplementation": true
+            }
+        },
+        "ButtonAttribute": {
+            "contentModifier": {
+                "hookName": "hookButtonContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "CanvasAttribute": {
+            "setCanvasOptions": {
+                "hookName": "hookSetCanvasOptions",
+                "replaceImplementation": false
+            }
+        },
+        "CommonMethod": {
+            "id": {
+                "hookName": "hookId",
+                "replaceImplementation": false
+            },
+            "stateStyles": {
+                "hookName": "hookStateStyleImpl",
+                "replaceImplementation": true
+            },
+            "gesture": {
+                "hookName": "hookGesture",
+                "replaceImplementation": true
+            },
+            "priorityGesture": {
+                "hookName": "hookPriorityGesture",
+                "replaceImplementation": true
+            },
+            "parallelGesture": {
+                "hookName": "hookParallelGesture",
+                "replaceImplementation": true
+            },
+            "gestureModifier": {
+                "hookName": "hookGestureModifier",
+                "replaceImplementation": true
+            },
+            "customProperty": {
+                "hookName": "hookCustomPropertyImpl",
+                "replaceImplementation": true
+            },
+            "drawModifier": {
+                "hookName": "hookDrawModifier",
+                "replaceImplementation": true
+            },
+            "allowDrop": {
+                "hookName": "hookAllowDrop",
+                "replaceImplementation": true
+            },
+            "dragPreviewOptions": {
+                "hookName": "hookDragPreviewOptions",
+                "replaceImplementation": true
+            }
+        },
+        "CheckboxAttribute": {
+            "contentModifier": {
+                "hookName": "hookCheckBoxContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "CheckboxGroupAttribute": {
+            "contentModifier": {
+                "hookName": "hookCheckBoxGroupContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "DataPanelAttribute": {
+            "contentModifier": {
+                "hookName": "hookDataPanelContentModifier",
+                "replaceImplementation": true
+            },
+            "trackShadow": {
+                "hookName": "hookDataPanelTrackShadow",
+                "replaceImplementation": true
+            }
+        },
+        "GaugeAttribute": {
+            "contentModifier": {
+                "hookName": "hookGaugeContentModifier",
+                "replaceImplementation": true
+            },
+            "indicator": {
+                "hookName": "hookGaugeIndicator",
+                "replaceImplementation": true
+            },
+            "trackShadow": {
+                "hookName": "hookGaugeTrackShadow",
+                "replaceImplementation": true
+            },
+            "description": {
+                "hookName": "hookGaugeDescription",
+                "replaceImplementation": true
+            }
+        },
+        "ImageAttribute": {
+            "onError": {
+                "hookName": "hookImageOnError",
+                "replaceImplementation": false
+            }
+        },
+        "ListAttribute": {
+            "childrenMainSize": {
+                "hookName": "hookListChildrenMainSizeImpl",
+                "replaceImplementation": true
+            }
+        },
+        "ListItemGroupAttribute": {
+            "childrenMainSize": {
+                "hookName": "hookListItemGroupChildrenMainSizeImpl",
+                "replaceImplementation": true
+            },
+            "setListItemGroupOptions": {
+                "hookName": "hookListItemGroupOptionsImpl",
+                "replaceImplementation": true
+            }
+        },
+        "LoadingProgressAttribute": {
+            "contentModifier": {
+                "hookName": "hookLoadingProgressContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "NavigationAttribute": {
+            "setNavigationOptions": {
+                "hookName": "hookSetNavigationOptions",
+                "replaceImplementation": true
+            },
+            "navDestination": {
+                "hookName": "hookSetNavDestination",
+                "replaceImplementation": true
+            },
+            "splitPlaceholder": {
+                "hookName": "hookSplitPlaceholder",
+                "replaceImplementation": true
+            }
+        },
+        "NavDestinationContextInternal": {
+            "getConfigInRouteMap": {
+                "hookName": "hookGetConfigInRouteMap",
+                "replaceImplementation": true
+            }
+        },
+        "PasteButtonAttribute": {
+            "onClick": {
+                "hookName": "hookPasteButtonOnClickImpl",
+                "replaceImplementation": false
+            }
+        },
+        "ProgressAttribute": {
+            "contentModifier": {
+                "hookName": "hookProgressContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "RadioAttribute": {
+            "contentModifier": {
+                "hookName": "hookRadioContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "RatingAttribute": {
+            "contentModifier": {
+                "hookName": "hookRatingContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "SaveButtonAttribute": {
+            "onClick": {
+                "hookName": "hookSaveButtonOnClickImpl",
+                "replaceImplementation": false
+            }
+        },
+        "SelectAttribute": {
+            "menuItemContentModifier": {
+                "hookName": "hookSelectContentModifier",
+                "replaceImplementation": true
+            },
+            "divider": {
+                "hookName": "hookSelectSetDividerMethod",
+                "replaceImplementation": true
+            }
+        },
+        "SliderAttribute": {
+            "contentModifier": {
+                "hookName": "hookSliderContentModifier",
+                "replaceImplementation": true
+            },
+            "prefix": {
+                "hookName": "hookSliderSetPrefixMethod",
+                "replaceImplementation": true
+            },
+            "suffix": {
+                "hookName": "hookSliderSetSuffixMethod",
+                "replaceImplementation": true
+            }
+        },
+        "TextClockAttribute": {
+            "contentModifier": {
+                "hookName": "hookTextClockContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "TextPickerAttribute": {
+            "divider": {
+                "hookName": "hookTextPickerDivider",
+                "replaceImplementation": false
+            }
+        },
+        "TextTimerAttribute": {
+            "contentModifier": {
+                "hookName": "hookTextTimerContentModifier",
+                "replaceImplementation": true
+            }
+        },
+        "ToggleAttribute": {
+            "contentModifier": {
+                "hookName": "hookToggleContentModifier",
+                "replaceImplementation": true
+            },
+            "setToggleOptions": {
+                "hookName": "hookSetToggleOptions",
+                "replaceImplementation": false
+            }
+        },
+        "VideoAttribute": {
+            "setVideoOptions": {
+                "hookName": "hookSetVideoOptions",
+                "replaceImplementation": false
+            },
+            "analyzerConfig": {
+                "hookName": "hookVideoAnalyzerConfig",
+                "replaceImplementation": false
+            },
+            "onError": {
+                "hookName": "hookVideoOnError",
+                "replaceImplementation": false
+            }
+        },
+        "waterFlowAttribute": {
+            "setWaterFlowOptions": {
+                "hookName": "hookWaterFlowOptionsImpl",
+                "replaceImplementation": true
+            }
+        },
+        "CanvasRenderer": {
+            "createImageData": {
+                "hookName": "hookCreateImageData",
+                "replaceImplementation": true
+            },
+            "getImageData": {
+                "hookName": "hookGetImageData",
+                "replaceImplementation": true
+            },
+            "putImageData": {
+                "hookName": "hookPutImageData",
+                "replaceImplementation": true
+            }
+        },
+        "CanvasRenderingContext2D": {
+            "onAttach": {
+                "hookName": "registerAttach",
+                "replaceImplementation": false
+            },
+            "offAttach": {
+                "hookName": "unregisterAttach",
+                "replaceImplementation": false
+            },
+            "onDetach": {
+                "hookName": "registerDetach",
+                "replaceImplementation": false
+            },
+            "offDetach": {
+                "hookName": "unregisterDetach",
+                "replaceImplementation": false
+            },
+            "startImageAnalyzer": {
+                "hookName": "hookCanvasStartImageAnalyzer",
+                "replaceImplementation": false
+            },
+            "getCanvas": {
+                "hookName": "hookGetCanvas",
+                "replaceImplementation": true
+            }
+        },
+        "XComponentController": {
+            "startImageAnalyzer": {
+                "hookName": "hookXComponentStartImageAnalyzer",
+                "replaceImplementation": true
+            }
+        },
+        "XComponentAttribute": {
+            "setXComponentOptions": {
+                "hookName": "hookSetXComponentOptions",
+                "replaceImplementation": false
+            }
+        },
+        "WithThemeAttribute": {
+            "setWithThemeOptions": {
+                "hookName": "hookWithThemeOptions",
+                "replaceImplementation": true
+            }
+        },
+        "CommonMethodModifier": {
+            "customProperty": {
+                "hookName": "hookCommonMethodModifierCustomProperty",
+                "replaceImplementation": true
+            }
+        },
+        "WebAttribute": {
+            "javaScriptProxy": {
+                "hookName": "hookJavaScriptProxy",
+                "replaceImplementation": false
+            }
+        }
+    },
+    "materialized": {
+        "ignoreReturnTypes": [
+            "Promise"
+        ]
+    },
+    "cppPrefix": "GENERATED_",
+    "serializer": {
+        "ignore": [
+            "Array",
+            "Callback",
+            "AttributeModifier",
+            "Number",
+            "String",
+            "Function",
+            "Optional",
+            "RelativeIndexable",
+            "StateStyles",
+            "Callback"
+        ]
+    },
+    "dummy": {
+        "ignoreMethods": {
+            "CommonMethod": [
+                "onClick",
+                "onClick0",
+                "onClick1",
+                "drawModifier"
+            ],
+            "EnvironmentBackend": [
+                "isAccessibilityEnabled",
+                "getColorMode",
+                "getFontScale",
+                "getFontWeightScale",
+                "getLayoutDirection",
+                "getLanguageCode"
+            ],
+            "EventEmulator": [
+                "emitClickEvent"
+            ],
+            "RenderServiceNode": [
+                "getNodeId"
+            ],
+            "ScreenshotService": [
+                "requestScreenshot"
+            ],
+            "DrawModifier": [
+                "invalidate",
+                "setDrawBehind_callback",
+                "setDrawContent_callback",
+                "setDrawFront_callback"
+            ]
+        }
+    },
+    "patchMaterialized": {},
+    "forceContext": [
+        "ExtendableComponent",
+        "LoadUserView",
+        "MeasureLayoutAndDraw",
+        "MeasureNode",
+        "DrawNode",
+        "TestCallIntNoArgs",
+        "TestCallIntIntArraySum",
+        "TestCallVoidIntArrayPrefixSum",
+        "TestCallIntRecursiveCallback",
+        "TestCallIntMemory",
+        "arkui.component.idlize.BuilderNodeOps.create",
+        "arkui.component.idlize.LazyForEachOps.NotifyChange",
+        "arkui.component.idlize.AnimationExtender.AnimateToImmediatelyImpl",
+        "arkui.component.idlize.AnimationExtender.KeyframeAnimationImpl",
+        "arkui.component.idlize.AnimationExtender.OpenImplicitAnimationForAnimation",
+        "arkui.component.idlize.AnimationExtender.CloseImplicitAnimationForAnimation",
+        "idlize.internal.interop.Node.ApplyModifierFinish",
+        "arkui.component.idlize.RouterExtender.back",
+        "arkui.component.idlize.RouterExtender.clear",
+        "arkui.component.idlize.RouterExtender.push",
+        "arkui.component.idlize.RouterExtender.replace",
+        "arkui.component.idlize.RouterExtender.runPage",
+        "arkui.component.navigation.NavigationAttribute.title",
+        "arkui.component.navigation.NavigationAttribute.menus",
+        "arkui.component.navigation.NavigationAttribute.toolbarConfiguration",
+        "arkui.component.navigation.NavPathStack.pushPath",
+        "arkui.component.navigation.NavPathStack.pushDestination",
+        "arkui.component.navigation.NavPathStack.pushPathByName",
+        "arkui.component.navigation.NavPathStack.pushDestinationByName",
+        "arkui.component.navigation.NavPathStack.replacePath",
+        "arkui.component.navigation.NavPathStack.replaceDestination",
+        "arkui.component.navigation.NavPathStack.replacePathByName",
+        "arkui.component.navDestination.NavDestinationAttribute.title",
+        "arkui.component.navDestination.NavDestinationAttribute.menus",
+        "arkui.component.navDestination.NavDestinationAttribute.toolbarConfiguration",
+        "arkui.component.list.ListScroller.getItemRectInGroup",
+        "arkui.component.list.ListScroller.scrollToItemInGroup",
+        "arkui.component.list.ListScroller.closeAllSwipeActions",
+        "arkui.component.list.ListScroller.getVisibleListContentInfo",
+        "arkui.component.scroll.Scroller.scrollTo",
+        "arkui.component.scroll.Scroller.scrollEdge",
+        "arkui.component.scroll.Scroller.fling",
+        "arkui.component.scroll.Scroller.scrollPage",
+        "arkui.component.scroll.Scroller.currentOffset",
+        "arkui.component.scroll.Scroller.scrollToIndex",
+        "arkui.component.scroll.Scroller.scrollBy",
+        "arkui.component.scroll.Scroller.isAtEnd",
+        "arkui.component.scroll.Scroller.getItemRect",
+        "arkui.component.scroll.Scroller.getItemIndex",
+        "arkui.component.scroll.Scroller.contentSize"
+    ],
+    "constants": {
+        "TouchTestInfo.rect": "{ x: 0, y: 0, width: 0, height: 0 }",
+        "TouchResult.strategy": "TouchTestStrategy.DEFAULT",
+        "TabBarSymbol.normal": "new SymbolGlyphModifier()"
+    },
+    "moduleName": "arkui",
+    "modules": {
+        "arkui": {
+            "name": "arkui",
+            "packages": [
+                ""
+            ]
+        }
+    },
+    "libraryNameMapping": {},
+    "currentModulePackagesPaths": [
+        {
+            "package": "arkui.component",
+            "path": "./component"
+        },
+        {
+            "package": "arkui.stateManagement",
+            "path": "./stateManagement"
+        },
+        {
+            "package": "arkui",
+            "path": "./"
+        }
+    ],
+    "currentModuleExportedPackages": [
+        "arkui.component",
+        "internal.component.ets",
+        "arkui.idlize"
+    ],
+    "globalPackages": [
+        "idlize.stdlib",
+        "org.openharmony.idlize.predefined",
+        "org.openharmony.arkui"
+    ]
+}

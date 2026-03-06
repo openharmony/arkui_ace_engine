@@ -486,6 +486,7 @@ public:
 
     // get PointerEvent ptr from ts
     const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromAxisEvent(napi_value event) override;
+    const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromTouchEvent(napi_value event) override;
 
 protected:
     void RunIntentPageIfNeeded();
@@ -531,6 +532,7 @@ protected:
     void CloseSyncTransaction(OHOS::Rosen::RSSyncTransactionController* transactionController,
         std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler);
     const EcmaVM* GetEcmaVMOnJsThread() const;
+    void InitWindowMode(const RefPtr<Platform::AceContainer>& container);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;

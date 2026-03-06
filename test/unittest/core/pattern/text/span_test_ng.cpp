@@ -2273,4 +2273,52 @@ HWTEST_F(SpanTestNg, ImageSpanViewSetSrc, TestSize.Level1)
     auto srcInfo = imageLayoutProperty->GetImageSourceInfo();
     EXPECT_EQ(srcInfo->src_, src);
 }
+
+/**
+ * @tc.name: SpanNodeOnAllowForceDarkUpdate001
+ * @tc.desc: Test SpanNode OnAllowForceDarkUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanNodeOnAllowForceDarkUpdate001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+    spanNode->OnAllowForceDarkUpdate(1);
+    ASSERT_NE(spanNode, nullptr);
+}
+
+/**
+ * @tc.name: SpanNodeOnAllowForceDarkUpdate002
+ * @tc.desc: Test SpanNode OnAllowForceDarkUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanNodeOnAllowForceDarkUpdate002, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+    spanNode->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(spanNode->resourceMgr_, nullptr);
+    spanNode->OnAllowForceDarkUpdate(0);
+    ASSERT_NE(spanNode, nullptr);
+}
+
+/**
+ * @tc.name: SpanNodeSetDefaultFontColor001
+ * @tc.desc: Test SpanNode SetDefaultFontColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanNodeSetDefaultFontColor001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    spanNode->SetDefaultFontColor(value);
+    ASSERT_NE(spanNode, nullptr);
+}
 } // namespace OHOS::Ace::NG

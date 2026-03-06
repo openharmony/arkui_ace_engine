@@ -20,7 +20,7 @@ import {
     KoalaCallsiteKey,
     Observable,
     ObservableHandler,
-    uint32,
+    uint32
 } from '@koalaui/common'
 import { Dependency, Dependent, ScopeToStates, StateToScopes } from './Dependency'
 import { Disposable, disposeContent, disposeContentBackward } from './Disposable'
@@ -30,6 +30,7 @@ import { RuntimeProfiler } from '../common/RuntimeProfiler'
 import { IncrementalNode } from '../tree/IncrementalNode'
 import { ReadonlyTreeNode } from '../tree/ReadonlyTreeNode'
 import { ReadableState, StateContext as StateContextBase, IncrementalScope } from 'arkui.incremental.runtime.state';
+import { GlobalStateManager } from '@koalaui/runtime'
 
 export const CONTEXT_ROOT_SCOPE = 'ohos.koala.context.root.scope'
 export const CONTEXT_ROOT_NODE = 'ohos.koala.context.root.node'
@@ -50,6 +51,25 @@ export function createStateManager(): StateManager {
 
 export const StateManagerLocal = new WorkerLocalValue<StateManager | undefined>(() => undefined)
 
+// The StateManager is globally unique and used in UI thread
+export class GlobalUIStateManager {
+    private static localManager = new containers.ConcurrentHashMap<int32, StateManager>();
+
+    // can only get from UI thread or DC thread
+    static getStateManagerForThread(workerId: int32): StateManager {
+        let current = GlobalUIStateManager.localManager.get(workerId);
+        if (!current) {
+            console.warn(`cannot get stateManager for ${workerId} thread, create a new one.`);
+            current = createStateManager();
+            GlobalUIStateManager.localManager.set(CoroutineExtras.getWorkerId(), current);
+        }
+        return current!;
+    }
+
+    static setStateManagerForThread(workerId: int32, manager: StateManager): void {
+        GlobalUIStateManager.localManager.set(workerId, manager);
+    }
+}
 /**
  * State manager, core of incremental runtime engine.
  *
@@ -307,6 +327,7 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
     get value(): Value {
         this.onAccess()
         const manager = this.manager
+        this.checkUIThreadAccess()
         if (!manager || manager.frozen) { return this.snapshot }
         if (manager.current?.nodeRef) { return this.snapshot }
         return this.current(manager.journal)
@@ -445,6 +466,16 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
             });
         }
         return nodes;
+    }
+
+    checkUIThreadAccess(): void {
+        const manager = this.manager
+        if (manager && manager.isDebugMode) {
+            const local = GlobalStateManager.GetLocalManager();
+            if (manager !== local) {
+                throw new Error('Used a state variable that was created externally');
+            }
+        }
     }
 }
 

@@ -59,6 +59,11 @@ struct Index {
     { title: '示例33：菜单基本功能_23_验证MenuItem组件设置不同尺寸/MenuTestLevel0_19', url: 'pages/Examples/MenuTestLevel0_19' },
     { title: '示例34：菜单基本功能_24_菜单边框外描边属性/MenuTestLevel0_20', url: 'pages/Examples/MenuTestLevel0_20' },
     { title: '示例35：菜单基本功能_25_菜单蒙层效果/MenuTestLevel0_21', url: 'pages/Examples/MenuTestLevel0_21' },
+    { title: '示例35：菜单基本功能_26_菜单生命周期测试/MenuTestLevel0_22', url: 'pages/Examples/MenuTestLevel0_22' },
+    { title: '示例35：菜单基本功能_27_菜单锚定组件布局/MenuTestLevel0_23', url: 'pages/Examples/MenuTestLevel0_23' },
+    { title: '示例35：菜单基本功能_28_混合手势菜单/MenuTestLevel0_25', url: 'pages/Examples/MenuTestLevel0_25' },
+    { title: '示例35：菜单基本功能_29_菜单控制opt属性systemMaterial测试/MenuTestLevel0_26', url: 'pages/Examples/MenuTestLevel0_26' },
+    { title: '示例35：菜单基本功能_30_菜单宽度/MenuTestLevel0_8', url: 'pages/Examples/MenuTestLevel0_8' },
   ]
 
   build() {

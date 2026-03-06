@@ -47,6 +47,12 @@ class BuilderNodeCommonBase {
     __JSScopeUtil__.restoreInstanceId();
     return ret;
   }
+  public postInputEventWithStrategy(event: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+    __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+    let ret = this._JSBuilderNode.postInputEventWithStrategy(event, competitionStrategy);
+    __JSScopeUtil__.restoreInstanceId();
+    return ret;
+  }
   public dispose(): void {
     if (this.isDisposed()) {
       return;
@@ -77,9 +83,13 @@ class BuilderNodeCommonBase {
   }
 }
 class BuilderNode extends BuilderNodeCommonBase {
+  public engineParams_: Object | undefined | null;
+  public _proxyObjectEngineParam: Object | undefined | null;
+  public updateEngineParams_: Object | undefined | null;
   constructor(uiContext: UIContext, options: RenderOptions) {
     super();
-    let jsBuilderNode = new JSBuilderNode(uiContext, options);
+    this.updateEngineParams_ = null;
+    const jsBuilderNode = new JSBuilderNode(uiContext, options, new WeakRef(this));
     this._JSBuilderNode = jsBuilderNode;
     let id = Symbol('BuilderRootFrameNode');
     BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
@@ -89,15 +99,32 @@ class BuilderNode extends BuilderNodeCommonBase {
     this._JSBuilderNode.build(builder, params, options);
     this.nodePtr_ = this._JSBuilderNode.getNodePtr();
   }
+  public getEngineParams(): Object | undefined | null {
+    return this.engineParams_;
+  }
+  public setEngineParams(params: Object | undefined | null): void {
+    this.engineParams_ = params;
+  }
+  public getProxyObjectEngineParam(): Object | undefined | null {
+    return this._proxyObjectEngineParam;
+  }
+  public setProxyObjectEngineParam(param: Object | undefined | null): void {
+    this._proxyObjectEngineParam = param;
+  }
+  public getUpdateEngineParams(): Object | undefined | null {
+    return this.updateEngineParams_;
+  }
+  public setUpdateEngineParams(param: Object | undefined | null): void {
+    this.updateEngineParams_ = param;
+  }
 }
 
 class JSBuilderNode extends BaseNode {
-  protected params_: Object;
+  protected host_ : WeakRef<BuilderNode> | WeakRef<ReactiveBuilderNode>;
   private uiContext_: UIContext;
   private frameNode_: FrameNode;
   private _nativeRef: NativeStrongRef;
   private _supportNestingBuilder: boolean;
-  private _proxyObjectParam: Object;
   private bindedViewOfBuilderNode: ViewPU;
   private _isDisposed: boolean;
   private inheritFreeze: boolean;
@@ -107,9 +134,9 @@ class JSBuilderNode extends BaseNode {
 
   // builderNode's parent, it may be view or builderNode
   public __parentViewOfBuildNode?: WeakRef<ViewBuildNodeBase>;
-  private updateParams_: Object;
   private activeCount_: number;
-  constructor(uiContext: UIContext, options?: RenderOptions) {
+  constructor(uiContext: UIContext, options?: RenderOptions,
+    builderNodeRef?: WeakRef<BuilderNode> | WeakRef<ReactiveBuilderNode>) {
     super(uiContext, options);
     this.uiContext_ = uiContext;
     this.updateFuncByElmtId = new UpdateFuncsByElmtId();
@@ -120,7 +147,7 @@ class JSBuilderNode extends BaseNode {
     this.parentallowFreeze = false;
     this.isFreeze = false;
     this.__parentViewOfBuildNode = undefined;
-    this.updateParams_ = null;
+    this.host_ = builderNodeRef;
     this.activeCount_ = 1;
   }
   public findProvidePU__(providePropName: string): ObservedPropertyAbstractPU<any> | undefined {
@@ -213,18 +240,20 @@ class JSBuilderNode extends BaseNode {
     }
   }
   protected buildWithNestingBuilder(builder: WrappedBuilder<Object[]>, supportLazyBuild: boolean): void {
-    if (this._supportNestingBuilder && this.isObject(this.params_)) {
-      this._proxyObjectParam = new Proxy(this.params_, {
+    const host = this.host_?.deref();
+    const hostParams = host?.getEngineParams();
+    if (this._supportNestingBuilder && this.isObject(hostParams)) {
+      host?.setProxyObjectEngineParam(new Proxy(hostParams, {
         set(target, property, val): boolean {
           throw new BusinessError(140109, `@Builder : Invalid attempt to set(write to) parameter '${property.toString()}' error!`);
         },
-        get: (target, property, receiver): Object => { return this.params_?.[property] }
-      });
+        get: (target, property, receiver): Object => { return this.host_?.deref()?.getEngineParams()?.[property] }
+      }));
       this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this),
-        this._proxyObjectParam, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+        host?.getProxyObjectEngineParam(), this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
     } else {
       this.nodePtr_ = super.create(builder.builder?.bind(this.bindedViewOfBuilderNode ? this.bindedViewOfBuilderNode : this),
-        this.params_, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+        hostParams, this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
     }
   }
   public clearChildBuilderNodeWeakMap(): void {
@@ -244,7 +273,7 @@ class JSBuilderNode extends BaseNode {
     const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
     this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
     this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing) ? (options?.enableProvideConsumeCrossing) : false;
-    this.params_ = params;
+    this.host_?.deref()?.setEngineParams(params);
     if (options?.localStorage instanceof LocalStorage) {
       this.setShareLocalStorage(options.localStorage);
     }
@@ -275,14 +304,14 @@ class JSBuilderNode extends BaseNode {
   }
   public update(param: Object) {
     if (this.isFreeze) {
-      this.updateParams_ = param;
+      this.host_?.deref()?.setUpdateEngineParams(param);
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.updateStart();
     try {
       this.purgeDeletedElmtIds();
-      this.params_ = param;
+      this.host_?.deref()?.setEngineParams(param);
       Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
         return (a < b) ? -1 : (a > b) ? 1 : 0;
       }).forEach(elmtId => this.UpdateElement(elmtId));
@@ -341,9 +370,11 @@ class JSBuilderNode extends BaseNode {
       } else {
         this.isFreeze = this.allowFreezeWhenInactive;
       }
-      if (this.isBuilderNodeActive() && this.updateParams_ !== null) {
-        this.update(this.updateParams_);
-        this.updateParams_ = null;
+      const host = this.host_?.deref()
+      const hostParams = host?.getUpdateEngineParams()
+      if (this.isBuilderNodeActive() && host && hostParams !== null) {
+        this.update(hostParams);
+        this.host_?.deref()?.setUpdateEngineParams(null);
       }
     }
     if (this.inheritFreeze) {
@@ -407,7 +438,7 @@ class JSBuilderNode extends BaseNode {
       if (this._supportNestingBuilder || this.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()) {
         compilerAssignedUpdateFunc(elmtId, isFirstRender);
       } else {
-        compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
+        compilerAssignedUpdateFunc(elmtId, isFirstRender, this.host_?.deref()?.getEngineParams());
       }
       if (!isFirstRender) {
         _popFunc();
@@ -575,9 +606,13 @@ class JSBuilderNode extends BaseNode {
 }
 
 class ReactiveBuilderNode extends BuilderNodeCommonBase {
+  public engineParams_: Object | undefined | null;
+  public _proxyObjectEngineParam: Object | undefined | null;
+  public updateEngineParams_: Object | undefined | null;
   constructor(uiContext: UIContext, options: RenderOptions) {
     super();
-    let jsBuilderNode = new ReactiveBuilderNodeBase(uiContext, options);
+    this.updateEngineParams_ = null;
+    const jsBuilderNode = new ReactiveBuilderNodeBase(uiContext, options, new WeakRef(this));
     this._JSBuilderNode = jsBuilderNode;
     let id = Symbol('BuilderRootFrameNode');
     BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
@@ -593,16 +628,36 @@ class ReactiveBuilderNode extends BuilderNodeCommonBase {
     }
 
   }
+  public getEngineParams(): Object | undefined | null {
+    return this.engineParams_;
+  }
+  public setEngineParams(params: Object | undefined | null): void {
+    this.engineParams_ = params;
+  }
+  public getProxyObjectEngineParam(): Object | undefined | null {
+    return this._proxyObjectEngineParam;
+  }
+  public setProxyObjectEngineParam(param: Object | undefined | null): void {
+    this._proxyObjectEngineParam = param;
+  }
+  public getUpdateEngineParams(): Object | undefined | null {
+    return this.updateEngineParams_;
+  }
+  public setUpdateEngineParams(param: Object | undefined | null): void {
+    this.updateEngineParams_ = param;
+  }
 }
 
 class ReactiveBuilderNodeBase extends JSBuilderNode {
-  constructor(uiContext: UIContext, options?: RenderOptions) {
-    super(uiContext, options);
+  constructor(uiContext: UIContext, options?: RenderOptions,
+    builderNodeRef?: WeakRef<BuilderNode> | WeakRef<ReactiveBuilderNode>) {
+    super(uiContext, options, builderNodeRef);
   }
   protected buildWithNestingBuilder(builder: WrappedBuilder<Object[]>, supportLazyBuild: boolean): void {
-    if (this.isArray(this.params_)) {
-      this.nodePtr_ = super.createReactive(builder.builder?.bind(this), this.params_ as Array<Object>,
-                                            this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
+    const hostParams = this.host_?.deref()?.getEngineParams();
+    if (this.isArray(hostParams)) {
+      this.nodePtr_ = super.createReactive(builder.builder?.bind(this), hostParams as Array<Object>,
+      this.updateNodeFromNative, this.updateConfiguration, supportLazyBuild);
     }
   }
   public __isReactiveBuilderNode__ViewBuildNodeBase__Internal(): boolean {

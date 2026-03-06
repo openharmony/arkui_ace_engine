@@ -722,7 +722,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
 
     const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-    bool autoResize = props->GetAutoResize().value_or(autoResizeDefault_);
+    bool autoResize = props->GetAutoResize().value_or(GetAutoResizeDefaultBeforeDecode());
     imageDfxConfig_.SetAutoResize(autoResize);
 
     ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
@@ -752,6 +752,21 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
         altLoadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
         altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
+}
+
+bool ImagePattern::GetAutoResizeDefaultBeforeDecode() const
+{
+    if (autoResizeDefault_) {
+        return true;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
+    bool hasResizable = renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice());
+    if (hasResizable || selfOrientation_ != ImageRotateOrientation::UP) {
+        return false;
+    }
+    return SystemProperties::GetImageAutoResizeEnabled();
 }
 
 void ImagePattern::UpdateSvgSmoothEdgeValue()
@@ -1907,7 +1922,7 @@ inline void ImagePattern::DumpSourceSize(const RefPtr<OHOS::Ace::NG::ImageLayout
 
 inline void ImagePattern::DumpAutoResize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp)
 {
-    bool autoResize = layoutProp->GetAutoResize().value_or(autoResizeDefault_);
+    bool autoResize = layoutProp->GetAutoResize().value_or(GetAutoResizeDefaultBeforeDecode());
     autoResize ? DumpLog::GetInstance().AddDesc("autoResize:true") : DumpLog::GetInstance().AddDesc("autoResize:false");
 }
 
@@ -2822,7 +2837,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAltError()
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             return;
         }
-        bool autoResize = imageLayoutProperty->GetAutoResize().value_or(pattern->autoResizeDefault_);
+        bool autoResize = imageLayoutProperty->GetAutoResize().value_or(pattern->GetAutoResizeDefaultBeforeDecode());
         pattern->altErrorCtx_->MakeCanvasImageIfNeed(
             geometryNode->GetContentSize(), autoResize, imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER));
     };

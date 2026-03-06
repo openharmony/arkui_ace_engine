@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 // Should use CJUIModifier API later
 NG::MarqueeModelNG* GetMarqueeModel()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("marquee");
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Marquee");
     if (module == nullptr) {
         LOGF("Can't find marquee dynamic module");
         abort();

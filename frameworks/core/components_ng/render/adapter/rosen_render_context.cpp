@@ -4974,6 +4974,14 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
             if (iter->second) {
                 rsNode_->MoveChild(newNode, index);
             } else {
+                if (SystemProperties::GetMultiInstanceEnabled()) {
+                    auto parentNode = newNode->GetParent();
+                    if (parentNode) {
+                        parentNode->RemoveChild(newNode);
+                    }
+                    auto context = rsNode_->GetRSUIContext();
+                    newNode->SetRSUIContext(context);
+                }
                 rsNode_->AddChild(newNode, index);
             }
         }
@@ -6902,6 +6910,7 @@ void RosenRenderContext::OnTransitionOutFinish()
             parent->MarkNeedSyncRenderTree();
             parent->RebuildRenderContextTree();
             FireTransitionUserCallback(false);
+            host->SetInActiveAfterTransitionOut();
             return;
         }
         parent->MarkNeedSyncRenderTree();
@@ -6913,6 +6922,7 @@ void RosenRenderContext::OnTransitionOutFinish()
     // if can not find the breakPoint, means the node is not disappearing (reappear? or the node of subtree), return.
     if (!breakPointParent) {
         FireTransitionUserCallback(false);
+        host->SetInActiveAfterTransitionOut();
         return;
     }
     if (breakPointChild->RemoveImmediately()) {
@@ -6929,6 +6939,7 @@ void RosenRenderContext::OnTransitionOutFinish()
         grandParent->RebuildRenderContextTree();
     }
     FireTransitionUserCallback(false);
+    host->SetInActiveAfterTransitionOut();
 }
 
 void RosenRenderContext::FireTransitionUserCallback(bool isTransitionIn)

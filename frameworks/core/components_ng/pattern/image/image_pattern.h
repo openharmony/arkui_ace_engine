@@ -396,6 +396,7 @@ private:
      * @param dstSize The size of the image to be decoded.
      */
     void StartDecoding(const SizeF& dstSize);
+    bool GetAutoResizeDefaultBeforeDecode() const;
     bool CheckIfNeedLayout();
     void OnImageDataReady();
     void OnCompleteInDataReady();

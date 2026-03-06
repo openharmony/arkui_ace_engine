@@ -550,7 +550,7 @@ public:
         }
         return iter->second;
     }
-
+    void ChangeIndex(int32_t index);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetRegionInfo(std::unique_ptr<JsonValue>& json);

@@ -412,6 +412,8 @@ public:
 
     bool TryFreeScroll(double offset, Axis axis) override;
 
+    void FillReportOnItemStopParams(std::unique_ptr<JsonValue>& params) override;
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 

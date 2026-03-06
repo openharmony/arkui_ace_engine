@@ -310,6 +310,8 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.operatingHand = operatingHand;
     event.convertInfo = convertInfo;
     event.processTime = processTime;
+    event.eventHandleId = eventHandleId;
+    event.isNewReferee = isNewReferee;
     if (passThrough) {
         event.postEventNodeId = postEventNodeId;
     }

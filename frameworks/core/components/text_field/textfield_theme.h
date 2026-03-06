@@ -264,6 +264,7 @@ public:
             theme->iconOffsetPadding_ = pattern->GetAttr<Dimension>("text_input_icon_offset_padding", 0.0_vp);
             theme->iconFocusPadding_ = pattern->GetAttr<Dimension>("text_input_icon_focus_padding", 0.0_vp);
             theme->errorUnderlineWidth_ = pattern->GetAttr<Dimension>("error_under_line_width", 0.0_vp);
+            theme->voiceButtonText_ = pattern->GetAttr<std::string>("voice_button_text", "");
         }
     };
 

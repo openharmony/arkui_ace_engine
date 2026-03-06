@@ -1,0 +1,95 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.component.idlize;
+
+import arkui.component.common;
+import ohos.arkui.UIContext;
+import arkui.Graphics;
+import arkui.FrameNode;
+import arkui.RenderNode;
+
+[Entity=Interface]
+interface BorderRadiuses_graphics { // TODO must be removed when names collision problem is resolved
+    attribute number topLeft;
+    attribute number topRight;
+    attribute number bottomLeft;
+    attribute number bottomRight;
+};
+[Entity=Interface]
+interface NodeEdgeStyles {
+    attribute BorderStyle top;
+    attribute BorderStyle right;
+    attribute BorderStyle bottom;
+    attribute BorderStyle left;
+};
+[Entity=Interface]
+interface EdgeF64 {
+    attribute f64 top;
+    attribute f64 right;
+    attribute f64 bottom;
+    attribute f64 left;
+};
+[Entity=Interface]
+interface EdgeI32 {
+    attribute i32 top;
+    attribute i32 right;
+    attribute i32 bottom;
+    attribute i32 left;
+};
+
+
+[Entity=Class]
+interface RenderNodeExtender {
+  static pointer constructorRenderNode(i32 nodeId);
+  static pointer getDestroy();
+  static void destroyPeer(RenderNode peer);
+  static void setBackgroundColor(RenderNode peer, i32 backgroundColor);
+  static void setClipToFrame(RenderNode peer, boolean clipToFrame);
+  static void setOpacity(RenderNode peer, f64 opacity);
+  static void setSize(RenderNode peer, Size size, i32 unitValue);
+  static void setPosition(RenderNode peer, Vector2 position, i32 unitValue);
+  static void setPivot(RenderNode peer, Vector2 pivot);
+  static void setScale(RenderNode peer, Vector2 scale);
+  static void setTranslation(RenderNode peer, Vector2 translation);
+  static void setRotation(RenderNode peer, Vector3 rotation, i32 unitValue);
+  static void setTransform(RenderNode peer, Matrix4 transform);
+  static void setShadowColor(RenderNode peer, i32 shadowColor);
+  static void setShadowOffset(RenderNode peer, Vector2 shadowOffset, i32 unitValue);
+  static void setLabel(RenderNode peer, String label);
+  static void setShadowAlpha(RenderNode peer, f64 shadowAlpha);
+  static void setShadowElevation(RenderNode peer, f64 shadowElevation);
+  static void setShadowRadius(RenderNode peer, f64 shadowRadius);
+  static void setBorderStyle(RenderNode peer, NodeEdgeStyles borderStyle);
+  static void setBorderWidth(RenderNode peer, EdgeF64 borderWidth, i32 unitValue);
+  static void setBorderColor(RenderNode peer, EdgeI32 borderColor);
+  static void setBorderRadius(RenderNode peer, BorderRadiuses_graphics borderRadius, i32 unitValue);
+  static void setMarkNodeGroup(RenderNode peer, boolean markNodeGroup);
+  static void setRectMask(RenderNode peer, Rect rect, number fillColor, number strokeColor, number strokeWidth);
+  static void setCircleMask(RenderNode peer, Circle circle, number fillColor, number strokeColor, number strokeWidth);
+  static void setRoundRectMask(RenderNode peer, RoundRect roundRect,number fillColor, number strokeColor, number strokeWidth);
+  static void setOvalMask(RenderNode peer, Rect rect, number fillColor, number strokeColor, number strokeWidth);
+  static void setPath(RenderNode peer, CommandPath path, number fillColor, number strokeColor, number strokeWidth);
+  static void setRectClip(RenderNode peer, Rect rect);
+  static void setCircleClip(RenderNode peer, Circle circle);
+  static void setRoundRectClip(RenderNode peer, RoundRect roundRect);
+  static void setOvalClip(RenderNode peer, Rect rect);
+  static void setPathClip(RenderNode peer, CommandPath path);
+  static i32 appendChild(RenderNode peer, RenderNode node);
+  static i32 insertChildAfter(RenderNode peer, RenderNode child, RenderNode sibling);
+  static i32 insertChild(RenderNode peer, RenderNode child);
+  static void removeChild(RenderNode peer, RenderNode node);
+  static void clearChildren(RenderNode peer);
+  static void invalidate(RenderNode peer);
+};

@@ -1,0 +1,144 @@
+{
+    "DeletedPackages": [
+        "arkui.component.interop",
+        "arkui.component.customComponent",
+        "arkui.component.repeat",
+        "arkui.component.lazyForEach",
+        "arkui.component.repeat",
+        "ohos.buffer",
+        "ohos.util.ArrayList",
+        "ohos.util.Deque",
+        "ohos.util.List",
+        "internal.component.ets"
+    ],
+    "DeletedDeclarations": [
+        "double",
+        "int",
+        "makeBindable",
+        "wrapBuilder",
+        "AnimatableArithmetic",
+        "IMonitorValue",
+        "IMonitor",
+        "MethodDecorator",
+        "ParticleInterface",
+        "ParticleAttribute",
+        "ParticleModifier",
+        "ParticleTuple",
+        "Particle",
+        "ParticleAttribute",
+        "Particles",
+        "ParticleColorPropertyOptions",
+        "ParticlePropertyOptions",
+        "IsolatedComponentInterface",
+        "IsolatedComponentAttribute",
+        "AccelerationOptions",
+        "ParticleOptions",
+        "EmitterOptions",
+        "EmitterProperty",
+        "ForEachInterface",
+        "ForEachAttribute",
+        "LazyForEachAttribute",
+        "LazyForEachInterface",
+        "IDataSource",
+        "DisturbanceFieldOptions",
+        "RepeatItem",
+        "RepeatItemBuilder",
+        "RepeatAttribute",
+        "RepeatInterface",
+        "TemplateTypedFunc",
+        "EntryOptions",
+        "UIBaseSpan",
+        "UICommonMethod",
+        "UICommonShapeMethod",
+        "UIScrollableCommonMethod",
+        "UIIsolatedComponentAttribute",
+        "UILazyForEachAttribute",
+        "UIParticleAttribute",
+        "UIRepeatAttribute",
+        "UIPluginComponentAttribute",
+        "UISecurityComponentMethod",
+        "UIRichEditorAttribute",
+        "$$",
+        "CommonTransition",
+        "PageTransitionEnter",
+        "PageTransitionExit",
+        "UICommonTransition",
+        "UIPageTransitionEnter",
+        "UIPageTransitionExit",
+        "ForEach",
+        "_r",
+        "_rawfile",
+        "DynamicNode",
+        "ArcListInterface",
+        "ArcListItemInterface",
+        "ArcScrollBarInterface",
+        "Gesture",
+        "GestureGroup",
+        "TapGesture",
+        "LongPressGesture",
+        "PanGesture",
+        "PinchGesture",
+        "RotationGesture",
+        "SwipeGesture",
+        "makeBuilderParameterProxy"
+    ],
+    "DeletedMembers": {
+        "CommonMethod": [
+            "attributeModifier"
+        ],
+        "ScrollableCommonMethod": [
+            "onWillScroll",
+            "onDidScroll"
+        ]
+    },
+    "StubbedDeclarations": [
+        "OnWillScrollCallback",
+        "LayoutChild",
+        "ColumnOptionsV2",
+        "RowOptionsV2"
+    ],
+    "Components": [
+        "BaseSpan",
+        "CommonMethod",
+        "arkui.component.common.CommonShapeMethod",
+        "ScrollableCommonMethod"
+    ],
+    "Throws": [
+        "CanvasRenderingContext2D.onOnAttach",
+        "CanvasRenderingContext2D.offOnAttach"
+    ],
+    "ForceCallback": {
+        "EditMenuOptions.onCreateMenu": "",
+        "EditMenuOptions.onMenuItemClick": "",
+        "XComponentController.onSurfaceCreated": "",
+        "XComponentController.onSurfaceChanged": "",
+        "XComponentController.onSurfaceDestroyed": "",
+        "DrawModifier.drawBehind": "ExtraMethod",
+        "DrawModifier.drawContent": "ExtraMethod",
+        "DrawModifier.drawFront": "ExtraMethod",
+        "CustomSpan.onMeasure": "ExtraMethod",
+        "CustomSpan.onDraw": "ExtraMethod",
+ 	    "LeadingMarginSpan.onDraw": "ExtraMethod",
+ 	    "LeadingMarginSpan.getLeadingMargin": "ExtraMethod"
+    },
+    "NameReplacements": {
+        "common.d.ts": [
+            [
+                "LinearGradient",
+                "LinearGradient_common"
+            ]
+        ],
+        "alert_dialog.d.ts": [
+            [
+                "TextStyle",
+                "TextStyle_alert_dialog"
+            ]
+        ],
+        "styled_string.d.ts": [
+            [
+                "TextStyle",
+                "TextStyle_styled_string"
+            ]
+        ]
+    }
+}

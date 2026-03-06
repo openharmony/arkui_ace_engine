@@ -20,26 +20,6 @@ namespace {
 const char* ANI_SHAPE_NAME = "@ohos.arkui.shape.PathShape";
 } // namespace
 
-void ANICreatePathShape(ani_env* env, [[maybe_unused]] ani_object object)
-{
-    ani_class cls;
-    ani_status status;
-    if ((status = env->FindClass(ANI_SHAPE_NAME, &cls)) != ANI_OK) {
-        LOGE("Not find PathShape class, status:%{public}d", status);
-        return;
-    }
-    PathPeer* shapePeer = new PathPeer();
-    auto path = AceType::MakeRefPtr<Path>();
-    shapePeer->pathShape = path;
-
-    if ((status = env->Object_SetPropertyByName_Long(
-             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
-        LOGE("PathShape set addr failed, status:%{public}d", status);
-        delete shapePeer;
-        return;
-    }
-}
-
 void ANICreatePathShapeWithParam(
     ani_env* env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
@@ -171,7 +151,6 @@ ani_status PathShape::BindPathShape(ani_env* env)
     }
 
     std::array methods = {
-        ani_native_function { "<ctor>", ":", reinterpret_cast<void*>(ANICreatePathShape) },
         ani_native_function {
             "<ctor>", "C{@ohos.arkui.shape.PathShapeOptions}:", reinterpret_cast<void*>(ANICreatePathShapeWithParam) },
         ani_native_function { "commands", nullptr, reinterpret_cast<void*>(ANIPathShapeCommands) },

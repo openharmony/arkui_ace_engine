@@ -25436,6 +25436,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebEnableAutoFillModifier.identity, WebEnableAutoFillModifier, value);
     return this;
   }
+  enableDefaultContextMenu(value) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -27147,6 +27151,20 @@ class WebEnableAutoFillModifier extends ModifierWithKey {
   }
 }
 WebEnableAutoFillModifier.identity = Symbol('webEnableAutoFillModifier');
+
+class WebEnableDefaultContextMenuModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableDefaultContextMenu(node);
+    } else {
+      getUINativeModule().web.setEnableDefaultContextMenu(node, this.value);
+    }
+  }
+}
+WebEnableDefaultContextMenuModifier.identity = Symbol('webEnableDefaultContextMenuModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

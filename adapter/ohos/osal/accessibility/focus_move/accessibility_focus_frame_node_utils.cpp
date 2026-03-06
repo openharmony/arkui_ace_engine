@@ -128,7 +128,7 @@ bool FrameNodeRulesCheckNode::GetPropChildrenCount(Accessibility::PropValue& val
 {
     value.valueType = Accessibility::ValueType::NUMBER;
     auto children = GetChildren();
-    value.valueNum = children.size();
+    value.valueNum = (int32_t)children.size();
     return true;
 }
 

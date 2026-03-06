@@ -251,6 +251,9 @@ export class FrameNode implements MaterializedBase {
         }
         return this._gestureEvent as UIGestureEvent;
     }
+    constructor(uiContext: UIContext, options?: FrameNodeOptions) {
+        this(uiContext, options, undefined, undefined);
+    }
     constructor(uiContext?: UIContext, options?: FrameNodeOptions, type?: string, ptr?: KPointer) {
         if ((uiContext) !== (undefined)) {
             this.uiContext = uiContext as UIContextImpl;
@@ -1769,10 +1772,6 @@ export namespace typeNode {
             throw new BusinessError(100023, error);
         }
         let listNode = node as ListFrameNode
-        if (!listNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
         listNode.initialize({scroller: controller})
         return
     }
@@ -1866,10 +1865,6 @@ export namespace typeNode {
             throw new BusinessError(100023, error);
         }
         let scrollNode = node as ScrollFrameNode
-        if (!scrollNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
         scrollNode.initialize(controller)
         return
     }
@@ -1917,10 +1912,6 @@ export namespace typeNode {
             throw new BusinessError(100023, error);
         }
         let gridNode = node as GridFrameNode
-        if (!gridNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
         let arkGridNode = gridNode.attribute as ArkGridNode;
         arkGridNode.getPeer()?.setGridOptionsAttribute(controller, undefined)
         arkGridNode.markDirty()
@@ -1993,10 +1984,6 @@ export namespace typeNode {
             throw new BusinessError(100023, error);
         }
         let waterFlowNode = node as WaterFlowFrameNode
-        if (!waterFlowNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
         waterFlowNode.initialize({scroller: controller})
         return
     }

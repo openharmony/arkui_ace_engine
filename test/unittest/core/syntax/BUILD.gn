@@ -14,16 +14,17 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("lazy_for_each_syntax_test_ng") {
-  module_name = "Animation-Frame"
+  module_name = "RenderControl-LazyForEach"
   type = "new"
   sources = [
     "lazy_for_each_syntax_test_ng.cpp",
     "lazy_for_each_syntax_test_ng_2.cpp",
+    "lazy_for_each_test_ng_ai.cpp",
   ]
 }
 
 ace_unittest("lazy_for_each_builder_syntax_test_ng") {
-  module_name = "Animation-Frame"
+  module_name = "RenderControl-LazyForEach"
   type = "new"
   sources = [
     "lazy_for_each_builder_syntax_test_ng.cpp",
@@ -33,13 +34,16 @@ ace_unittest("lazy_for_each_builder_syntax_test_ng") {
 }
 
 ace_unittest("for_each_syntax_test_ng") {
-  module_name = "Animation-Frame"
+  module_name = "RenderControl-ForEach"
   type = "new"
-  sources = [ "for_each_syntax_test_ng.cpp" ]
+  sources = [
+    "for_each_syntax_test_ng.cpp",
+    "for_each_test_ng_ai.cpp",
+  ]
 }
 
 ace_unittest("if_else_syntax_test_ng") {
-  module_name = "Animation-Frame"
+  module_name = "RenderControl-IfElse"
   type = "new"
   sources = [
     "if_else_syntax_test_ng.cpp",
@@ -48,7 +52,7 @@ ace_unittest("if_else_syntax_test_ng") {
 }
 
 ace_unittest("content_slot_syntax_test_ng") {
-  module_name = "Component-Snapshot"
+  module_name = "RenderControl-ContentSlot"
   type = "new"
   sources = [
     "$ace_root/frameworks/core/interfaces/native/node/node_content_modifier.cpp",
@@ -57,7 +61,7 @@ ace_unittest("content_slot_syntax_test_ng") {
 }
 
 ace_unittest("repeat_virtual_test_ng") {
-  module_name = "Animation-Frame"
+  module_name = "RenderControl-Repeat"
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components_ng/syntax/repeat_model_ng.cpp",
@@ -69,7 +73,7 @@ ace_unittest("repeat_virtual_test_ng") {
 }
 
 ace_unittest("repeat_virtual_2_test_ng") {
-  module_name = "Animation-Frame"
+  module_name = "RenderControl-Repeat"
   type = "new"
   sources = [
     "repeat_virtual_2_test_ng.cpp",
@@ -78,14 +82,18 @@ ace_unittest("repeat_virtual_2_test_ng") {
 }
 
 ace_unittest("syntax_arkoala_test_ng") {
-  module_name = "Animation-Frame"
+  module_name = "RenderControl-Sta"
   type = "new"
   sources = [
+    "arkoala_condition_scope_test_ng_ai.cpp",
     "arkoala_for_each_test_ng.cpp",
+    "arkoala_for_each_test_ng_ai.cpp",
     "arkoala_if_else_test_ng.cpp",
     "arkoala_lazy_test_ng.cpp",
+    "arkoala_lazy_test_ng_ai.cpp",
     "arkoala_lazy_two_test_ng.cpp",
     "arkoala_lazy_test_ng_advanced.cpp",
+    "arkoala_mixed_test_ng_ai.cpp",
   ]
 }
 

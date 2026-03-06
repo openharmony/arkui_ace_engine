@@ -292,6 +292,7 @@ void SetCustomCallback(ani_long ptr, void* fnMeasure, void* fnLayout)
     auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(ptr);
     CHECK_NULL_VOID(frameNodePeer);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+    CHECK_NULL_VOID(frameNode);
     frameNode->SetExtensionHandler(customNode);
 }
 

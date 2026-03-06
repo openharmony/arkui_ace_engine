@@ -140,6 +140,7 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
     eventInfo.SetSourceTool(lastPoint.sourceTool);
     eventInfo.SetPressedKeyCodes(lastPoint.pressedKeyCodes_);
     eventInfo.SetOperatingHand(lastPoint.operatingHand);
+    eventInfo.SetEventHandleId(lastPoint.eventHandleId);
     if (isFlushTouchEventsEnd_) {
         // trigger callback of the last touch event during one vsync period
         eventInfo.SetTouchEventsEnd(true);
