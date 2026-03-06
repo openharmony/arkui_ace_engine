@@ -43,7 +43,8 @@ export struct ButtonIndex {
     { name: 'Button组合场景8', path: 'ButtonLevel8' },
     { name: 'Button组合场景9', path: 'ButtonLevel9' },
     { name: 'Button组合场景10', path: 'ButtonLevel10' },
-    { name: 'Button组合场景11', path: 'ButtonLevel11' }
+    { name: 'Button组合场景11', path: 'ButtonLevel11' },
+    { name: 'Button组合场景12', path: 'ButtonLevel12' }
   ]
 
   build() {

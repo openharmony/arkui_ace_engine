@@ -41,7 +41,8 @@ export struct CheckboxIndex {
     { name: 'Checkbox组合场景3', path: 'CheckboxLevel1' },
     { name: 'Checkbox组合场景4', path: 'CheckboxLevel2' },
     { name: 'Checkbox组合场景5', path: 'CheckboxLevel3' },
-    { name: 'Checkbox组合场景6', path: 'CheckboxLevel4' }
+    { name: 'Checkbox组合场景6', path: 'CheckboxLevel4' },
+    { name: 'Checkbox组合场景7', path: 'CheckboxLevel5' }
   ]
 
   build() {
