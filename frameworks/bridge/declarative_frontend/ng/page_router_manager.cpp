@@ -2785,7 +2785,7 @@ void PageRouterManager::FireNavigateChangeCallback(const std::string& name)
         .name = name,
         .isSplit = stagePattern->GetIsSplit()
     };
-    navigationManager->FireNavigateChangeCallback(from, to);
+    navigationManager->FireNavigateChangeCallback(from, to, true);
 }
 
 void PageRouterManager::LoadCompleteManagerStopCollect()
