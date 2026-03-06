@@ -69,6 +69,8 @@ void LoadingProgressPattern::OnDetachFromMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    CHECK_NULL_VOID(loadingProgressModifier_);
+    loadingProgressModifier_->StartRecycle();
 }
 
 void LoadingProgressPattern::OnModifyDone()
