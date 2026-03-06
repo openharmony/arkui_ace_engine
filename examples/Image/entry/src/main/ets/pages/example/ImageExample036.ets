@@ -24,7 +24,7 @@ import { BusinessError } from '@kit.BasicServicesKit';
 @Component
 struct loadurlTest {
   @State renderMode: ImageRenderMode = ImageRenderMode.Original
-  @State res: Resource | string = $r('app.media.app_icon_1')
+  @State res: Resource | string = $r('app.media.startIcon')
   @State errorIf1: string = 'None'
   @State errorIf2: string = 'None'
   @State errorIf3: string = 'None'

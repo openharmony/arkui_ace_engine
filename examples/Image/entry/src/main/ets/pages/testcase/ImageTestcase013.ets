@@ -40,14 +40,6 @@ interface ImageBlendMode {
   description: string
 }
 
-interface TestImageData {
-  id: number
-  type: 'resource' | 'pixelmap' | 'base64' | 'svg'
-  source: string | Resource | image.PixelMap
-  properties: ImageProperties
-  metadata?: Map<string, any>
-}
-
 interface ImageProperties {
   width: number
   height: number
@@ -55,6 +47,14 @@ interface ImageProperties {
   size: number
   hasAlpha: boolean
   colorSpace: string
+}
+
+interface TestImageData {
+  id: number
+  type: 'resource' | 'pixelmap' | 'base64' | 'svg'
+  source: string | Resource | image.PixelMap
+  properties: ImageProperties
+  metadata?: Map<string, Object>
 }
 
 interface CompressionTest {
@@ -66,12 +66,79 @@ interface CompressionTest {
   processingTime: number
 }
 
+interface RGB {
+  r: number
+  g: number
+  b: number
+  a: number
+}
+
+interface HSL {
+  h: number
+  s: number
+  l: number
+}
+
+interface SamplePoint {
+  x: number
+  y: number
+  color: string
+}
+
 interface ColorTestResult {
   hex: string
-  rgb: { r: number; g: number; b: number; a: number }
-  hsl: { h: number; s: number; l: number }
+  rgb: RGB
+  hsl: HSL
   brightness: number
-  samplePoints: Array<{ x: number; y: number; color: string }>
+  samplePoints: Array<SamplePoint>
+}
+
+interface AdvancedTestResult {
+  name: string
+  status: string
+  details: string
+}
+
+interface GeneratedPattern {
+  id: number
+  type: string
+  data: ArrayBuffer
+}
+
+interface TransformedImage {
+  id: number
+  operation: string
+  result: boolean
+}
+
+interface TestSuite {
+  name: string
+  func: () => Promise<void>
+}
+
+interface BoundaryCondition {
+  name: string
+  width?: number
+  height?: number
+  size?: number
+  corrupted?: boolean
+}
+
+interface PatternTypeDistribution {
+  name: string
+  count: number
+}
+
+interface CategorizedTransformation {
+  type: string
+  operations: string[]
+  successRate: number
+}
+
+interface AdvancedTestResultItem {
+  name: string
+  status: string
+  details: string
 }
 
 @Entry
@@ -84,13 +151,13 @@ struct ImageAdvancedFeaturesTestCase {
   @State testImages: TestImageData[] = []
   @State compressionTests: CompressionTest[] = []
   @State colorTestResults: ColorTestResult[] = []
-  @State advancedTestResults: Array<{ name: string; status: string; details: string }> = []
+  @State advancedTestResults: AdvancedTestResult[] = []
   @State testProgress: number = 0
   @State isTesting: boolean = false
   @State processedImageCount: number = 0
   @State currentOperation: string = ''
-  @State generatedPatterns: Array<{ id: number; type: string; data: ArrayBuffer }> = []
-  @State transformedImages: Array<{ id: number; operation: string; result: boolean }> = []
+  @State generatedPatterns: GeneratedPattern[] = []
+  @State transformedImages: TransformedImage[] = []
 
   private readonly FILTER_PRESETS: ImageFilterConfig[] = [
     { name: '原图', brightness: 100, contrast: 100, saturation: 100, hueRotate: 0, blur: 0, grayscale: 0, sepia: 0, invert: 0 },
@@ -112,22 +179,22 @@ struct ImageAdvancedFeaturesTestCase {
   ]
 
   private readonly BLEND_MODES: ImageBlendMode[] = [
-    { mode: BlendMode.Normal, name: 'Normal', description: '正常混合模式' },
-    { mode: BlendMode.Multiply, name: 'Multiply', description: '正片叠底' },
-    { mode: BlendMode.Screen, name: 'Screen', description: '滤色' },
-    { mode: BlendMode.Overlay, name: 'Overlay', description: '叠加' },
-    { mode: BlendMode.Darken, name: 'Darken', description: '变暗' },
-    { mode: BlendMode.Lighten, name: 'Lighten', description: '变亮' },
-    { mode: BlendMode.ColorDodge, name: 'ColorDodge', description: '颜色减淡' },
-    { mode: BlendMode.ColorBurn, name: 'ColorBurn', description: '颜色加深' },
-    { mode: BlendMode.HardLight, name: 'HardLight', description: '强光' },
-    { mode: BlendMode.SoftLight, name: 'SoftLight', description: '柔光' },
-    { mode: BlendMode.Difference, name: 'Difference', description: '差值' },
-    { mode: BlendMode.Exclusion, name: 'Exclusion', description: '排除' },
-    { mode: BlendMode.Hue, name: 'Hue', description: '色相' },
-    { mode: BlendMode.Saturation, name: 'Saturation', description: '饱和度' },
-    { mode: BlendMode.Color, name: 'Color', description: '颜色' },
-    { mode: BlendMode.Luminosity, name: 'Luminosity', description: '明度' }
+    { mode: BlendMode.SRC_OVER, name: 'Normal', description: '正常混合模式' },
+    { mode: BlendMode.MULTIPLY, name: 'Multiply', description: '正片叠底' },
+    { mode: BlendMode.SCREEN, name: 'Screen', description: '滤色' },
+    { mode: BlendMode.OVERLAY, name: 'Overlay', description: '叠加' },
+    { mode: BlendMode.DARKEN, name: 'Darken', description: '变暗' },
+    { mode: BlendMode.LIGHTEN, name: 'Lighten', description: '变亮' },
+    { mode: BlendMode.COLOR_DODGE, name: 'ColorDodge', description: '颜色减淡' },
+    { mode: BlendMode.COLOR_BURN, name: 'ColorBurn', description: '颜色加深' },
+    { mode: BlendMode.HARD_LIGHT, name: 'HardLight', description: '强光' },
+    { mode: BlendMode.SOFT_LIGHT, name: 'SoftLight', description: '柔光' },
+    { mode: BlendMode.DIFFERENCE, name: 'Difference', description: '差值' },
+    { mode: BlendMode.EXCLUSION, name: 'Exclusion', description: '排除' },
+    { mode: BlendMode.HUE, name: 'Hue', description: '色相' },
+    { mode: BlendMode.SATURATION, name: 'Saturation', description: '饱和度' },
+    { mode: BlendMode.COLOR, name: 'Color', description: '颜色' },
+    { mode: BlendMode.LUMINOSITY, name: 'Luminosity', description: '明度' }
   ]
 
   private readonly COMPRESSION_FORMATS = ['JPEG', 'PNG', 'WEBP', 'GIF', 'BMP']
@@ -148,10 +215,10 @@ struct ImageAdvancedFeaturesTestCase {
     // 生成测试图片数据
     const testImageTypes = ['resource', 'pixelmap', 'base64', 'svg']
     const resources = [
-      $r('app.media.icon'),
+      $r('app.media.startIcon'),
       $r('app.media.foreground'),
       $r('app.media.background'),
-      $r('app.media.mask')
+      $r('app.media.foreground')
     ]
 
     for (let i = 0; i < 10; i++) {
@@ -170,11 +237,11 @@ struct ImageAdvancedFeaturesTestCase {
           hasAlpha: this.hasAlphaChannel(type),
           colorSpace: 'SRGB'
         },
-        metadata: new Map([
-          ['creationTime', Date.now()],
-          ['testId', `test_${i}`],
-          ['category', 'advanced'],
-          ['processed', false]
+        metadata: new Map<string, Object>([
+          ['creationTime', Date.now() as Object],
+          ['testId', `test_${i}` as Object],
+          ['category', 'advanced' as Object],
+          ['processed', false as Object]
         ])
       }
 
@@ -197,17 +264,17 @@ struct ImageAdvancedFeaturesTestCase {
     this.advancedTestResults = []
     this.testProgress = 0
 
-    const testSuites = [
-      { name: '图片滤镜测试', func: () => this.testImageFilters() },
-      { name: '混合模式测试', func: () => this.testBlendModes() },
-      { name: '图片压缩测试', func: () => this.testImageCompression() },
-      { name: '颜色分析测试', func: () => this.testColorAnalysis() },
-      { name: '图案生成测试', func: () => this.testPatternGeneration() },
-      { name: '图片变换测试', func: () => this.testImageTransformations() },
-      { name: '元数据测试', func: () => this.testImageMetadata() },
-      { name: '性能基准测试', func: () => this.testPerformanceBenchmarks() },
-      { name: '边界条件测试', func: () => this.testBoundaryConditions() },
-      { name: '错误处理测试', func: () => this.testErrorHandling() }
+    const testSuites: TestSuite[] = [
+      { name: '图片滤镜测试', func: () => this.testImageFilters() } as TestSuite,
+      { name: '混合模式测试', func: () => this.testBlendModes() } as TestSuite,
+      { name: '图片压缩测试', func: () => this.testImageCompression() } as TestSuite,
+      { name: '颜色分析测试', func: () => this.testColorAnalysis() } as TestSuite,
+      { name: '图案生成测试', func: () => this.testPatternGeneration() } as TestSuite,
+      { name: '图片变换测试', func: () => this.testImageTransformations() } as TestSuite,
+      { name: '元数据测试', func: () => this.testImageMetadata() } as TestSuite,
+      { name: '性能基准测试', func: () => this.testPerformanceBenchmarks() } as TestSuite,
+      { name: '边界条件测试', func: () => this.testBoundaryConditions() } as TestSuite,
+      { name: '错误处理测试', func: () => this.testErrorHandling() } as TestSuite
     ]
 
     for (let i = 0; i < testSuites.length; i++) {
@@ -286,15 +353,15 @@ struct ImageAdvancedFeaturesTestCase {
 
     for (const format of this.COMPRESSION_FORMATS) {
       for (const quality of this.QUALITY_LEVELS) {
-        const startTime = performance.now()
-        
+        const startTime = new Date().getTime()
+
         // 模拟压缩过程
         await this.delay(50 + quality)
-        
-        const endTime = performance.now()
+
+        const endTime = new Date().getTime()
         const originalSize = 1024 * 1024 // 1MB
         const compressedSize = originalSize * (quality / 100) * (1 - Math.random() * 0.5)
-        
+
         const compressionTest: CompressionTest = {
           quality: quality,
           format: format,
@@ -414,13 +481,13 @@ struct ImageAdvancedFeaturesTestCase {
 
     for (const operation of operations) {
       const iterations = 100
-      const startTime = performance.now()
+      const startTime = new Date().getTime()
 
       for (let i = 0; i < iterations; i++) {
         await this.delay(Math.random() * 10)
       }
 
-      const endTime = performance.now()
+      const endTime = new Date().getTime()
       const avgTime = (endTime - startTime) / iterations
 
       this.advancedTestResults.push({
@@ -432,17 +499,17 @@ struct ImageAdvancedFeaturesTestCase {
   }
 
   private async testBoundaryConditions(): Promise<void> {
-    const boundaryConditions = [
-      { name: '最小尺寸', width: 1, height: 1 },
-      { name: '最大尺寸', width: 50000, height: 50000 },
-      { name: '负宽度', width: -100, height: 100 },
-      { name: '负高度', width: 100, height: -100 },
-      { name: '零尺寸', width: 0, height: 0 },
-      { name: '极端比例', width: 1, height: 100000 },
-      { name: '超大文件', size: 100 << 20 }, // 100MB
-      { name: '空文件', size: 0 },
-      { name: '负文件大小', size: -1000 },
-      { name: '损坏文件', corrupted: true }
+    const boundaryConditions: BoundaryCondition[] = [
+      { name: '最小尺寸', width: 1, height: 1 } as BoundaryCondition,
+      { name: '最大尺寸', width: 50000, height: 50000 } as BoundaryCondition,
+      { name: '负宽度', width: -100, height: 100 } as BoundaryCondition,
+      { name: '负高度', width: 100, height: -100 } as BoundaryCondition,
+      { name: '零尺寸', width: 0, height: 0 } as BoundaryCondition,
+      { name: '极端比例', width: 1, height: 100000 } as BoundaryCondition,
+      { name: '超大文件', size: 100 << 20 } as BoundaryCondition,
+      { name: '空文件', size: 0 } as BoundaryCondition,
+      { name: '负文件大小', size: -1000 } as BoundaryCondition,
+      { name: '损坏文件', corrupted: true } as BoundaryCondition
     ]
 
     for (const condition of boundaryConditions) {
@@ -528,12 +595,12 @@ struct ImageAdvancedFeaturesTestCase {
     return Math.random() > 0.15 // 85% 成功率
   }
 
-  private async validateGeneratedPattern(pattern: { id: number; type: string; data: ArrayBuffer }): Promise<boolean> {
+  private async validateGeneratedPattern(pattern: GeneratedPattern): Promise<boolean> {
     await this.delay(20)
     return pattern.data.byteLength > 0
   }
 
-  private async testBoundaryCondition(condition: any): Promise<boolean> {
+  private async testBoundaryCondition(condition: BoundaryCondition): Promise<boolean> {
     await this.delay(30)
     // 模拟边界条件处理
     return condition.corrupted !== true
@@ -573,21 +640,21 @@ struct ImageAdvancedFeaturesTestCase {
     return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
   }
 
-  private generateRandomRGB(): { r: number; g: number; b: number; a: number } {
+  private generateRandomRGB(): RGB {
     return {
       r: Math.floor(Math.random() * 256),
       g: Math.floor(Math.random() * 256),
       b: Math.floor(Math.random() * 256),
       a: Math.floor(Math.random() * 256)
-    }
+    } as RGB
   }
 
-  private generateRandomHSL(): { h: number; s: number; l: number } {
+  private generateRandomHSL(): HSL {
     return {
       h: Math.random() * 360,
       s: Math.random() * 100,
       l: Math.random() * 100
-    }
+    } as HSL
   }
 
   private delay(ms: number): Promise<void> {
@@ -621,7 +688,7 @@ struct ImageAdvancedFeaturesTestCase {
           Text(`当前操作: ${this.currentOperation}`)
             .fontSize(14)
             .fontColor(Color.Blue)
-            .margin({ horizontal: 16, bottom: 8 })
+            .margin({ left: 16, right: 16, bottom: 8 })
         }
 
         Tabs({ barPosition: BarPosition.Start }) {
@@ -682,7 +749,7 @@ struct ImageAdvancedFeaturesTestCase {
           ForEach(this.filterConfigs, (filter: ImageFilterConfig, index: number) => {
             GridItem() {
               Column() {
-                Image($r('app.media.icon'))
+                Image($r('app.media.startIcon'))
                   .width(80)
                   .height(80)
                   .borderRadius(8)
@@ -718,7 +785,6 @@ struct ImageAdvancedFeaturesTestCase {
 
         // 当前滤镜详情
         if (this.currentFilterIndex < this.filterConfigs.length) {
-          const currentFilter = this.filterConfigs[this.currentFilterIndex]
           Column() {
             Text('当前滤镜参数')
               .fontSize(14)
@@ -731,7 +797,7 @@ struct ImageAdvancedFeaturesTestCase {
                   Text('亮度')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentFilter.brightness}%`)
+                  Text(`${this.filterConfigs[this.currentFilterIndex].brightness}%`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -742,7 +808,7 @@ struct ImageAdvancedFeaturesTestCase {
                   Text('对比度')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentFilter.contrast}%`)
+                  Text(`${this.filterConfigs[this.currentFilterIndex].contrast}%`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -753,7 +819,7 @@ struct ImageAdvancedFeaturesTestCase {
                   Text('饱和度')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentFilter.saturation}%`)
+                  Text(`${this.filterConfigs[this.currentFilterIndex].saturation}%`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -764,7 +830,7 @@ struct ImageAdvancedFeaturesTestCase {
                   Text('色相')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentFilter.hueRotate}°`)
+                  Text(`${this.filterConfigs[this.currentFilterIndex].hueRotate}°`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -775,7 +841,7 @@ struct ImageAdvancedFeaturesTestCase {
                   Text('模糊')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentFilter.blur}px`)
+                  Text(`${this.filterConfigs[this.currentFilterIndex].blur}px`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -786,7 +852,7 @@ struct ImageAdvancedFeaturesTestCase {
                   Text('灰度')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentFilter.grayscale}%`)
+                  Text(`${this.filterConfigs[this.currentFilterIndex].grayscale}%`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -799,7 +865,7 @@ struct ImageAdvancedFeaturesTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, top: 16 })
+          .margin({ left: 16, right: 16, top: 16 })
         }
       }
     }
@@ -866,14 +932,13 @@ struct ImageAdvancedFeaturesTestCase {
 
         // 当前混合模式详情
         if (this.currentBlendModeIndex < this.blendModes.length) {
-          const currentBlend = this.blendModes[this.currentBlendModeIndex]
           Column() {
-            Text(`当前混合模式: ${currentBlend.name}`)
+            Text(`当前混合模式: ${this.blendModes[this.currentBlendModeIndex].name}`)
               .fontSize(14)
               .fontWeight(FontWeight.Medium)
               .margin({ bottom: 8 })
             
-            Text(currentBlend.description)
+            Text(this.blendModes[this.currentBlendModeIndex].description)
               .fontSize(12)
               .fontColor(Color.Gray)
               .lineHeight(18)
@@ -898,7 +963,7 @@ struct ImageAdvancedFeaturesTestCase {
               Text('+')
                 .fontSize(20)
                 .fontWeight(FontWeight.Bold)
-                .margin({ horizontal: 8 })
+                .margin({ left: 8, right: 8 })
 
               Stack() {
                 Image($r('app.media.background'))
@@ -913,7 +978,7 @@ struct ImageAdvancedFeaturesTestCase {
               Text('=')
                 .fontSize(20)
                 .fontWeight(FontWeight.Bold)
-                .margin({ horizontal: 8 })
+                .margin({ left: 8, right: 8 })
 
               Stack() {
                 Image($r('app.media.background'))
@@ -924,8 +989,8 @@ struct ImageAdvancedFeaturesTestCase {
                   .width(40)
                   .height(40)
                   .backgroundColor('#0066CC')
-                  .blendMode(currentBlend.mode)
-                Text(`=${currentBlend.name}`)
+                  .blendMode(this.blendModes[this.currentBlendModeIndex].mode)
+                Text(`=${this.blendModes[this.currentBlendModeIndex].name}`)
                   .fontSize(10)
                   .fontColor(Color.White)
                   .textAlign(TextAlign.Center)
@@ -939,7 +1004,7 @@ struct ImageAdvancedFeaturesTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, top: 16 })
+          .margin({ left: 16, right: 16, top: 16 })
         }
       }
     }
@@ -990,13 +1055,13 @@ struct ImageAdvancedFeaturesTestCase {
         .padding(16)
         .backgroundColor(Color.White)
         .borderRadius(8)
-        .margin({ horizontal: 16 })
+        .margin({ left: 16, right: 16 })
 
         // 压缩测试结果列表
         Text('详细压缩结果')
           .fontSize(14)
           .fontWeight(FontWeight.Medium)
-          .margin({ top: 16, bottom: 8, horizontal: 16 })
+          .margin({ top: 16, bottom: 8, left: 16, right: 16 })
 
         List() {
           ForEach(this.compressionTests.slice(0, 10), (test: CompressionTest) => {
@@ -1029,7 +1094,7 @@ struct ImageAdvancedFeaturesTestCase {
           })
         }
         .height(300)
-        .margin({ horizontal: 16 })
+        .margin({ left: 16, right: 16 })
 
         // 压缩质量分布图
         if (this.compressionTests.length > 0) {
@@ -1045,30 +1110,29 @@ struct ImageAdvancedFeaturesTestCase {
                   Text(`${quality}%`)
                     .fontSize(10)
                     .fontColor(Color.Gray)
-                    
-                  Row() {
+
+                  Grid() {
                     ForEach(this.COMPRESSION_FORMATS, (format: string) => {
-                      const tests = this.compressionTests
-                        .filter(t => t.quality === quality && t.format === format)
-                        
-                      Column() {
-                        Text(`${tests.length}`)
+                      GridItem() {
+                        Column() {
+                        Text(`${this.getCompressionTestCount(quality, format)}`)
                           .fontSize(12)
                           .fontWeight(FontWeight.Bold)
                           .textAlign(TextAlign.Center)
-                          .width((tests.length * 20).clamp(20, 80))
+                          .width(Math.min(Math.max(this.getCompressionTestCount(quality, format) * 20, 20), 80))
                           .height(40)
                           .backgroundColor(this.getFormatColor(format))
                           .borderRadius(4)
+                        
+                        Text(format)
+                          .fontSize(10)
+                          .fontColor(Color.Gray)
+                          .margin({ top: 4 })
                       }
-                      .margin({ horizontal: 2 })
+                      .margin({ left: 2, right: 2 })
+                      }
                     })
                   }
-                  
-                  Text(format)
-                    .fontSize(10)
-                    .fontColor(Color.Gray)
-                    .margin({ top: 4 })
                 }
               })
             }
@@ -1076,7 +1140,7 @@ struct ImageAdvancedFeaturesTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, top: 16 })
+          .margin({ left: 16, right: 16, top: 16 })
         }
       }
     }
@@ -1123,7 +1187,7 @@ struct ImageAdvancedFeaturesTestCase {
                         .margin({ bottom: 2 })
                       
                       Grid() {
-                        ForEach(color.samplePoints, (point: { x: number; y: number; color: string }) => {
+                        ForEach(color.samplePoints, (point: SamplePoint) => {
                           GridItem() {
                             Column()
                               .width(8)
@@ -1217,7 +1281,7 @@ struct ImageAdvancedFeaturesTestCase {
         .padding(16)
         .backgroundColor('#FAFAFA')
         .borderRadius(8)
-        .margin({ horizontal: 16, top: 16 })
+        .margin({ left: 16, right: 16, top: 16 })
       }
     }
   }
@@ -1232,7 +1296,7 @@ struct ImageAdvancedFeaturesTestCase {
 
         // 图案网格展示
         Grid() {
-          ForEach(this.generatedPatterns, (pattern: { id: number; type: string; data: ArrayBuffer }) => {
+          ForEach(this.generatedPatterns, (pattern: GeneratedPattern) => {
             GridItem() {
               Column() {
                 // 图案预览
@@ -1308,17 +1372,17 @@ struct ImageAdvancedFeaturesTestCase {
         .padding(16)
         .backgroundColor(Color.White)
         .borderRadius(8)
-        .margin({ horizontal: 16, top: 8 })
+        .margin({ left: 16, right: 16, top: 8 })
 
         // 图谱类型分布
         Column() {
           Text('图案类型分布')
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
-            .margin({ top: 16, bottom: 12, horizontal: 16 })
+            .margin({ top: 16, bottom: 12, left: 16, right: 16 })
 
           Row() {
-            ForEach(this.getPatternTypeDistribution(), (type: { name: string; count: number }) => {
+            ForEach(this.getPatternTypeDistribution(), (type: PatternTypeDistribution) => {
               Column() {
                 Text(type.name)
                   .fontSize(12)
@@ -1339,7 +1403,7 @@ struct ImageAdvancedFeaturesTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, bottom: 16 })
+          .margin({ left: 16, right: 16, bottom: 16 })
         }
       }
     }
@@ -1355,11 +1419,11 @@ struct ImageAdvancedFeaturesTestCase {
 
         // 变换结果网格
         Grid() {
-          ForEach(this.transformedImages, (transform: { id: number; operation: string; result: boolean }) => {
+          ForEach(this.transformedImages, (transform: TransformedImage) => {
             GridItem() {
               Column() {
                 // 变换预览
-                Image($r('app.media.icon'))
+                Image($r('app.media.startIcon'))
                   .width(50)
                   .height(50)
                   .borderRadius(6)
@@ -1447,17 +1511,17 @@ struct ImageAdvancedFeaturesTestCase {
         .padding(16)
         .backgroundColor('#FAFAFA')
         .borderRadius(8)
-        .margin({ horizontal: 16, top: 16 })
+        .margin({ left: 16, right: 16, top: 16 })
 
         // 变换操作类型
         Column() {
           Text('变换操作类别')
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
-            .margin({ top: 16, bottom: 12, horizontal: 16 })
+            .margin({ top: 16, bottom: 12, left: 16, right: 16 })
 
           List() {
-            ForEach(this.getCategorizedTransformations(), (category: { type: string; operations: string[]; successRate: number }) => {
+            ForEach(this.getCategorizedTransformations(), (category: CategorizedTransformation) => {
               ListItem() {
                 Column() {
                   Row() {
@@ -1478,7 +1542,7 @@ struct ImageAdvancedFeaturesTestCase {
                       Text(op)
                         .fontSize(11)
                         .fontColor(Color.Gray)
-                        .padding({ horizontal: 6, vertical: 2 })
+                        .padding({ left: 6, right: 6, top: 2, bottom: 2 })
                         .backgroundColor('#F0F0F0')
                         .borderRadius(4)
                         .margin({ right: 4, bottom: 4 })
@@ -1494,7 +1558,7 @@ struct ImageAdvancedFeaturesTestCase {
             })
           }
           .height(200)
-          .margin({ horizontal: 16, bottom: 16 })
+          .margin({ left: 16, right: 16, bottom: 16 })
         }
       }
     }
@@ -1556,16 +1620,16 @@ struct ImageAdvancedFeaturesTestCase {
         .padding(16)
         .backgroundColor(Color.White)
         .borderRadius(8)
-        .margin({ horizontal: 16 })
+        .margin({ left: 16, right: 16 })
 
         // 详细结果列表
         Text('详细测试结果')
           .fontSize(14)
           .fontWeight(FontWeight.Medium)
-          .margin({ top: 16, bottom: 8, horizontal: 16 })
+          .margin({ top: 16, bottom: 8, left: 16, right: 16 })
 
         List() {
-          ForEach(this.advancedTestResults, (result: { name: string; status: string; details: string }) => {
+          ForEach(this.advancedTestResults, (result: AdvancedTestResultItem) => {
             ListItem() {
               Column() {
                 Row() {
@@ -1581,7 +1645,7 @@ struct ImageAdvancedFeaturesTestCase {
                   Text(result.status)
                     .fontSize(12)
                     .fontColor(this.getStatusTextColor(result.status))
-                    .padding({ horizontal: 8, vertical: 4 })
+                    .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                     .backgroundColor(this.getStatusBgColor(result.status))
                     .borderRadius(4)
                 }
@@ -1604,7 +1668,7 @@ struct ImageAdvancedFeaturesTestCase {
           })
         }
         .layoutWeight(1)
-        .margin({ horizontal: 16, bottom: 16 })
+        .margin({ left: 16, right: 16, bottom: 16 })
       }
     }
   }
@@ -1613,7 +1677,12 @@ struct ImageAdvancedFeaturesTestCase {
   private applyFilterBackground(filter: ImageFilterConfig): ResourceColor {
     const brightness = filter.brightness / 100
     const gray = Math.floor(255 - brightness * 50)
-    return Color.rgb(gray, gray, gray)
+    const hex = gray.toString(16).padStart(2, '0')
+    return `#${hex}${hex}${hex}`
+  }
+
+  private getCompressionTestCount(quality: number, format: string): number {
+    return this.compressionTests.filter(t => t.quality === quality && t.format === format).length
   }
 
   private getFormatColor(format: string): ResourceColor {
@@ -1622,7 +1691,7 @@ struct ImageAdvancedFeaturesTestCase {
       'PNG': Color.Green,
       'WEBP': Color.Blue,
       'GIF': Color.Orange,
-      'BMP': Color.Purple
+      'BMP': '#800080'
     }
     return colors[format] || Color.Gray
   }
@@ -1663,17 +1732,21 @@ struct ImageAdvancedFeaturesTestCase {
     return this.calculateTotalPatternSize() / this.generatedPatterns.length
   }
 
-  private getPatternTypeDistribution(): Array<{ name: string; count: number }> {
+  private getPatternTypeDistribution(): Array<PatternTypeDistribution> {
     const distribution = new Map<string, number>()
     this.generatedPatterns.forEach(pattern => {
       const count = distribution.get(pattern.type) || 0
       distribution.set(pattern.type, count + 1)
     })
-    return Array.from(distribution.entries()).map(([name, count]) => ({ name, count }))
+    const result: Array<PatternTypeDistribution> = []
+    distribution.forEach((count, name) => {
+      result.push({ name: name, count: count } as PatternTypeDistribution)
+    })
+    return result
   }
 
   private getRandomColor(): ResourceColor {
-    const colors = [Color.Red, Color.Blue, Color.Green, Color.Orange, Color.Purple, Color.Brown, Color.Pink]
+    const colors: ResourceColor[] = [Color.Red, Color.Blue, Color.Green, Color.Orange, '#800080', Color.Brown, Color.Pink]
     return colors[Math.floor(Math.random() * colors.length)]
   }
 
@@ -1683,8 +1756,12 @@ struct ImageAdvancedFeaturesTestCase {
     return (successCount / this.transformedImages.length) * 100
   }
 
-  private getCategorizedTransformations(): Array<{ type: string; operations: string[]; successRate: number }> {
-    const categories = new Map<string, { operations: string[], successes: number }>()
+  private getCategorizedTransformations(): Array<CategorizedTransformation> {
+    interface CategoryData {
+      operations: string[]
+      successes: number
+    }
+    const categories = new Map<string, CategoryData>()
     
     this.transformedImages.forEach(transform => {
       let category = '其他'
@@ -1698,17 +1775,21 @@ struct ImageAdvancedFeaturesTestCase {
         category = '变形效果'
       }
       
-      const existing = categories.get(category) || { operations: [], successes: 0 }
+      const existing: CategoryData = categories.get(category) ?? { operations: [], successes: 0 }
       existing.operations.push(transform.operation)
       if (transform.result) existing.successes++
       categories.set(category, existing)
     })
     
-    return Array.from(categories.entries()).map(([type, data]) => ({
-      type,
-      operations: data.operations,
-      successRate: (data.successes / data.operations.length) * 100
-    }))
+    const result: Array<CategorizedTransformation> = []
+    categories.forEach((data: CategoryData, type: string) => {
+      result.push({
+        type: type,
+        operations: data.operations,
+        successRate: (data.successes / data.operations.length) * 100
+      })
+    })
+    return result
   }
 
   private getStatusColor(status: string): ResourceColor {

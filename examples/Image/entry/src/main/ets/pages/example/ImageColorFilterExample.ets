@@ -32,7 +32,7 @@ struct ImageColorFilterExample {
       Column({ space: 15 }) {
         Text('无滤镜 (原图)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(this.imageWidth)
           .height(this.imageHeight)
           .border({ width: 2, color: Color.Blue })
@@ -42,7 +42,7 @@ struct ImageColorFilterExample {
       Column({ space: 15 }) {
         Text('灰度滤镜 (brightness)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(this.imageWidth)
           .height(this.imageHeight)
           .colorFilter([1.0, 0.0, 0.0]) // 降低亮度
@@ -53,7 +53,7 @@ struct ImageColorFilterExample {
       Column({ space: 15 }) {
         Text('反色滤镜 (invert)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(this.imageWidth)
           .height(this.imageHeight)
           .colorFilter([-1.0, -1.0, -1.0, 0.0, -1.0, -1.0, 1.0]) // 反转
@@ -64,7 +64,7 @@ struct ImageColorFilterExample {
       Column({ space: 15 }) {
         Text('深褐色滤镜 (sepia)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(this.imageWidth)
           .height(this.imageHeight)
           .colorFilter([0.39, 0.349, 0.272]) // 怀旧照片效果
@@ -75,7 +75,7 @@ struct ImageColorFilterExample {
       Column({ space: 15 }) {
         Text('自定义矩阵')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(this.imageWidth)
           .height(this.imageHeight)
           .colorFilter([
@@ -91,7 +91,7 @@ struct ImageColorFilterExample {
       Column({ space: 15 }) {
         Text('组合滤镜 (灰度+反色)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(this.imageWidth)
           .height(this.imageHeight)
           .colorFilter([

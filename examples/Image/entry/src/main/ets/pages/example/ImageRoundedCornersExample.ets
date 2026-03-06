@@ -82,7 +82,7 @@ struct ImageThumbnailExample {
             .fontSize(16)
             .fontColor(Color.Gray)
 
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .width(150)
             .height(150)
             .objectFit(ImageFit.Cover)
@@ -146,7 +146,7 @@ struct ImageThumbnailExample {
             .fontColor(Color.Black)
 
           let dims = this.sizePresets[this.selectedSize];
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .sourceSize({ width: dims[0], height: dims[1] })
             .width(dims[0] / 2)
             .height(dims[1] / 2)

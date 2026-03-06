@@ -19,11 +19,11 @@ struct ImageRotateOrientationIndex {
   @State text: string = "Image组件引入exif规范不支持的图源，设置autoResize属性"
   @State orientation: ImageRotateOrientation = ImageRotateOrientation.UP
   @State autoResize: boolean = false
-  @State resource: Resource = $r('app.media.huawei_200')
+  @State resource: Resource = $r('app.media.startIcon')
   @State onTree: boolean = true
   @State rotateDegree: number = 0
   @State fit: ImageFit = ImageFit.None
-  res: Resource = $r('app.media.UP')
+  res: Resource = $r('app.media.startIcon')
   idx: number = 0
   idx2: number = 0
   orientations: Array<ImageRotateOrientation> = [
@@ -48,13 +48,13 @@ struct ImageRotateOrientationIndex {
         Column() {
           Row() {
             Text('IMG_H_MIRROR_CCW')
-            Image($r('app.media.IMG_H_MIRROR_CCW'))
+            Image($r('app.media.startIcon'))
               .width(100)
               .height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
               .objectFit(ImageFit.Fill)
-            Image($r('app.media.IMG_H_MIRROR_CCW'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
@@ -63,11 +63,11 @@ struct ImageRotateOrientationIndex {
 
           Row() {
             Text('IMG_V_MIRROR')
-            Image($r('app.media.IMG_V_MIRROR'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.IMG_V_MIRROR'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
@@ -75,11 +75,11 @@ struct ImageRotateOrientationIndex {
 
           Row() {
             Text('IMG_H_MIRROR')
-            Image($r('app.media.IMG_H_MIRROR'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.IMG_H_MIRROR'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
@@ -87,11 +87,11 @@ struct ImageRotateOrientationIndex {
 
           Row() {
             Text('IMG_H_MIRROR_CW')
-            Image($r('app.media.IMG_H_MIRROR_CW'))
+            Image($r('app.media.foreground'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5).objectFit(ImageFit.Cover)
-            Image($r('app.media.IMG_H_MIRROR_CW'))
+            Image($r('app.media.foreground'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5).objectFit(ImageFit.Cover)
@@ -99,11 +99,11 @@ struct ImageRotateOrientationIndex {
 
           Row() {
             Text('IMG_CCW')
-            Image($r('app.media.IMG_CCW'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.IMG_CCW'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
@@ -111,11 +111,11 @@ struct ImageRotateOrientationIndex {
 
           Row() {
             Text('IMG_CW')
-            Image($r('app.media.IMG_CW'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.IMG_CW'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
@@ -123,11 +123,11 @@ struct ImageRotateOrientationIndex {
 
           Row() {
             Text('IMG_DOWN')
-            Image($r('app.media.IMG_DOWN'))
+            Image($r('app.media.foreground'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.IMG_DOWN'))
+            Image($r('app.media.foreground'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
@@ -135,100 +135,100 @@ struct ImageRotateOrientationIndex {
 
           Row() {
             Text('UP')
-            Image($r('app.media.img'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.img'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
           }
           Row() {
             Text('app.media.H_MIRROR_CW1')
-            Image($r('app.media.H_MIRROR_CW1'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.H_MIRROR_CW1'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
           }
           Row() {
             Text('app.media.H_MIRROR_CW2')
-            Image($r('app.media.H_MIRROR_CW2'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.H_MIRROR_CW2'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
           }
           Row() {
             Text('app.media.H_MIRROR_CCW1')
-            Image($r('app.media.H_MIRROR_CCW1'))
+            Image($r('app.media.foreground'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.H_MIRROR_CCW1'))
+            Image($r('app.media.foreground'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
           }
           Row() {
             Text('app.media.H_MIRROR_CCW2')
-            Image($r('app.media.H_MIRROR_CCW2'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.H_MIRROR_CCW2'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
           }
           Row() {
             Text('app.media.UP1')
-            Image($r('app.media.UP1'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
               .privacySensitive(true)
-            Image($r('app.media.UP1'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
           }
           Row() {
             Text('app.media.V_MIRROR')
-            Image($r('app.media.V_MIRROR'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.V_MIRROR'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
           }
           Row() {
             Text('app.media.CCW1')
-            Image($r('app.media.CCW1'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.CCW1'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
           }
           Row() {
             Text('app.media.CW1')
-            Image($r('app.media.CW1'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.AUTO)
               .margin(5)
-            Image($r('app.media.CW1'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)

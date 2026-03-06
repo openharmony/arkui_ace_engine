@@ -90,7 +90,7 @@ struct DarkModeTest {
           .width(200)
           .fillColor(Color.Red)
         Divider()
-        Image($r('app.media.cat'))
+        Image($r('app.media.startIcon'))
           .height('350vp')
           .width('350vp')
           .attributeModifier(this.modifier)

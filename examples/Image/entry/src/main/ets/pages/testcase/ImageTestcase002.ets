@@ -14,7 +14,7 @@
  */
 
 /**
- * 测试PixelMapDrawableDescriptor
+ * 测试 PixelMapDrawableDescriptor
  */
 import image from '@ohos.multimedia.image'
 import { PixelMapDrawableDescriptor } from '@kit.ArkUI'
@@ -25,7 +25,11 @@ struct DrawableTestCase2 {
   drawable: DrawableDescriptor | undefined = undefined
 
   aboutToAppear(): void {
-    let uint8 = getContext(this).resourceManager.getMediaContentSync($r('app.media.3'))
+    let context = this.getUIContext().getHostContext();
+    if (!context) {
+      return;
+    }
+    let uint8 = context.resourceManager.getMediaContentSync($r('app.media.foreground'))
     let imageSource = image.createImageSource(uint8.buffer)
     let pixmap = imageSource.createPixelMapSync()
     this.drawable = new PixelMapDrawableDescriptor(pixmap)

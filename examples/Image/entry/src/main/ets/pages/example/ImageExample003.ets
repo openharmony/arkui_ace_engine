@@ -19,9 +19,9 @@
 @Entry
 @Component
 struct ImageExample3 {
-  private imageOne: Resource = $r('app.media.earth');
+  private imageOne: Resource = $r('app.media.startIcon');
   private imageTwo: Resource = $r('app.media.star');
-  private imageThree: Resource = $r('app.media.moveStar');
+  private imageThree: Resource = $r('app.media.startIcon');
   @State src: Resource = this.imageOne
   @State src2: Resource = this.imageThree
   build(){

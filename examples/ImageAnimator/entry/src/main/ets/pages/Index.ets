@@ -17,7 +17,7 @@ import { router } from '@kit.ArkUI';
 @Entry
 @Component
 struct Index {
-  @State message: string = 'Image Example';
+  @State message: string = 'ImageAnimator Example';
 
   build() {
     RelativeContainer() {
@@ -38,6 +38,22 @@ struct Index {
             console.log('router ImageAnimatorExample003');
             router.pushUrl({ url: 'pages/example/ImageAnimatorExample003' })
           })
+
+          Button('router ImageAnimatorExample014').onClick(() => {
+            console.log('router ImageAnimatorExample014');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorExample014' })
+          })
+
+          Button('router ImageAnimatorExample015').onClick(() => {
+            console.log('router ImageAnimatorExample015');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorExample015' })
+          })
+
+          Button('router ImageAnimatorExample016').onClick(() => {
+            console.log('router ImageAnimatorExample016');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorExample016' })
+          })
+
         }
       }
     }

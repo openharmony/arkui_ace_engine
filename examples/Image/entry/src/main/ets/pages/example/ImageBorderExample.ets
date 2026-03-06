@@ -37,7 +37,7 @@ struct ImageBorderExample {
           .onChange((value: number) => {
             this.borderWidth = value
           })
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(200)
           .height(200)
           .border({ width: this.borderWidth, color: this.borderColor })
@@ -51,7 +51,7 @@ struct ImageBorderExample {
           .onChange((value: number) => {
             this.borderRadius = value
           })
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(200)
             .height(200)
             .borderRadius(this.borderRadius)
@@ -93,7 +93,7 @@ struct ImageBorderExample {
       Column({ space: 20 }) {
         Text('组合效果示例')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(250)
           .height(250)
           .border({ width: 3, color: this.borderColor, radius: this.borderRadius })

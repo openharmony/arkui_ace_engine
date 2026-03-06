@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
+");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -19,22 +20,71 @@
  */
 import { image } from '@kit.ImageKit'
 
+interface TestResult {
+  property: string
+  expected: string
+  actual: string
+  status: string
+}
+
+interface Scale {
+  x: number
+  y: number
+}
+
+interface TestConfiguration {
+  name: string
+  test: () => Promise<void>
+  expectedCount: number
+}
+
+interface BorderConfig {
+  width: number
+  color: ResourceColor
+  style: BorderStyle
+}
+
+interface ShadowConfig {
+  radius: number
+  color: ResourceColor
+  offsetX: number
+  offsetY: number
+}
+
+interface Transform {
+  rotate: number
+  scale: Scale
+  translate: Scale
+}
+
+interface MarginPadding {
+  left: number
+  right: number
+  top: number
+  bottom: number
+}
+
+interface LayoutConfig {
+  margin: MarginPadding
+  padding: MarginPadding
+}
+
 @Entry
 @Component
 struct ImagePropertiesTestCase {
   @State currentTestIndex: number = 0
-  @State testResults: Array<{ property: string, expected: string, actual: string, status: string }> = []
+  @State testResults: TestResult[] = []
   @State animatedWidth: number = 100
   @State animatedHeight: number = 100
   @State currentObjectFit: ImageFit = ImageFit.Contain
   @State currentBorderRadius: number = 0
   @State currentOpacity: number = 1.0
   @State currentRotation: number = 0
-  @State currentScale: { x: number, y: number } = { x: 1, y: 1 }
+  @State currentScale: Scale = { x: 1, y: 1 }
   @State isAutoAnimation: boolean = false
   @State testInProgress: boolean = false
 
-  private readonly OBJECT_FIT_OPTIONS: Array<ImageFit> = [
+  private readonly OBJECT_FIT_OPTIONS: ImageFit[] = [
     ImageFit.Contain,
     ImageFit.Cover,
     ImageFit.Fill,
@@ -43,7 +93,7 @@ struct ImagePropertiesTestCase {
     ImageFit.Auto
   ]
 
-  private readonly TEST_CONFIGURATIONS = [
+  private readonly TEST_CONFIGURATIONS: TestConfiguration[] = [
     {
       name: '宽度尺寸测试',
       test: () => this.testWidthProperties(),
@@ -114,13 +164,35 @@ struct ImagePropertiesTestCase {
   }
 
   private async testWidthProperties(): Promise<void> {
-    const widthValues = [50, 100, 150, 200, '50%', '100vp', '200px', 'auto']
-    const imageResource = $r('app.media.icon')
+    const widthValues: number[] = [50, 100, 150, 200]
+    const widthStrValues: string[] = ['50%', '100vp', '200px', 'auto']
 
     for (const width of widthValues) {
       try {
-        this.animatedWidth = typeof width === 'number' ? width : 100
-        
+        this.animatedWidth = width
+
+        this.testResults.push({
+          property: `width: ${width}`,
+          expected: `${width}`,
+          actual: `${this.animatedWidth}`,
+          status: 'success'
+        })
+
+        await this.delay(100)
+      } catch (error) {
+        this.testResults.push({
+          property: `width: ${width}`,
+          expected: `${width}`,
+          actual: 'Error',
+          status: 'failed'
+        })
+      }
+    }
+
+    for (const width of widthStrValues) {
+      try {
+        this.animatedWidth = 100
+
         this.testResults.push({
           property: `width: ${width}`,
           expected: `${width}`,
@@ -141,12 +213,34 @@ struct ImagePropertiesTestCase {
   }
 
   private async testHeightProperties(): Promise<void> {
-    const heightValues = [50, 100, 150, 200, '50%', '100vp', '200px', 'auto']
-    const imageResource = $r('app.media.icon')
+    const heightValues: number[] = [50, 100, 150, 200]
+    const heightStrValues: string[] = ['50%', '100vp', '200px', 'auto']
 
     for (const height of heightValues) {
       try {
-        this.animatedHeight = typeof height === 'number' ? height : 100
+        this.animatedHeight = height
+
+        this.testResults.push({
+          property: `height: ${height}`,
+          expected: `${height}`,
+          actual: `${this.animatedHeight}`,
+          status: 'success'
+        })
+
+        await this.delay(100)
+      } catch (error) {
+        this.testResults.push({
+          property: `height: ${height}`,
+          expected: `${height}`,
+          actual: 'Error',
+          status: 'failed'
+        })
+      }
+    }
+
+    for (const height of heightStrValues) {
+      try {
+        this.animatedHeight = 100
 
         this.testResults.push({
           property: `height: ${height}`,
@@ -244,32 +338,33 @@ struct ImagePropertiesTestCase {
   }
 
   private async testBackgroundColorProperties(): Promise<void> {
-    const backgroundColors = [
+    const backgroundColors: ResourceColor[] = [
       Color.Red,
       Color.Green,
       Color.Blue,
       Color.Yellow,
       Color.Pink,
-      Color.Purple,
+      '#800080',
       Color.Orange,
       Color.Gray
     ]
 
     for (const color of backgroundColors) {
       try {
-        // 测试背景色设置
+        const colorStr: string = `${color}`
         this.testResults.push({
-          property: `backgroundColor: ${color}`,
-          expected: `${color}`,
-          actual: `${color}`,
+          property: `backgroundColor: ${colorStr}`,
+          expected: colorStr,
+          actual: colorStr,
           status: 'success'
         })
 
         await this.delay(100)
       } catch (error) {
+        const colorStr: string = `${color}`
         this.testResults.push({
-          property: `backgroundColor: ${color}`,
-          expected: `${color}`,
+          property: `backgroundColor: ${colorStr}`,
+          expected: colorStr,
           actual: 'Error',
           status: 'failed'
         })
@@ -278,33 +373,35 @@ struct ImagePropertiesTestCase {
   }
 
   private async testBorderProperties(): Promise<void> {
-    const borderConfigs = [
+    const borderConfigs: BorderConfig[] = [
       { width: 1, color: Color.Black, style: BorderStyle.Solid },
       { width: 2, color: Color.Red, style: BorderStyle.Dashed },
       { width: 3, color: Color.Blue, style: BorderStyle.Dotted },
       { width: 4, color: Color.Green, style: BorderStyle.Solid },
-      { width: 5, color: Color.Purple, style: BorderStyle.Dashed },
-      { width: 0, color: Color.Gray, style: BorderStyle.None },
+      { width: 5, color: '#800080', style: BorderStyle.Dashed },
+      { width: 0, color: Color.Gray, style: BorderStyle.Solid },
       { width: 10, color: Color.Orange, style: BorderStyle.Solid },
       { width: 2, color: Color.Pink, style: BorderStyle.Dotted },
       { width: 3, color: Color.Brown, style: BorderStyle.Solid },
-      { width: 6, color: Color.Cyan, style: BorderStyle.Dashed }
+      { width: 6, color: '#00FFFF', style: BorderStyle.Dashed }
     ]
 
     for (const config of borderConfigs) {
       try {
+        const configStr: string = `${config.width}, ${config.color}, ${config.style}`
         this.testResults.push({
           property: `border: ${config.width}px ${config.color} ${config.style}`,
-          expected: `${config.width}, ${config.color}, ${config.style}`,
-          actual: `${config.width}, ${config.color}, ${config.style}`,
+          expected: configStr,
+          actual: configStr,
           status: 'success'
         })
 
         await this.delay(100)
       } catch (error) {
+        const configStr: string = `${config.width}, ${config.color}, ${config.style}`
         this.testResults.push({
           property: `border: ${config.width}px ${config.color} ${config.style}`,
-          expected: `${config.width}, ${config.color}, ${config.style}`,
+          expected: configStr,
           actual: 'Error',
           status: 'failed'
         })
@@ -313,29 +410,31 @@ struct ImagePropertiesTestCase {
   }
 
   private async testShadowProperties(): Promise<void> {
-    const shadowConfigs = [
+    const shadowConfigs: ShadowConfig[] = [
       { radius: 5, color: Color.Black, offsetX: 2, offsetY: 2 },
       { radius: 10, color: Color.Red, offsetX: 0, offsetY: 5 },
       { radius: 15, color: Color.Blue, offsetX: -3, offsetY: -3 },
       { radius: 20, color: Color.Green, offsetX: 10, offsetY: 10 },
       { radius: 0, color: Color.Gray, offsetX: 0, offsetY: 0 },
-      { radius: 8, color: Color.Purple, offsetX: 5, offsetY: -2 }
+      { radius: 8, color: '#800080', offsetX: 5, offsetY: -2 }
     ]
 
     for (const shadow of shadowConfigs) {
       try {
+        const shadowStr: string = `${shadow.radius}, ${shadow.color}, ${shadow.offsetX},${shadow.offsetY}`
         this.testResults.push({
           property: `shadow: ${shadow.radius} ${shadow.color} ${shadow.offsetX},${shadow.offsetY}`,
-          expected: `${shadow.radius}, ${shadow.color}, ${shadow.offsetX},${shadow.offsetY}`,
-          actual: `${shadow.radius}, ${shadow.color}, ${shadow.offsetX},${shadow.offsetY}`,
+          expected: shadowStr,
+          actual: shadowStr,
           status: 'success'
         })
 
         await this.delay(150)
       } catch (error) {
+        const shadowStr: string = `${shadow.radius}, ${shadow.color}, ${shadow.offsetX},${shadow.offsetY}`
         this.testResults.push({
           property: `shadow: ${shadow.radius} ${shadow.color} ${shadow.offsetX},${shadow.offsetY}`,
-          expected: `${shadow.radius}, ${shadow.color}, ${shadow.offsetX},${shadow.offsetY}`,
+          expected: shadowStr,
           actual: 'Error',
           status: 'failed'
         })
@@ -344,7 +443,7 @@ struct ImagePropertiesTestCase {
   }
 
   private async testTransformProperties(): Promise<void> {
-    consttransforms = [
+    const transforms: Transform[] = [
       { rotate: 0, scale: { x: 1, y: 1 }, translate: { x: 0, y: 0 } },
       { rotate: 45, scale: { x: 1.2, y: 1.2 }, translate: { x: 10, y: 0 } },
       { rotate: 90, scale: { x: 0.8, y: 0.8 }, translate: { x: 0, y: 10 } },
@@ -361,18 +460,25 @@ struct ImagePropertiesTestCase {
         this.currentRotation = transform.rotate
         this.currentScale = transform.scale
 
+        const expectedStr: string = `${transform.rotate}, ${transform.scale.x},${transform.scale.y}, ${transform.translate.x},${transform.translate.y}`
+        const actualStr: string = `${this.currentRotation}, ${this.currentScale.x},${this.currentScale.y}, ${transform.translate.x},${transform.translate.y}`
+        const propertyStr: string = `transform: rotate(${transform.rotate}) scale(${transform.scale.x},${transform.scale.y}) translate(${transform.translate.x},${transform.translate.y})`
+
         this.testResults.push({
-          property: `transform: rotate(${transform.rotate}) scale(${transform.scale.x},${transform.scale.y}) translate(${transform.translate.x},${transform.translate.y})`,
-          expected: `${transform.rotate}, ${transform.scale.x},${transform.scale.y}, ${transform.translate.x},${transform.translate.y}`,
-          actual: `${this.currentRotation}, ${this.currentScale.x},${this.currentScale.y}, ${transform.translate.x},${transform.translate.y}`,
+          property: propertyStr,
+          expected: expectedStr,
+          actual: actualStr,
           status: 'success'
         })
 
         await this.delay(200)
       } catch (error) {
+        const expectedStr: string = `${transform.rotate}, ${transform.scale.x},${transform.scale.y}, ${transform.translate.x},${transform.translate.y}`
+        const propertyStr: string = `transform: rotate(${transform.rotate}) scale(${transform.scale.x},${transform.scale.y}) translate(${transform.translate.x},${transform.translate.y})`
+
         this.testResults.push({
-          property: `transform: rotate(${transform.rotate}) scale(${transform.scale.x},${transform.scale.y}) translate(${transform.translate.x},${transform.translate.y})`,
-          expected: `${transform.rotate}, ${transform.scale.x},${transform.scale.y}, ${transform.translate.x},${transform.translate.y}`,
+          property: propertyStr,
+          expected: expectedStr,
           actual: 'Error',
           status: 'failed'
         })
@@ -381,35 +487,68 @@ struct ImagePropertiesTestCase {
   }
 
   private async testLayoutProperties(): Promise<void> {
-    const layoutConfigs = [
-      { margin: { left: 5, right: 5, top: 5, bottom: 5 }, padding: { left: 5, right: 5, top: 5, bottom: 5 } },
-      { margin: { left: 10, right: 10, top: 0, bottom: 0 }, padding: { left: 10, right: 10, top: 0, bottom: 0 } },
-      { margin: { left: 0, right: 0, top: 10, bottom: 10 }, padding: { left: 0, right: 0, top: 10, bottom: 10 } },
-      { margin: { left: 15, right: 0, top: 5, bottom: 0 }, padding: { left: 0, right: 15, top: 0, bottom: 5 } },
-      { margin: { left: 20, right: 20, top: 20, bottom: 20 }, padding: { left: 20, right: 20, top: 20, bottom: 20 } },
-      { margin: { left: 0, right: 0, top: 0, bottom: 0 }, padding: { left: 0, right: 0, top: 0, bottom: 0 } },
-      { margin: { left: 8, right: 8, top: 4, bottom: 4 }, padding: { left: 4, right: 4, top: 8, bottom: 8 } },
-      { margin: { left: 12, right: 8, top: 6, bottom: 10 }, padding: { left: 10, right: 12, top: 8, bottom: 6 } },
-      { margin: { left: 25, right: 15, top: 12, bottom: 18 }, padding: { left: 18, right: 25, top: 15, bottom: 12 } },
-      { margin: { left: 3, right: 3, top: 3, bottom: 3 }, padding: { left: 3, right: 3, top: 3, bottom: 3 } },
-      { margin: { left: 50, right: 0, top: 25, bottom: 0 }, padding: { left: 0, right: 50, top: 0, bottom: 25 } },
-      { margin: { left: 100, right: 100, top: 50, bottom: 50 }, padding: { left: 25, right: 25, top: 25, bottom: 25 } }
+    const margin1: MarginPadding = { left: 5, right: 5, top: 5, bottom: 5 }
+    const padding1: MarginPadding = { left: 5, right: 5, top: 5, bottom: 5 }
+    const margin2: MarginPadding = { left: 10, right: 10, top: 0, bottom: 0 }
+    const padding2: MarginPadding = { left: 10, right: 10, top: 0, bottom: 0 }
+    const margin3: MarginPadding = { left: 0, right: 0, top: 10, bottom: 10 }
+    const padding3: MarginPadding = { left: 0, right: 0, top: 10, bottom: 10 }
+    const margin4: MarginPadding = { left: 15, right: 0, top: 5, bottom: 0 }
+    const padding4: MarginPadding = { left: 0, right: 15, top: 0, bottom: 5 }
+    const margin5: MarginPadding = { left: 20, right: 20, top: 20, bottom: 20 }
+    const padding5: MarginPadding = { left: 20, right: 20, top: 20, bottom: 20 }
+    const margin6: MarginPadding = { left: 0, right: 0, top: 0, bottom: 0 }
+    const padding6: MarginPadding = { left: 0, right: 0, top: 0, bottom: 0 }
+    const margin7: MarginPadding = { left: 8, right: 8, top: 4, bottom: 4 }
+    const padding7: MarginPadding = { left: 4, right: 4, top: 8, bottom: 8 }
+    const margin8: MarginPadding = { left: 12, right: 8, top: 6, bottom: 10 }
+    const padding8: MarginPadding = { left: 10, right: 12, top: 8, bottom: 6 }
+    const margin9: MarginPadding = { left: 25, right: 15, top: 12, bottom: 18 }
+    const padding9: MarginPadding = { left: 18, right: 25, top: 15, bottom: 12 }
+    const margin10: MarginPadding = { left: 3, right: 3, top: 3, bottom: 3 }
+    const padding10: MarginPadding = { left: 3, right: 3, top: 3, bottom: 3 }
+    const margin11: MarginPadding = { left: 50, right: 0, top: 25, bottom: 0 }
+    const padding11: MarginPadding = { left: 0, right: 50, top: 0, bottom: 25 }
+    const margin12: MarginPadding = { left: 100, right: 100, top: 50, bottom: 50 }
+    const padding12: MarginPadding = { left: 25, right: 25, top: 25, bottom: 25 }
+
+    const layoutConfigs: LayoutConfig[] = [
+      { margin: margin1, padding: padding1 },
+      { margin: margin2, padding: padding2 },
+      { margin: margin3, padding: padding3 },
+      { margin: margin4, padding: padding4 },
+      { margin: margin5, padding: padding5 },
+      { margin: margin6, padding: padding6 },
+      { margin: margin7, padding: padding7 },
+      { margin: margin8, padding: padding8 },
+      { margin: margin9, padding: padding9 },
+      { margin: margin10, padding: padding10 },
+      { margin: margin11, padding: padding11 },
+      { margin: margin12, padding: padding12 }
     ]
 
     for (const layout of layoutConfigs) {
       try {
+        const marginStr: string = JSON.stringify(layout.margin)
+        const paddingStr: string = JSON.stringify(layout.padding)
+        const layoutStr: string = JSON.stringify(layout)
+
         this.testResults.push({
-          property: `margin: ${JSON.stringify(layout.margin)}, padding: ${JSON.stringify(layout.padding)}`,
-          expected: JSON.stringify(layout) + "," + JSON.stringify(layout.padding),
-          actual: JSON.stringify(layout) + "," + JSON.stringify(layout.padding),
+          property: `margin: ${marginStr}, padding: ${paddingStr}`,
+          expected: layoutStr + "," + paddingStr,
+          actual: layoutStr + "," + paddingStr,
           status: 'success'
         })
 
         await this.delay(150)
       } catch (error) {
+        const marginStr: string = JSON.stringify(layout.margin)
+        const paddingStr: string = JSON.stringify(layout.padding)
+        const layoutStr: string = JSON.stringify(layout)
+
         this.testResults.push({
-          property: `margin: ${JSON.stringify(layout.margin)}, padding: ${JSON.stringify(layout.padding)}`,
-          expected: JSON.stringify(layout) + "," + JSON.stringify(layout.padding),
+          property: `margin: ${marginStr}, padding: ${paddingStr}`,
+          expected: layoutStr + "," + paddingStr,
           actual: 'Error',
           status: 'failed'
         })
@@ -449,7 +588,7 @@ struct ImagePropertiesTestCase {
               Text('属性测试图片')
                 .fontSize(14)
                 .margin({ bottom: 8 })
-              Image($r('app.media.icon'))
+              Image($r('app.media.startIcon'))
                 .width(this.animatedWidth)
                 .height(this.animatedHeight)
                 .objectFit(this.currentObjectFit)
@@ -458,7 +597,7 @@ struct ImagePropertiesTestCase {
                 .rotate({ angle: this.currentRotation })
                 .scale({ x: this.currentScale.x, y: this.currentScale.y })
                 .border({ width: 2, color: Color.Blue })
-                .backgroundColor(Color.LightGray)
+                .backgroundColor('#D3D3D3')
                 .shadow({
                   radius: 10,
                   color: Color.Black,
@@ -477,36 +616,36 @@ struct ImagePropertiesTestCase {
 
               Text(`宽度: ${this.animatedWidth}`)
                 .fontSize(12)
-                .margin({ vertical: 2 })
+                .margin({ top: 2, bottom: 2 })
 
               Text(`高度: ${this.animatedHeight}`)
                 .fontSize(12)
-                .margin({ vertical: 2 })
+                .margin({ top: 2, bottom: 2 })
 
               Text(`适配: ${this.currentObjectFit}`)
                 .fontSize(12)
-                .margin({ vertical: 2 })
+                .margin({ top: 2, bottom: 2 })
 
               Text(`圆角: ${this.currentBorderRadius}`)
                 .fontSize(12)
-                .margin({ vertical: 2 })
+                .margin({ top: 2, bottom: 2 })
 
               Text(`透明度: ${this.currentOpacity}`)
                 .fontSize(12)
-                .margin({ vertical: 2 })
+                .margin({ top: 2, bottom: 2 })
 
               Text(`旋转: ${this.currentRotation}°`)
                 .fontSize(12)
-                .margin({ vertical: 2 })
+                .margin({ top: 2, bottom: 2 })
 
               Text(`缩放: ${this.currentScale.x}x${this.currentScale.y}`)
                 .fontSize(12)
-                .margin({ vertical: 2 })
+                .margin({ top: 2, bottom: 2 })
             }
             .layoutWeight(1)
             .margin(8)
           }
-          .margin({ vertical: 16 })
+          .margin({ top: 16, bottom: 16 })
 
           Divider()
 
@@ -517,7 +656,7 @@ struct ImagePropertiesTestCase {
             .margin({ top: 16, bottom: 8 })
 
           Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.Start }) {
-            ForEach(this.testResults, (result: { property: string, expected: string, actual: string, status: string }) => {
+            ForEach(this.testResults, (result: TestResult) => {
               Row() {
                 Circle({ width: 6, height: 6 })
                   .fill(result.status === 'success' ? Color.Green : Color.Red)

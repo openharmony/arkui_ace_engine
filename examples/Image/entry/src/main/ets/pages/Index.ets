@@ -91,7 +91,7 @@ struct Index {
 
           Button('router ImageExample014').onClick(() => {
             console.log('router ImageExample014');
-            router.pushUrl({ url: 'pages/example/ImageExample0140' })
+            router.pushUrl({ url: 'pages/example/ImageExample014' })
           })
 
           Button('router ImageExample015').onClick(() => {
@@ -157,6 +157,76 @@ struct Index {
           Button('router SVG Examples Index').onClick(() => {
             console.log('router SVG Examples Index');
             router.pushUrl({ url: 'pages/SVG/Index' })
+          })
+
+          Button('router ImageExample080').onClick(() => {
+            console.log('router ImageExample080');
+            router.pushUrl({ url: 'pages/example/ImageExample080' })
+          })
+
+          Button('router ImageExample081').onClick(() => {
+            console.log('router ImageExample081');
+            router.pushUrl({ url: 'pages/example/ImageExample081' })
+          })
+
+          Button('router ImageExample082').onClick(() => {
+            console.log('router ImageExample082');
+            router.pushUrl({ url: 'pages/example/ImageExample082' })
+          })
+
+          Button('router ImageExample083').onClick(() => {
+            console.log('router ImageExample083');
+            router.pushUrl({ url: 'pages/example/ImageExample083' })
+          })
+
+          Button('router ImageExample084').onClick(() => {
+            console.log('router ImageExample084');
+            router.pushUrl({ url: 'pages/example/ImageExample084' })
+          })
+
+          Button('router ImageExample085').onClick(() => {
+            console.log('router ImageExample085');
+            router.pushUrl({ url: 'pages/example/ImageExample085' })
+          })
+
+          Button('router ImageExample086').onClick(() => {
+            console.log('router ImageExample086');
+            router.pushUrl({ url: 'pages/example/ImageExample086' })
+          })
+
+          Button('router ImageExample087').onClick(() => {
+            console.log('router ImageExample087');
+            router.pushUrl({ url: 'pages/example/ImageExample087' })
+          })
+
+          Button('router ImageExample088').onClick(() => {
+            console.log('router ImageExample088');
+            router.pushUrl({ url: 'pages/example/ImageExample088' })
+          })
+
+          Button('router ImageExample089').onClick(() => {
+            console.log('router ImageExample089');
+            router.pushUrl({ url: 'pages/example/ImageExample089' })
+          })
+
+          Button('router ImageExample090').onClick(() => {
+            console.log('router ImageExample090');
+            router.pushUrl({ url: 'pages/example/ImageExample090' })
+          })
+
+          Button('router ImageExample091').onClick(() => {
+            console.log('router ImageExample091');
+            router.pushUrl({ url: 'pages/example/ImageExample091' })
+          })
+
+          Button('router ImageExample092').onClick(() => {
+            console.log('router ImageExample092');
+            router.pushUrl({ url: 'pages/example/ImageExample092' })
+          })
+
+          Button('router ImageExample093').onClick(() => {
+            console.log('router ImageExample093');
+            router.pushUrl({ url: 'pages/example/ImageExample093' })
           })
 
         }

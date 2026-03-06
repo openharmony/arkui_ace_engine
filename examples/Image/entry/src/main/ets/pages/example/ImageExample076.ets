@@ -32,7 +32,7 @@ struct ImageExample076 {
         .margin({ bottom: 20 })
 
       Stack() {
-        Image($r('app.media.png'))
+        Image($r('app.media.startIcon'))
           .width(this.isExpanded ? 300 : 200)
           .height(this.isExpanded ? 300 : 200)
           .scale({ x: this.scale, y: this.scale })

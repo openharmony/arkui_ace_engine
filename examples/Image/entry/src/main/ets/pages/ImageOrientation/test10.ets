@@ -48,12 +48,12 @@ class OrientationModifier implements AttributeModifier<ImageAttribute> {
 @Entry
 @Component
 struct Test01 {
-  @State res1: ResourceStr | undefined = $r('app.media.horizontal')
-  @State res2: ResourceStr | undefined = $r('app.media.rotate90cw')
-  @State res3: ResourceStr | undefined = $r('app.media.rotate270cw')
-  @State res4: ResourceStr | undefined = $r('app.media.rotate180')
-  @State res5: ResourceStr | undefined = $r('app.media.leaf')
-  @State res6: ResourceStr | undefined = $r('app.media.huawei_200')
+  @State res1: ResourceStr | undefined = $r('app.media.startIcon')
+  @State res2: ResourceStr | undefined = $r('app.media.background')
+  @State res3: ResourceStr | undefined = $r('app.media.foreground')
+  @State res4: ResourceStr | undefined = $r('app.media.startIcon')
+  @State res5: ResourceStr | undefined = $r('app.media.background')
+  @State res6: ResourceStr | undefined = $r('app.media.startIcon')
   @State text4: string = "Image组件引入exif规范支持的图源，设置borderRadius属性"
   @State orientation: ImageRotateOrientation = ImageRotateOrientation.AUTO
   @State fit: ImageFit = ImageFit.Cover

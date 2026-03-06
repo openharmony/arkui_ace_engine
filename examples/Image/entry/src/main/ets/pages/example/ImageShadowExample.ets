@@ -72,7 +72,7 @@ struct ImageShadow {
             .height(300)
 
             // 带阴影的图片
-            Image($r('app.media.app_icon'))
+            Image($r('app.media.startIcon'))
               .width(200)
               .height(200)
               .objectFit(ImageFit.Cover)
@@ -273,7 +273,7 @@ struct ImageShadow {
           .fontWeight(FontWeight.Medium)
             .fontColor(Color.Black)
 
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .width(150)
             .height(150)
             .objectFit(ImageFit.Cover)
@@ -328,7 +328,7 @@ struct ImageShadow {
   @Builder
   ShadowPreset(name: string, radius: number, offsetX: number, offsetY: number, opacity: number) {
     Column({ space: 8 }) {
-      Image($r('app.media.app_icon'))
+      Image($r('app.media.startIcon'))
         .width(100)
         .height(100)
         .objectFit(ImageFit.Cover)

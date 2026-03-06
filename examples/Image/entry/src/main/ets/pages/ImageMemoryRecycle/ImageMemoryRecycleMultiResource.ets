@@ -96,7 +96,7 @@ struct ImageMemoryRecycleMultiResource {
 
       Column() {
         if (this.currentType === 'resource') {
-          Image($r('app.media.test1'))
+          Image($r('app.media.startIcon'))
             .width(200)
             .height(200)
         } else if (this.currentType === 'pixelmap' && this.pixelMap) {

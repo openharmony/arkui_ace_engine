@@ -22,11 +22,11 @@ struct Test01 {
   @State text: string = "Image组件引入exif规范不支持的图源，设置autoResize属性"
   @State orientation: ImageRotateOrientation = ImageRotateOrientation.UP
   @State autoResize: boolean = false
-  @State resource: Resource = $r('app.media.huawei_200')
+  @State resource: Resource = $r('app.media.startIcon')
   @State onTree: boolean = true
   @State rotateDegree: number = 0
   @State fit: ImageFit = ImageFit.None
-  res: Resource = $r('app.media.UP')
+  res: Resource = $r('app.media.startIcon')
   idx: number = 0
   idx2: number = 0
   orientations: Array<ImageRotateOrientation> = [
@@ -67,15 +67,15 @@ struct Test01 {
       Row(){
         Button(`huwei`)
           .onClick(() => {
-            this.resource=$r('app.media.huawei_200')
+            this.resource=$r('app.media.startIcon')
           })
         Button(`gif`)
           .onClick(() => {
-            this.resource=$r('app.media.leaf')
+            this.resource=$r('app.media.background')
           })
         Button(`UP`)
           .onClick(() => {
-            this.resource=$r('app.media.UP')
+            this.resource=$r('app.media.startIcon')
           })
       }
 

@@ -36,7 +36,7 @@ struct ImageMarginPaddingExample {
           .onChange((value: number) => {
             this.marginValue = value
           })
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(300)
             .height(200)
             .margin({ top: this.marginValue, bottom: this.marginValue, left: this.marginValue, right: this.marginValue })
@@ -53,7 +53,7 @@ struct ImageMarginPaddingExample {
           .onChange((value: number) => {
             this.paddingValue = value
           })
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(300)
             .height(200)
             .padding({ top: this.paddingValue, bottom: this.paddingValue, left: this.paddingValue, right: this.paddingValue })
@@ -66,7 +66,7 @@ struct ImageMarginPaddingExample {
       Column({ space: 15 }) {
         Text('单独设置各边距:')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(300)
             .height(200)
             .margin({ top: 10, right: 20, bottom: 30, left: 40 })
@@ -80,7 +80,7 @@ struct ImageMarginPaddingExample {
       Column({ space: 15 }) {
         Text('百分比边距和内边距:')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width('80%')
             .height('80%')
             .margin({ top: '5%', right: '10%', bottom: '15%', left: '20%' })

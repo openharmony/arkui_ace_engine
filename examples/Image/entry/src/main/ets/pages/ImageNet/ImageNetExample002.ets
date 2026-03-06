@@ -31,7 +31,7 @@ interface ImageCompleteData {
 @Component
 struct ImagePreLoadAllTypesPage {
   @State renderMode: ImageRenderMode = ImageRenderMode.Original
-  @State res: Resource | string = $r('app.media.app_icon')
+  @State res: Resource | string = $r('app.media.startIcon')
   @State errorIf1: string = 'None'
   @State errorIf2: string = 'None'
   @State errorIf3: string = 'None'
@@ -133,7 +133,7 @@ struct ImagePreLoadAllTypesPage {
 
       Text('Alt with $r resource: ' + this.errorIf7)
       Image('xxx.webp')
-        .alt($r('app.media.icon'))
+        .alt($r('app.media.startIcon'))
         .height(50)
         .width(50)
         .onError((e) => {
@@ -148,7 +148,7 @@ struct ImagePreLoadAllTypesPage {
 
       Text('错误size《=0' + this.errorIf8)
       Image('xxx.com')
-        .alt($r('app.media.icon'))
+        .alt($r('app.media.startIcon'))
         .height(50)
         .width(50)
         .onError((e) => {

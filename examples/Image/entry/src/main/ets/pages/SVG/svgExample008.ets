@@ -21,8 +21,8 @@
 @Component
 struct svgExample008 {
   @State opacityValue: number = 1.0
-  @State borderRadius: number = 0
-  @State borderWidth: number = 0
+  @State borderRadiusValue: number = 0
+  @State borderWidthValue: number = 0
   @State shadowRadius: number = 0
   @State rotationAngle: number = 0
 
@@ -58,51 +58,51 @@ struct svgExample008 {
         Divider()
 
         // Border radius control
-        Text('Border Radius: ' + this.borderRadius)
+        Text('Border Radius: ' + this.borderRadiusValue)
           .fontSize(16)
 
         Image($r('app.media.svg'))
           .width(120)
           .height(120)
-          .borderRadius(this.borderRadius)
+          .borderRadius(this.borderRadiusValue)
           .border({ width: 1, color: Color.Gray })
-          .backgroundColor(Color.LightBlue)
+          .backgroundColor(Color.Blue)
 
         Slider({
-          value: this.borderRadius,
+          value: this.borderRadiusValue,
           min: 0,
           max: 60,
           step: 5
         })
           .width('80%')
           .onChange((value: number) => {
-            this.borderRadius = value
+            this.borderRadiusValue = value
           })
 
         Divider()
 
         // Border width control
-        Text('Border Width: ' + this.borderWidth)
+        Text('Border Width: ' + this.borderWidthValue)
           .fontSize(16)
 
-        Image($r('app.media.icon'))
+        Image($r('app.media.startIcon'))
           .width(120)
           .height(120)
           .border({
-            width: this.borderWidth,
+            width: this.borderWidthValue,
             color: Color.Blue,
             style: BorderStyle.Solid
           })
 
         Slider({
-          value: this.borderWidth,
+          value: this.borderWidthValue,
           min: 0,
           max: 20,
           step: 1
         })
           .width('80%')
           .onChange((value: number) => {
-            this.borderWidth = value
+            this.borderWidthValue = value
           })
 
         Divider()
@@ -191,7 +191,7 @@ struct svgExample008 {
           }
 
           Column({ space: 5 }) {
-            Image($r('app.media.icon'))
+            Image($r('app.media.startIcon'))
               .width(80)
               .height(80)
               .shadow({
@@ -217,19 +217,19 @@ struct svgExample008 {
           Image($r('app.media.testSvg'))
             .width(80)
             .height(80)
-            .backgroundColor(Color.LightBlue)
+            .backgroundColor(Color.Blue)
             .border({ width: 1, color: Color.Gray })
 
           Image($r('app.media.svg'))
             .width(80)
             .height(80)
-            .backgroundColor(Color.LightGreen)
+            .backgroundColor(Color.Green)
             .border({ width: 1, color: Color.Gray })
 
-          Image($r('app.media.icon'))
+          Image($r('app.media.startIcon'))
             .width(80)
             .height(80)
-            .backgroundColor(Color.LightYellow)
+            .backgroundColor(Color.Yellow)
             .border({ width: 1, color: Color.Gray })
         }
         .width('100%')

@@ -46,7 +46,7 @@ struct ImageCropping {
 
           Stack() {
             // 原图
-            Image($r('app.media.app_icon'))
+            Image($r('app.media.startIcon'))
               .width(320)
               .height(320)
               .objectFit(ImageFit.Cover)
