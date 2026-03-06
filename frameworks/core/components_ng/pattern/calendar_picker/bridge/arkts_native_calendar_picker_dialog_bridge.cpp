@@ -344,6 +344,7 @@ std::map<std::string, NG::DialogEvent> CalendarPickerDialogBridge::ChangeDialogE
             AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
 
         onAcceptEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](const std::string& info) {
+            panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             ACE_SCORING_EVENT("CalendarDialog.onAccept");
             PipelineContext::SetCallBackNode(node);
