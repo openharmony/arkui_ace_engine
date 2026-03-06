@@ -14,7 +14,7 @@
  */
 /// <reference path='./import.ts' />
 function loadComponent() {
-  if (globalThis.__ArkComponent__ !== undefined && loadComponent.componentObj === undefined) {
+  if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
     class RatingStarsModifier extends ModifierWithKey {
       constructor(value) {
         super(value);
@@ -263,6 +263,7 @@ class JSRating extends JSViewAbstract {
 }
 
 function createComponent(nativePtr, classType) {
+  loadComponent();
   if (loadComponent.componentObj !== undefined) {
     return new loadComponent.componentObj.component(nativePtr, classType);
   }
