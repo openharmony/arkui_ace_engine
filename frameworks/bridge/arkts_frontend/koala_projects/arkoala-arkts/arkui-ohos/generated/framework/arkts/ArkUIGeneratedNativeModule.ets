@@ -4407,6 +4407,10 @@ export class ArkUIGeneratedNativeModule {
     native static _DragEvent_getUseCustomDropAnimation(ptr: KPointer): boolean
     @ani.unsafe.Quick
     native static _DragEvent_setUseCustomDropAnimation(ptr: KPointer, useCustomDropAnimation: boolean): void
+    @ani.unsafe.Quick
+    native static _DragEvent_getAutoHideComponentUniqueIds(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _DragEvent_setAutoHideComponentUniqueIds(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _DragEvent_setGetModifierKeyState(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct

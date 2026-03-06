@@ -15,6 +15,8 @@
 
 #include "gesture_event_hub.h"
 
+#include <algorithm>
+
 #include "base/image/image_source.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
@@ -39,6 +41,7 @@
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/pipeline/base/element_register.h"
 
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "image_source.h"
@@ -594,6 +597,48 @@ bool GestureEventHub::IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInf
     return dragEventActuator_->IsNeedGather();
 }
 
+std::vector<RefPtr<FrameNode>> GestureEventHub::ResolveAutoHideTargetsByUniqueId(
+    const RefPtr<OHOS::Ace::DragEvent>& dragEvent) const
+{
+    CHECK_NULL_RETURN(dragEvent, std::vector<RefPtr<FrameNode>> {});
+    return DragDropFuncWrapper::ResolveAutoHideTargetsByUniqueId(dragEvent->GetAutoHideComponentUniqueIds());
+}
+
+void GestureEventHub::HideAutoHideTargets(const std::vector<RefPtr<FrameNode>>& targets)
+{
+    if (dragframeNodeInfo_.autoHideExecuted) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Skip auto hide because it has already executed");
+        return;
+    }
+    if (targets.empty()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Skip auto hide because no valid target was resolved");
+        return;
+    }
+    for (const auto& target : targets) {
+        if (UpdateAutoHideTargetVisibility(target)) {
+            dragframeNodeInfo_.autoHideFrameNodes.emplace_back(target);
+        }
+    }
+    dragframeNodeInfo_.autoHideExecuted = !dragframeNodeInfo_.autoHideFrameNodes.empty();
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Auto hide targets finished, hidden size %{public}zu",
+        dragframeNodeInfo_.autoHideFrameNodes.size());
+}
+
+void GestureEventHub::ResetAutoHideDragInfo()
+{
+    if (!dragframeNodeInfo_.autoHideFrameNodes.empty() || dragframeNodeInfo_.autoHideExecuted) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Reset auto hide drag info, hidden size %{public}zu, executed %{public}d",
+            dragframeNodeInfo_.autoHideFrameNodes.size(), dragframeNodeInfo_.autoHideExecuted);
+    }
+    dragframeNodeInfo_.autoHideFrameNodes.clear();
+    dragframeNodeInfo_.autoHideExecuted = false;
+}
+
+bool GestureEventHub::UpdateAutoHideTargetVisibility(const RefPtr<FrameNode>& frameNode) const
+{
+    return DragDropFuncWrapper::UpdateAutoHideTargetVisibility(frameNode);
+}
+
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     ACE_BENCH_MARK_TRACE("OnDragStart_start");
@@ -893,6 +938,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
 {
     ACE_SCOPED_TRACE("drag: to start");
+    ResetAutoHideDragInfo();
     auto dragNodePipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(dragNodePipeline);
     auto overlayManager = dragNodePipeline->GetOverlayManager();
@@ -1078,6 +1124,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);
         return;
     }
+    HideAutoHideTargets(ResolveAutoHideTargetsByUniqueId(dragEvent));
     StartVibratorByDrag(frameNode);
     dragEventActuator_->NotifyDragStart();
     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAG_START_SUCCESS);
@@ -1298,6 +1345,7 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
         }
     }
     HandleDragEndAction(dragframeNodeInfo_);
+    ResetAutoHideDragInfo();
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
@@ -1305,6 +1353,7 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
 
 void GestureEventHub::HandleOnDragCancel()
 {
+    ResetAutoHideDragInfo();
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
@@ -1353,6 +1402,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
                 gestureEventHubPtr->HandleDragEndAction(dragframeNodeInfo);
+                gestureEventHubPtr->ResetAutoHideDragInfo();
                 auto dragEventActuator = gestureEventHubPtr->GetDragEventActuator();
                 CHECK_NULL_VOID(dragEventActuator);
                 dragEventActuator->NotifyDragEnd();

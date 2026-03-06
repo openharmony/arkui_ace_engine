@@ -15,6 +15,8 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 
+#include <algorithm>
+
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/properties/ui_material.h"
@@ -23,12 +25,14 @@
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
+#include "core/pipeline/base/element_register.h"
 #include "ui/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
@@ -50,6 +54,7 @@ constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr size_t SHORT_KEY_LENGTH = 8;
 constexpr size_t PLAINTEXT_LENGTH = 4;
 constexpr size_t  CONVERT_TIME_BASE = 1000;
+constexpr VisibleType AUTO_HIDE_TARGET_VISIBLE_TYPE = VisibleType::INVISIBLE;
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
@@ -62,6 +67,43 @@ static bool CheckInternalDragging(const RefPtr<Container>& container)
     if (!pipelineContext || !pipelineContext->IsDragging()) {
         return false;
     }
+    return true;
+}
+
+std::vector<RefPtr<FrameNode>> DragDropFuncWrapper::ResolveAutoHideTargetsByUniqueId(
+    const std::vector<int32_t>& uniqueIds)
+{
+    std::vector<RefPtr<FrameNode>> targets;
+    for (auto uniqueId : uniqueIds) {
+        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(uniqueId);
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        if (!frameNode) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Auto hide target not found, uniqueId %{public}d", uniqueId);
+            continue;
+        }
+        if (std::find(targets.begin(), targets.end(), frameNode) == targets.end()) {
+            targets.emplace_back(frameNode);
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Resolve auto hide targets, config size %{public}zu, target size %{public}zu",
+        uniqueIds.size(), targets.size());
+    return targets;
+}
+
+bool DragDropFuncWrapper::UpdateAutoHideTargetVisibility(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == AUTO_HIDE_TARGET_VISIBLE_TYPE) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Skip auto hide target, uniqueId %{public}d is already invisible",
+            frameNode->GetId());
+        return false;
+    }
+    layoutProperty->UpdateVisibility(AUTO_HIDE_TARGET_VISIBLE_TYPE);
+    DragEventActuator::MarkDirtyNode(frameNode);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Auto hide target success, uniqueId %{public}d, tag %{public}s",
+        frameNode->GetId(), frameNode->GetTag().c_str());
     return true;
 }
 

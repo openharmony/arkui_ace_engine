@@ -30467,6 +30467,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Opt_Union_I32_Array_I32 GetAutoHideComponentUniqueIdsImpl(Ark_DragEvent peer)
+    {
+        if (!needGroupedLog(1)) {
+            return { .tag=INTEROP_TAG_UNDEFINED };
+        }
+        string out("getAutoHideComponentUniqueIds(");
+        out.append(") \n");
+        out.append("[return { .tag=INTEROP_TAG_UNDEFINED }] \n");
+        appendGroupedLog(1, out);
+        return { .tag=INTEROP_TAG_UNDEFINED };
+    }
+    void SetAutoHideComponentUniqueIdsImpl(Ark_DragEvent peer,
+                                           const Opt_Union_I32_Array_I32* autoHideComponentUniqueIds)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setAutoHideComponentUniqueIds(");
+        WriteToString(&out, autoHideComponentUniqueIds);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetGetModifierKeyStateImpl(Ark_DragEvent peer,
                                     const Opt_ModifierKeyStateGetter* getModifierKeyState)
     {
@@ -48780,6 +48802,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::SetDragBehaviorImpl,
             DragEventAccessor::GetUseCustomDropAnimationImpl,
             DragEventAccessor::SetUseCustomDropAnimationImpl,
+            DragEventAccessor::GetAutoHideComponentUniqueIdsImpl,
+            DragEventAccessor::SetAutoHideComponentUniqueIdsImpl,
             DragEventAccessor::SetGetModifierKeyStateImpl,
         };
         return &DragEventAccessorImpl;

@@ -36,6 +36,8 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
+constexpr size_t SINGLE_AUTO_HIDE_COMPONENT_SIZE = 1;
+
 void NapiThrow(const RefPtr<Framework::JsEngine>& engine, int32_t errCode, const std::string& message)
 {
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -48,6 +50,45 @@ void NapiThrow(const RefPtr<Framework::JsEngine>& engine, int32_t errCode, const
     napi_value error = nullptr;
     napi_create_error(env, code, msg, &error);
     napi_throw(env, error);
+}
+
+bool ParseAutoHideComponentUniqueId(const JSRef<JSVal>& value, std::vector<int32_t>& uniqueIds)
+{
+    if (!value->IsNumber()) {
+        return false;
+    }
+    uniqueIds.emplace_back(value->ToNumber<int32_t>());
+    return true;
+}
+
+std::vector<int32_t> ParseAutoHideComponentUniqueIds(const JSRef<JSVal>& value)
+{
+    std::vector<int32_t> uniqueIds;
+    if (ParseAutoHideComponentUniqueId(value, uniqueIds) || !value->IsArray()) {
+        return uniqueIds;
+    }
+    auto jsArray = JSRef<JSArray>::Cast(value);
+    for (size_t index = 0; index < jsArray->Length(); ++index) {
+        ParseAutoHideComponentUniqueId(jsArray->GetValueAt(index), uniqueIds);
+    }
+    return uniqueIds;
+}
+
+void SetAutoHideComponentUniqueIdResult(const std::vector<int32_t>& uniqueIds, const JSCallbackInfo& args)
+{
+    if (uniqueIds.empty()) {
+        args.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+    if (uniqueIds.size() == SINGLE_AUTO_HIDE_COMPONENT_SIZE) {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(uniqueIds.front())));
+        return;
+    }
+    JSRef<JSArray> uniqueIdArray = JSRef<JSArray>::New();
+    for (size_t index = 0; index < uniqueIds.size(); ++index) {
+        uniqueIdArray->SetValueAt(index, JSRef<JSVal>::Make(ToJSValue(uniqueIds[index])));
+    }
+    args.SetReturnValue(uniqueIdArray);
 }
 
 } // namespace
@@ -131,6 +172,8 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("setDragInfo", &JsDragEvent::SetDragInfo);
     JSClass<JsDragEvent>::CustomMethod("getDragInfo", &JsDragEvent::GetDragInfo);
     JSClass<JsDragEvent>::CustomProperty("dragBehavior", &JsDragEvent::GetDragBehavior, &JsDragEvent::SetDragBehavior);
+    JSClass<JsDragEvent>::CustomProperty("autoHideComponentUniqueIds", &JsDragEvent::GetAutoHideComponentUniqueIds,
+        &JsDragEvent::SetAutoHideComponentUniqueIds);
     JSClass<JsDragEvent>::CustomMethod("getVelocityX", &JsDragEvent::GetVelocityX);
     JSClass<JsDragEvent>::CustomMethod("getVelocityY", &JsDragEvent::GetVelocityY);
     JSClass<JsDragEvent>::CustomMethod("getVelocity", &JsDragEvent::GetVelocity);
@@ -483,6 +526,22 @@ void JsDragEvent::GetDragBehavior(const JSCallbackInfo& args)
                                                                        : OHOS::Ace::DragBehavior::COPY)));
     auto dragBehaviorRef = JSRef<JSVal>::Make(dragBehavior);
     args.SetReturnValue(dragBehaviorRef);
+}
+
+void JsDragEvent::SetAutoHideComponentUniqueIds(const JSCallbackInfo& args)
+{
+    CHECK_NULL_VOID(dragEvent_);
+    auto uniqueIds = ParseAutoHideComponentUniqueIds(args[0]);
+    dragEvent_->SetAutoHideComponentUniqueIds(uniqueIds);
+    TAG_LOGI(AceLogTag::ACE_DRAG,
+        "Configure autoHideComponentUniqueIds, input size %{public}zu, normalized size %{public}zu",
+        uniqueIds.size(), dragEvent_->GetAutoHideComponentUniqueIds().size());
+}
+
+void JsDragEvent::GetAutoHideComponentUniqueIds(const JSCallbackInfo& args)
+{
+    CHECK_NULL_VOID(dragEvent_);
+    SetAutoHideComponentUniqueIdResult(dragEvent_->GetAutoHideComponentUniqueIds(), args);
 }
 
 void JsDragEvent::GetVelocityX(const JSCallbackInfo& args)

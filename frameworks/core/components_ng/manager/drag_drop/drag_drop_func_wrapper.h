@@ -91,6 +91,8 @@ public:
         const RefPtr<PipelineBase>& nodeContext, const RefPtr<Subwindow>& subWindow);
     static void SetMenuSubWindowTouchable(bool touchable);
     static void HandleBackPressHideMenu();
+    static std::vector<RefPtr<FrameNode>> ResolveAutoHideTargetsByUniqueId(const std::vector<int32_t>& uniqueIds);
+    static bool UpdateAutoHideTargetVisibility(const RefPtr<FrameNode>& frameNode);
 
     // multi drag
     static bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);

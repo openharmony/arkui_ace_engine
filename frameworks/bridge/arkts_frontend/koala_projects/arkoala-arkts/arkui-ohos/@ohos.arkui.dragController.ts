@@ -99,6 +99,7 @@ export namespace dragController {
         extraParams?: string;
         touchPoint?: TouchPoint;
         previewOptions?: DragPreviewOptions;
+        autoHideComponentUniqueIds?: int | Array<int>;
         dataLoadParams?: unifiedDataChannel.DataLoadParams;
     }
 

@@ -692,6 +692,7 @@ export class DismissSheetActionInternal implements MaterializedBase,DismissSheet
 export interface DragEvent {
     dragBehavior: DragBehavior
     useCustomDropAnimation: boolean
+    autoHideComponentUniqueIds?: int32 | Array<int32> | undefined
     getModifierKeyState?: ModifierKeyStateGetter | undefined
     getDisplayX(): double
     getDisplayY(): double
@@ -723,11 +724,13 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     public dragBehavior: DragBehavior
     public useCustomDropAnimation: boolean
+    public autoHideComponentUniqueIds?: int32 | Array<int32> | undefined
     public getModifierKeyState?: ModifierKeyStateGetter | undefined
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DragEventInternal.getFinalizer())
         this.dragBehavior = this.getDragBehavior()
         this.useCustomDropAnimation = this.getUseCustomDropAnimation()
+        this.autoHideComponentUniqueIds = this.getAutoHideComponentUniqueIds()
         this.getModifierKeyState = this.getGetModifierKeyState()
     }
     constructor() {
@@ -834,6 +837,14 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.setUseCustomDropAnimation_serialize(useCustomDropAnimation_casted)
         return
     }
+    private getAutoHideComponentUniqueIds(): int32 | Array<int32> | undefined {
+        return this.getAutoHideComponentUniqueIds_serialize()
+    }
+    private setAutoHideComponentUniqueIds(autoHideComponentUniqueIds: int32 | Array<int32> | undefined): void {
+        const autoHideComponentUniqueIds_casted = autoHideComponentUniqueIds as (int32 | Array<int32> | undefined)
+        this.setAutoHideComponentUniqueIds_serialize(autoHideComponentUniqueIds_casted)
+        return
+    }
     private getGetModifierKeyState(): ModifierKeyStateGetter | undefined {
         return hookDragEventGetModifierKeyState(this)
     }
@@ -938,6 +949,62 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     private setUseCustomDropAnimation_serialize(useCustomDropAnimation: boolean): void {
         ArkUIGeneratedNativeModule._DragEvent_setUseCustomDropAnimation(this.peer!.ptr, useCustomDropAnimation ? true : false)
+    }
+    private getAutoHideComponentUniqueIds_serialize(): int32 | Array<int32> | undefined {
+        const retval = ArkUIGeneratedNativeModule._DragEvent_getAutoHideComponentUniqueIds(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: int32 | Array<int32> | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptUnionSelector: int32 = retvalDeserializer.readInt8()
+            let bufferOpt: int32 | Array<int32> | undefined
+            if (bufferOptUnionSelector == (0).toByte()) {
+                bufferOpt = retvalDeserializer.readInt32()
+            } else if (bufferOptUnionSelector == (1).toByte()) {
+                const bufferOptBufULength: int32 = retvalDeserializer.readInt32()
+                const bufferOptBufU: Array<int32> = new Array<int32>(bufferOptBufULength, (arg0: int32):int32 => {
+            return retvalDeserializer.readInt32();
+        })
+                bufferOpt = bufferOptBufU
+            } else {
+                throw new Error('One of the branches for bufferOpt has to be chosen through deserialisation.')
+            }
+            buffer = (bufferOpt as int32 | Array<int32>)
+        }
+        const returnResult: int32 | Array<int32> | undefined = buffer
+        return returnResult
+    }
+    private setAutoHideComponentUniqueIds_serialize(autoHideComponentUniqueIds: int32 | Array<int32> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (autoHideComponentUniqueIds !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const autoHideComponentUniqueIdsTmpValue = autoHideComponentUniqueIds!
+            if (autoHideComponentUniqueIdsTmpValue instanceof int32) {
+                thisSerializer.writeInt8((0).toByte())
+                const autoHideComponentUniqueIdsTmpValueForIdx0 = autoHideComponentUniqueIdsTmpValue as int32
+                thisSerializer.writeInt32(autoHideComponentUniqueIdsTmpValueForIdx0)
+            } else if (autoHideComponentUniqueIdsTmpValue instanceof Array) {
+                if (autoHideComponentUniqueIdsTmpValue.length == 0) {
+                    thisSerializer.writeInt8((1).toByte())
+                    thisSerializer.writeInt32(0)
+                } else {
+                    const autoHideComponentUniqueIdsTmpValueElem = autoHideComponentUniqueIdsTmpValue[0]
+                    if (autoHideComponentUniqueIdsTmpValueElem instanceof int32) {
+                        thisSerializer.writeInt8((1).toByte())
+                        const autoHideComponentUniqueIdsTmpValueForIdx1 = autoHideComponentUniqueIdsTmpValue as Array<int32>
+                        thisSerializer.writeInt32((autoHideComponentUniqueIdsTmpValueForIdx1.length).toInt())
+                        for (let autoHideComponentUniqueIdsTmpValueForIdx1CounterI = 0; autoHideComponentUniqueIdsTmpValueForIdx1CounterI < autoHideComponentUniqueIdsTmpValueForIdx1.length; autoHideComponentUniqueIdsTmpValueForIdx1CounterI++) {
+                            const autoHideComponentUniqueIdsTmpValueForIdx1TmpElement: int32 = autoHideComponentUniqueIdsTmpValueForIdx1[autoHideComponentUniqueIdsTmpValueForIdx1CounterI]
+                            thisSerializer.writeInt32(autoHideComponentUniqueIdsTmpValueForIdx1TmpElement)
+                        }
+                    }
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DragEvent_setAutoHideComponentUniqueIds(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     private setGetModifierKeyState_serialize(getModifierKeyState: ModifierKeyStateGetter | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
