@@ -8339,8 +8339,9 @@ void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
 void RichEditorPattern::HandleTouchUp()
 {
     bool isHandleMoving = IsHandleMoving();
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleTouchUp, fingers=%{public}zu, isHandleMoving=%{public}d",
-        touchedFingers_.size(), isHandleMoving);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleTouchUp, fingers=%{public}zu, movingState=[%{public}d, %{public}d]",
+        touchedFingers_.size(), isHandleMoving, moveCaretState_.isMoveCaret);
+    IF_TRUE(moveCaretState_.isMoveCaret, MoveCaretToContentRect());
     HandleTouchUpAfterLongPress();
     ResetTouchAndMoveCaretState();
     ResetTouchSelectState();
