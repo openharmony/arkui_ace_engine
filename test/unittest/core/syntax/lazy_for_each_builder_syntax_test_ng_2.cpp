@@ -792,6 +792,50 @@ HWTEST_F(LazyForEachSyntaxTestNg2, LazyForEachBuilderSetActiveChildRange001, Tes
 }
 
 /**
+ * @tc.name: LazyForEachBuilderSetActiveChildRange002
+ * @tc.desc: Test SetActiveChildRange with mixed null nodes (some in expiringItem_, some not)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg2, LazyForEachBuilderSetActiveChildRange002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     * @tc.expected: Create LazyForEachBuilder success.
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup cachedItems_ with null nodes - some in expiringItem_, some not
+     * @tc.expected: Only those NOT in expiringItem_ should be deleted
+     */
+    std::string str0 = "0";
+    std::string str1 = "1";
+    std::string str2 = "2";
+
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild(str0, nullptr);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild(str1, nullptr);
+    lazyForEachBuilder->cachedItems_[2] = LazyForEachChild(str2, nullptr);
+
+    // Only add some keys to expiringItem_
+    lazyForEachBuilder->expiringItem_.clear();
+    lazyForEachBuilder->expiringItem_[str1] = LazyForEachCacheChild(-1, nullptr);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange with range [0, 0]
+     * @tc.expected: Indices 2 (not in expiringItem_) should be deleted; indices 1 (in expiringItem_) should remain
+     */
+    lazyForEachBuilder->SetActiveChildRange(0, 0);
+
+    // Only indices 1 should remain (in expiringItem_) and index 0 (in range)
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.size(), 2);
+    EXPECT_TRUE(lazyForEachBuilder->cachedItems_.find(0) != lazyForEachBuilder->cachedItems_.end());
+    EXPECT_TRUE(lazyForEachBuilder->cachedItems_.find(1) != lazyForEachBuilder->cachedItems_.end());
+    EXPECT_TRUE(lazyForEachBuilder->cachedItems_.find(2) == lazyForEachBuilder->cachedItems_.end()); // deleted
+}
+
+/**
  * @tc.name: LazyForEachBuilderGetChildIndex001
  * @tc.desc: Create LazyForEach.
  * @tc.type: FUNC
