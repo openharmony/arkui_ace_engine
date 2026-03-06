@@ -218,6 +218,9 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
         uiParam.rect_ = { absRect.GetLeft(), absRect.GetTop(), width, height };
         uiParam.scaleX_ = absRect.GetWidth() / width;
         uiParam.scaleY_ = absRect.GetHeight() / height;
+        auto matrix = globalGeometry->GetAbsMatrix();
+        uiParam.rsScaleX_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_X);
+        uiParam.rsScaleY_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
     }
     uiParam.needSync_ = ancestorInfo.notSyncPosition ? false : true;
     auto matrix = globalGeometry->GetAbsMatrix();
