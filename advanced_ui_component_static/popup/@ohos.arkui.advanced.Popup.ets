@@ -418,7 +418,7 @@ export struct PopupComponent {
     } else if (typeof fontWeight === 'string') {
       return fontWeight as string
     } else if (typeof fontWeight === 'number') {
-      return Math.trunc(fontWeight as number) as int
+      return Math.trunc(fontWeight as number).toInt()
     } else {
       return fontWeight as FontWeight
     }
@@ -497,7 +497,7 @@ export struct PopupComponent {
     let defaultDisplaySyncWidth: number = 0;
     try {
       defaultDisplaySync = display.getDefaultDisplaySync()
-      defaultDisplaySyncWidth = defaultDisplaySync.width as number;
+      defaultDisplaySyncWidth = defaultDisplaySync.width.toDouble();
     } catch (error) {
       console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
       return textMaxWeight = 400
@@ -693,13 +693,18 @@ export struct PopupComponent {
       if ((value as Resource).id !== -1) {
         if ((value?.type?.toInt()) === RESOURCE_TYPE_FLOAT) {
           return this.getUIContext()
-            .px2vp(this.getUIContext().getHostContext()?.resourceManager?.getDouble((value as Resource).id) as number);
+            .px2vp(
+              Number(
+                this.getUIContext().getHostContext()?.resourceManager?.getDouble((value as Resource).id).toDouble()
+              ).toDouble()
+            );
         }
         if ((value?.type?.toInt()) === RESOURCE_TYPE_INTEGER) {
-          return this.getUIContext().px2vp(
+          return this.getUIContext()
+          .px2vp(
             Number(
-              this.getUIContext().getHostContext()?.resourceManager?.getInt((value as Resource).id) as int
-            ) as number
+              this.getUIContext().getHostContext()?.resourceManager?.getInt((value as Resource).id).toDouble()
+            ).toDouble()
           )
         }
         return POPUP_DEFAULT_MAXWIDTH
@@ -727,7 +732,7 @@ export struct PopupComponent {
     let defaultDisplaySyncWidth: number = 0;
     try {
       defaultDisplaySync = display.getDefaultDisplaySync()
-      defaultDisplaySyncWidth = defaultDisplaySync.width as number
+      defaultDisplaySyncWidth = defaultDisplaySync.width.toDouble()
     } catch (error) {
       console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
       return Number.NEGATIVE_INFINITY;

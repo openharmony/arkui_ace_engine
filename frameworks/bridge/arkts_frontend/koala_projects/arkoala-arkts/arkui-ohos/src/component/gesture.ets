@@ -845,7 +845,7 @@ export class ScrollableTargetInfoTransfer {
         }
         let pointer = wrapFunc.invoke(esValue);
         if (pointer.isNumber()) {
-            ArkUIAniModule._ScrollableTargetInfoAccessorWithPointer(peer, pointer.toNumber() as long)
+            ArkUIAniModule._ScrollableTargetInfoAccessorWithPointer(peer, Double.toLong(pointer.toNumber()))
         }
         return ScrollableTargetInfoInternal.fromPtr(peer);
     }
@@ -854,7 +854,7 @@ export class ScrollableTargetInfoTransfer {
             return new Object();
         }
         let objectInternal: EventTargetInfo = input as EventTargetInfo;
-        const nativePointer: KPointer = ArkUIAniModule._TransferScrollableTargetInfoPointer(objectInternal.peer!.ptr as long);
+        const nativePointer: KPointer = ArkUIAniModule._TransferScrollableTargetInfoPointer(objectInternal.peer!.ptr.toLong());
         const global = ESValue.getGlobal();
         const wrapFunc = global.getProperty('wrapScrollableTargetInfoPointer');
         if (wrapFunc.isNull() || wrapFunc.isUndefined()) {

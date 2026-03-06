@@ -161,7 +161,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
             ArkThemeScopeManager.getInstance().executeReload(node);
             (staticComponent as CustomDelegate<T, T_Options>).__updateStruct(options ? options() : undefined);
             },
-            peerNode.getPeerPtr() as number,
+            peerNode.getPeerPtr().toDouble(),
         ];
 }
 
@@ -505,7 +505,7 @@ export function transferCompatibleBuilder<T extends Function>(
 
         const ptr = node.value.peer.ptr;
         uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
-        return ptr as number;
+        return ptr.toDouble();
     }
     const createDynamicBuilder = ESValue.getGlobal().getProperty('createDynamicBuilder');
     const dynamicBuilder = createDynamicBuilder.invoke(ESValue.wrap(staticBuilderFunc));
@@ -541,7 +541,7 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
         });
         const ptr = node.value.peer.ptr;
         uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
-        return [ptr as number, ()=>{ if (state) { state.value++; } }];
+        return [ptr.toDouble(), ()=>{ if (state) { state.value++; } }];
     }
     const createDynamicUpdatableBuilder = ESValue.getGlobal().getProperty('createDynamicUpdatableBuilder');
     const dynamicBuilder = createDynamicUpdatableBuilder.invoke(ESValue.wrap(staticBuilderFunc));

@@ -723,7 +723,7 @@ struct OperateItemStruct {
         fadeout: true,
         marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
       })
-      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
+      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value.toInt())
       .draggable(false)
       .flexShrink(1)
   }
@@ -977,7 +977,7 @@ struct OperateItemStruct {
               fadeout: true,
               marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
             })
-            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value as int)
+            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value.toInt())
             .focusable(true)
             .draggable(false)
             .constraintSize({
@@ -1301,7 +1301,7 @@ export struct ComposeListItem {
     if (this.callbackId) {
       let context: UIContext = this.getUIContext();
       if (context.getHostContext() !== undefined) {
-        this.applicationContext.offEnvironment(this.callbackId as Int,
+        this.applicationContext.offEnvironment(this.callbackId.toInt(),
           (err: BusinessError<void> | null): void => {
             hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
           })

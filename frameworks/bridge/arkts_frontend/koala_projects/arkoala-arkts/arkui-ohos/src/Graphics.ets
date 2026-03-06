@@ -98,7 +98,7 @@ export class LengthMetrics {
     }
     static resource(res: Resource) {
         let returnResult = SystemOps.resourceToLengthMetrics(res);
-        let unit = returnResult.unit as int32;
+        let unit = returnResult.unit.toInt();
         let lengthUnit: LengthUnit = LengthUnit.PX;
         if (unit >= LengthUnit.PX || unit <= LengthUnit.LPX) {
             lengthUnit = LengthUnit.fromValue(unit);
@@ -131,7 +131,7 @@ export class ColorMetrics {
     static readonly YELLOW: int32 = 0xffffff00.toInt();
     static readonly TRANSPARENT: string = '#00000000';
     get color(): string {
-        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${(this.alpha as double) / MAX_CHANNEL_VALUE})`;
+        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${(this.alpha.toDouble()) / MAX_CHANNEL_VALUE})`;
     }
     get red(): int32 {
         return this.red_!;
@@ -170,10 +170,10 @@ export class ColorMetrics {
         this.alpha_ = MAX_CHANNEL_VALUE;
     }
     constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE) {
-        this.red_ = ColorMetrics.clamp(red) as int32;
-        this.green_ = ColorMetrics.clamp(green) as int32;
-        this.blue_ = ColorMetrics.clamp(blue) as int32;
-        this.alpha_ = ColorMetrics.clamp(alpha) as int32;
+        this.red_ = ColorMetrics.clamp(red).toInt();
+        this.green_ = ColorMetrics.clamp(green).toInt();
+        this.blue_ = ColorMetrics.clamp(blue).toInt();
+        this.alpha_ = ColorMetrics.clamp(alpha).toInt();
     }
     public static numeric(value: int32): ColorMetrics {
         const red = (value >> 16) & 0x000000FF;
@@ -251,14 +251,14 @@ export class ColorMetrics {
             const blue = chanels[3];
             const alpha = chanels[4];
             let colorMetrics = new ColorMetrics(red, green, blue, alpha);
-            colorMetrics.alpha_ = ColorMetrics.clamp(alpha) as int32;
+            colorMetrics.alpha_ = ColorMetrics.clamp(alpha).toInt();
             if (chanels.length > 5) {
                 const resourceId = chanels[5];
-                colorMetrics.setResourceId(resourceId as int32);
+                colorMetrics.setResourceId(resourceId.toInt());
             }
             return colorMetrics;
         } else if (color instanceof int32) {
-            return ColorMetrics.numeric(color as int32);
+            return ColorMetrics.numeric(color.toInt());
         } else if (typeof color === 'string') {
             let colorValue = color.toString();
             if (ColorMetrics.isHexFormat(colorValue)) {

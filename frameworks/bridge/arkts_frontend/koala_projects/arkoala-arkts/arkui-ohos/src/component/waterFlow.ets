@@ -34,7 +34,7 @@ export class WaterFlowSections {
     }
 
     static toArrayIndex(origin: int32, limit: int32): int32 {
-        let result: int32 = Math.trunc(origin) as int32;
+        let result: int32 = Math.trunc(origin).toInt();
         if (result < 0) {
             // Negative index counts from the end of the sectionArray
             result += limit;
@@ -78,7 +78,7 @@ export class WaterFlowSections {
         if (deleteCount === undefined && sections === undefined) {
             intDeleteCount = oldLength - intStart;
         } else if (deleteCount !== undefined) {
-            intDeleteCount = Math.trunc(deleteCount) as int32;
+            intDeleteCount = Math.trunc(deleteCount).toInt();
             if (intDeleteCount > oldLength - intStart) {
                 intDeleteCount = oldLength - intStart;
             }

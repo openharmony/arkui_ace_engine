@@ -86,7 +86,7 @@ export class RenderNodeTransfer {
         }
         let colorVal = getRenderNodeColorInt(inVal, 'backgroundColorValue');
         if (colorVal !== undefined) {
-            rn.backgroundColor = colorVal as int;
+            rn.backgroundColor = colorVal.toInt();
         }
         rn.clipToFrame = TransferUtil.getPropBool(inVal, "clipToFrameValue");
         rn.frame = TransferUtil.getPropFrame(inVal, "frameValue");
@@ -97,7 +97,7 @@ export class RenderNodeTransfer {
         rn.scale = TransferUtil.getPropVector2(inVal, "scaleValue");
         let clrVal = getRenderNodeColorInt(inVal, 'shadowColorValue');
         if (clrVal !== undefined) {
-            rn.shadowColor = clrVal as int;
+            rn.shadowColor = clrVal.toInt();
         }
         rn.shadowOffset = TransferUtil.getPropVector2(inVal, "shadowOffsetValue");
         rn.label = TransferUtil.getPropString(inVal, "labelValue");

@@ -266,7 +266,7 @@ struct ContentItemStruct {
         textContent: text,
         fontSize: sizeResource,
         maxLines: TEXT_MAX_LINE
-      }).height as number);
+      }).height.toInt());
       return singleRowHeight;
     }
     return 0;
@@ -346,7 +346,7 @@ struct ContentItemStruct {
         .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
           if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
             this.isWrapFirstText = this.judgeIsWrap(this.primaryText, this.primaryTextSize,
-              newValue.height as number);
+              newValue.height.toDouble());
           }
         })
       if (this.secondaryText != null) {
@@ -361,7 +361,7 @@ struct ContentItemStruct {
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
             if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
               this.isWrapSecondText = this.judgeIsWrap(this.secondaryText, this.secondaryThirdTextSize,
-                newValue.height as number);
+                newValue.height.toDouble());
             }
           })
       }
@@ -377,7 +377,7 @@ struct ContentItemStruct {
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
             if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
               this.isWrapThirdText = this.judgeIsWrap(this.description, this.secondaryThirdTextSize,
-                newValue.height as number);
+                newValue.height.toDouble());
             }
           })
       }
@@ -1167,12 +1167,12 @@ export struct ComposeListItem {
       if (this.contentItem?.icon === undefined) {
         this.itemHeight = ItemHeight.FIRST_HEIGHT;
       } else {
-        this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ?
+        this.itemHeight = this.contentItem.iconStyle.toDouble() <= IconType.HEAD_SCULPTURE ?
         ItemHeight.SECOND_HEIGHT :
           (LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value);
       }
     } else if (this.contentItem.description === undefined) {
-      let iconStyle = this.contentItem.iconStyle as number;
+      let iconStyle = this.contentItem.iconStyle.toDouble();
       if (this.contentItem.icon === undefined ||
         (this.contentItem.icon !== undefined && iconStyle <= IconType.SYSTEM_ICON)) {
         this.itemHeight = ItemHeight.THIRD_HEIGHT;
@@ -1182,8 +1182,8 @@ export struct ComposeListItem {
     } else {
       this.itemHeight = ItemHeight.FIFTH_HEIGHT;
     }
-    if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
-      this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
+    if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle.toDouble()).toDouble() >= this.itemHeight) {
+      this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle.toDouble()).toDouble() + SAFE_LIST_PADDING;
     }
 
     if (this.operateItem?.arrow && this.operateItem?.text && this.operateItem?.arrow?.action) {
@@ -1337,7 +1337,7 @@ export struct ComposeListItem {
     if (this.containerDirection === FlexDirection.Row) {
       return LengthMetrics.vp(0);
     }
-    let iconSize = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number);
+    let iconSize = ICON_SIZE_MAP.get(this.contentItem?.iconStyle.toDouble());
     if (this.contentItem?.icon && iconSize && iconSize <= HEADSCULPTURE_SIZE) {
       return LengthMetrics.vp(iconSize + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
     }

@@ -23,7 +23,7 @@ export class LengthMetricsTransfer {
         }
         const value = ESValue.wrap(input).getProperty('value').toNumber();
         const unit = ESValue.wrap(input).getProperty('unit').toNumber();
-        let unitInt32 = unit as int32;
+        let unitInt32 = unit.toInt();
         let lengthUnit: LengthUnit = LengthUnit.VP;
         if (unitInt32 >= LengthUnit.PX || unitInt32 <= LengthUnit.LPX) {
             lengthUnit = LengthUnit.fromValue(unitInt32);

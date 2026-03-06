@@ -810,10 +810,10 @@ export struct FoldSplitContainer {
     let height: Long = 0;
     if (rects && rects.length) {
       const rect = rects[0];
-      left = (this.getUIContext().px2vp(rect.left) - this.containerGlobalPosition.x) as Long;
-      top = (this.getUIContext().px2vp(rect.top) - this.containerGlobalPosition.y) as Long;
-      width = this.getUIContext().px2vp(rect.width) as Long;
-      height = this.getUIContext().px2vp(rect.height) as Long;
+      left = (this.getUIContext().px2vp(rect.left) - this.containerGlobalPosition.x).toLong();
+      top = (this.getUIContext().px2vp(rect.top) - this.containerGlobalPosition.y).toLong();
+      width = this.getUIContext().px2vp(rect.width).toLong();
+      height = this.getUIContext().px2vp(rect.height).toLong();
     }
 
     return { left, top, width, height };

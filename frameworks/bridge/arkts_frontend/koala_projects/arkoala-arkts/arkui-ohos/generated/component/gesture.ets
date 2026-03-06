@@ -433,11 +433,11 @@ export class BaseGestureEvent_serializer {
         let valueDeserializer: DeserializerBase = buffer
         let ptr: KPointer = valueDeserializer.readPointer()
         // instructive change start
-        let type = ArkUIGeneratedNativeModule._GestureOps_getGestureEventType(ptr)
+        let type = Double.toInt(ArkUIGeneratedNativeModule._GestureOps_getGestureEventType(ptr))
         if (type === -1) {
             return BaseGestureEventInternal.fromPtr(ptr)
         }
-        let recognizerType = GestureControl.GestureType.fromValue(type as int32)
+        let recognizerType = GestureControl.GestureType.fromValue(type)
         switch(recognizerType) {
             case GestureControl.GestureType.TAP_GESTURE:
                 return TapGestureEventInternal.fromPtr(ptr)
@@ -491,7 +491,7 @@ export class GestureRecognizer_serializer {
         let ptr: KPointer = valueDeserializer.readPointer()
         // instructive change start
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_getType(ptr)
-        let recognizerType =  GestureControl.GestureType.fromValue(retval)
+        let recognizerType =  GestureControl.GestureType.fromValue(Double.toInt(retval))
         switch(recognizerType) {
             case GestureControl.GestureType.TAP_GESTURE:
                 return TapRecognizerInternal.fromPtr(ptr)

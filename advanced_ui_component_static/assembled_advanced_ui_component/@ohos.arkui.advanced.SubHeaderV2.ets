@@ -463,7 +463,7 @@ export struct SubHeaderV2 {
     Column() {
       Text($$.content)
         .primaryTitleStyles({
-          fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
+          fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
           maxLines: DOUBLE_LINE_NUM,
           alignment: Alignment.Start,
           fontColor: this.subHeaderV2Theme.fontPrimaryColor,
@@ -503,7 +503,7 @@ export struct SubHeaderV2 {
   PrimaryTitleStyle($$: ContentIconOption): void {
     Text($$.content)
       .primaryTitleStyles({
-        fontWeight: getResourceValue('sys.float.subheader_title_font_weight') as int,
+        fontWeight: getResourceValue('sys.float.subheader_title_font_weight').toInt(),
         maxLines: DOUBLE_LINE_NUM,
         alignment: Alignment.Start,
         fontColor: this.subHeaderV2Theme.fontPrimaryColor,

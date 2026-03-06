@@ -125,7 +125,7 @@ export function _r(id: long, type: long, bundleName: string, moduleName: string,
     if (id === -1) {
         return new ArkResource(null, bundleName, moduleName, ...params);
     }
-    return new ArkResource(id as long, type as int32, bundleName, moduleName, ...params);
+    return new ArkResource(id.toLong(), type.toInt(), bundleName, moduleName, ...params);
 }
 export function _rawfile(id: long, type: long, bundleName: string, moduleName: string, ...params: Array<string | int | long | double | Resource>): Resource {
     const name: string = params[0] as string;

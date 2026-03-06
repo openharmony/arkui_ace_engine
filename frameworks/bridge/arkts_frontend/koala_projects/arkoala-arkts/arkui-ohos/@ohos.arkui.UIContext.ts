@@ -1615,75 +1615,75 @@ export class UIObserver {
     }
 
     public onBeforePanStart(callback: PanListenerCallback): void {
-        let resourceId = UIObserverGestureEventOps.setOnBeforePanStart(this.instanceId_ as int, callback);
-        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_ as int, resourceId, 'beforePanStart', callback);
+        let resourceId = UIObserverGestureEventOps.setOnBeforePanStart(this.instanceId_.toInt(), callback);
+        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_.toInt(), resourceId, 'beforePanStart', callback);
  	}
 
     public offBeforePanStart(callback?: PanListenerCallback): void {
-        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_ as int, 'beforePanStart', callback);
+        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_.toInt(), 'beforePanStart', callback);
     }
 
     public onBeforePanEnd(callback: PanListenerCallback): void {
-        let resourceId = UIObserverGestureEventOps.setOnBeforePanEnd(this.instanceId_ as int, callback);
-        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_ as int, resourceId, 'beforePanEnd', callback);
+        let resourceId = UIObserverGestureEventOps.setOnBeforePanEnd(this.instanceId_.toInt(), callback);
+        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_.toInt(), resourceId, 'beforePanEnd', callback);
  	}
 
     public offBeforePanEnd(callback?: PanListenerCallback): void {
-        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_ as int, 'beforePanEnd', callback);
+        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_.toInt(), 'beforePanEnd', callback);
     }
 
     public onAfterPanStart(callback: PanListenerCallback): void {
-        let resourceId = UIObserverGestureEventOps.setOnAfterPanStart(this.instanceId_ as int, callback);
-        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_ as int, resourceId, 'afterPanStart', callback);
+        let resourceId = UIObserverGestureEventOps.setOnAfterPanStart(this.instanceId_.toInt(), callback);
+        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_.toInt(), resourceId, 'afterPanStart', callback);
  	}
 
     public offAfterPanStart(callback?: PanListenerCallback): void {
-        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_ as int, 'afterPanStart', callback);
+        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_.toInt(), 'afterPanStart', callback);
     }
 
     public onAfterPanEnd(callback: PanListenerCallback): void {
-        let resourceId = UIObserverGestureEventOps.setOnAfterPanEnd(this.instanceId_ as int, callback);
-        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_ as int, resourceId, 'afterPanEnd', callback);
+        let resourceId = UIObserverGestureEventOps.setOnAfterPanEnd(this.instanceId_.toInt(), callback);
+        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_.toInt(), resourceId, 'afterPanEnd', callback);
  	}
 
     public offAfterPanEnd(callback?: PanListenerCallback): void {
-        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_ as int, 'afterPanEnd', callback);
+        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_.toInt(), 'afterPanEnd', callback);
     }
 
     public onWillClick(callback: ClickEventListenerCallback): void {
-        let resourceId = UIObserverGestureEventOps.setOnWillClick(this.instanceId_ as int, callback);
-        ArkUIAniModule._GestureEventUIObserver_SetClickListenerCallback(this.instanceId_ as int, resourceId, 'willClick', callback);
+        let resourceId = UIObserverGestureEventOps.setOnWillClick(this.instanceId_.toInt(), callback);
+        ArkUIAniModule._GestureEventUIObserver_SetClickListenerCallback(this.instanceId_.toInt(), resourceId, 'willClick', callback);
  	}
 
     public offWillClick(callback?: ClickEventListenerCallback): void {
-        ArkUIAniModule._GestureEventUIObserver_RemoveClickListenerCallback(this.instanceId_ as int, 'willClick', callback);
+        ArkUIAniModule._GestureEventUIObserver_RemoveClickListenerCallback(this.instanceId_.toInt(), 'willClick', callback);
     }
 
     public onDidClick(callback: ClickEventListenerCallback): void {
-        let resourceId = UIObserverGestureEventOps.setOnDidClick(this.instanceId_ as int, callback);
-        ArkUIAniModule._GestureEventUIObserver_SetClickListenerCallback(this.instanceId_ as int, resourceId, 'didClick', callback);
+        let resourceId = UIObserverGestureEventOps.setOnDidClick(this.instanceId_.toInt(), callback);
+        ArkUIAniModule._GestureEventUIObserver_SetClickListenerCallback(this.instanceId_.toInt(), resourceId, 'didClick', callback);
  	}
 
     public offDidClick(callback?: ClickEventListenerCallback): void {
-        ArkUIAniModule._GestureEventUIObserver_RemoveClickListenerCallback(this.instanceId_ as int, 'didClick', callback);
+        ArkUIAniModule._GestureEventUIObserver_RemoveClickListenerCallback(this.instanceId_.toInt(), 'didClick', callback);
     }
 
     public onWillTap(callback: GestureEventListenerCallback): void {
-        let resourceId = UIObserverGestureEventOps.setOnWillTap(this.instanceId_ as int, callback);
-        ArkUIAniModule._GestureEventUIObserver_SetTapListenerCallback(this.instanceId_ as int, resourceId, 'willTap', callback);
+        let resourceId = UIObserverGestureEventOps.setOnWillTap(this.instanceId_.toInt(), callback);
+        ArkUIAniModule._GestureEventUIObserver_SetTapListenerCallback(this.instanceId_.toInt(), resourceId, 'willTap', callback);
  	}
 
     public offWillTap(callback?: GestureEventListenerCallback): void {
-        ArkUIAniModule._GestureEventUIObserver_RemoveTapListenerCallback(this.instanceId_ as int, 'willTap', callback);
+        ArkUIAniModule._GestureEventUIObserver_RemoveTapListenerCallback(this.instanceId_.toInt(), 'willTap', callback);
     }
 
     public onDidTap(callback: GestureEventListenerCallback): void {
-        let resourceId = UIObserverGestureEventOps.setOnDidTap(this.instanceId_ as int, callback);
-        ArkUIAniModule._GestureEventUIObserver_SetTapListenerCallback(this.instanceId_ as int, resourceId, 'didTap', callback);
+        let resourceId = UIObserverGestureEventOps.setOnDidTap(this.instanceId_.toInt(), callback);
+        ArkUIAniModule._GestureEventUIObserver_SetTapListenerCallback(this.instanceId_.toInt(), resourceId, 'didTap', callback);
  	}
 
     public offDidTap(callback?: GestureEventListenerCallback): void {
-        ArkUIAniModule._GestureEventUIObserver_RemoveTapListenerCallback(this.instanceId_ as int, 'didTap', callback);
+        ArkUIAniModule._GestureEventUIObserver_RemoveTapListenerCallback(this.instanceId_.toInt(), 'didTap', callback);
     }
 
     public addGlobalGestureListener(type: GestureListenerType, option: GestureObserverConfigs, callback: GestureListenerCallback): void
