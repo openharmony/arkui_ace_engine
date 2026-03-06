@@ -67,7 +67,7 @@ public:
 
 private:
     bool hasText_ = false;
-    bool hasImage_ = false;
+    bool isImage_ = false;
     bool isEdit_ = false;
     WebElementType elementType_ = WebElementType::NONE;
     ResponseType responseType_ = ResponseType::RIGHT_CLICK;

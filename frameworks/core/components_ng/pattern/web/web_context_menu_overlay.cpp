@@ -75,31 +75,35 @@ void WebContextMenuOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOve
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->contextMenuParam_);
     hasText_ = !pattern->contextMenuParam_->GetSelectionText().empty();
-    hasImage_ = pattern->contextMenuParam_->HasImageContents();
+    isImage_ = pattern->contextMenuParam_->GetLinkUrl().empty() &&
+               (pattern->contextMenuParam_->GetMediaType() ==
+                   OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_IMAGE);
+    isEdit_ = pattern->contextMenuParam_->IsEditable();
     uint32_t flags = static_cast<uint32_t>(pattern->contextMenuParam_->GetEditStateFlags());
-    TAG_LOGI(AceLogTag::ACE_WEB, "OnUpdateMenuInfo hasText:%{public}d, hasImage:%{public}d flags:%{public}d", hasText_,
-        hasImage_, flags);
-    if (!(flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_CUT)) {
-        menuInfo.showCut = false;
-    } else {
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "OnUpdateMenuInfo hasText:%{public}d, isImage_:%{public}d isEdit_:%{public}d flags:%{public}d", hasText_,
+        isImage_, isEdit_, flags);
+    if ((flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_CUT) && isEdit_ && hasText_) {
         menuInfo.showCut = true;
-    }
-    if (!(flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_COPY)) {
-        menuInfo.showCopy = false;
     } else {
+        menuInfo.showCut = false;
+    }
+    if ((flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_COPY) && hasText_) {
         menuInfo.showCopy = true;
-    }
-    if (!(flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_PASTE)) {
-        menuInfo.showPaste = false;
     } else {
+        menuInfo.showCopy = false;
+    }
+    if ((flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_PASTE) && isEdit_) {
         menuInfo.showPaste = true;
-    }
-    if (!(flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_SELECT_ALL)) {
-        menuInfo.showCopyAll = false;
     } else {
-        menuInfo.showCopyAll = true;
+        menuInfo.showPaste = false;
     }
-    menuInfo.showCopy = menuInfo.showCopy || hasImage_;
+    if ((flags & NWeb::NWebContextMenuParams::ContextMenuEditStateFlags::CM_ES_CAN_SELECT_ALL)) {
+        menuInfo.showCopyAll = true;
+    } else {
+        menuInfo.showCopyAll = false;
+    }
+    menuInfo.showCopy = menuInfo.showCopy || isImage_;
     menuInfo.menuType = OptionMenuType::MOUSE_MENU;
     menuInfo.menuIsShow = IsShowMenu();
     menuInfo.showCameraInput = false;
@@ -128,7 +132,7 @@ void WebContextMenuOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuTy
     CHECK_NULL_VOID(pattern->contextMenuResult_);
     switch (id) {
         case OptionMenuActionId::COPY:
-            if (hasImage_) {
+            if (isImage_) {
                 pattern->contextMenuResult_->CopyImage();
             } else {
                 pattern->contextMenuResult_->Copy();
@@ -183,14 +187,11 @@ void WebContextMenuOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selectI
 {
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
-    CHECK_NULL_VOID(pattern->contextMenuParam_);
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(selectInfo, requestCode);
     selectInfo.handlerColor = Color(0xff007dff);
     selectInfo.handleReverse = IsHandleReverse();
-    auto offset = pattern->GetCoordinatePoint().value_or(OffsetF());
     selectInfo.isUsingMouse = true;
-    selectInfo.rightClickOffset =
-        offset + OffsetF(pattern->contextMenuParam_->GetXCoord(), pattern->contextMenuParam_->GetYCoord());
+    CalculateMenuOffset(selectInfo);
     selectInfo.menuInfo.responseType = static_cast<int32_t>(TextResponseType::RIGHT_CLICK);
     selectInfo.menuInfo.editorType = static_cast<int32_t>(TextSpanType::MIXED);
     selectInfo.callerFrameNode = pattern->GetHost();
@@ -198,6 +199,30 @@ void WebContextMenuOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selectI
     selectInfo.selectArea = pattern->selectArea_;
     selectInfo.recreateOverlay = requestCode == REQUEST_RECREATE;
     SetEditMenuOption(selectInfo);
+}
+
+void WebContextMenuOverlay::CalculateMenuOffset(SelectOverlayInfo& selectInfo)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->contextMenuParam_);
+    auto offset = pattern->GetCoordinatePoint().value_or(OffsetF());
+    selectInfo.rightClickOffset =
+        offset + OffsetF(pattern->contextMenuParam_->GetXCoord(), pattern->contextMenuParam_->GetYCoord());
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    if (!isContainerModal) {
+        auto stageManager = pipeline->GetStageManager();
+        CHECK_NULL_VOID(stageManager);
+        auto page = stageManager->GetLastPage();
+        CHECK_NULL_VOID(page);
+        auto pageOffset = page->GetOffsetRelativeToWindow();
+        selectInfo.rightClickOffset = selectInfo.rightClickOffset + pageOffset;
+        TAG_LOGD(AceLogTag::ACE_SELECT_OVERLAY, "CreateMenuNode pageOffset:%{public}s", pageOffset.ToString().c_str());
+    }
 }
 
 std::vector<NG::MenuItemParam> WebContextMenuOverlay::FilterSupportedMenuItems(
