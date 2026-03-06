@@ -46,6 +46,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string CHILD_NODE = "ChildNode";
+const double EPS = 1e-6;
 
 class MockNodeContainerPattern : public NodeContainerPattern {
 public:
@@ -224,7 +225,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure001, TestSize.L
      * @tc.steps: step3. call the function Measure.
      */
     layoutAlgorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
+    EXPECT_NEAR(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0, EPS);
 }
 
 /**
@@ -272,7 +273,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerLayoutAlgorithmMeasure002, TestSize.L
      */
     layoutAlgorithm->Measure(&layoutWrapper);
 
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0);
+    EXPECT_NEAR(layoutWrapper.GetGeometryNode()->GetFrameSize().Width(), 0.0, EPS);
 }
 
 /**
