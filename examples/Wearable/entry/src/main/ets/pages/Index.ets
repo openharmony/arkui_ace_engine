@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,38 @@ struct Index {
             .onClick(() => {
               console.log('router ArcButtonExample005');
               router.pushUrl({ url: 'pages/ArcButton/ArcButtonExample005' })
+            })
+
+          Button('Example006 - 异常值测试')
+            .width('80%')
+            .margin(10)
+            .onClick(() => {
+              console.log('router ArcButtonExample006');
+              router.pushUrl({ url: 'pages/ArcButton/ArcButtonExample006' })
+            })
+
+          Button('Example007 - 进度条样式测试')
+            .width('80%')
+            .margin(10)
+            .onClick(() => {
+              console.log('router ArcButtonExample007');
+              router.pushUrl({ url: 'pages/ArcButton/ArcButtonExample007' })
+            })
+
+          Button('Example008 - 进度条样式背景混色测试')
+            .width('80%')
+            .margin(10)
+            .onClick(() => {
+              console.log('router ArcButtonExample008');
+              router.pushUrl({ url: 'pages/ArcButton/ArcButtonExample008' })
+            })
+
+          Button('Example009 - ArcButton文本测试')
+            .width('80%')
+            .margin(10)
+            .onClick(() => {
+              console.log('router ArcButtonExample009');
+              router.pushUrl({ url: 'pages/ArcButton/ArcButtonExample009' })
             })
         }
         .width('100%')
