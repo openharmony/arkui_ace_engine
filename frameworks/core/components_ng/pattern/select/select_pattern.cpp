@@ -711,6 +711,7 @@ void SelectPattern::SetFocusStyle()
     if (bgColorModify_) {
         selectRenderContext->UpdateBackgroundColor(selectTheme->GetSelectFocusedBackground());
     }
+    CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     focusTextColorModify_ = props->GetTextColor() == selectTheme->GetFontColor();
@@ -754,6 +755,7 @@ void SelectPattern::ClearFocusStyle()
     }
     if (focusTextColorModify_) {
         focusTextColorModify_ = false;
+        CHECK_NULL_VOID(text_);
         auto props = text_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateTextColor(selectTheme->GetFontColor());
@@ -834,7 +836,7 @@ void SelectPattern::SetDisabledStyle()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
-
+    CHECK_NULL_VOID(text_);
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
     textProps->UpdateTextColor(theme->GetDisabledFontColor());
@@ -1016,6 +1018,7 @@ void SelectPattern::SetValue(const std::string& value)
 
 void SelectPattern::SetValueImpl(const std::string& value)
 {
+    CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateContent(value);
@@ -1035,6 +1038,7 @@ void SelectPattern::SetFontSize(const Dimension& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     FREE_NODE_CHECK(host, SetFontSize, value);
+    CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontSize(value);
@@ -1050,6 +1054,7 @@ void SelectPattern::SetItalicFontStyle(const Ace::FontStyle& value)
 
 void SelectPattern::SetItalicFontStyleImpl(const Ace::FontStyle& value)
 {
+    CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateItalicFontStyle(value);
@@ -1065,6 +1070,7 @@ void SelectPattern::SetFontWeight(const FontWeight& value)
 
 void SelectPattern::SetFontWeightImpl(const FontWeight& value)
 {
+    CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontWeight(value);
@@ -1080,6 +1086,7 @@ void SelectPattern::SetFontFamily(const std::vector<std::string>& value)
 
 void SelectPattern::SetFontFamilyImpl(const std::vector<std::string>& value)
 {
+    CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontFamily(value);
@@ -1096,6 +1103,7 @@ void SelectPattern::SetFontColor(const Color& color)
 void SelectPattern::SetFontColorImpl(const Color& color)
 {
     fontColor_ = color;
+    CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateTextColor(color);
@@ -1402,6 +1410,7 @@ void SelectPattern::UpdateComponentColor(const Color& color, const SelectColorTy
         switch (selectColorType) {
             case SelectColorType::FONT_COLOR:
                 SetFontColor(color);
+                CHECK_NULL_VOID(text_);
                 text_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
                 break;
             case SelectColorType::BACKGROUND_COLOR:
@@ -2245,6 +2254,7 @@ void SelectPattern::OnLanguageConfigurationUpdate()
 Dimension SelectPattern::GetFontSize()
 {
     Dimension defaultRet = Dimension();
+    CHECK_NULL_RETURN(text_, defaultRet);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, defaultRet);
     auto host = props->GetHost();
@@ -2581,6 +2591,7 @@ void SelectPattern::SetDivider(const SelectDivider& divider)
 
 void SelectPattern::ResetFontColor()
 {
+    CHECK_NULL_VOID(text_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     FREE_NODE_CHECK(host, ResetFontColor);
@@ -2630,6 +2641,7 @@ void SelectPattern::SetMenuOutline(const MenuParam& menuParam)
 void SelectPattern::SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply)
 {
     textApply_ = textApply;
+    CHECK_NULL_VOID(text_);
     if (textApply) {
         auto textLayoutProperty = text_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
@@ -2847,6 +2859,7 @@ void SelectPattern::SetModifierByUser(const RefPtr<SelectTheme>& theme, const Re
 {
     CHECK_NULL_VOID(theme);
     CHECK_NULL_VOID(props);
+    CHECK_NULL_VOID(text_);
     if (!props->GetFontColorSetByUserValue(false)) {
         ResetFontColor();
         text_->MarkDirtyNode();
