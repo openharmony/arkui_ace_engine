@@ -41,7 +41,7 @@ public:
     bool UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset, VectorF& zoomOffset);
     bool UpdateMagnifierOffset();
     bool UpdateMagnifierEdgeY(const RefPtr<PipelineContext>& pipelineContext, float& magnifierY,
-        float& layoutBottom, float& windowScale, int32_t& screenHeight);
+        float& patternVisibleBottom, float& windowScale, int32_t& screenHeight);
 
     void UpdateShowMagnifier(bool isShowMagnifier = false);
 

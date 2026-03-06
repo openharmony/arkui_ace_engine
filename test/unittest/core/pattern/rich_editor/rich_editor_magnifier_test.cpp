@@ -15,6 +15,7 @@
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_container.h"
@@ -158,6 +159,18 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level2)
     InitMagnifierParams(frameSize);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    RectF paintRect(0, 0, frameSize.Width(), frameSize.Height());
+    mockParentRenderContext->SetPaintRectWithTransform(paintRect);
+    auto rootUINodeRenderContext = rootUINode->renderContext_;
+    rootUINode->renderContext_ = mockParentRenderContext;
+    richEditorNode_->renderContext_ = mockParentRenderContext;
+    richEditorNode_->MountToParent(rootUINode);
+    ASSERT_NE(richEditorNode_->GetParent(), nullptr);
     auto paintOffset = richEditorPattern->GetTextPaintOffset();
 
     /**
@@ -195,6 +208,8 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level2)
      * @tc.steps: step3. Test cases of magnifier.
      */
     TestMagnifier(richEditorPattern, controller, localOffset);
+    rootUINode->RemoveChild(richEditorNode_);
+    rootUINode->renderContext_ = rootUINodeRenderContext;
 }
 
 /**

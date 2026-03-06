@@ -25,6 +25,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -60,6 +61,8 @@ class SelectOverlayPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    void VerifyMagnifierBottomRightResult(MagnifierController& controller, const SizeF& frameSize,
+        float magnifierWidth, float magnifierHeight, const OffsetF& localOffset);
 };
 
 void SelectOverlayPatternTestNg::SetUpTestCase()
@@ -88,6 +91,32 @@ void SelectOverlayPatternTestNg::TearDownTestCase()
 void ResetCallback()
 {
     std::cout << "onResetSelection" << std::endl;
+}
+
+void SelectOverlayPatternTestNg::VerifyMagnifierBottomRightResult(MagnifierController& controller,
+    const SizeF& frameSize, float magnifierWidth, float magnifierHeight, const OffsetF& localOffset)
+{
+    OffsetF magnifierPaintOffset;
+    VectorF magnifierOffset(0.f, 0.f);
+    VectorF zoomOffset(0.f, 0.f);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(magnifierPaintOffset, OffsetF(frameSize.Width() - magnifierWidth,
+        frameSize.Height() - magnifierOffset.y - magnifierHeight));
+    EXPECT_NE(magnifierOffset.y, 0.f);
+    float halfPreScaledTextWidth = magnifierWidth / MAGNIFIER_FACTOR / 2;
+    float preScaledMagnifierHeight = static_cast<float>(MAGNIFIER_HEIGHT.ConvertToPx() / MAGNIFIER_FACTOR);
+    float halfMagnifierInnerPaddingY = static_cast<float>(
+        (MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * MAGNIFIER_SHADOW_SIZE_SCALE).ConvertToPx() / 2);
+    float magnifierInnerPaddingX =
+        static_cast<float>((MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
+    float maxZoomOffsetX = magnifierWidth / 2 - halfPreScaledTextWidth + magnifierInnerPaddingX;
+    float targetZoomOffsetX = localOffset.GetX() - frameSize.Width() + magnifierWidth / 2;
+    float targetZoomOffsetY = localOffset.GetY() - frameSize.Height() + magnifierHeight / 2;
+    float maxZoomOffsetY = magnifierHeight / 2 - preScaledMagnifierHeight / 2 +
+                          halfMagnifierInnerPaddingY / MAGNIFIER_FACTOR;
+    EXPECT_EQ(zoomOffset, VectorF(std::clamp(targetZoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX),
+        std::clamp(targetZoomOffsetY, -maxZoomOffsetY, maxZoomOffsetY)));
 }
 
 class MockUINode : public UINode {
@@ -531,6 +560,14 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
     MagnifierController controller(weakPattern);
     auto windowNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pattern, false);
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    RectF paintRect(0, 0, frameSize.Width(), frameSize.Height());
+    mockParentRenderContext->SetPaintRectWithTransform(paintRect);
+    auto rootUINodeRenderContext = rootUINode->renderContext_;
+    rootUINode->renderContext_ = mockParentRenderContext;
+    windowNode->renderContext_ = mockParentRenderContext;
+    columnNode->renderContext_ = mockParentRenderContext;
+    windowNode->MountToParent(rootUINode);
     columnNode->MountToParent(windowNode);
 
     /**
@@ -561,6 +598,8 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
     float targetZoomOffsetX = localOffset.GetX() - magnifierWidth / 2;
     EXPECT_EQ(zoomOffset, VectorF(std::clamp(targetZoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX),
         localOffset.GetY() - magnifierHeight / 2));
+    rootUINode->RemoveChild(windowNode);
+    rootUINode->renderContext_ = rootUINodeRenderContext;
 }
 
 /**
@@ -583,10 +622,16 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
     rootGeometryNode->SetFrameSize(frameSize);
 
     auto pattern = AceType::MakeRefPtr<Pattern>();
-    WeakPtr<Pattern> weakPattern(pattern);
-    MagnifierController controller(weakPattern);
+    MagnifierController controller { WeakPtr<Pattern>(pattern) };
     auto windowNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pattern, false);
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, frameSize.Width(), frameSize.Height()));
+    auto rootUINodeRenderContext = rootUINode->renderContext_;
+    rootUINode->renderContext_ = mockParentRenderContext;
+    windowNode->renderContext_ = mockParentRenderContext;
+    columnNode->renderContext_ = mockParentRenderContext;
+    windowNode->MountToParent(rootUINode);
     columnNode->MountToParent(windowNode);
 
     /**
@@ -603,21 +648,9 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
     /**
      * @tc.steps: step3. Test zoomOffset value when magnifier at bottom-right position.
      */
-    OffsetF magnifierPaintOffset;
-    VectorF magnifierOffset(0.f, 0.f);
-    VectorF zoomOffset(0.f, 0.f);
-    EXPECT_EQ(controller.UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
-    EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
-    EXPECT_EQ(magnifierPaintOffset, OffsetF(frameSize.Width() - magnifierWidth,
-        localOffset.GetY() - MAGNIFIER_OFFSETY.ConvertToPx() - magnifierHeight / 2));
-    EXPECT_EQ(magnifierOffset, VectorF(0.f, MAGNIFIER_OFFSETY.ConvertToPx()));
-    float halfPreScaledTextWidth = magnifierWidth / MAGNIFIER_FACTOR / 2;
-    float magnifierInnerPaddingX =
-        static_cast<float>((MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
-    float maxZoomOffsetX = magnifierWidth / 2 - halfPreScaledTextWidth + magnifierInnerPaddingX;
-    float targetZoomOffsetX = localOffset.GetX() - frameSize.Width() + magnifierWidth / 2;
-    EXPECT_EQ(zoomOffset, VectorF(std::clamp(targetZoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX),
-        localOffset.GetY() - frameSize.Height() + magnifierHeight / 2));
+    VerifyMagnifierBottomRightResult(controller, frameSize, magnifierWidth, magnifierHeight, localOffset);
+    rootUINode->RemoveChild(windowNode);
+    rootUINode->renderContext_ = rootUINodeRenderContext;
 }
 
 /**
@@ -644,6 +677,14 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
     MagnifierController controller(weakPattern);
     auto windowNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pattern, false);
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    RectF paintRect(0, 0, frameSize.Width(), frameSize.Height());
+    mockParentRenderContext->SetPaintRectWithTransform(paintRect);
+    auto rootUINodeRenderContext = rootUINode->renderContext_;
+    rootUINode->renderContext_ = mockParentRenderContext;
+    windowNode->renderContext_ = mockParentRenderContext;
+    columnNode->renderContext_ = mockParentRenderContext;
+    windowNode->MountToParent(rootUINode);
     columnNode->MountToParent(windowNode);
 
     /**
@@ -669,6 +710,8 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
         localOffset.GetY() - MAGNIFIER_OFFSETY.ConvertToPx() - magnifierHeight / 2));
     EXPECT_EQ(magnifierOffset, VectorF(0.f, MAGNIFIER_OFFSETY.ConvertToPx()));
     EXPECT_EQ(zoomOffset, VectorF(0.f, 0.f));
+    rootUINode->RemoveChild(windowNode);
+    rootUINode->renderContext_ = rootUINodeRenderContext;
 }
 
 /**
