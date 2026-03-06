@@ -41,6 +41,7 @@ export struct SliderIndex {
     { name: 'SliderPrefixSuffix', path: 'SliderPrefixSuffix' },
     { name: 'SliderShowSteps', path: 'SliderShowSteps' },
     { name: 'SliderBlockColor', path: 'SliderBlockColor' },
+    { name: 'Slider组合场景16', path: 'SliderLevel16' }
   ]
 
   build() {
