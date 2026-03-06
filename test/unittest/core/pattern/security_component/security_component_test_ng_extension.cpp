@@ -2667,6 +2667,9 @@ HWTEST_F(SecurityComponentModelTestNg, SetQiangjiCustomProperty003, TestSize.Lev
     SecurityComponentModelNG::SetText(frameNode.GetRawPtr(), textEmpty);
     EXPECT_EQ(property->GetTextContent().value_or(""), "");
 
+    SecurityComponentModelNG::SetText(frameNode.GetRawPtr(), "");
+    EXPECT_EQ(property->GetTextContent().value_or(""), "");
+
     SecurityComponentModelNG::SetText(frameNode.GetRawPtr(), CUSTOMIZE_TEXT);
     std::optional<NG::BorderRadiusProperty> iconBorderRadius;
     SecurityComponentModelNG::SetIconBorderRadius(frameNode.GetRawPtr(), iconBorderRadius);
