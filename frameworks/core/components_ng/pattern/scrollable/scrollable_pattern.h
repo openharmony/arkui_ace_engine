@@ -915,6 +915,15 @@ public:
 
     void OnStatusBarClick() override;
 
+    void SetIsAllowMouse(bool enableScrollWithMouse)
+    {
+        isAllowMouse_ = enableScrollWithMouse;
+    }
+    virtual bool GetIsAllowMouse() const
+    {
+        return isAllowMouse_;
+    }
+
     void GetRepeatCountInfo(
         RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount);
 
@@ -1080,6 +1089,7 @@ protected:
     bool GetCanOverScroll() const;
     bool lastCanOverScroll_ = false;
     bool lastScrollFromInjection_ = false;
+    bool isAllowMouse_ = false;
 
     void CheckScrollBarOff();
 

@@ -25680,6 +25680,8 @@ typedef struct GENERATED_ArkUIScrollableCommonMethodModifier {
                                 const Opt_VoidCallback* value);
     void (*setOnDidStopFling)(Ark_NativePointer node,
                               const Opt_VoidCallback* value);
+    void (*setEnableScrollWithMouse)(Ark_NativePointer node,
+                                     const Opt_Boolean* value);
     void (*setOnReachStart)(Ark_NativePointer node,
                             const Opt_synthetic_Callback_Void* value);
     void (*setOnReachEnd)(Ark_NativePointer node,

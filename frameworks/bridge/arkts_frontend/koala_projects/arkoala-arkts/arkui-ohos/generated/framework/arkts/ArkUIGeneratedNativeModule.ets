@@ -667,6 +667,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ScrollableCommonMethod_setOnDidStopFling(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _ScrollableCommonMethod_setEnableScrollWithMouse(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _ScrollableCommonMethod_setOnReachStart(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _ScrollableCommonMethod_setOnReachEnd(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void

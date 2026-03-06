@@ -95,6 +95,9 @@ void ListPattern::OnModifyDone()
         SetDigitalCrownEvent();
 #endif
     }
+    if (scrollable_) {
+        scrollable_->SetIsAllowMouse(GetIsAllowMouse());
+    }
 
     SetEdgeEffect();
 
@@ -122,6 +125,15 @@ void ListPattern::OnModifyDone()
     if (!overlayNode && fadingEdge) {
         CreateAnalyzerOverlay(host);
     }
+}
+
+bool ListPattern::GetIsAllowMouse() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, isAllowMouse_);
+    auto listEventHub = host->GetEventHub<ListEventHub>();
+    CHECK_NULL_RETURN(listEventHub, isAllowMouse_);
+    return listEventHub->GetOnItemDragStart() ? false : isAllowMouse_;
 }
 
 bool ListPattern::GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty)

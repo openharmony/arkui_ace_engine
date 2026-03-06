@@ -95,6 +95,20 @@ class BackToTopModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class EnableScrollWithMouseModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableScrollWithMouse');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetEnableScrollWithMouse(node);
+    } else {
+      getUINativeModule().scrollable.setEnableScrollWithMouse(node, this.value);
+    }
+  }
+}
+
 class ScrollBarMarginModifier extends ModifierWithKey<ScrollBarMargin> {
   constructor(value: ScrollBarMargin) {
     super(value);
@@ -271,6 +285,10 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
     }
     backToTop(value: boolean): this {
       modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
+      return this;
+    }
+    enableScrollWithMouse(value: boolean): this {
+      modifierWithKey(this._modifiersWithKeys, EnableScrollWithMouseModifier.identity, EnableScrollWithMouseModifier, value);
       return this;
     }
     scrollBarMargin(margin: ScrollBarMargin): T {

@@ -6953,6 +6953,19 @@ typedef enum {
     NODE_SCROLL_ENABLE_BOUNCES_ZOOM = 1002026,
 
     /**
+     * @brief Sets whether dragging scrolling with the left mouse button pressed is supported.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether dragging scrolling with the left mouse button pressed is supported. <b>0</b>: no; <b>1</b>: yes. Default value: <b>0</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether dragging scrolling with the left mouse button pressed is supported. <b>0</b>: no; <b>1</b>: yes. \n
+     *
+     * @since 26.0.0
+     */
+    NODE_SCROLL_ENABLE_SCROLL_WITH_MOUSE = 1002027,
+    
+    /**
      * @brief Sets whether to automatically adjust the margin of the scrollbar to avoid the component's <b>NODE_PADDING</b>, <b>NODE_SCROLL_CONTENT_START_OFFSET</b>, and <b>NODE_SCROLL_CONTENT_END_OFFSET</b> areas.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute\n

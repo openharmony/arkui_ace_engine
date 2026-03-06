@@ -157,7 +157,10 @@ void GridPattern::OnModifyDone()
         SetDigitalCrownEvent();
 #endif
     }
-
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->SetIsAllowMouse(GetIsAllowMouse());
+    }
     SetEdgeEffect();
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
@@ -179,6 +182,15 @@ void GridPattern::OnModifyDone()
     if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
         CreateAnalyzerOverlay(host);
     }
+}
+
+bool GridPattern::GetIsAllowMouse() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, isAllowMouse_);
+    auto gridEventHub = host->GetEventHub<GridEventHub>();
+    CHECK_NULL_RETURN(gridEventHub, isAllowMouse_);
+    return gridEventHub->GetOnItemDragStart() ? false : isAllowMouse_;
 }
 
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)

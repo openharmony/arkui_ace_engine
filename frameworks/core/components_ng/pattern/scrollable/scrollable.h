@@ -170,6 +170,13 @@ public:
         }
     }
 
+    void SetIsAllowMouse(const bool isAllowMouse)
+    {
+        if (panRecognizerNG_) {
+            panRecognizerNG_->SetIsAllowMouse(isAllowMouse);
+        }
+    }
+
     void SetScrollEndCallback(const ScrollEventCallback& scrollEndCallback)
     {
         scrollEndCallback_ = scrollEndCallback;

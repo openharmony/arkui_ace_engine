@@ -6559,6 +6559,18 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnDidStopFling(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableScrollWithMouseAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setEnableScrollWithMouse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnReachStartAttribute(value: (() => void) | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -10486,6 +10498,9 @@ export interface ScrollableCommonMethod extends CommonMethod {
     onDidStopFling(value: VoidCallback | undefined): this {
         throw new Error('Unimplemented method onDidStopFling')
     }
+    enableScrollWithMouse(value: boolean | undefined): this {
+        throw new Error('Unimplemented method enableScrollWithMouse')
+    }
     onReachStart(value: (() => void) | undefined): this {
         throw new Error('Unimplemented method onReachStart')
     }
@@ -11930,6 +11945,11 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public onDidStopFling(value: VoidCallback | undefined): this {
         const value_casted = value as (VoidCallback | undefined)
         this.getPeer()?.setOnDidStopFlingAttribute(value_casted)
+        return this
+    }
+    public enableScrollWithMouse(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setEnableScrollWithMouseAttribute(value_casted)
         return this
     }
     public onReachStart(value: (() => void) | undefined): this {

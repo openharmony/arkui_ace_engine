@@ -68,6 +68,11 @@ public:
         onItemDragStart_ = std::move(onItemDragStart);
     }
 
+    const ItemDragStartFunc& GetOnItemDragStart() const
+    {
+        return onItemDragStart_;
+    }
+
     void SetOnItemDragEnter(ItemDragEnterFunc&& onItemDragEnter)
     {
         onItemDragEnter_ = std::move(onItemDragEnter);

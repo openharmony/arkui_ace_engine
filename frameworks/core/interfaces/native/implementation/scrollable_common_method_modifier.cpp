@@ -262,6 +262,13 @@ void SetOnDidStopFlingImpl(Ark_NativePointer node,
     };
     ScrollableModelStatic::SetOnDidStopFling(frameNode, std::move(onEvent));
 }
+void SetEnableScrollWithMouse(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ScrollableModelStatic::SetEnableScrollWithMouse(frameNode, *convValue);
+}
 void SetOnReachStartImpl(Ark_NativePointer node,
                          const Opt_synthetic_Callback_Void* value)
 {
@@ -427,6 +434,7 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::SetOnDidStopDraggingImpl,
         ScrollableCommonMethodModifier::SetOnWillStartFlingImpl,
         ScrollableCommonMethodModifier::SetOnDidStopFlingImpl,
+        ScrollableCommonMethodModifier::SetEnableScrollWithMouse,
         ScrollableCommonMethodModifier::SetOnReachStartImpl,
         ScrollableCommonMethodModifier::SetOnReachEndImpl,
         ScrollableCommonMethodModifier::SetOnScrollStartImpl,

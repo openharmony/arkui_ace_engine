@@ -11678,6 +11678,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetEnableScrollWithMouseImpl(Ark_NativePointer node,
+                                      const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setEnableScrollWithMouse(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetOnReachStartImpl(Ark_NativePointer node,
                              const Opt_synthetic_Callback_Void* value)
     {
@@ -22585,6 +22596,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollableCommonMethodModifier::SetOnDidStopDraggingImpl,
             ScrollableCommonMethodModifier::SetOnWillStartFlingImpl,
             ScrollableCommonMethodModifier::SetOnDidStopFlingImpl,
+            ScrollableCommonMethodModifier::SetEnableScrollWithMouseImpl,
             ScrollableCommonMethodModifier::SetOnReachStartImpl,
             ScrollableCommonMethodModifier::SetOnReachEndImpl,
             ScrollableCommonMethodModifier::SetOnScrollStartImpl,

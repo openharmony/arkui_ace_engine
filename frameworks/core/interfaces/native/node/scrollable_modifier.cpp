@@ -255,6 +255,27 @@ int32_t GetBackToTop(ArkUINodeHandle node)
     return ScrollableModelNG::GetBackToTop(frameNode);
 }
 
+void SetEnableScrollWithMouse(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetEnableScrollWithMouse(frameNode, value);
+}
+
+void ResetEnableScrollWithMouse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::ResetEnableScrollWithMouse(frameNode);
+}
+
+int32_t GetEnableScrollWithMouse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ScrollableModelNG::GetEnableScrollWithMouse(frameNode);
+}
+
 void SetScrollBarMargin(ArkUINodeHandle node, ArkUI_Float32 marginStart, ArkUI_Int32 marginStartLengthUnit,
     ArkUI_Float32 marginEnd, ArkUI_Int32 marginEndLengthUnit)
 {
@@ -507,6 +528,9 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .setBackToTop = SetBackToTop,
         .resetBackToTop = ResetBackToTop,
         .getBackToTop = GetBackToTop,
+        .setEnableScrollWithMouse = SetEnableScrollWithMouse,
+        .resetEnableScrollWithMouse = ResetEnableScrollWithMouse,
+        .getEnableScrollWithMouse = GetEnableScrollWithMouse,
         .setScrollBarMargin = SetScrollBarMargin,
         .resetScrollBarMargin = ResetScrollBarMargin,
         .getScrollBarMargin = GetScrollBarMargin,

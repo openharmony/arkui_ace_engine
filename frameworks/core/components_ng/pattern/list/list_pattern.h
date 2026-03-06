@@ -409,6 +409,8 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 
+    bool GetIsAllowMouse() const override;
+
     inline int32_t GetItemStartIndex()
     {
         return itemStartIndex_;

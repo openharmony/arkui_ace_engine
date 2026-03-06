@@ -799,6 +799,22 @@ HWTEST_F(ScrollPatternThreeTestNg, SnapWithContentOffsetUpdate, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableScrollWithMouse001
+ * @tc.desc: Test SetEnableScrollWithMouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, SetEnableScrollWithMouse001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    pattern_->SetIsAllowMouse(true);
+    CreateScrollDone();
+    EXPECT_TRUE(pattern_->GetIsAllowMouse());
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    EXPECT_TRUE(scrollable->panRecognizerNG_->isAllowMouse_);
+}
+
+/**
  * @tc.name: GetScrollSnap001
  * @tc.desc: Test Snap with contentOffset
  * @tc.type: FUNC

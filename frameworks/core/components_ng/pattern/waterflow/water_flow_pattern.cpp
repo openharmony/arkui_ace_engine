@@ -224,6 +224,10 @@ void WaterFlowPattern::OnModifyDone()
         SetDigitalCrownEvent();
 #endif
     }
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->SetIsAllowMouse(GetIsAllowMouse());
+    }
     SetEdgeEffect();
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();

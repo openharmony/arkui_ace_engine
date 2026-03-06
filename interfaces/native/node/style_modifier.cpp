@@ -7702,6 +7702,35 @@ const ArkUI_AttributeItem* GetScrollBackToTop(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetEnableScrollWithMouse(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (!node || actualSize < 0 || !fullImpl || !CheckAttributeIsBool(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getScrollableModifier()->setEnableScrollWithMouse(
+        node->uiNodeHandle, static_cast<bool>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetEnableScrollWithMouse(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!node || !fullImpl) {
+        return;
+    }
+    fullImpl->getNodeModifiers()->getScrollableModifier()->resetEnableScrollWithMouse(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetEnableScrollWithMouse(ArkUI_NodeHandle node)
+{
+    auto value =
+        GetFullImpl()->getNodeModifiers()->getScrollableModifier()->getEnableScrollWithMouse(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 int32_t SetScrollBarMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     double marginStart = 0.0;
@@ -21331,7 +21360,7 @@ int32_t SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge, SetScrollEnablePaging, SetScrollPage,
         SetScrollBy, SetScrollFling, SetScrollFadingEdge, nullptr, SetContentStartOffset, SetContentEndOffset,
         SetFlingSpeedLimit, SetScrollContentClip, SetScrollBackToTop, SetScrollBarMargin, SetMaxZoomScale,
-        SetMinZoomScale, SetZoomScale, SetEnableBouncesZoom, nullptr, SetAutoAdjustScrollBarMargin };
+        SetMinZoomScale, SetZoomScale, SetEnableBouncesZoom, SetEnableScrollWithMouse, SetAutoAdjustScrollBarMargin };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "scroll node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -21346,7 +21375,7 @@ const ArkUI_AttributeItem* GetScrollAttribute(ArkUI_NodeHandle node, int32_t sub
         GetScrollScrollSnap, GetScrollNestedScroll, GetScrollOffset, GetScrollEdge, GetScrollEnablePaging, nullptr,
         nullptr, nullptr, GetScrollFadingEdge, GetScrollContentSize, GetContentStartOffset, GetContentEndOffset,
         GetFlingSpeedLimit, GetScrollContentClip, GetScrollBackToTop, GetScrollBarMargin, GetMaxZoomScale,
-        GetMinZoomScale, GetZoomScale, GetEnableBouncesZoom, nullptr, GetAutoAdjustScrollBarMargin };
+        GetMinZoomScale, GetZoomScale, GetEnableBouncesZoom, GetEnableScrollWithMouse, GetAutoAdjustScrollBarMargin };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -21362,7 +21391,7 @@ void ResetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetScrollScrollSnap, ResetScrollNestedScroll, ResetScrollTo, ResetScrollEdge, ResetScrollEnablePaging,
         nullptr, nullptr, nullptr, ResetScrollFadingEdge, nullptr, ResetContentStartOffset, ResetContentEndOffset,
         ResetFlingSpeedLimit, ResetScrollContentClip, ResetScrollBackToTop, ResetScrollBarMargin, ResetMaxZoomScale,
-        ResetMinZoomScale, ResetZoomScale, ResetEnableBouncesZoom, nullptr, ResetAutoAdjustScrollBarMargin };
+        ResetMinZoomScale, ResetZoomScale, ResetEnableBouncesZoom, ResetEnableScrollWithMouse, ResetAutoAdjustScrollBarMargin };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

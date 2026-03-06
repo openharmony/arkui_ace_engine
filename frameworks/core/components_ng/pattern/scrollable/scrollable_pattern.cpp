@@ -282,6 +282,7 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     nestedScrollOptions->Put("scrollForward", nestedScroll.GetNestedScrollModeStr(nestedScroll.forward).c_str());
     nestedScrollOptions->Put("scrollBackward", nestedScroll.GetNestedScrollModeStr(nestedScroll.backward).c_str());
     json->PutExtAttr("nestedScroll", nestedScrollOptions, filter);
+    json->PutExtAttr("enableScrollWithMouse", GetIsAllowMouse(), filter);
     if (NearEqual(GetFriction(), -1.0) && scrollableEvent_) {
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);

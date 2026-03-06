@@ -2621,6 +2621,23 @@ HWTEST_F(WaterFlowTestNg, CreateWithResourceObjFriction002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableScrollWithMouse001
+ * @tc.desc: Test SetEnableScrollWithMouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, SetEnableScrollWithMouse001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(4);
+    pattern_->SetIsAllowMouse(true);
+    CreateDone();
+    EXPECT_TRUE(pattern_->GetIsAllowMouse());
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    EXPECT_TRUE(scrollable->panRecognizerNG_->isAllowMouse_);
+}
+
+/**
  * @tc.name: ItemFillPolicyTestWithWidth500
  * @tc.desc: Test specify the number of columnsTemplate on waterFlow for width 500 in different responsive breakpoints
  * @tc.type: FUNC

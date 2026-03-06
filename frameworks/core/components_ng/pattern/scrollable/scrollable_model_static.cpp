@@ -355,6 +355,13 @@ void ScrollableModelStatic::SetOnDidStopFling(FrameNode* frameNode, OnDidStopFli
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidStopFling(std::move(event));
 }
+void ScrollableModelStatic::SetEnableScrollWithMouse(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsAllowMouse(enabled);
+}
 
 void ScrollableModelStatic::SetAutoAdjustScrollBarMargin(FrameNode* frameNode, std::optional<bool> autoAdjust)
 {
