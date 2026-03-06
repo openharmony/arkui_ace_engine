@@ -1179,6 +1179,7 @@ let NavigationMode;
   NavigationMode[NavigationMode.Stack = 0] = 'Stack';
   NavigationMode[NavigationMode.Split = 1] = 'Split';
   NavigationMode[NavigationMode.Auto = 2] = 'Auto';
+  NavigationMode[NavigationMode.AUTO_WITH_ASPECT_RATIO = 3] = 'AUTO_WITH_ASPECT_RATIO';
 })(NavigationMode || (NavigationMode = {}));
 
 let NavRouteMode;
