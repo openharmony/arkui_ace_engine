@@ -875,7 +875,6 @@ void ListItemGroupPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("startHeaderPos", startHeaderPos_);
     json->Put("endFooterPos", endFooterPos_);
     auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty) {
         layoutProperty->DumpInfo(json);
     }

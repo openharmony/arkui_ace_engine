@@ -31,9 +31,9 @@ void ScrollableLayoutProperty::DumpInfo()
 void ScrollableLayoutProperty::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("contentStartOffset",
-        propContentStartOffset_.has_value() ? std::to_string(propContentStartOffset_.value()).c_str() : "None");
+        propContentStartOffset_.has_value() ? std::to_string(propContentStartOffset_.value_or(0)).c_str() : "None");
     json->Put("contentEndOffset",
-        propContentEndOffset_.has_value() ? std::to_string(propContentEndOffset_.value()).c_str() : "None");
+        propContentEndOffset_.has_value() ? std::to_string(propContentEndOffset_.value_or(0)).c_str() : "None");
 }
 
 void ScrollableLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
