@@ -45,6 +45,9 @@ export class ArkContentSlotPeer extends PeerNode {
             ArkUIAniModule._ContentSlotInterface_setContentSlotOptions(this.peer.ptr, nullptr)
         }
     }
+    setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
+        return;
+    }
 }
 
 export class ArkContentSlotComponent extends ComponentBase implements ContentSlotAttribute {
@@ -62,6 +65,10 @@ export class ArkContentSlotComponent extends ComponentBase implements ContentSlo
             }
             throw new Error("Can not select appropriate overload")
         }
+        return this
+    }
+    
+    public debugLine(sourceLine: string, moduleName?: string): this {
         return this
     }
 }

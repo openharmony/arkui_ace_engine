@@ -24139,6 +24139,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setOnGestureRecognizerJudgeBegin1)(Ark_NativePointer node,
                                               const Opt_GestureRecognizerJudgeBeginCallback* callback_,
                                               const Opt_Boolean* exposeInnerGesture);
+    void (*setDebugLine)(Ark_NativePointer node,
+                         const Ark_String* sourceLine,
+                         const Opt_String* moduleName);
 } GENERATED_ArkUICommonMethodModifier;
 
 typedef struct GENERATED_ArkUICommonShapeMethodModifier {

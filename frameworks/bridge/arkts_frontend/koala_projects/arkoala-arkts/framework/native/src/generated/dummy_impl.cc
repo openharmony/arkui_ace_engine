@@ -4712,6 +4712,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetDebugLineImpl(Ark_NativePointer node,
+                          const Ark_String* sourceLine,
+                          const Opt_String* moduleName)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setDebugLine(");
+        WriteToString(&out, sourceLine);
+        out.append(", ");
+        WriteToString(&out, moduleName);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // CommonMethodModifier
     namespace CommonShapeMethodModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -21457,6 +21472,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetKeyboardShortcutImpl,
             CommonMethodModifier::SetAccessibilityGroupImpl,
             CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
+            CommonMethodModifier::SetDebugLineImpl,
         };
         return &ArkUICommonMethodModifierImpl;
     }

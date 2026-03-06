@@ -5574,6 +5574,19 @@ void impl_CommonMethod_setOnGestureRecognizerJudgeBegin1(Ark_NativePointer thisP
         GetNodeModifiers()->getCommonMethodModifier()->setOnGestureRecognizerJudgeBegin1(self, static_cast<Opt_GestureRecognizerJudgeBeginCallback*>(&callback_ValueTemp), static_cast<Opt_Boolean*>(&exposeInnerGestureValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnGestureRecognizerJudgeBegin1, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_setDebugLine(Ark_NativePointer thisPtr, const KStringPtr& sourceLine, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto moduleNameValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_String moduleNameValueTempTmpBuf = {};
+        moduleNameValueTempTmpBuf.tag = moduleNameValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((moduleNameValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            moduleNameValueTempTmpBuf.value = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        Opt_String moduleNameValueTemp = moduleNameValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setDebugLine(self, (const Ark_String*) (&sourceLine), static_cast<Opt_String*>(&moduleNameValueTemp));
+}
+KOALA_INTEROP_V4(CommonMethod_setDebugLine, Ark_NativePointer, KStringPtr, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_CommonShapeMethod_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getCommonShapeMethodModifier()->construct(id, flags);
 }

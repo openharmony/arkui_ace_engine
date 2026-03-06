@@ -238,6 +238,10 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
     }
+    
+    debugLine(sourceLine: string, moduleName?: string): this {
+        return this
+    }
 }
 
 /** @memo:intrinsic */

@@ -125,6 +125,9 @@ export interface LazyForEachAttribute<T> extends DynamicNode {
         return this;
     }
     applyAttributesFinish(): void {}
+    debugLine(sourceLine: string, moduleName?: string): this {
+        return this;
+    }
 }
 
 export class ArkLazyForEachComponent<T> implements LazyForEachAttribute<T> {
@@ -157,6 +160,10 @@ export class ArkLazyForEachComponent<T> implements LazyForEachAttribute<T> {
     }
 
     applyAttributesFinish(): void {}
+    
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        return this;
+    }
 }
 
 /** @memo */
