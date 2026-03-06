@@ -1767,12 +1767,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindListController(node: FrameNode, controller: Scroller): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'List') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'List') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let listNode = node as ListFrameNode
-        listNode.initialize({scroller: controller})
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkListPeer(ptr, node._nodeId!.toInt(), "List", 0);
+        peer.setListOptionsAttribute({scroller: controller})
         return
     }
 
@@ -1860,12 +1861,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindScrollController(node: FrameNode, controller: Scroller): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Scroll') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'Scroll') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let scrollNode = node as ScrollFrameNode
-        scrollNode.initialize(controller)
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkScrollPeer(ptr, node._nodeId!.toInt(), "Scroll", 0);
+        peer.setScrollOptionsAttribute(controller)
         return
     }
 
@@ -1907,14 +1909,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindGridController(node: FrameNode, controller: Scroller): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Grid') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'Grid') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let gridNode = node as GridFrameNode
-        let arkGridNode = gridNode.attribute as ArkGridNode;
-        arkGridNode.getPeer()?.setGridOptionsAttribute(controller, undefined)
-        arkGridNode.markDirty()
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkGridPeer(ptr, node._nodeId!.toInt(), "Grid", 0);
+        peer.setGridOptionsAttribute(controller, undefined)
         return
     }
 
@@ -1979,12 +1980,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindWaterFlowController(node: FrameNode, controller: Scroller): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'WaterFlow') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'WaterFlow') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let waterFlowNode = node as WaterFlowFrameNode
-        waterFlowNode.initialize({scroller: controller})
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkWaterFlowPeer(ptr, node._nodeId!.toInt(), "WaterFlow", 0);
+        peer.setWaterFlowOptionsAttribute({scroller: controller})
         return
     }
 
