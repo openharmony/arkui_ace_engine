@@ -56,6 +56,7 @@
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline/container_window_manager.h"
 
@@ -2102,6 +2103,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
     AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
     AceNewPipeJudgement::InitAceNewPipeConfig();
+    NG::XComponentResolutionConfig::GetInstance().GetApsSdrRatio(context->GetBundleName(),
+        static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE));
+    NG::XComponentResolutionConfig::GetInstance().GetApsSdrRatio(context->GetBundleName(),
+        static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH));
+    LOGD("GetApsSdrRatio XCOMPONENT_SIZE_RATIO:%{public}f, XCOMPONENT_TOUCH_RATIO:%{public}f",
+        NG::SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE) - 1],
+        NG::SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH) - 1]);
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = context->GetApplicationInfo()->apiReleaseType;
     auto apiTargetVersion = context->GetApplicationInfo()->apiTargetVersion;
@@ -2302,8 +2310,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     FormManager::GetInstance().SetFormUtils(formUtils);
 #endif
 #ifdef APS_ENABLE
-    auto apsMonitor = std::make_shared<ApsMonitorImpl>(instanceId_);
-    PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
+    ApsMonitorImpl::GetInstance().SetContainerInstanceId(instanceId_);
+    PerfMonitor::GetPerfMonitor()->SetApsMonitor(&ApsMonitorImpl::GetInstance());
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
     if (vmType_ == VMType::ARK_NATIVE) {

@@ -22,6 +22,7 @@
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
 
+#include "adapter/ohos/entrance/aps_monitor_impl.h"
 #include "base/display_manager/display_manager.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -41,6 +42,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
 #include "core/event/axis_event.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
@@ -132,6 +134,7 @@ XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComp
         InitNativeXComponent();
     }
     RegisterSurfaceCallbackModeEvent();
+    UpdateSdrRatioIfNeed();
 }
 
 void XComponentPattern::AdjustNativeWindowSize(float width, float height)
@@ -1414,14 +1417,15 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchInfoList.empty()) {
         return;
     }
+    UpdateSdrRatioIfNeed();
     const auto& touchInfo = touchInfoList.front();
     const auto& screenOffset = touchInfo.GetGlobalLocation();
     const auto& localOffset = touchInfo.GetLocalLocation();
     touchEventPoint_.id = touchInfo.GetFingerId();
-    touchEventPoint_.screenX = static_cast<float>(screenOffset.GetX());
-    touchEventPoint_.screenY = static_cast<float>(screenOffset.GetY());
-    touchEventPoint_.x = static_cast<float>(localOffset.GetX());
-    touchEventPoint_.y = static_cast<float>(localOffset.GetY());
+    touchEventPoint_.screenX = static_cast<float>(screenOffset.GetX() * xcomponentTouchSdrRatio_);
+    touchEventPoint_.screenY = static_cast<float>(screenOffset.GetY() * xcomponentTouchSdrRatio_);
+    touchEventPoint_.x = static_cast<float>(localOffset.GetX() * xcomponentTouchSdrRatio_);
+    touchEventPoint_.y = static_cast<float>(localOffset.GetY() * xcomponentTouchSdrRatio_);
     touchEventPoint_.size = touchInfo.GetSize();
     touchEventPoint_.force = touchInfo.GetForce();
     touchEventPoint_.deviceId = touchInfo.GetTouchDeviceId();
@@ -1518,6 +1522,7 @@ void XComponentPattern::SetTouchPoint(
     uint32_t index = 0;
     for (auto iterator = touchInfoList.begin(); iterator != touchInfoList.end() && index < OH_MAX_TOUCH_POINTS_NUMBER;
          iterator++) {
+        UpdateSdrRatioIfNeed();
         OH_NativeXComponent_TouchPoint ohTouchPoint;
         const auto& pointTouchInfo = *iterator;
         const auto& pointWindowOffset = pointTouchInfo.GetGlobalLocation();
@@ -1525,10 +1530,10 @@ void XComponentPattern::SetTouchPoint(
         const auto& pointDisplayOffset = pointTouchInfo.GetScreenLocation();
         ohTouchPoint.id = pointTouchInfo.GetFingerId();
         // screenX and screenY implementation wrong but should not modify for maintaining compatibility
-        ohTouchPoint.screenX = static_cast<float>(pointWindowOffset.GetX());
-        ohTouchPoint.screenY = static_cast<float>(pointWindowOffset.GetY());
-        ohTouchPoint.x = static_cast<float>(pointLocalOffset.GetX());
-        ohTouchPoint.y = static_cast<float>(pointLocalOffset.GetY());
+        ohTouchPoint.screenX = static_cast<float>(pointWindowOffset.GetX() * xcomponentTouchSdrRatio_);
+        ohTouchPoint.screenY = static_cast<float>(pointWindowOffset.GetY() * xcomponentTouchSdrRatio_);
+        ohTouchPoint.x = static_cast<float>(pointLocalOffset.GetX() * xcomponentTouchSdrRatio_);
+        ohTouchPoint.y = static_cast<float>(pointLocalOffset.GetY() * xcomponentTouchSdrRatio_);
         ohTouchPoint.type = XComponentUtils::ConvertNativeXComponentTouchEvent(touchType);
         ohTouchPoint.size = pointTouchInfo.GetSize();
         ohTouchPoint.force = pointTouchInfo.GetForce();
@@ -1539,8 +1544,8 @@ void XComponentPattern::SetTouchPoint(
         XComponentTouchPoint xcomponentTouchPoint;
         xcomponentTouchPoint.tiltX = pointTouchInfo.GetTiltX().value_or(0.0f);
         xcomponentTouchPoint.tiltY = pointTouchInfo.GetTiltY().value_or(0.0f);
-        xcomponentTouchPoint.windowX = static_cast<float>(pointWindowOffset.GetX());
-        xcomponentTouchPoint.windowY = static_cast<float>(pointWindowOffset.GetY());
+        xcomponentTouchPoint.windowX = static_cast<float>(pointWindowOffset.GetX() * xcomponentTouchSdrRatio_);
+        xcomponentTouchPoint.windowY = static_cast<float>(pointWindowOffset.GetY() * xcomponentTouchSdrRatio_);
         xcomponentTouchPoint.displayX = static_cast<float>(pointDisplayOffset.GetX());
         xcomponentTouchPoint.displayY = static_cast<float>(pointDisplayOffset.GetY());
         xcomponentTouchPoint.sourceToolType =
@@ -1995,8 +2000,9 @@ void XComponentPattern::OnSurfaceCreated()
     if (isNativeXComponent_) {
         CHECK_NULL_VOID(nativeXComponentImpl_);
         CHECK_NULL_VOID(nativeXComponent_);
-        nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
-        nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
+        UpdateSdrRatioIfNeed();
+        nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width * xcomponentSizeSdrRatio_));
+        nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height * xcomponentSizeSdrRatio_));
         nativeXComponentImpl_->SetSurface(nativeWindow_);
         const auto* callback = nativeXComponentImpl_->GetCallback();
         CHECK_NULL_VOID(callback);
@@ -2027,8 +2033,9 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
     if (isNativeXComponent_) {
         CHECK_NULL_VOID(nativeXComponent_);
         CHECK_NULL_VOID(nativeXComponentImpl_);
-        nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
-        nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
+        UpdateSdrRatioIfNeed();
+        nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width * xcomponentSizeSdrRatio_));
+        nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height * xcomponentSizeSdrRatio_));
         auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
         const auto* callback = nativeXComponentImpl_->GetCallback();
         CHECK_NULL_VOID(callback);
@@ -2534,4 +2541,28 @@ void XComponentPattern::SetSurfaceIsOpaque(bool isOpaque)
         renderSurface_->SetSurfaceBufferOpaque(isOpaque);
     }
 }
+
+void XComponentPattern::UpdateSdrRatioIfNeed()
+{
+    if (xcomponentTouchSdrRatio_ < std::numeric_limits<float>::epsilon() &&
+        xcomponentSizeSdrRatio_ < std::numeric_limits<float>::epsilon()) {
+        std::lock_guard<std::mutex> lock(SDR_RATIOS_MUTEX);
+        if (SDR_RATIOS.empty()) {
+            xcomponentTouchSdrRatio_ = static_cast<float>(NG::RatioValue::RATIO_DEFAULT);
+            xcomponentSizeSdrRatio_ = static_cast<float>(NG::RatioValue::RATIO_DEFAULT);
+        }
+        xcomponentTouchSdrRatio_ = SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH) - 1] <
+            std::numeric_limits<float>::epsilon() ?
+            static_cast<float>(NG::RatioValue::RATIO_DEFAULT) :
+            SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH) - 1];
+        xcomponentSizeSdrRatio_ = SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE) - 1] <
+            std::numeric_limits<float>::epsilon() ?
+            static_cast<float>(NG::RatioValue::RATIO_DEFAULT) :
+            SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE) - 1];
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT,
+            "XComponentPattern[UpdateSdrRatioIfNeed] touchSdrRatio_:%{public}f, sizeSdrRatio_:%{public}f",
+            xcomponentTouchSdrRatio_, xcomponentSizeSdrRatio_);
+    }
+}
+
 } // namespace OHOS::Ace::NG

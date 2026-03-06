@@ -200,7 +200,7 @@ void PerfMonitor::SetApplicationInfo()
     PerfInterfaces::SetApplicationInfo();
 }
 
-void PerfMonitor::SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor)
+void PerfMonitor::SetApsMonitor(ApsMonitor* apsMonitor)
 {
     apsMonitor_ = apsMonitor;
 }

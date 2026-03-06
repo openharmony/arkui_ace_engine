@@ -29,6 +29,7 @@ build_component_ng("xcomponent_pattern_ng") {
     "xcomponent_pattern.cpp",
     "xcomponent_pattern_multithread.cpp",
     "xcomponent_pattern_v2.cpp",
+    "xcomponent_resolution_config.cpp",
     "xcomponent_utils.cpp",
   ]
 

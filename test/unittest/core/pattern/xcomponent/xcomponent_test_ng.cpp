@@ -45,6 +45,7 @@
 #include "frameworks/core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1527,6 +1528,52 @@ HWTEST_F(XComponentTestNg, AddLayoutTask001, TestSize.Level1)
  
     EXPECT_EQ(pattern->surfaceSize_.Width(), 400.0f);
     EXPECT_EQ(pattern->surfaceSize_.Height(), 400.0f);
+}
+
+/**
+ * @tc.name: UpdateSdrRatioIfNeed
+ * @tc.desc: Test UpdateSdrRatioIfNeed for XComponent
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, UpdateSdrRatioIfNeed001, TestSize.Level1)
+{
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    pattern->xcomponentTouchSdrRatio_ = 0.0f;
+    pattern->xcomponentSizeSdrRatio_ = 0.0f;
+    SDR_RATIOS = std::vector<float>(INDEX_FOR_USING_CLIENT_SIZE, static_cast<float>(RatioValue::RATIO_NOT_SET));
+    pattern->UpdateSdrRatioIfNeed();
+    EXPECT_EQ((pattern->xcomponentTouchSdrRatio_ - 1.0f) < std::numeric_limits<float>::epsilon(), true);
+    EXPECT_EQ((pattern->xcomponentSizeSdrRatio_ - 1.0f) < std::numeric_limits<float>::epsilon(), true);
+
+    pattern->xcomponentTouchSdrRatio_ = 0.0f;
+    pattern->xcomponentSizeSdrRatio_ = 0.0f;
+    NG::SDR_RATIOS = std::vector<float>(INDEX_FOR_USING_CLIENT_SIZE, 0.5f);
+    pattern->UpdateSdrRatioIfNeed();
+    EXPECT_EQ((pattern->xcomponentTouchSdrRatio_ - 0.5f) < std::numeric_limits<float>::epsilon(), true);
+    EXPECT_EQ((pattern->xcomponentSizeSdrRatio_ - 0.5f) < std::numeric_limits<float>::epsilon(), true);
+
+    pattern->xcomponentTouchSdrRatio_ = 1.0f;
+    pattern->xcomponentSizeSdrRatio_ = 0.0f;
+    pattern->UpdateSdrRatioIfNeed();
+    EXPECT_EQ((pattern->xcomponentTouchSdrRatio_ - 1.0f) < std::numeric_limits<float>::epsilon(), true);
+    EXPECT_EQ(pattern->xcomponentSizeSdrRatio_ < std::numeric_limits<float>::epsilon(), true);
+
+    pattern->xcomponentSizeSdrRatio_ = 1.0f;
+    pattern->xcomponentTouchSdrRatio_ = 0.0f;
+    pattern->UpdateSdrRatioIfNeed();
+    EXPECT_EQ((pattern->xcomponentSizeSdrRatio_ - 1.0f) < std::numeric_limits<float>::epsilon(), true);
+    EXPECT_EQ(pattern->xcomponentTouchSdrRatio_ < std::numeric_limits<float>::epsilon(), true);
+
+    pattern->xcomponentSizeSdrRatio_ = 1.0f;
+    pattern->xcomponentTouchSdrRatio_ = 1.0f;
+    pattern->UpdateSdrRatioIfNeed();
+    EXPECT_EQ((pattern->xcomponentSizeSdrRatio_ - 1.0f) < std::numeric_limits<float>::epsilon(), true);
+    EXPECT_EQ((pattern->xcomponentTouchSdrRatio_ - 1.0f) < std::numeric_limits<float>::epsilon(), true);
 }
 
 } // namespace OHOS::Ace::NG

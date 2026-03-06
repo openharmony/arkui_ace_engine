@@ -509,6 +509,8 @@ private:
 
     void AddLayoutTask();
 
+    void UpdateSdrRatioIfNeed();
+
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
     std::optional<std::string> libraryname_;
     std::shared_ptr<InnerXComponentController> xcomponentController_;
@@ -559,6 +561,8 @@ private:
     // record the initial surfaceId_ in InitSurface, this variable should not be modified after the initial assignment
     std::string initialSurfaceId_;
     int32_t foldDisplayCallbackId_ = -1;
+    float xcomponentTouchSdrRatio_ = 0.0f;
+    float xcomponentSizeSdrRatio_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
