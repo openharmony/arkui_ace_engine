@@ -2856,6 +2856,234 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeDumpSimplifyCommonInfo001
+ * @tc.desc: Test DumpSimplifyCommonInfo with background color.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set background color.
+     * @tc.expected: background color is set.
+     */
+    frameNode->renderContext_->UpdateBackgroundColor(Color::BLUE);
+
+    /**
+     * @tc.steps: step3. create json and call DumpSimplifyCommonInfo.
+     * @tc.expected: backgroundColor should be in json.
+     */
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
+    EXPECT_NE(json, nullptr);
+    frameNode->DumpSimplifyCommonInfo(json);
+
+    const auto& valueBackgroundColor = json->GetValue("backgroundColor");
+    bool hasKeyBackgroundColor = !(valueBackgroundColor->IsNull());
+    EXPECT_TRUE(hasKeyBackgroundColor);
+}
+
+/**
+ * @tc.name: FrameNodeDumpSimplifyCommonInfo002
+ * @tc.desc: Test DumpSimplifyCommonInfo with opacity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set opacity (not 1.0).
+     * @tc.expected: opacity is set.
+     */
+    frameNode->GetRenderContext()->UpdateOpacity(PARA_OPACITY_VALUE_1);
+
+    /**
+     * @tc.steps: step3. create json and call DumpSimplifyCommonInfo.
+     * @tc.expected: opacity should be in json.
+     */
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
+    EXPECT_NE(json, nullptr);
+    frameNode->DumpSimplifyCommonInfo(json);
+
+    const auto& valueOpacity = json->GetValue("opacity");
+    bool hasKeyOpacity = !(valueOpacity->IsNull());
+    EXPECT_TRUE(hasKeyOpacity);
+}
+
+/**
+ * @tc.name: FrameNodeDumpSimplifyCommonInfo003
+ * @tc.desc: Test DumpSimplifyCommonInfo with visibility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set visibility to INVISIBLE.
+     * @tc.expected: visibility is set.
+     */
+    frameNode->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step3. create json and call DumpSimplifyCommonInfo.
+     * @tc.expected: visible should be in json with value "false".
+     */
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
+    EXPECT_NE(json, nullptr);
+    frameNode->DumpSimplifyCommonInfo(json);
+
+    const auto& valueVisible = json->GetValue("visible");
+    bool hasKeyVisible = !(valueVisible->IsNull());
+    EXPECT_TRUE(hasKeyVisible);
+    EXPECT_EQ(valueVisible->GetString(), "false");
+}
+
+/**
+ * @tc.name: FrameNodeDumpSimplifyCommonInfo004
+ * @tc.desc: Test DumpSimplifyCommonInfo with active status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set active to false.
+     * @tc.expected: active status is set.
+     */
+    frameNode->isActive_ = false;
+
+    /**
+     * @tc.steps: step3. create json and call DumpSimplifyCommonInfo.
+     * @tc.expected: active should be in json with value "false".
+     */
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
+    EXPECT_NE(json, nullptr);
+    frameNode->DumpSimplifyCommonInfo(json);
+
+    const auto& valueActive = json->GetValue("active");
+    bool hasKeyActive = !(valueActive->IsNull());
+    EXPECT_TRUE(hasKeyActive);
+    EXPECT_EQ(valueActive->GetString(), "false");
+}
+
+/**
+ * @tc.name: FrameNodeDumpSimplifyCommonInfo005
+ * @tc.desc: Test DumpSimplifyCommonInfo with inspector ID.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set inspector ID.
+     * @tc.expected: inspector ID is set.
+     */
+    frameNode->propInspectorId_ = "test_compid_123";
+
+    /**
+     * @tc.steps: step3. create json and call DumpSimplifyCommonInfo.
+     * @tc.expected: compid should be in json.
+     */
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
+    EXPECT_NE(json, nullptr);
+    frameNode->DumpSimplifyCommonInfo(json);
+
+    const auto& valueCompId = json->GetValue("compid");
+    bool hasKeyCompId = !(valueCompId->IsNull());
+    EXPECT_TRUE(hasKeyCompId);
+    EXPECT_EQ(valueCompId->GetString(), "test_compid_123");
+}
+
+/**
+ * @tc.name: FrameNodeDumpSimplifyCommonInfo006
+ * @tc.desc: Test DumpSimplifyCommonInfo with all properties set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set all properties.
+     * @tc.expected: all properties are set.
+     */
+    frameNode->propInspectorId_ = "test_compid_456";
+    frameNode->isActive_ = false;
+    frameNode->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
+    frameNode->GetRenderContext()->UpdateOpacity(PARA_OPACITY_VALUE_3);
+    frameNode->renderContext_->UpdateBackgroundColor(Color::RED);
+
+    /**
+     * @tc.steps: step3. create json and call DumpSimplifyCommonInfo.
+     * @tc.expected: all properties should be in json.
+     */
+    std::shared_ptr<JsonValue> json = JsonUtil::CreateSharedPtrJson(true);
+    EXPECT_NE(json, nullptr);
+    frameNode->DumpSimplifyCommonInfo(json);
+
+    const auto& valueRect = json->GetValue("$rect");
+    bool hasKeyRect = !(valueRect->IsNull());
+    EXPECT_TRUE(hasKeyRect);
+
+    const auto& valueCompId = json->GetValue("compid");
+    bool hasKeyCompId = !(valueCompId->IsNull());
+    EXPECT_TRUE(hasKeyCompId);
+    EXPECT_EQ(valueCompId->GetString(), "test_compid_456");
+
+    const auto& valueActive = json->GetValue("active");
+    bool hasKeyActive = !(valueActive->IsNull());
+    EXPECT_TRUE(hasKeyActive);
+    EXPECT_EQ(valueActive->GetString(), "false");
+
+    const auto& valueVisible = json->GetValue("visible");
+    bool hasKeyVisible = !(valueVisible->IsNull());
+    EXPECT_TRUE(hasKeyVisible);
+    EXPECT_EQ(valueVisible->GetString(), "false");
+
+    const auto& valueOpacity = json->GetValue("opacity");
+    bool hasKeyOpacity = !(valueOpacity->IsNull());
+    EXPECT_TRUE(hasKeyOpacity);
+
+    const auto& valueBackgroundColor = json->GetValue("backgroundColor");
+    bool hasKeyBackgroundColor = !(valueBackgroundColor->IsNull());
+    EXPECT_TRUE(hasKeyBackgroundColor);
+}
+
+/**
  * @tc.name: FrameNodeDumpCommonInfo
  * @tc.desc: Test DumpCommonInfo.
  * @tc.type: FUNC
