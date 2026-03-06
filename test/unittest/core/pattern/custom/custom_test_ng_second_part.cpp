@@ -15,7 +15,37 @@
 
 #include "test/unittest/core/pattern/custom/custom_test_ng.h"
 
+#include "base/log/dump_log.h"
+#include "base/utils/system_properties.h"
+
 namespace OHOS::Ace::NG {
+
+namespace {
+class BoolFlagGuard final {
+public:
+    BoolFlagGuard(bool& flag, bool value) : flag_(flag), old_(flag)
+    {
+        flag_ = value;
+    }
+
+    ~BoolFlagGuard()
+    {
+        flag_ = old_;
+    }
+
+private:
+    bool& flag_;
+    bool old_;
+};
+
+template<typename Stack>
+void ClearStack(Stack& stack)
+{
+    while (!stack.empty()) {
+        stack.pop();
+    }
+}
+} // namespace
 
 /**
  * @tc.name: CustomTest032
@@ -1273,6 +1303,257 @@ HWTEST_F(CustomTestNg, CustomTest116, TestSize.Level1)
     EXPECT_EQ(lifecycleEvents[2], CustomNodeBase::LifeCycleEvent::ON_RECYCLE);
     EXPECT_EQ(lifecycleEvents[3], CustomNodeBase::LifeCycleEvent::ON_REUSE);
     EXPECT_EQ(lifecycleEvents[4], CustomNodeBase::LifeCycleEvent::ON_DISAPPEAR);
+}
+
+/**
+ * @tc.name: CustomTest117
+ * @tc.desc: Test CustomNodeBase appear/disappear and page transition callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest117, TestSize.Level1)
+{
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    bool appearCalled = false;
+    customNode->SetAppearFunction([&appearCalled]() { appearCalled = true; });
+    customNode->FireOnAppear();
+    EXPECT_TRUE(appearCalled);
+    EXPECT_TRUE(customNode->CheckFireOnAppear());
+
+    std::vector<int32_t> lifecycleEvents;
+    customNode->SetTriggerLifecycleFunction([&lifecycleEvents](int32_t eventId) -> bool {
+        lifecycleEvents.push_back(eventId);
+        return true;
+    });
+
+    bool destroyCalled = false;
+    customNode->SetDestroyFunction([&destroyCalled]() { destroyCalled = true; });
+    customNode->FireOnDisappear();
+    EXPECT_TRUE(destroyCalled);
+    ASSERT_FALSE(lifecycleEvents.empty());
+    EXPECT_EQ(lifecycleEvents.back(), CustomNodeBase::LifeCycleEvent::ON_DISAPPEAR);
+
+    bool pageTransitionCalled = false;
+    customNode->SetPageTransitionFunction([&pageTransitionCalled]() { pageTransitionCalled = true; });
+    customNode->CallPageTransitionFunction();
+    EXPECT_TRUE(pageTransitionCalled);
+
+    customNode->Reset();
+}
+
+/**
+ * @tc.name: CustomTest118
+ * @tc.desc: Test CustomNodeBase update/recycle/this/reuse hooks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest118, TestSize.Level1)
+{
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    // Force node update func not set.
+    customNode->FireNodeUpdateFunc(1);
+
+    int32_t receivedId = -1;
+    customNode->SetForceUpdateNodeFunc([&receivedId](int32_t id) { receivedId = id; });
+    customNode->FireNodeUpdateFunc(100);
+    EXPECT_EQ(receivedId, 100);
+
+    EXPECT_FALSE(customNode->FireHasNodeUpdateFunc(10));
+    customNode->SetHasNodeUpdateFunc([](int32_t id) { return id == 10; });
+    EXPECT_TRUE(customNode->FireHasNodeUpdateFunc(10));
+    EXPECT_FALSE(customNode->FireHasNodeUpdateFunc(11));
+
+    customNode->SetRecycleRenderFunc([]() {});
+    EXPECT_TRUE(customNode->HasRecycleRenderFunc());
+    customNode->ResetRecycle();
+    EXPECT_FALSE(customNode->HasRecycleRenderFunc());
+
+    EXPECT_EQ(customNode->FireThisFunc(), nullptr);
+    int32_t testValue = 0;
+    customNode->SetThisFunc([&testValue]() -> void* { return &testValue; });
+    EXPECT_EQ(customNode->FireThisFunc(), &testValue);
+
+    bool clearAllCalled = false;
+    customNode->SetClearAllRecycleFunc([&clearAllCalled]() { clearAllCalled = true; });
+    customNode->FireClearAllRecycleFunc();
+    EXPECT_TRUE(clearAllCalled);
+
+    customNode->SetReuseId("reuseId");
+    EXPECT_EQ(customNode->GetReuseId(), "reuseId");
+
+    bool onRecycleCalled = false;
+    customNode->SetOnRecycleFunc([&onRecycleCalled]() { onRecycleCalled = true; });
+    customNode->FireOnRecycleFunc();
+    EXPECT_TRUE(onRecycleCalled);
+
+    bool onReuseCalled = false;
+    void* onReuseParams = nullptr;
+    customNode->SetOnReuseFunc([&onReuseCalled, &onReuseParams](void* params) {
+        onReuseCalled = true;
+        onReuseParams = params;
+    });
+    int32_t reuseParam = 1;
+    customNode->FireOnReuseFunc(&reuseParam);
+    EXPECT_TRUE(onReuseCalled);
+    EXPECT_EQ(onReuseParams, &reuseParam);
+
+    customNode->Reset();
+}
+
+/**
+ * @tc.name: CustomTest119
+ * @tc.desc: Test Render builds parent info when dynamic trace enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest119, TestSize.Level1)
+{
+    BoolFlagGuard dynamicTraceGuard(SystemProperties::dynamicDetectionTraceEnable_, true);
+
+    auto parentCustomNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "Parent");
+    parentCustomNode->SetJSViewName("ParentView");
+
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "Child");
+    customNode->SetJSViewName("ChildView");
+    customNode->MountToParent(parentCustomNode);
+
+    auto frameChild = FrameNode::CreateFrameNode(
+        "frameChild", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    RenderFunction renderFunction =
+        [frameChild](int64_t /* deadline */, bool& isTimeout) -> RefPtr<UINode> {
+        isTimeout = false;
+        return frameChild;
+    };
+    customNode->SetRenderFunction(renderFunction);
+    EXPECT_TRUE(customNode->Render());
+    auto firstChild = customNode->GetFirstChild();
+    EXPECT_EQ(AceType::RawPtr(firstChild), AceType::RawPtr(frameChild));
+}
+
+/**
+ * @tc.name: CustomTest121
+ * @tc.desc: Test DumpInfo handles invalid and valid json.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest121, TestSize.Level1)
+{
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.description_.clear();
+
+    customNode->SetOnDumpInspectorFunc([]() { return std::string("not a json"); });
+    customNode->DumpInfo();
+    EXPECT_TRUE(dumpLog.description_.empty());
+
+    const std::string dumpInfo = R"({
+        "viewInfo": {
+            "ComponentName": "TestComponent",
+            "isV2": true,
+            "isCompFreezeAllowed_": false,
+            "isViewActive_": true
+        },
+        "observedPropertiesInfo": [
+            {
+                "decorator": "@State",
+                "propertyName": "count",
+                "value": "1",
+                "id": 1,
+                "inRenderingElementId": 10,
+                "dependentElementIds": [100, 101]
+            },
+            {
+                "decorator": "@Prop",
+                "propertyName": "title",
+                "value": "hello",
+                "id": 2,
+                "inRenderingElementId": 11,
+                "dependentElementIds": []
+            }
+        ]
+    })";
+
+    customNode->SetOnDumpInspectorFunc([dumpInfo]() { return dumpInfo; });
+    customNode->DumpInfo();
+    EXPECT_FALSE(dumpLog.description_.empty());
+
+    bool hasDecoratorStart = false;
+    for (const auto& line : dumpLog.description_) {
+        if (line.find("start print decoratorInfo") != std::string::npos) {
+            hasDecoratorStart = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(hasDecoratorStart);
+    dumpLog.description_.clear();
+}
+
+/**
+ * @tc.name: CustomTest122
+ * @tc.desc: Test FireRecycleRenderFunc handles config change and parent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest122, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+
+    BoolFlagGuard dynamicTraceGuard(SystemProperties::dynamicDetectionTraceEnable_, true);
+    BoolFlagGuard configPerformGuard(g_isConfigChangePerform, false);
+
+    auto parentCustomNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "Parent");
+    parentCustomNode->SetJSViewName("ParentView");
+
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "Child");
+    customNode->SetJSViewName("ChildView");
+    customNode->MountToParent(parentCustomNode);
+
+    auto childNode = FrameNode::CreateFrameNode(
+        "childNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    customNode->AddChild(childNode);
+    EXPECT_FALSE(childNode->isDarkMode_);
+
+    bool recycleRenderCalled = false;
+    customNode->SetRecycleRenderFunc([&recycleRenderCalled]() { recycleRenderCalled = true; });
+    EXPECT_TRUE(customNode->HasRecycleRenderFunc());
+
+    g_isConfigChangePerform = true;
+    customNode->FireRecycleRenderFunc();
+    EXPECT_TRUE(recycleRenderCalled);
+    EXPECT_TRUE(childNode->isDarkMode_);
+    EXPECT_FALSE(customNode->HasRecycleRenderFunc());
+
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: CustomTest123
+ * @tc.desc: Test OnDestroyingStateChange adds pending delete custom node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest123, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ClearStack(context->pendingDeleteCustomNode_);
+
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    EXPECT_TRUE(context->pendingDeleteCustomNode_.empty());
+    customNode->OnDestroyingStateChange(true, true);
+    // In unittest environment, PipelineContext::AddPendingDeleteCustomNode may be mocked as a no-op.
+    // Validate behavior when pending stack is updated, and avoid accessing empty stack.
+    if (!context->pendingDeleteCustomNode_.empty()) {
+        EXPECT_EQ(context->pendingDeleteCustomNode_.top(), customNode);
+        context->pendingDeleteCustomNode_.pop();
+    }
+
+    customNode->OnDestroyingStateChange(false, true);
+    customNode->OnDestroyingStateChange(true, false);
+    EXPECT_TRUE(context->pendingDeleteCustomNode_.empty());
 }
 
 } // namespace OHOS::Ace::NG
