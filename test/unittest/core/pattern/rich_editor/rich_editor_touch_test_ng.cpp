@@ -217,6 +217,12 @@ HWTEST_F(RichEditorTouchTestNg, HandleTouchUp002, TestSize.Level0)
     richEditorPattern->moveCaretState_.isMoveCaret = true;
     richEditorPattern->HandleTouchUp();
     EXPECT_FALSE(richEditorPattern->isCursorAlwaysDisplayed_);
+    ASSERT_NE(richEditorPattern->selectOverlay_, nullptr);
+    ASSERT_NE(richEditorPattern->magnifierController_, nullptr);
+    richEditorPattern->selectOverlay_->isHandleMoving_ = false;
+    richEditorPattern->magnifierController_->isShowMagnifier_ = false;
+    richEditorPattern->HandleTouchUp();
+    EXPECT_FALSE(richEditorPattern->magnifierController_->GetShowMagnifier());
 }
 
 /**
