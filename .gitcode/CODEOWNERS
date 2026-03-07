@@ -110,6 +110,8 @@ adapter/ohos/entrance/window/drag_window_ohos.cpp @ArkUI_Event
 adapter/ohos/entrance/window/drag_window_ohos.h @ArkUI_Event
 adapter/ohos/entrance/window/foldable_window_ohos.cpp @arkuipopupwindow_all
 adapter/ohos/entrance/window/foldable_window_ohos.h @arkuipopupwindow_all
+adapter/ohos/entrance/event_compatible/ @ArkUI_Event
+adapter/ohos/entrance/event_converter/ @ArkUI_Event
 adapter/ohos/osal/accessibility/ @ArkUI_ability_group
 adapter/ohos/osal/ace_checker.cpp @arkui_framework_xnode
 adapter/ohos/osal/ace_engine_ext.cpp @ArkUI_Event
