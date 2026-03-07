@@ -49,6 +49,12 @@ enum class BindSheetDismissReason {
     SLIDE_DOWN,
     SLIDE,
 };
+enum class SheetMiniDefaultShowPosition {
+    LeftTop = 0,
+    RightTop,
+    LeftBottom,
+    RightBottom,
+};
 class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern,
                                             public PopupBasePattern,
                                             public FocusView,
@@ -1031,6 +1037,18 @@ public:
     void SendMessagesBeforeTransitionOut();
     void SendMessagesAfterTransitionOut(FrameNode* sheetNode);
 
+    void SetSheetMiniDefaultShowPosition(SheetMiniDefaultShowPosition position)
+    {
+        sheetMiniShowPosition_ = position;
+    }
+
+    SheetMiniDefaultShowPosition GetSheetMiniDefaultShowPosition()
+    {
+        return sheetMiniShowPosition_;
+    }
+    std::optional<Dimension> GetSheetMiniDeviceMarginWidth();
+    std::optional<Dimension> GetSheetMiniDeviceMarginHeight();
+
     RefPtr<SheetObject> GetSheetObject() const
     {
         return sheetObject_;
@@ -1145,6 +1163,7 @@ private:
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();
+    void InitSheetObjectDragEvent(RefPtr<SheetObject> sheetObject);
 
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
@@ -1266,6 +1285,8 @@ private:
     std::vector<float> sheetDetentHeight_;
     std::vector<float> unSortedSheetDentents_;
     std::vector<Rect> currentFoldCreaseRegion_;
+
+    SheetMiniDefaultShowPosition sheetMiniShowPosition_ = SheetMiniDefaultShowPosition::RightTop;
 
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;

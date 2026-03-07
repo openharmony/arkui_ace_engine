@@ -67,6 +67,8 @@ public:
     }
 
 private:
+    OffsetF GetSheetMiniShowOffset(const RefPtr<SheetPresentationPattern>& sheetPattern);
+    
     float sheetHeight_ = 0.0f;
     float sheetWidth_ = 0.0f;
     float sheetMaxHeight_ = 0.0f;

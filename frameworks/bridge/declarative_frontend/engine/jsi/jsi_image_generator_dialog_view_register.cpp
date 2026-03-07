@@ -70,6 +70,45 @@ void AddImageGeneratorDialogNode(const panda::Local<panda::ObjectRef>& obj)
     NG::ViewStackProcessor::GetInstance()->SetImageGeneratorDialogNode(customNode);
 }
 
+void ParseAuroraPauseCallback(const panda::Local<panda::ObjectRef>& obj, panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    const auto object = JSRef<JSObject>::Make(obj);
+    auto auroraPauseCallback = object->GetProperty("auroraPauseCallback");
+    auto auroraResumeCallback = object->GetProperty("auroraResumeCallback");
+    JsiCallbackInfo info(runtimeCallInfo);
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    if (auroraPauseCallback->IsFunction()) {
+        RefPtr<JsFunction> jsAuroraPauseFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(auroraPauseCallback));
+        auto onSheetMiniDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsAuroraPauseFunc),
+                               node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute();
+        };
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->SetOnSheetMiniDragStartCallback(std::move(onSheetMiniDragStart));
+        }
+    }
+    if (auroraResumeCallback->IsFunction()) {
+        RefPtr<JsFunction> jsAuroraResumeFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(auroraResumeCallback));
+        auto onSheetMiniDragResume = [execCtx = info.GetExecutionContext(), func = std::move(jsAuroraResumeFunc),
+                               node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute();
+        };
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->SetOnSheetMiniDragResumeCallback(std::move(onSheetMiniDragResume));
+        }
+    }
+}
+
 panda::Local<panda::JSValueRef> JsLoadImageGeneratorDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -83,6 +122,7 @@ panda::Local<panda::JSValueRef> JsLoadImageGeneratorDialog(panda::JsiRuntimeCall
     }
     panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
     AddImageGeneratorDialogNode(obj);
+    ParseAuroraPauseCallback(obj, runtimeCallInfo);
 
     return panda::JSValueRef::Undefined(vm);
 }
