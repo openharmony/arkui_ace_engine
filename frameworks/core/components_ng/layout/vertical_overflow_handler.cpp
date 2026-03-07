@@ -164,7 +164,8 @@ void VerticalOverflowHandler::InitOffsetAfterLayout()
     auto offsetAdjust = verticalReverse ? childFrameHeight - contentHeight : 0.0f;
     if ((verticalReverse && !NearEqual(offsetToChildFrameBottom_, 0.0f)) ||
         !NearEqual(childFrameTop_.value(), totalChildFrameRect_.GetY() - contentRect_.GetY())) {
-        AdjustChildrenOffset(childFrameTop_.value() + offsetAdjust);
+        auto verticalOffset =  verticalReverse ? 0.0f : (totalChildFrameRect_.GetY() - contentRect_.GetY());
+        AdjustChildrenOffset(childFrameTop_.value() + offsetAdjust - verticalOffset);
     }
 }
 

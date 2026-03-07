@@ -1140,4 +1140,38 @@ HWTEST_F(OverflowTestNg, CustomHandleContentOverflowWithIgnoreLayoutSafeAreaTest
     bool hasSafeAreaProp = childLayoutProperty->IsIgnoreOptsValid() || ignoreSafeAreaChild->SelfExpansive();
     EXPECT_TRUE(hasSafeAreaProp);
 }
+/**
+ * @tc.name: InitOffsetAfterLayoutFirstCallTest
+ * @tc.desc: test InitOffsetAfterLayout when called for the first time
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, InitOffsetAfterLayoutFirstCallTest, TestSize.Level1)
+{
+    float contentX = 0.0f;
+    float contentY = 100.0f;
+    float contentWidth = 200.0f;
+    float contentheight = 200.0f;
+    float childX = 0.0f;
+    float childY = 100.0f;
+    float childWidth = 400.0f;
+    float childHeight = 400.0f;
+
+    auto flex = CreateFlex([this](FlexModelNG model) {
+        model.SetDirection(FlexDirection::COLUMN);
+    });
+    CHECK_NULL_VOID(flex);
+    auto pattern = flex->GetPattern<FlexLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    const auto& vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(flex)));
+    vOverflowHandler->SetContentRect(RectF(contentX, contentY, contentWidth, contentheight));
+    vOverflowHandler->SetTotalChildFrameRect(RectF(childX, childY, childWidth, childHeight));
+
+    vOverflowHandler->InitOffsetAfterLayout();
+
+    auto expectedChildFrameTop = childY - contentY;
+    auto expectedOffsetToBottom = expectedChildFrameTop + childHeight - contentheight;
+    EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(-1), expectedChildFrameTop);
+    EXPECT_EQ(vOverflowHandler->offsetToChildFrameBottom_, expectedOffsetToBottom);
+}
 } // namespace OHOS::Ace::NG
