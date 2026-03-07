@@ -927,8 +927,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.cpp @form_framework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h @form_framework
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.cpp @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h @arkuieco3
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.cpp @arkuilayout1
@@ -969,10 +969,10 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navi
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigator_bridge.h @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h @arkui_navigation
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_adapter_bridge.cpp @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_adapter_bridge.h @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.cpp @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.h @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_adapter_bridge.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_adapter_bridge.h @arkuieco3
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.h @arkuieco3
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.cpp @arkuicodepulse
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h @arkuicodepulse
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_particle_bridge.cpp @arkuicodepulse
@@ -999,8 +999,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_refr
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_refresh_bridge.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_relative_container_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_relative_container_bridge.h @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.cpp @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h @arkuieco3
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_resource_bridge.cpp @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_resource_bridge.h @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.cpp @arkui_rich_editor
@@ -3818,6 +3818,9 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Com
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeContent.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/contentSlot.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/nodeContainer.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/hooks/modifiers/ArkCommonModifier.ts @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/transfer/FrameNodeTransfer.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/transfer/RenderNodeTransfer.ets @arkuieco3
 
 [arkuilayout1 ArkTS1.2]
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/hooks/CanvasOpsHandWritten.ets @arkuilayout1
