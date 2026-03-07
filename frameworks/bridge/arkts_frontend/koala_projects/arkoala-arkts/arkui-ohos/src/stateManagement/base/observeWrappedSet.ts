@@ -20,7 +20,7 @@ import { ObserveSingleton } from './observeSingleton';
 import { ObserveWrappedKeyedMeta } from './observeWrappedBase';
 
 final class CONSTANT {
-    public static readonly OB_SET_ANY_PROPERTY = '__OB_ANY_INDEX';
+    public static readonly OB_SET_ANY_PROPERTY = '__OB_ANY_PROPERTY';
     public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 

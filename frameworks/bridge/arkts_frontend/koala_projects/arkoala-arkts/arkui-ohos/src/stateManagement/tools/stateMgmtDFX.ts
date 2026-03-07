@@ -662,8 +662,8 @@ const ObservedTypeToDecoratorName: Map<ObservedType, string> = new Map<ObservedT
 ]);
 
 const V1CaseMixusageStateVariableName: Map<ObservedType, string> = new Map<ObservedType, string>([
-    [ObservedType.OBSERVED, 'Unknown @Observed Object Property'],
-    [ObservedType.INTERFACE_V1, 'Unknown Object Literal Property'],
+    [ObservedType.OBSERVED, 'Any @Observed Object Property'],
+    [ObservedType.INTERFACE_V1, 'Any Object Literal Property'],
     [ObservedType.BUILTIN_V1, 'Unknown BuiltIn Object Property']
 ]);
 
@@ -790,7 +790,7 @@ function updateMetaInfo(meta: DecoratorInfo, related: Array<ElementInfo>, observ
     meta.decoratorName = ObservedTypeToDecoratorName.get(observedType)!;
 
     if (meta.stateVariableName === '__metaBuiltInV1_WrappedDate') {
-        meta.stateVariableName = 'Date Inner Property';
+        meta.stateVariableName = '__OB_DATE';
     } else {
         meta.stateVariableName = (observedType === ObservedType.BUILTIN_V1)
             ? meta.stateVariableName : V1CaseMixusageStateVariableName.get(observedType)!;
@@ -815,16 +815,16 @@ function determineVariableNameByType(observedType: ObservedType, info: string): 
         return info.substring(9);
     } else if (observedType === ObservedType.BUILTIN_V2) {
         if (info === '__metaBuiltInV2Key_WrappedDate') {
-            return 'Date Inner Property';
+            return '__OB_DATE';
         }
         return info;
     } else if (observedType === ObservedType.BUILTIN_MAKEOBSERVED) {
         if (info === '__metaBuiltInMakeObserved_WrappedDate') {
-            return 'Date Inner Property';
+            return '__OB_DATE';
         }
         return info;
     } else if (observedType === ObservedType.INTERFACE_MAKEOBSERVED) {
-        return 'Unknown Object Literal Property';
+        return 'Any Object Literal Property';
     } else {
         return 'Unknown Variable Name';
     }
