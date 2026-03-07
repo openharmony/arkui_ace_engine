@@ -106,7 +106,7 @@ void UIExtensionManagerNg::ValidSessionWrapper(RefPtr<UIExtensionPattern> patter
     RegisterSecurityUIExtensionInFocus
  * @tc.type: FUNC
  */
-HWTEST_F(UIExtensionManagerNg, UIExtensionManager001, TestSize.Level1)
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager001, TestSize.Level0)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**
@@ -160,7 +160,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager001, TestSize.Level1)
     UnWrapExtensionAbilityId/ApplyExtensionId/RecycleExtensionId
  * @tc.type: FUNC
  */
-HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level1)
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level0)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**
@@ -212,7 +212,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level1)
     IsShowPlaceholder/RemoveDestroyedUIExtension/NotifySizeChangeReason
  * @tc.type: FUNC
  */
-HWTEST_F(UIExtensionManagerNg, UIExtensionManager003, TestSize.Level1)
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager003, TestSize.Level0)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**
