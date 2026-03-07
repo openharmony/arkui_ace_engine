@@ -156,7 +156,8 @@ private:
     void OnAnimationFinish();
     float CalculateStart();
     float CalculateEnd();
-    float GetTextOffset(bool getFirstChild = true);
+    float GetTextOffset();
+    std::pair<float, float> GetDoubleTextOffset();
     float GetTextNodeWidth();
     double GetScrollAmount();
     void CheckTextDirectionChange(TextDirection direction);
