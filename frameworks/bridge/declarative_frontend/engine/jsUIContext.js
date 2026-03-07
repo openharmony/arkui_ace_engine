@@ -1043,7 +1043,7 @@ class UIContext {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let ret = Context.isEasySplit();
         __JSScopeUtil__.restoreInstanceId();
-        return res;
+        return ret;
     }
 }
 
