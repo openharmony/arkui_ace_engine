@@ -44,7 +44,10 @@ public:
     {
         isRouter_ = isRouter;
     }
-
+    bool IsRouterForceSplit() const
+    {
+        return isRouter_;
+    }
     void SetForceSplitSupported(bool isForceSplitSupported)
     {
         isForceSplitSupported_ = isForceSplitSupported;
@@ -95,6 +98,7 @@ public:
     void AddForceSplitStateListener(int32_t nodeId, std::function<void()>&& listener);
     void RemoveForceSplitStateListener(int32_t nodeId);
     void NotifyForceSplitStateChange();
+    void OnForceSplitEnableChange();
 
     bool HasRelatedPage() const
     {
@@ -119,7 +123,9 @@ public:
         return dialogSuppotSplit_;
     }
 private:
-    void OnForceSplitEnableChange();
+    bool IsTopFullScreenPage();
+    bool IsWindowConditionMatched();
+    bool HasForceSplitTargetNavigation();
     void RegisterSurfaceChangeCallbackIfNeeded();
     void ChangeForceSplitModeIfNeeded();
 

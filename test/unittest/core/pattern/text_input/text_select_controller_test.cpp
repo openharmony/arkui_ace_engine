@@ -261,6 +261,9 @@ HWTEST_F(TextSelectControllerTest, GetTouchLinePos001, TestSize.Level1)
     textSelectController->contentController_->content_ = u"hhh";
     auto result = textSelectController->GetTouchLinePos(localOffset);
     EXPECT_EQ(result, TouchPosition::LEFT);
+    localOffset = { 0, 0 };
+    result = textSelectController->GetTouchLinePos(localOffset);
+    EXPECT_EQ(result, TouchPosition::LEFT);
 }
 
 /**
@@ -283,6 +286,9 @@ HWTEST_F(TextSelectControllerTest, GetTouchLinePos002, TestSize.Level1)
     Offset localOffset = { 0, 0 };
     textSelectController->contentController_->content_ = u"";
     auto result = textSelectController->GetTouchLinePos(localOffset);
+    EXPECT_EQ(result, TouchPosition::RIGHT);
+    localOffset = { 1, 1 };
+    result = textSelectController->GetTouchLinePos(localOffset);
     EXPECT_EQ(result, TouchPosition::RIGHT);
 }
 

@@ -59,6 +59,9 @@ export class ArkWithThemePeer extends PeerNode {
         ArkUIGeneratedNativeModule._WithThemeInterface_setWithThemeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
+        return;
+    }
 }
 export interface WithThemeOptions {
     theme?: CustomTheme;
@@ -70,6 +73,9 @@ export interface WithThemeAttribute {
     }
     attributeModifier(value: AttributeModifier<WithThemeAttribute> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
+    }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        throw new Error('Unimplemented method debugLine')
     }
 }
 
@@ -96,6 +102,9 @@ export class ArkWithThemeComponent extends ComponentBase implements WithThemeAtt
     }
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
+    }
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        return this
     }
 }
 export class WithThemeOptions_serializer {

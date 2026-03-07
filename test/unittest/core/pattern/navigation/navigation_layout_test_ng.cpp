@@ -1750,6 +1750,58 @@ HWTEST_F(NavigationLayoutTestNg, UpdateNavigationMode002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateNavigationMode003
+ * @tc.desc: Test AUTO_WITH_ASPECT_RATIO mode, height / width > 1.2 should use STACK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, UpdateNavigationMode003, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 1003, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->UpdateEnableModeChangeAnimation(false);
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO_WITH_ASPECT_RATIO);
+    navigationPattern->SetNavigationMode(NavigationMode::SPLIT);
+
+    auto navigationLayoutAlgorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    ASSERT_NE(navigationLayoutAlgorithm, nullptr);
+    auto frameSize = SizeF(1000.0f, 1300.0f);
+    navigationLayoutAlgorithm->UpdateNavigationMode(navigationLayoutProperty, frameSize, navigationNode);
+    EXPECT_EQ(navigationPattern->GetNavigationMode(), NavigationMode::STACK);
+}
+
+/**
+ * @tc.name: UpdateNavigationMode004
+ * @tc.desc: Test AUTO_WITH_ASPECT_RATIO mode, height / width <= 1.2 should use SPLIT.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLayoutTestNg, UpdateNavigationMode004, TestSize.Level1)
+{
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 1004, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->UpdateEnableModeChangeAnimation(false);
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO_WITH_ASPECT_RATIO);
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+
+    auto navigationLayoutAlgorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
+    ASSERT_NE(navigationLayoutAlgorithm, nullptr);
+    auto frameSize = SizeF(1000.0f, 1200.0f);
+    navigationLayoutAlgorithm->UpdateNavigationMode(navigationLayoutProperty, frameSize, navigationNode);
+    EXPECT_EQ(navigationPattern->GetNavigationMode(), NavigationMode::SPLIT);
+}
+
+/**
  * @tc.name: DealNavigationExit003
  * @tc.desc: Test DealNavigationExit and make the logic as follows:
  *               GetEventHub return true

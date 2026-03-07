@@ -145,6 +145,7 @@ private:
 
     void StartMarqueeAnimation();
     void StopMarqueeAnimation(bool stopAndStart);
+    void ChangeSecondChildVisibility(bool stopAndStart);
     void UpdateTextTranslateXY(float offsetX, bool cancel = false, bool isFirstTextNode = true);
     void PropertyCancelAnimationFinish();
     bool OnlyPlayStatusChange();
@@ -155,7 +156,8 @@ private:
     void OnAnimationFinish();
     float CalculateStart();
     float CalculateEnd();
-    float GetTextOffset(bool getFirstChild = true);
+    float GetTextOffset();
+    std::pair<float, float> GetDoubleTextOffset();
     float GetTextNodeWidth();
     double GetScrollAmount();
     void CheckTextDirectionChange(TextDirection direction);

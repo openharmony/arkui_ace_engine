@@ -829,6 +829,22 @@ float RichEditorSelectOverlay::GetHandleHotZoneRadius()
     return hotZoneRadius;
 }
 
+RectF RichEditorSelectOverlay::GetHandleRectWithTransform(const RectF& handleRect)
+{
+    CHECK_NULL_RETURN(hasTransform_, handleRect);
+    auto localPaintRect = handleRect;
+    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+    auto left = localPaintRect.Left() + localPaintRect.Width() / DOUBLE;
+    std::vector<OffsetF> points = { OffsetF(left, localPaintRect.Top()), OffsetF(left, localPaintRect.Bottom()) };
+    GetGlobalPointsWithTransform(points);
+    auto startPoint = points[0];
+    auto endPoint = points[1];
+    auto offsetX = std::max(startPoint.GetX(), endPoint.GetX());
+    auto offsetY = std::min(startPoint.GetY(), endPoint.GetY());
+    auto height = endPoint.GetY() - startPoint.GetY();
+    return RectF(OffsetF(offsetX, offsetY), SizeF(localPaintRect.Width(), std::abs(height)));
+}
+
 void RichEditorSelectOverlay::OnHandleMarkInfoChange(
     std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
 {

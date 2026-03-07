@@ -163,8 +163,10 @@ void LoadCompleteManager::DeleteLoadComponent(int32_t nodeId)
     if (collectStatus_ == CollectStatus::COMPLETE) {
         return;
     }
-    nodeSet_.erase(nodeId);
-    lastLoadComponent = GetCurrentTimestamp();
+    if (nodeSet_.count(nodeId) > 0) {
+        nodeSet_.erase(nodeId);
+        lastLoadComponent = GetCurrentTimestamp();
+    }
     TryFinishCollectTask();
 }
 
@@ -173,8 +175,10 @@ void LoadCompleteManager::CompleteLoadComponent(int32_t nodeId)
     if (collectStatus_ == CollectStatus::COMPLETE) {
         return;
     }
-    nodeSet_.erase(nodeId);
-    lastLoadComponent = GetCurrentTimestamp();
+    if (nodeSet_.count(nodeId) > 0) {
+        nodeSet_.erase(nodeId);
+        lastLoadComponent = GetCurrentTimestamp();
+    }
     TryFinishCollectTask();
 }
 } // namespace OHOS::Ace::NG

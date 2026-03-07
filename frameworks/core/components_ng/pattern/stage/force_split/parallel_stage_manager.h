@@ -92,12 +92,14 @@ public:
         return isTopFullScreenPageChanged_;
     }
 
-    bool IsTopFullScreenPage() const
+    bool IsTopFullScreenPage() const override
     {
         return isTopFullScreenPage_;
     }
 
     RefPtr<FrameNode> GetRelatedOrPlaceHolderPage();
+
+    bool IsDisplaySplitMode() const override;
 
 private:
     class StageOptScope {
@@ -116,7 +118,7 @@ private:
 
     void OnModeChange();
     void OnWindowStateChange(bool show);
-    RefPtr<FrameNode> GetLastPrimaryPage();
+    RefPtr<FrameNode> GetLastPrimaryPage() const;
 
     void FirePageHideOnPushPage(RouterPageType newPageType, const RefPtr<FrameNode>& lastPage,
         const RefPtr<FrameNode>& topRelatedOrPhPage, const RefPtr<FrameNode>& prePrimaryPage,

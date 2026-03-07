@@ -38,7 +38,6 @@
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::Ace::Framework;

@@ -44,6 +44,10 @@ public:
     void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
         std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
         std::function<void(int32_t)>&& onDrop) override;
+    bool IsAllowAnimation() override;
+    bool IsImplicitAnimationOpen() override;
+    bool IsChildInAnimation(uint32_t fromIndex) override;
+    std::pair<int32_t, int32_t> GetActiveRange() override;
 };
 } // namespace OHOS::Ace::NG
 

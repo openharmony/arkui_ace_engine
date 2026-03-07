@@ -21,7 +21,7 @@ import { ObserveWrappedKeyedMeta } from './observeWrappedBase';
 import { UIUtils } from '../utils';
 import { uiUtils } from './uiUtilsImpl';
 final class CONSTANT {
-    public static readonly OB_MAP_ANY_PROPERTY = '__OB_SET_ANY_PROPERTY';
+    public static readonly OB_MAP_ANY_PROPERTY = '__OB_ANY_PROPERTY';
     public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 

@@ -733,6 +733,32 @@ HWTEST_F(RichEditorAITestOneNg, CreateAIEntityMenuTest001, TestSize.Level2)
 }
 
 /**
+ * @tc.name: CalcAIEntityRectWithHandles
+ * @tc.desc: Test CalcAIEntityRectWithHandles
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, CalcAIEntityRectWithHandles, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    pattern->textSelector_.firstHandle = RectF(20, 20, 20, 20);
+    pattern->textSelector_.secondHandle = RectF(60, 20, 20, 20);
+    pattern->parentGlobalOffset_ = OffsetF(0, 0);
+    pattern->contentRect_ = RectF(10, 10, 200, 200);
+    auto aiRect = pattern->CalcAIEntityRectWithHandles();
+    EXPECT_EQ(aiRect, RectF(20, 20, 60, 20));
+    pattern->selectOverlay_->hasTransform_ = true;
+    aiRect = pattern->CalcAIEntityRectWithHandles();
+    EXPECT_EQ(aiRect, RectF(30, 20, 60, 20));
+    pattern->selectOverlay_->hasTransform_ = false;
+    pattern->textSelector_.secondHandle = RectF(60, 40, 20, 20);
+    aiRect = pattern->CalcAIEntityRectWithHandles();
+    EXPECT_EQ(aiRect, RectF(10, 20, 200, 40));
+}
+
+/**
  * @tc.name: NeedAiAnalysis001
  * @tc.desc: test NeedAiAnalysis
  * @tc.type: FUNC

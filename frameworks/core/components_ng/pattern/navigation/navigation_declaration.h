@@ -209,6 +209,7 @@ enum class NavigationMode {
     STACK = 0,
     SPLIT,
     AUTO,
+    AUTO_WITH_ASPECT_RATIO,
 };
 
 enum class NavBarPosition {

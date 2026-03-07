@@ -37,6 +37,11 @@
     "pages/Examples/MenuTestLevel0_19",
     "pages/Examples/MenuTestLevel0_20",
     "pages/Examples/MenuTestLevel0_21",
+    "pages/Examples/MenuTestLevel0_22",
+    "pages/Examples/MenuTestLevel0_23",
+    "pages/Examples/MenuTestLevel0_25",
+    "pages/Examples/MenuTestLevel0_26",
+    "pages/Examples/MenuTestLevel0_8",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",
@@ -371,6 +376,21 @@
     "pages/MenuPlacement/LongPress/Bottom/noPlacement",
     "pages/MenuPlacement/LongPress/Bottom/noPlacement1",
     "pages/MenuPlacement/LongPress/Bottom/noPlacement2",
-    "pages/MenuPlacement/LongPress/Bottom/noPlacement3"
+    "pages/MenuPlacement/LongPress/Bottom/noPlacement3",
+
+    "pages/Menu1_1/Index",
+    "pages/Menu1_1/MenuBuilder",
+    "pages/Menu1_1/bindMenu/bindMenu",
+    "pages/Menu1_1/bindMenu/bindMenu_modifier",
+    "pages/Menu1_1/bindMenu/options_contentTest",
+    "pages/Menu1_1/bindMenu/options_PlacementTest",
+    "pages/Menu1_1/bindMenu/options_TitleTest",
+    "pages/Menu1_1/bindMenu/options_TransitionTest",
+    "pages/Menu1_1/bindContextMenu/bindContextMenu",
+    "pages/Menu1_1/bindContextMenu/bindContextMenu_23",
+    "pages/Menu1_1/bindContextMenu/bindContextMenu_AvailableLayoutArea",
+    "pages/Menu1_1/bindContextMenu/bindContextMenu_ContextMenuOptions",
+    "pages/Menu1_1/bindContextMenu/bindContextMenu_LongPress",
+    "pages/Menu1_1/bindContextMenu/bindContextMenu_previewScaleMode"
   ]
 }

@@ -303,6 +303,28 @@ void CallManagedCallback_AccessibilityActionInterceptResult_VoidSync(Ark_VMConte
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void CallManagedCallback_ArcSwiperContentTransitionProxy(Ark_Int32 resourceId, Ark_ArcSwiperContentTransitionProxy data)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(KIND_CALLBACK_ARCSWIPERCONTENTTRANSITIONPROXY);
+    argsSerializer.writeInt32(resourceId);
+    ArcSwiperContentTransitionProxy_serializer::write(argsSerializer, data);
+    enqueueCallback(API_KIND, &callbackBuffer);
+}
+void CallManagedCallback_ArcSwiperContentTransitionProxySync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ArcSwiperContentTransitionProxy data)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(API_KIND);
+    argsSerializer.writeInt32(KIND_CALLBACK_ARCSWIPERCONTENTTRANSITIONPROXY);
+    argsSerializer.writeInt32(resourceId);
+    ArcSwiperContentTransitionProxy_serializer::write(argsSerializer, data);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void CallManagedCallback_Area_Area_Void(Ark_Int32 resourceId, Ark_Area oldValue, Ark_Area newValue)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -11111,6 +11133,8 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedButtonTriggerClickCallback);
     case KIND_CALLBACK_ACCESSIBILITYACTIONINTERCEPTRESULT_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_AccessibilityActionInterceptResult_Void);
+    case KIND_CALLBACK_ARCSWIPERCONTENTTRANSITIONPROXY:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_ArcSwiperContentTransitionProxy);
     case KIND_CALLBACK_AREA_AREA_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_Area_Area_Void);
     case KIND_CALLBACK_ARRAY_I32_VOID:
@@ -11831,6 +11855,8 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedButtonTriggerClickCallbackSync);
     case KIND_CALLBACK_ACCESSIBILITYACTIONINTERCEPTRESULT_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_AccessibilityActionInterceptResult_VoidSync);
+    case KIND_CALLBACK_ARCSWIPERCONTENTTRANSITIONPROXY:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_ArcSwiperContentTransitionProxySync);
     case KIND_CALLBACK_AREA_AREA_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_Area_Area_VoidSync);
     case KIND_CALLBACK_ARRAY_I32_VOID:

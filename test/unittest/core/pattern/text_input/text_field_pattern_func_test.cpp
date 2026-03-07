@@ -1456,4 +1456,57 @@ HWTEST_F(TextFieldPatternFuncTest, OnHandleBeforeMenuVisibiltyChanged, TestSize.
     pattern->selectOverlay_->ShowMenu();
     EXPECT_FALSE(pattern->selectOverlay_->needRefreshPasteButton_);
 }
-} // namespace OHOS::Ace
+
+/**
+ * @tc.name: GetSelectAreaFromRectsWithTransform
+ * @tc.desc: test text_field_select_overlay.cpp GetSelectAreaFromRects with transform
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetSelectAreaFromRectsWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set up transform scenario and call GetSelectAreaFromRects.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(textFieldNode);
+    manager->selectOverlayNode_ = overlayNode;
+    manager->shareOverlayInfo_ = shareOverlayInfo;
+    pattern->selectOverlay_->OnBind(manager);
+    manager->SetHolder(pattern->selectOverlay_);
+    
+    /**
+     * @tc.steps: step3. Enable transform and set up test rectangles.
+     */
+    pattern->selectOverlay_->hasTransform_ = true;
+    pattern->contentRect_ = RectF(0, 0, 300, 100);
+    pattern->textRect_ = RectF(10, 10, 290, 90);
+    pattern->selectController_->caretInfo_.rect.SetRect(50, 30, 100, 40);
+    
+    /**
+     * @tc.steps: step4. Call GetSelectAreaFromRects with LEFT_TOP_POINT.
+     */
+    auto result = pattern->selectOverlay_->GetSelectAreaFromRects(SelectRectsType::LEFT_TOP_POINT);
+    
+    /**
+     * @tc.expected: The result should be constrained within content rect.
+     */
+    EXPECT_TRUE(result.GetX() >= pattern->contentRect_.GetX());
+    EXPECT_TRUE(result.GetY() >= pattern->contentRect_.GetY());
+    EXPECT_TRUE(result.Right() <= pattern->contentRect_.Right());
+    EXPECT_TRUE(result.Bottom() <= pattern->contentRect_.Bottom());
+}
+} // namespace OHOS::Ace::NG

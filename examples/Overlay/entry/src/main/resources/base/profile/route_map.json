@@ -417,6 +417,51 @@
       "buildFunction": "SoftKeyboardLevel02Builder"
     },
     {
+      "name": "SoftKeyboardLevel03Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_3.ets",
+      "buildFunction": "SoftKeyboardLevel03Builder"
+    },
+    {
+      "name": "SoftKeyboardLevel04Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_4.ets",
+      "buildFunction": "SoftKeyboardLevel04Builder"
+    },
+    {
+      "name": "SoftKeyboardLevel05Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_5.ets",
+      "buildFunction": "SoftKeyboardLevel05Builder"
+    },
+    {
+      "name": "SoftKeyboardLevel06Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_6.ets",
+      "buildFunction": "SoftKeyboardLevel06Builder"
+    },
+    {
+      "name": "SoftKeyboardLevel07Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_7.ets",
+      "buildFunction": "SoftKeyboardLevel07Builder"
+    },
+    {
+      "name": "SoftKeyboardLevel08Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_8.ets",
+      "buildFunction": "SoftKeyboardLevel08Builder"
+    },
+    {
+      "name": "SoftKeyboardLevel09Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_9.ets",
+      "buildFunction": "SoftKeyboardLevel09Builder"
+    },
+    {
+      "name": "SoftKeyboardLevel010Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_10.ets",
+      "buildFunction": "SoftKeyboardLevel10Builder"
+    },
+    {
+      "name": "SoftKeyboardLevel011Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_11.ets",
+      "buildFunction": "SoftKeyboardLevel11Builder"
+    },
+    {
       "name": "MenuComplex",
       "pageSourceFile": "src/main/ets/pages/components/menu/MenuComplexTest.ets",
       "buildFunction": "MenuComplexBuilder"
@@ -440,6 +485,11 @@
       "name": "toastPositionTest",
       "pageSourceFile": "src/main/ets/pages/components/toast/toastPositionTest.ets",
       "buildFunction": "ToastPositionBuilder"
+    },
+    {
+      "name": "ActionSheetAdvanced",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/actionSheetAdvanced.ets",
+      "buildFunction": "ActionSheetAdvancedBuilder"
     }
   ]
 }

@@ -2402,6 +2402,10 @@ std::string NavigationGroupNode::ToDumpString()
         case NavigationMode::AUTO:
             mode = (actualMode == NavigationMode::STACK) ? "AUTO(STACK)" : "AUTO(SPLIT)";
             break;
+        case NavigationMode::AUTO_WITH_ASPECT_RATIO:
+            mode = (actualMode == NavigationMode::STACK) ?
+                "AUTO_WITH_ASPECT_RATIO(STACK)" : "AUTO_WITH_ASPECT_RATIO(SPLIT)";
+            break;
         default:
             mode = "INVALID";
             break;

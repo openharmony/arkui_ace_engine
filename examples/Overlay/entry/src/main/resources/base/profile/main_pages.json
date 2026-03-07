@@ -18,6 +18,10 @@
     "pages/components/dialog/page/AlertDialogTestLevel0_0",
     "pages/components/dialog/page/AlertDialogTestLevel0_1",
     "pages/components/dialog/page/AlertDialogTestLevel0_2",
-    "pages/components/dialog/page/AlertDialogTestLevel0_3"
+    "pages/components/dialog/page/AlertDialogTestLevel0_3",
+    "pages/components/dialog/page/ActionSheetAdvanced_Style",
+    "pages/components/dialog/page/ActionSheetAdvanced_Events",
+    "pages/components/dialog/page/ActionSheetAdvanced_Groups",
+    "pages/components/dialog/page/ActionSheetAdvanced_Icons"
   ]
 }

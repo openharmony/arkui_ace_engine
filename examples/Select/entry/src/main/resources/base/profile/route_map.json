@@ -181,6 +181,11 @@
       "buildFunction": "SelectMenuOutlineStaticBuilder"
     },
     {
+      "name": "SelectLevel8",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel8.ets",
+      "buildFunction": "SelectLevel8Builder"
+    },
+    {
       "name": "ButtonIndex",
       "pageSourceFile": "src/main/ets/pages/components/button/Index.ets",
       "buildFunction": "ButtonIndexBuilder"
@@ -282,8 +287,18 @@
     },
     {
       "name": "ToggleIndex",
-      "pageSourceFile": "src/main/ets/pages/components/toggle/index.ets",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/Index.ets",
       "buildFunction": "ToggleIndexBuilder"
+    },
+    {
+      "name": "ButtonLevel12",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel12.ets",
+      "buildFunction": "ButtonLevel12Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel6",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel6.ets",
+      "buildFunction": "ToggleMultiTestLevel6Builder"
     },
     {
       "name": "ToggleWithDialog",
@@ -446,6 +461,11 @@
       "buildFunction": "CheckboxLevel4Builder"
     },
     {
+      "name": "CheckboxLevel5",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel5.ets",
+      "buildFunction": "CheckboxLevel5Builder"
+    },
+    {
       "name": "RatingIndex",
       "pageSourceFile": "src/main/ets/pages/components/rating/Index.ets",
       "buildFunction": "RatingIndexBuilder"
@@ -489,6 +509,11 @@
       "name": "RatingLevel2",
       "pageSourceFile": "src/main/ets/pages/components/rating/ratingLevel2.ets",
       "buildFunction": "RatingLevel2Builder"
+    },
+    {
+      "name": "RatingLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingLevel3.ets",
+      "buildFunction": "RatingLevel3Builder"
     },
     {
       "name": "SliderIndex",
@@ -576,6 +601,11 @@
       "buildFunction": "SliderLevel15Builder"
     },
     {
+      "name": "SliderLevel16",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel16.ets",
+      "buildFunction": "SliderLevel16Builder"
+    },
+    {
       "name": "SliderPrefixSuffix",
       "pageSourceFile": "src/main/ets/pages/components/slider/SliderPrefixSuffix.ets",
       "buildFunction": "SliderPrefixSuffixBuilder"
@@ -644,6 +674,11 @@
       "name": "RadioLevel4",
       "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel4.ets",
       "buildFunction": "RadioLevel4Builder"
+    },
+    {
+      "name": "RadioLevel5",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel5.ets",
+      "buildFunction": "RadioLevel5Builder"
     },
     {
       "name": "FormIndex",

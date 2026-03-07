@@ -31,6 +31,10 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr float DEFAULT_SCALE = 1.05f;
+constexpr float HALF = 0.5f;
+constexpr int32_t DEFAULT_DURATION = 30;
+
 constexpr Dimension SHEET_MINIMIZE_BORDER_RADIUS = 12.0_vp;
 
 NG::BorderWidthProperty SheetMinimizeObject::PostProcessBorderWidth(const NG::BorderWidthProperty& borderWidth)
@@ -83,6 +87,7 @@ void SheetMinimizeObject::UpdateMinimizePosition()
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+    dragOffsetAddUp_ = OffsetF(0.0f, 0.0f);
 }
 
 RefPtr<InterpolatingSpring> SheetMinimizeObject::GetSheetTransitionCurve(float dragVelocity) const
@@ -354,10 +359,33 @@ void SheetMinimizeObject::HandleDragStart()
     InitScrollProps();
     sheetPattern->SetIsDragging(false);
     currentOffset_ = 0.0f;
+
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometry = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometry);
+    // with parent padding
+    dragStartOffset_ = geometry->GetMarginFrameOffset();
+    const auto& overlayManager = sheetPattern->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto sheetDragPauseFunc = overlayManager->GetOnSheetMiniDragStartCallback();
+    if (sheetDragPauseFunc) {
+        sheetDragPauseFunc();
+    }
+    HandleDragStartAnimation();
 }
 
 void SheetMinimizeObject::HandleDragUpdate(const GestureEvent& info)
 {
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    OffsetF gestureOffset(info.GetOffsetX(), info.GetOffsetY());
+    gestureOffset = gestureOffset + dragOffsetAddUp_;
+    renderContext->UpdateTransformTranslate({ gestureOffset.GetX(), gestureOffset.GetY(), 0.0f });
 }
 
 void SheetMinimizeObject::HandleDragUpdateForLTR(const GestureEvent& info)
@@ -378,6 +406,316 @@ void SheetMinimizeObject::HandleDragEndForLTR(float dragVelocity)
 
 void SheetMinimizeObject::HandleDragEndForRTL(float dragVelocity)
 {
+}
+
+void SheetMinimizeObject::HandleDragStartAnimation()
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasTransformScale()) {
+        prevScale_ = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
+    } else {
+        renderContext->UpdateTransformScale({ 1.0f, 1.0f });
+    }
+
+    AnimationOption option;
+    /* 0.5:init velocity, 350:stiffness, 35:damping */
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0.5, 1, 350, 35));
+    option.SetDuration(DEFAULT_DURATION);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+            auto sheetObject = AceType::DynamicCast<SheetMinimizeObject>(weak.Upgrade());
+            CHECK_NULL_VOID(sheetObject);
+            auto sheetPattern = sheetObject->GetPattern();
+            CHECK_NULL_VOID(sheetPattern);
+            auto host = sheetPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            auto newScale = sheetObject->prevScale_ * DEFAULT_SCALE;
+            renderContext->UpdateTransformScale(newScale);
+        },
+        option.GetOnFinishEvent(), nullptr, context
+    );
+}
+
+void SheetMinimizeObject::HandleTransformScale()
+{
+    AnimationOption option;
+    /* 0.5:init velocity, 350:stiffness, 35:damping */
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0.5, 1, 350, 35));
+    option.SetDuration(DEFAULT_DURATION);
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+            auto sheetObject = AceType::DynamicCast<SheetMinimizeObject>(weak.Upgrade());
+            CHECK_NULL_VOID(sheetObject);
+            auto sheetPattern = sheetObject->GetPattern();
+            CHECK_NULL_VOID(sheetPattern);
+            auto host = sheetPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateTransformScale(sheetObject->prevScale_);
+        },
+        option.GetOnFinishEvent(), nullptr, context
+    );
+}
+
+SheetPositionInfo SheetMinimizeObject::GetSheetPositionInfo()
+{
+    SheetPositionInfo resInfo = SheetPositionInfo();
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_RETURN(sheetPattern, resInfo);
+    auto sheetObject = sheetPattern->GetHost();
+    auto parent = sheetObject->GetParentFrameNode();
+    CHECK_NULL_RETURN(parent, resInfo);
+    auto parentGeometry = parent->GetGeometryNode();
+    CHECK_NULL_RETURN(parentGeometry, resInfo);
+    CHECK_NULL_RETURN(parentGeometry->GetPadding(), resInfo);
+    float left = parentGeometry->GetPadding()->left.value_or(0.0f);
+    float top = parentGeometry->GetPadding()->top.value_or(0.0f);
+    float right = parentGeometry->GetPadding()->right.value_or(0.0f);
+    float bottom = parentGeometry->GetPadding()->bottom.value_or(0.0f);
+
+    auto sheetMiniDeviceMarginWidth = sheetPattern->GetSheetMiniDeviceMarginWidth();
+    auto sheetMiniDeviceMarginHeight = sheetPattern->GetSheetMiniDeviceMarginHeight();
+    CHECK_NULL_RETURN(sheetMiniDeviceMarginWidth, resInfo);
+    CHECK_NULL_RETURN(sheetMiniDeviceMarginHeight, resInfo);
+
+    resInfo.parentLeftConstraint = left + sheetMiniDeviceMarginWidth.value().ConvertToPx();
+    resInfo.parentTopConstraint = top + sheetMiniDeviceMarginHeight.value().ConvertToPx();
+    resInfo.parentRightConstraint =
+        parentGeometry->GetFrameSize().Width() - right - sheetMiniDeviceMarginWidth.value().ConvertToPx();
+    resInfo.parentBottomConstraint =
+        parentGeometry->GetFrameSize().Height() - bottom - sheetMiniDeviceMarginHeight.value().ConvertToPx();
+
+    resInfo.sheetOffset = dragOffsetAddUp_ + dragStartOffset_;
+    auto sheetObjectGeometry = sheetObject->GetGeometryNode();
+    CHECK_NULL_RETURN(sheetObjectGeometry, resInfo);
+    resInfo.sheetWidth = sheetObjectGeometry->GetMarginFrameSize().Width();
+    resInfo.sheetHeight = sheetObjectGeometry->GetMarginFrameSize().Height();
+    
+    return resInfo;
+}
+
+OffsetF SheetMinimizeObject::CalcDragOutOfBoundsPosition()
+{
+    SheetPositionInfo sheetInfo = GetSheetPositionInfo();
+
+    // check: bottom -> right -> top -> left
+    auto fixOffet = OffsetF(0.0f, 0.0f);
+    auto sheetObjectBottom = sheetInfo.sheetOffset.GetY() + sheetInfo.sheetHeight;
+    if (sheetObjectBottom > sheetInfo.parentBottomConstraint) {
+        fixOffet = OffsetF(0.0f, sheetInfo.parentBottomConstraint - sheetObjectBottom);
+        dragOffsetAddUp_ = dragOffsetAddUp_ + fixOffet;
+        sheetInfo.sheetOffset = dragOffsetAddUp_ + dragStartOffset_;
+    }
+    auto sheetObjectRight = sheetInfo.sheetOffset.GetX() + sheetInfo.sheetWidth;
+    if (sheetObjectRight > sheetInfo.parentRightConstraint) {
+        fixOffet = OffsetF(sheetInfo.parentRightConstraint - sheetObjectRight, 0.0f);
+        dragOffsetAddUp_ = dragOffsetAddUp_ + fixOffet;
+        sheetInfo.sheetOffset = dragOffsetAddUp_ + dragStartOffset_;
+    }
+    auto sheetObjectTop = sheetInfo.sheetOffset.GetY();
+    if (sheetObjectTop < sheetInfo.parentTopConstraint) {
+        fixOffet = OffsetF(0.0f, sheetInfo.parentTopConstraint - sheetObjectTop);
+        dragOffsetAddUp_ = dragOffsetAddUp_ + fixOffet;
+        sheetInfo.sheetOffset = dragOffsetAddUp_ + dragStartOffset_;
+    }
+    auto sheetObjectleft = sheetInfo.sheetOffset.GetX();
+    if (sheetObjectleft < sheetInfo.parentLeftConstraint) {
+        fixOffet = OffsetF(sheetInfo.parentLeftConstraint - sheetObjectleft, 0.0f);
+        dragOffsetAddUp_ = dragOffsetAddUp_ + fixOffet;
+        sheetInfo.sheetOffset = dragOffsetAddUp_ + dragStartOffset_;
+    }
+
+    return dragOffsetAddUp_;
+}
+
+OffsetF SheetMinimizeObject::CalcDragAdsorbePosition()
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_RETURN(sheetPattern, OffsetF(0.0f, 0.0f));
+
+    SheetPositionInfo sheetInfo = GetSheetPositionInfo();
+    OffsetF sheetObjectCentor;
+    sheetObjectCentor.SetX(sheetInfo.sheetOffset.GetX() + HALF * sheetInfo.sheetWidth);
+    sheetObjectCentor.SetY(sheetInfo.sheetOffset.GetY() + HALF * sheetInfo.sheetHeight);
+    OffsetF sheetParentCentor;
+    sheetParentCentor.SetX(
+        sheetInfo.parentLeftConstraint + HALF * (sheetInfo.parentRightConstraint - sheetInfo.parentLeftConstraint));
+    sheetParentCentor.SetY(
+        sheetInfo.parentTopConstraint + HALF * (sheetInfo.parentBottomConstraint - sheetInfo.parentTopConstraint));
+
+    SheetMiniDefaultShowPosition showPosition = SheetMiniDefaultShowPosition::RightTop; // default
+    if (sheetObjectCentor.GetX() < sheetParentCentor.GetX()) {
+        if (sheetObjectCentor.GetY() < sheetParentCentor.GetY()) {
+            showPosition = SheetMiniDefaultShowPosition::LeftTop;
+        } else {
+            showPosition = SheetMiniDefaultShowPosition::LeftBottom;
+        }
+    } else {
+        if (sheetObjectCentor.GetY() < sheetParentCentor.GetY()) {
+            showPosition = SheetMiniDefaultShowPosition::RightTop;
+        } else {
+            showPosition = SheetMiniDefaultShowPosition::RightBottom;
+        }
+    }
+    sheetPattern->SetSheetMiniDefaultShowPosition(showPosition);
+
+    auto fixOffet = OffsetF(0.0f, 0.0f);
+    if (showPosition == SheetMiniDefaultShowPosition::LeftTop ||
+        showPosition == SheetMiniDefaultShowPosition::LeftBottom) {
+        fixOffet.SetX(sheetInfo.parentLeftConstraint - sheetInfo.sheetOffset.GetX());
+    }
+    if (showPosition == SheetMiniDefaultShowPosition::RightTop ||
+        showPosition == SheetMiniDefaultShowPosition::RightBottom) {
+        fixOffet.SetX(sheetInfo.parentRightConstraint - sheetInfo.sheetOffset.GetX() - sheetInfo.sheetWidth);
+    }
+
+    dragOffsetAddUp_ = dragOffsetAddUp_ + fixOffet;
+    return dragOffsetAddUp_;
+}
+
+void SheetMinimizeObject::HandleEndPosition()
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto finalShowPosition = CalcDragOutOfBoundsPosition();
+    finalShowPosition = CalcDragAdsorbePosition();
+
+    AnimationOption optionX;
+    auto curveX = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.3, 0.9);
+    optionX.SetCurve(curveX);
+    optionX.SetDuration(DEFAULT_DURATION);
+    AnimationOption optionY;
+    auto curveY = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.4, 0.8);
+    optionY.SetCurve(curveY);
+    optionY.SetDuration(DEFAULT_DURATION);
+
+    AnimationUtils::Animate(optionX, [finalShowPosition, weak = WeakClaim(this)]() {
+            auto sheetObject = AceType::DynamicCast<SheetMinimizeObject>(weak.Upgrade());
+            CHECK_NULL_VOID(sheetObject);
+            auto sheetPattern = sheetObject->GetPattern();
+            CHECK_NULL_VOID(sheetPattern);
+            auto host = sheetPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateTransformTranslate({ finalShowPosition.GetX(), 0.0f, 0.0f });
+        },
+        optionX.GetOnFinishEvent(), nullptr, context
+    );
+    AnimationUtils::Animate(optionY, [finalShowPosition, weak = WeakClaim(this)]() {
+            auto sheetObject = AceType::DynamicCast<SheetMinimizeObject>(weak.Upgrade());
+            CHECK_NULL_VOID(sheetObject);
+            auto sheetPattern = sheetObject->GetPattern();
+            CHECK_NULL_VOID(sheetPattern);
+            auto host = sheetPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateTransformTranslate({ finalShowPosition.GetX(), finalShowPosition.GetY(), 0.0f });
+        },
+        optionY.GetOnFinishEvent(), nullptr, context
+    );
+}
+
+void SheetMinimizeObject::HandleDragEndResumeAurora()
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    const auto& overlayManager = sheetPattern->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto sheetDragResumeFunc = overlayManager->GetOnSheetMiniDragResumeCallback();
+    if (sheetDragResumeFunc) {
+        sheetDragResumeFunc();
+    }
+}
+
+void SheetMinimizeObject::HandleDragEndAnimation()
+{
+    // start animation to reset transformscale.
+    HandleTransformScale();
+
+    HandleEndPosition();
+
+    HandleDragEndResumeAurora();
+}
+
+void SheetMinimizeObject::HandleOnDragCancel()
+{
+    HandleDragEndAnimation();
+}
+
+void SheetMinimizeObject::HandleOnDragEnd(const GestureEvent& info)
+{
+    OffsetF gestureOffset(info.GetOffsetX(), info.GetOffsetY());
+    dragOffsetAddUp_ = dragOffsetAddUp_ + gestureOffset;
+    HandleDragEndAnimation();
+}
+
+void SheetMinimizeObject::InitDragDropEvent()
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    dragOffsetAddUp_ = OffsetF(0.0f, 0.0f);
+    if (panEvent_) {
+        return;
+    }
+
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto sheetObject = AceType::DynamicCast<SheetMinimizeObject>(weak.Upgrade());
+        CHECK_NULL_VOID(sheetObject);
+        sheetObject->HandleDragStart();
+    };
+
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto sheetObject = AceType::DynamicCast<SheetMinimizeObject>(weak.Upgrade());
+        CHECK_NULL_VOID(sheetObject);
+        sheetObject->HandleDragUpdate(info);
+    };
+
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        auto sheetObject = AceType::DynamicCast<SheetMinimizeObject>(weak.Upgrade());
+        CHECK_NULL_VOID(sheetObject);
+        sheetObject->HandleOnDragCancel();
+    };
+
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto sheetObject = AceType::DynamicCast<SheetMinimizeObject>(weak.Upgrade());
+        CHECK_NULL_VOID(sheetObject);
+        sheetObject->HandleOnDragEnd(info);
+    };
+
+    PanDirection panDirection;
+    panDirection.type = GetPanDirection();
+    panEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 }
 
 void SheetMinimizeObject::ModifyFireSheetTransition(float dragVelocity)

@@ -23,8 +23,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension SHEET_MINIMIZE_DEFAULT_WIDTH = 125.0_vp;
 constexpr Dimension SHEET_MINIMIZE_DEFAULT_HEIGHT = 125.0_vp;
-constexpr Dimension SHEET_MINIMIZE_MARGIN_BOTTOM = 28.0_vp;
-constexpr Dimension SHEET_MINIMIZE_MARGIN_RIGHT = 32.0_vp;
 } // namespace
 
 void SheetPresentationMinimizeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -71,6 +69,32 @@ void SheetPresentationMinimizeLayoutAlgorithm::MeasureScrollNode(LayoutWrapper* 
     scrollWrapper->Measure(constraint);
 }
 
+OffsetF SheetPresentationMinimizeLayoutAlgorithm::GetSheetMiniShowOffset(
+    const RefPtr<SheetPresentationPattern>& sheetPattern)
+{
+    CHECK_NULL_RETURN(sheetPattern, OffsetF(0.0f, 0.0f));
+    auto sheetMiniDeviceMarginWidth = sheetPattern->GetSheetMiniDeviceMarginWidth();
+    auto sheetMiniDeviceMarginHeight = sheetPattern->GetSheetMiniDeviceMarginHeight();
+    CHECK_NULL_RETURN(sheetMiniDeviceMarginWidth, OffsetF(0.0f, 0.0f));
+    CHECK_NULL_RETURN(sheetMiniDeviceMarginHeight, OffsetF(0.0f, 0.0f));
+    SheetMiniDefaultShowPosition showPosition = sheetPattern->GetSheetMiniDefaultShowPosition();
+    OffsetF positionOffset(0.0f, 0.0f);
+    if (showPosition == SheetMiniDefaultShowPosition::LeftTop) {
+        positionOffset.SetX(sheetMiniDeviceMarginWidth.value().ConvertToPx());
+        positionOffset.SetY(sheetMiniDeviceMarginHeight.value().ConvertToPx());
+    } else if (showPosition == SheetMiniDefaultShowPosition::RightTop) {
+        positionOffset.SetX(sheetMaxWidth_ - sheetWidth_ - sheetMiniDeviceMarginWidth.value().ConvertToPx());
+        positionOffset.SetY(sheetMiniDeviceMarginHeight.value().ConvertToPx());
+    } else if (showPosition == SheetMiniDefaultShowPosition::LeftBottom) {
+        positionOffset.SetX(sheetMiniDeviceMarginWidth.value().ConvertToPx());
+        positionOffset.SetY(sheetMaxHeight_ - sheetHeight_ - sheetMiniDeviceMarginHeight.value().ConvertToPx());
+    } else if (showPosition == SheetMiniDefaultShowPosition::RightBottom) {
+        positionOffset.SetX(sheetMaxWidth_ - sheetWidth_ - sheetMiniDeviceMarginWidth.value().ConvertToPx());
+        positionOffset.SetY(sheetMaxHeight_ - sheetHeight_ - sheetMiniDeviceMarginHeight.value().ConvertToPx());
+    }
+    return positionOffset;
+}
+
 void SheetPresentationMinimizeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -80,9 +104,7 @@ void SheetPresentationMinimizeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapp
     CHECK_NULL_VOID(sheetPattern);
     auto scrollNode = sheetPattern->GetSheetScrollNode();
     CHECK_NULL_VOID(scrollNode);
-    OffsetF positionOffset;
-    positionOffset.SetX(sheetMaxWidth_ - sheetWidth_ - SHEET_MINIMIZE_MARGIN_RIGHT.ConvertToPx());
-    positionOffset.SetY(sheetMaxHeight_ - sheetHeight_ - SHEET_MINIMIZE_MARGIN_BOTTOM.ConvertToPx());
+    OffsetF positionOffset = GetSheetMiniShowOffset(sheetPattern);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     geometryNode->SetMarginFrameOffset(positionOffset);
 

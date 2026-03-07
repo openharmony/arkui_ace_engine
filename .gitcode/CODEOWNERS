@@ -262,6 +262,7 @@ advanced_ui_component_static/arcbutton/ @arkuipopupwindow_all
 advanced_ui_component_static/arcslider/ @arkuipopupwindow_all
 advanced_ui_component_static/popup/ @arkuipopupwindow_all
 advanced_ui_component_static/formmenu/ @form_framework
+advanced_ui_component/imageGeneratorDialog/source/image_generator_dialog_project/image_generator_dialog/src/main/ets/common/utils/ @ArkUI_ability_group
 
 [Advanced UI Components Static]
 advanced_ui_component_static/assembled_advanced_ui_component/ @arkuiadvancedcomponent
@@ -3713,6 +3714,7 @@ test/unittest/core/pattern/test_ng.cpp @arkuiscroll
 test/unittest/core/pattern/test_ng.h @arkuiscroll
 test/unittest/core/pipeline/ @arkui_framework_xnode
 test/unittest/core/property/templates_parser_test_ng.cpp @arkuiscroll
+test/unittest/core/manager/load_complete_manager_test_ng.cpp @arkui_framework_xnode
 test/unittest/core/property/accessibility_property_test_ng.cpp @ArkUI_ability_group
 test/unittest/core/property/accessibility_property_test_three_ng.cpp @ArkUI_ability_group
 test/unittest/core/property/accessibility_property_testtwo_ng.cpp @ArkUI_ability_group
@@ -3731,6 +3733,11 @@ test/unittest/interfaces/ui_input_event_test.cpp @ArkUI_Event
 test/unittest/interfaces/ace_ui_input_event/ @ArkUI_Event
 test/unittest/interfaces/ace_gesture/ @ArkUI_Event
 test/unittest/interfaces/form_render/ @form_framework
+test/unittest/frameworks/core/common/ace_engine_test.cpp @arkui_framework_xnode
+test/unittest/frameworks/core/common/container_scope_test.cpp @arkui_framework_xnode
+test/unittest/frameworks/core/common/BUILD.gn @arkui_framework_xnode
+test/mock/core/common/mock_resource_wrapper.h @arkui_framework_resource
+test/unittest/core/common/resource/resource_parse_utils_test_ng.cpp @arkui_framework_resource
 
 [Generated source]
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/ @arkui-idlize

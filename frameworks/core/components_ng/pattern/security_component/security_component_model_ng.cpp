@@ -570,7 +570,7 @@ void SecurityComponentModelNG::SetText(const std::string& value)
     auto hasPermission = prop->GetHasCustomPermissionForSecComp();
     if (hasPermission.value_or(false)) {
         RefPtr<FrameNode> textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
-        if (textNode == nullptr) {
+        if ((textNode == nullptr) && (!value.empty())) {
             textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(textNode);
@@ -595,7 +595,7 @@ void SecurityComponentModelNG::SetText(FrameNode* frameNode, const std::optional
     auto hasPermission = prop->GetHasCustomPermissionForSecComp();
     if (hasPermission.value_or(false) && value.has_value()) {
         RefPtr<FrameNode> textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
-        if (textNode == nullptr) {
+        if ((textNode == nullptr) && (!value.value().empty())) {
             textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(textNode);

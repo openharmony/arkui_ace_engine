@@ -1452,6 +1452,7 @@
       OHOS::Ace::NG::BaseTextSelectOverlay::IsCurrentMenuVisibile*;
       OHOS::Ace::NG::BaseTextSelectOverlay::IsTouchAtHandle*;
       OHOS::Ace::NG::BaseTextSelectOverlay::RevertLocalPointWithTransform*;
+      OHOS::Ace::NG::BaseTextSelectOverlay::GetGlobalPointsWithTransform*;
       OHOS::Ace::NG::BaseTextSelectOverlay::GetOwner*;
       OHOS::Ace::NG::BaseTextSelectOverlay::HideMenu*;
       OHOS::Ace::NG::BaseTextSelectOverlay::GetAncestorNodeViewPort*;

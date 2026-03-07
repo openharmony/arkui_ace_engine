@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export interface  NavListItem {
+export interface NavListItem {
   name: string;
   path: string;
 }
@@ -21,19 +21,22 @@ export interface  NavListItem {
 @Component
 export struct NavList {
   pages: NavListItem[] = []
-  onPathChange: (item: NavListItem) => void = () => {};
+  onPathChange: (item: NavListItem) => void = () => {
+  };
 
   build() {
-    Column() {
-      ForEach(this.pages, (item: NavListItem) => {
-        Button(item.name)
-          .stateEffect(true)
-          .type(ButtonType.Capsule)
-          .width('80%')
-          .height(40)
-          .margin(20)
-          .onClick(() =>  this.onPathChange(item))
-      })
+    Scroll() {
+      Column() {
+        ForEach(this.pages, (item: NavListItem) => {
+          Button(item.name)
+            .stateEffect(true)
+            .type(ButtonType.Capsule)
+            .width('80%')
+            .height(40)
+            .margin(20)
+            .onClick(() => this.onPathChange(item))
+        })
+      }
     }
   }
 }

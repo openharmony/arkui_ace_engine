@@ -116,7 +116,7 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
 
     public getDFXInfo(): ElementInfo {
         return {
-            elementName: `@Computed ${this.varName}`,
+            elementName: `@Computed get ${this.varName}`,
             elementId: this.id
         };
     }

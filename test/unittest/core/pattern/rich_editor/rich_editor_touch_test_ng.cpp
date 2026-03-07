@@ -217,6 +217,12 @@ HWTEST_F(RichEditorTouchTestNg, HandleTouchUp002, TestSize.Level0)
     richEditorPattern->moveCaretState_.isMoveCaret = true;
     richEditorPattern->HandleTouchUp();
     EXPECT_FALSE(richEditorPattern->isCursorAlwaysDisplayed_);
+    ASSERT_NE(richEditorPattern->selectOverlay_, nullptr);
+    ASSERT_NE(richEditorPattern->magnifierController_, nullptr);
+    richEditorPattern->selectOverlay_->isHandleMoving_ = false;
+    richEditorPattern->magnifierController_->isShowMagnifier_ = false;
+    richEditorPattern->HandleTouchUp();
+    EXPECT_FALSE(richEditorPattern->magnifierController_->GetShowMagnifier());
 }
 
 /**
@@ -660,13 +666,12 @@ HWTEST_F(RichEditorTouchTestNg, TestTouchedFingerCount, TestSize.Level0)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto& fingerCount = richEditorPattern->touchedFingerCount_;
-    fingerCount = 0;
+    auto& touchedFingers = richEditorPattern->touchedFingers_;
     TouchLocationInfo touchLocationInfo(0);
     richEditorPattern->HandleTouchDown(touchLocationInfo);
-    EXPECT_NE(fingerCount, 0);
+    EXPECT_EQ(touchedFingers.size(), 0);
     richEditorPattern->HandleTouchUp();
-    EXPECT_EQ(fingerCount, 0);
+    EXPECT_EQ(touchedFingers.size(), 0);
 }
 
 /**

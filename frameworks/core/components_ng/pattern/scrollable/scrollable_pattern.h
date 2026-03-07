@@ -90,6 +90,16 @@ struct ScrollOffsetAbility {
     float contentStartOffset = 0.0f;
     float contentEndOffset = 0.0f;
 };
+struct ScrollOnInjectionEventInfo {
+    bool isScrollByRatio = false;
+    bool isScrollByOffset = false;
+    bool isScrollByTargetId = false;
+    int reportEventId = 0;
+    int32_t targetId = -1;
+    float ratio = 0.0f;
+    double scrollOffset = 0.0;
+};
+
 class ACE_FORCE_EXPORT ScrollablePattern : public NestableScrollContainer, public virtual StatusBarClickListener {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
@@ -1065,6 +1075,7 @@ protected:
 
     bool GetCanOverScroll() const;
     bool lastCanOverScroll_ = false;
+    bool lastScrollFromInjection_ = false;
 
     void CheckScrollBarOff();
 
@@ -1073,11 +1084,26 @@ protected:
         return isBackToTopRunning_;
     }
 
-    std::string ParseCommand(const std::string& command, int& reportEventId, float& moveRatio, bool& isScrollByRatio);
+    std::string ParseCommand(const std::string& command, ScrollOnInjectionEventInfo& scrollOnInjectionEventInfo);
     void ReportScroll(bool isJump, ScrollError error, int32_t reportEventId);
     int32_t OnInjectionEventByRatio(const std::string& command);
     ScrollError ScrollByRatio(bool reverse, float ratio);
     void HandleScrollByRatio(bool isScrollByRatio, bool reverse, float ratio, int reportEventId);
+    void HandleScrollByOffset(double scrollOffset, int reportEventId);
+    void HandleScrollByTargetId(int32_t targetId, int reportEventId);
+
+    virtual int32_t GetFirstIndex() const
+    {
+        return -1;
+    }
+
+    virtual void FillReportOnItemStopParams(std::unique_ptr<JsonValue>& params);
+    void ReportOnItemScrollStop(const std::string& event);
+
+    void SetLastScrollFromInjection(bool val)
+    {
+        lastScrollFromInjection_ = val;
+    }
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();

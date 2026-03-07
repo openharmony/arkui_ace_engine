@@ -68,7 +68,6 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(dialogPattern);
     auto navigationManager = pipeline->GetNavigationManager();
     CHECK_NULL_VOID(navigationManager);
-    auto existForceSplitNav = navigationManager->GetExistForceSplitNav();
     auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
     CHECK_NULL_VOID(forceSplitMgr);
     NG::RectF floatButtons;
@@ -89,10 +88,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isModal_ && !isShowInSubWindow_;
     auto enableHoverMode = dialogProp->GetEnableHoverMode().value_or(false);
     hoverModeArea_ = dialogProp->GetHoverModeArea().value_or(HoverModeAreaType::BOTTOM_SCREEN);
-    needAdaptForceSplitMode_ = pipeline->IsCurrentInForceSplitMode() && !IsEmbeddedDialog(hostNode) &&
-                                (forceSplitMgr->IsForceSplitSupported(true) ||
-                                (forceSplitMgr->IsForceSplitSupported(false) && existForceSplitNav.first)) &&
-                                    (forceSplitMgr->GetDialogSupportSplit());
+    needAdaptForceSplitMode_ = pipeline->IsDisplayInForceSplitMode() && !IsEmbeddedDialog(hostNode) &&
+                                (forceSplitMgr->GetDialogSupportSplit());
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();

@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 import { VoidCallback, Length, ResourceColor, Font } from '/arkui/component/units';
-import { SwiperAnimationEvent, SwiperContentAnimatedTransition, SwiperContentTransitionProxy, OnSwiperAnimationStartCallback, OnSwiperAnimationEndCallback, OnSwiperGestureSwipeCallback } from 'arkui/component/swiper'
+import { SwiperAnimationEvent } from 'arkui/component/swiper'
 import { CrownSensitivity, EdgeEffect } from 'arkui/component/enums'
 import { LinearGradient } from 'arkui/component/dataPanel'
-import { CommonMethod, Callback, ArkCommonMethodPeer, ArkCommonMethodComponent } from 'arkui/component/common'
+import { CommonMethod, Callback, ArkCommonMethodPeer, ArkCommonMethodComponent, Callback as arkui_component_common_Callback } from 'arkui/component/common'
 import { Finalizable, runtimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, InteropNativeModule} from '@koalaui/interop'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
@@ -25,6 +25,130 @@ import { PeerNode } from "arkui/PeerNode"
 import { ArcSwiperExtender, ArcSwiperControllerHelper, ArcDirectionInner, ArcDotIndicatorInner } from 'arkui/component/idlize';
 import { NodeAttach, remember } from "@koalaui/runtime"
 
+export interface ArcSwiperContentTransitionProxy {
+    selectedIndex: int32
+    index: int32
+    position: double
+    mainAxisLength: double
+    finishTransition(): void
+}
+export class ArcSwiperContentTransitionProxyInternal implements MaterializedBase,ArcSwiperContentTransitionProxy {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get selectedIndex(): int32 {
+        return this.getSelectedIndex()
+    }
+    set selectedIndex(selectedIndex: int32) {
+        this.setSelectedIndex(selectedIndex)
+    }
+    get index(): int32 {
+        return this.getIndex()
+    }
+    set index(index: int32) {
+        this.setIndex(index)
+    }
+    get position(): double {
+        return this.getPosition()
+    }
+    set position(position: double) {
+        this.setPosition(position)
+    }
+    get mainAxisLength(): double {
+        return this.getMainAxisLength()
+    }
+    set mainAxisLength(mainAxisLength: double) {
+        this.setMainAxisLength(mainAxisLength)
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, ArcSwiperContentTransitionProxyInternal.getFinalizer())
+    }
+    constructor() {
+        this(ArcSwiperContentTransitionProxyInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): ArcSwiperContentTransitionProxyInternal {
+        return new ArcSwiperContentTransitionProxyInternal(ptr)
+    }
+    public finishTransition(): void {
+        this.finishTransition_serialize()
+        return
+    }
+    private getSelectedIndex(): int32 {
+        return this.getSelectedIndex_serialize()
+    }
+    private setSelectedIndex(selectedIndex: int32): void {
+        const selectedIndex_casted = selectedIndex as (int32)
+        this.setSelectedIndex_serialize(selectedIndex_casted)
+        return
+    }
+    private getIndex(): int32 {
+        return this.getIndex_serialize()
+    }
+    private setIndex(index: int32): void {
+        const index_casted = index as (int32)
+        this.setIndex_serialize(index_casted)
+        return
+    }
+    private getPosition(): double {
+        return this.getPosition_serialize()
+    }
+    private setPosition(position: double): void {
+        const position_casted = position as (double)
+        this.setPosition_serialize(position_casted)
+        return
+    }
+    private getMainAxisLength(): double {
+        return this.getMainAxisLength_serialize()
+    }
+    private setMainAxisLength(mainAxisLength: double): void {
+        const mainAxisLength_casted = mainAxisLength as (double)
+        this.setMainAxisLength_serialize(mainAxisLength_casted)
+        return
+    }
+    finishTransition_serialize(): void {
+        ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_finishTransition(this.peer!.ptr)
+    }
+    private getSelectedIndex_serialize(): int32 {
+        const retval  = ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_getSelectedIndex(this.peer!.ptr)
+        return retval
+    }
+    private setSelectedIndex_serialize(selectedIndex: int32): void {
+        ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_setSelectedIndex(this.peer!.ptr, selectedIndex)
+    }
+    private getIndex_serialize(): int32 {
+        const retval  = ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_getIndex(this.peer!.ptr)
+        return retval
+    }
+    private setIndex_serialize(index: int32): void {
+        ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_setIndex(this.peer!.ptr, index)
+    }
+    private getPosition_serialize(): double {
+        const retval  = ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_getPosition(this.peer!.ptr)
+        return retval
+    }
+    private setPosition_serialize(position: double): void {
+        ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_setPosition(this.peer!.ptr, position)
+    }
+    private getMainAxisLength_serialize(): double {
+        const retval  = ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_getMainAxisLength(this.peer!.ptr)
+        return retval
+    }
+    private setMainAxisLength_serialize(mainAxisLength: double): void {
+        ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_setMainAxisLength(this.peer!.ptr, mainAxisLength)
+    }
+}
+export interface ArcSwiperContentAnimatedTransition {
+    timeout?: int32;
+    transition: arkui_component_common_Callback<ArcSwiperContentTransitionProxy, void>;
+}
 export class ArcSwiperController implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
@@ -139,8 +263,6 @@ export type IndexChangedHandler = (index: int32) => void;
 export type AnimationStartHandler = (index: int32, targetIndex: int32, event: SwiperAnimationEvent) => void;
 export type AnimationEndHandler = (index: int32, event: SwiperAnimationEvent) => void;
 export type GestureSwipeHandler = (index: int32, event: SwiperAnimationEvent) => void;
-export type ArcSwiperContentAnimatedTransition = SwiperContentAnimatedTransition;
-export type ArcSwiperContentTransitionProxy = SwiperContentTransitionProxy;
 
 export interface ArcSwiperAttribute extends CommonMethod {
     setArcSwiperOptions(controller?: ArcSwiperController): this {
@@ -199,6 +321,7 @@ export class ArkArcSwiperPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setArcSwiperOptionsAttribute(controller?: ArcSwiperController): void {
+        ArcSwiperContentTransitionProxyInternal.construct()
         const controller_casted = ArcSwiperControllerInnerHelper.ConvertArcSwiperController(controller);
         ArcSwiperExtender.setConstructInfo(this.peer.ptr, controller_casted)
     }
@@ -236,7 +359,7 @@ export class ArkArcSwiperPeer extends ArkCommonMethodPeer {
     setEffectModeAttribute(value: EdgeEffect | undefined): void {
         ArcSwiperExtender.effectMode(this.peer.ptr, value)
     }
-    setCustomContentTransitionAttribute(value: SwiperContentAnimatedTransition | undefined): void {
+    setCustomContentTransitionAttribute(value: ArcSwiperContentAnimatedTransition | undefined): void {
         ArcSwiperExtender.customContentTransition(this.peer.ptr, value)
     }
     setDisableTransitionAnimationAttribute(value: boolean | undefined): void {
@@ -348,9 +471,9 @@ export class ArkArcSwiperComponent extends ArkCommonMethodComponent implements A
         }
         return this
     }
-    public customContentTransition(value: SwiperContentAnimatedTransition | undefined): this {
+    public customContentTransition(value: ArcSwiperContentAnimatedTransition | undefined): this {
         if (this.checkPriority("customContentTransition")) {
-            const value_casted = value as (SwiperContentAnimatedTransition | undefined)
+            const value_casted = value as (ArcSwiperContentAnimatedTransition | undefined)
             this.getPeer()?.setCustomContentTransitionAttribute(value_casted)
             return this
         }

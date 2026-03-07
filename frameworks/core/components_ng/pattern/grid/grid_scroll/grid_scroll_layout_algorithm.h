@@ -261,6 +261,8 @@ private:
      */
     bool MeasureExistingLine(
         int32_t line, float& mainLength, int32_t& endIdx, bool isScrollableSpringMotionRunning = false);
+
+    bool HaveToMeasureInNextFrame(bool reverse, LayoutWrapper* layoutWrapper) const;
     
     /**
      * @brief Check next line(previously recorded) height is zero

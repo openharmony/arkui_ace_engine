@@ -127,6 +127,16 @@ public:
         return false;
     }
 
+    virtual bool IsTopFullScreenPage() const
+    {
+        return false;
+    }
+
+    virtual bool IsDisplaySplitMode() const
+    {
+        return false;
+    }
+
 protected:
     void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
     void AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage);

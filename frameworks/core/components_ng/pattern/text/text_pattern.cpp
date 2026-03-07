@@ -2068,17 +2068,7 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
         parentGlobalOffset_ = GetParentGlobalOffset();
         calculateHandleFunc();
     }
-    if (textSelector_.firstHandle.Top() != textSelector_.secondHandle.Top()) {
-        auto top = std::min(textSelector_.firstHandle.Top(), textSelector_.secondHandle.Top());
-        auto bottom = std::max(textSelector_.firstHandle.Bottom(), textSelector_.secondHandle.Bottom());
-        auto textContentGlobalOffset = parentGlobalOffset_ + contentRect_.GetOffset();
-        auto left = textContentGlobalOffset.GetX();
-        auto right = textContentGlobalOffset.GetX() + contentRect_.Width();
-        aiRect = RectT(left, top, right - left, bottom - top);
-        AdjustAIEntityRect(aiRect);
-    } else {
-        aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
-    }
+    aiRect = CalcAIEntityRectWithHandles();
     RectF viewPort;
     if (selectOverlay_->GetClipHandleViewPort(viewPort) &&
         GreatNotEqual(aiRect.GetY() + aiRect.Height(), viewPort.GetY() + viewPort.Height()) &&
@@ -2094,6 +2084,20 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
     }
     return aiRect;
 }
+
+RectF TextPattern::CalcAIEntityRectWithHandles()
+{
+    if (textSelector_.firstHandle.Top() == textSelector_.secondHandle.Top()) {
+        return textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
+    }
+    auto top = std::min(textSelector_.firstHandle.Top(), textSelector_.secondHandle.Top());
+    auto bottom = std::max(textSelector_.firstHandle.Bottom(), textSelector_.secondHandle.Bottom());
+    auto textContentGlobalOffset = parentGlobalOffset_ + contentRect_.GetOffset();
+    auto left = textContentGlobalOffset.GetX();
+    auto right = textContentGlobalOffset.GetX() + contentRect_.Width();
+    return RectT(left, top, right - left, bottom - top);
+}
+
 std::pair<bool, bool> TextPattern::GetCopyAndSelectable()
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();

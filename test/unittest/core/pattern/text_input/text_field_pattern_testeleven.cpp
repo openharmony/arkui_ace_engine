@@ -1681,4 +1681,212 @@ HWTEST_F(TextFieldPatternTesteleven, HandleOnTab001, TestSize.Level1)
     auto result = textFieldPattern->HandleOnTab(true);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: SetBackBorderRadius001
+ * @tc.desc: Test SetBackBorderRadius with LTR layout and default radius
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, SetBackBorderRadius001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField node with LTR layout
+     * @tc.expected: BorderRadiusFlagByUser should be set
+     */
+    CreateTextField("", "");
+
+    /**
+     * @tc.steps: step2. Set border radius with default value
+     */
+    pattern_->SetBackBorderRadius();
+
+    /**
+     * @tc.steps: step3. Verify border radius is set correctly
+     * @tc.expected: BorderRadiusFlagByUser should be set to true
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    EXPECT_TRUE(paintProperty->HasBorderRadiusFlagByUser());
+}
+
+/**
+ * @tc.name: SetBackBorderRadius002
+ * @tc.desc: Test SetBackBorderRadius with RTL layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, SetBackBorderRadius002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField node with RTL layout
+     * @tc.expected: Border radius should be mirrored correctly in RTL layout
+     */
+    CreateTextField("", "");
+
+    /**
+     * @tc.steps: step2. Set layout direction to RTL
+     */
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+
+    /**
+     * @tc.steps: step3. Set border radius in RTL layout
+     */
+    pattern_->SetBackBorderRadius();
+
+    /**
+     * @tc.steps: step4. Verify border radius is set correctly in RTL layout
+     * @tc.expected: BorderRadiusFlagByUser should be set to true
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    EXPECT_TRUE(paintProperty->HasBorderRadiusFlagByUser());
+}
+
+/**
+ * @tc.name: SetBackBorderRadius003
+ * @tc.desc: Test SetBackBorderRadius when border radius already set
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, SetBackBorderRadius003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField node
+     * @tc.expected: BorderRadiusFlagByUser should already be set (already set)
+     */
+    CreateTextField("", "");
+
+    /**
+     * @tc.steps: step2. Set border radius
+     */
+    pattern_->SetBackBorderRadius();
+
+    /**
+     * @tc.steps: step3. Verify border radius flag is set
+     * @tc.expected: BorderRadiusFlagByUser should be set to true (already set)
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    EXPECT_TRUE(paintProperty->HasBorderRadiusFlagByUser());
+}
+
+/**
+ * @tc.name: UpdateBorderResource001
+ * @tc.desc: Test UpdateBorderResource with border radius enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, UpdateBorderResource001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField node and set border radius
+     */
+    CreateTextField("", "");
+    FlushLayoutTask(frameNode_);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(5.0, DimensionUnit::VP));
+    TextFieldModelNG::SetBorderRadius(AceType::RawPtr(frameNode_), borderRadius);
+
+    /**
+     * @tc.steps: step2. Call UpdateBorderResource and verify
+     * @tc.expected: BorderRadiusFlagByUser should be set
+     */
+    pattern_->UpdateBorderResource();
+
+    /**
+     * @tc.steps: step3. Verify results
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    EXPECT_TRUE(paintProperty->HasBorderRadiusFlagByUser());
+}
+
+/**
+ * @tc.name: UpdateBorderResource002
+ * @tc.desc: Test UpdateBorderResource with HasBorderRadius and HasBorderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, UpdateBorderResource002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField node and set border radius
+     */
+    CreateTextField("", "");
+    FlushLayoutTask(frameNode_);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(5.0, DimensionUnit::VP));
+    TextFieldModelNG::SetBorderRadius(AceType::RawPtr(frameNode_), borderRadius);
+
+    /**
+     * @tc.steps: step2. Set border color
+     */
+    BorderColorProperty borderColors;
+    borderColors.leftColor = Color::RED;
+    borderColors.rightColor = Color::RED;
+    borderColors.topColor = Color::RED;
+    borderColors.bottomColor = Color::RED;
+    TextFieldModelNG::SetBorderColor(AceType::RawPtr(frameNode_), borderColors);
+
+    /**
+     * @tc.steps: step3. Call UpdateBorderResource and verify
+     * @tc.expected: BorderColorFlagByUser should be set
+     */
+    pattern_->UpdateBorderResource();
+
+    /**
+     * @tc.steps: step4. Verify results
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    EXPECT_TRUE(paintProperty->HasBorderRadiusFlagByUser());
+    EXPECT_TRUE(paintProperty->HasBorderColorFlagByUser());
+}
+
+/**
+ * @tc.name: UpdateBorderResource003
+ * @tc.desc: Test UpdateBorderResource with HasBorderRadius, HasBorderColor and HasBorderWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, UpdateBorderResource003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField node and set border radius
+     */
+    CreateTextField("", "");
+    FlushLayoutTask(frameNode_);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(5.0, DimensionUnit::VP));
+    TextFieldModelNG::SetBorderRadius(AceType::RawPtr(frameNode_), borderRadius);
+
+    /**
+     * @tc.steps: step2. Set border color
+     */
+    BorderColorProperty borderColors;
+    borderColors.leftColor = Color::RED;
+    borderColors.rightColor = Color::RED;
+    borderColors.topColor = Color::RED;
+    borderColors.bottomColor = Color::RED;
+    TextFieldModelNG::SetBorderColor(AceType::RawPtr(frameNode_), borderColors);
+
+    /**
+     * @tc.steps: step3. Set border width
+     */
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(Dimension(10.0, DimensionUnit::VP));
+    TextFieldModelNG::SetBorderWidth(AceType::RawPtr(frameNode_), borderWidth);
+
+    /**
+     * @tc.steps: step4. Call UpdateBorderResource and verify
+     * @tc.expected: All border property flags should be set
+     */
+    pattern_->UpdateBorderResource();
+
+    /**
+     * @tc.steps: step5. Verify results
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    EXPECT_TRUE(paintProperty->HasBorderRadiusFlagByUser());
+    EXPECT_TRUE(paintProperty->HasBorderColorFlagByUser());
+    EXPECT_TRUE(paintProperty->HasBorderWidthFlagByUser());
+}
 } // namespace OHOS::Ace::NG

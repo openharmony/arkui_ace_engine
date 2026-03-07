@@ -2052,6 +2052,64 @@ HWTEST_F(ListPatternTestNg, OnInjectionEventTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnInjectionEventTest004
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, OnInjectionEventTest004, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    std::string command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":-20})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetCurrentOffset().GetY(), 0);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 0);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":20})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetCurrentOffset().GetY(), 20);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 0);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":-10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetCurrentOffset().GetY(), 10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 0);
+
+    command = R"({"cmd":"scrolloffset","eventId":123123,"offset":10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetCurrentOffset().GetY(), 10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 0);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123)";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetCurrentOffset().GetY(), 10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 0);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetCurrentOffset().GetY(), 600);
+    EXPECT_EQ(pattern_->GetFirstIndex(), 6);
+}
+
+/**
  * @tc.name: ReportComponentChangeEventTest001
  * @tc.desc: ReportComponentChangeEvent
  * @tc.type: FUNC

@@ -69,7 +69,7 @@ NavigationModel* NavigationModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t TITLE_MODE_RANGE = 2;
-constexpr int32_t NAVIGATION_MODE_RANGE = 2;
+constexpr int32_t NAVIGATION_MODE_RANGE = 3;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;

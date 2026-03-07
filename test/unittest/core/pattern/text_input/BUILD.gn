@@ -89,6 +89,8 @@ ace_unittest("text_input_pattern_test") {
     "text_field_pattern_testthree.cpp",
     "text_field_pattern_testtwo.cpp",
     "text_input_base.cpp",
+    "text_field_pattern_for_tv.cpp",
+    "text_field_pattern_ai_menu_option_test.cpp",
   ]
   cflags = [ "-fno-access-control" ]
 

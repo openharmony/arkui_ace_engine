@@ -43,7 +43,7 @@ RefPtr<RepeatVirtualScroll2Node> RepeatVirtual2TestNg::CreateRepeatVirtualNode(u
         {4, 5},
         {5, 6}
     };
-    onGetRid4Index_ = [&](IndexType index) -> std::pair<RIDType, uint32_t> {
+    onGetRid4Index_ = [&](IndexType index, bool inAnimation) -> std::pair<RIDType, uint32_t> {
         auto it = l1Rid4Index_.find(0);
         if (it != l1Rid4Index_.end()) {
             return {index, 2};
@@ -630,43 +630,43 @@ HWTEST_F(RepeatVirtual2TestNg, CallOnGetRid4Index001, TestSize.Level1)
 {
     auto repeatNode = CreateRepeatVirtualNode(10, 10);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
         return {1, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
     auto item0 = repeatNode->caches_.CallOnGetRid4Index(0).value();
     EXPECT_EQ(item0, nullptr);
 
-    repeatNode->caches_.onGetRid4Index_ = [&](IndexType index)->std::pair<RIDType, uint32_t> {
+    repeatNode->caches_.onGetRid4Index_ = [&](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
         CreateListItemNode(); return {1, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
     auto item1 = repeatNode->caches_.CallOnGetRid4Index(0).value();
     EXPECT_EQ(item1->node_->GetId(), 10002);
 
-    repeatNode->caches_.onGetRid4Index_ = [&](IndexType index)->std::pair<RIDType, uint32_t> {
+    repeatNode->caches_.onGetRid4Index_ = [&](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
         CreateListItemNode(); return {0, OnGetRid4IndexResult::CREATED_NEW_NODE}; };
     auto item2 = repeatNode->caches_.CallOnGetRid4Index(0);
     EXPECT_EQ(item2, std::nullopt);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
         return {1, OnGetRid4IndexResult::UPDATED_NODE}; };
     auto item3 = repeatNode->caches_.CallOnGetRid4Index(0).value();
     EXPECT_EQ(item3->node_->GetId(), 10002);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
         return {2, OnGetRid4IndexResult::UPDATED_NODE}; };
     auto item4 = repeatNode->caches_.CallOnGetRid4Index(0);
     EXPECT_EQ(item4, std::nullopt);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
         return {1, OnGetRid4IndexResult::UPDATED_NODE}; };
     repeatNode->caches_.GetCacheItem4RID(1).value()->node_ = nullptr;
     auto item5 = repeatNode->caches_.CallOnGetRid4Index(0);
     EXPECT_EQ(item5, std::nullopt);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
         return {0, OnGetRid4IndexResult::UPDATED_NODE}; };
     auto item6 = repeatNode->caches_.CallOnGetRid4Index(0);
     EXPECT_EQ(item6, std::nullopt);
 
-    repeatNode->caches_.onGetRid4Index_ = [](IndexType index)->std::pair<RIDType, uint32_t> {
+    repeatNode->caches_.onGetRid4Index_ = [](IndexType index, bool inAnimation)->std::pair<RIDType, uint32_t> {
         return {1, OnGetRid4IndexResult::NO_NODE}; };
     auto item7 = repeatNode->caches_.CallOnGetRid4Index(0);
     EXPECT_EQ(item7, std::nullopt);
@@ -960,6 +960,175 @@ HWTEST_F(RepeatVirtual2TestNg, GetFrameChildByIndexImpl001, TestSize.Level1)
     EXPECT_EQ(repeatNode->disappearingChildren_.size(), 1);
     repeatNode->GetFrameChildByIndexImpl(0, true, true, false);
     EXPECT_EQ(repeatNode->disappearingChildren_.size(), 0);
+}
+
+/**
+ * @tc.name: IsAllowAnimation001
+ * @tc.desc: Test node.IsAllowAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation001, TestSize.Level1)
+{
+    auto listNode = CreateNode(V2::LIST_ETS_TAG);
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    
+    listNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), true);
+}
+
+/**
+ * @tc.name: IsAllowAnimation002
+ * @tc.desc: Test node.IsAllowAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, IsAllowAnimation002, TestSize.Level1)
+{
+    auto gridNode = CreateNode(V2::GRID_ETS_TAG);
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    
+    gridNode->AddChild(repeatNode);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
+}
+
+/**
+ * @tc.name: IsChildInAnimation001
+ * @tc.desc: Test node.IsChildInAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, IsChildInAnimation001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    EXPECT_EQ(repeatNode->IsChildInAnimation(0), false);
+}
+
+/**
+ * @tc.name: IsChildOnMainTree001
+ * @tc.desc: Test node.IsChildOnMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, IsChildOnMainTree001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2022, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = { { 1, cacheItem } };
+    repeatNode->caches_.l1Rid4Index_ = { { 0, 1} };
+    uiNode->onMainTree_ = true;
+    EXPECT_EQ(repeatNode->IsChildOnMainTree(1), true);
+    uiNode->onMainTree_ = false;
+    EXPECT_EQ(repeatNode->IsChildOnMainTree(1), false);
+    EXPECT_EQ(repeatNode->IsChildOnMainTree(2), false);
+}
+
+/**
+ * @tc.name: ModelIsAllowAnimation001
+ * @tc.desc: Test model.IsAllowAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, ModelIsAllowAnimation001, TestSize.Level1)
+{
+    auto listNode = CreateNode(V2::LIST_ETS_TAG);
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    auto repeatId = elmtId_;
+    listNode->AddChild(repeatNode);
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2023, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = { { 1, cacheItem } };
+    repeatNode->caches_.l1Rid4Index_ = { { 0, 1} };
+    uiNode->onMainTree_ = true;
+
+    RepeatVirtualScroll2ModelNG repeatModel;
+    EXPECT_EQ(repeatModel.IsAllowAnimation(repeatId), true);
+    EXPECT_EQ(repeatModel.IsAllowAnimation(0), false);
+
+    ViewStackProcessor::GetInstance()->Push(repeatNode);
+    EXPECT_EQ(repeatModel.IsAllowAnimation(0), true);
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: ModelIsAllowAnimation002
+ * @tc.desc: Test model.IsAllowAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, ModelIsAllowAnimation002, TestSize.Level1)
+{
+    auto gridNode = CreateNode(V2::GRID_ETS_TAG);
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    auto repeatId = elmtId_;
+    gridNode->AddChild(repeatNode);
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2024, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = { { 1, cacheItem } };
+    repeatNode->caches_.l1Rid4Index_ = { { 0, 1} };
+    uiNode->onMainTree_ = true;
+
+    RepeatVirtualScroll2ModelNG repeatModel;
+    EXPECT_EQ(repeatModel.IsAllowAnimation(repeatId), false);
+    EXPECT_EQ(repeatModel.IsAllowAnimation(0), false);
+
+    ViewStackProcessor::GetInstance()->Push(repeatNode);
+    EXPECT_EQ(repeatModel.IsAllowAnimation(0), false);
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: ModelIsImplicitAnimationOpen001
+ * @tc.desc: Test model.IsImplicitAnimationOpen
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, ModelIsImplicitAnimationOpen001, TestSize.Level1)
+{
+    RepeatVirtualScroll2ModelNG repeatModel;
+    EXPECT_EQ(repeatModel.IsImplicitAnimationOpen(), AnimationUtils::IsImplicitAnimationOpen());
+}
+
+/**
+ * @tc.name: ModelIsChildInAnimation001
+ * @tc.desc: Test model.IsChildInAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, ModelIsChildInAnimation001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    auto repeatId = elmtId_;
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2025, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = { { 1, cacheItem } };
+    repeatNode->caches_.l1Rid4Index_ = { { 0, 1} };
+    uiNode->onMainTree_ = true;
+
+    RepeatVirtualScroll2ModelNG repeatModel;
+    EXPECT_EQ(repeatModel.IsChildInAnimation(repeatId, 1), false);
+    EXPECT_EQ(repeatModel.IsChildInAnimation(0, 1), false);
+
+    ViewStackProcessor::GetInstance()->Push(repeatNode);
+    EXPECT_EQ(repeatModel.IsChildInAnimation(0, 1), false);
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: ModelIsChildOnMainTree001
+ * @tc.desc: Test model.IsChildOnMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, ModelIsChildOnMainTree001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    auto repeatId = elmtId_;
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2026, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = { { 1, cacheItem } };
+    repeatNode->caches_.l1Rid4Index_ = { { 0, 1} };
+    uiNode->onMainTree_ = true;
+
+    RepeatVirtualScroll2ModelNG repeatModel;
+    EXPECT_EQ(repeatModel.IsChildOnMainTree(repeatId, 1), true);
+    EXPECT_EQ(repeatModel.IsChildOnMainTree(0, 1), false);
+
+    ViewStackProcessor::GetInstance()->Push(repeatNode);
+    EXPECT_EQ(repeatModel.IsChildOnMainTree(0, 1), true);
+    ViewStackProcessor::GetInstance()->Finish();
 }
 
 } // namespace OHOS::Ace::NG

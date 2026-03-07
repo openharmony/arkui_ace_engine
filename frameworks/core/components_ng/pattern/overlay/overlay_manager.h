@@ -765,6 +765,24 @@ public:
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
     BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;
     static SafeAreaInsets GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false);
+
+    void SetOnSheetMiniDragStartCallback(std::function<void()>&& onSheetMiniDragStart)
+    {
+        onSheetMiniDragStart_ = std::move(onSheetMiniDragStart);
+    }
+    std::function<void()> GetOnSheetMiniDragStartCallback()
+    {
+        return onSheetMiniDragStart_;
+    }
+    void SetOnSheetMiniDragResumeCallback(std::function<void()>&& onSheetMiniDragResume)
+    {
+        onSheetMiniDragResume_ = std::move(onSheetMiniDragResume);
+    }
+    std::function<void()> GetOnSheetMiniDragResumeCallback()
+    {
+        return onSheetMiniDragResume_;
+    }
+
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     bool IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
     static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode, int32_t type);
@@ -1015,6 +1033,9 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 
     bool hasFilterActived {false};
+
+    std::function<void()> onSheetMiniDragStart_;
+    std::function<void()> onSheetMiniDragResume_;
 
     int32_t dismissPopupId_ = 0;
 
