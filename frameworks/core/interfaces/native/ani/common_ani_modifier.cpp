@@ -110,7 +110,7 @@ ani_boolean IsEasySplit(ArkUI_Int32 instanceId)
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "IsEasySplit-ani can not get current context.");
         return false;
     }
-    return context->IsCurrentInForceSplitMode();
+    return context->IsDisplayInForceSplitMode();
 }
 
 ani_ref* GetHostContext(ArkUI_Int32 key)
