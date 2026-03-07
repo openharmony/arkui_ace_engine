@@ -44,7 +44,10 @@ public:
     {
         isRouter_ = isRouter;
     }
-
+    bool IsRouterForceSplit() const
+    {
+        return isRouter_;
+    }
     void SetForceSplitSupported(bool isForceSplitSupported)
     {
         isForceSplitSupported_ = isForceSplitSupported;
@@ -54,7 +57,7 @@ public:
     {
         return isForceSplitSupported_ && isRouter_ == isRouter;
     }
-    void SetForceSplitEnable(bool isForceSplit);
+    void SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport = false);
     bool IsForceSplitEnable(bool isRouter) const;
     void SetNavigationForceSplitEnableInternal(bool enableSplit);
     bool GetDisableNavForceSplitInternal() const
@@ -95,6 +98,7 @@ public:
     void AddForceSplitStateListener(int32_t nodeId, std::function<void()>&& listener);
     void RemoveForceSplitStateListener(int32_t nodeId);
     void NotifyForceSplitStateChange();
+    void OnForceSplitEnableChange();
 
     bool HasRelatedPage() const
     {
@@ -109,14 +113,28 @@ public:
         appIconId_ = id;
     }
 
+    void SetDialogSupportSplit(bool dialogSupportSplit)
+    {
+        dialogSuppotSplit_ = dialogSupportSplit;
+    }
+
+    bool GetDialogSupportSplit()
+    {
+        return dialogSuppotSplit_;
+    }
 private:
-    void OnForceSplitEnableChange();
+    bool IsTopFullScreenPage();
+    bool IsWindowConditionMatched();
+    bool HasForceSplitTargetNavigation();
+    void RegisterSurfaceChangeCallbackIfNeeded();
+    void ChangeForceSplitModeIfNeeded();
 
     WeakPtr<PipelineContext> pipeline_;
     bool hasSetForceSplitConfig_ = false;
     bool isForceSplitSupported_ = false;
     bool isForceSplitEnable_ = false;
     bool isRouter_ = false;
+    bool dialogSuppotSplit_ = true;
     std::set<std::string> fullScreenPages_;
     std::string homePageName_;
     std::string relatedPageName_;
@@ -124,6 +142,11 @@ private:
     int32_t appIconId_ = 0;
     // for navigation force split, we need disable forcesplit before router transition.
     bool disableNavForceSplitInternal_ = false;
+    // When the window actively notifies ArkUI to enable/disable force split, it may need to work
+    // in coordination with subsequent UpdateViewportConfig. For example, in rotation scenarios,
+    // the application rotation animation may include a split/stack switching animation.
+    std::optional<int32_t> surfaceChangeCallbackId_;
+    std::optional<bool> delayedIsForceSplitEnable_;
 };
 } // namespace OHOS::Ace::NG
 

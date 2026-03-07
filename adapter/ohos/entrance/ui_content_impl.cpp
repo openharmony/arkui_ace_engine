@@ -5587,6 +5587,7 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
         NG::ForceSplitUtils::LogAppForceSplitConfig(appConfig->isRouter, config);
         context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
         forceSplitMgr->SetIsRouter(appConfig->isRouter);
+        forceSplitMgr->SetDialogSupportSplit(config.dialogSupportSplit);
         forceSplitMgr->SetHomePageName(config.homePage);
         forceSplitMgr->SetRelatedPageName(config.relatedPage);
         forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
@@ -5611,6 +5612,7 @@ void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConf
     }
     NG::ForceSplitUtils::LogSystemForceSplitConfig(systemConfig->isRouter, systemConfig->homePage, config);
     context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
+    forceSplitMgr->SetDialogSupportSplit(config.dialogSupportSplit);
     forceSplitMgr->SetIsRouter(systemConfig->isRouter);
     forceSplitMgr->SetHomePageName(systemConfig->homePage);
     forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
