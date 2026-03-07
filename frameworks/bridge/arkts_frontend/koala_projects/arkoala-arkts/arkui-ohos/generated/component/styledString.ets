@@ -29,7 +29,10 @@ import { TextDecorationType, Color as arkui_component_enums_Color, TextDecoratio
 import { Resource as global_resource_Resource } from 'global.resource'
 import { drawing_ColorFilter_serializer } from './../framework/ohos.graphics.drawing'
 import { PixelMap, ShadowOptions_serializer, ShadowOptions, ClickEvent, Callback as arkui_component_common_Callback, TouchEvent, ClickEvent_serializer, TouchEvent_serializer } from './common'
-import { extractors, CustomSpan } from '#handwritten'
+// instuctive change begin
+// no need import the CustomSpan
+import { extractors } from '#handwritten'
+// instuctive change end
 import { default as image } from '@ohos.multimedia.image'
 import { DrawingColorFilter } from './image'
 import { default as drawing } from '@ohos.graphics.drawing'

@@ -16,7 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { hookBaseEventGetModifierKeyState, hookDragEventGetSummary, hookDragEventStartDataLoading, hookDragEventSetDataLoadParams, hookEnableInternalDropAnimation, hookDragEventGetModifierKeyState, extractors, hookKeyEventGetModifierKeyState, DrawModifier, GestureModifier, GestureType, WrappedBuilder, CustomSpan, GestureControl, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, hookAllowDrop, hookDragPreviewOptions, CustomStyles, initializers, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from '#handwritten'
+// instuctive change begin
+// no need import the CustomSpan
+import { hookBaseEventGetModifierKeyState, hookDragEventGetSummary, hookDragEventStartDataLoading, hookDragEventSetDataLoadParams, hookEnableInternalDropAnimation, hookDragEventGetModifierKeyState, extractors, hookKeyEventGetModifierKeyState, DrawModifier, GestureModifier, GestureType, WrappedBuilder, GestureControl, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, hookAllowDrop, hookDragPreviewOptions, CustomStyles, initializers, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from '#handwritten'
+// instuctive change end
 import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
