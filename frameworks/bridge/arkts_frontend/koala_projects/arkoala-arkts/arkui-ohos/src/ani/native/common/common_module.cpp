@@ -90,7 +90,7 @@ ani_boolean IsEasySplit([[maybe_unused]] ani_env* env, ani_object obj, ani_int i
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return ANI_FALSE;
     }
-    return modifier->getCommonAniModifier()->IsEasySplit(instanceId);
+    return modifier->getCommonAniModifier()->isEasySplit(instanceId);
 }
 
 ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key)
