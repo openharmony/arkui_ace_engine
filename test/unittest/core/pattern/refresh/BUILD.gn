@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("refresh_test_ng") {
   module_name = "ScrollingSet-Refresh"
   type = "new"
+
   sources = [
     "refresh_accessibility_test_ng.cpp",
     "refresh_event_test_ng.cpp",
@@ -24,4 +25,11 @@ ace_unittest("refresh_test_ng") {
     "refresh_nested_test_ng.cpp",
     "refresh_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "refresh_test_core.cpp" ]
+  } else {
+    sources += [ "refresh_test_core.cpp" ]
+  }
 }

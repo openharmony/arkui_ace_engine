@@ -22,4 +22,16 @@ ace_unittest("render_node_test_ng") {
     "render_node_test_ng.cpp",
     "render_node_test_two_ng.cpp"
   ]
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "render_node_test_min.cpp",
+      "render_node_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "render_node_test_min.cpp",
+      "render_node_test_core.cpp",
+    ]
+  }
 }

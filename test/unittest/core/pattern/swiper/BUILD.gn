@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("swiper_test_ng") {
   module_name = "CommonProperties-Background"
   type = "new"
+
   sources = [
     "arc_swiper_indicator_modifiy_test_ng.cpp",
     "arc_swiper_indicator_pattern_test.cpp",
@@ -61,4 +62,11 @@ ace_unittest("swiper_test_ng") {
     "swiper_ui_session_adapter_test_ng.cpp",
     "swiper_utils_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "swiper_test_core.cpp" ]
+  } else {
+    sources += [ "swiper_test_core.cpp" ]
+  }
 }

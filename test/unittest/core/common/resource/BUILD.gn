@@ -17,6 +17,19 @@ ace_unittest("resource_manager_test") {
   module_name = "StateManagement-InApp"
   type = "new"
   sources = [ "resource_manager_test.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "resource_test_min.cpp",
+      "resource_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "resource_test_min.cpp",
+      "resource_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("resource_parse_utils_test_ng") {

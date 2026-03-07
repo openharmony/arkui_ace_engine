@@ -23,4 +23,11 @@ ace_unittest("calendar_test_ng") {
     "calendar_test_ng.cpp",
     "calendar_utils_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "calendar_test_core.cpp" ]
+  } else {
+    sources += [ "calendar_test_core.cpp" ]
+  }
 }

@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("video_test_ng") {
   module_name = "DrawingSet-Video"
   type = "new"
+
   sources = [
     "$ace_root/test/mock/base/mock_background_task_helper.cpp",
     "video_property_test_ng.cpp",
@@ -23,5 +24,13 @@ ace_unittest("video_test_ng") {
     "video_test_ng_add.cpp",
     "video_test_ng_extra_add.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "video_test_core.cpp" ]
+  } else {
+    sources += [ "video_test_core.cpp" ]
+  }
+
   external_deps = [ "napi:ace_napi" ]
 }

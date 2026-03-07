@@ -27,4 +27,17 @@ ace_unittest("container_picker_test") {
     "container_picker_model_test.cpp",
     "container_picker_supplement_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "container_picker_test_min.cpp",
+      "container_picker_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "container_picker_test_min.cpp",
+      "container_picker_test_core.cpp",
+    ]
+  }
 }

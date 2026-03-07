@@ -32,4 +32,17 @@ ace_unittest("app_bar_test_ng") {
     "$ace_root/test/mock/adapter/mock_want_wrap.cpp",
   ]
   sources += mocks
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "app_bar_test_min.cpp",
+      "app_bar_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "app_bar_test_min.cpp",
+      "app_bar_test_core.cpp",
+    ]
+  }
 }

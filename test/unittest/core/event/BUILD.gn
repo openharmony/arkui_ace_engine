@@ -31,6 +31,19 @@ ace_unittest("event_manager_test_ng") {
     "event_manager_test_ng_two_issuse.cpp",
     "event_manager_test_three_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("click_event_test_ng") {
@@ -53,6 +66,19 @@ ace_unittest("drag_event_test_ng") {
     "drag_event_test_ng_property_config.cpp",
     "drag_event_test_ng_property_config_coverage.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("drag_drop_event_test_ng") {
@@ -102,6 +128,19 @@ ace_unittest("focus_hub_test_ng") {
     "focus_core/page_focus_switch_test.cpp",
     "focus_core/passive_last_focus_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("gesture_event_hub_test_ng") {
@@ -117,6 +156,19 @@ ace_unittest("gesture_event_hub_test_ng") {
     "gesture_event_hub_test_three_ng.cpp",
     "gesture_event_hub_test_two_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("input_event_hub_test_ng") {

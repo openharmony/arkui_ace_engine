@@ -29,6 +29,13 @@ ace_unittest("xcomponent_test_ng") {
     "xcomponent_v2_test_ng.cpp",
   ]
 
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "xcomponent_test_core.cpp" ]
+  } else {
+    sources += [ "xcomponent_test_core.cpp" ]
+  }
+
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "napi:ace_napi",
@@ -38,10 +45,19 @@ ace_unittest("xcomponent_test_ng") {
 ace_unittest("xcomponent_test_set_rate_range") {
   module_name = "CommonEvent-VisiableAreaChange"
   type = "new"
+
   sources = [
     "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
     "xcomponent_test_set_rate_range.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "xcomponent_test_set_rate_range_core.cpp" ]
+  } else {
+    sources += [ "xcomponent_test_set_rate_range_core.cpp" ]
+  }
+
   external_deps = [ "bounds_checking_function:libsec_shared" ]
   defines = [ "ENABLE_ROSEN_BACKEND" ]
   if (current_os == "ohos") {

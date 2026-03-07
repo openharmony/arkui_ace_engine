@@ -65,6 +65,19 @@ ace_unittest("form_test_ng") {
       "resource_management:global_resmgr",
     ]
   }
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "form_test_min.cpp",
+      "form_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "form_test_min.cpp",
+      "form_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("form_node_test") {
@@ -117,6 +130,19 @@ ace_unittest("form_node_test") {
       "icu:shared_icuuc",
       "input:libmmi-client",
       "resource_management:global_resmgr",
+    ]
+  }
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "form_test_min.cpp",
+      "form_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "form_test_min.cpp",
+      "form_test_core.cpp",
     ]
   }
 }
@@ -174,6 +200,19 @@ ace_unittest("form_pattern_test") {
       "resource_management:global_resmgr",
     ]
   }
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "form_test_min.cpp",
+      "form_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "form_test_min.cpp",
+      "form_test_core.cpp",
+    ]
+  }
 }
 
 ohos_unittest("form_special_style_test") {
@@ -204,9 +243,9 @@ ohos_unittest("form_snapshot_util_test") {
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
     "form_snapshot_util_test.cpp",
   ]
- 
+
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
- 
+
   deps = [
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_unittest_log",

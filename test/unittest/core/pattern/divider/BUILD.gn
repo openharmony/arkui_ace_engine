@@ -24,4 +24,10 @@ ace_unittest("divider_test_ng") {
     "divider_branch_coverage_test_ng.cpp",
     "old_cases/divider_test_ng.cpp",
   ]
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "divider_test_core.cpp" ]
+  } else {
+    sources += [ "divider_test_core.cpp" ]
+  }
 }

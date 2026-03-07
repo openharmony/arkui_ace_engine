@@ -43,6 +43,20 @@ ace_unittest("common_test") {
     "vibrator/vibrator_test.cpp",
     "task_runner_adapter_impl/task_runner_adapter_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "common_test_min.cpp",
+      "common_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "common_test_min.cpp",
+      "common_test_core.cpp",
+    ]
+  }
+
   external_deps = [
     "eventhandler:libeventhandler",
   ]

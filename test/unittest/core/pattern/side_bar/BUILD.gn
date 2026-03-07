@@ -16,10 +16,18 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("side_bar_test_ng") {
   module_name = "NavigationSet-SideBarContainer"
   type = "new"
+
   sources = [
     "side_bar_layout_test_ng.cpp",
     "side_bar_pattern_test_ng.cpp",
     "side_bar_pattern_test_two_ng.cpp",
     "side_bar_view_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "side_bar_test_core.cpp" ]
+  } else {
+    sources += [ "side_bar_test_core.cpp" ]
+  }
 }

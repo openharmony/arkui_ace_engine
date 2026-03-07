@@ -20,4 +20,17 @@ ace_unittest("box_layout_algorithm_test_ng") {
     "box_layout_algorithm_test.cpp",
     "old_cases/box_layout_algorithm_test_old.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "box_layout_test_min.cpp",
+      "box_layout_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "box_layout_test_min.cpp",
+      "box_layout_test_core.cpp",
+    ]
+  }
 }

@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("progress_test_ng") {
   type = "new"
   module_name = "InfoShowSet-Progress"
+
   sources = [
     "progress_builder_test_ng.cpp",
     "progress_content_modifier_test_ng.cpp",
@@ -24,4 +25,11 @@ ace_unittest("progress_test_ng") {
     "progress_test_ng.cpp",
     "progress_test_tojson.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "progress_test_core.cpp" ]
+  } else {
+    sources += [ "progress_test_core.cpp" ]
+  }
 }

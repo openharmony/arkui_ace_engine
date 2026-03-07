@@ -65,6 +65,18 @@ ace_unittest("property_test_ng") {
   type = "new"
   module_name = "CommonEvent-Input"
   sources = [ "property_test_ng.cpp" ]
+   if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ 
+      "property_test_min.cpp",
+      "property_test_core.cpp",
+    ]
+  } else {
+    sources += [ 
+      "property_test_min.cpp",
+      "property_test_core.cpp",
+    ]
+   }
 }
 
 ace_unittest("layout_constraint_test_ng") {

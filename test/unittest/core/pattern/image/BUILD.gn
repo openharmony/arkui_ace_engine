@@ -29,4 +29,11 @@ ace_unittest("image_test_ng") {
     "image_testtwo_ng.cpp",
   ]
   defines = [ "ENABLE_ROSEN_BACKEND" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "image_test_core.cpp" ]
+  } else {
+    sources += [ "image_test_core.cpp" ]
+  }
 }

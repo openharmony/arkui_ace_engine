@@ -32,4 +32,17 @@ ace_unittest("arc_list_test_ng") {
     "arc_list_test_ng.cpp",
     "arc_scroll_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "arc_list_test_min.cpp",
+      "arc_list_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "arc_list_test_min.cpp",
+      "arc_list_test_core.cpp",
+    ]
+  }
 }

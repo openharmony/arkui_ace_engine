@@ -24,4 +24,11 @@ ace_unittest("gauge_test_ng") {
     "gauge_pattern_test_two_ng.cpp",
     "gauge_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "gauge_test_core.cpp" ]
+  } else {
+    sources += [ "gauge_test_core.cpp" ]
+  }
 }

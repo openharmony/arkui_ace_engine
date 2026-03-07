@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("toggle_test_ng") {
   module_name = "FormAndSelection-Toggle"
   type = "new"
+
   sources = [
     "toggle_content_modifier_add_test_ng.cpp",
     "toggle_content_modifier_one_test_ng.cpp",
@@ -26,4 +27,17 @@ ace_unittest("toggle_test_ng") {
     "toggle_switch_test_ng.cpp",
     "toggle_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "toggle_test_min.cpp",
+      "toggle_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "toggle_test_min.cpp",
+      "toggle_test_core.cpp",
+    ]
+  }
 }

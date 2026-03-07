@@ -77,4 +77,17 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_theme_test_ng.cpp",
     "rich_editor_overlay_modifier_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "rich_editor_test_min.cpp",
+      "rich_editor_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "rich_editor_test_min.cpp",
+      "rich_editor_test_core.cpp",
+    ]
+  }
 }

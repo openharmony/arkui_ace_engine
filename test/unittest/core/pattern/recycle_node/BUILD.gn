@@ -20,4 +20,17 @@ ace_unittest("recycle_node_test_ng") {
     "recycle_manager_test.cpp",
     "recycle_node_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "recycle_node_test_min.cpp",
+      "recycle_node_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "recycle_node_test_min.cpp",
+      "recycle_node_test_core.cpp",
+    ]
+  }
 }

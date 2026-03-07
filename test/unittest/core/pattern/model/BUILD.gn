@@ -30,6 +30,20 @@ ace_unittest("model_test_ng") {
     "model_test_ng.cpp",
   ]
 
+  if (!ace_enable_full_test_suite) {
+    sources= []
+    sources += [
+      "model_test_min.cpp",
+      "model_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "model_test_min.cpp",
+      "model_test_core.cpp",
+    ]
+  }
+
+
   if (is_ohos_standard_system) {
     external_deps = [
       "ability_base:want",

@@ -25,4 +25,11 @@ ace_unittest("bubble_test_ng") {
     "bubble_test_two_ng.cpp",
     "bubble_tips_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "bubble_test_core.cpp" ]
+  } else {
+    sources += [ "bubble_test_core.cpp" ]
+  }
 }

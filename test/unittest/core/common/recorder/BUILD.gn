@@ -22,4 +22,17 @@ ace_unittest("event_recorder_test") {
     "event_recorder_test.cpp",
     "event_recorder_test_two.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "recorder_test_min.cpp",
+      "recorder_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "recorder_test_min.cpp",
+      "recorder_test_core.cpp",
+    ]
+  }
 }

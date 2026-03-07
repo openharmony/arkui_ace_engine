@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("search_test_ng") {
   module_name = "ImperativeFramework-FrameNode"
   type = "new"
+
   sources = [
     "search_base.cpp",
     "search_decoration_test_ng.cpp",
@@ -25,4 +26,11 @@ ace_unittest("search_test_ng") {
     "search_testthree_ng.cpp",
     "search_testtwo_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "search_test_core.cpp" ]
+  } else {
+    sources += [ "search_test_core.cpp" ]
+  }
 }

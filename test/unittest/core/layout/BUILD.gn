@@ -23,6 +23,19 @@ ace_unittest("layout_property_test_ng") {
     "layout_property_test_ng_two_first_part.cpp",
     "layout_property_test_ng_two_second_part.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "layout_test_min.cpp",
+      "layout_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "layout_test_min.cpp",
+      "layout_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("layout_wrapper_test_ng") {
@@ -33,6 +46,19 @@ ace_unittest("layout_wrapper_test_ng") {
     "layout_wrapper_test_ng_second_part.cpp",
     "layout_wrapper_testtwo_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "layout_test_min.cpp",
+      "layout_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "layout_test_min.cpp",
+      "layout_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("layout_algorithm_test_ng") {
@@ -71,8 +97,8 @@ ace_unittest("overflow_test_ng") {
 }
 
 ace_unittest("overflow_collector_test_ng") {
-  type = "new"
   module_name = "Animation-Frame"
+  type = "new"
   sources = [ "overflow_collector_test_ng.cpp" ]
 }
 

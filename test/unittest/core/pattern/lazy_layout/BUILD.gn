@@ -20,6 +20,19 @@ ace_unittest("lazy_grid_layout_test") {
     "grid_layout/lazy_grid_layout_test.cpp",
     "grid_layout/lazy_grid_generated_layout_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "lazy_layout_test_min.cpp",
+      "lazy_layout_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "lazy_layout_test_min.cpp",
+      "lazy_layout_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("dynamiclayout_grid_test_ng") {

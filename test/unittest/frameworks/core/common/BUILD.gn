@@ -54,7 +54,21 @@ ohos_unittest("ace_engine_common_test") {
 ace_unittest("color_inverter_test") {
   module_name = "ScrollingSet-Refresh"
   type = "new"
+
   sources = [ "color_inverter_test.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "frameworks_core_common_test_min.cpp",
+      "frameworks_core_common_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "frameworks_core_common_test_min.cpp",
+      "frameworks_core_common_test_core.cpp",
+    ]
+  }
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

@@ -23,4 +23,17 @@ ace_unittest("custom_test_ng") {
     "custom_test_ng_first_part.cpp",
     "custom_test_ng_second_part.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "custom_test_min.cpp",
+      "custom_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "custom_test_min.cpp",
+      "custom_test_core.cpp",
+    ]
+  }
 }

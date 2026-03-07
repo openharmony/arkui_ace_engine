@@ -30,4 +30,17 @@ ace_unittest("scrollable_test_ng") {
     "scrollable_utils_test.cpp",
     "scrollable_generated_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "scrollable_test_min.cpp",
+      "scrollable_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "scrollable_test_min.cpp",
+      "scrollable_test_core.cpp",
+    ]
+  }
 }
