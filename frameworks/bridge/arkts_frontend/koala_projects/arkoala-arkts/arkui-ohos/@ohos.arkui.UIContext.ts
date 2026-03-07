@@ -878,6 +878,10 @@ export class UIContext {
         childScroller: Scroller): void {
         throw Error("unbindTabsFromNestedScrollable not implemented in UIContext!")
     }
+
+    public isEasySplit(): boolean {
+        throw Error("isEasySplit not implemented in UIContext!")
+    }
 }
 export abstract class FrameCallback {
     onFrame(frameTimeInNano: long): void {}

@@ -103,6 +103,16 @@ static thread_local std::vector<int32_t> restoreInstanceIds_;
 static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Hyperlink" };
 static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Hyperlink" };
 
+ani_boolean IsEasySplit(ArkUI_Int32 instanceId)
+{
+    auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "IsEasySplit-ani can not get current context.");
+        return false;
+    }
+    return context->IsCurrentInForceSplitMode();
+}
+
 ani_ref* GetHostContext(ArkUI_Int32 key)
 {
     auto context = NG::PipelineContext::GetCurrentContextSafely();
@@ -1198,6 +1208,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getAllInstanceIds = OHOS::Ace::NG::GetAllInstanceIds,
         .resolveUIContext = OHOS::Ace::NG::ResolveUIContext,
         .getPageRootNode = OHOS::Ace::NG::GetPageRootNodeInStatic,
+        .isEasySplit = OHOS::Ace::NG::IsEasySplit,
     };
     return &impl;
 }

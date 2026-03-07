@@ -1479,6 +1479,17 @@ void JSViewContext::JSSetCustomKeyboardContinueFeature(const JSCallbackInfo& inf
     textFieldManager->SetCustomKeyboardContinueFeature(value);
 }
 
+void JSViewContext::JSIsEasySplit(const JSCallbackInfo& info)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    if (!context) {
+        info.SetReturnValue(JSRef<JSVal>::Make(JSVal(ToJSValue(false))));
+        return;
+    }
+    auto result = context->IsCurrentInForceSplitMode();
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -1509,6 +1520,7 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("setImageRawDataCacheSize",  JSViewContext::JSSetImageRawDataCacheSize);
     JSClass<JSViewContext>::StaticMethod(
         "setCustomKeyboardContinueFeature",  JSViewContext::JSSetCustomKeyboardContinueFeature);
+    JSClass<JSViewContext>::StaticMethod("isEasySplit", JSViewContext::JSIsEasySplit);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

@@ -402,6 +402,8 @@ export class ArkUIAniModule {
     native static _Common_getWindowWidthBreakpoint(): KInt
     native static _Common_getWindowHeightBreakpoint(): KInt
 
+    native static _Common_IsEasySplit(instanceId: KInt): boolean
+
     // for transfer
     native static _createTouchEventAccessorWithPointer(input: KPointer): KPointer
     native static _createMouseEventAccessorWithPointer(input: KPointer): KPointer

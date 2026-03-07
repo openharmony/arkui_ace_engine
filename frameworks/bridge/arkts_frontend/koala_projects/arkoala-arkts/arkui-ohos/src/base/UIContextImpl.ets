@@ -1731,6 +1731,10 @@ export class UIContextImpl extends UIContext {
         return result;
     }
 
+    public isEasySplit(): boolean {
+        return ArkUIAniModule._Common_IsEasySplit(this.instanceId);
+    }
+
     public updateBindSheet(bindSheetContent: ComponentContentBase, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
         let ptr: KPointer = 0;
         if (bindSheetContent.getNodePtr() != undefined) {
