@@ -107,7 +107,7 @@ ani_boolean IsEasySplit(ArkUI_Int32 instanceId)
 {
     auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
     if (context == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "IsEasySplit-ani can not get current context.");
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "IsEasySplit-ani can not get current context.");
         return false;
     }
     return context->IsDisplayInForceSplitMode();
