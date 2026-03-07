@@ -1732,7 +1732,7 @@ export class UIContextImpl extends UIContext {
     }
 
     public isEasySplit(): boolean {
-        return ArkUIAniModule._Common_IsEasySplit(this.instanceId);
+        return ArkUIAniModule._Common_IsEasySplit(this.instanceId_);
     }
 
     public updateBindSheet(bindSheetContent: ComponentContentBase, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
