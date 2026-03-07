@@ -444,7 +444,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         copy = {};
         copiedObjects.set(obj, copy);
         const err: Error = new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
-        const toJSON: Function | undefined = globalThis.panda?.STValue?.toJSON;
+        const toJSON: Function | undefined = globalThis.Panda?.STValue?.toJSON;
         if (typeof toJSON === 'function') {
           const json: string = toJSON(obj);
           if (typeof json === 'string') {
