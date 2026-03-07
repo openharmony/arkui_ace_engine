@@ -1129,7 +1129,7 @@ public:
     bool GetPendingSizeStatus();
     void OnInactive();
     void OnActive();
-    void SetOfflineWebActiveStatus(int32_t webId, bool isActive);
+    void SetOfflineWebActiveStatus(bool isActive);
     void GestureBackBlur();
     void OnWebviewHide();
     void OnWebviewShow();
