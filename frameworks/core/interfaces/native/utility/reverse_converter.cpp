@@ -612,6 +612,7 @@ void AssignArkValue(Ark_Frame& dst, const RectF& src)
     dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
+namespace {
 template<typename PeerType, typename AceSpan>
 void CreateStylePeer(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 {
@@ -619,20 +620,28 @@ void CreateStylePeer(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
     peer->span = AceType::DynamicCast<AceSpan>(src);
     dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, PeerType*>(peer);
 }
-void AssignArkValue(Ark_CustomSpanWrapper &dst, const RefPtr<OHOS::Ace::NG::CustomSpanImpl>& src)
+void CreateCustomSpanWrapper(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 {
     static auto emptyFunc = [](int32_t) {};
-    static Ark_CallbackResource emtpyResource {.resourceId {}, .hold {emptyFunc}, .release {emptyFunc}};
-    APP_LOGE("GLEB, AssignArkValue(Ark_CustomSpanWrapper, CustomSpanImpl), ...");
-    CHECK_NULL_VOID(src && src->GetHolder());
-    dst = {
-        .managed {src->GetHolder()->GetObject()},
+    static Ark_CallbackResource emtpyResource {
+        .resourceId {}, .hold {emptyFunc}, .release {emptyFunc}
+    };
+
+    APP_LOGE("GLEB, AssignArkValue(Ark_SpanStyle, SpanBase), CustomSpan, ...");
+    CHECK_NULL_VOID(src);
+    auto custSpanPeer = AceType::DynamicCast<CustomSpanNativePeer>(src);
+    CHECK_NULL_VOID(custSpanPeer);
+    Ark_CustomSpanWrapper custSpanWrap {
+        .managed {custSpanPeer->GetObject()},
         .nativeObj {},
         .onMeasure_callback {.resource {emtpyResource}, .call {}, .callSync {}},
         .onDraw_callback {.resource {emtpyResource}, .call {}, .callSync {}},
     };
-    APP_LOGE("GLEB, AssignArkValue(Ark_CustomSpanWrapper, CustomSpanImpl), done, id=%{public}d", dst.managed.resource.resourceId);
+    dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_CustomSpanWrapper>(custSpanWrap);
+    APP_LOGE("GLEB, AssignArkValue(Ark_SpanStyle, SpanBase), CustomSpan, done");
 }
+} // namespace
+
 void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 {
     dst.start = Converter::ArkValue<Ark_Int32>(src->GetStartIndex());
@@ -672,16 +681,10 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
         case Ace::SpanType::Image:
             CreateStylePeer<ImageAttachmentPeer, OHOS::Ace::ImageSpan>(dst, src);
             break;
-        case Ace::SpanType::CustomSpan: {
-            APP_LOGE("GLEB, AssignArkValue(Ark_SpanStyle, SpanBase), CustomSpan, ...");
-            CHECK_NULL_VOID(src);
-            auto castSpanImpl = AceType::DynamicCast<OHOS::Ace::NG::CustomSpanImpl>(src);
-            CHECK_NULL_VOID(castSpanImpl);
-            auto castSpanWrap = Converter::ArkValue<Ark_CustomSpanWrapper>(castSpanImpl);
-            dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_CustomSpanWrapper>(castSpanWrap);
+        case Ace::SpanType::CustomSpan:
+            CreateCustomSpanWrapper(dst, src);
             APP_LOGE("GLEB, AssignArkValue(Ark_SpanStyle, SpanBase), CustomSpan, done");
             break;
-        }
         case Ace::SpanType::ExtSpan: {
             auto userDataSpanHolder = AceType::DynamicCast<UserDataSpanHolder>(src);
             CHECK_NULL_VOID(userDataSpanHolder);

@@ -152,7 +152,6 @@ struct TextRange;
 struct TextStyleResult;
 
 namespace NG {
-class CustomSpanImpl;
 class NavDestinationContext;
 class NavigationTransitionProxy;
 class PanRecognizer;
@@ -324,7 +323,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& src);
     void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src);
-    void AssignArkValue(Ark_CustomSpanWrapper &dst, const RefPtr<OHOS::Ace::NG::CustomSpanImpl>& src);
     void AssignArkValue(Ark_arkui_component_enums_Color& dst, const Color& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Date& dst, const std::string& src);

@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_CustomSpanNative peer)
 }
 Ark_CustomSpanNative ConstructImpl()
 {
-    auto peer = AceType::MakeRefPtr<OHOS::Ace::NG::CustomSpanImpl>();
+    auto peer = AceType::MakeRefPtr<CustomSpanNativePeer>();
     peer->IncRefCount();
     return reinterpret_cast<CustomSpanNativePeer *>(Referenced::RawPtr(peer));
 }

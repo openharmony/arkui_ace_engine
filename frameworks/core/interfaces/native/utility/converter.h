@@ -57,6 +57,7 @@
 namespace OHOS::Ace {
 // SORTED_SECTION
 class DrawableDescriptor;
+class SpanBase;
 class ResponseRegion;
 enum class CanvasUnit;
 enum class ChainEdgeEffect;
@@ -92,7 +93,6 @@ enum class SessionType : int32_t;
 enum class SubMenuExpandingMode;
 enum class ToggleType;
 struct BarItem;
-class CustomSpanImpl;
 struct KeyboardOptions;
 struct NavDestinationTransition;
 struct NavigationBackgroundOptions;
@@ -642,7 +642,6 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT Color Convert(const Ark_Int64& src);
     template<> ACE_FORCE_EXPORT Color Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT Color Convert(const Ark_String& src);
-    template<> CustomSpanImpl* Convert(const Ark_CustomSpanWrapper& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_Int32& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_LengthMetrics& src);
@@ -743,6 +742,8 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<Curve> Convert(const Ark_curves_ICurve& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
+    template<> RefPtr<SpanBase> Convert(const Ark_CustomSpanWrapper& src);
+    template<> RefPtr<SpanBase> Convert(const Ark_ImageAttachment& src);
     template<> ACE_FORCE_EXPORT RefPtr<PixelMap> Convert(const Ark_image_PixelMap& src);
     template<> RenderingContextOptions Convert(const Ark_RenderingContextOptions& src);
     template<> ResponseRegion Convert(const Ark_ResponseRegion &src);

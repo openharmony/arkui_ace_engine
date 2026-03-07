@@ -16,8 +16,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/accessor_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
-
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
@@ -70,16 +68,17 @@ Ark_MutableStyledString ConstructImpl(const Ark_Union_String_ImageAttachment_Cus
                 UpdateSpansRange(spans.value(), data.length());
                 peer->spanString->BindWithSpans(spans.value());
             },
-            [&peer](const Ark_ImageAttachment& arkImageAttachment) {
-                ImageAttachmentPeer* peerImageAttachment = arkImageAttachment;
-                CHECK_NULL_VOID(peerImageAttachment && peerImageAttachment->span);
-                auto options = peerImageAttachment->span->GetImageSpanOptions();
-                peer->spanString = AceType::MakeRefPtr<MutableSpanString>(options);
+            [&peer](const Ark_ImageAttachment& arkImageAtt) {
+                auto span = Convert<RefPtr<SpanBase>>(arkImageAtt);
+                CHECK_NULL_VOID(span);
+                peer->spanString = AceType::MakeRefPtr<MutableSpanString>(std::u16string());
+                std::vector<RefPtr<SpanBase>> spans = { span };
+                peer->spanString->BindWithSpans(spans);
             },
-            [&peer](const Ark_CustomSpanWrapper& arkCustomSpanWrap) {
-                auto castSpanImpl = Convert<CustomSpanImpl *>(arkCustomSpanWrap); 
-                CHECK_NULL_VOID(castSpanImpl);
-                auto customSpan = AceType::Claim<CustomSpan>(castSpanImpl);
+            [&peer](const Ark_CustomSpanWrapper& arkCustomSpan) {
+                auto span = Convert<RefPtr<SpanBase>>(arkCustomSpan);
+                auto customSpan = AceType::DynamicCast<CustomSpan>(span);
+                CHECK_NULL_VOID(customSpan);
                 peer->spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
                 APP_LOGE("GLEB, MutableStyledStringAccessor::ConstructImpl, Ark_CustomSpanWrapper, done");
             },
