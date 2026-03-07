@@ -339,8 +339,7 @@ NG::CalendarPickerModelNG* GetCalendarPickerModel()
     if (!cachedModel) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("CalendarPicker");
         if (module == nullptr) {
-            LOGF("Can't find calendarPicker dynamic module");
-            abort();
+            LOGF_ABORT("Can't find calendarPicker dynamic module");
         }
         cachedModel = reinterpret_cast<NG::CalendarPickerModelNG*>(module->GetModel());
     }

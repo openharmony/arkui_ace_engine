@@ -30,8 +30,7 @@ NG::MarqueeModelNG* GetMarqueeModel()
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Marquee");
     if (module == nullptr) {
-        LOGF("Can't find marquee dynamic module");
-        abort();
+        LOGF_ABORT("Can't find marquee dynamic module");
     }
     return reinterpret_cast<NG::MarqueeModelNG*>(module->GetModel());
 }

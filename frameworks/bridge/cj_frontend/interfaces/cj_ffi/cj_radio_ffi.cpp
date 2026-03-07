@@ -32,8 +32,7 @@ NG::RadioModelNG* GetRadioModel()
     if (model == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Radio");
         if (module  == nullptr) {
-            LOGF("Can't find radio dynamic module");
-            abort();
+            LOGF_ABORT("Can't find radio dynamic module");
         }
         model = reinterpret_cast<NG::RadioModelNG*>(module->GetModel());
     }

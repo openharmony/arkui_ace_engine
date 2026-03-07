@@ -31,8 +31,7 @@ NG::QRCodeModelNG* GetQRCodeModel()
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("QRCode");
     if (module == nullptr) {
-        LOGF("Can't find qrcode dynamic module");
-        abort();
+        LOGF_ABORT("Can't find qrcode dynamic module");
     }
     return reinterpret_cast<NG::QRCodeModelNG*>(module->GetModel());
 }

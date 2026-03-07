@@ -31,8 +31,7 @@ NG::RichEditorModelNG* GetRichEditorModel()
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Richeditor");
     if (module == nullptr) {
-        LOGF("Can't find richeditor dynamic module");
-        abort();
+        LOGF_ABORT("Can't find richeditor dynamic module");
     }
     return reinterpret_cast<NG::RichEditorModelNG*>(module->GetModel());
 }
