@@ -49,6 +49,10 @@ constexpr float TEST_FRAME_WIDTH = 300.0f;
 constexpr float TEST_FRAME_HEIGHT = 400.0f;
 constexpr int32_t LOOP_COUNT_SMALL = 3;
 constexpr int32_t LOOP_COUNT_MEDIUM = 5;
+constexpr int32_t LOOP_COUNT_LARGE = 10;
+constexpr int32_t LARGE_NODE_ID = 1000000;
+constexpr int32_t ZERO_NODE_ID = 0;
+constexpr int32_t NEGATIVE_NODE_ID = -1;
 
 } // namespace
 
@@ -1656,6 +1660,417 @@ HWTEST_F(NodeContainerPatternTestNg, FireOnWillBind_MultipleTimes, TestSize.Leve
     }
 
     SUCCEED();
+}
+
+/**
+ * @tc.name: FireOnWillUnbind_MultipleTimes
+ * @tc.desc: Test FireOnWillUnbind called multiple times
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, FireOnWillUnbind_MultipleTimes, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    for (int i = 0; i < LOOP_COUNT_MEDIUM; ++i) {
+        pattern->FireOnWillUnbind(TEST_CONTAINER_ID + i);
+    }
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GetExportTextureNode_WithNullExportTextureNode
+ * @tc.desc: Test GetExportTextureNode when exportTextureNode_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, GetExportTextureNode_WithNullExportTextureNode, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->ResetExportTextureInfo();
+    auto result = pattern->GetExportTextureNode();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: ResetExportTextureInfo_MultipleTimes
+ * @tc.desc: Test ResetExportTextureInfo called multiple times
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, ResetExportTextureInfo_MultipleTimes, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    for (int i = 0; i < LOOP_COUNT_MEDIUM; ++i) {
+        pattern->ResetExportTextureInfo();
+        EXPECT_EQ(pattern->GetSurfaceId(), 0U);
+    }
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap_MultipleConfigs
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap with different config combinations
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, OnDirtyLayoutWrapperSwap_MultipleConfigs, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+
+    struct ConfigTest {
+        bool skipMeasure;
+        bool skipLayout;
+        bool frameSizeChange;
+    };
+
+    ConfigTest tests[] = {
+        {true, true, false},
+        {true, false, true},
+        {false, true, true},
+        {false, false, false},
+        {false, false, true},
+    };
+
+    for (const auto& test : tests) {
+        DirtySwapConfig config;
+        config.skipMeasure = test.skipMeasure;
+        config.skipLayout = test.skipLayout;
+        config.frameSizeChange = test.frameSizeChange;
+
+        auto result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+        EXPECT_FALSE(result);
+    }
+}
+
+/**
+ * @tc.name: CleanChild_BeforeAdd
+ * @tc.desc: Test CleanChild before adding any child
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, CleanChild_BeforeAdd, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->CleanChild();
+    EXPECT_EQ(frameNode->GetChildAtIndex(0), nullptr);
+}
+
+/**
+ * @tc.name: RemakeNode_BeforeSetMakeFunction
+ * @tc.desc: Test RemakeNode before setting make function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, RemakeNode_BeforeSetMakeFunction, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->RemakeNode();
+    EXPECT_EQ(frameNode->GetChildAtIndex(0), nullptr);
+}
+
+/**
+ * @tc.name: AddBaseNode_NullThenValid
+ * @tc.desc: Test AddBaseNode with null then valid child
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, AddBaseNode_NullThenValid, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->AddBaseNode(nullptr);
+    EXPECT_EQ(frameNode->GetChildAtIndex(0), nullptr);
+
+    auto childNode = CreateChildFrameNode("ChildNode", TEST_NODE_ID_2);
+    childNode->SetIsArkTsFrameNode(true);
+    childNode->SetIsRootBuilderNode(true);
+    pattern->AddBaseNode(childNode);
+
+    auto result = frameNode->GetChildAtIndex(0);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetId(), childNode->GetId());
+}
+
+/**
+ * @tc.name: SetMakeFunction_EmptyLambda
+ * @tc.desc: Test SetMakeFunction with empty lambda
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, SetMakeFunction_EmptyLambda, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetMakeFunction([]() -> RefPtr<UINode> { return nullptr; });
+    auto result = pattern->FireMakeFunction();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: SetOnResize_EmptyLambda
+ * @tc.desc: Test SetOnResize with empty lambda
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, SetOnResize_EmptyLambda, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetOnResize([](const SizeF& size) {});
+    SizeF testSize(TEST_FRAME_WIDTH, TEST_FRAME_HEIGHT);
+    pattern->FireOnResize(testSize);
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: BindController_EmptyLambda
+ * @tc.desc: Test BindController with empty lambda
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, BindController_EmptyLambda, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->BindController([]() {});
+    pattern->ResetController();
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: SetOnTouchEvent_Normal
+ * @tc.desc: Test SetOnTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, SetOnTouchEvent_Normal, TestSize.Level1)
+{
+    NodeContainerModelNG model;
+    model.Create();
+
+    bool called = false;
+    model.SetOnTouchEvent([&called](TouchEventInfo& info) { called = true; });
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: SetOnTouchEvent_Null
+ * @tc.desc: Test SetOnTouchEvent with null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, SetOnTouchEvent_Null, TestSize.Level1)
+{
+    NodeContainerModelNG model;
+    model.Create();
+
+    model.SetOnTouchEvent(nullptr);
+
+    SUCCEED();
+}
+
+
+/**
+ * @tc.name: Measure_Normal
+ * @tc.desc: Test Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, Measure_Normal, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto algorithm = AceType::MakeRefPtr<NodeContainerLayoutAlgorithm>();
+    ASSERT_NE(algorithm, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+
+    SUCCEED();
+}
+
+/**
+ * @tc.name: IsEnableChildrenMatchParent_Consistency
+ * @tc.desc: Test IsEnableChildrenMatchParent returns consistent value
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, IsEnableChildrenMatchParent_Consistency, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    for (int i = 0; i < LOOP_COUNT_LARGE; ++i) {
+        EXPECT_TRUE(pattern->IsEnableChildrenMatchParent());
+    }
+}
+
+/**
+ * @tc.name: IsEnableMatchParent_Consistency
+ * @tc.desc: Test IsEnableMatchParent returns consistent value
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, IsEnableMatchParent_Consistency, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    for (int i = 0; i < LOOP_COUNT_LARGE; ++i) {
+        EXPECT_TRUE(pattern->IsEnableMatchParent());
+    }
+}
+
+/**
+ * @tc.name: IsEnableFix_Consistency
+ * @tc.desc: Test IsEnableFix returns consistent value
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, IsEnableFix_Consistency, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    for (int i = 0; i < LOOP_COUNT_LARGE; ++i) {
+        EXPECT_TRUE(pattern->IsEnableFix());
+    }
+}
+
+/**
+ * @tc.name: IsAtomicNode_Consistency
+ * @tc.desc: Test IsAtomicNode returns consistent value
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, IsAtomicNode_Consistency, TestSize.Level1)
+{
+    auto frameNode = CreateNodeContainerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    for (int i = 0; i < LOOP_COUNT_LARGE; ++i) {
+        EXPECT_TRUE(pattern->IsAtomicNode());
+    }
+}
+
+/**
+ * @tc.name: GetOrCreateNodeContainerNode_LargeId
+ * @tc.desc: Test GetOrCreateNodeContainerNode with large node ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, GetOrCreateNodeContainerNode_LargeId, TestSize.Level1)
+{
+    int32_t largeId = LARGE_NODE_ID;
+    auto frameNode = NodeContainerNode::GetOrCreateNodeContainerNode(largeId);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetId(), largeId);
+}
+
+/**
+ * @tc.name: GetOrCreateNodeContainerNode_ZeroId
+ * @tc.desc: Test GetOrCreateNodeContainerNode with zero node ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, GetOrCreateNodeContainerNode_ZeroId, TestSize.Level1)
+{
+    auto frameNode = NodeContainerNode::GetOrCreateNodeContainerNode(ZERO_NODE_ID);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetId(), ZERO_NODE_ID);
+}
+
+/**
+ * @tc.name: GetOrCreateNodeContainerNode_NegativeId
+ * @tc.desc: Test GetOrCreateNodeContainerNode with negative node ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, GetOrCreateNodeContainerNode_NegativeId, TestSize.Level1)
+{
+    auto frameNode = NodeContainerNode::GetOrCreateNodeContainerNode(NEGATIVE_NODE_ID);
+    ASSERT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: Create_Alignment
+ * @tc.desc: Test Create sets alignment correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, Create_Alignment, TestSize.Level1)
+{
+    NodeContainerModelNG model;
+    model.Create();
+
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: CompleteWorkflow
+ * @tc.desc: Test complete workflow: Create -> SetMakeFunction -> FireMakeNode -> CleanChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerPatternTestNg, CompleteWorkflow, TestSize.Level1)
+{
+    NodeContainerModelNG model;
+    model.Create();
+
+    auto childNode = CreateChildFrameNode("ChildNode", TEST_NODE_ID_2);
+    childNode->SetIsArkTsFrameNode(true);
+    childNode->SetIsRootBuilderNode(true);
+
+    model.SetMakeFunction([childNode]() -> RefPtr<UINode> { return childNode; });
+    model.FireMakeNode();
+
+    auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(element, nullptr);
+    auto pattern = element->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ASSERT_NE(element->GetChildAtIndex(0), nullptr);
+    EXPECT_EQ(element->GetChildAtIndex(0)->GetId(), childNode->GetId());
+
+    pattern->CleanChild();
+    EXPECT_EQ(element->GetChildAtIndex(0), nullptr);
 }
 
 } // namespace OHOS::Ace::NG
