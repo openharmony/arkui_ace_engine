@@ -305,6 +305,19 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetCurrentTextDirection001, TestSi
     EXPECT_EQ(direction, TextDirection::LTR);
 }
 
+/*
+ * @tc.name: MarqueePattern_UpdateTextDirection_LTR
+ * @tc.desc: Test UpdateTextDirection with LTR content
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_UpdateTextDirection_LTR, TestSize.Level1)
+{
+    MarqueePattern marqueePattern;
+    auto content = "test";
+    auto result = marqueePattern.GetTextDirection(content, TextDirection::LTR);
+    EXPECT_NE(result, TextDirection::AUTO);
+}
+
 /**
  * @tc.name: MarqueePattern_OnModifyDone001
  * @tc.desc: Test OnModifyDone with NeedSecondChild() returns true (MarqueeSpacing set)
