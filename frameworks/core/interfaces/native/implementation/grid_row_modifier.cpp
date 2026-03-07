@@ -265,7 +265,6 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
         auto arkOptions = convValue.value();
 
         auto optGutter = Converter::OptConvert<V2::Gutter>(arkOptions.gutter);
-        Validator::ValidateNonNegative(optGutter);
         auto gutter = optGutter.has_value() ? AceType::MakeRefPtr<V2::Gutter>(optGutter.value()) : nullGutter;
         GridRowModelNG::SetGutter(frameNode, gutter);
 

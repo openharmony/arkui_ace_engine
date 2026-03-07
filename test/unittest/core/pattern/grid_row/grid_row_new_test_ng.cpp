@@ -304,7 +304,7 @@ HWTEST_F(GridRowNewTestNG, InheritGridRowColumnsTest, TestSize.Level0)
     EXPECT_EQ(gridContainerSize->ToString(), expectedResult->ToString());
     /**
      * @tc.steps: step2. containerSizeArray[5] = 9,
-                         which means the developer initializes gridrow's columns property as {xxl:9}.
+                          which means the developer initializes gridrow's columns property as {xxl:9}.
      * @tc.expected: gridContainerSize has 9 columns for each breakpoint.
      */
     int32_t containerSizeArray2[6] = {-1, -1, -1, 0, -1, -1};
@@ -321,7 +321,7 @@ HWTEST_F(GridRowNewTestNG, InheritGridRowColumnsTest, TestSize.Level0)
      * @tc.steps: step3. containerSizeArray[0] = 2, containerSizeArray[5] = 9,
                          which means the developer initializes gridrow's columns property as {xs:2, xxl:9}.
      * @tc.expected: gridContainerSize has 2 columns for xs, sm, md, lg, xl.
-                     gridContainerSize has 9 columns for xxl.
+                      gridContainerSize has 9 columns for xxl.
      */
     int32_t containerSizeArray3[6] = {-1, -1, -1, 0, -1, -1};
     containerSizeArray3[0] = 2;
@@ -335,10 +335,10 @@ HWTEST_F(GridRowNewTestNG, InheritGridRowColumnsTest, TestSize.Level0)
     EXPECT_EQ(gridContainerSize->ToString(), expectedResult->ToString());
     /**
      * @tc.steps: step4. containerSizeArray[0] = 2, containerSizeArray4[2] = 4, containerSizeArray[5] = 9,
-                         which means the developer initializes gridrow's columns property as {xs:2, md:4, xxl:9}.
+                          which means the developer initializes gridrow's columns property as {xs:2, md:4, xxl:9}.
      * @tc.expected: gridContainerSize has 2 columns for xs, sm.
-                     gridContainerSize has 4 columns for md, lg, xl
-                     gridContainerSize has 9 columns for xxl.
+                      gridContainerSize has 4 columns for md, lg, xl
+                      gridContainerSize has 9 columns for xxl.
      */
     int32_t containerSizeArray4[6] = {-1, -1, -1, 0, -1, -1};
     containerSizeArray4[0] = 2;
