@@ -25,8 +25,8 @@ import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_ser
 import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, TouchEvent_serializer, MouseEvent_serializer, AxisEvent_serializer, TouchEvent, TouchEventInternal, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, KeyEvent, KeyEventInternal, SheetOptions, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SizeResult, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from './common'
 import { extractors, ContentModifier, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
 import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
-import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer } from './../framework/Graphics'
-import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame } from 'arkui.Graphics'
+import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
+import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
 import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, Curve, BorderStyle, ColorSpace } from './enums'
@@ -90,6 +90,7 @@ import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { default as curves } from '@ohos.curves'
 import { ParticleUpdater, ParticleColorOptions, VelocityOptions, EmitterParticleOptions, ParticleEmitterShape, DistributionType, DisturbanceFieldShape, ParticleColorOptions_serializer, EmitterParticleOptions_serializer, VelocityOptions_serializer } from './particle'
 import { default as router } from '@ohos.router'
+import { CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, CustomSpanMeasureInfo_serializer, CustomSpanDrawInfo_serializer } from './styledString'
 import { RootModifier } from './../RootModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
@@ -2075,6 +2076,37 @@ export class CustomDialogControllerExtender implements MaterializedBase {
     private getState_serialize(): promptAction.CommonState {
         const retval = ArkUIGeneratedNativeModule._CustomDialogControllerExtender_getState(this.peer!.ptr)
         return promptAction.CommonState.fromValue(retval)
+    }
+}
+export class CustomSpanNativeInternal {
+    public static fromPtr(ptr: KPointer): CustomSpanNative {
+        return new CustomSpanNative(MaterializedBaseTag.NOP, ptr)
+    }
+}
+export class CustomSpanNative implements MaterializedBase {
+    public peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, CustomSpanNative.getFinalizer())
+    }
+    constructor() {
+        this(MaterializedBaseTag.NOP, CustomSpanNative.construct())
+    }
+    static construct(): KPointer {
+        const retval = ArkUIGeneratedNativeModule._CustomSpanNative_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._CustomSpanNative_getFinalizer()
+    }
+    public invalidate(): void {
+        this.invalidate_serialize()
+        return
+    }
+    private invalidate_serialize(): void {
+        ArkUIGeneratedNativeModule._CustomSpanNative_invalidate(this.peer!.ptr)
     }
 }
 export class DataPanelExtender {
@@ -6826,6 +6858,12 @@ export interface CustomLayoutRoot {
         throw new Error('Unimplemented method attributeModifier')
     }
 }
+export interface CustomSpanWrapper {
+    managed: Object;
+    nativeObj: CustomSpanNative;
+    onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics);
+    onDraw_callback: ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void);
+}
 export interface TransformationMatrix {
     matrix4x4: Array<number>;
 }
@@ -6981,6 +7019,17 @@ export class CustomDialogControllerExtender_serializer {
         let valueDeserializer: DeserializerBase = buffer
         let ptr: KPointer = valueDeserializer.readPointer()
         return CustomDialogControllerExtenderInternal.fromPtr(ptr)
+    }
+}
+export class CustomSpanNative_serializer {
+    public static write(buffer: SerializerBase, value: CustomSpanNative): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): CustomSpanNative {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return CustomSpanNativeInternal.fromPtr(ptr)
     }
 }
 export class InnerGestureTriggerInfo_serializer {
@@ -7351,6 +7400,62 @@ export class CustomDialogControllerExternalOptionsExtender_serializer {
         }
         const customStyleTmpResult: boolean | undefined = customStyleTmpBuf
         let value: CustomDialogControllerExternalOptionsExtender = ({customStyle: customStyleTmpResult} as CustomDialogControllerExternalOptionsExtender)
+        return value
+    }
+}
+export class CustomSpanWrapper_serializer {
+    public static write(buffer: SerializerBase, value: CustomSpanWrapper): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForManaged = value.managed
+        valueSerializer.holdAndWriteObject(valueHolderForManaged)
+        const valueHolderForNativeObj = value.nativeObj
+        CustomSpanNative_serializer.write(valueSerializer, valueHolderForNativeObj)
+        const valueHolderForOnMeasure_callback = value.onMeasure_callback
+        valueSerializer.holdAndWriteCallback(valueHolderForOnMeasure_callback)
+        const valueHolderForOnDraw_callback = value.onDraw_callback
+        valueSerializer.holdAndWriteCallback(valueHolderForOnDraw_callback)
+    }
+    public static read(buffer: DeserializerBase): CustomSpanWrapper {
+        let valueDeserializer: DeserializerBase = buffer
+        const managedTmpResult: Object = (valueDeserializer.readObject() as object)
+        const nativeObjTmpResult: CustomSpanNative = (CustomSpanNative_serializer.read(valueDeserializer) as CustomSpanNative)
+        const onMeasure_callbackTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+        const onMeasure_callbackTmpBufBufCall: KPointer = valueDeserializer.readPointer()
+        const onMeasure_callbackTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
+        const onMeasure_callbackTmpBufClosure = (measureInfo: CustomSpanMeasureInfo):CustomSpanMetrics => {
+            const onMeasure_callbackTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+            onMeasure_callbackTmpBufBufArgsSerializer.writeInt32(onMeasure_callbackTmpBufBufResource.resourceId);
+            onMeasure_callbackTmpBufBufArgsSerializer.writePointer(onMeasure_callbackTmpBufBufCall);
+            onMeasure_callbackTmpBufBufArgsSerializer.writePointer(onMeasure_callbackTmpBufBufCallSync);
+            CustomSpanMeasureInfo_serializer.write(onMeasure_callbackTmpBufBufArgsSerializer, measureInfo);
+            let onMeasure_callbackTmpBufBufContinuationValue: CustomSpanMetrics | undefined;
+            const onMeasure_callbackTmpBufBufContinuationCallback: ((value: CustomSpanMetrics) => void) = (value: CustomSpanMetrics):void => {
+            onMeasure_callbackTmpBufBufContinuationValue = value;
+        }
+            onMeasure_callbackTmpBufBufArgsSerializer.holdAndWriteCallback(onMeasure_callbackTmpBufBufContinuationCallback);
+            InteropNativeModule._CallCallbackSync(10, -1570631366, onMeasure_callbackTmpBufBufArgsSerializer.asBuffer(), onMeasure_callbackTmpBufBufArgsSerializer.length());
+            onMeasure_callbackTmpBufBufArgsSerializer.release();
+            return (onMeasure_callbackTmpBufBufContinuationValue as CustomSpanMetrics);
+        }
+        resourceFinalizerRegister(onMeasure_callbackTmpBufClosure, onMeasure_callbackTmpBufBufResource)
+        const onMeasure_callbackTmpResult: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) = onMeasure_callbackTmpBufClosure
+        const onDraw_callbackTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+        const onDraw_callbackTmpBufBufCall: KPointer = valueDeserializer.readPointer()
+        const onDraw_callbackTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
+        const onDraw_callbackTmpBufClosure = (context: arkui_Graphics_DrawContext, drawInfo: CustomSpanDrawInfo):void => {
+            const onDraw_callbackTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+            onDraw_callbackTmpBufBufArgsSerializer.writeInt32(onDraw_callbackTmpBufBufResource.resourceId);
+            onDraw_callbackTmpBufBufArgsSerializer.writePointer(onDraw_callbackTmpBufBufCall);
+            onDraw_callbackTmpBufBufArgsSerializer.writePointer(onDraw_callbackTmpBufBufCallSync);
+            arkui_Graphics_DrawContext_serializer.write(onDraw_callbackTmpBufBufArgsSerializer, context);
+            CustomSpanDrawInfo_serializer.write(onDraw_callbackTmpBufBufArgsSerializer, drawInfo);
+            InteropNativeModule._CallCallbackSync(10, 799028158, onDraw_callbackTmpBufBufArgsSerializer.asBuffer(), onDraw_callbackTmpBufBufArgsSerializer.length());
+            onDraw_callbackTmpBufBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(onDraw_callbackTmpBufClosure, onDraw_callbackTmpBufBufResource)
+        const onDraw_callbackTmpResult: ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void) = onDraw_callbackTmpBufClosure
+        let value: CustomSpanWrapper = ({managed: managedTmpResult, nativeObj: nativeObjTmpResult, onMeasure_callback: onMeasure_callbackTmpResult, onDraw_callback: onDraw_callbackTmpResult} as CustomSpanWrapper)
         return value
     }
 }

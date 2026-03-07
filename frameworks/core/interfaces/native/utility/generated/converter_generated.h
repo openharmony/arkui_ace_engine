@@ -607,22 +607,6 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_String_ImageAttachment_CustomSpan& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_SwiperAnimationMode_Boolean& src)
 {
     switch (src.selector) {
@@ -1973,6 +1957,22 @@ void AssignUnionTo(std::optional<T>& dst,
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
         case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_String_ImageAttachment_CustomSpanWrapper& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -3590,7 +3590,7 @@ ASSIGN_OPT(Opt_CustomDialogController)
 ASSIGN_OPT(Opt_CustomDialogControllerExtender)
 ASSIGN_OPT(Opt_CustomKeyboardContinueFeature)
 ASSIGN_OPT(Opt_CustomObject)
-ASSIGN_OPT(Opt_CustomSpan)
+ASSIGN_OPT(Opt_CustomSpanNative)
 ASSIGN_OPT(Opt_CutEvent)
 ASSIGN_OPT(Opt_DataPanelType)
 ASSIGN_OPT(Opt_DataResubmissionHandler)
@@ -4149,7 +4149,6 @@ ASSIGN_OPT(Opt_Union_String_arkui_component_enums_Color_I32_CanvasGradient_Canva
 ASSIGN_OPT(Opt_Union_String_F64)
 ASSIGN_OPT(Opt_Union_String_FunctionKey)
 ASSIGN_OPT(Opt_Union_String_I32)
-ASSIGN_OPT(Opt_Union_String_ImageAttachment_CustomSpan)
 ASSIGN_OPT(Opt_Union_SwiperAnimationMode_Boolean)
 ASSIGN_OPT(Opt_Union_TextInputStyle_TextContentStyle)
 ASSIGN_OPT(Opt_UrlRegexRule)
@@ -4728,6 +4727,7 @@ ASSIGN_OPT(Opt_CustomDialogControllerExternalOptionsExtender)
 ASSIGN_OPT(Opt_CustomSpanDrawInfo)
 ASSIGN_OPT(Opt_CustomSpanMeasureInfo)
 ASSIGN_OPT(Opt_CustomSpanMetrics)
+ASSIGN_OPT(Opt_CustomSpanWrapper)
 ASSIGN_OPT(Opt_CustomTheme)
 ASSIGN_OPT(Opt_DataPanelConfiguration)
 ASSIGN_OPT(Opt_DataPanelOptions)
@@ -5031,6 +5031,7 @@ ASSIGN_OPT(Opt_Union_String_I32_I64_F64_Resource)
 ASSIGN_OPT(Opt_Union_String_I32_Resource_Buffer)
 ASSIGN_OPT(Opt_Union_String_image_PixelMap_Resource)
 ASSIGN_OPT(Opt_Union_String_image_PixelMap_Resource_SymbolGlyphModifier)
+ASSIGN_OPT(Opt_Union_String_ImageAttachment_CustomSpanWrapper)
 ASSIGN_OPT(Opt_Union_String_ItemFillPolicy)
 ASSIGN_OPT(Opt_Union_String_Resource)
 ASSIGN_OPT(Opt_Union_String_Resource_image_PixelMap)

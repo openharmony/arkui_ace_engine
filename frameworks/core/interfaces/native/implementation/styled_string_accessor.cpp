@@ -157,7 +157,7 @@ void DestroyPeerImpl(Ark_StyledString peer)
 {
     StyledStringPeer::Destroy(peer);
 }
-Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpanWrapper* value,
                                const Opt_Array_StyleOptions* styles)
 {
     auto peer = StyledStringPeer::Create();

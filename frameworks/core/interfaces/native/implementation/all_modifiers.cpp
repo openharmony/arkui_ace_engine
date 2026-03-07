@@ -239,7 +239,7 @@ const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor();
 const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor();
 const GENERATED_ArkUICopyEventAccessor* GetCopyEventAccessor();
 const GENERATED_ArkUICustomDialogControllerExtenderAccessor* GetCustomDialogControllerExtenderAccessor();
-const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
+const GENERATED_ArkUICustomSpanNativeAccessor* GetCustomSpanNativeAccessor();
 const GENERATED_ArkUICutEventAccessor* GetCutEventAccessor();
 const GENERATED_ArkUIDataPanelExtenderAccessor* GetDataPanelExtenderAccessor();
 const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor();
@@ -585,7 +585,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetControllerHandlerAccessor,
         GetCopyEventAccessor,
         GetCustomDialogControllerExtenderAccessor,
-        GetCustomSpanAccessor,
+        GetCustomSpanNativeAccessor,
         GetCutEventAccessor,
         GetDataPanelExtenderAccessor,
         GetDataResubmissionHandlerAccessor,

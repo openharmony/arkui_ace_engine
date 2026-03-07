@@ -82,7 +82,7 @@ generated_sources = [
   "implementation/custom_builder_root_modifier.cpp",
   "implementation/custom_dialog_controller_extender_accessor.cpp",
   "implementation/custom_layout_root_modifier.cpp",
-  "implementation/custom_span_accessor.cpp",
+  "implementation/custom_span_native_accessor.cpp",
   "implementation/cut_event_accessor.cpp",
   "implementation/data_panel_extender_accessor.cpp",
   "implementation/data_panel_modifier.cpp",

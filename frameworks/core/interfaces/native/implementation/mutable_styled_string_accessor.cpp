@@ -55,7 +55,7 @@ void DestroyPeerImpl(Ark_MutableStyledString peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_MutableStyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+Ark_MutableStyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpanWrapper* value,
                                       const Opt_Array_StyleOptions* styles)
 {
     auto peer = PeerUtils::CreatePeer<MutableStyledStringPeer>();

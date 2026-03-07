@@ -31804,53 +31804,19 @@ Ark_Int32 impl_CustomDialogControllerExtender_getState(Ark_NativePointer thisPtr
         return GetAccessors()->getCustomDialogControllerExtenderAccessor()->getState(self);
 }
 KOALA_INTEROP_DIRECT_1(CustomDialogControllerExtender_getState, Ark_Int32, Ark_NativePointer)
-Ark_NativePointer impl_CustomSpan_construct() {
-        return GetAccessors()->getCustomSpanAccessor()->construct();
+Ark_NativePointer impl_CustomSpanNative_construct() {
+        return GetAccessors()->getCustomSpanNativeAccessor()->construct();
 }
-KOALA_INTEROP_DIRECT_0(CustomSpan_construct, Ark_NativePointer)
-Ark_NativePointer impl_CustomSpan_getFinalizer() {
-        return GetAccessors()->getCustomSpanAccessor()->getFinalizer();
+KOALA_INTEROP_DIRECT_0(CustomSpanNative_construct, Ark_NativePointer)
+Ark_NativePointer impl_CustomSpanNative_getFinalizer() {
+        return GetAccessors()->getCustomSpanNativeAccessor()->getFinalizer();
 }
-KOALA_INTEROP_DIRECT_0(CustomSpan_getFinalizer, Ark_NativePointer)
-void impl_CustomSpan_invalidate(Ark_NativePointer thisPtr) {
-        Ark_CustomSpan self = reinterpret_cast<Ark_CustomSpan>(thisPtr);
-        GetAccessors()->getCustomSpanAccessor()->invalidate(self);
+KOALA_INTEROP_DIRECT_0(CustomSpanNative_getFinalizer, Ark_NativePointer)
+void impl_CustomSpanNative_invalidate(Ark_NativePointer thisPtr) {
+        Ark_CustomSpanNative self = reinterpret_cast<Ark_CustomSpanNative>(thisPtr);
+        GetAccessors()->getCustomSpanNativeAccessor()->invalidate(self);
 }
-KOALA_INTEROP_DIRECT_V1(CustomSpan_invalidate, Ark_NativePointer)
-KInteropReturnBuffer impl_CustomSpan_getOnMeasure_callback(Ark_NativePointer thisPtr) {
-        Ark_CustomSpan self = reinterpret_cast<Ark_CustomSpan>(thisPtr);
-        const auto &retValue = GetAccessors()->getCustomSpanAccessor()->getOnMeasure_callback(self);
-        SerializerBase _retSerializer {};
-        _retSerializer.writeCallbackResource(retValue.resource);
-        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
-        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
-        return _retSerializer.toReturnBuffer();
-}
-KOALA_INTEROP_1(CustomSpan_getOnMeasure_callback, KInteropReturnBuffer, Ark_NativePointer)
-void impl_CustomSpan_setOnMeasure_callback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_CustomSpan self = reinterpret_cast<Ark_CustomSpan>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_CustomSpanMeasureInfo_CustomSpanMetrics onMeasure_callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfo measureInfo, const Callback_CustomSpanMetrics_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_CUSTOMSPANMEASUREINFO_CUSTOMSPANMETRICS)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfo measureInfo, const Callback_CustomSpanMetrics_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_CUSTOMSPANMEASUREINFO_CUSTOMSPANMETRICS))))};;
-        GetAccessors()->getCustomSpanAccessor()->setOnMeasure_callback(self, static_cast<Callback_CustomSpanMeasureInfo_CustomSpanMetrics*>(&onMeasure_callbackValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(CustomSpan_setOnMeasure_callback, Ark_NativePointer, KSerializerBuffer, int32_t)
-KInteropReturnBuffer impl_CustomSpan_getOnDraw_callback(Ark_NativePointer thisPtr) {
-        Ark_CustomSpan self = reinterpret_cast<Ark_CustomSpan>(thisPtr);
-        const auto &retValue = GetAccessors()->getCustomSpanAccessor()->getOnDraw_callback(self);
-        SerializerBase _retSerializer {};
-        _retSerializer.writeCallbackResource(retValue.resource);
-        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
-        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
-        return _retSerializer.toReturnBuffer();
-}
-KOALA_INTEROP_1(CustomSpan_getOnDraw_callback, KInteropReturnBuffer, Ark_NativePointer)
-void impl_CustomSpan_setOnDraw_callback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_CustomSpan self = reinterpret_cast<Ark_CustomSpan>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_DrawContext_CustomSpanDrawInfo_Void onDraw_callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DrawContext context, const Ark_CustomSpanDrawInfo drawInfo)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_DRAWCONTEXT_CUSTOMSPANDRAWINFO_VOID)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DrawContext context, const Ark_CustomSpanDrawInfo drawInfo)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_DRAWCONTEXT_CUSTOMSPANDRAWINFO_VOID))))};;
-        GetAccessors()->getCustomSpanAccessor()->setOnDraw_callback(self, static_cast<Callback_DrawContext_CustomSpanDrawInfo_Void*>(&onDraw_callbackValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(CustomSpan_setOnDraw_callback, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V1(CustomSpanNative_invalidate, Ark_NativePointer)
 Ark_NativePointer impl_CutEvent_construct() {
         return GetAccessors()->getCutEventAccessor()->construct();
 }
@@ -36330,7 +36296,7 @@ KOALA_INTEROP_DIRECT_V3(MouseEvent_setGlobalDisplayY, Ark_NativePointer, KSerial
 Ark_NativePointer impl_MutableStyledString_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 valueValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_String_ImageAttachment_CustomSpan valueValueTempTmpBuf = {};
+        Ark_Union_String_ImageAttachment_CustomSpanWrapper valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.selector = valueValueTempTmpBufUnionSelector;
         if (valueValueTempTmpBufUnionSelector == 0) {
             valueValueTempTmpBuf.selector = 0;
@@ -36340,11 +36306,11 @@ Ark_NativePointer impl_MutableStyledString_construct(KSerializerBuffer thisArray
             valueValueTempTmpBuf.value1 = static_cast<Ark_ImageAttachment>(ImageAttachment_serializer::read(thisDeserializer));
         } else if (valueValueTempTmpBufUnionSelector == 2) {
             valueValueTempTmpBuf.selector = 2;
-            valueValueTempTmpBuf.value2 = static_cast<Ark_CustomSpan>(CustomSpan_serializer::read(thisDeserializer));
+            valueValueTempTmpBuf.value2 = CustomSpanWrapper_serializer::read(thisDeserializer);
         } else {
             INTEROP_FATAL("One of the branches for valueValueTempTmpBuf has to be chosen through deserialisation.");
         }
-        Ark_Union_String_ImageAttachment_CustomSpan valueValueTemp = static_cast<Ark_Union_String_ImageAttachment_CustomSpan>(valueValueTempTmpBuf);;
+        Ark_Union_String_ImageAttachment_CustomSpanWrapper valueValueTemp = static_cast<Ark_Union_String_ImageAttachment_CustomSpanWrapper>(valueValueTempTmpBuf);;
         const auto stylesValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_Array_StyleOptions stylesValueTempTmpBuf = {};
         stylesValueTempTmpBuf.tag = stylesValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -36359,7 +36325,7 @@ Ark_NativePointer impl_MutableStyledString_construct(KSerializerBuffer thisArray
             stylesValueTempTmpBuf.value = stylesValueTempTmpBufOpt;
         }
         Opt_Array_StyleOptions stylesValueTemp = stylesValueTempTmpBuf;;
-        return GetAccessors()->getMutableStyledStringAccessor()->construct(static_cast<Ark_Union_String_ImageAttachment_CustomSpan*>(&valueValueTemp), static_cast<Opt_Array_StyleOptions*>(&stylesValueTemp));
+        return GetAccessors()->getMutableStyledStringAccessor()->construct(static_cast<Ark_Union_String_ImageAttachment_CustomSpanWrapper*>(&valueValueTemp), static_cast<Opt_Array_StyleOptions*>(&stylesValueTemp));
 }
 KOALA_INTEROP_DIRECT_2(MutableStyledString_construct, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_MutableStyledString_getFinalizer() {
@@ -40275,7 +40241,7 @@ KOALA_INTEROP_DIRECT_V4(StateStylesOps_onStateStyleChange, Ark_NativePointer, KS
 Ark_NativePointer impl_StyledString_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 valueValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_String_ImageAttachment_CustomSpan valueValueTempTmpBuf = {};
+        Ark_Union_String_ImageAttachment_CustomSpanWrapper valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.selector = valueValueTempTmpBufUnionSelector;
         if (valueValueTempTmpBufUnionSelector == 0) {
             valueValueTempTmpBuf.selector = 0;
@@ -40285,11 +40251,11 @@ Ark_NativePointer impl_StyledString_construct(KSerializerBuffer thisArray, int32
             valueValueTempTmpBuf.value1 = static_cast<Ark_ImageAttachment>(ImageAttachment_serializer::read(thisDeserializer));
         } else if (valueValueTempTmpBufUnionSelector == 2) {
             valueValueTempTmpBuf.selector = 2;
-            valueValueTempTmpBuf.value2 = static_cast<Ark_CustomSpan>(CustomSpan_serializer::read(thisDeserializer));
+            valueValueTempTmpBuf.value2 = CustomSpanWrapper_serializer::read(thisDeserializer);
         } else {
             INTEROP_FATAL("One of the branches for valueValueTempTmpBuf has to be chosen through deserialisation.");
         }
-        Ark_Union_String_ImageAttachment_CustomSpan valueValueTemp = static_cast<Ark_Union_String_ImageAttachment_CustomSpan>(valueValueTempTmpBuf);;
+        Ark_Union_String_ImageAttachment_CustomSpanWrapper valueValueTemp = static_cast<Ark_Union_String_ImageAttachment_CustomSpanWrapper>(valueValueTempTmpBuf);;
         const auto stylesValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_Array_StyleOptions stylesValueTempTmpBuf = {};
         stylesValueTempTmpBuf.tag = stylesValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -40304,7 +40270,7 @@ Ark_NativePointer impl_StyledString_construct(KSerializerBuffer thisArray, int32
             stylesValueTempTmpBuf.value = stylesValueTempTmpBufOpt;
         }
         Opt_Array_StyleOptions stylesValueTemp = stylesValueTempTmpBuf;;
-        return GetAccessors()->getStyledStringAccessor()->construct(static_cast<Ark_Union_String_ImageAttachment_CustomSpan*>(&valueValueTemp), static_cast<Opt_Array_StyleOptions*>(&stylesValueTemp));
+        return GetAccessors()->getStyledStringAccessor()->construct(static_cast<Ark_Union_String_ImageAttachment_CustomSpanWrapper*>(&valueValueTemp), static_cast<Opt_Array_StyleOptions*>(&stylesValueTemp));
 }
 KOALA_INTEROP_DIRECT_2(StyledString_construct, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_StyledString_getFinalizer() {

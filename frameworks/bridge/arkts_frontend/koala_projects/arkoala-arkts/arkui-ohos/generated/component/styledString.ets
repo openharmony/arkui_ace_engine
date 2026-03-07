@@ -24,17 +24,18 @@ import { CallbackTransformer } from './../CallbackTransformer'
 import { arkui_Graphics_LengthMetrics_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
 import { LengthMetrics as arkui_component_units_LengthMetrics, ResourceColor, Resource as arkui_component_units_Resource, SizeOptions_serializer, ColorFilter_serializer, SizeOptions, ColorFilter, ColorFilterInternal, ResourceStr, Margin, Padding, BorderRadiuses, Padding_serializer, BorderRadiuses_serializer } from './units'
 import { LengthMetrics as arkui_Graphics_LengthMetrics, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
-import { extractors } from '#handwritten'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { TextDecorationType, Color as arkui_component_enums_Color, TextDecorationStyle, ImageSpanAlignment, ImageFit, TextAlign, TextOverflow, WordBreak, FontStyle, FontWeight } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { drawing_ColorFilter_serializer } from './../framework/ohos.graphics.drawing'
 import { PixelMap, ShadowOptions_serializer, ShadowOptions, ClickEvent, Callback as arkui_component_common_Callback, TouchEvent, ClickEvent_serializer, TouchEvent_serializer } from './common'
+import { extractors, CustomSpan } from '#handwritten'
 import { default as image } from '@ohos.multimedia.image'
 import { DrawingColorFilter } from './image'
 import { default as drawing } from '@ohos.graphics.drawing'
 import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from './richEditor'
 import { TextVerticalAlign, TextDirection, FontConfigs_serializer, FontConfigs, SuperscriptStyle } from './textCommon'
+import { CustomSpanWrapper, CustomSpanWrapper_serializer } from './idlize'
 import { memo, memo_stable } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { GestureEvent, GestureEvent_serializer } from './gesture'
@@ -113,131 +114,6 @@ export class BaselineOffsetStyle implements MaterializedBase {
     private getBaselineOffset_serialize(): double {
         const retval = ArkUIGeneratedNativeModule._BaselineOffsetStyle_getBaselineOffset(this.peer!.ptr)
         return retval
-    }
-}
-export class CustomSpanInternal {
-    public static fromPtr(ptr: KPointer): CustomSpan {
-        return new CustomSpan(MaterializedBaseTag.NOP, ptr)
-    }
-}
-export class CustomSpan implements MaterializedBase {
-    public peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    onMeasure(measureInfo: CustomSpanMeasureInfo): CustomSpanMetrics {
-        throw new Error('Not implemented!')
-    }
-    get onMeasure_callback(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
-        return this.getOnMeasure_callback()
-    }
-    set onMeasure_callback(onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)) {
-        this.setOnMeasure_callback(onMeasure_callback)
-    }
-    onDraw(context: arkui_Graphics_DrawContext, drawInfo: CustomSpanDrawInfo): void {
-        throw new Error('Not implemented!')
-    }
-    get onDraw_callback(): ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
-        return this.getOnDraw_callback()
-    }
-    set onDraw_callback(onDraw_callback: ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void)) {
-        this.setOnDraw_callback(onDraw_callback)
-    }
-    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, CustomSpan.getFinalizer())
-    }
-    constructor() {
-        this(MaterializedBaseTag.NOP, CustomSpan.construct())
-        this.onMeasure_callback = this.onMeasure
-        this.onDraw_callback = this.onDraw
-    }
-    static construct(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._CustomSpan_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._CustomSpan_getFinalizer()
-    }
-    public invalidate(): void {
-        this.invalidate_serialize()
-        return
-    }
-    private getOnMeasure_callback(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
-        return this.getOnMeasure_callback_serialize()
-    }
-    private setOnMeasure_callback(onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)): void {
-        const onMeasure_callback_casted = onMeasure_callback as (((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics))
-        this.setOnMeasure_callback_serialize(onMeasure_callback_casted)
-        return
-    }
-    private getOnDraw_callback(): ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
-        return this.getOnDraw_callback_serialize()
-    }
-    private setOnDraw_callback(onDraw_callback: ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
-        const onDraw_callback_casted = onDraw_callback as (((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void))
-        this.setOnDraw_callback_serialize(onDraw_callback_casted)
-        return
-    }
-    private invalidate_serialize(): void {
-        ArkUIGeneratedNativeModule._CustomSpan_invalidate(this.peer!.ptr)
-    }
-    private getOnMeasure_callback_serialize(): ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) {
-        const retval = ArkUIGeneratedNativeModule._CustomSpan_getOnMeasure_callback(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferBufResource: CallbackResource = retvalDeserializer.readCallbackResource()
-        const bufferBufCall: KPointer = retvalDeserializer.readPointer()
-        const bufferBufCallSync: KPointer = retvalDeserializer.readPointer()
-        const bufferClosure = (measureInfo: CustomSpanMeasureInfo):CustomSpanMetrics => {
-            const bufferBufArgsSerializer: SerializerBase = SerializerBase.hold();
-            bufferBufArgsSerializer.writeInt32(bufferBufResource.resourceId);
-            bufferBufArgsSerializer.writePointer(bufferBufCall);
-            bufferBufArgsSerializer.writePointer(bufferBufCallSync);
-            CustomSpanMeasureInfo_serializer.write(bufferBufArgsSerializer, measureInfo);
-            let bufferBufContinuationValue: CustomSpanMetrics | undefined;
-            const bufferBufContinuationCallback: ((value: CustomSpanMetrics) => void) = (value: CustomSpanMetrics):void => {
-            bufferBufContinuationValue = value;
-        }
-            bufferBufArgsSerializer.holdAndWriteCallback(bufferBufContinuationCallback);
-            InteropNativeModule._CallCallbackSync(10, -1570631366, bufferBufArgsSerializer.asBuffer(), bufferBufArgsSerializer.length());
-            bufferBufArgsSerializer.release();
-            return (bufferBufContinuationValue as CustomSpanMetrics);
-        }
-        resourceFinalizerRegister(bufferClosure, bufferBufResource)
-        const returnResult: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics) = bufferClosure
-        return returnResult
-    }
-    private setOnMeasure_callback_serialize(onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics)): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(onMeasure_callback)
-        ArkUIGeneratedNativeModule._CustomSpan_setOnMeasure_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getOnDraw_callback_serialize(): ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void) {
-        const retval = ArkUIGeneratedNativeModule._CustomSpan_getOnDraw_callback(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferBufResource: CallbackResource = retvalDeserializer.readCallbackResource()
-        const bufferBufCall: KPointer = retvalDeserializer.readPointer()
-        const bufferBufCallSync: KPointer = retvalDeserializer.readPointer()
-        const bufferClosure = (context: arkui_Graphics_DrawContext, drawInfo: CustomSpanDrawInfo):void => {
-            const bufferBufArgsSerializer: SerializerBase = SerializerBase.hold();
-            bufferBufArgsSerializer.writeInt32(bufferBufResource.resourceId);
-            bufferBufArgsSerializer.writePointer(bufferBufCall);
-            bufferBufArgsSerializer.writePointer(bufferBufCallSync);
-            arkui_Graphics_DrawContext_serializer.write(bufferBufArgsSerializer, context);
-            CustomSpanDrawInfo_serializer.write(bufferBufArgsSerializer, drawInfo);
-            InteropNativeModule._CallCallbackSync(10, 799028158, bufferBufArgsSerializer.asBuffer(), bufferBufArgsSerializer.length());
-            bufferBufArgsSerializer.release();
-            return;
-        }
-        resourceFinalizerRegister(bufferClosure, bufferBufResource)
-        const returnResult: ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void) = bufferClosure
-        return returnResult
-    }
-    private setOnDraw_callback_serialize(onDraw_callback: ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void)): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(onDraw_callback)
-        ArkUIGeneratedNativeModule._CustomSpan_setOnDraw_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
 }
 export class DecorationStyleInternal {
@@ -991,7 +867,8 @@ export class StyledString implements MaterializedBase {
         } else if (value instanceof CustomSpan) {
             thisSerializer.writeInt8((2).toByte())
             const valueForIdx2 = value as CustomSpan
-            CustomSpan_serializer.write(thisSerializer, valueForIdx2)
+            const valueForIdx2Transformed: CustomSpanWrapper = extractors.transform_Ark_CustomSpan_to_Ark_CustomSpanWrapper(valueForIdx2)
+            CustomSpanWrapper_serializer.write(thisSerializer, valueForIdx2Transformed)
         }
         if (styles !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1619,17 +1496,6 @@ export class BaselineOffsetStyle_serializer {
         return BaselineOffsetStyleInternal.fromPtr(ptr)
     }
 }
-export class CustomSpan_serializer {
-    public static write(buffer: SerializerBase, value: CustomSpan): void {
-        let valueSerializer: SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): CustomSpan {
-        let valueDeserializer: DeserializerBase = buffer
-        let ptr: KPointer = valueDeserializer.readPointer()
-        return CustomSpanInternal.fromPtr(ptr)
-    }
-}
 export class DecorationStyle_serializer {
     public static write(buffer: SerializerBase, value: DecorationStyle): void {
         let valueSerializer: SerializerBase = buffer
@@ -2017,7 +1883,8 @@ export class StyleOptions_serializer {
         } else if (valueHolderForStyledValue instanceof CustomSpan) {
             valueSerializer.writeInt8((10).toByte())
             const valueHolderForStyledValueForIdx10 = valueHolderForStyledValue as CustomSpan
-            CustomSpan_serializer.write(valueSerializer, valueHolderForStyledValueForIdx10)
+            const valueHolderForStyledValueForIdx10Transformed: CustomSpanWrapper = extractors.transform_Ark_CustomSpan_to_Ark_CustomSpanWrapper(valueHolderForStyledValueForIdx10)
+            CustomSpanWrapper_serializer.write(valueSerializer, valueHolderForStyledValueForIdx10Transformed)
         } else if (valueHolderForStyledValue instanceof UserDataSpan) {
             valueSerializer.writeInt8((11).toByte())
             const valueHolderForStyledValueForIdx11 = valueHolderForStyledValue as UserDataSpan
@@ -2066,7 +1933,8 @@ export class StyleOptions_serializer {
         } else if (styledValueTmpBufUnionSelector == (9).toByte()) {
             styledValueTmpBuf = (UrlStyle_serializer.read(valueDeserializer) as UrlStyle)
         } else if (styledValueTmpBufUnionSelector == (10).toByte()) {
-            styledValueTmpBuf = (CustomSpan_serializer.read(valueDeserializer) as CustomSpan)
+            const styledValueTmpBufBufUDeserialized: CustomSpanWrapper = CustomSpanWrapper_serializer.read(valueDeserializer)
+            styledValueTmpBuf = extractors.transform_Ark_CustomSpanWrapper_to_Ark_CustomSpan(styledValueTmpBufBufUDeserialized)
         } else if (styledValueTmpBufUnionSelector == (11).toByte()) {
             styledValueTmpBuf = (valueDeserializer.readObject() as UserDataSpan)
         } else if (styledValueTmpBufUnionSelector == (12).toByte()) {
@@ -2213,7 +2081,8 @@ export class SpanStyle_serializer {
         } else if (valueHolderForStyledValue instanceof CustomSpan) {
             valueSerializer.writeInt8((10).toByte())
             const valueHolderForStyledValueForIdx10 = valueHolderForStyledValue as CustomSpan
-            CustomSpan_serializer.write(valueSerializer, valueHolderForStyledValueForIdx10)
+            const valueHolderForStyledValueForIdx10Transformed: CustomSpanWrapper = extractors.transform_Ark_CustomSpan_to_Ark_CustomSpanWrapper(valueHolderForStyledValueForIdx10)
+            CustomSpanWrapper_serializer.write(valueSerializer, valueHolderForStyledValueForIdx10Transformed)
         } else if (valueHolderForStyledValue instanceof UserDataSpan) {
             valueSerializer.writeInt8((11).toByte())
             const valueHolderForStyledValueForIdx11 = valueHolderForStyledValue as UserDataSpan
@@ -2252,7 +2121,8 @@ export class SpanStyle_serializer {
         } else if (styledValueTmpBufUnionSelector == (9).toByte()) {
             styledValueTmpBuf = (UrlStyle_serializer.read(valueDeserializer) as UrlStyle)
         } else if (styledValueTmpBufUnionSelector == (10).toByte()) {
-            styledValueTmpBuf = (CustomSpan_serializer.read(valueDeserializer) as CustomSpan)
+            const styledValueTmpBufBufUDeserialized: CustomSpanWrapper = CustomSpanWrapper_serializer.read(valueDeserializer)
+            styledValueTmpBuf = extractors.transform_Ark_CustomSpanWrapper_to_Ark_CustomSpan(styledValueTmpBufBufUDeserialized)
         } else if (styledValueTmpBufUnionSelector == (11).toByte()) {
             styledValueTmpBuf = (valueDeserializer.readObject() as UserDataSpan)
         } else if (styledValueTmpBufUnionSelector == (12).toByte()) {
@@ -3050,7 +2920,8 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         } else if (value instanceof CustomSpan) {
             thisSerializer.writeInt8((2).toByte())
             const valueForIdx2 = value as CustomSpan
-            CustomSpan_serializer.write(thisSerializer, valueForIdx2)
+            const valueForIdx2Transformed: CustomSpanWrapper = extractors.transform_Ark_CustomSpan_to_Ark_CustomSpanWrapper(valueForIdx2)
+            CustomSpanWrapper_serializer.write(thisSerializer, valueForIdx2Transformed)
         }
         if (styles !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

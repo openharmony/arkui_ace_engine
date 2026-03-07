@@ -13643,15 +13643,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // CustomDialogControllerExtenderAccessor
-    namespace CustomSpanAccessor {
-    void DestroyPeerImpl(Ark_CustomSpan peer)
+    namespace CustomSpanNativeAccessor {
+    void DestroyPeerImpl(Ark_CustomSpanNative peer)
     {
-        auto peerImpl = reinterpret_cast<CustomSpanPeerImpl *>(peer);
+        auto peerImpl = reinterpret_cast<CustomSpanNativePeerImpl *>(peer);
         if (peerImpl) {
             delete peerImpl;
         }
     }
-    Ark_CustomSpan ConstructImpl()
+    Ark_CustomSpanNative ConstructImpl()
     {
         return {};
     }
@@ -13659,26 +13659,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    void InvalidateImpl(Ark_CustomSpan peer)
+    void InvalidateImpl(Ark_CustomSpanNative peer)
     {
     }
-    Callback_CustomSpanMeasureInfo_CustomSpanMetrics GetOnMeasure_callbackImpl(Ark_CustomSpan peer)
-    {
-        return {};
-    }
-    void SetOnMeasure_callbackImpl(Ark_CustomSpan peer,
-                                   const Callback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure_callback)
-    {
-    }
-    Callback_DrawContext_CustomSpanDrawInfo_Void GetOnDraw_callbackImpl(Ark_CustomSpan peer)
-    {
-        return {};
-    }
-    void SetOnDraw_callbackImpl(Ark_CustomSpan peer,
-                                const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw_callback)
-    {
-    }
-    } // CustomSpanAccessor
+    } // CustomSpanNativeAccessor
     namespace CutEventAccessor {
     void DestroyPeerImpl(Ark_CutEvent peer)
     {
@@ -16526,7 +16510,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_MutableStyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+    Ark_MutableStyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpanWrapper* value,
                                           const Opt_Array_StyleOptions* styles)
     {
         return {};
@@ -18925,7 +18909,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+    Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpanWrapper* value,
                                    const Opt_Array_StyleOptions* styles)
     {
         return {};
@@ -21941,23 +21925,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct CustomDialogControllerExtenderPeer {
         virtual ~CustomDialogControllerExtenderPeer() = default;
     };
-    const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor()
+    const GENERATED_ArkUICustomSpanNativeAccessor* GetCustomSpanNativeAccessor()
     {
-        static const GENERATED_ArkUICustomSpanAccessor CustomSpanAccessorImpl {
-            CustomSpanAccessor::DestroyPeerImpl,
-            CustomSpanAccessor::ConstructImpl,
-            CustomSpanAccessor::GetFinalizerImpl,
-            CustomSpanAccessor::InvalidateImpl,
-            CustomSpanAccessor::GetOnMeasure_callbackImpl,
-            CustomSpanAccessor::SetOnMeasure_callbackImpl,
-            CustomSpanAccessor::GetOnDraw_callbackImpl,
-            CustomSpanAccessor::SetOnDraw_callbackImpl,
+        static const GENERATED_ArkUICustomSpanNativeAccessor CustomSpanNativeAccessorImpl {
+            CustomSpanNativeAccessor::DestroyPeerImpl,
+            CustomSpanNativeAccessor::ConstructImpl,
+            CustomSpanNativeAccessor::GetFinalizerImpl,
+            CustomSpanNativeAccessor::InvalidateImpl,
         };
-        return &CustomSpanAccessorImpl;
+        return &CustomSpanNativeAccessorImpl;
     }
 
-    struct CustomSpanPeer {
-        virtual ~CustomSpanPeer() = default;
+    struct CustomSpanNativePeer {
+        virtual ~CustomSpanNativePeer() = default;
     };
     const GENERATED_ArkUICutEventAccessor* GetCutEventAccessor()
     {
@@ -25203,7 +25183,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetControllerHandlerAccessor,
             GetCopyEventAccessor,
             GetCustomDialogControllerExtenderAccessor,
-            GetCustomSpanAccessor,
+            GetCustomSpanNativeAccessor,
             GetCutEventAccessor,
             GetDataPanelExtenderAccessor,
             GetDataResubmissionHandlerAccessor,
