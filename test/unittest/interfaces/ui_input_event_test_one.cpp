@@ -112,11 +112,11 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPosition, Te
     auto ret = OH_ArkUI_PointerEvent_SetClonedEventLocalPosition(nullptr, 0.0f, 0.0f);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 
-    event.isCloned = false;
+    event.isCreatedByUser = false;
     ret = OH_ArkUI_PointerEvent_SetClonedEventLocalPosition(&event, 0.0f, 0.0f);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
 
-    event.isCloned = true;
+    event.isCreatedByUser = true;
     event.inputEvent = nullptr;
     ret = OH_ArkUI_PointerEvent_SetClonedEventLocalPosition(&event, 0.0f, 0.0f);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -142,11 +142,11 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIn
     auto ret = OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(nullptr, 0.0f, 0.0f, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 
-    event.isCloned = false;
+    event.isCreatedByUser = false;
     ret = OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(&event, 0.0f, 0.0f, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
 
-    event.isCloned = true;
+    event.isCreatedByUser = true;
     event.inputEvent = nullptr;
     ret = OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(&event, 0.0f, 0.0f, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -180,11 +180,11 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventActionType, TestS
     auto ret = OH_ArkUI_PointerEvent_SetClonedEventActionType(nullptr, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 
-    event.isCloned = false;
+    event.isCreatedByUser = false;
     ret = OH_ArkUI_PointerEvent_SetClonedEventActionType(&event, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
 
-    event.isCloned = true;
+    event.isCreatedByUser = true;
     event.inputEvent = nullptr;
     ret = OH_ArkUI_PointerEvent_SetClonedEventActionType(&event, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -208,11 +208,11 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId, 
     auto ret = OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(nullptr, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 
-    event.isCloned = false;
+    event.isCreatedByUser = false;
     ret = OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(&event, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
 
-    event.isCloned = true;
+    event.isCreatedByUser = true;
     event.inputEvent = nullptr;
     ret = OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(&event, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -237,11 +237,11 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex, 
     auto ret = OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(nullptr, 1, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 
-    event.isCloned = false;
+    event.isCreatedByUser = false;
     ret = OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(&event, 1, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
 
-    event.isCloned = true;
+    event.isCreatedByUser = true;
     event.inputEvent = nullptr;
     ret = OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(&event, 1, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);

@@ -74,7 +74,7 @@ HWTEST_F(KeyEventTest, OH_ArkUI_KeyEvent_Dispatch003, TestSize.Level0)
         .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
         .eventTypeId = AXIS_EVENT_ID,
         .inputEvent = nullptr,
-        .isCloned = false,
+        .isCreatedByUser = false,
         .apiVersion = 0,
     };
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
