@@ -41,6 +41,26 @@ public:
     static RefPtr<ResourceAdapter> Create();
     static RefPtr<ResourceAdapter> CreateV2();
 
+    void SetBundleName(const std::string& bundleName)
+    {
+        bundleName_ = bundleName;
+    }
+
+    void SetModuleName(const std::string& moduleName)
+    {
+        moduleName_ = moduleName;
+    }
+
+    const std::string& GetBundleName() const
+    {
+        return bundleName_;
+    }
+
+    const std::string& GetModuleName() const
+    {
+        return moduleName_;
+    }
+
     virtual void Init(const ResourceInfo& resourceInfo) {}
 
     virtual void UpdateConfig(const ResourceConfiguration& config, bool themeFlag = false) {}
@@ -273,6 +293,10 @@ public:
     {
         return -1;
     }
+
+private:
+    std::string bundleName_;
+    std::string moduleName_;
 };
 
 } // namespace OHOS::Ace

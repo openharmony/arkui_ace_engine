@@ -110,9 +110,19 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
         resourceAdapterV2->SetAppHasDarkRes(aceContainer->GetResourceConfiguration().GetAppHasDarkRes());
         newResourceAdapter = resourceAdapterV2;
     } else {
+        if (!container->IsFormRender()) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                "[%{public}s][%{public}s][%{public}d] Context is null, create resAdapter by resInfo.",
+                bundleName.c_str(), moduleName.c_str(), container->GetInstanceId());
+        }
+
         newResourceAdapter = ResourceAdapter::CreateV2();
         auto resourceInfo = aceContainer->GetResourceInfo();
         newResourceAdapter->Init(resourceInfo);
+    }
+    if (newResourceAdapter) {
+        newResourceAdapter->SetBundleName(bundleName);
+        newResourceAdapter->SetModuleName(moduleName);
     }
 
     auto resConfig = aceContainer->GetResourceConfiguration();
@@ -427,7 +437,9 @@ Color ResourceAdapterImplV2::GetColor(uint32_t resId)
     CHECK_NULL_RETURN(manager, Color(result));
     auto state = manager->GetColorById(resId, result);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get color by id error, id=%{public}u", resId);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get color by id error, id=%{public}u, bundleName: %{public}s, moduleName: %{public}s", resId,
+            GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "Color", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
@@ -529,7 +541,10 @@ std::string ResourceAdapterImplV2::GetString(uint32_t resId)
     CHECK_NULL_RETURN(manager, strResult);
     auto state = manager->GetStringById(resId, strResult);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get string by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "Get string by id error, id=%{public}u, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+            "%{public}s",
+            resId, state, GetBundleName().c_str(), GetModuleName().c_str());
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             std::to_string(resId), "String", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));

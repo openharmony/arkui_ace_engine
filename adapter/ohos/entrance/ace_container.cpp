@@ -317,12 +317,16 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     if (context && context->GetResourceManager()) {
         resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
+        resourceAdapter->SetBundleName(bundleName);
+        resourceAdapter->SetModuleName(moduleName);
     } else if (ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, instanceId)) {
         resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId);
     }
 
     if (resourceAdapter == nullptr) {
         resourceAdapter = ResourceAdapter::CreateV2();
+        resourceAdapter->SetBundleName(bundleName);
+        resourceAdapter->SetModuleName(moduleName);
         resourceAdapter->Init(resourceInfo);
     }
 
