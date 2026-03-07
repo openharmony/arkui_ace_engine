@@ -1486,7 +1486,7 @@ void JSViewContext::JSIsEasySplit(const JSCallbackInfo& info)
         info.SetReturnValue(JSRef<JSVal>::Make(JSVal(ToJSValue(false))));
         return;
     }
-    auto result = context->IsCurrentInForceSplitMode();
+    auto result = context->IsDisplayInForceSplitMode();
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
