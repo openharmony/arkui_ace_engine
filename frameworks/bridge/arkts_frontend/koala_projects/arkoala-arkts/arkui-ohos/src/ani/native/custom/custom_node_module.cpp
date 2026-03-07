@@ -100,7 +100,7 @@ void NativeCustomComponent::CustomNodeCallDefaultLayout(
     auto frameNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(uiNode);
     CHECK_NULL_VOID(frameNode);
     NG::CustomNodeStatic::DidDefaultLayout(frameNode);
-    return ;
+    return;
 }
 
 void NativeCustomComponent::CustomNodeSetBuildFunction(

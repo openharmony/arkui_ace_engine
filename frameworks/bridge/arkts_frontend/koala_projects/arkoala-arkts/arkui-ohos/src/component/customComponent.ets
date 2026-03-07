@@ -120,26 +120,26 @@ export interface PageLifeCycle {
 export interface LayoutCallbacks {
     onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
         try{
-            const currentComponent = this as Any as (ExtendableComponent | undefined)
+            const currentComponent = this as Any as (ExtendableComponent | undefined);
             const peerNode = currentComponent?.__getPeerNode__Internal();
             if (peerNode) {
-                ArkUIAniCustomNodeModule._CustomNode_CallDefaultLayout(peerNode!.peer.ptr)
+                ArkUIAniCustomNodeModule._CustomNode_CallDefaultLayout(peerNode!.peer.ptr);
             }
             }
         catch(e) {
-            console.log("sqf: customComponent onPlaceChildren err",e)
+            console.log("customComponent onPlaceChildren err", e);
         }
     }
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
         try{
-            const currentComponent = this as Any as (ExtendableComponent | undefined)
+            const currentComponent = this as Any as (ExtendableComponent | undefined);
             const peerNode = currentComponent?.__getPeerNode__Internal();
             if (peerNode) {
-                return ArkUIAniCustomNodeModule._CustomNode_CallDefaultMeasure(peerNode!.peer.ptr) as SizeResult
+                return ArkUIAniCustomNodeModule._CustomNode_CallDefaultMeasure(peerNode!.peer.ptr) as SizeResult;
             }
             }
         catch(e) {
-            console.log("sqf: customComponent onMeasureSize err",e)
+            console.log("customComponent onMeasureSize err", e);
         }
         return {width: 0, height: 0} as SizeResult
     }
