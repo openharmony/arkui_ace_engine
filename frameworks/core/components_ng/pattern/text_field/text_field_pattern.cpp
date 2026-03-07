@@ -4737,7 +4737,9 @@ void TextFieldPattern::InitEditingValueText(std::u16string content)
 
 bool TextFieldPattern::InitValueText(std::u16string content)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Init text len %{public}d", static_cast<int32_t>(content.length()));
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Init text len %{public}d", static_cast<int32_t>(content.length()));
+    }
     if (GetIsPreviewText()) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Init when has previewText");
         return false;
