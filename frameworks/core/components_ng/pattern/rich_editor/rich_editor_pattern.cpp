@@ -3815,11 +3815,23 @@ std::function<void(const RectF& firstHandle, const RectF& secondHandle)> RichEdi
     };
 }
 
-void RichEditorPattern::AdjustAIEntityRect(RectF& aiRect)
+RectF RichEditorPattern::CalcAIEntityRectWithHandles()
 {
+    auto firstHandleRect = selectOverlay_->GetHandleRectWithTransform(textSelector_.firstHandle);
+    auto secondHandleRect = selectOverlay_->GetHandleRectWithTransform(textSelector_.secondHandle);
+    if (firstHandleRect.Top() == secondHandleRect.Top()) {
+        return firstHandleRect.CombineRectT(secondHandleRect);
+    }
+    auto top = std::min(firstHandleRect.Top(), secondHandleRect.Top());
+    auto bottom = std::max(firstHandleRect.Bottom(), secondHandleRect.Bottom());
+    auto textContentGlobalOffset = parentGlobalOffset_ + contentRect_.GetOffset();
+    auto left = textContentGlobalOffset.GetX();
+    auto right = textContentGlobalOffset.GetX() + contentRect_.Width();
+    RectF aiRect = RectT(left, top, right - left, bottom - top);
     auto offset = GetPaintRectGlobalOffset(); // component offset relative to window
     aiRect -= offset; // aiRect offset relative to component
     aiRect = aiRect.IntersectRectT(contentRect_) + offset;
+    return aiRect;
 }
 
 std::pair<int32_t, int32_t> RichEditorPattern::GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& item)
@@ -4770,16 +4782,22 @@ void RichEditorPattern::ClearDragDropEvent()
 void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
     auto theme = GetTheme<RichEditorTheme>();
-    CHECK_NULL_VOID(theme);
-    auto touchX = event->GetX();
-    auto touchY = event->GetY();
+    CHECK_NULL_VOID(event && theme);
+    auto localOffset = OffsetF(event->GetX(), event->GetY() - theme->GetInsertCursorOffset().ConvertToPx());
+    bool hasRenderTransform = selectOverlay_->HasRenderTransform();
+    if (hasRenderTransform) {
+        selectOverlay_->RevertLocalPointWithTransform(localOffset);
+    } else {
+        localOffset -= parentGlobalOffset_;
+    }
     auto textRect = GetTextRect();
     textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { touchX - textRect.GetX() - GetParentGlobalOffset().GetX(),
-        touchY - textRect.GetY() - GetParentGlobalOffset().GetY() - theme->GetInsertCursorOffset().ConvertToPx() };
+    Offset textOffset = { localOffset.GetX() - textRect.GetX(), localOffset.GetY() - textRect.GetY()};
     auto position = isShowPlaceholder_? 0 : paragraphs_.GetIndex(textOffset);
     ResetSelection();
     CloseSelectOverlay();
+    // The HandleOnDragStatusCallback may not be triggered when a render transform is applied.
+    IF_TRUE(hasRenderTransform, HandleCursorOnDragMoved());
     SetCaretPosition(position);
     CalcAndRecordLastClickCaretInfo(textOffset);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
@@ -4791,7 +4809,6 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     CHECK_NULL_VOID(host);
     if (host->GetDragPreviewOption().enableEdgeAutoScroll) {
         AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG, .showScrollbar = true };
-        auto localOffset = OffsetF(touchX, touchY) - parentGlobalOffset_;
         AutoScrollByEdgeDetection(param, localOffset, EdgeDetectionStrategy::IN_BOUNDARY);
         MarkContentNodeForRender();
     } else if (scrollController_->isAutoScrollRunning_) {
@@ -11072,7 +11089,7 @@ RefPtr<FocusHub> RichEditorPattern::GetFocusHub() const
     return focusHub;
 }
 
-void RichEditorPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent)
+void RichEditorPattern::HandleCursorOnDragMoved()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -11143,7 +11160,7 @@ void RichEditorPattern::HandleOnDragStatusCallback(
     ScrollablePattern::HandleOnDragStatusCallback(dragEventType, notifyDragEvent);
     switch (dragEventType) {
         case DragEventType::MOVE:
-            HandleCursorOnDragMoved(notifyDragEvent);
+            HandleCursorOnDragMoved();
             break;
         case DragEventType::LEAVE:
             HandleCursorOnDragLeaved(notifyDragEvent);

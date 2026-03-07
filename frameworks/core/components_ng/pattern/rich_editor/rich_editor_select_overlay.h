@@ -90,6 +90,7 @@ public:
         return needRefreshMenu_;
     }
     float GetHandleHotZoneRadius();
+    RectF GetHandleRectWithTransform(const RectF& handleRect);
     RectF GetVisibleRect();
     bool IsMenuShow();
     bool IsSingleLineChanged();

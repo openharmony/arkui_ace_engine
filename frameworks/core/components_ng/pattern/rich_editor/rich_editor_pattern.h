@@ -695,7 +695,7 @@ public:
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
     RefPtr<FrameNode> CreateAIEntityMenu() override;
     std::function<void(const RectF& firstHandle, const RectF& secondHandle)> GetAISelectTextFunc();
-    void AdjustAIEntityRect(RectF& aiRect) override;
+    RectF CalcAIEntityRectWithHandles() override;
     WindowMode GetWindowMode();
     bool GetIsMidScene();
     void NotifyKeyboardClosedByUser() override
@@ -1687,7 +1687,7 @@ private:
     void ReplacePlaceholderWithSymbolSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void ReplacePlaceholderWithImageSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
 
-    void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleCursorOnDragMoved();
     void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
 
