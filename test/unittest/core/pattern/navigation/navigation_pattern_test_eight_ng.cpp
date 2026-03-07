@@ -22,6 +22,7 @@
 #define protected public
 #define private public
 #include "core/common/multi_thread_build_manager.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -217,9 +218,8 @@ HWTEST_F(NavigationPatternTestEightNg, UpdateForceSplitHomeDestVisibility001, Te
     auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto pattern = navNode->GetPattern<NavigationPattern>();
 
-    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
     auto property = dest->GetLayoutProperty();
     ASSERT_NE(property, nullptr);
@@ -244,9 +244,8 @@ HWTEST_F(NavigationPatternTestEightNg, UpdateForceSplitHomeDestVisibility002, Te
     auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto pattern = navNode->GetPattern<NavigationPattern>();
 
-    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
     auto property = dest->GetLayoutProperty();
     ASSERT_NE(property, nullptr);
@@ -273,9 +272,8 @@ HWTEST_F(NavigationPatternTestEightNg, UpdateForceSplitHomeDestVisibility003, Te
     auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto pattern = navNode->GetPattern<NavigationPattern>();
 
-    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest, nullptr);
     auto property = dest->GetLayoutProperty();
     ASSERT_NE(property, nullptr);
@@ -293,4 +291,504 @@ HWTEST_F(NavigationPatternTestEightNg, UpdateForceSplitHomeDestVisibility003, Te
     pattern->UpdateForceSplitHomeDestVisibility();
     EXPECT_EQ(property->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
 }
+
+/**
+ * @tc.name: GetNavigationNodeTest001
+ * @tc.desc: Test GetNavigationNode returns navigation frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetNavigationNodeTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto navigationNode = pattern->GetNavigationNode();
+    EXPECT_EQ(navigationNode, navNode);
+
+    navNode = nullptr;
+    navigationNode = nullptr;
+    pattern = nullptr;
+}
+
+/**
+ * @tc.name: GetNavBarNodeTest001
+ * @tc.desc: Test GetNavBarNode returns nav bar node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetNavBarNodeTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto navBarNode = pattern->GetNavBarNode();
+    EXPECT_EQ(navBarNode, navNode->GetNavBarNode());
+}
+
+/**
+ * @tc.name: GetNavBarNodeOrHomeDestinationTest001
+ * @tc.desc: Test GetNavBarNodeOrHomeDestination returns nav bar or home destination
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetNavBarNodeOrHomeDestinationTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto navBarOrHomeDest = pattern->GetNavBarNodeOrHomeDestination();
+    EXPECT_EQ(navBarOrHomeDest, navNode->GetNavBarOrHomeDestinationNode());
+}
+
+/**
+ * @tc.name: GetContentNodeTest001
+ * @tc.desc: Test GetContentNode returns content node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetContentNodeTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto contentNode = pattern->GetContentNode();
+    EXPECT_EQ(contentNode, navNode->GetContentNode());
+}
+
+/**
+ * @tc.name: GetDividerNodeTest001
+ * @tc.desc: Test GetDividerNode returns divider node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetDividerNodeTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dividerNode = pattern->GetDividerNode();
+    EXPECT_EQ(dividerNode, navNode->GetDividerNode());
+}
+
+/**
+ * @tc.name: GetDragBarNodeTest001
+ * @tc.desc: Test GetDragBarNode returns drag bar node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, GetDragBarNodeTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dragBarNode = pattern->GetDragBarNode();
+    EXPECT_EQ(dragBarNode, navNode->GetDragBarNode());
+}
+
+/**
+ * @tc.name: BeforeSyncGeometryPropertiesTest001
+ * @tc.desc: Test BeforeSyncGeometryProperties calls AddDividerHotZoneRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, BeforeSyncGeometryPropertiesTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    DirtySwapConfig config;
+    pattern->BeforeSyncGeometryProperties(config);
+}
+
+/**
+ * @tc.name: AddDividerHotZoneRectTest001
+ * @tc.desc: Test AddDividerHotZoneRect adds hot zone rect to divider
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, AddDividerHotZoneRectTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dividerNode = navNode->GetDividerNode();
+    ASSERT_NE(dividerNode, nullptr);
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(dividerNode);
+    ASSERT_NE(dividerFrameNode, nullptr);
+    auto geometryNode = dividerFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+
+    pattern->AddDividerHotZoneRect();
+
+    auto gestureHub = dividerFrameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto mouseRegion = gestureHub->GetMouseResponseRegion();
+    EXPECT_FALSE(mouseRegion.empty());
+    auto responseRegion = gestureHub->GetResponseRegion();
+    EXPECT_FALSE(responseRegion.empty());
+}
+
+/**
+ * @tc.name: AddDragBarHotZoneRectTest001
+ * @tc.desc: Test AddDragBarHotZoneRect adds hot zone rect to drag bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, AddDragBarHotZoneRectTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    pattern->enableDragBar_ = true;
+    pattern->OnModifyDone();
+
+    auto dragBarNode = navNode->GetDragBarNode();
+    ASSERT_NE(dragBarNode, nullptr);
+    auto dragBarFrameNode = AceType::DynamicCast<FrameNode>(dragBarNode);
+    ASSERT_NE(dragBarFrameNode, nullptr);
+    auto geometryNode = dragBarFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+
+    pattern->AddDragBarHotZoneRect();
+
+    auto gestureHub = dragBarFrameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto responseRegion = gestureHub->GetResponseRegion();
+    EXPECT_FALSE(responseRegion.empty());
+}
+
+/**
+ * @tc.name: NotifyDialogLifecycleTest001
+ * @tc.desc: Test NotifyDialogLifecycle notifies dialog lifecycle events
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, NotifyDialogLifecycleTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+
+    auto stack = pattern->GetNavigationStack();
+    ASSERT_NE(stack, nullptr);
+    stack->Add("test", dest);
+
+    navNode->lastStandardIndex_ = 0;
+    pattern->NotifyDialogLifecycle(NavDestinationLifecycle::ON_SHOW, true, NavDestVisibilityChangeReason::TRANSITION);
+    EXPECT_EQ(stack->Size(), 1);
+
+    pattern->NotifyDialogLifecycle(NavDestinationLifecycle::ON_HIDE, true, NavDestVisibilityChangeReason::TRANSITION);
+    EXPECT_EQ(stack->Size(), 1);
+
+    pattern->NotifyDialogLifecycle(
+        NavDestinationLifecycle::ON_WILL_APPEAR, true, NavDestVisibilityChangeReason::TRANSITION);
+    EXPECT_EQ(stack->Size(), 1);
+
+    pattern->NotifyDialogLifecycle(
+        NavDestinationLifecycle::ON_WILL_DISAPPEAR, true, NavDestVisibilityChangeReason::TRANSITION);
+    EXPECT_EQ(stack->Size(), 1);
+}
+
+/**
+ * @tc.name: DumpInfoTest001
+ * @tc.desc: Test DumpInfo logs navigation stack size
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, DumpInfoTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto stack = pattern->GetNavigationStack();
+    ASSERT_NE(stack, nullptr);
+    stack->Add("test1", nullptr);
+    EXPECT_EQ(stack->Size(), 1);
+
+    pattern->DumpInfo();
+    EXPECT_EQ(stack->Size(), 1);
+}
+
+/**
+ * @tc.name: TriggerCustomAnimationTest001
+ * @tc.desc: Test TriggerCustomization triggers custom transition animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, TriggerCustomAnimationTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(preTopNavDestination, nullptr);
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(newTopNavDestination, nullptr);
+
+    bool result = pattern->TriggerCustomAnimation(preTopNavDestination, newTopNavDestination, false);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnCustomAnimationFinishTest001
+ * @tc.desc: Test OnCustomAnimationFinish handles custom animation finish
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, OnCustomAnimationFinishTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(preTopNavDestination, nullptr);
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(newTopNavDestination, nullptr);
+
+    pattern->OnCustomAnimationFinish(preTopNavDestination, newTopNavDestination, false);
+}
+
+/**
+ * @tc.name: ExecuteTransitionTest001
+ * @tc.desc: Test ExecuteTransition executes navigation transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, ExecuteTransitionTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
+    pattern->proxyList_.emplace_back(proxy);
+
+    pattern->onTransition_ = [](RefPtr<NavDestinationContext> preInfo, RefPtr<NavDestinationContext> topInfo,
+                                 NavigationOperation operation) -> NavigationTransition {
+        NavigationTransition transition;
+        transition.isValid = false;
+        return transition;
+    };
+
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(preTopNavDestination, nullptr);
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(newTopNavDestination, nullptr);
+
+    auto transition = pattern->ExecuteTransition(preTopNavDestination, newTopNavDestination, false);
+    EXPECT_FALSE(transition.isValid);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdateTest001
+ * @tc.desc: Test OnColorConfigurationUpdate updates color mode for nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, OnColorConfigurationUpdateTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dividerNode = FrameNode::CreateFrameNode(
+        "divider", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    navNode->SetDividerNode(dividerNode);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    pattern->enableDragBar_ = true;
+    pattern->OnModifyDone();
+
+    auto dragBarNode = navNode->GetDragBarNode();
+    ASSERT_NE(dragBarNode, nullptr);
+    auto dragBarFrameNode = AceType::DynamicCast<FrameNode>(dragBarNode);
+    ASSERT_NE(dragBarFrameNode, nullptr);
+    auto dragBarPattern = dragBarFrameNode->GetPattern<NavigationDragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+
+    pattern->OnColorConfigurationUpdate();
+
+    auto renderContext = dragBarFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_TRUE(renderContext->HasBackgroundColor());
+}
+
+/**
+ * @tc.name: UpdateDividerBackgroundColorTest001
+ * @tc.desc: Test UpdateDividerBackgroundColor updates divider background color
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, UpdateDividerBackgroundColorTest001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto dividerNode = FrameNode::CreateFrameNode(
+        "divider", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    navNode->SetDividerNode(dividerNode);
+
+    auto renderContext = dividerNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_FALSE(renderContext->HasBackgroundColor());
+
+    pattern->UpdateDividerBackgroundColor();
+
+    EXPECT_TRUE(renderContext->HasBackgroundColor());
+}
+
+/**
+ * @tc.name: UpdateToobarFocusColorTest001
+ * @tc.desc: Test UpdateToobarFocusColor updates toobar focus color
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, UpdateToobarFocusColorTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+    navNode->SetNavBarNode(navBarNode);
+
+    auto navBarOrHomeDestNode = navNode->GetNavBarOrHomeDestinationNode();
+    ASSERT_NE(navBarOrHomeDestNode, nullptr);
+
+    pattern->UpdateToobarFocusColor();
+
+    EXPECT_NE(navBarOrHomeDestNode, nullptr);
+    EXPECT_TRUE(pattern != nullptr);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest001
+ * @tc.desc: Test OnThemeScopeUpdate handles theme scope update
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, OnThemeScopeUpdateTest001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+    navNode->SetNavBarNode(navBarNode);
+
+    bool result = pattern->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest002
+ * @tc.desc: Test OnThemeScopeUpdate returns false for invalid theme scope
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, OnThemeScopeUpdateTest002, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+    navNode->SetNavBarNode(navBarNode);
+
+    bool result = pattern->OnThemeScopeUpdate(0);
+    EXPECT_FALSE(result);
+}
+
 } // namespace OHOS::Ace::NG
