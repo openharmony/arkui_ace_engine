@@ -37,15 +37,29 @@ interface TransitionEffect {
   name: string
   type: 'fade' | 'slide' | 'scale' | 'rotate' | 'flip' | 'swirl' | 'bounce'
   duration: number
-  fromValue: { x?: number; y?: number; width?: number; height?: number; opacity?: number; angle?: number }
-  toValue: { x?: number; y?: number; width?: number; height?: number; opacity?: number; angle?: number }
+  fromValue: TransitionValue
+  toValue: TransitionValue
+}
+
+interface TransitionValue {
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  opacity?: number
+  angle?: number
 }
 
 interface KeyframeAnimation {
   name: string
-  keyframes: Array<{ percent: number; value: { x?: number; y?: number; width?: number; height?: number; opacity?: number; angle?: number } }>
+  keyframes: Array<KeyframeData>
   duration: number
   curve: Curve
+}
+
+interface KeyframeData {
+  percent: number
+  value: TransitionValue
 }
 
 interface AnimationTestResult {
@@ -70,6 +84,16 @@ interface GestureAnimation {
   springVelocity: number
 }
 
+interface AnimationQueueItem {
+  name: string
+  config: AnimationConfig
+}
+
+interface CompositeAnimation {
+  name: string
+  animations: string[]
+}
+
 @Entry
 @Component
 struct ImageAnimationTestCase {
@@ -88,9 +112,9 @@ struct ImageAnimationTestCase {
   @State totalFrames: number = 0
   @State fpsMonitor: number = 60
   @State selectedImageAnimator: Animator | null = null
-  @State animationQueue: Array<{ name: string; config: AnimationConfig }> = []
+  @State animationQueue: Array<AnimationQueueItem> = []
   @State isAutoPlaybackEnabled: boolean = false
-  @State compositeAnimations: Array<{ name: string; animations: string[] }> = []
+  @State compositeAnimations: Array<CompositeAnimation> = []
 
   private readonly ANIMATION_PRESETS: AnimationConfig[] = [
     { id: 1, name: '慢速淡入', duration: 2000, curve: Curve.EaseInOut, delay: 0, repeat: 1, autoReverse: false, playState: AnimationStatus.Initial },
@@ -113,11 +137,11 @@ struct ImageAnimationTestCase {
     { name: '右滑入', type: 'slide', duration: 600, fromValue: { x: 300 }, toValue: { x: 0 } },
     { name: '上滑入', type: 'slide', duration: 600, fromValue: { y: -300 }, toValue: { y: 0 } },
     { name: '下滑入', type: 'slide', duration: 600, fromValue: { y: 300 }, toValue: { y: 0 } },
-    { name: '放大进入', type: 'scale', duration: 700, fromValue: { scale: 0 }, toValue: { scale: 1 } },
-    { name: '缩小进入', type: 'scale', duration: 700, fromValue: { scale: 2 }, toValue: { scale: 1 } },
+    { name: '放大进入', type: 'scale', duration: 700, fromValue: { width: 0, height: 0 }, toValue: { width: 100, height: 100 } },
+    { name: '缩小进入', type: 'scale', duration: 700, fromValue: { width: 200, height: 200 }, toValue: { width: 100, height: 100 } },
     { name: '旋转进入', type: 'rotate', duration: 900, fromValue: { angle: 360 }, toValue: { angle: 0 } },
     { name: '翻转进入', type: 'flip', duration: 800, fromValue: { angle: 180 }, toValue: { angle: 0 } },
-    { name: '螺旋进入', type: 'swirl', duration: 1200, fromValue: { angle: 720, scale: 0.5 }, toValue: { angle: 0, scale: 1 } },
+    { name: '螺旋进入', type: 'swirl', duration: 1200, fromValue: { angle: 720, width: 50 }, toValue: { angle: 0, width: 100 } },
     { name: '弹跳进入', type: 'bounce', duration: 1000, fromValue: { y: -200, opacity: 0 }, toValue: { y: 0, opacity: 1 } }
   ]
 
@@ -125,11 +149,11 @@ struct ImageAnimationTestCase {
     {
       name: '复杂缩放动画',
       keyframes: [
-        { percent: 0, value: { scale: 0.5, opacity: 0 } },
-        { percent: 25, value: { scale: 1.2, opacity: 0.5 } },
-        { percent: 50, value: { scale: 0.8, opacity: 0.8 } },
-        { percent: 75, value: { scale: 1.1, opacity: 1 } },
-        { percent: 100, value: { scale: 1, opacity: 1 } }
+        { percent: 0, value: { width: 50, height: 50, opacity: 0 } },
+        { percent: 25, value: { width: 120, height: 120, opacity: 0.5 } },
+        { percent: 50, value: { width: 80, height: 80, opacity: 0.8 } },
+        { percent: 75, value: { width: 110, height: 110, opacity: 1 } },
+        { percent: 100, value: { width: 100, height: 100, opacity: 1 } }
       ],
       duration: 1500,
       curve: Curve.EaseInOut
@@ -193,7 +217,7 @@ struct ImageAnimationTestCase {
     { gestureType: '旋转', animationType: '角度回弹', triggerThreshold: 15, animationDuration: 250, dampingRatio: 0.35, springVelocity: 45 }
   ]
 
-  private readonly COMPOSITE_ANIMATIONS = [
+  private readonly COMPOSITE_ANIMATIONS: CompositeAnimation[] = [
     { name: '放大旋转淡入', animations: ['scale', 'rotate', 'fade'] },
     { name: '滑动缩放组合', animations: ['slide', 'scale'] },
     { name: '旋转弹跳', animations: ['rotate', 'bounce'] },
@@ -227,10 +251,14 @@ struct ImageAnimationTestCase {
   }
 
   private startAnimationTesting(): Promise<void> {
+    interface AnimationTest {
+      name: string
+      func: () => Promise<void>
+    }
     return new Promise(async (resolve) => {
       this.isAnimating = true
 
-      const animationTests = [
+      const animationTests: AnimationTest[] = [
         { name: '基础动画测试', func: () => this.testBasicAnimations() },
         { name: '过渡效果测试', func: () => this.testTransitionEffects() },
         { name: '关键帧动画测试', func: () => this.testKeyframeAnimations() },
@@ -343,7 +371,11 @@ struct ImageAnimationTestCase {
   }
 
   private async testAnimationPerformance(): Promise<void> {
-    const performanceTests = [
+    interface PerformanceTest {
+      name: string
+      duration: number
+    }
+    const performanceTests: PerformanceTest[] = [
       { name: '单动画性能', duration: 1000 },
       { name: '多动画性能', duration: 2000 },
       { name: '复杂动画性能', duration: 3000 },
@@ -387,7 +419,7 @@ struct ImageAnimationTestCase {
 
   // 动画执行方法
   private async performBasicAnimation(config: AnimationConfig): Promise<AnimationTestResult> {
-    const startTime = performance.now()
+    const startTime = new Date().getTime()
     let frameCount = 0
     let success = true
 
@@ -399,17 +431,17 @@ struct ImageAnimationTestCase {
     for (let frame = 0; frame < totalFrames; frame++) {
       await this.delay(frameInterval)
       frameCount++
-      
+
       // 模拟动画进度
       this.animationProgress = (frame / totalFrames) * 100
-      
+
       // 模拟偶尔的丢帧
       if (Math.random() < 0.05) {
         frameCount++
       }
     }
 
-    const endTime = performance.now()
+    const endTime = new Date().getTime()
     const actualDuration = endTime - startTime
 
     return {
@@ -427,7 +459,7 @@ struct ImageAnimationTestCase {
   }
 
   private async performTransitionEffect(effect: TransitionEffect): Promise<AnimationTestResult> {
-    const startTime = performance.now()
+    const startTime = new Date().getTime()
     let frameCount = 0
 
     // 模拟过渡动画
@@ -440,7 +472,7 @@ struct ImageAnimationTestCase {
       this.animationProgress = (frame / totalFrames) * 100
     }
 
-    const endTime = performance.now()
+    const endTime = new Date().getTime()
 
     return {
       name: effect.name,
@@ -457,7 +489,7 @@ struct ImageAnimationTestCase {
   }
 
   private async performKeyframeAnimation(animation: KeyframeAnimation): Promise<AnimationTestResult> {
-    const startTime = performance.now()
+    const startTime = new Date().getTime()
     let frameCount = 0
 
     // 模拟关键帧动画
@@ -467,13 +499,13 @@ struct ImageAnimationTestCase {
     for (let frame = 0; frame < totalFrames; frame++) {
       await this.delay(frameInterval)
       frameCount++
-      
+
       // 计算当前应该处于哪个关键帧
       const percent = (frame / totalFrames) * 100
       this.animationProgress = percent
     }
 
-    const endTime = performance.now()
+    const endTime = new Date().getTime()
 
     return {
       name: animation.name,
@@ -490,12 +522,12 @@ struct ImageAnimationTestCase {
   }
 
   private async performGestureAnimation(gesture: GestureAnimation): Promise<AnimationTestResult> {
-    const startTime = performance.now()
+    const startTime = new Date().getTime()
     let frameCount = 0
 
     // 模拟手势触发的动画
     await this.delay(gesture.triggerThreshold)
-    
+
     const frameInterval = 16
     const totalFrames = Math.floor(gesture.animationDuration / frameInterval)
 
@@ -505,7 +537,7 @@ struct ImageAnimationTestCase {
       this.animationProgress = (frame / totalFrames) * 100
     }
 
-    const endTime = performance.now()
+    const endTime = new Date().getTime()
 
     return {
       name: gesture.animationType,
@@ -521,18 +553,18 @@ struct ImageAnimationTestCase {
     }
   }
 
-  private async performCompositeAnimation(composite: { name: string; animations: string[] }): Promise<AnimationTestResult> {
-    const startTime = performance.now()
+  private async performCompositeAnimation(composite: CompositeAnimation): Promise<AnimationTestResult> {
+    const startTime = new Date().getTime()
     let frameCount = 0
     let totalDuration = 0
 
     // 组合多个动画的总时间
     for (const animName of composite.animations) {
       totalDuration += 300 + Math.random() * 700 // 每个动画300-1000ms
-      
+
       const frameInterval = 16
       const animFrames = Math.floor(totalDuration / frameInterval)
-      
+
       for (let frame = 0; frame < animFrames; frame++) {
         await this.delay(frameInterval)
         frameCount++
@@ -540,7 +572,7 @@ struct ImageAnimationTestCase {
       }
     }
 
-    const endTime = performance.now()
+    const endTime = new Date().getTime()
 
     return {
       name: composite.name,
@@ -556,14 +588,14 @@ struct ImageAnimationTestCase {
     }
   }
 
-  private async playFromQueue(queueItem: { name: string; config: AnimationConfig }): Promise<AnimationTestResult> {
-    const startTime = performance.now()
+  private async playFromQueue(queueItem: AnimationQueueItem): Promise<AnimationTestResult> {
+    const startTime = Date.now()
     let frameCount = 0
 
     const result = await this.performBasicAnimation(queueItem.config)
-    
-    const endTime = performance.now()
-    
+
+    const endTime = Date.now()
+
     return {
       name: queueItem.name,
       startTime: startTime,
@@ -579,7 +611,7 @@ struct ImageAnimationTestCase {
   }
 
   private async performPerformanceTest(testName: string, duration: number): Promise<AnimationTestResult> {
-    const startTime = performance.now()
+    const startTime = new Date().getTime()
     let frameCount = 0
 
     const frameInterval = 16
@@ -588,7 +620,7 @@ struct ImageAnimationTestCase {
     for (let frame = 0; frame < totalFrames; frame++) {
       await this.delay(frameInterval)
       frameCount++
-      
+
       // 根据测试类型调整性能
       if (testName.includes('多动画')) {
         // 模拟多动画的性能开销
@@ -597,11 +629,11 @@ struct ImageAnimationTestCase {
         // 模拟复杂动画的性能开销
         await this.delay(4)
       }
-      
+
       this.animationProgress = (frame / totalFrames) * 100
     }
 
-    const endTime = performance.now()
+    const endTime = new Date().getTime()
 
     return {
       name: testName,
@@ -618,7 +650,7 @@ struct ImageAnimationTestCase {
   }
 
   private async performMemoryTest(): Promise<AnimationTestResult> {
-    const startTime = performance.now()
+    const startTime = new Date().getTime()
     let frameCount = 0
 
     // 模拟大量动画测试内存使用
@@ -628,7 +660,7 @@ struct ImageAnimationTestCase {
       frameCount++
     }
 
-    const endTime = performance.now()
+    const endTime = new Date().getTime()
 
     return {
       name: 'Memory Test',
@@ -645,12 +677,12 @@ struct ImageAnimationTestCase {
   }
 
   private async performConcurrentTest(): Promise<AnimationTestResult> {
-    const startTime = performance.now()
+    const startTime = new Date().getTime()
     let frameCount = 0
 
     // 模拟并发执行多个动画
     const concurrentPromises: Promise<void>[] = []
-    
+
     for (let i = 0; i < 5; i++) {
       const promise = new Promise<void>((resolve) => {
         setTimeout(() => {
@@ -668,7 +700,7 @@ struct ImageAnimationTestCase {
     await Promise.all(concurrentPromises)
     clearInterval(interval)
 
-    const endTime = performance.now()
+    const endTime = new Date().getTime()
 
     return {
       name: 'Concurrent Test',
@@ -685,17 +717,17 @@ struct ImageAnimationTestCase {
   }
 
   private async performInterruptionTest(): Promise<AnimationTestResult> {
-    const startTime = performance.now()
+    const startTime = new Date().getTime()
     let frameCount = 0
 
     // 模拟动画被中断和恢复
     for (let i = 0; i < 3; i++) {
       // 开始动画
       await this.delay(200)
-      
+
       // 模拟中断
       await this.delay(50)
-      
+
       // 恢复动画
       for (let frame = 0; frame < 10; frame++) {
         await this.delay(16)
@@ -704,7 +736,7 @@ struct ImageAnimationTestCase {
       }
     }
 
-    const endTime = performance.now()
+    const endTime = new Date().getTime()
 
     return {
       name: 'Interruption Test',
@@ -776,7 +808,7 @@ struct ImageAnimationTestCase {
             .fontSize(12)
             .fontColor(Color.Gray)
         }
-        .margin({ horizontal: 16, bottom: 8 })
+        .margin({ left: 16, right: 16, bottom: 8 })
       }
 
       // 动画进度条
@@ -788,7 +820,7 @@ struct ImageAnimationTestCase {
         })
           .width('90%')
           .height(8)
-          .margin({ horizontal: 16, bottom: 8 })
+          .margin({ left: 16, right: 16, bottom: 8 })
           .backgroundColor('#E0E0E0')
           .color(Color.Blue)
       }
@@ -856,7 +888,7 @@ struct ImageAnimationTestCase {
             GridItem() {
               Column() {
                 // 动画预览
-                Image($r('app.media.icon'))
+                Image($r('app.media.startIcon'))
                   .width(50)
                   .height(50)
                   .borderRadius(6)
@@ -901,7 +933,6 @@ struct ImageAnimationTestCase {
 
         // 当前动画详情
         if (this.currentAnimationIndex < this.animationConfigs.length) {
-          const currentConfig = this.animationConfigs[this.currentAnimationIndex]
           Column() {
             Text('当前动画配置')
               .fontSize(14)
@@ -914,7 +945,7 @@ struct ImageAnimationTestCase {
                   Text('持续时间')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentConfig.duration}ms`)
+                  Text(`${this.animationConfigs[this.currentAnimationIndex].duration}ms`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -925,7 +956,7 @@ struct ImageAnimationTestCase {
                   Text('延迟')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentConfig.delay}ms`)
+                  Text(`${this.animationConfigs[this.currentAnimationIndex].delay}ms`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -936,7 +967,7 @@ struct ImageAnimationTestCase {
                   Text('重复次数')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(currentConfig.repeat === -1 ? '无限' : currentConfig.repeat.toString())
+                  Text(this.animationConfigs[this.currentAnimationIndex].repeat === -1 ? '无限' : this.animationConfigs[this.currentAnimationIndex].repeat.toString())
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -947,10 +978,10 @@ struct ImageAnimationTestCase {
                   Text('自动反转')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(currentConfig.autoReverse ? '是' : '否')
+                  Text(this.animationConfigs[this.currentAnimationIndex].autoReverse ? '是' : '否')
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
-                    .fontColor(currentConfig.autoReverse ? Color.Green : Color.Gray)
+                    .fontColor(this.animationConfigs[this.currentAnimationIndex].autoReverse ? Color.Green : Color.Gray)
                 }
               }
             }
@@ -961,7 +992,7 @@ struct ImageAnimationTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, top: 16 })
+          .margin({ left: 16, right: 16, top: 16 })
         }
       }
     }
@@ -982,7 +1013,7 @@ struct ImageAnimationTestCase {
               Column() {
                 // 过渡效果预览
                 Stack() {
-                  Image($r('app.media.icon'))
+                  Image($r('app.media.startIcon'))
                     .width(60)
                     .height(60)
                     .borderRadius(4)
@@ -1033,9 +1064,8 @@ struct ImageAnimationTestCase {
 
         // 过渡效果详情
         if (this.currentTransitionIndex < this.transitionEffects.length) {
-          const currentEffect = this.transitionEffects[this.currentTransitionIndex]
           Column() {
-            Text(`当前过渡: ${currentEffect.name}`)
+            Text(`当前过渡: ${this.transitionEffects[this.currentTransitionIndex].name}`)
               .fontSize(14)
               .fontWeight(FontWeight.Medium)
               .margin({ bottom: 12 })
@@ -1045,7 +1075,7 @@ struct ImageAnimationTestCase {
                 Text('类型')
                   .fontSize(12)
                   .fontColor(Color.Gray)
-                Text(currentEffect.type)
+                Text(this.transitionEffects[this.currentTransitionIndex].type)
                   .fontSize(16)
                   .fontWeight(FontWeight.Bold)
               }
@@ -1055,7 +1085,7 @@ struct ImageAnimationTestCase {
                 Text('持续时间')
                   .fontSize(12)
                   .fontColor(Color.Gray)
-                Text(`${currentEffect.duration}ms`)
+                Text(`${this.transitionEffects[this.currentTransitionIndex].duration}ms`)
                   .fontSize(16)
                   .fontWeight(FontWeight.Bold)
               }
@@ -1065,20 +1095,20 @@ struct ImageAnimationTestCase {
 
             // 参数展示
             Flex({ wrap: FlexWrap.Wrap }) {
-              ForEach(Object.entries(currentEffect.fromValue), ([key, value]) => {
-                Text(`起始${key}: ${value}`)
+              ForEach(Object.entries(this.transitionEffects[this.currentTransitionIndex].fromValue), (entry: [string, number | undefined]) => {
+                Text(`起始${entry[0]}: ${entry[1]}`)
                   .fontSize(11)
                   .fontColor(Color.Gray)
-                  .padding({ horizontal: 6, vertical: 2 })
+                  .padding({ left: 6, right: 6, top: 2, bottom: 2 })
                   .backgroundColor('#F0F0F0')
                   .borderRadius(4)
                   .margin({ right: 4, bottom: 4 })
               })
-              ForEach(Object.entries(currentEffect.toValue), ([key, value]) => {
-                Text(`结束${key}: ${value}`)
+              ForEach(Object.entries(this.transitionEffects[this.currentTransitionIndex].toValue), (entry: [string, number | undefined]) => {
+                Text(`结束${entry[0]}: ${entry[1]}`)
                   .fontSize(11)
                   .fontColor(Color.Gray)
-                  .padding({ horizontal: 6, vertical: 2 })
+                  .padding({ left: 6, right: 6, top: 2, bottom: 2 })
                   .backgroundColor('#F0F0F0')
                   .borderRadius(4)
                   .margin({ right: 4, bottom: 4 })
@@ -1090,7 +1120,7 @@ struct ImageAnimationTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, top: 16 })
+          .margin({ left: 16, right: 16, top: 16 })
         }
       }
     }
@@ -1111,7 +1141,7 @@ struct ImageAnimationTestCase {
               Column() {
                 // 关键帧动画预览
                 Stack() {
-                  Image($r('app.media.icon'))
+                  Image($r('app.media.startIcon'))
                     .width(50)
                     .height(50)
                     .borderRadius(4)
@@ -1160,16 +1190,15 @@ struct ImageAnimationTestCase {
 
         // 关键帧详情
         if (this.currentKeyframeIndex < this.keyframeAnimations.length) {
-          const currentAnimation = this.keyframeAnimations[this.currentKeyframeIndex]
           Column() {
-            Text(`当前关键帧动画: ${currentAnimation.name}`)
+            Text(`当前关键帧动画: ${this.keyframeAnimations[this.currentKeyframeIndex].name}`)
               .fontSize(14)
               .fontWeight(FontWeight.Medium)
               .margin({ bottom: 12 })
 
             // 关键帧列表
             List() {
-              ForEach(currentAnimation.keyframes, (keyframe, index: number) => {
+              ForEach(this.keyframeAnimations[this.currentKeyframeIndex].keyframes, (keyframe: KeyframeData, index: number) => {
                 ListItem() {
                   Column() {
                     Text(`关键帧 ${index + 1}: ${keyframe.percent}%`)
@@ -1177,11 +1206,11 @@ struct ImageAnimationTestCase {
                       .fontWeight(FontWeight.Medium)
                     
                     Flex({ wrap: FlexWrap.Wrap }) {
-                      ForEach(Object.entries(keyframe.value), ([key, value]) => {
-                        Text(`${key}: ${value}`)
+                      ForEach(Object.entries(keyframe.value), (entry: [string, number | undefined]) => {
+                        Text(`${entry[0]}: ${entry[1]}`)
                           .fontSize(10)
                           .fontColor(Color.Gray)
-                          .padding({ horizontal: 4, vertical: 2 })
+                          .padding({ left: 4, right: 4, top: 2, bottom: 2 })
                           .backgroundColor('#F5F5F5')
                           .borderRadius(3)
                           .margin({ right: 4, bottom: 2 })
@@ -1202,7 +1231,7 @@ struct ImageAnimationTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, top: 16 })
+          .margin({ left: 16, right: 16, top: 16 })
         }
       }
     }
@@ -1250,7 +1279,7 @@ struct ImageAnimationTestCase {
           })
         }
         .height(400)
-        .margin({ horizontal: 16 })
+        .margin({ left: 16, right: 16 })
 
         // 手势动画统计
         Row() {
@@ -1289,7 +1318,7 @@ struct ImageAnimationTestCase {
         .padding(16)
         .backgroundColor(Color.White)
         .borderRadius(8)
-        .margin({ horizontal: 16, top: 16 })
+        .margin({ left: 16, right: 16, top: 16 })
       }
     }
   }
@@ -1304,12 +1333,12 @@ struct ImageAnimationTestCase {
 
         // 组合动画网格
         Grid() {
-          ForEach(this.compositeAnimations, (composite: { name: string; animations: string[] }) => {
+          ForEach(this.compositeAnimations, (composite: CompositeAnimation) => {
             GridItem() {
               Column() {
                 // 组合动画预览
                 Stack() {
-                  Image($r('app.media.icon'))
+                  Image($r('app.media.startIcon'))
                     .width(70)
                     .height(70)
                     .borderRadius(8)
@@ -1354,7 +1383,7 @@ struct ImageAnimationTestCase {
         .padding(16)
 
         // 组合动画详情
-        ForEach(this.compositeAnimations.slice(0, 3), (composite: { name: string; animations: string[] }) => {
+        ForEach(this.compositeAnimations.slice(0, 3), (composite: CompositeAnimation) => {
           Column() {
             Text(`组合: ${composite.name}`)
               .fontSize(14)
@@ -1367,7 +1396,7 @@ struct ImageAnimationTestCase {
                 Text(anim)
                   .fontSize(11)
                   .fontColor(Color.Blue)
-                  .padding({ horizontal: 8, vertical: 4 })
+                  .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                   .backgroundColor('#E3F2FD')
                   .borderRadius(4)
                   .margin({ right: 6, bottom: 6 })
@@ -1378,7 +1407,7 @@ struct ImageAnimationTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, bottom: 8 })
+          .margin({ left: 16, right: 16, bottom: 8 })
         })
       }
     }
@@ -1429,16 +1458,16 @@ struct ImageAnimationTestCase {
         .padding(16)
         .backgroundColor(Color.White)
         .borderRadius(8)
-        .margin({ horizontal: 16 })
+        .margin({ left: 16, right: 16 })
 
         // 队列列表
         Text('播放队列')
           .fontSize(14)
           .fontWeight(FontWeight.Medium)
-          .margin({ top: 16, bottom: 8, horizontal: 16 })
+          .margin({ top: 16, bottom: 8, left: 16, right: 16 })
 
         List() {
-          ForEach(this.animationQueue.slice(0, 10), (queueItem: { name: string; config: AnimationConfig }, index: number) => {
+          ForEach(this.animationQueue.slice(0, 10), (queueItem: AnimationQueueItem, index: number) => {
             ListItem() {
               Row() {
                 Column() {
@@ -1469,7 +1498,7 @@ struct ImageAnimationTestCase {
           })
         }
         .height(350)
-        .margin({ horizontal: 16, bottom: 16 })
+        .margin({ left: 16, right: 16, bottom: 16 })
       }
     }
   }
@@ -1518,13 +1547,13 @@ struct ImageAnimationTestCase {
         .padding(16)
         .backgroundColor(Color.White)
         .borderRadius(8)
-        .margin({ horizontal: 16 })
+        .margin({ left: 16, right: 16 })
 
         // 性能测试结果
         Text('测试性能结果')
           .fontSize(14)
           .fontWeight(FontWeight.Medium)
-          .margin({ top: 16, bottom: 8, horizontal: 16 })
+          .margin({ top: 16, bottom: 8, left: 16, right: 16 })
 
         List() {
           ForEach(this.animationTestResults.slice(0, 15), (result: AnimationTestResult) => {
@@ -1570,7 +1599,7 @@ struct ImageAnimationTestCase {
           })
         }
         .height(400)
-        .margin({ horizontal: 16, bottom: 16 })
+        .margin({ left: 16, right: 16, bottom: 16 })
       }
     }
   }
@@ -1631,7 +1660,7 @@ struct ImageAnimationTestCase {
         .padding(16)
         .backgroundColor(Color.White)
         .borderRadius(8)
-        .margin({ horizontal: 16 })
+        .margin({ left: 16, right: 16 })
 
         // 详细结果列表
         List() {
@@ -1684,7 +1713,7 @@ struct ImageAnimationTestCase {
           })
         }
         .height(450)
-        .margin({ horizontal: 16, bottom: 16 })
+        .margin({ left: 16, right: 16, bottom: 16 })
       }
     }
   }

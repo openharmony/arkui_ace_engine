@@ -31,7 +31,7 @@ struct ImageMemoryUsageExample {
       Column({ space: 15 }) {
         Text('回收不可见图片内存')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(300)
           .height(200)
           .border({ width: 2, color: Color.Green })
@@ -58,7 +58,7 @@ struct ImageMemoryUsageExample {
       Column({ space: 15 }) {
         Text('图片缓存机制')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(300)
           .height(200)
           .border({ width: 2, color: Color.Blue })
@@ -71,7 +71,7 @@ struct ImageMemoryUsageExample {
       Column({ space: 15 }) {
         Text('内存占用:')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(300)
           .height(200)
           .border({ width: 2, color: Color.Red })

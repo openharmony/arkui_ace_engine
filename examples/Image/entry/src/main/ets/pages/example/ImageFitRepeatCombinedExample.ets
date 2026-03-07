@@ -87,7 +87,7 @@ struct ImageFitRepeatCombinedExample {
       Column({ space: 20 }) {
         Text('组合效果预览')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(300)
             .height(300)
             .objectFit(this.selectedFit)

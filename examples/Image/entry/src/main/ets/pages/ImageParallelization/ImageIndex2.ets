@@ -106,12 +106,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -188,12 +188,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -270,12 +270,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -352,12 +352,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                       .width(100)
                       .height(100)
@@ -434,12 +434,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -516,12 +516,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -598,12 +598,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -680,12 +680,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -762,12 +762,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -844,12 +844,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -926,12 +926,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -1008,12 +1008,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -1090,12 +1090,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -1172,12 +1172,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -1254,12 +1254,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -1336,12 +1336,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -1418,12 +1418,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -1500,12 +1500,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -1582,12 +1582,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)
@@ -1664,12 +1664,12 @@ struct ImageAnimatorTest {
                   Text('sourceSize').fontSize(22).margin({ bottom: 15 } as Margin)
                   
                   Row() {
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize({ width: 100, height: 100 })
                       .width(100)
                       .height(100)
                       .border({ width: 1, color: Color.Black })
-                    Image($r('app.media.no8'))
+                    Image($r('app.media.foreground'))
                       .sourceSize(undefined)
                        .width(100)
                       .height(100)

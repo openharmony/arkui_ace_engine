@@ -66,13 +66,13 @@ struct ImageMultipleSourceExample {
           .border({ width: 2, color: Color.Green })
       } else if (this.currentImage === 2) {
         // Data URL
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(300)
           .height(300)
           .border({ width: 2, color: Color.Orange })
       } else if (this.currentImage === 3) {
         // Base64
-        Image($r('app.media.base64_icon'))
+        Image($r('app.media.startIcon'))
           .width(300)
           .height(300)
           .border({ width: 2, color: Color.Red })

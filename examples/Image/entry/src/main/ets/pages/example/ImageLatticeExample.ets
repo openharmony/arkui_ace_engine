@@ -37,7 +37,7 @@ struct ImageLatticeExample {
       Column({ space: 15 }) {
         Text('九宫格切片 (lattice1)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(300)
             .height(300)
             .lattice(this.lattice1)
@@ -51,7 +51,7 @@ struct ImageLatticeExample {
       Column({ space: 15 }) {
         Text('4列2行切片 (lattice2)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(300)
             .height(300)
             .lattice(this.lattice2)
@@ -65,7 +65,7 @@ struct ImageLatticeExample {
       Column({ space: 15 }) {
         Text('水平3列切片 (lattice3)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(300)
             .height(300)
             .lattice(this.lattice3)

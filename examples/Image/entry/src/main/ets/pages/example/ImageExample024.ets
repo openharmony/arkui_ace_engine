@@ -25,7 +25,7 @@ struct MyComponent {
     Scroll(this.scroller) {
       Column() {
         Row() {
-          Image($r('app.media.img_2'))
+          Image($r('app.media.background'))
             .width(200)
             .height(150)
             .border({ width: 1 })
@@ -41,7 +41,7 @@ struct MyComponent {
             .objectFit(ImageFit.Cover)
             .margin(15)
             .overlay('Cover', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
-          Image($r('app.media.img_2'))
+          Image($r('app.media.background'))
             .width(200)
             .height(150)
             .border({ width: 1 })
@@ -52,7 +52,7 @@ struct MyComponent {
         }
 
         Row() {
-          Image($r('app.media.img_2'))
+          Image($r('app.media.background'))
             .width(200)
             .height(150)
             .border({ width: 1 })
@@ -60,7 +60,7 @@ struct MyComponent {
             .objectFit(ImageFit.Fill)
             .margin(15)
             .overlay('Fill', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
-          Image($r('app.media.img_2'))
+          Image($r('app.media.background'))
             .width(200)
             .height(150)
             .border({ width: 1 })
@@ -68,7 +68,7 @@ struct MyComponent {
             .objectFit(ImageFit.ScaleDown)
             .margin(15)
             .overlay('ScaleDown', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
-          Image($r('app.media.img_2'))
+          Image($r('app.media.background'))
             .width(200)
             .height(150)
             .border({ width: 1 })

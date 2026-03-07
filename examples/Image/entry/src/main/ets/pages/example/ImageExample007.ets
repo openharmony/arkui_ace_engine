@@ -14,9 +14,9 @@
  */
 
 /**
- * 播放PixelMap数组动画
+ * 播放 PixelMap 数组动画
  */
-import {AnimationOptions, AnimatedDrawableDescriptor} from '@kit.ArkUI';
+import { AnimationOptions, AnimatedDrawableDescriptor } from '@kit.ArkUI';
 import { image } from '@kit.ImageKit';
 
 @Entry
@@ -35,7 +35,8 @@ struct ImageExample {
     Column() {
       Row() {
         Image(this.animated)
-          .width('500px').height('500px')
+          .width('500px')
+          .height('500px')
           .onFinish(() => {
             console.info('finish');
           })
@@ -54,7 +55,11 @@ struct ImageExample {
   }
 
   private async getPixmapListFromMedia(resource: Resource) {
-    let unit8Array = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent({
+    let context = this.getUIContext().getHostContext();
+    if (!context) {
+      return [];
+    }
+    let unit8Array = await context.resourceManager.getMediaContent({
       bundleName: resource.bundleName,
       moduleName: resource.moduleName,
       id: resource.id
@@ -68,7 +73,11 @@ struct ImageExample {
   }
 
   private async getPixmapFromMedia(resource: Resource) {
-    let unit8Array = await this.getUIContext().getHostContext()?.resourceManager?.getMediaContent({
+    let context = this.getUIContext().getHostContext();
+    if (!context) {
+      return undefined;
+    }
+    let unit8Array = await context.resourceManager.getMediaContent({
       bundleName: resource.bundleName,
       moduleName: resource.moduleName,
       id: resource.id
@@ -82,10 +91,13 @@ struct ImageExample {
   }
 
   private async getPixelMaps() {
-    let myPixelMaps:PixelMap[] = await this.getPixmapListFromMedia($r('app.media.mountain')); //添加图片
-    myPixelMaps.push(await this.getPixmapFromMedia($r('app.media.sky')));
-    myPixelMaps.push(await this.getPixmapFromMedia($r('app.media.clouds')));
-    myPixelMaps.push(await this.getPixmapFromMedia($r('app.media.landscape')));
+    let myPixelMaps: PixelMap[] = await this.getPixmapListFromMedia($r('app.media.background'));
+    let skyPixmap = await this.getPixmapFromMedia($r('app.media.background'));
+    let cloudsPixmap = await this.getPixmapFromMedia($r('app.media.background'));
+    let landscapePixmap = await this.getPixmapFromMedia($r('app.media.background'));
+    if (skyPixmap) myPixelMaps.push(skyPixmap);
+    if (cloudsPixmap) myPixelMaps.push(cloudsPixmap);
+    if (landscapePixmap) myPixelMaps.push(landscapePixmap);
     return myPixelMaps;
   }
 }

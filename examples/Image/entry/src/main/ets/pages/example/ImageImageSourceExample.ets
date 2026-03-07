@@ -59,7 +59,7 @@ struct ImageImageSourceExample {
       Column({ space: 15 }) {
         Text('Data (data:)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
           .width(300)
           .height(200)
           .border({ width: 2, color: Color.Orange })
@@ -98,7 +98,7 @@ struct ImageImageSourceExample {
       Column({ space: 15 }) {
         Text('Base64 编码')
           .fontSize(16)
-        Image($r('app.media.base64_icon'))
+        Image($r('app.media.startIcon'))
           .width(300)
           .height(200)
           .border({ width: 2, color: Color.Gray })

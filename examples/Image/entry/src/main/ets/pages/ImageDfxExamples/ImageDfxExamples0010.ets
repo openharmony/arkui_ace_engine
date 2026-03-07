@@ -95,7 +95,7 @@ struct LocalResourceDemo {
         .fontSize(18)
         .margin({ top: 30 })
 
-      Image($r('app.media.img_1'))
+      Image($r('app.media.startIcon'))
         .width(200)
         .height(200)
         .margin({ top: 20 })

@@ -35,7 +35,7 @@ struct LoadDrawableTestCase1 {
   async aboutToAppear() {
     this.fore = await this.getPixmapFromMedia($r('app.media.foreground'))
     this.back = await this.getPixmapFromMedia($r('app.media.background'))
-    this.maskPixel = await this.getPixmapFromMedia($r('app.media.mask'))
+    this.maskPixel = await this.getPixmapFromMedia($r('app.media.foreground'))
 
     // 使用PixelMapDrawableDescriptor创建LayeredDrawableDescriptor
     this.foregroundDraw = new PixelMapDrawableDescriptor(this.fore)

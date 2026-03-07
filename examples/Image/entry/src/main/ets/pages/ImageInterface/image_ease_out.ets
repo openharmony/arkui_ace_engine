@@ -20,12 +20,12 @@ struct AttrAnimationExample {
 
   build() {
     Column() {
-      Image($r('app.media.jpg'))
+      Image($r('app.media.startIcon'))
         .width('1260px')
         .height('813px')
         .padding({left: 4, right: 4})
         .objectFit(ImageFit.Cover)
-      Image($r('app.media.jpg'))
+      Image($r('app.media.startIcon'))
         .width('1260px')
         .height('813px')
         .objectFit(ImageFit.Contain)

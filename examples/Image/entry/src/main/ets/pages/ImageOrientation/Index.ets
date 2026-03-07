@@ -39,9 +39,9 @@ struct Index {
       List() {
         ForEach(this.pages, (item: string, index) => {
           ListItem() {
-            Button(`点击进入[${item}]`)
+            Button(`点击进入 [${item}]`)
               .onClick(() => {
-                router.pushUrl({url: `pages/${item}`})
+                router.pushUrl({ url: `pages/${item}` })
               })
               .width('100%')
               .height(40)

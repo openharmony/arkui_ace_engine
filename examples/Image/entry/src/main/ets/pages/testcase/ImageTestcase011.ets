@@ -27,6 +27,21 @@ interface EventLog {
   success: boolean
 }
 
+interface TestScenario {
+  name: string
+  imageUrl: Resource | string
+  expectedEvents: string[]
+  stressTest: boolean
+  altImage?: Resource
+}
+
+interface TestResult {
+  testName: string
+  expectedEvents: number
+  actualEvents: number
+  status: string
+}
+
 @Entry
 @Component
 struct ImageEventTestCase {
@@ -35,52 +50,52 @@ struct ImageEventTestCase {
   @State testInProgress: boolean = false
   @State imageLoadState: 'idle' | 'loading' | 'success' | 'error' = 'idle'
   @State eventCounter: Map<string, number> = new Map()
-  @State testResults: Array<{ testName: string, expectedEvents: number, actualEvents: number, status: string }> = []
+  @State testResults: Array<TestResult> = []
 
-  private readonly TEST_SCENARIOS = [
+  private readonly TEST_SCENARIOS: TestScenario[] = [
     {
       name: '正常图片加载事件',
-      imageUrl: $r('app.media.icon'),
+      imageUrl: $r('app.media.startIcon'),
       expectedEvents: ['onAppear', 'onComplete'],
       stressTest: false
-    },
+    } as TestScenario,
     {
       name: '无效图片加载事件',
       imageUrl: 'invalid://nonexistent/image.jpg',
       expectedEvents: ['onAppear', 'onError'],
       stressTest: false
-    },
+    } as TestScenario,
     {
       name: '网络图片加载事件',
       imageUrl: 'https://picsum.photos/200/200',
       expectedEvents: ['onAppear', 'onComplete'],
       stressTest: false
-    },
+    } as TestScenario,
     {
       name: '替代图片事件',
       imageUrl: '',
-      altImage: $r('app.media.icon'),
+      altImage: $r('app.media.startIcon'),
       expectedEvents: ['onAppear', 'onComplete'],
       stressTest: false
-    },
+    } as TestScenario,
     {
       name: '快速切换图片事件',
-      imageUrl: $r('app.media.icon'),
+      imageUrl: $r('app.media.startIcon'),
       expectedEvents: ['onAppear', 'onComplete', 'onDisappear'],
       stressTest: true
-    },
+    } as TestScenario,
     {
       name: '动态图片源事件',
-      imageUrl: $r('app.media.icon'),
+      imageUrl: $r('app.media.startIcon'),
       expectedEvents: ['onAppear', 'onComplete'],
       stressTest: false
-    },
+    } as TestScenario,
     {
       name: '图片缓存事件',
-      imageUrl: $r('app.media.icon'),
+      imageUrl: $r('app.media.startIcon'),
       expectedEvents: ['onAppear', 'onComplete'],
       stressTest: false
-    }
+    } as TestScenario
   ]
 
   aboutToAppear() {
@@ -89,7 +104,7 @@ struct ImageEventTestCase {
   }
 
   private initializeEventCounter(): void {
-    const allEvents = ['onAppear', 'onDisappear', 'onComplete', 'onError', 'onDragStart', 'onDragEnd']
+    const allEvents = ['onAppear', 'onDisAppear', 'onComplete', 'onError', 'onDragStart', 'onDragEnd']
     allEvents.forEach(event => {
       this.eventCounter.set(event, 0)
     })
@@ -109,7 +124,7 @@ struct ImageEventTestCase {
     this.testInProgress = false
   }
 
-  private async runSingleEventTest(scenario: any): Promise<void> {
+  private async runSingleEventTest(scenario: TestScenario): Promise<void> {
     const testStartTime = Date.now()
     const initialEvents = new Map(this.eventCounter)
     
@@ -153,7 +168,7 @@ struct ImageEventTestCase {
     this.addEventLog('testDuration', `测试耗时: ${testDuration}ms`, true)
   }
 
-  private async runNormalTest(scenario: any): Promise<void> {
+  private async runNormalTest(scenario: TestScenario): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         this.imageLoadState = 'loading'
@@ -176,7 +191,7 @@ struct ImageEventTestCase {
     })
   }
 
-  private async runStressTest(scenario: any): Promise<void> {
+  private async runStressTest(scenario: TestScenario): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         let switchCount = 0
@@ -203,10 +218,10 @@ struct ImageEventTestCase {
 
   private calculateEventDifferences(initial: Map<string, number>): Array<number> {
     const differences: Array<number> = []
-    for (const [event, count] of this.eventCounter) {
+    this.eventCounter.forEach((count: number, event: string) => {
       const initialCount = initial.get(event) || 0
       differences.push(count - initialCount)
-    }
+    })
     return differences
   }
 
@@ -300,13 +315,13 @@ struct ImageEventTestCase {
                 Text('正常加载')
                   .fontSize(12)
                   .margin({ bottom: 4 })
-                Image($r('app.media.icon'))
+                Image($r('app.media.startIcon'))
                   .width(80)
                   .height(80)
-                  .onAppear(() => this.onImageAppear($r('app.media.icon')))
-                  .onDisappear(() => this.onImageDisappear($r('app.media.icon')))
-                  .onComplete(() => this.onImageComplete($r('app.media.icon')))
-                  .onError((error: BusinessError) => this.onImageError(error.message, $r('app.media.icon')))
+                  .onAppear(() => this.onImageAppear($r('app.media.startIcon')))
+                  .onDisAppear(() => this.onImageDisappear($r('app.media.startIcon')))
+                  .onComplete(() => this.onImageComplete($r('app.media.startIcon')))
+                  .onError((error: ImageError) => this.onImageError(error.message ?? 'Unknown error', $r('app.media.startIcon')))
               }
               .margin(8)
 
@@ -318,11 +333,11 @@ struct ImageEventTestCase {
                 Image('https://picsum.photos/80/80')
                   .width(80)
                   .height(80)
-                  .alt($r('app.media.icon'))
+                  .alt($r('app.media.startIcon'))
                   .onAppear(() => this.onImageAppear('https://picsum.photos/80/80'))
-                  .onDisappear(() => this.onImageDisappear('https://picsum.photos/80/80'))
+                  .onDisAppear(() => this.onImageDisappear('https://picsum.photos/80/80'))
                   .onComplete(() => this.onImageComplete('https://picsum.photos/80/80'))
-                  .onError((error: BusinessError) => this.onImageError(error.message, 'https://picsum.photos/80/80'))
+                  .onError((error: ImageError) => this.onImageError(error.message ?? 'Unknown error', 'https://picsum.photos/80/80'))
               }
               .margin(8)
 
@@ -334,11 +349,11 @@ struct ImageEventTestCase {
                 Image('invalid://url')
                   .width(80)
                   .height(80)
-                  .alt($r('app.media.icon'))
+                  .alt($r('app.media.startIcon'))
                   .onAppear(() => this.onImageAppear('invalid://url'))
-                  .onDisappear(() => this.onImageDisappear('invalid://url'))
+                  .onDisAppear(() => this.onImageDisappear('invalid://url'))
                   .onComplete(() => this.onImageComplete('invalid://url'))
-                  .onError((error: BusinessError) => this.onImageError(error.message, 'invalid://url'))
+                  .onError((error: ImageError) => this.onImageError(error.message ?? 'Unknown error', 'invalid://url'))
               }
               .margin(8)
 
@@ -347,7 +362,7 @@ struct ImageEventTestCase {
                 Text('拖拽测试')
                   .fontSize(12)
                   .margin({ bottom: 4 })
-                Image($r('app.media.icon'))
+                Image($r('app.media.startIcon'))
                   .width(80)
                   .height(80)
                   .draggable(true)
@@ -374,7 +389,7 @@ struct ImageEventTestCase {
           .padding(16)
           .backgroundColor(Color.White)
           .borderRadius(8)
-          .margin({ vertical: 8 })
+          .margin({ top: 8, bottom: 8 })
 
           Divider()
 
@@ -385,16 +400,16 @@ struct ImageEventTestCase {
             .margin({ top: 16, bottom: 8 })
 
           Grid() {
-            ForEach(Array.from(this.eventCounter.entries()), ([event, count]) => {
+            ForEach(Array.from(this.eventCounter.entries()), (entry: [string, number]) => {
               GridItem() {
                 Column() {
-                  Text(event)
+                  Text(entry[0])
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${count}`)
+                  Text(`${entry[1]}`)
                     .fontSize(18)
                     .fontWeight(FontWeight.Bold)
-                    .fontColor(count > 0 ? Color.Blue : Color.Gray)
+                    .fontColor(entry[1] > 0 ? Color.Blue : Color.Gray)
                 }
                 .justifyContent(FlexAlign.Center)
                 .padding(8)
@@ -416,7 +431,7 @@ struct ImageEventTestCase {
             .fontWeight(FontWeight.Bold)
             .margin({ top: 16, bottom: 8 })
 
-          ForEach(this.testResults, (result: { testName: string, expectedEvents: number, actualEvents: number, status: string }) => {
+          ForEach(this.testResults, (result: TestResult) => {
             Row() {
               Column() {
                 Text(result.testName)
@@ -432,7 +447,7 @@ struct ImageEventTestCase {
               Text(result.status)
                 .fontSize(12)
                 .fontColor(this.getStatusColor(result.status))
-                .padding({ horizontal: 8, vertical: 4 })
+                .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                 .backgroundColor(this.getStatusBgColor(result.status))
                 .borderRadius(4)
             }

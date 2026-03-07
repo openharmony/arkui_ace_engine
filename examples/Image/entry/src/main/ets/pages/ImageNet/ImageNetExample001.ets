@@ -23,7 +23,7 @@
 @Component
 struct ImageNoAccessPage {
   @State renderMode: ImageRenderMode = ImageRenderMode.Original
-  @State res: Resource | string = $r('app.media.app_icon')
+  @State res: Resource | string = $r('app.media.startIcon')
   @State errorIf1: string = 'None'
 
   async aboutToAppear() {

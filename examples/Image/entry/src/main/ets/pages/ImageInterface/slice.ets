@@ -23,7 +23,7 @@ class MyImageNodeController extends NodeController {
     this.uiContext = uiContext;
     this.rootNode = new FrameNode(uiContext);
     let node = typeNode.createNode(uiContext, 'Image');
-    node.initialize($r('app.media.200both6'))
+    node.initialize($r('app.media.startIcon'))
       .width(100)
       .height(100)
       .syncLoad(true)
@@ -86,7 +86,7 @@ class NodeContentCtrl {
 
   AddNode() {
     let node = typeNode.createNode(this.uiContext, "Image");
-    node.initialize($r('app.media.200both6'))
+    node.initialize($r('app.media.startIcon'))
       .width(100)
       .height(100)
       .syncLoad(true)
@@ -121,7 +121,7 @@ class MyNodeController extends NodeController {
 
   AddNode(frameNode: FrameNode | null, uiContext: UIContext) {
     let node = typeNode.createNode(uiContext, "Image");
-    node.initialize($r('app.media.200both6'))
+    node.initialize($r('app.media.startIcon'))
       .width(100)
       .height(100)
       .syncLoad(true)

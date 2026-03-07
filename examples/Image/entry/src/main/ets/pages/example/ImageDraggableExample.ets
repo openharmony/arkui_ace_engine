@@ -39,7 +39,7 @@ struct ImageDraggableExample {
             .margin({ bottom: 10 })
 
           // 可拖拽图片
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .width(this.imageWidth)
             .height(this.imageHeight)
             .draggable(true)

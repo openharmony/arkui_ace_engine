@@ -66,7 +66,7 @@ struct ImageAnimationExample {
 
       // 动画展示
       Stack() {
-        Image($r('app.media.animated_icon'))
+        Image($r('app.media.startIcon'))
           .width(300)
           .height(300)
           .animation({

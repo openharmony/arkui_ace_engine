@@ -32,7 +32,7 @@ struct ImageEventCallbacksExample {
       Column({ space: 15 }) {
         Text('onComplete (加载完成)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(200)
             .height(200)
             .onComplete(() => {

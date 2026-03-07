@@ -27,13 +27,13 @@ struct Index {
   build() {
     Column({ space: 5 }) {
       // 原图效果
-      Image($r('app.media.landscape'))
+      Image($r('app.media.background'))
         .width(200).height(200)
         .border({ width: 2, color: Color.Pink })
         .objectFit(ImageFit.Contain)
 
       // 图像拉伸效果，设置resizable属性，对图片不同方向进行拉伸
-      Image($r('app.media.landscape'))
+      Image($r('app.media.background'))
         .resizable({
           slice: {
             left: this.left,

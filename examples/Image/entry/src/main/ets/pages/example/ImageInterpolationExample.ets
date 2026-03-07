@@ -34,7 +34,7 @@ struct ImageInterpolationExample {
         Column({ space: 10 }) {
           Text('None')
             .fontSize(16)
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .width(this.imageWidth)
             .height(this.imageHeight)
             .interpolation(ImageInterpolation.None)
@@ -49,7 +49,7 @@ struct ImageInterpolationExample {
         Column({ space: 10 }) {
           Text('Low (低质量)')
             .fontSize(16)
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .width(this.imageWidth)
             .height(this.imageHeight)
             .interpolation(ImageInterpolation.Low)
@@ -64,7 +64,7 @@ struct ImageInterpolationExample {
         Column({ space: 10 }) {
           Text('Medium (中等质量)')
             .fontSize(16)
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .width(this.imageWidth)
             .height(this.imageHeight)
             .interpolation(ImageInterpolation.Medium)
@@ -79,7 +79,7 @@ struct ImageInterpolationExample {
         Column({ space: 10 }) {
           Text('High (高质量)')
             .fontSize(16)
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .width(this.imageWidth)
             .height(this.imageHeight)
             .interpolation(ImageInterpolation.High)

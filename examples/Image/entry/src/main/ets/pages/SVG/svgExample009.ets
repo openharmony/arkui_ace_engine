@@ -23,8 +23,11 @@ struct svgExample009 {
   @State clickCount: number = 0
   @State touchText: string = 'Touch the SVG image'
   @State isPressed: boolean = false
-  @State hoverText: string = 'Hover over the images'
+  @State hoverText: string = 'Hover over images'
   @State lastSwipe: string = ''
+  @State longPressText: string = 'Long press the image'
+  @State doubleTapCount: number = 0
+  @State doubleTapText: string = 'Double tap the image'
 
   build() {
     Scroll() {
@@ -84,7 +87,7 @@ struct svgExample009 {
           .fontSize(16)
           .fontWeight(FontWeight.Medium)
 
-        Image($r('app.media.icon'))
+        Image($r('app.media.startIcon'))
           .width(120)
           .height(120)
           .fillColor(this.isPressed ? Color.Green : Color.Gray)
@@ -120,7 +123,7 @@ struct svgExample009 {
             .height(100)
             .border({ width: 2, color: Color.Gray })
             .onHover((isHover: boolean) => {
-              this.hoverText = isHover ? 'Hovering over star' : 'Hover over the images'
+              this.hoverText = isHover ? 'Hovering over star' : 'Hover over images'
             })
             .animation({
               duration: 200,
@@ -132,7 +135,7 @@ struct svgExample009 {
             .height(100)
             .border({ width: 2, color: Color.Gray })
             .onHover((isHover: boolean) => {
-              this.hoverText = isHover ? 'Hovering over heart' : 'Hover over the images'
+              this.hoverText = isHover ? 'Hovering over heart' : 'Hover over images'
             })
             .animation({
               duration: 200,
@@ -160,13 +163,13 @@ struct svgExample009 {
           .gesture(
             SwipeGesture({ direction: SwipeDirection.All })
               .onAction((event: GestureEvent) => {
-                if (event swipeDirection === SwipeDirection.Left) {
+                if (event.direction === SwipeDirection.Left) {
                   this.lastSwipe = 'Swiped Left'
-                } else if (event swipeDirection === SwipeDirection.Right) {
+                } else if (event.direction === SwipeDirection.Right) {
                   this.lastSwipe = 'Swiped Right'
-                } else if (event swipeDirection === SwipeDirection.Up) {
+                } else if (event.direction === SwipeDirection.Up) {
                   this.lastSwipe = 'Swiped Up'
-                } else if (event swipeDirection === SwipeDirection.Down) {
+                } else if (event.direction === SwipeDirection.Down) {
                   this.lastSwipe = 'Swiped Down'
                 }
               })
@@ -178,8 +181,6 @@ struct svgExample009 {
         Text('Long Press Event')
           .fontSize(16)
           .fontWeight(FontWeight.Medium)
-
-        @State longPressText: string = 'Long press the image'
 
         Text(this.longPressText)
           .fontSize(14)
@@ -203,14 +204,11 @@ struct svgExample009 {
           .fontSize(16)
           .fontWeight(FontWeight.Medium)
 
-        @State doubleTapCount: number = 0
-        @State doubleTapText: string = 'Double tap the image'
-
         Text(this.doubleTapText)
           .fontSize(14)
           .fontColor(Color.Gray)
 
-        Image($r('app.media.icon'))
+        Image($r('app.media.startIcon'))
           .width(120)
           .height(120)
           .border({ width: 1, color: Color.Gray })

@@ -24,11 +24,11 @@ struct ImageExample001 {
       Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Start }) {
         Row() {
           // 加载png格式图片
-          Image($r('app.media.png'))
+          Image($r('app.media.startIcon'))
             .width(110).height(110).margin(15)
             .overlay('png', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
           // 加载gif格式图片
-          Image($r('app.media.gif'))
+          Image($r('app.media.startIcon'))
             .width(110).height(110).margin(15)
             .overlay('gif', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
         }
@@ -39,7 +39,7 @@ struct ImageExample001 {
             .width(110).height(110).margin(15)
             .overlay('svg', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
           // 加载jpg格式图片
-          Image($r('app.media.jpg'))
+          Image($r('app.media.startIcon'))
             .width(110).height(110).margin(15)
             .overlay('jpg', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
         }
