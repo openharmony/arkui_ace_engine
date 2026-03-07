@@ -923,6 +923,11 @@ public:
         return isCurrentInForceSplitMode_;
     }
 
+    virtual bool IsDisplayInForceSplitMode() const
+    {
+        return IsCurrentInForceSplitMode();
+    }
+
     double CalcPageWidth(double rootWidth) const;
 
     double GetPageWidth() const;

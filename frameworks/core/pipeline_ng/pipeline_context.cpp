@@ -7627,4 +7627,14 @@ void PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const
     appInfo->Put("CurrentPageName", pageName.c_str());
     root->Put("appInfo", std::move(appInfo));
 }
+
+bool PipelineContext::IsDisplayInForceSplitMode() const
+{
+    CHECK_NULL_RETURN(forceSplitMgr_, isCurrentInForceSplitMode_);
+    if (!forceSplitMgr_->IsRouterForceSplit()) {
+        return isCurrentInForceSplitMode_;
+    }
+    CHECK_NULL_RETURN(stageManager_, isCurrentInForceSplitMode_);
+    return stageManager_->IsDisplaySplitMode();
+}
 } // namespace OHOS::Ace::NG

@@ -126,7 +126,7 @@ void ParallelStageManager::OnWindowStateChange(bool show)
     }
 }
 
-RefPtr<FrameNode> ParallelStageManager::GetLastPrimaryPage()
+RefPtr<FrameNode> ParallelStageManager::GetLastPrimaryPage() const
 {
     CHECK_NULL_RETURN(stageNode_, nullptr);
     const auto& children = stageNode_->GetChildren();
@@ -1486,5 +1486,13 @@ void ParallelStageManager::ReportPageTransitionEnd(const RefPtr<FrameNode>& page
         CHECK_NULL_VOID(mgr);
         mgr->OnPageTransitionEnd(node);
     });
+}
+
+bool ParallelStageManager::IsDisplaySplitMode() const
+{
+    if (GetLastPrimaryPage() != nullptr) {
+        return IsSplitMode();
+    }
+    return false;
 }
 }

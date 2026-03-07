@@ -91,6 +91,8 @@ void NavigationManager::SetForceSplitNavState(bool isTargetForceSplitNav, const 
     bool hasDisableInternal = forceSplitMgr->GetDisableNavForceSplitInternal();
     if (hasDisableInternal) {
         forceSplitMgr->SetNavigationForceSplitEnableInternal(true);
+    } else {
+        forceSplitMgr->OnForceSplitEnableChange();
     }
 }
 
