@@ -4974,6 +4974,10 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
             if (iter->second) {
                 rsNode_->MoveChild(newNode, index);
             } else {
+                if (SystemProperties::GetMultiInstanceEnabled()) {
+                    auto context = rsNode_->GetRSUIContext();
+                    newNode->SetRSUIContext(context);
+                }
                 rsNode_->AddChild(newNode, index);
             }
         }
