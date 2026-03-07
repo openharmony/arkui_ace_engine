@@ -26,10 +26,10 @@ StackLayoutAlgorithm::StackLayoutAlgorithm() = default;
 void StackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
-    HandleStackContentOverflow(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout();
     }
+    HandleStackContentOverflow(layoutWrapper);
 }
 
 // Called to perform layout render node and child.
