@@ -53,7 +53,6 @@ export function ArkComponentRoot(
                     return true;
                 }, (_: boolean | undefined) => {
                     scheduleCallback(() => {
-                        component.__getLifecycle__Internal()?.trigger(LifeCycleEvent.ON_DISAPPEAR);
                         component.aboutToDisappear();
                     });
                 });
