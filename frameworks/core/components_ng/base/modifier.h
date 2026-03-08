@@ -161,6 +161,32 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(NormalProperty);
 };
 
+template<>
+inline LinearVector<LinearColor> NormalProperty<LinearVector<LinearColor>>::Get()
+{
+    if (getFunc_) {
+        auto result = getFunc_();
+        size_t minSize = std::min(result.size(), value_.size());
+        for (size_t i = 0; i != minSize; ++i) {
+            result[i].SetPlaceholder(value_[i].GetPlaceholder());
+        }
+        return result;
+    } else {
+        return value_;
+    }
+}
+
+template<>
+inline void NormalProperty<LinearVector<LinearColor>>::Set(const LinearVector<LinearColor>& value)
+{
+    if (setFunc_) {
+        value_ = value;
+        setFunc_(value);
+    } else {
+        value_ = value;
+    }
+}
+
 template<typename T>
 class AnimatableProperty : public NormalProperty<T> {
     DECLARE_ACE_TYPE(AnimatableProperty, NormalProperty<T>);

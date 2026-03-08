@@ -863,7 +863,7 @@ void TextContentModifier::ModifySymbolColorInTextStyle(TextStyle& textStyle)
 {
     if (symbolColors_.has_value() && animatableSymbolColor_) {
         lastSymbolColors_= animatableSymbolColor_->Get();
-        textStyle.SetSymbolColorList(Convert2VectorColor(animatableSymbolColor_->Get()));
+        textStyle.SetSymbolColorList(Convert2VectorColor(lastSymbolColors_));
     }
 }
 
@@ -1061,20 +1061,21 @@ void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
         return;
     }
     symbolColors_ = Convert2VectorLinearColor(symbolColors.value());
-    if (symbolColors_.has_value() && animatableSymbolColor_ &&
-        (ColorsDifferExceptHolder(symbolColors_.value(), animatableSymbolColor_->Get()) ||
-            ColorsDifferExceptHolder(lastSymbolColors_, animatableSymbolColor_->Get()))) {
-        flag |= PROPERTY_UPDATE_MEASURE_SELF;
-        if (SystemProperties::GetTextTraceEnabled()) {
-            ACE_TEXT_SCOPED_TRACE(
-                "TextContentModifier::UpdateSymbolColorMeasureFlag[symbolColors:%s][lastSymbolColors:%s]["
-                "animatableSymbolColor_:%s]",
-                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(symbolColors_.value())).c_str(),
-                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(lastSymbolColors_)).c_str(),
-                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(animatableSymbolColor_->Get()))
-                    .c_str());
+    if (symbolColors_.has_value() && animatableSymbolColor_) {
+        auto currentColors = animatableSymbolColor_->Get();
+        if (ColorsDifferExceptHolder(symbolColors_.value(), currentColors) ||
+            ColorsDifferExceptHolder(lastSymbolColors_, currentColors)) {
+            flag |= PROPERTY_UPDATE_MEASURE_SELF;
+            if (SystemProperties::GetTextTraceEnabled()) {
+                ACE_TEXT_SCOPED_TRACE(
+                    "TextContentModifier::UpdateSymbolColorMeasureFlag[symbolColors:%s][lastSymbolColors:%s]["
+                    "animatableSymbolColor_:%s]",
+                    StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(symbolColors_.value())).c_str(),
+                    StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(lastSymbolColors_)).c_str(),
+                    StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(currentColors)).c_str());
+            }
+            lastSymbolColors_ = currentColors;
         }
-        lastSymbolColors_ = animatableSymbolColor_->Get();
     }
 }
 

@@ -3402,6 +3402,18 @@ HWTEST_F(PipelineContextTestNg, AddNeedReloadNodes001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LinearColorSetPlaceholder001
+ * @tc.desc: Test LinearColor.SetPlaceholder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, LinearColorSetPlaceholder001, TestSize.Level1)
+{
+    LinearColor linearColor;
+    linearColor.SetPlaceholder(ColorPlaceholder::BRAND);
+    EXPECT_EQ(linearColor.GetPlaceholder(), ColorPlaceholder::BRAND);
+}
+
+/**
  * @tc.name: GetCurrentPageName
  * @tc.desc: Test GetCurrentPageName of pipeline_context
  * @tc.type: FUNC
