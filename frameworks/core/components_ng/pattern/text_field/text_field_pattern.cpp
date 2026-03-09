@@ -1879,6 +1879,9 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
         }
         return true;
     }
+    if (event.action == KeyAction::DOWN && event.code == KeyCode::KEY_SPACE && focusIndex_ != FocuseIndex::TEXT) {
+        return HandleSpaceKeyClickEvent();
+    }
     if (directionKeysMoveFocusOut_ && (IsMoveFocusOutFromLeft(event) || IsMoveFocusOutFromRight(event))) {
         TextInputClient::HandleKeyEvent(event);
         return false;
@@ -9971,6 +9974,47 @@ bool TextFieldPattern::HandleSpaceEvent()
             UnitResponseKeyEvent();
         }
         return true;
+    }
+    return false;
+}
+
+bool TextFieldPattern::HandleSpaceKeyClickEvent()
+{
+    if (focusIndex_ == FocuseIndex::CANCEL) {
+        auto cleanNodeArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        CHECK_NULL_RETURN(cleanNodeArea, false);
+        auto frameNode = cleanNodeArea->GetFrameNode();
+        CHECK_NULL_RETURN(frameNode, false);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gestureHub, false);
+        gestureHub->ActClick();
+        return true;
+    }
+    if (focusIndex_ == FocuseIndex::VOICE) {
+        auto voiceNodeArea = AceType::DynamicCast<VoiceNodeResponseArea>(voiceResponseArea_);
+        CHECK_NULL_RETURN(voiceNodeArea, false);
+        auto frameNode = voiceNodeArea->GetFrameNode();
+        CHECK_NULL_RETURN(frameNode, false);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gestureHub, false);
+        gestureHub->ActClick();
+        return true;
+    }
+    if (focusIndex_ == FocuseIndex::UNIT) {
+        if (IsShowPasswordIcon()) {
+            auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+            CHECK_NULL_RETURN(passwordArea, false);
+            auto frameNode = passwordArea->GetFrameNode();
+            CHECK_NULL_RETURN(frameNode, false);
+            auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_RETURN(gestureHub, false);
+            gestureHub->ActClick();
+            return true;
+        }
+        if (IsShowUnit()) {
+            UnitResponseKeyEvent();
+            return true;
+        }
     }
     return false;
 }
