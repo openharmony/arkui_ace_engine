@@ -30,8 +30,8 @@ constexpr int32_t ADD_TEXT = 0;
 static bool checkLayoutPolicy(const std::optional<NG::LayoutPolicyProperty> layoutPolicy)
 {
     if (layoutPolicy.has_value()) {
-        return layoutPolicy->widthLayoutPolicy_ != LayoutCalPolicy::NO_MATCH ||
-               layoutPolicy->heightLayoutPolicy_ != LayoutCalPolicy::NO_MATCH;
+        auto policy = layoutPolicy.value();
+        return !policy.IsWidthNoMatch() || !policy.IsHeightNoMatch();
     }
     return false;
 }
