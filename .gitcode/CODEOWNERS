@@ -278,6 +278,7 @@ component_ext/movingphoto_ani/ @arkuiadvancedcomponent
 
 [Examples]
 examples/ @arkuipopupwindow_all
+examples/AdvancedBlendMode @arkuicodepulse
 examples/Navigation/ @arkui_navigation
 examples/BindSheet/ @arkuicodepulse
 examples/BindSheet_DragBar/ @arkuicodepulse
