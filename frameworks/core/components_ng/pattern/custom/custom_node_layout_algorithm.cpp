@@ -46,7 +46,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 renderFunction_ = nullptr;
                 stack->Pop();
             }
-            CHECK_NULL_VOID(child);
+            
             auto layoutWrapperNode = DynamicCast<LayoutWrapperNode>(Claim(layoutWrapper));
             for (const auto& child : frameNode->GetChildren()) {
                 if (!child) {
