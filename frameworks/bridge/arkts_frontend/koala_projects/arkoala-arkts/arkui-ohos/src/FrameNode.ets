@@ -969,6 +969,7 @@ export class ProxyFrameNode extends ImmutableFrameNode {
 }
 export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
     private __BuilderNodeOpt: JSBuilderNode<T> | undefined = undefined;
+    private __disposed: boolean = false;
     constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode', ptr?: KPointer) {
         super(uiContext, 'BuilderRootFrameNode', ptr);
         if (!ptr) {
@@ -993,12 +994,20 @@ export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
         this._nodeId = -1;
     }
     public disposeNode(): void {
+        if (this.__disposed) {
+            return;
+        }
         super.dispose();
+        this.__disposed = true;
         this.__BuilderNodeOpt = undefined;
         this._nodeId = -1;
     }
     public dispose(): void {
+        if (this.__disposed) {
+            return;
+        }
         super.dispose();
+        this.__disposed = true;
         this.__BuilderNodeOpt?.disposeNode();
         this.__BuilderNodeOpt = undefined;
         this._nodeId = -1;
