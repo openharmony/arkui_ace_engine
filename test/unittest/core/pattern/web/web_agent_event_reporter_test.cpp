@@ -783,7 +783,7 @@ HWTEST_F(WebAgentEventReporterTest, SetAISessionOptions_BoundaryType, TestSize.L
     auto onDestroy = [](const std::string&, const std::string&,
         const std::function<void(uint32_t, const std::string&)>&&) { return true; };
     
-    uint32_t boundaryType = WebAgentEventReporter::MAX_AI_SESSION_TYPE - 1;
+    uint32_t boundaryType = MAX_AI_SESSION_TYPE - 1;
     reporter->SetAISessionOptions(boundaryType, std::move(onCreate), std::move(onExecute), std::move(onDestroy));
     
     auto retrievedCreate = reporter->GetOnCreateAISession(boundaryType);
@@ -813,7 +813,7 @@ HWTEST_F(WebAgentEventReporterTest, SetAISessionOptions_InvalidType, TestSize.Le
     auto onDestroy = [](const std::string&, const std::string&,
         const std::function<void(uint32_t, const std::string&)>&&) { return true; };
     
-    uint32_t invalidType = WebAgentEventReporter::MAX_AI_SESSION_TYPE;
+    uint32_t invalidType = MAX_AI_SESSION_TYPE;
     reporter->SetAISessionOptions(invalidType, std::move(onCreate), std::move(onExecute), std::move(onDestroy));
     
     auto retrievedCreate = reporter->GetOnCreateAISession(invalidType);
@@ -1012,7 +1012,7 @@ HWTEST_F(WebAgentEventReporterTest, AISessionCallbacks_MultipleTypes, TestSize.L
 #ifdef OHOS_STANDARD_SYSTEM
     auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
     
-    for (uint32_t i = 0; i < WebAgentEventReporter::MAX_AI_SESSION_TYPE; ++i) {
+    for (uint32_t i = 0; i < MAX_AI_SESSION_TYPE; ++i) {
         auto onCreate = [i](const std::string&, const std::string&,
             const std::function<void(uint32_t, const std::string&)>&&) { return true; };
         auto onExecute = [i](const std::string&, const std::string&,
@@ -1023,7 +1023,7 @@ HWTEST_F(WebAgentEventReporterTest, AISessionCallbacks_MultipleTypes, TestSize.L
         reporter->SetAISessionOptions(i, std::move(onCreate), std::move(onExecute), std::move(onDestroy));
     }
     
-    for (uint32_t i = 0; i < WebAgentEventReporter::MAX_AI_SESSION_TYPE; ++i) {
+    for (uint32_t i = 0; i < MAX_AI_SESSION_TYPE; ++i) {
         auto createCallback = reporter->GetOnCreateAISession(i);
         auto executeCallback = reporter->GetOnExecuteAIAction(i);
         auto destroyCallback = reporter->GetOnDestroyAISession(i);

@@ -4286,6 +4286,12 @@ void WrapAISessionCallback(const JSRef<JSObject>& option, const std::string& fun
     }
     aiSessionCallback = [option, func = JSRef<JSFunc>::Cast(funcVal)](const std::string& id,
             const std::string& params, const std::function<void(uint32_t, const std::string&)>&& callback) {
+        napi_env env = GetNapiEnv();
+        if (!env) {
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
         auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
         auto adapter = runtime->NewFunction(
             [callback = std::move(callback)](shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
@@ -4304,6 +4310,7 @@ void WrapAISessionCallback(const JSRef<JSObject>& option, const std::string& fun
             JSRef<JSVal>::Make(std::static_pointer_cast<ArkJSValue>(adapter)->GetValue(runtime))
         };
         JSRef<JSVal> result = func->Call(option, ArraySize(argv), argv);
+        napi_close_handle_scope(env, scope);
         return result->ToBoolean();
     };
 }

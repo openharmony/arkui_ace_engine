@@ -52,39 +52,13 @@ public:
         uint32_t delay = 0);
 
     void SetAISessionOptions(uint32_t type, const AISessionCallback&& onCreateAISession,
-        const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)
-    {
-        if (type >= MAX_AI_SESSION_TYPE) {
-            return;
-        }
-        onCreateAISessionArray_[type] = std::move(onCreateAISession);
-        onExecuteAIActionArray_[type] = std::move(onExecuteAIAction);
-        onDestroyAISessionArray_[type] = std::move(onDestroyAISession);
-    }
+        const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession);
 
-    AISessionCallback GetOnCreateAISession(uint32_t type)
-    {
-        if (type >= MAX_AI_SESSION_TYPE) {
-            return nullptr;
-        }
-        return onCreateAISessionArray_[type];
-    }
+    AISessionCallback GetOnCreateAISession(uint32_t type);
 
-    AISessionCallback GetOnExecuteAIAction(uint32_t type)
-    {
-        if (type >= MAX_AI_SESSION_TYPE) {
-            return nullptr;
-        }
-        return onExecuteAIActionArray_[type];
-    }
+    AISessionCallback GetOnExecuteAIAction(uint32_t type);
 
-    AISessionCallback GetOnDestroyAISession(uint32_t type)
-    {
-        if (type >= MAX_AI_SESSION_TYPE) {
-            return nullptr;
-        }
-        return onDestroyAISessionArray_[type];
-    }
+    AISessionCallback GetOnDestroyAISession(uint32_t type);
 
     enum class WebEventType { Unknown, Tap, LongPress, ScrollStart, ScrollEnd, PinchEnd };
 
