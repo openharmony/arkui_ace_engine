@@ -119,7 +119,7 @@ export interface PageLifeCycle {
 
 export interface LayoutCallbacks {
     onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
-        try{
+        try {
             const currentComponent = this as Any as (ExtendableComponent | undefined);
             const peerNode = currentComponent?.__getPeerNode__Internal();
             if (peerNode) {
@@ -130,7 +130,7 @@ export interface LayoutCallbacks {
         }
     }
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
-        try{
+        try {
             const currentComponent = this as Any as (ExtendableComponent | undefined);
             const peerNode = currentComponent?.__getPeerNode__Internal();
             if (peerNode) {
@@ -139,7 +139,7 @@ export interface LayoutCallbacks {
         } catch(e) {
             console.log('customComponent onMeasureSize err', e);
         }
-        return {width: 0, height: 0} as SizeResult
+        return {width: 0, height: 0} as SizeResult;
     }
 }
 
