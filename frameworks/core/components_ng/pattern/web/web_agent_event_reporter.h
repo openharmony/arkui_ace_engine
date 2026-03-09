@@ -59,24 +59,33 @@ public:
         if (type >= MAX_AI_SESSION_TYPE) {
             return;
         }
-        onCreateAISessionArray[type] = std::move(onCreateAISession);
-        onExecuteAIActionArray[type] = std::move(onExecuteAIAction);
-        onDestroyAISessionArray[type] = std::move(onDestroyAISession);
+        onCreateAISessionArray_[type] = std::move(onCreateAISession);
+        onExecuteAIActionArray_[type] = std::move(onExecuteAIAction);
+        onDestroyAISessionArray_[type] = std::move(onDestroyAISession);
     }
 
     AISessionCallback GetOnCreateAISession(uint32_t type)
     {
-        return onCreateAISessionArray[type];
+        if (type >= MAX_AI_SESSION_TYPE) {
+            return nullptr;
+        }
+        return onCreateAISessionArray_[type];
     }
 
     AISessionCallback GetOnExecuteAIAction(uint32_t type)
     {
-        return onExecuteAIActionArray[type];
+        if (type >= MAX_AI_SESSION_TYPE) {
+            return nullptr;
+        }
+        return onExecuteAIActionArray_[type];
     }
 
     AISessionCallback GetOnDestroyAISession(uint32_t type)
     {
-        return onDestroyAISessionArray[type];
+        if (type >= MAX_AI_SESSION_TYPE) {
+            return nullptr;
+        }
+        return onDestroyAISessionArray_[type];
     }
 
     enum class WebEventType { Unknown, Tap, LongPress, ScrollStart, ScrollEnd, PinchEnd };
@@ -91,9 +100,9 @@ public:
 
 private:
     WeakPtr<Pattern> pattern_;
-    AISessionCallback onCreateAISessionArray[MAX_AI_SESSION_TYPE] = { nullptr };
-    AISessionCallback onExecuteAIActionArray[MAX_AI_SESSION_TYPE] = { nullptr };
-    AISessionCallback onDestroyAISessionArray[MAX_AI_SESSION_TYPE] = { nullptr };
+    AISessionCallback onCreateAISessionArray_[MAX_AI_SESSION_TYPE] = { nullptr };
+    AISessionCallback onExecuteAIActionArray_[MAX_AI_SESSION_TYPE] = { nullptr };
+    AISessionCallback onDestroyAISessionArray_[MAX_AI_SESSION_TYPE] = { nullptr };
 
 protected:
     virtual RectF ConvertToWindow(const RectF& rect, bool addComponentOffset = true);
