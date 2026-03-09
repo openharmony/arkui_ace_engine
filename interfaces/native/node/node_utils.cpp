@@ -33,7 +33,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutSize(ArkUI_NodeHandle node, ArkUI_IntSize* s
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    ArkUI_Int32* tempSize = new ArkUI_Int32[2];
+    ArkUI_Int32 tempSize[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getLayoutSize(node->uiNodeHandle, tempSize);
     size->width = tempSize[0];
     size->height = tempSize[1];
