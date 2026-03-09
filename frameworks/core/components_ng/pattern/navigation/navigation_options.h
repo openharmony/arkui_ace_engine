@@ -136,11 +136,13 @@ struct NavigationTitlebarOptions {
     NavigationBarOptions brOptions;
     NavigationTextOptions textOptions;
     bool enableHoverMode = false;
+    bool enableCustomTitlePaddingCheck = false;
 
     bool operator== (const NavigationTitlebarOptions& other) const
     {
-        return bgOptions == other.bgOptions && brOptions == other.brOptions
-            && enableHoverMode == other.enableHoverMode;
+        return bgOptions == other.bgOptions && brOptions == other.brOptions &&
+               enableHoverMode == other.enableHoverMode &&
+               enableCustomTitlePaddingCheck == other.enableCustomTitlePaddingCheck;
     }
 
     bool operator!= (const NavigationTitlebarOptions& other) const

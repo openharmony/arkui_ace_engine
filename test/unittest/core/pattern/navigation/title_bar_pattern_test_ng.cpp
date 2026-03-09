@@ -1979,4 +1979,59 @@ HWTEST_F(TitleBarPatternTestNg, TitleBarLayoutTitle002, TestSize.Level1)
      */
     EXPECT_EQ(titleGeo->GetMarginFrameOffset().GetY(), 50);
 }
+
+/**
+ * @tc.name: PrasePaddingEnd001
+ * @tc.desc: Test PrasePaddingEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestNg, PrasePaddingEnd001, TestSize.Level1)
+{
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    titleBarNode->SetParent(navDestination);
+
+    auto layoutAlgorithm = AceType::DynamicCast<TitleBarLayoutAlgorithm>(titleBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    float avoidWidth = 100.0f;
+    layoutAlgorithm->paddingRightForMenu_ = 50.0f;
+
+    navDestination->UpdatePrevTitleIsCustom(true);
+    NavigationTitlebarOptions options;
+    options.enableCustomTitlePaddingCheck = false;
+    titleBarPattern->SetTitlebarOptions(options);
+    bool result = layoutAlgorithm->PrasePaddingEnd(titleBarNode, avoidWidth);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(avoidWidth, 100.0f);
+
+    options.enableCustomTitlePaddingCheck = true;
+    titleBarPattern->SetTitlebarOptions(options);
+    result = layoutAlgorithm->PrasePaddingEnd(titleBarNode, avoidWidth);
+    EXPECT_TRUE(result);
+
+    options.brOptions.paddingEnd = CalcDimension(10.0f);
+    titleBarPattern->SetTitlebarOptions(options);
+    layoutAlgorithm->paddingRightForMenu_ = 150.0f;
+    navDestination->UpdatePrevTitleIsCustom(false);
+    result = layoutAlgorithm->PrasePaddingEnd(titleBarNode, avoidWidth);
+    EXPECT_FALSE(result);
+
+    layoutAlgorithm->paddingRightForMenu_ = 50.0f;
+    navDestination->UpdatePrevTitleIsCustom(true);
+    result = layoutAlgorithm->PrasePaddingEnd(titleBarNode, avoidWidth);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(avoidWidth, 50.0f);
+
+    options.enableCustomTitlePaddingCheck = false;
+    titleBarPattern->SetTitlebarOptions(options);
+    float avoidWidth2 = 100.0f;
+    result = layoutAlgorithm->PrasePaddingEnd(titleBarNode, avoidWidth2);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(avoidWidth2, 100.0f);
+}
 } // namespace OHOS::Ace::NG
