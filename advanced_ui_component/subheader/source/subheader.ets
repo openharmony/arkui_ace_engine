@@ -1320,7 +1320,16 @@ class Util {
    */
   public static getNumberByResource(resourceId: number, defaultNumber: number): number {
     try {
-      let resourceNumber: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
+      let currentDeviceType: resourceManager.DeviceType | undefined = 
+        resourceManager.getSysResourceManager()?.getConfigurationSync()?.deviceType;
+      let systemConfiguration: resourceManager.Configuration =
+        resourceManager.getSystemResourceManager()?.getConfigurationSync();
+      if (currentDeviceType !== undefined && systemConfiguration !== undefined) {
+        systemConfiguration.deviceType = currentDeviceType;
+      }
+      let resourceNumber: number = resourceManager.getSystemResourceManager()
+        .getOverrideResourceManager(systemConfiguration)
+        .getNumber(resourceId);
       if (resourceNumber === 0) {
         return defaultNumber;
       } else {
