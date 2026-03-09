@@ -36,6 +36,7 @@ constexpr int32_t INITIAL_NODE_SIZE = 5;
 constexpr int32_t INITIAL_NODE_SIZE_PLUS_ONE = INITIAL_NODE_SIZE + 1;
 constexpr int32_t NORMAL_NODE_ID = 0;
 constexpr int32_t TEST_SCROLLING_NODE_ID = 100;
+constexpr int32_t TEST_TRANSITIONING_NODE_ID = 200;
 constexpr int32_t NEVER_ONCE = 0;
 constexpr int32_t AT_LEAST_ONCE = 1;
 
@@ -123,6 +124,22 @@ void ResetChangedSwiperNodes()
     auto contentChangeMgr = GetContentChangeManager();
     if (contentChangeMgr) {
         contentChangeMgr->changedSwiperNodes_.clear();
+    }
+}
+
+void SetTransitioningNodes()
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    if (contentChangeMgr) {
+        contentChangeMgr->transitioningNodes_.emplace(TEST_TRANSITIONING_NODE_ID);
+    }
+}
+
+void ResetTransitioningNodes()
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    if (contentChangeMgr) {
+        contentChangeMgr->transitioningNodes_.clear();
     }
 }
 } // namespace
@@ -1645,5 +1662,126 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
     })";
     mask = contentChangeMgr->GetIgnoreEventMask(jsonStr);
     EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest020
+ * @tc.desc: Test OnTransitionAdded
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnTransitionAdded when content change detect is disabled.
+     * @tc.expected: transitioningNodes_ is empty.
+     */
+    EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+    contentChangeMgr->OnTransitionAdded(NORMAL_NODE_ID);
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+
+    /**
+     * @tc.steps: step3. call OnTransitionAdded under normal conditions.
+     * @tc.expected: transitioningNodes_ is not empty and contains the node id.
+     */
+    ContentChangeConfig config;
+    contentChangeMgr->currentContentChangeConfig_ = config;
+    EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
+    contentChangeMgr->OnTransitionAdded(NORMAL_NODE_ID);
+    EXPECT_FALSE(contentChangeMgr->transitioningNodes_.empty());
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->transitioningNodes_.count(NORMAL_NODE_ID)), 1);
+    auto size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 1);
+
+    /**
+     * @tc.steps: step4. call OnTransitionAdded when transitioningNodes_ already has nodes.
+     * @tc.expected: transitioningNodes_ size increases and contains both node ids.
+     */
+    SetTransitioningNodes();
+    size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 2);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->transitioningNodes_.count(NORMAL_NODE_ID)), 1);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->transitioningNodes_.count(TEST_TRANSITIONING_NODE_ID)), 1);
+
+    /**
+     * @tc.steps: step5. call OnTransitionAdded with existing node id (duplicate test).
+     * @tc.expected: transitioningNodes_ size remains unchanged (set deduplication).
+     */
+    contentChangeMgr->OnTransitionAdded(NORMAL_NODE_ID);
+    size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 2);
+
+    /**
+     * @tc.steps: step6. reset.
+     */
+    contentChangeMgr->currentContentChangeConfig_.reset();
+    EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+    ResetTransitioningNodes();
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest021
+ * @tc.desc: Test OnTransitionRemoved
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    constexpr int32_t TEST_NODE_ID_NOT_EXIST = 999;
+
+    /**
+     * @tc.steps: step2. call OnTransitionRemoved when node does not exist.
+     * @tc.expected: transitioningNodes_ remains empty.
+     */
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+    contentChangeMgr->OnTransitionRemoved(TEST_NODE_ID_NOT_EXIST);
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+
+    /**
+     * @tc.steps: step3. add some nodes and then remove a non-existent node.
+     * @tc.expected: transitioningNodes_ size remains unchanged.
+     */
+    contentChangeMgr->transitioningNodes_.emplace(NORMAL_NODE_ID);
+    contentChangeMgr->transitioningNodes_.emplace(TEST_TRANSITIONING_NODE_ID);
+    auto size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 2);
+    contentChangeMgr->OnTransitionRemoved(TEST_NODE_ID_NOT_EXIST);
+    size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 2);
+
+    /**
+     * @tc.steps: step4. remove an existing node.
+     * @tc.expected: transitioningNodes_ size decreases by 1.
+     */
+    contentChangeMgr->OnTransitionRemoved(NORMAL_NODE_ID);
+    size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 1);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->transitioningNodes_.count(NORMAL_NODE_ID)), 0);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->transitioningNodes_.count(TEST_TRANSITIONING_NODE_ID)), 1);
+
+    /**
+     * @tc.steps: step5. remove the last existing node.
+     * @tc.expected: transitioningNodes_ is empty.
+     */
+    contentChangeMgr->OnTransitionRemoved(TEST_TRANSITIONING_NODE_ID);
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+
+    /**
+     * @tc.steps: step6. reset.
+     */
+    ResetTransitioningNodes();
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
 }
 } // namespace OHOS::Ace::NG

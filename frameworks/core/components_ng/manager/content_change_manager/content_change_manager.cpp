@@ -199,6 +199,10 @@ private:
                 ss << "DIALOG," << (nodeId > 0 ? "show" : "hide") << ',' << std::abs(nodeId) << ',' <<
                     std::get<NODE_TAG_INDEX>(reportInfo);
                 break;
+            case OHOS::Ace::ChangeType::IMAGE_LOADED:
+                // the nodeId is representing the image count here, and the nodeTag is representing the sourceTypes.
+                ss << typeDict_[type] << ",count:" << nodeId << ',' << std::get<NODE_TAG_INDEX>(reportInfo);
+                break;
             default:
                 ss << "INVALID REPORT RECORD";
         }
@@ -219,7 +223,8 @@ private:
         { OHOS::Ace::ChangeType::SWIPER, "SWIPER" },
         { OHOS::Ace::ChangeType::TABS, "TABS" },
         { OHOS::Ace::ChangeType::TEXT, "TEXT" },
-        { OHOS::Ace::ChangeType::DIALOG, "DIALOG" }
+        { OHOS::Ace::ChangeType::DIALOG, "DIALOG" },
+        { OHOS::Ace::ChangeType::IMAGE_LOADED, "IMAGE_LOADED" }
     };
 
     int64_t timestamp_ = 0;
@@ -268,6 +273,8 @@ void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& c
     textContentRatio_ = currentContentChangeConfig_->textContentRatio;
     componentReportInterval_ = static_cast<uint64_t>(currentContentChangeConfig_->minReportTime) * NS_PER_MS;
     ignoreEventMask_ = GetIgnoreEventMask(currentContentChangeConfig_->ignoreEventType);
+    LOGI("[ContentChangeManager] ignoreEventType:%{public}s, ignoreEventMask:%{public}u",
+        currentContentChangeConfig_->ignoreEventType.c_str(), ignoreEventMask_);
     imageMinWidth_ = currentContentChangeConfig_->minWidth;
     imageMinHeight_ = currentContentChangeConfig_->minHeight;
     componentReportDelayTime_ = static_cast<uint64_t>(currentContentChangeConfig_->reportDelayTime) * NS_PER_MS;
@@ -689,17 +696,28 @@ void ContentChangeManager::ReportImageEvent()
     auto json = JsonUtil::CreateSharedPtrJson(true);
     auto imagesArray = JsonUtil::CreateArray(true);
 
+    std::string sourceTypes;
     for (const auto& [nodeId, rect, sourceType] : imageChangeList) {
         auto imageJson = JsonUtil::CreateSharedPtrJson(true);
         imageJson->Put("$ID", nodeId);
         imageJson->Put("$rect", rect.ToBounds().c_str());
         imageJson->Put("sourceType", sourceType.c_str());
         imagesArray->PutRef(std::move(imageJson));
+        
+        if (!sourceTypes.empty()) {
+            sourceTypes += ",";
+        }
+        sourceTypes += sourceType;
     }
 
     json->PutRef("images", std::move(imagesArray));
     UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::IMAGE_LOADED, json->ToString());
     lastComponentReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
+    
+#ifndef IS_RELEASE_VERSION
+    int32_t imageCount = static_cast<int32_t>(imageChangeList.size());
+    dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::IMAGE_LOADED, imageCount, sourceTypes));
+#endif
 }
 
 bool ContentChangeManager::IsInTransitionDelayWindow() const
