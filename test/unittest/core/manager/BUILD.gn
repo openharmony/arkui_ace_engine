@@ -162,7 +162,10 @@ ace_unittest("scroll_adjust_manager_test_ng") {
 ace_unittest("safe_area_manager_test_ng") {
   module_name = "StateManagement-ComponentExtention"
   type = "new"
-  sources = [ "safe_area_manager_test_ng.cpp" ]
+  sources = [ 
+    "safe_area_manager_test_ng.cpp",
+    "safe_area_manager_test_ng_part_two.cpp" 
+  ]
 }
 
 ace_unittest("navigation_manager_test_ng") {
