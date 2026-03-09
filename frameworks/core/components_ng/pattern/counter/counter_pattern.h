@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -169,6 +170,64 @@ public:
             host->MarkModifyDone();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+    }
+
+    void SetCounterOnInc()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto counterPattern = DynamicCast<CounterPattern>(host->GetPattern());
+        CHECK_NULL_VOID(counterPattern);
+        auto addId = counterPattern->GetAddId();
+        auto addNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(addId)));
+        CHECK_NULL_VOID(addNode);
+        auto gestureHub = addNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto onIncClickEventFunc = gestureHub->GetClickEvent();
+        CHECK_NULL_VOID(onIncClickEventFunc);
+        GestureEvent info;
+        onIncClickEventFunc(info);
+    }
+
+    void SetCounterOnDec()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto counterPattern = DynamicCast<CounterPattern>(host->GetPattern());
+        CHECK_NULL_VOID(counterPattern);
+        auto subId = counterPattern->GetSubId();
+        auto subNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(subId)));
+        CHECK_NULL_VOID(subNode);
+        auto gestureHub = subNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto onDecClickEventFunc = gestureHub->GetClickEvent();
+        CHECK_NULL_VOID(onDecClickEventFunc);
+        GestureEvent info;
+        onDecClickEventFunc(info);
+    }
+
+    std::string ParseCommand(const std::string& command)
+    {
+        auto json = JsonUtil::ParseJsonString(command);
+        if (!json || json->IsNull()) {
+            return std::string();
+        }
+
+        return json->GetString("cmd");
+    }
+
+    int32_t OnInjectionEvent(const std::string& command) override
+    {
+        std::string cmdType = ParseCommand(command);
+        if (cmdType == "setCounterOnInc") {
+            SetCounterOnInc();
+        } else if (cmdType == "setCounterOnDec") {
+            SetCounterOnDec();
+        } else {
+            TAG_LOGD(AceLogTag::ACE_COUNTER, "unknown cmd: %{public}s", cmdType.c_str());
+            return RET_FAILED;
+        }
+        return RET_SUCCESS;
     }
 
 private:

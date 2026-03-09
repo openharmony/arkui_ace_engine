@@ -706,4 +706,39 @@ HWTEST_F(HyperlinkTestNg, UpdatePropertyImpl001, TestSize.Level1)
     EXPECT_TRUE(MockPipelineContext::GetCurrent()->fontManager_);
 }
 
+/**
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: Test OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, OnInjectionEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::HYPERLINK_ETS_TAG);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(HYPERLINK_CONTENT);
+    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
+    frameNode->SetDraggable(true);
+    frameNode->MarkModifyDone();
+    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(hyperlinkPattern, nullptr);
+    /**
+     * @tc.steps: step2. Call OnInjectionEvent with different key.
+     */
+    std::string jsonCommand = R"({"cmd":"click"})";
+    int32_t result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+    jsonCommand = R"({"cmd":"Hyperlink"})";
+    result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+    jsonCommand = R"({")";
+    result = hyperlinkPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+}
 } // namespace OHOS::Ace::NG
