@@ -281,6 +281,7 @@ examples/ @arkuipopupwindow_all
 examples/Navigation/ @arkui_navigation
 examples/BindSheet/ @arkuicodepulse
 examples/BindSheet_DragBar/ @arkuicodepulse
+examples/LuminanceSampling @arkuicodepulse
 examples/Image/ @arkui001
 examples/Image_C/ @arkui001
 examples/Reusable/ @arkui001
