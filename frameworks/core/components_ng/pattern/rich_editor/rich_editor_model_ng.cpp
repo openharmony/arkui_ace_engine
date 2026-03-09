@@ -610,6 +610,32 @@ PositionWithAffinity RichEditorModelNG::GetGlyphPositionAtCoordinate(FrameNode* 
     return pattern->GetGlyphPositionAtCoordinate(x, y);
 }
 
+PositionWithAffinity RichEditorModelNG::GetCharacterPositionAtCoordinate(FrameNode* frameNode, int32_t x, int32_t y)
+{
+    CHECK_NULL_RETURN(frameNode, PositionWithAffinity(0, TextAffinity::UPSTREAM));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, PositionWithAffinity(0, TextAffinity::UPSTREAM));
+    return pattern->GetCharacterPositionAtCoordinate(x, y);
+}
+
+std::pair<TextRange, TextRange> RichEditorModelNG::GetGlyphRangeForCharacterRange(
+    FrameNode* frameNode, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(frameNode, {});
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, {});
+    return pattern->GetGlyphRangeForCharacterRange(start, end);
+}
+
+std::pair<TextRange, TextRange> RichEditorModelNG::GetCharacterRangeForGlyphRange(
+    FrameNode* frameNode, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(frameNode, {});
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, {});
+    return pattern->GetCharacterRangeForGlyphRange(start, end);
+}
+
 void RichEditorModelNG::SetTypingParagraphStyle(FrameNode* frameNode,
     std::optional<struct UpdateParagraphStyle> typingParagraphStyle)
 {

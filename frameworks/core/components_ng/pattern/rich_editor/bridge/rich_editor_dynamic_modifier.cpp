@@ -1577,6 +1577,53 @@ ArkUITextLineMetrics GetRichEditorLineMetrics(ArkUINodeHandle node, ArkUI_Int32 
     return Convert(textLineMetrics);
 }
 
+void* GetRichEditorCharacterPositionAtCoordinate(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy)
+{
+#ifndef PREVIEW
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    PositionWithAffinity positionWithAffinity = RichEditorModelNG::GetCharacterPositionAtCoordinate(frameNode, dx, dy);
+    auto* indexAndAffinity = new OHOS::Rosen::IndexAndAffinity(0, OHOS::Rosen::Affinity::PREV);
+    indexAndAffinity->index = positionWithAffinity.position_;
+    indexAndAffinity->affinity = static_cast<OHOS::Rosen::Affinity>(positionWithAffinity.affinity_);
+    return indexAndAffinity;
+#else
+    return nullptr;
+#endif
+}
+
+void GetRichEditorGlyphRangeForCharacterRange(
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
+{
+#ifndef PREVIEW
+    CHECK_NULL_VOID(range);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto [glyphRange, charRange] = RichEditorModelNG::GetGlyphRangeForCharacterRange(frameNode, start, end);
+    range->glyphStart = glyphRange.start;
+    range->glyphEnd = glyphRange.end;
+    range->charStart = charRange.start;
+    range->charEnd = charRange.end;
+#else
+#endif
+}
+
+void GetRichEditorCharacterRangeForGlyphRange(
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
+{
+#ifndef PREVIEW
+    CHECK_NULL_VOID(range);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto [charRange, glyphRange] = RichEditorModelNG::GetCharacterRangeForGlyphRange(frameNode, start, end);
+    range->glyphStart = glyphRange.start;
+    range->glyphEnd = glyphRange.end;
+    range->charStart = charRange.start;
+    range->charEnd = charRange.end;
+#else
+#endif
+}
+
 void SetTypingParagraphStyle(ArkUINodeHandle node, const ArkUIRichEditorParagraphStyle& paragraphStyle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2003,6 +2050,9 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .getRichEditorRectsForRange = GetRichEditorRectsForRange,
         .getRichEditorGlyphPositionAtCoordinate = GetRichEditorGlyphPositionAtCoordinate,
         .getRichEditorLineMetrics = GetRichEditorLineMetrics,
+        .getRichEditorCharacterPositionAtCoordinate = GetRichEditorCharacterPositionAtCoordinate,
+        .getRichEditorGlyphRangeForCharacterRange = GetRichEditorGlyphRangeForCharacterRange,
+        .getRichEditorCharacterRangeForGlyphRange = GetRichEditorCharacterRangeForGlyphRange,
         .setTypingParagraphStyle = SetTypingParagraphStyle,
         .setRichEditorTypingStyle = SetRichEditorTypingStyle,
         .getRichEditorTypingStyle = GetRichEditorTypingStyle,

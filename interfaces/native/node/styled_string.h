@@ -39,8 +39,13 @@ struct ArkUI_StyledString {
 };
 
 struct ArkUI_Boundary {
-    int32_t leftIndex;
-    int32_t rightIndex;
+    size_t leftIndex;
+    size_t rightIndex;
+    ArkUI_Boundary(size_t left, size_t right)
+    {
+        leftIndex = left;
+        rightIndex = right;
+    }
 };
 
 #ifdef __cplusplus
