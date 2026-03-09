@@ -428,7 +428,6 @@ export class TapGesture extends Gesture {
     onActionCallback?: Callback<GestureEvent>;
     pointer: KPointer = nullptr;
     static $_instantiate(factory: () => TapGesture, value?: TapGestureParameters): TapGesture {
-        console.log(`zcb TapGesture _instantiate`);
         const tap = factory();
         tap.finger = value?.fingers;
         tap.count = value?.count;
@@ -454,7 +453,6 @@ export class TapGesture extends Gesture {
     }
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
-            console.log(`zcb TapGesture setGesture`);
             this.createAndSetTapGestureAttr();
             GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.Normal, this.pointer, false);
         }
