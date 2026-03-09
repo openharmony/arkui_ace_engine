@@ -293,7 +293,12 @@ void SetTabBarImpl(Ark_NativePointer node,
             TabContentModelStatic::SetTabBar(frameNode, label, icon, nullptr);
             TabbarAddTabBarItem(AceType::WeakClaim(frameNode));
         },
-        []() {});
+        [frameNode]() {
+            TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+            TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, nullptr);
+            TabContentModelStatic::SetTabBarWithContent(frameNode, nullptr);
+            TabbarAddTabBarItem(AceType::WeakClaim(frameNode));
+        });
 }
 void SetOnWillShowImpl(Ark_NativePointer node,
                        const Opt_VoidCallback* value)
