@@ -1277,7 +1277,7 @@ abstract class ViewPU extends PUV2ViewBase
   public reuseOrCreateNewComponent(params: { componentClass: any, getParams: () => Object,
     getReuseId?: () => string, extraInfo?: ExtraInfo }): void {
       // ViewPU should not have a ReusableV2 Component, throw error!
-      const error = `@Component cannot have a child @ReusableV2 component !`;
+      const error = `@Component cannot have a child @ReusableV2 component.`;
       stateMgmtConsole.applicationError(error);
       throw new BusinessError(USE_REUSABLE_V2_IN_COMPONENT, error);
   }
@@ -1309,15 +1309,7 @@ abstract class ViewPU extends PUV2ViewBase
       return undefined;
     }
     const prop = Reflect.get(this, fieldName);
-    let value = stateMgmtDFX.unwrapRawValue(prop);
-    if (typeof value === 'string') {
-      try {
-        value = JSON.parse(value);
-      } catch {
-        stateMgmtConsole.error('Invalid json string');
-        return undefined;
-      }
-    }
+    const value = stateMgmtDFX.unwrapRawValue(prop);
     if (value === null || value === undefined) {
       return undefined;
     }

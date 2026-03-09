@@ -148,8 +148,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
  
     /** @memo:intrinsic */
     callStyles(): void {
-        const customComponentInstance = this.instance as BaseCustomComponent<T_Options>;
-        customComponentInstance.__set__commonStyle__Internal(new Array<(instance: CommonMethod) => void>());
+        if (this.instance instanceof BaseCustomComponent) {
+            const customComponentInstance = this.instance as BaseCustomComponent<T_Options>;
+            customComponentInstance.__set__commonStyle__Internal(new Array<(instance: CommonMethod) => void>());
+        }
         this.styles?.(this.instance as T)
     }
  
