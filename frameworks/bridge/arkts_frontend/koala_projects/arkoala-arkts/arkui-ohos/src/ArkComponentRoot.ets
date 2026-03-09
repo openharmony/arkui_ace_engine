@@ -23,7 +23,10 @@ import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { CallbackTransformer } from './CallbackTransformer';
 import { KPointer, nullptr } from '@koalaui/interop';
 import { FreeRootNode } from './CallbackTransformer';
-import { LifeCycleEvent } from './component/customComponent';
+import { LifeCycleEvent, CustomDelegate } from './component/customComponent';
+import { int32 } from '@koalaui/common';
+import { ExtendableComponent } from './component/extendableComponent';
+import { IEnvVariable } from './stateManagement/decoratorImpl/decoratorEnv';
 
 export function setNeedCreate(isNeedCreate: boolean): boolean {
     const temp = GlobalStateManager.instance._isNeedCreate
@@ -77,6 +80,20 @@ export function ArkComponentRoot(
                     return new Long(childPeerPtr);
                 }
             });
+            if (component instanceof CustomDelegate && (component as Any as CustomDelegate<ExtendableComponent, Object>).getInstance().checkEnvSetSize()) {
+                const envComponent: ExtendableComponent = (component as Any as CustomDelegate<ExtendableComponent, Object>).getInstance();
+                node.getEnvInstanceId((instanceId: int32): void => {
+                    if (envComponent.getEnvInstance() && envComponent.getEnvInstance() === instanceId) {
+                        return;
+                    }
+                    envComponent.setEnvInstance(instanceId);
+                    const envSet: Set<IEnvVariable> = envComponent.getEnvSet();
+                    for (const envItem of envSet) {
+                        envItem.unRegisterEnv(instanceId);
+                        envItem.registerEnv(instanceId);
+                    }
+                })
+            }
             return node;
         },
         (node: ArkCustomComponentRootPeer) => { }

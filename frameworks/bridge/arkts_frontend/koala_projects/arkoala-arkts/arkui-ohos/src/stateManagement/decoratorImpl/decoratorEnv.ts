@@ -25,14 +25,22 @@ import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { default as window } from '@ohos.window';
 import { UIObserver } from '@ohos.arkui.UIContext';
 import { HeightBreakpoint, WidthBreakpoint } from '@ohos.arkui.component';
+import { int32 } from '@koalaui/common';
 
 export interface IEnvironmentValueBase {
-    destroy(): void;
+    onWatchFunc(): void;
+    offWatchFunc(instanceId?: int32): void;
 }
 
 export interface IEnvironmentValue<T> extends IEnvironmentValueBase {
     get(): T;
     shouldAddRef(): boolean;
+    reConstructor(instanceId: int32): void;
+}
+
+export interface IEnvVariable {
+    registerEnv(instanceId?: int32): void;
+    unRegisterEnv(instanceId?: int32): void;
 }
 
 export class WindowSizeLayoutBreakpoint implements uiObserver.WindowSizeLayoutBreakpointInfo,
@@ -40,11 +48,25 @@ export class WindowSizeLayoutBreakpoint implements uiObserver.WindowSizeLayoutBr
     private widthBreakPointBackingValue: IBackingValue<WidthBreakpoint>;
     private heightBreakPointBackingValue: IBackingValue<HeightBreakpoint>;
     private uiObserver: UIObserver;
+    private instanceId: int32;
 
-    constructor(context: UIContext) {
+    constructor(instanceId: int32) {
+        this.instanceId = instanceId;
+        const context: UIContext = UIContextUtil.getOrCreateUIContextById(this.instanceId);
         this.uiObserver = context.getUIObserver();
         this.widthBreakPointBackingValue = FactoryInternal.mkDecoratorValue<WidthBreakpoint>('EnvWidthBreakpoint', context.getWindowWidthBreakpoint());
         this.heightBreakPointBackingValue = FactoryInternal.mkDecoratorValue<HeightBreakpoint>('EnvHeightBreakpoint', context.getWindowHeightBreakpoint());
+    }
+
+    public reConstructor(instanceId: int32): void {
+        this.instanceId = instanceId;
+        const context: UIContext = UIContextUtil.getOrCreateUIContextById(this.instanceId);
+        this.uiObserver = context.getUIObserver();
+        this.widthBreakpoint = context.getWindowWidthBreakpoint();
+        this.heightBreakpoint = context.getWindowHeightBreakpoint();
+    }
+
+    public onWatchFunc(): void {
         this.uiObserver.onWindowSizeLayoutBreakpointChange(this.breakPointCallback);
     }
 
@@ -61,6 +83,7 @@ export class WindowSizeLayoutBreakpoint implements uiObserver.WindowSizeLayoutBr
         const oldWidthBreakpointValue = this.widthBreakPointBackingValue.get(false);
         if (oldWidthBreakpointValue !== newValue) {
             this.widthBreakPointBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -73,6 +96,7 @@ export class WindowSizeLayoutBreakpoint implements uiObserver.WindowSizeLayoutBr
         const oldHeightBreakpointValue = this.heightBreakPointBackingValue.get(false);
         if (oldHeightBreakpointValue !== newValue) {
             this.heightBreakPointBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -89,7 +113,7 @@ export class WindowSizeLayoutBreakpoint implements uiObserver.WindowSizeLayoutBr
         return this;
     }
 
-    public destroy(): void {
+    public offWatchFunc(instanceId?: int32): void {
         this.uiObserver.offWindowSizeLayoutBreakpointChange(this.breakPointCallback);
     }
 }
@@ -101,13 +125,29 @@ export class WindowAvoidAreaPxEnv implements window.UIEnvWindowAvoidAreaInfoPX, 
     private keyboardBackingValue: IBackingValue<window.AvoidArea>;
     private navigationIndicatorBackingValue: IBackingValue<window.AvoidArea>;
     private win: window.Window;
+    private instanceId: int32;
     
-    constructor(context: UIContext) {
+    constructor(instanceId: int32) {
+        this.instanceId = instanceId;
+        const context: UIContext = UIContextUtil.getOrCreateUIContextById(this.instanceId);
         this.win = window.findWindow(context.getWindowName()!);
         this.statusBarBackingValue = FactoryInternal.mkDecoratorValue<window.AvoidArea>('EnvStatusBar', this.win.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM));
         this.cutoutBackingValue = FactoryInternal.mkDecoratorValue<window.AvoidArea>('EnvCutout', this.win.getWindowAvoidArea(window.AvoidAreaType.TYPE_CUTOUT));
         this.keyboardBackingValue = FactoryInternal.mkDecoratorValue<window.AvoidArea>('EnvKeyboard', this.win.getWindowAvoidArea(window.AvoidAreaType.TYPE_KEYBOARD));
         this.navigationIndicatorBackingValue = FactoryInternal.mkDecoratorValue<window.AvoidArea>('EnvNavigationIndicator', this.win.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR));
+    }
+
+    public reConstructor(instanceId: int32): void {
+        this.instanceId = instanceId;
+        const context: UIContext = UIContextUtil.getOrCreateUIContextById(this.instanceId);
+        this.win = window.findWindow(context.getWindowName()!);
+        this.statusBar = this.win.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
+        this.cutout = this.win.getWindowAvoidArea(window.AvoidAreaType.TYPE_CUTOUT);
+        this.keyboard = this.win.getWindowAvoidArea(window.AvoidAreaType.TYPE_KEYBOARD);
+        this.navigationIndicator = this.win.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
+    }
+
+    public onWatchFunc(): void {
         this.win.onAvoidAreaChange(this.avoidAreaChangeCallback);
     }
 
@@ -128,6 +168,7 @@ export class WindowAvoidAreaPxEnv implements window.UIEnvWindowAvoidAreaInfoPX, 
         const oldStatusBarValue = this.statusBarBackingValue.get(false);
         if (oldStatusBarValue !== newValue) {
             this.statusBarBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -140,6 +181,7 @@ export class WindowAvoidAreaPxEnv implements window.UIEnvWindowAvoidAreaInfoPX, 
         const oldCutoutValue = this.cutoutBackingValue.get(false);
         if (oldCutoutValue !== newValue) {
             this.cutoutBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -152,6 +194,7 @@ export class WindowAvoidAreaPxEnv implements window.UIEnvWindowAvoidAreaInfoPX, 
         const oldKeyboardValue = this.keyboardBackingValue.get(false);
         if (oldKeyboardValue !== newValue) {
             this.keyboardBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -164,6 +207,7 @@ export class WindowAvoidAreaPxEnv implements window.UIEnvWindowAvoidAreaInfoPX, 
         const oldNavigationIndicatorValue = this.navigationIndicatorBackingValue.get(false);
         if (oldNavigationIndicatorValue !== newValue) {
             this.navigationIndicatorBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -190,8 +234,10 @@ export class WindowAvoidAreaPxEnv implements window.UIEnvWindowAvoidAreaInfoPX, 
         return this;
     }
 
-    public destroy(): void {
-        this.win.offAvoidAreaChange(this.avoidAreaChangeCallback);
+    public offWatchFunc(instanceId?: int32): void {
+        if (instanceId === undefined) {
+            this.win.offAvoidAreaChange(this.avoidAreaChangeCallback);
+        }
     }
 }
 
@@ -200,16 +246,39 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
     private cutoutVpBackingValue: IBackingValue<window.UIEnvAvoidAreaVP>;
     private keyboardVpBackingValue: IBackingValue<window.UIEnvAvoidAreaVP>;
     private navigationIndicatorVpBackingValue: IBackingValue<window.UIEnvAvoidAreaVP>;
+    private instanceId: int32;
 
     private win: window.Window;
     private context: UIContext;
     private areaInPx: Map<window.AvoidAreaType, window.AvoidArea> = new Map<window.AvoidAreaType, window.AvoidArea>();
     private uiObserver: UIObserver;
 
-    constructor(context: UIContext) {
-        this.context = context;
+    constructor(instanceId: int32) {
+        this.instanceId = instanceId;
+        this.context = UIContextUtil.getOrCreateUIContextById(this.instanceId);
         this.uiObserver = this.context.getUIObserver();
         this.win = window.findWindow(this.context.getWindowName()!);
+        this.initAreaInPx();
+        this.statusBarVpBackingValue = FactoryInternal.mkDecoratorValue<window.UIEnvAvoidAreaVP>('EnvStatusBarVp', this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_SYSTEM)!));
+        this.cutoutVpBackingValue = FactoryInternal.mkDecoratorValue<window.UIEnvAvoidAreaVP>('EnvCutoutVp', this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_CUTOUT)!));
+        this.keyboardVpBackingValue = FactoryInternal.mkDecoratorValue<window.UIEnvAvoidAreaVP>('EnvKeyboardVp', this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_KEYBOARD)!));
+        this.navigationIndicatorVpBackingValue = FactoryInternal.mkDecoratorValue<window.UIEnvAvoidAreaVP>('EnvNavigationIndicatorVp', this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR)!));
+    }
+
+    public reConstructor(instanceId: int32): void {
+        this.instanceId = instanceId;
+        this.context = UIContextUtil.getOrCreateUIContextById(this.instanceId);
+        this.uiObserver = this.context.getUIObserver();
+        this.win = window.findWindow(this.context.getWindowName()!);
+        this.areaInPx.clear();
+        this.initAreaInPx();
+        this.statusBar = this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_SYSTEM)!);
+        this.cutout = this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_CUTOUT)!);
+        this.keyboard = this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_KEYBOARD)!);
+        this.navigationIndicator = this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR)!);
+    }
+
+    private initAreaInPx(): void {
         for (const type of [
             window.AvoidAreaType.TYPE_SYSTEM, 
             window.AvoidAreaType.TYPE_CUTOUT, 
@@ -218,10 +287,9 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
         ]) {
             this.areaInPx.set(type, this.win.getWindowAvoidArea(type));
         }
-        this.statusBarVpBackingValue = FactoryInternal.mkDecoratorValue<window.UIEnvAvoidAreaVP>('EnvStatusBarVp', this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_SYSTEM)!));
-        this.cutoutVpBackingValue = FactoryInternal.mkDecoratorValue<window.UIEnvAvoidAreaVP>('EnvCutoutVp', this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_CUTOUT)!));
-        this.keyboardVpBackingValue = FactoryInternal.mkDecoratorValue<window.UIEnvAvoidAreaVP>('EnvKeyboardVp', this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_KEYBOARD)!));
-        this.navigationIndicatorVpBackingValue = FactoryInternal.mkDecoratorValue<window.UIEnvAvoidAreaVP>('EnvNavigationIndicatorVp', this.translateAvoidAreaToVp(this.areaInPx.get(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR)!));
+    }
+
+    public onWatchFunc(): void {
         this.win.onAvoidAreaChange(this.avoidAreaChangeCallback);
         this.uiObserver.onDensityUpdate(this.densityUpdateCallback);
     }
@@ -258,6 +326,7 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
         const oldStatusBarVpValue = this.statusBarVpBackingValue.get(false);
         if (oldStatusBarVpValue !== newValue) {
             this.statusBarVpBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -270,6 +339,7 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
         const oldCutoutVpValue = this.cutoutVpBackingValue.get(false);
         if (oldCutoutVpValue !== newValue) {
             this.cutoutVpBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -282,6 +352,7 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
         const oldKeyboardVpValue = this.keyboardVpBackingValue.get(false);
         if (oldKeyboardVpValue !== newValue) {
             this.keyboardVpBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -294,6 +365,7 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
         const oldNavigationIndicatorVpValue = this.navigationIndicatorVpBackingValue.get(false);
         if (oldNavigationIndicatorVpValue !== newValue) {
             this.navigationIndicatorVpBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -335,10 +407,12 @@ export class WindowAvoidAreaVpEnv implements window.UIEnvWindowAvoidAreaInfoVP, 
         return this;
     }
 
-    public destroy(): void {
+    public offWatchFunc(instanceId?: int32): void {
         this.areaInPx.clear();
         this.uiObserver.offDensityUpdate(this.densityUpdateCallback);
-        this.win.offAvoidAreaChange(this.avoidAreaChangeCallback);
+        if (instanceId === undefined) {
+            this.win.offAvoidAreaChange(this.avoidAreaChangeCallback);
+        }
     }
 }
 
@@ -346,12 +420,27 @@ export class WindowSizePxEnv implements window.Size, IEnvironmentValue<window.Si
     private widthBackingValue: IBackingValue<int>;
     private heightBackingValue: IBackingValue<int>;
     private win: window.Window;
+    private instanceId: int32;
     
-    constructor(context: UIContext) {
+    constructor(instanceId: int32) {
+        this.instanceId = instanceId;
+        const context = UIContextUtil.getOrCreateUIContextById(this.instanceId);
         this.win = window.findWindow(context.getWindowName()!);
         const props = this.win.getWindowProperties();
         this.widthBackingValue = FactoryInternal.mkDecoratorValue<int>('EnvWindowSizeWidth', props.windowRect.width);
         this.heightBackingValue = FactoryInternal.mkDecoratorValue<int>('EnvWindowSizeHeight', props.windowRect.height);
+    }
+
+    public reConstructor(instanceId: int32): void {
+        this.instanceId = instanceId;
+        const context = UIContextUtil.getOrCreateUIContextById(this.instanceId);
+        this.win = window.findWindow(context.getWindowName()!);
+        const props = this.win.getWindowProperties();
+        this.width = props.windowRect.width;
+        this.height = props.windowRect.height;
+    }
+
+    public onWatchFunc(): void {
         this.win.onWindowSizeChange(this.sizeChangeCallback);
     }
 
@@ -368,6 +457,7 @@ export class WindowSizePxEnv implements window.Size, IEnvironmentValue<window.Si
         const oldWidthValue = this.widthBackingValue.get(false);
         if (oldWidthValue !== newValue) {
             this.widthBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -380,6 +470,7 @@ export class WindowSizePxEnv implements window.Size, IEnvironmentValue<window.Si
         const oldHeightValue = this.heightBackingValue.get(false);
         if (oldHeightValue !== newValue) {
             this.heightBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -396,8 +487,10 @@ export class WindowSizePxEnv implements window.Size, IEnvironmentValue<window.Si
         return this;
     }
 
-    public destroy(): void {
-        this.win.offWindowSizeChange(this.sizeChangeCallback);
+    public offWatchFunc(instanceId?: int32): void {
+        if (instanceId === undefined) {
+            this.win.offWindowSizeChange(this.sizeChangeCallback);
+        }
     }
 }
 
@@ -409,9 +502,11 @@ export class WindowSizeVpEnv implements window.SizeInVP, IEnvironmentValue<windo
     private widthPx: int = 0;
     private heightPx: int = 0;
     private uiObserver: UIObserver;
+    private instanceId: int32;
     
-    constructor(context: UIContext) {
-        this.context = context;
+    constructor(instanceId: int32) {
+        this.instanceId = instanceId;
+        this.context = UIContextUtil.getOrCreateUIContextById(this.instanceId);
         this.uiObserver = this.context.getUIObserver();
         this.win = window.findWindow(this.context.getWindowName()!);
         const props = this.win.getWindowProperties();
@@ -419,6 +514,21 @@ export class WindowSizeVpEnv implements window.SizeInVP, IEnvironmentValue<windo
         this.heightPx = props.windowRect.height;
         this.widthVpBackingValue = FactoryInternal.mkDecoratorValue<double>('EnvWindowSizeWidthVp', this.context.px2vp(this.widthPx));
         this.heightVpBackingValue = FactoryInternal.mkDecoratorValue<double>('EnvWindowSizeHeightVp', this.context.px2vp(this.heightPx));
+    }
+
+    public reConstructor(instanceId: int32): void {
+        this.instanceId = instanceId;
+        this.context = UIContextUtil.getOrCreateUIContextById(this.instanceId);
+        this.uiObserver = this.context.getUIObserver();
+        this.win = window.findWindow(this.context.getWindowName()!);
+        const props = this.win.getWindowProperties();
+        this.widthPx = props.windowRect.width;
+        this.heightPx = props.windowRect.height;
+        this.width = this.context.px2vp(this.widthPx);
+        this.height = this.context.px2vp(this.heightPx);
+    }
+
+    public onWatchFunc(): void {
         this.win.onWindowSizeChange(this.sizeChangeCallback);
         this.uiObserver.onDensityUpdate(this.densityChangeCallback);
     }
@@ -436,6 +546,7 @@ export class WindowSizeVpEnv implements window.SizeInVP, IEnvironmentValue<windo
         const oldWidthVpValue = this.widthVpBackingValue.get(false);
         if (oldWidthVpValue !== newValue) {
             this.widthVpBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -448,6 +559,7 @@ export class WindowSizeVpEnv implements window.SizeInVP, IEnvironmentValue<windo
         const oldHeightVpValue = this.heightVpBackingValue.get(false);
         if (oldHeightVpValue !== newValue) {
             this.heightVpBackingValue.setNoCheck(newValue);
+            EnvDecoratedVariable.instanceIdSet.add(this.instanceId);
         }
     }
 
@@ -480,37 +592,75 @@ export class WindowSizeVpEnv implements window.SizeInVP, IEnvironmentValue<windo
         this.height = size.height;
     }
 
-    public destroy(): void {
-        this.win.offWindowSizeChange(this.sizeChangeCallback);
+    public offWatchFunc(instanceId?: int32): void {
         this.uiObserver.offDensityUpdate(this.densityChangeCallback);
+        if (instanceId === undefined) {
+            this.win.offWindowSizeChange(this.sizeChangeCallback);
+        }
     }
 }
 
-export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IEnvDecoratedVariable<T> {
-    private finalResult: IEnvironmentValue<T> | undefined;
+export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IEnvDecoratedVariable<T>, IEnvVariable {
+    private owningViewInternal: IVariableOwner;
+    private envValue: string;
+    public static instanceIdSet: Set<int32> = new Set<int32>();
+    private latestInstanceId: int32 | undefined = undefined;
+    private finalResultBackingValue: IBackingValue<IEnvironmentValue<T> | undefined>;
 
     constructor(owningView: IVariableOwner, envValue: string, varName: string, envOptions?: EnvOptions<T>) {
         super('@Env', owningView, varName);
-        const context = UIContextUtil.getOrCreateCurrentUIContext();
-        if (!context) {
-            StateMgmtConsole.error('current context is unavailable!');
-            throw new Error('current context is unavailable!');
-        }
-        const findInternalEnv = owningView.__findEnv__Internal(envValue);
-        if (findInternalEnv !== undefined) {
-            this.finalResult = findInternalEnv as IEnvironmentValue<T>;
+        this.owningViewInternal = owningView;
+        this.envValue = envValue;
+        this.finalResultBackingValue = FactoryInternal.mkDecoratorValue<IEnvironmentValue<T> | undefined>('EnvFinalResult', undefined);
+        this.registerEnv();
+    }
+
+    public registerEnv(instanceId?: int32): void {
+        const tempInstanceId: int32 = instanceId? instanceId : UIContextUtil.getCurrentInstanceId();
+        const getEnvProperty: Object | undefined = UIContextUtil.getEnvContextById(tempInstanceId, this.envValue);
+        if (getEnvProperty !== undefined) {
+            this.finalResult = getEnvProperty as IEnvironmentValue<T>;
+            this.finalResult!.reConstructor(tempInstanceId);
         } else {
-            this.finalResult = this.registerEnv(envValue, context);
-            if (this.finalResult === undefined) {
-                StateMgmtConsole.error('final result is undefined!');
-                throw new Error('final result is undefined!');
+            if (this.latestInstanceId === undefined) {
+                this.finalResult = this.getEnvProperty(this.envValue, tempInstanceId);
+            } else {
+                this.finalResult = this.getEnvProperty(this.envValue, this.latestInstanceId!);
+                this.finalResult!.reConstructor(tempInstanceId);
             }
-            owningView.__addEnv__Internal(envValue, this.finalResult! as Object);
+            UIContextUtil.setEnvContextById(tempInstanceId, this.envValue, this.finalResult! as Object);
         }
+        this.finalResult!.onWatchFunc();
+        if (instanceId === undefined) {
+            this.owningViewInternal.__addEnvInstance__Internal(this as IEnvVariable);
+        }
+        EnvDecoratedVariable.instanceIdSet.add(tempInstanceId);
+        this.latestInstanceId = tempInstanceId;
+    }
+
+    public unRegisterEnv(instanceId?: int32): void {
+        this.finalResult!.offWatchFunc(instanceId);
+        this.finalResult = undefined;
     }
 
     public resetOnReuse(newValue: T): void {
         return;
+    }
+
+    public shouldAddRef(): boolean {
+        return OBSERVE.renderingComponent > 0;
+    }
+
+    get finalResult(): IEnvironmentValue<T> | undefined {
+        const shouldAddRef = this.shouldAddRef();
+        return this.finalResultBackingValue.get(shouldAddRef);
+    }
+
+    set finalResult(newValue: IEnvironmentValue<T> | undefined) {
+        const oldFinalResultValue = this.finalResultBackingValue.get(false);
+        if (oldFinalResultValue !== newValue) {
+            this.finalResultBackingValue.setNoCheck(newValue);
+        }
     }
 
     public info(): string {
@@ -521,43 +671,43 @@ export class EnvDecoratedVariable<T> extends DecoratedVariableBase implements IE
         return this.finalResult!.get();
     }
 
-    private windowSizeLayoutBreakpointActivate(context: UIContext): IEnvironmentValue<T> {
-        return new WindowSizeLayoutBreakpoint(context) as IEnvironmentValue<T>;
+    private windowSizeLayoutBreakpointActivate(instanceId: int32): IEnvironmentValue<T> {
+        return new WindowSizeLayoutBreakpoint(instanceId) as IEnvironmentValue<T>;
     }
 
-    private windowAvoidAreaPxEnvActivate(context: UIContext): IEnvironmentValue<T> {
-        return new WindowAvoidAreaPxEnv(context) as IEnvironmentValue<T>;
+    private windowAvoidAreaPxEnvActivate(instanceId: int32): IEnvironmentValue<T> {
+        return new WindowAvoidAreaPxEnv(instanceId) as IEnvironmentValue<T>;
     }
 
-    private windowAvoidAreaVpEnvActivate(context: UIContext): IEnvironmentValue<T> {
-        return new WindowAvoidAreaVpEnv(context) as IEnvironmentValue<T>;
+    private windowAvoidAreaVpEnvActivate(instanceId: int32): IEnvironmentValue<T> {
+        return new WindowAvoidAreaVpEnv(instanceId) as IEnvironmentValue<T>;
     }
 
-    private windowSizePxEnvActivate(context: UIContext): IEnvironmentValue<T> {
-        return new WindowSizePxEnv(context) as IEnvironmentValue<T>;
+    private windowSizePxEnvActivate(instanceId: int32): IEnvironmentValue<T> {
+        return new WindowSizePxEnv(instanceId) as IEnvironmentValue<T>;
     }
 
-    private windowSizeVpEnvActivate(context: UIContext): IEnvironmentValue<T> {
-        return new WindowSizeVpEnv(context) as IEnvironmentValue<T>;
+    private windowSizeVpEnvActivate(instanceId: int32): IEnvironmentValue<T> {
+        return new WindowSizeVpEnv(instanceId) as IEnvironmentValue<T>;
     }
 
-    private registerEnv(key: string, context: UIContext): IEnvironmentValue<T> | undefined {
+    private getEnvProperty(key: string, instanceId: int32): IEnvironmentValue<T> | undefined {
         let ret: IEnvironmentValue<T> | undefined = undefined;
         switch (key) {
             case 'system.arkui.breakpoint':
-                ret = this.windowSizeLayoutBreakpointActivate(context);
+                ret = this.windowSizeLayoutBreakpointActivate(instanceId);
                 break;
             case 'system.window.avoidarea':
-                ret = this.windowAvoidAreaVpEnvActivate(context);
+                ret = this.windowAvoidAreaVpEnvActivate(instanceId);
                 break;
             case 'system.window.avoidarea.px':
-                ret = this.windowAvoidAreaPxEnvActivate(context);
+                ret = this.windowAvoidAreaPxEnvActivate(instanceId);
                 break;
             case 'system.window.size':
-                ret = this.windowSizeVpEnvActivate(context);
+                ret = this.windowSizeVpEnvActivate(instanceId);
                 break;
             case 'system.window.size.px':
-                ret = this.windowSizePxEnvActivate(context);
+                ret = this.windowSizePxEnvActivate(instanceId);
                 break;
             default:
                 break;

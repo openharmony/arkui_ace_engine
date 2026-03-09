@@ -31,6 +31,8 @@ export class ArkUIAniCustomNodeModule {
     native static _CustomNode_CallDefaultMeasure(ptr: KPointer): SizeResult
 
     native static _CustomNode_CallDefaultLayout(ptr: KPointer): void
+
+    native static _CustomNode_EnvFunction(ptr: KPointer, envFunc: (instanceId: int32) => void): void
 }
 
 export class MeasurableLayoutableInner implements Measurable, Layoutable {

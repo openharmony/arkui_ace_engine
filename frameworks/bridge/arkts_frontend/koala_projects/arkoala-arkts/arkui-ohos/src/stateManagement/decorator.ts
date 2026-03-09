@@ -21,6 +21,7 @@ import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
 import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
 import { IncrementalNode } from '@koalaui/runtime';
 import { CustomComponentLifecycle } from '../component/customComponent';
+import { IEnvVariable } from './decoratorImpl/decoratorEnv'
 
 export interface IDecoratorBaseRegistry {
     registerToOwningView(): void;
@@ -36,8 +37,7 @@ export interface IVariableOwner {
     __addProvider__Internal<T>(alias: string, v: IProviderDecoratedVariable<T>): void;
     __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
     __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void;
-    __addEnv__Internal(alias: string, v: Object): void;
-    __findEnv__Internal(alias: string): Object | undefined;
+    __addEnvInstance__Internal(envProperty: IEnvVariable): void;
 }
 
 export interface IDecoratedVariable {

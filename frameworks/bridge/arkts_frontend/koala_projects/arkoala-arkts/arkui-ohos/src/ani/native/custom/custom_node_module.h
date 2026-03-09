@@ -31,6 +31,8 @@ private:
         ani_env *env, [[maybe_unused]] ani_object obj, ani_long parent, ani_long child);
     static ani_object CustomNodeCallDefaultMeasure(ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
     static void CustomNodeCallDefaultLayout(ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
+    static void EnvBuildFunction(
+        ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_fn_object envFunc);
 };
 } // namespace OHOS::Ace::Ani
 

@@ -20,6 +20,7 @@ import { ArkUIAniModule } from "arkui.ani";
 
 export class UIContextUtil {
     static contextMap_: Map<int32, UIContext> = new Map<int32, UIContext>();
+    public static envContextMap: Map<int32, Map<string, Object>> = new Map<int32, Map<string, Object>>();
 
     static getOrCreateCurrentUIContext(): UIContext {
         let id: int32 = ArkUIAniModule._Common_Get_Current_InstanceId();
@@ -89,5 +90,21 @@ export class UIContextUtil {
     }
     static resolveUIContext(): Array<int> {
         return ArkUIAniModule._ResolveUIContext();
+    }
+    static setEnvContextById(instanceId: int32, envValue: string, envProperty: Object): void {
+        if (!UIContextUtil.envContextMap.has(instanceId)) {
+            const tempEnvMap: Map<string, Object> = new Map<string, Object>();
+            tempEnvMap.set(envValue, envProperty);
+            UIContextUtil.envContextMap.set(instanceId, tempEnvMap);
+        } else {
+            UIContextUtil.envContextMap.get(instanceId)!.set(envValue, envProperty);
+        }
+    }
+    static getEnvContextById(instanceId: int32, envValue: string): Object | undefined {
+        if (!UIContextUtil.envContextMap.has(instanceId) ||
+            !UIContextUtil.envContextMap.get(instanceId)!.has(envValue)) {
+            return undefined;
+        }
+        return UIContextUtil.envContextMap.get(instanceId)!.get(envValue);
     }
 }

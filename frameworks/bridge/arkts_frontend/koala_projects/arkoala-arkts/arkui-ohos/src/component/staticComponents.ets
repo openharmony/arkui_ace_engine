@@ -153,6 +153,11 @@ export class ArkCustomComponentRootPeer extends PeerNode {
     getChildPeerPtr(): KPointer {
         return this.childPeerPtr;
     }
+
+    getEnvInstanceId(envFunc: (instanceId: int32) => void): void {
+        ArkUIAniCustomNodeModule._CustomNode_EnvFunction(this.peer.ptr, envFunc);
+        return;
+    }
 }
 export interface Root {
 }

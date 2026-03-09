@@ -40,6 +40,7 @@ import { ObserveSingleton } from './stateManagement/base/observeSingleton'
 import { StateMgmtDFX, StateUpdateLoop } from './stateManagement'
 import { AceTrace } from 'arkui/base/AceTrace'
 import { flushBuilderRootNode } from './BuilderNode'
+import { EnvDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorEnv";
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -419,6 +420,14 @@ export class Application {
         let detachedRoots = getDetachedRootsByInstanceId(this.instanceId);
         for (const detachedRoot of detachedRoots.values()) {
             detachedRoot.compute()
+        }
+        if (EnvDecoratedVariable.instanceIdSet.size > 0) {
+            for (const item of EnvDecoratedVariable.instanceIdSet) {
+                let envDetachedRoots = getDetachedRootsByInstanceId(item);
+                for (const detachedRoot of envDetachedRoots.values()) {
+                    detachedRoot.compute();
+                }
+            }
         }
         updateLazyItems()
         this.uiContext!.updateParallelizeItemNode()
