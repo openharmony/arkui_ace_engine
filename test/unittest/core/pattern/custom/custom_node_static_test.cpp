@@ -171,4 +171,54 @@ HWTEST_F(CustomNodeStaticTestNg, CustomNodeStaticTest005, TestSize.Level1)
     EXPECT_EQ(node->GetId(), TEST_NODE_ID);
 }
 
+/**
+ * @tc.name: CustomNodeStaticTest006
+ * @tc.desc: Test DidDefaultMeasure with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeStaticTestNg, CustomNodeStaticTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Invoke DidDefaultMeasure with null frameNode
+     * @tc.expected: Should return SizeF(0, 0)
+     */
+    RefPtr<CustomMeasureLayoutNode> nullFrameNode = nullptr;
+    auto result = CustomNodeStatic::DidDefaultMeasure(nullFrameNode);
+    EXPECT_EQ(result.Width(), 0.0f);
+    EXPECT_EQ(result.Height(), 0.0f);
+}
+
+/**
+ * @tc.name: CustomNodeStaticTest007
+ * @tc.desc: Test DidDefaultMeasure with valid frameNode but no children
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeStaticTestNg, CustomNodeStaticTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomMeasureLayoutNode without children
+     * @tc.expected: FrameNode is created successfully
+     */
+    auto frameNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(TEST_NODE_ID, "");
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get initial geometry node frame size
+     * @tc.expected: Initial frame size is (0, 0)
+     */
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto initialSize = geometryNode->GetFrameSize();
+    EXPECT_EQ(initialSize.Width(), 0.0f);
+    EXPECT_EQ(initialSize.Height(), 0.0f);
+
+    /**
+     * @tc.steps: step3. Invoke DidDefaultMeasure
+     * @tc.expected: Should complete measurement and return valid frame size
+     */
+    auto result = CustomNodeStatic::DidDefaultMeasure(frameNode);
+    EXPECT_GE(result.Width(), 0.0f);
+    EXPECT_GE(result.Height(), 0.0f);
+}
+
 } // namespace OHOS::Ace::NG

@@ -440,7 +440,7 @@ void FillPlaceSizeProperty(ani_env* env, ani_object info, const NG::SizeF& size)
     }
 }
 
-ani_object GenMeasureResult(ani_env* env, const NG::SizeF& size)
+ani_object AniMeasureLayoutParamNG::GenMeasureResult(ani_env* env, const NG::SizeF& size)
 {
     ani_object measureResult_obj;
     ani_class cls;
@@ -701,7 +701,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
         ptr->UpdateSize(size);
         FillPlaceSizeProperty(env, aniClass, size);
 
-        ani_object measureResultObject = GenMeasureResult(env, size);
+        ani_object measureResultObject = AniMeasureLayoutParamNG::GenMeasureResult(env, size);
         return measureResultObject;
     }
 
@@ -785,7 +785,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
     ptr->UpdateSize(size);
     FillPlaceSizeProperty(env, aniClass, size);
 
-    ani_object measureResultObject = GenMeasureResult(env, size);
+    ani_object measureResultObject = AniMeasureLayoutParamNG::GenMeasureResult(env, size);
     return measureResultObject;
 }
 
