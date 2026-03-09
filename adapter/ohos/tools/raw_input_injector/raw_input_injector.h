@@ -27,12 +27,23 @@
 namespace OHOS {
 namespace Ace {
 
+inline constexpr int32_t DEFAULT_KEY_CODE = -999;
+inline constexpr int32_t DEFAULT_KEY_WAIT_TIME = -1;
 struct PointerInfo {
     int32_t startDisplayX = 0;
     int32_t startDisplayY = 0;
     int32_t lastDisplayX = 0;
     int32_t lastDisplayY = 0;
     int32_t fingerId = 0;
+};
+
+struct KeyCommand {
+    int32_t type = 0;
+    int32_t keyCode = DEFAULT_KEY_CODE;
+    std::vector<int32_t> pressedKeys;
+    bool pressedKeysState = false;
+    bool metaState = false;
+    int32_t waitTime = DEFAULT_KEY_WAIT_TIME;
 };
 
 class GlobalPointerStatus {
@@ -74,13 +85,22 @@ private:
     void PrintAllCommands(int32_t argc, char* argv[]);
     bool ParseAndPackCommandQueue(int32_t argc, char* argv[]);
     bool ParseAndPackCommandForTouch(int32_t argc, char* argv[]);
+    bool ParseAndPackCommandForKey(int32_t argc, char* argv[]);
     bool ParseFingerId(int32_t argc, char* argv[]);
     bool PackSingleCommandToQueueFromCurrentPos(CommandType type, int32_t argc, char* argv[]);
     bool CheckCommandQueue();
     bool ExecuteQueue();
+    bool ExecuteKeyQueue();
+    void DumpKeyCommands();
     bool PrepareAllInjectingActions(std::vector<std::vector<ConsumeActionInfo>>& allActions);
     void DumpAllInjectingActions(const std::vector<std::vector<ConsumeActionInfo>>& allActions);
     void DoInject(const std::vector<std::vector<ConsumeActionInfo>>& allActions);
+    void PushValidKeyCommand(KeyCommand& currentCmd, bool& hasPendingCmd);
+    bool HandleKeyCommand(int32_t opt, KeyCommand& currentCmd, bool& hasPendingCmd);
+    bool HandleKeyWaitCommand(int32_t argc, char* argv[], KeyCommand& currentCmd, bool& hasPendingCmd);
+    bool HandleKeyCode(int32_t argc, char* argv[], KeyCommand& currentCmd, bool hasPendingCmd);
+    bool HandleKeyPressedCode(int32_t argc, char* argv[], KeyCommand& currentCmd, bool hasPendingCmd);
+    bool HandleKeyMetaCode(int32_t argc, char* argv[], KeyCommand& currentCmd, bool hasPendingCmd);
     void PackInjectActionForOneRound(const std::vector<ConsumeActionInfo>& actionList, int32_t lastActivedFinger,
         int64_t currentTime, std::vector<InjectingInfo>& activedInjectingInfos,
         std::vector<InjectingInfo>& otherInjectingInfos);
@@ -100,6 +120,8 @@ private:
     std::string GetParamFromCurrentPosAndMoveOn(int32_t argc, char* argv[]);
     GlobalPointerStatus globalPointerStatus_;
     std::map<int32_t, CommandList> commandMap_;
+    std::vector<KeyCommand> keyCommands_;
+    bool isKeyMode_ = false;
     int32_t currentParsingFinger_ = 0;
     int32_t currentParsingPos_ = 1;
 };

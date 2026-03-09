@@ -47,6 +47,9 @@ public:
     static bool InjectOnePonterEvent(
         std::vector<InjectingInfo>& activingInjecting, std::vector<InjectingInfo>& allOtherInjectings);
 
+    static bool InjectKeyEvent(int32_t type, int32_t keyCode,
+        const std::vector<int32_t>& pressedKeys, std::vector<int32_t>& globalDownKeys);
+
 private:
     InjectingExecutor() = default;
     ~InjectingExecutor() = default;
