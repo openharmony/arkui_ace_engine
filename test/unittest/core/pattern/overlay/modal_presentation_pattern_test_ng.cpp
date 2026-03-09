@@ -17,7 +17,9 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "test/mock/adapter/mock_ui_session_manager.h"
 #include "test/mock/base/mock_foldable_window.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_window.h"
@@ -156,6 +158,91 @@ HWTEST_F(ModalPresentationPatternTestNg, OnInjectionEvent002, TestSize.Level1)
     std::string command = R"({"cmd":"OpenFullModal"})";
     int32_t ret = sheetPattern->OnInjectionEvent(command);
     EXPECT_EQ(ret, RET_FAILED);
+    ModalPresentationPatternTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnAppearTest001
+ * @tc.desc: Test ModalPresentationPattern OnAppear Event Report
+ * @tc.type: FUNC
+ */
+HWTEST_F(ModalPresentationPatternTestNg, OnAppearTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ModalPresentationPattern and setup environment
+     */
+    ModalPresentationPatternTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto modalNode = FrameNode::CreateFrameNode(
+        "Modal", 101, AceType::MakeRefPtr<ModalPresentationPattern>(201, ModalTransition::ALPHA, std::move(callback)));
+    ASSERT_NE(modalNode, nullptr);
+
+    auto modalPattern = modalNode->GetPattern<ModalPresentationPattern>();
+    ASSERT_NE(modalPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup Mock UiSessionManager
+     */
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetComponentChangeEventRegistered())
+        .WillRepeatedly(Return(true));
+
+    /**
+     * @tc.steps: step3. Test OnAppear event report
+     * @tc.expected: OnAppear should trigger ReportComponentChangeEvent
+     */
+    bool onAppearCalled = false;
+    modalPattern->UpdateOnAppear([&onAppearCalled]() { onAppearCalled = true; });
+    modalPattern->OnAppear();
+    EXPECT_TRUE(onAppearCalled);
+
+    /**
+     * @tc.steps: step4. Cleanup
+     */
+    ModalPresentationPatternTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnDisappearTest001
+ * @tc.desc: Test ModalPresentationPattern OnDisappear Event Report
+ * @tc.type: FUNC
+ */
+HWTEST_F(ModalPresentationPatternTestNg, OnDisappearTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ModalPresentationPattern and setup environment
+     */
+    ModalPresentationPatternTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto modalNode = FrameNode::CreateFrameNode(
+        "Modal", 101, AceType::MakeRefPtr<ModalPresentationPattern>(201, ModalTransition::ALPHA, std::move(callback)));
+    ASSERT_NE(modalNode, nullptr);
+
+    auto modalPattern = modalNode->GetPattern<ModalPresentationPattern>();
+    ASSERT_NE(modalPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Setup Mock UiSessionManager
+     */
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetComponentChangeEventRegistered())
+        .WillRepeatedly(Return(true));
+
+    /**
+     * @tc.steps: step3. Test OnDisappear event report
+     * @tc.expected: OnDisappear should trigger ReportComponentChangeEvent and set isExecuteOnDisappear_
+     */
+    bool onDisappearCalled = false;
+    modalPattern->UpdateOnDisappear([&onDisappearCalled]() { onDisappearCalled = true; });
+    modalPattern->OnDisappear();
+    EXPECT_TRUE(onDisappearCalled);
+    EXPECT_TRUE(modalPattern->IsExecuteOnDisappear());
+
+    /**
+     * @tc.steps: step4. Cleanup
+     */
     ModalPresentationPatternTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG
