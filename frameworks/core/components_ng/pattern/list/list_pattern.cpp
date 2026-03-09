@@ -2424,7 +2424,10 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
         indexInGroup > groupPattern->GetDisplayEndIndexInGroup()) {
         return Rect();
     }
-    auto groupItem = itemGroup->GetChildByIndex(indexInGroup + groupPattern->GetItemStartIndex());
+    auto prop = host->GetLayoutProperty<ListLayoutProperty>();
+    bool show = prop ? prop->GetShowCachedItemsValue(false) : false;
+    bool isCache = groupPattern->GetItemPosition().empty() && !show;
+    auto groupItem = itemGroup->GetChildByIndex(indexInGroup + groupPattern->GetItemStartIndex(), isCache);
     CHECK_NULL_RETURN(groupItem, Rect());
     auto groupItemGeometry = groupItem->GetGeometryNode();
     CHECK_NULL_RETURN(groupItemGeometry, Rect());
