@@ -16,7 +16,7 @@
 import { int32 } from '@koalaui/common';
 import { RecordData } from '@ohos.base';
 import { default as uiObserver } from '@ohos/arkui/observer';
-import { CustomComponentV2, CustomComponentLifecycle } from './customComponent';
+import { CustomComponentV2, CustomComponentLifecycle, CustomDelegate } from './customComponent';
 import { __CustomComponentLifecycle__Internal } from './customComponentLifecycle';
 import { InteropNativeModule, SerializerBase, DeserializerBase, KPointer } from '@koalaui/interop';
 import {
@@ -287,6 +287,13 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
             return envLocalVar;
         }
         return this.parent_?.__findEnv__Internal(envPropName);
+    }
+
+    __getDelegate__Internal<T extends ExtendableComponent, T_Options>(): CustomDelegate<T, T_Options> | undefined {
+        if (this.delegate_ instanceof CustomDelegate) {
+            return this.delegate_ as CustomDelegate<T, T_Options>;
+        }
+        return undefined;
     }
 
     getownedStateVariables(): Array<IDecoratorBaseRegistry> | undefined {

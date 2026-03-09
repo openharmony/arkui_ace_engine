@@ -291,6 +291,10 @@ void GetCustomNodeInfo(const RefPtr<NG::UINode> &customNode, std::unique_ptr<OHO
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     jsonNode->Put(INSPECTOR_DEBUGLINE, jsonJumpLine->ToString().c_str());
     jsonNode->Put(INSPECTOR_CUSTOM_VIEW_TAG, node->GetCustomTag().c_str());
+    auto debugLine = customNode->GetDebugLine();
+    if (debugLine != "") {
+        jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
+    }
 }
 
 void PutNodeInfoToJsonNode(RefPtr<OHOS::Ace::NG::FrameNode>& node,
