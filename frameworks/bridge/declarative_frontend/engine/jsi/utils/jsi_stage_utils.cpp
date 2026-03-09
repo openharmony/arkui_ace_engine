@@ -44,7 +44,7 @@ panda::Local<panda::JSValueRef> JsSetStageRenderGroup(panda::JsiRuntimeCallInfo*
 
     // 3. Get instanceId parameter (first argument, number type)
     panda::Local<panda::JSValueRef> instanceIdArg = info->GetCallArgRef(0);
-    if (instanceIdArg->IsUndefined() || instanceIdArg->IsNull()) {
+    if (instanceIdArg.IsNull() || instanceIdArg->IsUndefined() || instanceIdArg->IsNull()) {
         TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN,
             "JsSetStageRenderGroup failed: instanceId parameter is undefined or null");
         return panda::JSValueRef::Undefined(vm);
@@ -60,7 +60,7 @@ panda::Local<panda::JSValueRef> JsSetStageRenderGroup(panda::JsiRuntimeCallInfo*
 
     // 4. Get isRenderGroup parameter (second argument, boolean type)
     panda::Local<panda::JSValueRef> renderGroupArg = info->GetCallArgRef(1);
-    if (renderGroupArg->IsUndefined() || renderGroupArg->IsNull()) {
+    if (renderGroupArg.IsNull() || renderGroupArg->IsUndefined() || renderGroupArg->IsNull()) {
         TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN,
             "JsSetStageRenderGroup failed: isRenderGroup parameter is undefined or null");
         return panda::JSValueRef::Undefined(vm);
