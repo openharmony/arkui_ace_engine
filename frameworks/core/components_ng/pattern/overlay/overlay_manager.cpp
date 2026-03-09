@@ -3241,6 +3241,14 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         return RemoveMenu(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (InstanceOf<LinearLayoutPattern>(pattern)) {
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            auto dragDropManager = pipeline->GetDragDropManager();
+            bool isDragging = dragDropManager && dragDropManager->IsDragging();
+            if (isDragging || hasPixelMap_ || hasGatherNode_) {
+                return OVERLAY_EXISTS;
+            }
+        }
         return RemoveDragPreview(overlay) ? OVERLAY_REMOVE : OVERLAY_NOTHING;
     }
     return OVERLAY_NOTHING;
