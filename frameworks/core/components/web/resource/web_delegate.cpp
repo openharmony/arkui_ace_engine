@@ -8152,6 +8152,7 @@ void WebDelegate::OnNativeEmbedAllDestory()
         std::string embedId = dataInfo->GetEmbedId();
         TAG_LOGI(AceLogTag::ACE_WEB, "OnNativeEmbedAllDestory embdedid=%{public}s", embedId.c_str());
         std::string surfaceId = dataInfo->GetSurfaceId();
+        NG::SameLayerSurface::RemoveSameLayerSurfaceId(surfaceId);
         auto embedInfo = dataInfo->GetNativeEmbedInfo();
         if (embedInfo) {
             info = {embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(),
@@ -8212,6 +8213,33 @@ int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surface
     return webAccessibilityId;
 }
 
+void WebDelegate::HandleNativeEmbedLifecycle(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo)
+{
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto accessibilityManager = context->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+
+        std::string embedId = dataInfo->GetEmbedId();
+        std::string surfaceId = dataInfo->GetSurfaceId();
+        auto status = static_cast<OHOS::Ace::NativeEmbedStatus>(dataInfo->GetStatus());
+
+        if (status == OHOS::Ace::NativeEmbedStatus::CREATE || status == OHOS::Ace::NativeEmbedStatus::UPDATE) {
+            accessibilityManager->SetWebPatternBySurfaceId(surfaceId, webPattern_);
+            NG::SameLayerSurface::SetSameLayerSurfaceId(surfaceId);
+            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
+            embedDataInfo_.insert_or_assign(embedId, dataInfo);
+        } else if (status == OHOS::Ace::NativeEmbedStatus::DESTROY) {
+            accessibilityManager->RemoveWebPatternBySurfaceId(surfaceId);
+            NG::SameLayerSurface::RemoveSameLayerSurfaceId(surfaceId);
+            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
+            auto iter = embedDataInfo_.find(embedId);
+            if (iter != embedDataInfo_.end()) {
+                embedDataInfo_.erase(iter);
+            }
+        }
+}
+
 void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo)
 {
     if (!isEmbedModeEnabled_) {
@@ -8226,30 +8254,13 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         embedId = dataInfo->GetEmbedId();
         surfaceId = dataInfo->GetSurfaceId();
         status = static_cast<OHOS::Ace::NativeEmbedStatus>(dataInfo->GetStatus());
-        auto context = context_.Upgrade();
-        CHECK_NULL_VOID(context);
-        auto accessibilityManager = context->GetAccessibilityManager();
-        CHECK_NULL_VOID(accessibilityManager);
-
         auto embedInfo = dataInfo->GetNativeEmbedInfo();
         if (embedInfo) {
             info = { embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(), embedInfo->GetUrl(),
                 embedInfo->GetTag(), embedInfo->GetWidth(), embedInfo->GetHeight(), embedInfo->GetX(),
                 embedInfo->GetY(), embedInfo->GetParams() };
         }
-
-        if (status == OHOS::Ace::NativeEmbedStatus::CREATE || status == OHOS::Ace::NativeEmbedStatus::UPDATE) {
-            accessibilityManager->SetWebPatternBySurfaceId(surfaceId, webPattern_);
-            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
-            embedDataInfo_.insert_or_assign(embedId, dataInfo);
-        } else if (status == OHOS::Ace::NativeEmbedStatus::DESTROY) {
-            accessibilityManager->RemoveWebPatternBySurfaceId(surfaceId);
-            std::unique_lock<std::shared_mutex> writeLock(embedDataInfoMutex_);
-            auto iter = embedDataInfo_.find(embedId);
-            if (iter != embedDataInfo_.end()) {
-                embedDataInfo_.erase(iter);
-            }
-        }
+        HandleNativeEmbedLifecycle(dataInfo);
     }
 
     CHECK_NULL_VOID(taskExecutor_);
