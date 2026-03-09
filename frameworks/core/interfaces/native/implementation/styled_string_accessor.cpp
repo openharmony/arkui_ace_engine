@@ -130,7 +130,6 @@ template<>
 RefPtr<SpanBase> Convert(const Ark_CustomSpanWrapper& src)
 {
     auto peer = reinterpret_cast<CustomSpanNativePeer *>(src.nativeObj);
-    APP_LOGE("GLEB, SpanBase Convert(Ark_CustomSpanWrapper), ..., peer=%{public}p", peer);
     CHECK_NULL_RETURN(peer, nullptr);
     peer->SetObject(src.managed);
     peer->SetOnMeasure([arkCallback = CallbackHelper(src.onMeasure_callback)](
@@ -147,7 +146,6 @@ RefPtr<SpanBase> Convert(const Ark_CustomSpanWrapper& src)
         auto arkInfo = Converter::ArkValue<Ark_CustomSpanDrawInfo>(customSpanOptions);
         arkCallback.InvokeSync(arkCtxPtr, arkInfo);
     });
-    APP_LOGE("GLEB, SpanBase Convert(Ark_CustomSpanWrapper), done, peer=%{public}p", peer);
     return peer->GetSubSpan(0, 1);
 }
 template<>
@@ -160,7 +158,6 @@ template<>
 RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
 {
     RefPtr<SpanBase> dst;
-    APP_LOGE("GLEB, SpanBase Convert(Ark_StyleOptions), ...");
     auto optSpanBase = Converter::OptConvert<RefPtr<SpanBase>>(src.styledValue);
     CHECK_NULL_RETURN(optSpanBase && *optSpanBase, dst);
     auto start = Converter::OptConvert<int32_t>(src.start).value_or(0);
@@ -169,7 +166,6 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
     dst = (*optSpanBase);
     dst->UpdateStartIndex(start);
     dst->UpdateEndIndex(end);
-    APP_LOGE("GLEB, SpanBase Convert(Ark_StyleOptions), done");
     return dst;
 }
 } // namespace OHOS::Ace::NG::Converter
@@ -283,7 +279,6 @@ Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan
                 auto spans = Converter::OptConvert<std::vector<RefPtr<SpanBase>>>(*styles);
                 CHECK_NULL_VOID(spans);
                 UpdateSpansRange(spans.value(), data.length());
-                APP_LOGE("GLEB, StyledStringAccessor::ConstructImpl, Ark_String, spans.size=%{public}d", spans->size());
                 peer->spanString->BindWithSpans(spans.value());
             },
             [&peer](const Ark_ImageAttachment& arkImageAtt) {
@@ -340,11 +335,7 @@ Opt_Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
     } else {
         spans = peer->spanString->GetSpans(spanStart, spanLength);
     }
-    APP_LOGE("GLEB, StyledStringAccessor::GetStylesImpl, spans.size=%{public}d", spans.size());
-    auto optSpanStyle = Converter::ArkValue<Opt_Array_SpanStyle>(spans, Converter::FC);
-    APP_LOGE("GLEB, StyledStringAccessor::GetStylesImpl, optSpanStyle.value.length=%{public}d", optSpanStyle.value.length);
-    return optSpanStyle;
-    // return Converter::ArkValue<Opt_Array_SpanStyle>(spans, Converter::FC);
+    return Converter::ArkValue<Opt_Array_SpanStyle>(spans, Converter::FC);
 }
 Ark_Boolean EqualsImpl(Ark_StyledString peer,
                        Ark_StyledString other)

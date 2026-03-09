@@ -80,7 +80,6 @@ Ark_MutableStyledString ConstructImpl(const Ark_Union_String_ImageAttachment_Cus
                 auto customSpan = AceType::DynamicCast<CustomSpan>(span);
                 CHECK_NULL_VOID(customSpan);
                 peer->spanString = AceType::MakeRefPtr<MutableSpanString>(customSpan);
-                APP_LOGE("GLEB, MutableStyledStringAccessor::ConstructImpl, Ark_CustomSpanWrapper, done");
             },
             []() {}
         );

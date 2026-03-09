@@ -627,7 +627,6 @@ void CreateCustomSpanWrapper(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBas
         .resourceId {}, .hold {emptyFunc}, .release {emptyFunc}
     };
 
-    APP_LOGE("GLEB, AssignArkValue(Ark_SpanStyle, SpanBase), CustomSpan, ...");
     CHECK_NULL_VOID(src);
     auto custSpanPeer = AceType::DynamicCast<CustomSpanNativePeer>(src);
     CHECK_NULL_VOID(custSpanPeer);
@@ -638,7 +637,6 @@ void CreateCustomSpanWrapper(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBas
         .onDraw_callback {.resource {emtpyResource}, .call {}, .callSync {}},
     };
     dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_CustomSpanWrapper>(custSpanWrap);
-    APP_LOGE("GLEB, AssignArkValue(Ark_SpanStyle, SpanBase), CustomSpan, done");
 }
 } // namespace
 
@@ -683,7 +681,6 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
             break;
         case Ace::SpanType::CustomSpan:
             CreateCustomSpanWrapper(dst, src);
-            APP_LOGE("GLEB, AssignArkValue(Ark_SpanStyle, SpanBase), CustomSpan, done");
             break;
         case Ace::SpanType::ExtSpan: {
             auto userDataSpanHolder = AceType::DynamicCast<UserDataSpanHolder>(src);

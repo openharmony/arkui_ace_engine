@@ -29,38 +29,28 @@ struct CustomSpanNativePeer : public OHOS::Ace::CustomSpan {
           spanStringBaseSet_(other.spanStringBaseSet_),
           obj_(other.obj_)
     {
-        APP_LOGE("GLEB, CustomSpanNativePeer::ctor(other), this=%{public}p", this);
-
         if (obj_.resource.hold) {
             (*obj_.resource.hold)(obj_.resource.resourceId);
-            APP_LOGE("GLEB, SpanObjectHolder::ctor(arkObj), this=%{public}p, id=%{public}d, hold done", this, obj_.resource.resourceId);
         }
     }
 
 public:
-    CustomSpanNativePeer() : OHOS::Ace::CustomSpan(), spanStringBaseSet_(new SpanSet()), isOriginal_(true)
+    CustomSpanNativePeer() : OHOS::Ace::CustomSpan(), spanStringBaseSet_(new SpanSet()), isOriginal_(true) {}
+    ~CustomSpanNativePeer() override
     {
-        APP_LOGE("GLEB, CustomSpanNativePeer::ctor, this=%{public}p", this);
-    }
-    ~CustomSpanNativePeer()
-    {
-        APP_LOGE("GLEB, CustomSpanNativePeer::dtor, this=%{public}p", this);
         if (!isOriginal_ && obj_.resource.release) {
             (*obj_.resource.release)(obj_.resource.resourceId);
-            APP_LOGE("GLEB, CustomSpanNativePeer::dtor, ..., this=%{public}p, id=%{public}d, release done", this, obj_.resource.resourceId);
         }
     }
 
     void AddStyledString(const OHOS::Ace::WeakPtr<OHOS::Ace::SpanStringBase>& spanString) override
     {
-        APP_LOGE("GLEB, CustomSpanNativePeer::AddStyledString, this=%{public}p", this);
         if (spanStringBaseSet_) {
             spanStringBaseSet_->insert(spanString);
         }
     }
     void RemoveStyledString(const OHOS::Ace::WeakPtr<OHOS::Ace::SpanStringBase>& spanString) override
     {
-        APP_LOGE("GLEB, CustomSpanNativePeer::RemoveStyledString, this=%{public}p", this);
         if (spanStringBaseSet_) {
             spanStringBaseSet_->erase(spanString);
         }
@@ -89,7 +79,6 @@ public:
     void SetObject(const Ark_Object &arkObj)
     {
         obj_ = arkObj;
-        APP_LOGE("GLEB, CustomSpanNativePeer::SetObject, this=%{public}p, id=%{public}d", this, obj_.resource.resourceId);
     }
     const Ark_Object &GetObject() const
     {
