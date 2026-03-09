@@ -865,11 +865,13 @@ namespace OHOS::Ace::NG {
         int32_t count = GetTotalCount();
         UpdateHistoricalTotalCount(count);
         bool needBuild = false;
-        for (auto& [index, node] : cachedItems_) {
+        for (auto iter = cachedItems_.begin(); iter != cachedItems_.end();) {
+            auto& [index, node] = *iter;
             bool isInRange = (index < count) && ((start <= end && start <= index && end >= index) ||
                 (start > end && (index <= end || index >= start)));
             if (!isInRange) {
                 if (!node.second) {
+                    expiringItem_.find(node.first) == expiringItem_.end() ? iter = cachedItems_.erase(iter) : ++iter;
                     continue;
                 }
                 auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
@@ -883,6 +885,7 @@ namespace OHOS::Ace::NG {
                     ProcessOffscreenNode(tempNode, true);
                 }
                 needBuild = true;
+                ++iter;
                 continue;
             }
             if (node.second) {
@@ -890,6 +893,7 @@ namespace OHOS::Ace::NG {
                 if (frameNode) {
                     frameNode->SetActive(true);
                 }
+                ++iter;
                 continue;
             }
             auto keyIter = expiringItem_.find(node.first);
@@ -901,6 +905,7 @@ namespace OHOS::Ace::NG {
                     frameNode->SetActive(true);
                 }
             }
+            ++iter;
             needBuild = true;
         }
         return needBuild;
