@@ -1854,4 +1854,57 @@ HWTEST_F(ListAttrTestNg, SetScrollSnapAnimationSpeed001, TestSize.Level1)
     model.SetScrollSnapAnimationSpeed(AceType::RawPtr(frameNode_), ScrollSnapAnimationSpeed::NORMAL);
     EXPECT_EQ(model.GetScrollSnapAnimationSpeed(AceType::RawPtr(frameNode_)), ScrollSnapAnimationSpeed::NORMAL);
 }
+
+/**
+ * @tc.name: FadingEdgeProperty001
+ * @tc.desc: Test fadingEdge and defaultFadingEdge properties in ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, FadingEdgeProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with default properties.
+     * @tc.expected: Created successful.
+     */
+    ListModelNG model = CreateList();
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ToJsonValue and check default fadingEdge values.
+     * @tc.expected: fadingEdge and defaultFadingEdge are both false by default.
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    auto paintProperty = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->ToJsonValue(json, filter);
+
+    EXPECT_EQ(json->GetBool("fadingEdge"), false);
+    EXPECT_EQ(json->GetBool("defaultFadingEdge"), false);
+    EXPECT_EQ(paintProperty->GetDefaultFadingEdge(), false);
+
+    /**
+     * @tc.steps: step3. SetFadingEdge to true.
+     * @tc.expected: fadingEdge property is true after setting.
+     */
+    paintProperty->UpdateFadingEdge(true);
+
+    // Re-generate JSON to verify the change
+    json = JsonUtil::Create(true);
+    paintProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetBool("fadingEdge"), true);
+    // defaultFadingEdge remains false as GetDefaultFadingEdge() returns false by default
+    EXPECT_EQ(json->GetBool("defaultFadingEdge"), false);
+
+    /**
+     * @tc.steps: step4. UpdateDefaultFadingEdge to true.
+     * @tc.expected: fadingEdge and defaultFadingEdge are both true by default.
+     */
+    paintProperty->UpdateDefaultFadingEdge(true);
+    // Re-generate JSON to verify the change
+    json = JsonUtil::Create(true);
+    paintProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetBool("fadingEdge"), true);
+    EXPECT_EQ(json->GetBool("defaultFadingEdge"), true);
+}
 } // namespace OHOS::Ace::NG
