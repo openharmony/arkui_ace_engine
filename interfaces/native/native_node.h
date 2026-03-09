@@ -8772,6 +8772,13 @@ typedef struct {
 } ArkUI_TextChangeEvent;
 
 /**
+ * @brief Defines a data structure for the text editor content change event.
+ *
+ * @since 24
+ */
+typedef struct OH_ArkUI_TextEditorChangeEvent OH_ArkUI_TextEditorChangeEvent;
+
+/**
  * @brief Defines a interceptable data structure for component events.
  *
  * @since 24
@@ -9856,6 +9863,37 @@ typedef enum {
     NODE_TEXT_EDITOR_ON_COPY,
 
     /**
+     * @brief Defines the event triggered before text content is about to change in
+     * <b>ARKUI_NODE_TEXT_EDITOR</b> component.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link OH_ArkUI_TextEditorChangeEvent}. \n
+     * @return Whether the content change is allowed. \n
+     * You can set the return value using <b>OH_ArkUI_NodeEvent_SetReturnNumberValue</b>. \n
+     * value.i32 at index 0 in the return value indicates whether the content change is allowed.
+     * <b>0</b>: not allowed. <b>1</b>: allowed. \n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ON_WILL_CHANGE,
+
+    /**
+     * @brief Defines the event triggered after text content changed in
+     * <b>ARKUI_NODE_TEXT_EDITOR</b> component.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains four parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: start index of range of content that was replaced. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: end index of range of content that was replaced. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: start index of range of content that was newly added. \n
+     * <b>ArkUI_NodeComponentEvent.data[3].i32</b>: end index of range of content that was newly added. \n
+     *
+     * @since 24
+     */
+    NODE_TEXT_EDITOR_ON_DID_CHANGE,
+
+    /**
      * @brief Defines the event triggered when the index of the currently displayed element of this
      * <b>ARKUI_NODE_SWIPER</b> instance changes.
      *
@@ -10765,6 +10803,16 @@ int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_Nu
  * @since 22
  */
 ArkUI_TouchTestInfo* OH_ArkUI_NodeEvent_GetTouchTestInfo(ArkUI_NodeEvent* nodeEvent);
+
+/**
+ * @brief Obtains a <b>OH_ArkUI_TextEditorChangeEvent</b> object from the specified <b>ArkUI_NodeEvent</b> object.
+ *
+ * @param event Indicates the pointer to an <b>ArkUI_NodeEvent</b> object.
+ * @return Returns the pointer to an <b>OH_ArkUI_TextEditorChangeEvent</b> object.
+ *         Returns <b>null</b> if the input parameter is invalid or does not represent a text editor change event.
+ * @since 24
+ */
+OH_ArkUI_TextEditorChangeEvent* OH_ArkUI_NodeEvent_GetTextEditorOnWillChangeEvent(ArkUI_NodeEvent* event);
 
 /**
     * @brief Defines the dirty area flag passed in the <b>::markDirty</b> API.

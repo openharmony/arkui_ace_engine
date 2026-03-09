@@ -1377,4 +1377,74 @@ void RichEditorModelNG::SetScrollBarColor(FrameNode* frameNode, std::optional<Co
     richEditorPattern->UpdateScrollBarColor(value, true);
 }
 
+SelectionRangeInfo RichEditorModelNG::GetSelectionRangeInfo(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, SelectionRangeInfo(0, 0));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, SelectionRangeInfo(0, 0));
+    auto start = std::max(pattern->GetTextSelector().GetTextStart(), 0);
+    auto end = std::max(pattern->GetTextSelector().GetTextEnd(), 0);
+    if (start == end) {
+        start = pattern->GetCaretPosition();
+        end = pattern->GetCaretPosition();
+    }
+    return SelectionRangeInfo(start, end);
+}
+
+void RichEditorModelNG::SetStyledString(FrameNode* frameNode, const SpanString* value)
+{
+    CHECK_NULL_VOID(frameNode && value);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto mutableSpanString = AceType::MakeRefPtr<MutableSpanString>(u"");
+    auto length = value->GetLength();
+    auto target = value->GetSubSpanString(0, length);
+    mutableSpanString->AppendSpanString(target);
+    pattern->SetStyledString(mutableSpanString);
+}
+
+SpanStringBase* RichEditorModelNG::GetStyledString(FrameNode* frameNode)
+{
+    MutableSpanString* mutableSpanString = new MutableSpanString(u"");
+    CHECK_NULL_RETURN(frameNode, mutableSpanString);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, mutableSpanString);
+    auto styledString = pattern->GetStyledString();
+    CHECK_NULL_RETURN(styledString, mutableSpanString);
+    auto length = styledString->GetLength();
+    auto spanString = styledString->GetSubSpanString(0, length);
+    mutableSpanString->AppendSpanString(spanString);
+    mutableSpanString->SetFramNode(pattern->GetContentHost());
+    return mutableSpanString;
+}
+
+void RichEditorModelNG::SetStyledPlaceholder(FrameNode* frameNode, const SpanString* value)
+{
+    CHECK_NULL_VOID(frameNode && value);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto mutableSpanString = AceType::MakeRefPtr<MutableSpanString>(u"");
+    auto length = value->GetLength();
+    auto target = value->GetSubSpanString(0, length);
+    mutableSpanString->AppendSpanString(target);
+    pattern->SetPlaceholderStyledString(mutableSpanString);
+}
+
+void RichEditorModelNG::SetOnStyledStringWillChange(FrameNode* frameNode,
+    std::function<bool(const StyledStringChangeValue&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStyledStringWillChange(std::move(func));
+}
+ 
+void RichEditorModelNG::SetOnStyledStringDidChange(FrameNode* frameNode,
+    std::function<void(const StyledStringChangeValue&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStyledStringDidChange(std::move(func));
+}
 } // namespace OHOS::Ace::NG

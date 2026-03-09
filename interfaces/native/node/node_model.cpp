@@ -714,6 +714,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent)
         case PREVENTABLE_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->preventableEvent.subKind);
             break;
+        case TEXT_EDITOR_CHANGE_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->textEditorChangeEvent.subKind);
+            break;
         default:
             break; /* Empty */
     }

@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "base/image/image_packer.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace {

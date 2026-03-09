@@ -235,6 +235,13 @@ typedef struct ArkUI_ListItemSwipeActionItem ArkUI_ListItemSwipeActionItem;
 typedef struct ArkUI_ListItemSwipeActionOption ArkUI_ListItemSwipeActionOption;
 
 /**
+* @brief Define the data objects of styled string supported by text components.
+*
+* @since 14
+*/
+typedef struct ArkUI_StyledString_Descriptor ArkUI_StyledString_Descriptor;
+
+/**
  * @brief 指定设置在相对容器中子组件的对齐规则。
  *
  * @since 12
@@ -9410,6 +9417,63 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_SetTypingStyle(
  */
 ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_GetTypingStyle(
     OH_ArkUI_TextEditorStyledStringController* controller, OH_ArkUI_TextEditorTextStyle* style);
+
+/**
+ * @brief Gets the selection of text editor with styled string controller.
+ *
+ * @note All input pointer parameters must be allocated, managed, and released by the caller.
+ * @param controller <b>TextEditor</b> styled string controller.
+ * @param start Start offset of selection.
+ * @param end End offset of selection.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_GetSelection(
+    const OH_ArkUI_TextEditorStyledStringController* controller, uint32_t* start, uint32_t* end);
+
+/**
+ * @brief Sets the styled string of text editor.
+ *
+ * @note All input pointer parameters must be allocated, managed, and released by the caller.
+ * @param controller <b>TextEditor</b> styled string controller.
+ * @param descriptor Pointer to a <b>ArkUI_StyledString_Descriptor</b> object.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_SetStyledString(
+    const OH_ArkUI_TextEditorStyledStringController* controller, const ArkUI_StyledString_Descriptor* descriptor);
+
+/**
+ * @brief Gets the styled string of text editor.
+ *
+ * @note All input pointer parameters must be allocated, managed, and released by the caller.
+ * @param controller <b>TextEditor</b> styled string controller.
+ * @param descriptor Pointer to a <b>ArkUI_StyledString_Descriptor</b> object.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_GetStyledString(
+    const OH_ArkUI_TextEditorStyledStringController* controller, ArkUI_StyledString_Descriptor* descriptor);
+
+/**
+ * @brief Sets the styled string placeholder.
+ *
+ * @note All input pointer parameters must be allocated, managed, and released by the caller.
+ * @param controller <b>TextEditor</b> styled string controller.
+ * @param descriptor Pointer to a <b>ArkUI_StyledString_Descriptor</b> object.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_SetStyledPlaceholder(
+    const OH_ArkUI_TextEditorStyledStringController* controller, const ArkUI_StyledString_Descriptor* descriptor);
 
 /**
  * @brief Creates a TextEditor selection menu options object.

@@ -265,7 +265,11 @@ struct OH_ArkUI_DecorationStyleOptions {
     ArkUI_TextDecorationStyle style;
     float thicknessScale;
 };
- 
+
+struct OH_ArkUI_DecorationStyle : public OH_ArkUI_DecorationStyleOptions {
+    bool enableMultiType;
+};
+
 struct OH_ArkUI_TextDataDetectorConfig {
     std::vector<ArkUI_TextDataDetectorType> types;
     void* onDetectResultUpdate;

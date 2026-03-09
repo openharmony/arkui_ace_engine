@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -681,6 +682,42 @@ void GestureSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
     spanItem->onTouch = nullptr;
 }
 
+RefPtr<SpanBase> NapiGestureSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<NapiGestureSpan>(GetGestureStyle(), start, end);
+    auto gestureSpan = DynamicCast<NapiGestureSpan>(spanBase);
+    CHECK_NULL_RETURN(gestureSpan, spanBase);
+    if (GetGestureSpanId() == -1) {
+        SetGestureSpanId(gGestureSpanId.fetch_add(1) % GESTURES_SPAN_DIVIDE_SIZE);
+    }
+    gestureSpan->SetGestureSpanId(GetGestureSpanId());
+    gestureSpan->onNapiClick_ = onNapiClick_;
+    gestureSpan->onNapiLongPress_ = onNapiLongPress_;
+    gestureSpan->onNapiTouch_ = onNapiTouch_;
+    return spanBase;
+}
+
+bool NapiGestureSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto gestureSpan = DynamicCast<NapiGestureSpan>(other);
+    if (!gestureSpan) {
+        return false;
+    }
+    if (onNapiClick_ != gestureSpan->onNapiClick_ ||
+        onNapiLongPress_ != gestureSpan->onNapiLongPress_ ||
+        onNapiTouch_ != gestureSpan->onNapiTouch_) {
+        return false;
+    }
+    return GestureSpan::IsAttributesEqual(other);
+}
+
+void NapiGestureSpan::ClearSpecialData()
+{
+    onNapiClick_ = nullptr;
+    onNapiLongPress_ = nullptr;
+    onNapiTouch_ = nullptr;
+}
+
 // TextShadowSpan
 TextShadowSpan::TextShadowSpan(std::vector<Shadow> textShadow) : SpanBase(0, 0), textShadow_(std::move(textShadow)) {}
 
@@ -950,6 +987,27 @@ bool CustomSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     return false;
 }
 
+
+RefPtr<SpanBase> NapiCustomSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    if (end - start > 1) {
+        return nullptr;
+    }
+    RefPtr<SpanBase> spanBase = MakeRefPtr<NapiCustomSpan>(GetOnMeasure(), GetOnDraw(), start, end);
+    auto customSpan = DynamicCast<NapiCustomSpan>(spanBase);
+    if (customSpan) {
+        customSpan->onNapiMeasure_ = onNapiMeasure_;
+        customSpan->onNapiDraw_ = onNapiDraw_;
+    }
+    return spanBase;
+}
+
+void NapiCustomSpan::ClearSpecialData()
+{
+    onNapiMeasure_ = nullptr;
+    onNapiDraw_ = nullptr;
+}
+
 // ParagraphStyleSpan
 ParagraphStyleSpan::ParagraphStyleSpan(SpanParagraphStyle paragraphStyle)
     : SpanBase(0, 0), paragraphStyle_(std::move(paragraphStyle))
@@ -1070,6 +1128,37 @@ RefPtr<SpanBase> ParagraphStyleSpan::GetSubSpan(int32_t start, int32_t end)
 {
     RefPtr<SpanBase> spanBase = MakeRefPtr<ParagraphStyleSpan>(paragraphStyle_, start, end);
     return spanBase;
+}
+
+
+RefPtr<SpanBase> NapiParagraphStyleSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<NapiParagraphStyleSpan>(GetParagraphStyle(), start, end);
+    auto paragraphStyleSpan = DynamicCast<NapiParagraphStyleSpan>(spanBase);
+    if (paragraphStyleSpan) {
+        paragraphStyleSpan->onNapiDrawLeadingMargin_ = onNapiDrawLeadingMargin_;
+        paragraphStyleSpan->onNapiGetLeadingMargin_ = onNapiGetLeadingMargin_;
+    }
+    return spanBase;
+}
+
+bool NapiParagraphStyleSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto paragraphSpan = DynamicCast<NapiParagraphStyleSpan>(other);
+    if (!paragraphSpan) {
+        return false;
+    }
+    if (paragraphSpan->onNapiDrawLeadingMargin_ != onNapiDrawLeadingMargin_ ||
+        paragraphSpan->onNapiGetLeadingMargin_ != onNapiGetLeadingMargin_) {
+        return false;
+    }
+    return ParagraphStyleSpan::IsAttributesEqual(other);
+}
+
+void NapiParagraphStyleSpan::ClearSpecialData()
+{
+    onNapiDrawLeadingMargin_ = nullptr;
+    onNapiGetLeadingMargin_ = nullptr;
 }
 
 // LineHeightSpan
@@ -1203,6 +1292,8 @@ bool HalfLeadingSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 // ExtSpan
 ExtSpan::ExtSpan(int32_t start, int32_t end) : SpanBase(start, end) {}
 
+ExtSpan::ExtSpan(void* userData, int32_t start, int32_t end) : SpanBase(start, end), userData_(userData) {}
+
 RefPtr<SpanBase> ExtSpan::GetSubSpan(int32_t start, int32_t end)
 {
     RefPtr<SpanBase> spanBase = MakeRefPtr<ExtSpan>(start, end);
@@ -1229,6 +1320,11 @@ std::string ExtSpan::ToString() const
 bool ExtSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 {
     return false;
+}
+
+void ExtSpan::ClearSpecialData()
+{
+    userData_ = nullptr;
 }
 
 BackgroundColorSpan::BackgroundColorSpan(

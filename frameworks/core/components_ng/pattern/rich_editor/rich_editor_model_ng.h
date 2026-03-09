@@ -198,6 +198,14 @@ public:
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType,
         TextResponseType& responseType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void ResetBindSelectionMenu(FrameNode* frameNode);
+    static SelectionRangeInfo GetSelectionRangeInfo(FrameNode* frameNode);
+    static void SetStyledString(FrameNode* frameNode, const SpanString* value);
+    static SpanStringBase* GetStyledString(FrameNode* frameNode);
+    static void SetStyledPlaceholder(FrameNode* frameNode, const SpanString* value);
+    static void SetOnStyledStringWillChange(FrameNode* frameNode,
+        std::function<bool(const NG::StyledStringChangeValue&)>&& func);
+    static void SetOnStyledStringDidChange(FrameNode* frameNode,
+        std::function<void(const NG::StyledStringChangeValue&)>&& func);
 
 private:
     void SetDraggable(bool draggable);
