@@ -138,6 +138,24 @@ AllocatorType PixelMapOhos::AllocatorTypeConverter(Media::AllocatorType allocato
     }
 }
 
+Media::AllocatorType PixelMapOhos::ConvertToMediaAllocatorType(Ace::AllocatorType allocatorType)
+{
+    switch (allocatorType) {
+        case AllocatorType::DEFAULT:
+            return Media::AllocatorType::DEFAULT;
+        case AllocatorType::HEAP_ALLOC:
+            return Media::AllocatorType::HEAP_ALLOC;
+        case AllocatorType::SHARE_MEM_ALLOC:
+            return Media::AllocatorType::SHARE_MEM_ALLOC;
+        case AllocatorType::CUSTOM_ALLOC:
+            return Media::AllocatorType::CUSTOM_ALLOC;
+        case AllocatorType::DMA_ALLOC:
+            return Media::AllocatorType::DMA_ALLOC;
+        default:
+            return Media::AllocatorType::DEFAULT;
+    }
+}
+
 Media::ScaleMode PixelMapOhos::ConvertToMediaScaleMode(Ace::ScaleMode scaleMode)
 {
     switch (scaleMode) {

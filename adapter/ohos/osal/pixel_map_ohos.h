@@ -32,6 +32,7 @@ public:
     static Media::PixelFormat ConvertToMediaPixelFormat(Ace::PixelFormat pixelFormat);
     static AlphaType AlphaTypeConverter(Media::AlphaType alphaType);
     static Media::AlphaType ConvertToMediaAlphaType(Ace::AlphaType alphaType);
+    static Media::AllocatorType ConvertToMediaAllocatorType(Ace::AllocatorType allocatorType);
     static AllocatorType AllocatorTypeConverter(Media::AllocatorType allocatorType);
     static Media::ScaleMode ConvertToMediaScaleMode(Ace::ScaleMode scaleMode);
     int32_t GetWidth() const override;
