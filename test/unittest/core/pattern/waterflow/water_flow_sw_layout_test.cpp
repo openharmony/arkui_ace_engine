@@ -2571,4 +2571,36 @@ HWTEST_F(WaterFlowSWTest, ZeroHeightAtEnd002, TestSize.Level1)
         EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
     }
 }
+
+/**
+ * @tc.name: TrailingCallbackClamp001
+ * @tc.desc: When scrolled to bottom (offsetEnd_ && !itemStart_) and TopFinalPos is negative,
+ *           trailing callback should return >= 1.0 to prevent false top-overscroll detection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, TrailingCallbackClamp001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateRandomWaterFlowItems(50);
+    CreateDone();
+
+    // Scroll to bottom so offsetEnd_ = true, itemStart_ = false
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_FALSE(info_->itemStart_);
+    EXPECT_TRUE(info_->offsetEnd_);
+
+    // Simulate post-bounce state: add positive delta_ to force TopFinalPos() negative,
+    // reproducing the condition where CurrentPos(0) > TopFinalPos(negative) causes
+    // a wrong-direction spring in StartSpringMotion.
+    float origTopFinalPos = info_->TopFinalPos();
+    info_->delta_ = std::abs(origTopFinalPos) + 10.0f;
+    EXPECT_LT(info_->TopFinalPos(), 0.0);
+
+    auto scrollEffect = pattern_->GetScrollEdgeEffect();
+    ASSERT_TRUE(scrollEffect);
+    EXPECT_GE(scrollEffect->trailingCallback_(), 1.0);
+    EXPECT_GE(scrollEffect->initTrailingCallback_(), 1.0);
+}
 } // namespace OHOS::Ace::NG
