@@ -186,6 +186,7 @@ public:
     MOCK_METHOD(void, ForceFullGC, (), (override));
     MOCK_METHOD(bool, WindowIsShow, (), (const, override));
     MOCK_METHOD(bool, IsMainWindow, (), (const, override));
+    MOCK_METHOD(bool, IsSubWindow, (), (const, override));
     MOCK_METHOD(Rect, GetGlobalScaledRect, (), (const, override));
     MOCK_METHOD(void, LoadCompleteManagerStartCollect, (const std::string& url), (override));
     MOCK_METHOD(void, LoadCompleteManagerStopCollect, (), (override));
