@@ -125,9 +125,8 @@ export interface LayoutCallbacks {
             if (peerNode) {
                 ArkUIAniCustomNodeModule._CustomNode_CallDefaultLayout(peerNode!.peer.ptr);
             }
-            }
-        catch(e) {
-            console.log("customComponent onPlaceChildren err", e);
+        } catch(e) {
+            console.log('customComponent onPlaceChildren err', e);
         }
     }
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
@@ -137,9 +136,8 @@ export interface LayoutCallbacks {
             if (peerNode) {
                 return ArkUIAniCustomNodeModule._CustomNode_CallDefaultMeasure(peerNode!.peer.ptr) as SizeResult;
             }
-            }
-        catch(e) {
-            console.log("customComponent onMeasureSize err", e);
+        } catch(e) {
+            console.log('customComponent onMeasureSize err', e);
         }
         return {width: 0, height: 0} as SizeResult
     }
