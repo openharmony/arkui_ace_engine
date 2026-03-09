@@ -51,6 +51,7 @@ public:
     void CreateAndWrapChild(ani_env* env, ani_array array, int newCount);
 
     static RefPtr<AniMeasureLayoutParamNG> GetInstance(NG::LayoutWrapper* layoutWrapper, ani_env* env);
+    static ani_object GenMeasureResult(ani_env* env, const NG::SizeF& size);
     ani_object GetSelfLayoutInfo(ani_env* env);
     ani_object GetConstraint(ani_env* env);
     ani_object GetPlaceChildrenConstraint(ani_env* env);

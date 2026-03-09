@@ -1781,6 +1781,11 @@ void ListPattern::OnAnimateStop()
     scrollTarget_.reset();
 }
 
+int32_t ListPattern::GetFirstIndex() const
+{
+    return startIndex_;
+}
+
 void ListPattern::ScrollTo(float position)
 {
     StopAnimate();
@@ -2424,7 +2429,10 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
         indexInGroup > groupPattern->GetDisplayEndIndexInGroup()) {
         return Rect();
     }
-    auto groupItem = itemGroup->GetChildByIndex(indexInGroup + groupPattern->GetItemStartIndex());
+    auto prop = host->GetLayoutProperty<ListLayoutProperty>();
+    bool show = prop ? prop->GetShowCachedItemsValue(false) : false;
+    bool isCache = groupPattern->GetItemPosition().empty() && !show;
+    auto groupItem = itemGroup->GetChildByIndex(indexInGroup + groupPattern->GetItemStartIndex(), isCache);
     CHECK_NULL_RETURN(groupItem, Rect());
     auto groupItemGeometry = groupItem->GetGeometryNode();
     CHECK_NULL_RETURN(groupItemGeometry, Rect());
@@ -3257,6 +3265,16 @@ void ListPattern::DumpAdvanceInfo()
     IsAtTop() ? DumpLog::GetInstance().AddDesc("IsAtTop:true") : DumpLog::GetInstance().AddDesc("IsAtTop:false");
     IsAtBottom() ? DumpLog::GetInstance().AddDesc("IsAtBottom:true")
                  : DumpLog::GetInstance().AddDesc("IsAtBottom:false");
+    multiSelectable_ ? DumpLog::GetInstance().AddDesc("multiSelectable:true")
+                     : DumpLog::GetInstance().AddDesc("multiSelectable:false");
+    chainAnimation_ ? DumpLog::GetInstance().AddDesc("chainAnimation:true")
+                     : DumpLog::GetInstance().AddDesc("chainAnimation:false");
+    maintainVisibleContentPosition_ ? DumpLog::GetInstance().AddDesc("maintainVisibleContentPosition:true")
+                                   : DumpLog::GetInstance().AddDesc("maintainVisibleContentPosition:false");
+    auto property = GetLayoutProperty<ListLayoutProperty>();
+    if (property) {
+        property->DumpInfo();
+    }
 }
 
 void ListPattern::GetEventDumpInfo()
@@ -3556,6 +3574,15 @@ void ListPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("isScrollEnd", isScrollEnd_);
     json->Put("IsAtTop", IsAtTop());
     json->Put("IsAtBottom", IsAtBottom());
+    json->Put("multiSelectable", multiSelectable_);
+    json->Put("chainAnimation", chainAnimation_);
+    json->Put("maintainVisibleContentPosition", maintainVisibleContentPosition_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    if (listLayoutProperty) {
+        listLayoutProperty->DumpInfo(json);
+    }
 }
 
 void ListPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)

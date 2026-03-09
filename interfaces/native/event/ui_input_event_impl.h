@@ -44,7 +44,7 @@ struct ArkUI_UIInputEvent {
     ArkUI_UIInputEvent_Type inputType;
     ArkUIEventTypeId eventTypeId;
     void* inputEvent;
-    bool isCloned = false;
+    bool isCreatedByUser = false;
     int32_t apiVersion = 0;
 };
 

@@ -93,6 +93,8 @@ export interface IfAttribute {
     ): void;
 
     applyAttributesFinish(): void {}
+    
+    debugLine(sourceLine: string, moduleName?: string): this;
 }
 
 class BranchBuilder {
@@ -195,6 +197,10 @@ class ArkIfElseComponent implements IfAttribute {
 
     applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
+    }
+    
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        return this;
     }
 }
 

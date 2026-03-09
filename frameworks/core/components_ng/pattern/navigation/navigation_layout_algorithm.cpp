@@ -29,6 +29,7 @@ namespace {
 constexpr NavigationMode INITIAL_MODE = NavigationMode::AUTO;
 constexpr int32_t MODE_SWITCH_ANIMATION_DURATION = 500; // ms
 const RefPtr<CubicCurve> MODE_SWITCH_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
+constexpr float AUTO_WITH_ASPECT_RATIO_THRESHOLD = 1.2f;
 constexpr Dimension DIVIDER_DRAG_BAR_WIDTH = 12.0_vp;
 constexpr Dimension DIVIDER_DRAG_BAR_HEIGHT = 48.0_vp;
 constexpr Dimension DRAG_BAR_ITEM_WIDTH = 2.0_vp;
@@ -494,15 +495,22 @@ void NavigationLayoutAlgorithm::RangeCalculation(
     }
     maxNavBarWidthValue_ = Dimension(Dimension(std::max(maxNavBarWidth, minNavBarWidth)).ConvertToVp(),
         DimensionUnit::VP);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(navigationPattern);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
+    if (navigationPattern->GetIsNavBarWidthChange()) {
+        auto navBarWidthValue = navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH);
+        auto navBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
+        realNavBarWidth_ = navBarWidth;
+        navigationPattern->SetRealNavBarWidthValue(realNavBarWidth_);
+        navigationPattern->SetIsNavBarWidthChange(false);
+    }
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
         auto minNavBarWidth = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
         auto maxNavBarWidth = maxNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
         realNavBarWidth_ = std::max(realNavBarWidth_, static_cast<float>(minNavBarWidth));
         realNavBarWidth_ = std::min(realNavBarWidth_, static_cast<float>(maxNavBarWidth));
     }
-    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
-    CHECK_NULL_VOID(navigationPattern);
     navigationPattern->SetMinNavBarWidthValue(minNavBarWidthValue_);
     navigationPattern->SetMaxNavBarWidthValue(maxNavBarWidthValue_);
     navigationPattern->SetMinContentWidthValue(minContentWidthValue_);
@@ -556,6 +564,17 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     }
     if (usrNavigationMode == NavigationMode::AUTO) {
         if (frameSize.Width() >= CalculateNavigationWidth(hostNode)) {
+            usrNavigationMode = NavigationMode::SPLIT;
+            auto targetNode = hostNode->GetNavBarOrHomeDestinationNode();
+            if (targetNode) {
+                targetNode->SetJSViewActive(true);
+            }
+        } else {
+            usrNavigationMode = NavigationMode::STACK;
+        }
+    } else if (usrNavigationMode == NavigationMode::AUTO_WITH_ASPECT_RATIO) {
+        if (frameSize.Width() >= CalculateNavigationWidth(hostNode) &&
+            frameSize.Height() / frameSize.Width() <= AUTO_WITH_ASPECT_RATIO_THRESHOLD) {
             usrNavigationMode = NavigationMode::SPLIT;
             auto targetNode = hostNode->GetNavBarOrHomeDestinationNode();
             if (targetNode) {

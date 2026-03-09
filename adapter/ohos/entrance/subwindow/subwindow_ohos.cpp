@@ -1350,15 +1350,21 @@ void SubwindowOhos::ShowBindSheetNG(bool isShow, std::function<void(const std::s
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    ResizeWindow();
-    ShowWindow();
-    CHECK_NULL_VOID(window_);
-    window_->SetFullScreen(true);
     auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentAceContainer);
     if (parentAceContainer->IsUIExtensionWindow()) {
+        auto parentWindowRect = GetUIExtensionHostWindowRect();
+        // keep consistent with the size and position of the parent window in first frame.
+        CHECK_NULL_VOID(window_);
+        window_->MoveTo(parentWindowRect.GetOffset().GetX(), parentWindowRect.GetOffset().GetY());
+        ResizeWindow(parentWindowRect.Width(), parentWindowRect.Height());
         window_->SetFollowParentWindowLayoutEnabled(true);
+    } else {
+        ResizeWindow();
     }
+    ShowWindow();
+    CHECK_NULL_VOID(window_);
+    window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
     overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc),

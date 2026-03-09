@@ -15,7 +15,7 @@
  
 @Entry
 @Component
-struct Index {
+struct HoverScale {
   private iconStr: ResourceStr = $r('app.media.app_icon')
 
   @Builder

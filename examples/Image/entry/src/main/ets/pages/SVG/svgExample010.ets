@@ -49,10 +49,10 @@ struct svgExample010 {
                 .height(50)
                 .fillColor([
                   Color.Red, Color.Blue, Color.Green, Color.Orange,
-                  Color.Purple, Color.Cyan, Color.Brown, Color.Pink,
+                  Color.Gray, Color.Blue, Color.Brown, Color.Pink,
                   Color.Gray, Color.Black
                 ][index % 10])
-                .border({ width: 1, color: Color.LightGray })
+                .border({ width: 1, color: Color.Gray })
             }
           })
         }
@@ -102,7 +102,7 @@ struct svgExample010 {
           }
 
           Column({ space: 5 }) {
-            Image($r('app.media.icon'))
+            Image($r('app.media.startIcon'))
               .width(80)
               .height(80)
             Text('Complex').fontSize(12)
@@ -192,7 +192,7 @@ struct svgExample010 {
               .width(60)
               .height(60)
               .fillColor([
-                Color.Red, Color.Green, Color.Blue, Color.Orange, Color.Purple
+                Color.Red, Color.Green, Color.Blue, Color.Orange, Color.Gray
               ][index])
           })
         }

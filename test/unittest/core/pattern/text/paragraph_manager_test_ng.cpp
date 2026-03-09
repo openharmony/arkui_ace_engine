@@ -455,19 +455,19 @@ HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRange001, TestSize.Lev
     auto charStart1 = result1.second.start;
     auto charEnd1 = result1.second.end;
     EXPECT_EQ(glyphStart1, 10);
-    EXPECT_EQ(glyphEnd1, 20);
+    EXPECT_EQ(glyphEnd1, 45);
     EXPECT_EQ(charStart1, 5);
-    EXPECT_EQ(charEnd1, 25);
+    EXPECT_EQ(charEnd1, 45);
 
     auto result2 = pManager->GetGlyphRangeForCharacterRange(0, 20);
     auto glyphStart2 = result2.first.start;
     auto glyphEnd2 = result2.first.end;
     auto charStart2 = result2.second.start;
     auto charEnd2 = result2.second.end;
-    EXPECT_EQ(glyphStart2, 30);
-    EXPECT_EQ(glyphEnd2, 60);
-    EXPECT_EQ(charStart2, 15);
-    EXPECT_EQ(charEnd2, 75);
+    EXPECT_EQ(glyphStart2, 10);
+    EXPECT_EQ(glyphEnd2, 20);
+    EXPECT_EQ(charStart2, 5);
+    EXPECT_EQ(charEnd2, 25);
 
     auto result3 = pManager->GetGlyphRangeForCharacterRange(-10, 40);
     auto glyphStart3 = result3.first.start;
@@ -492,9 +492,9 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRange001, TestSize.Lev
     auto glyphEnd1 = result1.first.end;
     auto charStart1 = result1.second.start;
     auto charEnd1 = result1.second.end;
-    EXPECT_EQ(glyphStart1, 20);
+    EXPECT_EQ(glyphStart1, 10);
     EXPECT_EQ(glyphEnd1, 40);
-    EXPECT_EQ(charStart1, 10);
+    EXPECT_EQ(charStart1, 5);
     EXPECT_EQ(charEnd1, 50);
 
     auto result2 = pManager->GetCharacterRangeForGlyphRange(0, 20);
@@ -502,10 +502,10 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRange001, TestSize.Lev
     auto glyphEnd2 = result2.first.end;
     auto charStart2 = result2.second.start;
     auto charEnd2 = result2.second.end;
-    EXPECT_EQ(glyphStart2, 20);
-    EXPECT_EQ(glyphEnd2, 40);
-    EXPECT_EQ(charStart2, 10);
-    EXPECT_EQ(charEnd2, 50);
+    EXPECT_EQ(glyphStart2, 10);
+    EXPECT_EQ(glyphEnd2, 20);
+    EXPECT_EQ(charStart2, 5);
+    EXPECT_EQ(charEnd2, 25);
 
     auto result3 = pManager->GetCharacterRangeForGlyphRange(-10, 40);
     auto glyphStart3 = result3.first.start;
@@ -516,5 +516,214 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRange001, TestSize.Lev
     EXPECT_EQ(glyphEnd3, -1);
     EXPECT_EQ(charStart3, -1);
     EXPECT_EQ(charEnd3, -1);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRangeWithEmptyParagraph001
+ * @tc.desc: Test GetGlyphRangeForCharacterRange with empty paragraph (charLength <= 0).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeWithEmptyParagraph001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ParagraphManager with mixed paragraphs (normal + empty)
+     * @tc.expected: ParagraphManager created successfully
+     */
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto normalParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*normalParagraph, GetHeight()).WillRepeatedly(Return(100.f));
+    EXPECT_CALL(*normalParagraph, GetParagraphText()).WillRepeatedly(Return(u"abc"));
+    std::pair<TextRange, TextRange> normalRange { TextRange { 0, 3 }, TextRange { 0, 3 } };
+    EXPECT_CALL(*normalParagraph, GetGlyphRangeForCharacterRange(_, _))
+        .WillRepeatedly(Return(normalRange));
+    auto emptyParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*emptyParagraph, GetHeight()).WillRepeatedly(Return(20.f));
+    EXPECT_CALL(*emptyParagraph, GetParagraphText()).WillRepeatedly(Return(u""));
+    manager->AddParagraph({ .paragraph = normalParagraph, .start = 0, .end = 3 });
+    manager->AddParagraph({ .paragraph = emptyParagraph, .start = 3, .end = 4 });
+    manager->AddParagraph({ .paragraph = normalParagraph, .start = 4, .end = 7 });
+    /**
+     * @tc.steps: step2. Call GetGlyphRangeForCharacterRange with range spanning empty paragraph
+     * @tc.expected: Empty paragraph is skipped, returns valid result
+     */
+    auto result = manager->GetGlyphRangeForCharacterRange(0, 5);
+    /**
+     * @tc.steps: step3. Verify result is not (-1, -1)
+     * @tc.expected: Result should be valid (empty paragraph skipped)
+     */
+    EXPECT_NE(result.first.start, -1);
+    EXPECT_NE(result.first.end, -1);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRangeWithEmptyParagraph002
+ * @tc.desc: Test GetGlyphRangeForCharacterRange with first paragraph empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeWithEmptyParagraph002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ParagraphManager with empty first paragraph
+     */
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto emptyParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*emptyParagraph, GetHeight()).WillRepeatedly(Return(20.f));
+    EXPECT_CALL(*emptyParagraph, GetParagraphText()).WillRepeatedly(Return(u""));
+    auto normalParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*normalParagraph, GetHeight()).WillRepeatedly(Return(100.f));
+    EXPECT_CALL(*normalParagraph, GetParagraphText()).WillRepeatedly(Return(u"abc"));
+    std::pair<TextRange, TextRange> normalRange { TextRange { 0, 3 }, TextRange { 0, 3 } };
+    EXPECT_CALL(*normalParagraph, GetGlyphRangeForCharacterRange(_, _))
+        .WillRepeatedly(Return(normalRange));
+    manager->AddParagraph({ .paragraph = emptyParagraph, .start = 0, .end = 1 });
+    manager->AddParagraph({ .paragraph = normalParagraph, .start = 1, .end = 4 });
+    /**
+     * @tc.steps: step2. Call GetGlyphRangeForCharacterRange(0, 1)
+     * @tc.expected: Empty first paragraph is skipped
+     */
+    auto result = manager->GetGlyphRangeForCharacterRange(0, 1);
+    /**
+     * @tc.steps: step3. Verify result
+     * @tc.expected: Should return valid result from second paragraph
+     */
+    EXPECT_NE(result.first.start, -1);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRangeWithAllEmptyParagraphs001
+ * @tc.desc: Test GetGlyphRangeForCharacterRange with all paragraphs empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeWithAllEmptyParagraphs001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ParagraphManager with all empty paragraphs
+     */
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto emptyParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*emptyParagraph, GetHeight()).WillRepeatedly(Return(20.f));
+    EXPECT_CALL(*emptyParagraph, GetParagraphText()).WillRepeatedly(Return(u""));
+    std::pair<TextRange, TextRange> emptyRange { TextRange { 0, 0 }, TextRange { 0, 0 } };
+    EXPECT_CALL(*emptyParagraph, GetGlyphRangeForCharacterRange(_, _))
+        .WillRepeatedly(Return(emptyRange));
+    manager->AddParagraph({ .paragraph = emptyParagraph, .start = 0, .end = 1 });
+    manager->AddParagraph({ .paragraph = emptyParagraph, .start = 1, .end = 2 });
+    manager->AddParagraph({ .paragraph = emptyParagraph, .start = 2, .end = 3 });
+    /**
+     * @tc.steps: step2. Call GetGlyphRangeForCharacterRange
+     * @tc.expected: Falls through to last paragraph handling
+     */
+    auto result = manager->GetGlyphRangeForCharacterRange(0, 1);
+    /**
+     * @tc.steps: step3. Verify fallback behavior
+     * @tc.expected: Uses last paragraph as fallback
+     */
+    EXPECT_GE(result.first.start, 0);
+}
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRangeWithEmptyParagraph001
+ * @tc.desc: Test GetCharacterRangeForGlyphRange with empty paragraph (glyphLength <= 0).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeWithEmptyParagraph001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ParagraphManager with mixed paragraphs
+     */
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto normalParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*normalParagraph, GetHeight()).WillRepeatedly(Return(100.f));
+    EXPECT_CALL(*normalParagraph, GetParagraphText()).WillRepeatedly(Return(u"abc"));
+    std::pair<TextRange, TextRange> normalRange { TextRange { 0, 3 }, TextRange { 0, 3 } };
+    EXPECT_CALL(*normalParagraph, GetCharacterRangeForGlyphRange(_, _))
+        .WillRepeatedly(Return(normalRange));
+    auto emptyParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*emptyParagraph, GetHeight()).WillRepeatedly(Return(20.f));
+    EXPECT_CALL(*emptyParagraph, GetParagraphText()).WillRepeatedly(Return(u""));
+    manager->AddParagraph({ .paragraph = normalParagraph, .start = 0, .end = 3 });
+    manager->AddParagraph({ .paragraph = emptyParagraph, .start = 3, .end = 4 });
+    manager->AddParagraph({ .paragraph = normalParagraph, .start = 4, .end = 7 });
+    /**
+     * @tc.steps: step2. Call GetCharacterRangeForGlyphRange
+     * @tc.expected: Empty paragraph is skipped
+     */
+    auto result = manager->GetCharacterRangeForGlyphRange(0, 5);
+    /**
+     * @tc.steps: step3. Verify result is not (-1, -1)
+     * @tc.expected: Valid result returned
+     */
+    EXPECT_NE(result.first.start, -1);
+    EXPECT_NE(result.first.end, -1);
+}
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRangeWithEmptyParagraph002
+ * @tc.desc: Test GetCharacterRangeForGlyphRange with first paragraph empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeWithEmptyParagraph002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ParagraphManager with empty first paragraph
+     */
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto emptyParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*emptyParagraph, GetHeight()).WillRepeatedly(Return(20.f));
+    EXPECT_CALL(*emptyParagraph, GetParagraphText()).WillRepeatedly(Return(u""));
+    auto normalParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*normalParagraph, GetHeight()).WillRepeatedly(Return(100.f));
+    EXPECT_CALL(*normalParagraph, GetParagraphText()).WillRepeatedly(Return(u"456"));
+    std::pair<TextRange, TextRange> normalRange { TextRange { 0, 3 }, TextRange { 0, 3 } };
+    EXPECT_CALL(*normalParagraph, GetCharacterRangeForGlyphRange(_, _))
+        .WillRepeatedly(Return(normalRange));
+    manager->AddParagraph({ .paragraph = emptyParagraph, .start = 0, .end = 1 });
+    manager->AddParagraph({ .paragraph = normalParagraph, .start = 1, .end = 4 });
+    /**
+     * @tc.steps: step2. Call GetCharacterRangeForGlyphRange(3, 4)
+     * @tc.expected: Empty first paragraph is skipped, index mapped correctly
+     */
+    auto result = manager->GetCharacterRangeForGlyphRange(3, 4);
+    /**
+     * @tc.steps: step3. Verify result
+     * @tc.expected: Should not return (-1, -1)
+     */
+    EXPECT_NE(result.first.start, -1);
+}
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRangeWithConsecutiveEmptyParagraphs001
+ * @tc.desc: Test GetCharacterRangeForGlyphRange with consecutive empty paragraphs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeWithConsecutiveEmptyParagraphs001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ParagraphManager with consecutive empty paragraphs
+     */
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto emptyParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*emptyParagraph, GetHeight()).WillRepeatedly(Return(20.f));
+    EXPECT_CALL(*emptyParagraph, GetParagraphText()).WillRepeatedly(Return(u""));
+    auto normalParagraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*normalParagraph, GetHeight()).WillRepeatedly(Return(100.f));
+    EXPECT_CALL(*normalParagraph, GetParagraphText()).WillRepeatedly(Return(u"test"));
+    std::pair<TextRange, TextRange> normalRange { TextRange { 0, 4 }, TextRange { 0, 4 } };
+    EXPECT_CALL(*normalParagraph, GetCharacterRangeForGlyphRange(_, _))
+        .WillRepeatedly(Return(normalRange));
+    manager->AddParagraph({ .paragraph = emptyParagraph, .start = 0, .end = 1 });
+    manager->AddParagraph({ .paragraph = emptyParagraph, .start = 1, .end = 2 });
+    manager->AddParagraph({ .paragraph = emptyParagraph, .start = 2, .end = 3 });
+    manager->AddParagraph({ .paragraph = normalParagraph, .start = 3, .end = 7 });
+    /**
+     * @tc.steps: step2. Call GetCharacterRangeForGlyphRange
+     * @tc.expected: All empty paragraphs are skipped
+     */
+    auto result = manager->GetCharacterRangeForGlyphRange(0, 2);
+    /**
+     * @tc.steps: step3. Verify result
+     * @tc.expected: Should return valid result from normal paragraph
+     */
+    EXPECT_NE(result.first.start, -1);
 }
 } // namespace OHOS::Ace::NG

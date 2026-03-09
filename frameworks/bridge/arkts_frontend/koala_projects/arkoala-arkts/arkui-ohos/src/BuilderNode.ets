@@ -90,7 +90,7 @@ export function flushBuilderRootNode(): void {
     for (const mgt of detachedStatMgt) {
         let stateMgt = mgt[0]?.deref()
         let peerNode = mgt[1]?.deref()
-        if (stateMgt !== undefined && peerNode !== undefined) {
+        if (stateMgt !== undefined && peerNode !== undefined && !peerNode!.disposed) {
             const old = GlobalStateManager.instance;
             GlobalStateManager.SetLocalManager(stateMgt);
             stateMgt.callCallbacks()
@@ -219,6 +219,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private _instanceId: int32 = -1;
     private __buildOptions: BuildOptions | undefined = undefined
     private __updateUseParallel: boolean = false;
+    private __isDisposed: boolean = false;
 
     private reset(): void {
         this.__root = undefined;
@@ -423,24 +424,37 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
 
     public disposeNode(): void {
+        if (this.__isDisposed && this.__rootStage === undefined) {
+            return;
+        }
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         this.disposeAll();
         this.__frameNode?.disposeNode();
         this.__frameNode = null;
         ArkUIAniModule._Common_Restore_InstanceId();
+        this.__isDisposed = true;
     }
 
     private disposeAll(): void {
         super.disposeNode();
+        this.__root = undefined;
+        this.__rootStage?.dispose();
+        this.__rootStage = undefined;
         this.__builderProxyNode?.dispose();
+        this.__builderProxyNode = undefined;
+        this.__builderRootNode = undefined;
         this.__manager.reset();
     }
 
     public dispose(): void {
+        if (this.__isDisposed && this.__rootStage === undefined) {
+            return;
+        }
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
         this.disposeAll();
         this.__frameNode?.disposeNode();
         this.__frameNode = null;
         ArkUIAniModule._Common_Restore_InstanceId();
+        this.__isDisposed = true;
     }
 }

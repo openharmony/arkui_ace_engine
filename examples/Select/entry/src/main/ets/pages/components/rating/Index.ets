@@ -30,7 +30,8 @@ export struct RatingIndex {
     { name: 'RatingCustom', path: 'RatingCustom' },
     { name: 'Rating组合场景1', path: 'RatingLevel0' },
     { name: 'Rating组合场景2', path: 'RatingLevel1' },
-    { name: 'Rating组合场景3', path: 'RatingLevel2' }
+    { name: 'Rating组合场景3', path: 'RatingLevel2' },
+    { name: 'Rating组合场景4', path: 'RatingLevel3' }
   ]
 
   build() {

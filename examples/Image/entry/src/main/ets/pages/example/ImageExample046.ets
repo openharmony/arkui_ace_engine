@@ -39,7 +39,7 @@ struct AnimatorTest {
       Text(this.values[this.idx])
 
       // 图片组件：绑定当前索引的动态范围模式，点击切换
-      Image($r("app.media.JPEGISOSingle"))
+      Image($r("app.media.startIcon"))
         .height(200)
         .width(200)
         .dynamicRangeMode(this.dy[this.idx]) // 应用当前动态范围模式

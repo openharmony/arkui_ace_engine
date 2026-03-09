@@ -251,6 +251,9 @@ export class FrameNode implements MaterializedBase {
         }
         return this._gestureEvent as UIGestureEvent;
     }
+    constructor(uiContext: UIContext, options?: FrameNodeOptions) {
+        this(uiContext, options, undefined, undefined);
+    }
     constructor(uiContext?: UIContext, options?: FrameNodeOptions, type?: string, ptr?: KPointer) {
         if ((uiContext) !== (undefined)) {
             this.uiContext = uiContext as UIContextImpl;
@@ -966,6 +969,7 @@ export class ProxyFrameNode extends ImmutableFrameNode {
 }
 export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
     private __BuilderNodeOpt: JSBuilderNode<T> | undefined = undefined;
+    private __disposed: boolean = false;
     constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode', ptr?: KPointer) {
         super(uiContext, 'BuilderRootFrameNode', ptr);
         if (!ptr) {
@@ -990,12 +994,20 @@ export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
         this._nodeId = -1;
     }
     public disposeNode(): void {
+        if (this.__disposed) {
+            return;
+        }
         super.dispose();
+        this.__disposed = true;
         this.__BuilderNodeOpt = undefined;
         this._nodeId = -1;
     }
     public dispose(): void {
+        if (this.__disposed) {
+            return;
+        }
         super.dispose();
+        this.__disposed = true;
         this.__BuilderNodeOpt?.disposeNode();
         this.__BuilderNodeOpt = undefined;
         this._nodeId = -1;
@@ -1764,16 +1776,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindListController(node: FrameNode, controller: Scroller): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'List') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'List') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let listNode = node as ListFrameNode
-        if (!listNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
-        listNode.initialize({scroller: controller})
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkListPeer(ptr, node._nodeId!.toInt(), "List", 0);
+        peer.setListOptionsAttribute({scroller: controller})
         return
     }
 
@@ -1861,16 +1870,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindScrollController(node: FrameNode, controller: Scroller): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Scroll') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'Scroll') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let scrollNode = node as ScrollFrameNode
-        if (!scrollNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
-        scrollNode.initialize(controller)
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkScrollPeer(ptr, node._nodeId!.toInt(), "Scroll", 0);
+        peer.setScrollOptionsAttribute(controller)
         return
     }
 
@@ -1912,18 +1918,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindGridController(node: FrameNode, controller: Scroller): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Grid') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'Grid') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let gridNode = node as GridFrameNode
-        if (!gridNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
-        let arkGridNode = gridNode.attribute as ArkGridNode;
-        arkGridNode.getPeer()?.setGridOptionsAttribute(controller, undefined)
-        arkGridNode.markDirty()
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkGridPeer(ptr, node._nodeId!.toInt(), "Grid", 0);
+        peer.setGridOptionsAttribute(controller, undefined)
         return
     }
 
@@ -1988,16 +1989,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindWaterFlowController(node: FrameNode, controller: Scroller): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'WaterFlow') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'WaterFlow') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let waterFlowNode = node as WaterFlowFrameNode
-        if (!waterFlowNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
-        waterFlowNode.initialize({scroller: controller})
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkWaterFlowPeer(ptr, node._nodeId!.toInt(), "WaterFlow", 0);
+        peer.setWaterFlowOptionsAttribute({scroller: controller})
         return
     }
 

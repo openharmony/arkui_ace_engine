@@ -238,6 +238,7 @@ public:
         return layoutInfo_->contentStartOffset_;
     }
 
+    int32_t GetFirstIndex() const override;
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {

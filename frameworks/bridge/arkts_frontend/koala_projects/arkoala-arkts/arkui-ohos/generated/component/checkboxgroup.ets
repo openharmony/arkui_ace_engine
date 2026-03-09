@@ -36,7 +36,7 @@ import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { CheckboxGroupModifier } from './../CheckboxGroupModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-export interface CheckBoxGroupConfiguration {
+export interface CheckBoxGroupConfiguration extends CommonConfiguration<CheckBoxGroupConfiguration> {
     enabled: boolean
     contentModifier: ContentModifier<CheckBoxGroupConfiguration>
     name: string

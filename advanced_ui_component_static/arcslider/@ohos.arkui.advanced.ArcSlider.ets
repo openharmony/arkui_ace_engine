@@ -367,7 +367,7 @@ export struct ArcSlider {
   }
 
   aboutToDisappear() {
-    clearTimeout(this.meter as Int);
+    clearTimeout(this.meter.toInt());
     this.touchAnimator = undefined;
     this.restoreAnimator = undefined;
     this.maxRestoreAnimator = undefined;
@@ -976,7 +976,7 @@ export struct ArcSlider {
 
   clearTimeout() {
     if (this.meter !== INVALID_TIMEOUT_ID) {
-      clearTimeout(this.meter as Int);
+      clearTimeout(this.meter.toInt());
       this.meter = INVALID_TIMEOUT_ID
     }
   }

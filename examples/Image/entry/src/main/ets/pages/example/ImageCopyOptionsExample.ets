@@ -31,7 +31,7 @@ struct ImageCopyOptionsExample {
       Column({ space: 15 }) {
         Text('InApp (在应用内)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(200)
             .height(200)
             .copyOptions(CopyOptions.InApp)
@@ -48,7 +48,7 @@ struct ImageCopyOptionsExample {
       Column({ space: 15 }) {
         Text('LocalDevice (在本设备)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(200)
             .height(200)
             .copyOptions(CopyOptions.LocalDevice)
@@ -65,7 +65,7 @@ struct ImageCopyOptionsExample {
       Column({ space: 15 }) {
         Text('Distributed (分布式)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(200)
             .height(200)
             .copyOptions(CopyOptions.Distributed)

@@ -52,7 +52,9 @@ void ForEachElement::MakeElementByIdMap(const std::list<RefPtr<Element>>& elmts,
     while (idsIter != ids.end()) {
         auto elmtIter = elmtsBySlotMap.find(slot);
         ACE_DCHECK(elmtIter != elmtsBySlotMap.end());
-        result.emplace(*idsIter, (*elmtIter).second);
+        if (elmtIter != elmtsBySlotMap.end()) {
+            result.emplace(*idsIter, (*elmtIter).second);
+        }
         idsIter++;
         slot++;
     }

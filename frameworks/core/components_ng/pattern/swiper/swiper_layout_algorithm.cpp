@@ -744,7 +744,9 @@ void SwiperLayoutAlgorithm::MeasureSwiper(LayoutWrapper* layoutWrapper, const La
     } else {
         AdjustStartInfoOnSwipeByGroup(startIndex, prevItemPosition_, startIndexInVisibleWindow, startPos);
         bool overScrollTop = startIndexInVisibleWindow == 0 && GreatNotEqual(startPos, startMainPos_);
-        if ((!overScrollFeature_ && NonNegative(currentOffset_)) || (overScrollFeature_ && overScrollTop)) {
+        bool isInitSinglePage = realTotalCount_ == 1 && NearZero(startPos);
+        if ((!overScrollFeature_ && NonNegative(currentOffset_)) || (overScrollFeature_ && overScrollTop) ||
+            isInitSinglePage) {
             LayoutForward(layoutWrapper, layoutConstraint, startIndexInVisibleWindow, startPos);
             auto adjustStartMainPos =
                 startMainPos_ - prevMargin_ - spaceWidth_ - (Positive(ignoreBlankOffset_) ? ignoreBlankOffset_ : 0.0f);

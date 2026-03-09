@@ -29,8 +29,7 @@ NG::HyperlinkModelNG* GetHyperlinkModel()
 {
     static auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("Hyperlink");
     if (module == nullptr) {
-        LOGF("Cannot find hyperlink dynamic module");
-        abort();
+        LOGF_ABORT("Cannot find hyperlink dynamic module");
     }
     return reinterpret_cast<NG::HyperlinkModelNG*>(module->GetModel());
 }

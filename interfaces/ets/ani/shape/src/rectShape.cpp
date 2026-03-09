@@ -41,26 +41,6 @@ void ParseWidthAndHeight(ani_env* env, ani_object object, OHOS::Ace::RefPtr<OHOS
 }
 }
 
-void ANICreateRectShape(ani_env* env, [[maybe_unused]] ani_object object)
-{
-    ani_class cls;
-    ani_status status;
-    if ((status = env->FindClass(ANI_SHAPE_NAME, &cls)) != ANI_OK) {
-        LOGE("Not find RectShape class, status:%{public}d", status);
-        return;
-    }
-    RectPeer* shapePeer = new RectPeer();
-    auto rect = AceType::MakeRefPtr<ShapeRect>();
-    shapePeer->rectShape = rect;
-
-    if ((status = env->Object_SetPropertyByName_Long(
-             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
-        LOGE("RectShape set addr failed, status:%{public}d", status);
-        delete shapePeer;
-        return;
-    }
-}
-
 void ANICreateRectShapeWithParam(
     ani_env* env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
@@ -326,7 +306,6 @@ ani_status RectShape::BindRectShape(ani_env* env)
     }
 
     std::array methods = {
-        ani_native_function { "<ctor>", ":", reinterpret_cast<void*>(ANICreateRectShape) },
         ani_native_function { "<ctor>",
             "X{C{@ohos.arkui.shape.RectShapeOptions}C{@ohos.arkui.shape.RoundRectShapeOptions}}:",
             reinterpret_cast<void*>(ANICreateRectShapeWithParam) },

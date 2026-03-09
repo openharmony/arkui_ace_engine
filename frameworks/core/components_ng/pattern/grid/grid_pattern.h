@@ -285,6 +285,8 @@ public:
         return info_.contentStartOffset_;
     }
 
+    int32_t GetFirstIndex() const override;
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.

@@ -26,5 +26,8 @@ export interface ContentSlotAttribute {
     // instructive change start
     setContentSlotOptions(content?: Content): this  {  throw new Error("Unimplemented method setContentSlotOptions") }
     // instructive change end
+    debugLine(sourceLine: string, moduleName?: string): this {
+        throw new Error("Unimplemented method debugLine")
+    }
 }
 export type ContentSlotInterface = (content: Content) => ContentSlotAttribute;

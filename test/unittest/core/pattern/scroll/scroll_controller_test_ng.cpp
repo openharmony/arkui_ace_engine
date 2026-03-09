@@ -550,6 +550,69 @@ HWTEST_F(ScrollControllerTestNg, OnInjectionEventTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnInjectionEventTest003
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, OnInjectionEventTest003, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::NONE, true, EffectEdge::START);
+    CreateContent();
+    CreateScrollDone();
+
+    std::string command = R"()";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":-20})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":20})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -20);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":-10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    command = R"({"cmd":"scrolloffset","eventId":123123,"offset":10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123)";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -600);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+}
+
+/**
  * @tc.name: ReportComponentChangeEventTest001
  * @tc.desc: Test ReportComponentChangeEvent
  * @tc.type: FUNC

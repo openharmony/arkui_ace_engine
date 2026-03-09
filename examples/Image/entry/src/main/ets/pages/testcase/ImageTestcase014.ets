@@ -67,10 +67,27 @@ interface AdjustmentConfig {
   tint: number
 }
 
+interface BatchQueueItem {
+  id: number
+  operation: string
+  params: OperationParams
+}
+
+interface EditTest {
+  name: string
+  func: () => Promise<void>
+}
+
 interface FilterPreset {
   name: string
   adjustment: AdjustmentConfig
   thumbnail: string
+}
+
+interface OperationParams {
+  intensity: number
+  quality: number
+  mode: number
 }
 
 interface EditOperation {
@@ -78,7 +95,7 @@ interface EditOperation {
   type: string
   name: string
   timestamp: number
-  params: any
+  params: OperationParams
   result: 'success' | 'failed' | 'processing'
   processingTime: number
 }
@@ -90,6 +107,11 @@ interface ProcessingHistory {
   after: string
   duration: number
   success: boolean
+}
+
+interface Position {
+  x: number
+  y: number
 }
 
 @Entry
@@ -112,7 +134,7 @@ struct ImageEditTestCase {
   @State currentOperation: string = ''
   @State processedImagesCount: number = 0
   @State autoProcessingEnabled: boolean = false
-  @State batchProcessingQueue: Array<{ id: number; operation: string; params: any }> = []
+  @State batchProcessingQueue: Array<BatchQueueItem> = []
 
   private readonly CROP_PRESETS: CropRegion[] = [
     { x: 0, y: 0, width: 200, height: 200, aspectRatio: '1:1' },
@@ -217,17 +239,17 @@ struct ImageEditTestCase {
     this.isProcessing = true
     this.autoProcessingEnabled = true
 
-    const editTests = [
-      { name: '图片裁剪测试', func: () => this.testCropOperations() },
-      { name: '图片旋转测试', func: () => this.testRotationOperations() },
-      { name: '水印添加测试', func: () => this.testWatermarkOperations() },
-      { name: '文字叠加测试', func: () => this.testTextOverlayOperations() },
-      { name: '调整参数测试', func: () => this.testAdjustmentOperations() },
-      { name: '滤镜预设测试', func: () => this.testFilterPresetOperations() },
-      { name: '批处理测试', func: () => this.testBatchProcessing() },
-      { name: '撤销重做测试', func: () => this.testUndoRedoOperations() },
-      { name: '历史记录测试', func: () => this.testHistoryOperations() },
-      { name: '性能测试', func: () => this.testEditPerformance() }
+    const editTests: EditTest[] = [
+      { name: '图片裁剪测试', func: () => this.testCropOperations() } as EditTest,
+      { name: '图片旋转测试', func: () => this.testRotationOperations() } as EditTest,
+      { name: '水印添加测试', func: () => this.testWatermarkOperations() } as EditTest,
+      { name: '文字叠加测试', func: () => this.testTextOverlayOperations() } as EditTest,
+      { name: '调整参数测试', func: () => this.testAdjustmentOperations() } as EditTest,
+      { name: '滤镜预设测试', func: () => this.testFilterPresetOperations() } as EditTest,
+      { name: '批处理测试', func: () => this.testBatchProcessing() } as EditTest,
+      { name: '撤销重做测试', func: () => this.testUndoRedoOperations() } as EditTest,
+      { name: '历史记录测试', func: () => this.testHistoryOperations() } as EditTest,
+      { name: '性能测试', func: () => this.testEditPerformance() } as EditTest
     ]
 
     for (let i = 0; i < editTests.length; i++) {
@@ -421,16 +443,16 @@ struct ImageEditTestCase {
     const iterations = 10
 
     for (const op of operations) {
-      const startTime = performance.now()
-      
+      const startTime = new Date().getTime()
+
       for (let i = 0; i < iterations; i++) {
         await this.performOperation(op)
         await this.delay(20) // 短延迟模拟快速连续操作
       }
-      
-      const endTime = performance.now()
+
+      const endTime = new Date().getTime()
       const avgTime = (endTime - startTime) / iterations
-      
+
       this.addEditOperation(`Performance_${op}`, avgTime < 100 ? 'success' : 'warning')
     }
   }
@@ -467,7 +489,7 @@ struct ImageEditTestCase {
     return Math.random() > 0.08 // 92% 成功率
   }
 
-  private async processBatchItem(item: { id: number; operation: string; params: any }): Promise<boolean> {
+  private async processBatchItem(item: BatchQueueItem): Promise<boolean> {
     await this.delay(60 + Math.random() * 120)
     return Math.random() > 0.12 // 88% 成功率
   }
@@ -507,7 +529,7 @@ struct ImageEditTestCase {
     return operations[Math.floor(Math.random() * operations.length)]
   }
 
-  private getRandomParams(): any {
+  private getRandomParams(): OperationParams {
     return {
       intensity: Math.floor(Math.random() * 100),
       quality: Math.floor(Math.random() * 30) + 70,
@@ -521,7 +543,11 @@ struct ImageEditTestCase {
       type: operation,
       name: operation,
       timestamp: Date.now(),
-      params: {},
+      params: {
+        intensity: 50,
+        quality: 80,
+        mode: 1
+      },
       result: result as 'success' | 'failed' | 'processing',
       processingTime: Math.floor(Math.random() * 300) + 50
     }
@@ -580,7 +606,7 @@ struct ImageEditTestCase {
         Text(`当前操作: ${this.currentOperation}`)
           .fontSize(14)
           .fontColor(Color.Orange)
-          .margin({ horizontal: 16, bottom: 8 })
+          .margin({ left: 16, right: 16, bottom: 8 })
       }
 
       Tabs({ barPosition: BarPosition.Start }) {
@@ -647,7 +673,7 @@ struct ImageEditTestCase {
               Column() {
                 // 裁剪预览
                 Stack() {
-                  Image($r('app.media.icon'))
+                  Image($r('app.media.startIcon'))
                     .width(80)
                     .height(80)
                     .borderRadius(4)
@@ -689,7 +715,6 @@ struct ImageEditTestCase {
 
         // 当前裁剪详情
         if (this.currentCropIndex < this.cropRegions.length) {
-          const currentCrop = this.cropRegions[this.currentCropIndex]
           Column() {
             Text('当前裁剪参数')
               .fontSize(14)
@@ -702,7 +727,7 @@ struct ImageEditTestCase {
                   Text('X坐标')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentCrop.x}`)
+                  Text(`${this.cropRegions[this.currentCropIndex].x}`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -713,7 +738,7 @@ struct ImageEditTestCase {
                   Text('Y坐标')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentCrop.y}`)
+                  Text(`${this.cropRegions[this.currentCropIndex].y}`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -724,7 +749,7 @@ struct ImageEditTestCase {
                   Text('宽度')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentCrop.width}`)
+                  Text(`${this.cropRegions[this.currentCropIndex].width}`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -735,7 +760,7 @@ struct ImageEditTestCase {
                   Text('高度')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentCrop.height}`)
+                  Text(`${this.cropRegions[this.currentCropIndex].height}`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -750,7 +775,7 @@ struct ImageEditTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16 })
+          .margin({ left: 16, right: 16 })
         }
       }
     }
@@ -770,7 +795,7 @@ struct ImageEditTestCase {
             GridItem() {
               Column() {
                 // 旋转预览
-                Image($r('app.media.icon'))
+                Image($r('app.media.startIcon'))
                   .width(60)
                   .height(60)
                   .rotate({ angle: rotation.angle })
@@ -810,7 +835,6 @@ struct ImageEditTestCase {
 
         // 当前旋转详情
         if (this.currentRotationIndex < this.rotationConfigs.length) {
-          const currentRotation = this.rotationConfigs[this.currentRotationIndex]
           Column() {
             Text('当前旋转参数')
               .fontSize(14)
@@ -822,7 +846,7 @@ struct ImageEditTestCase {
                 Text('旋转角度')
                   .fontSize(12)
                   .fontColor(Color.Gray)
-                Text(`${currentRotation.angle}°`)
+                Text(`${this.rotationConfigs[this.currentRotationIndex].angle}°`)
                   .fontSize(16)
                   .fontWeight(FontWeight.Bold)
               }
@@ -832,10 +856,10 @@ struct ImageEditTestCase {
                 Text('水平翻转')
                   .fontSize(12)
                   .fontColor(Color.Gray)
-                Text(currentRotation.flipHorizontal ? '是' : '否')
+                Text(this.rotationConfigs[this.currentRotationIndex].flipHorizontal ? '是' : '否')
                   .fontSize(16)
                   .fontWeight(FontWeight.Bold)
-                  .fontColor(currentRotation.flipHorizontal ? Color.Green : Color.Gray)
+                  .fontColor(this.rotationConfigs[this.currentRotationIndex].flipHorizontal ? Color.Green : Color.Gray)
               }
               .layoutWeight(1)
 
@@ -843,10 +867,10 @@ struct ImageEditTestCase {
                 Text('垂直翻转')
                   .fontSize(12)
                   .fontColor(Color.Gray)
-                Text(currentRotation.flipVertical ? '是' : '否')
+                Text(this.rotationConfigs[this.currentRotationIndex].flipVertical ? '是' : '否')
                   .fontSize(16)
                   .fontWeight(FontWeight.Bold)
-                  .fontColor(currentRotation.flipVertical ? Color.Green : Color.Gray)
+                  .fontColor(this.rotationConfigs[this.currentRotationIndex].flipVertical ? Color.Green : Color.Gray)
               }
               .layoutWeight(1)
             }
@@ -858,13 +882,13 @@ struct ImageEditTestCase {
                 .fontSize(12)
                 .fontColor(Color.Gray)
               Progress({
-                value: currentRotation.quality,
+                value: this.rotationConfigs[this.currentRotationIndex].quality,
                 total: 100,
                 type: ProgressType.Linear
               })
                 .width(200)
-                .margin({ horizontal: 8 })
-              Text(`${currentRotation.quality}%`)
+                .margin({ left: 8, right: 8 })
+              Text(`${this.rotationConfigs[this.currentRotationIndex].quality}%`)
                 .fontSize(12)
                 .fontColor(Color.Blue)
             }
@@ -875,7 +899,7 @@ struct ImageEditTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, top: 16 })
+          .margin({ left: 16, right: 16, top: 16 })
         }
       }
     }
@@ -896,7 +920,7 @@ struct ImageEditTestCase {
               Column() {
                 // 水印预览
                 Stack() {
-                  Image($r('app.media.icon'))
+                  Image($r('app.media.startIcon'))
                     .width(80)
                     .height(80)
                     .borderRadius(4)
@@ -939,7 +963,6 @@ struct ImageEditTestCase {
 
         // 当前水印详情
         if (this.currentWatermarkIndex < this.watermarkConfigs.length) {
-          const currentWatermark = this.watermarkConfigs[this.currentWatermarkIndex]
           Column() {
             Text('当前水印参数')
               .fontSize(14)
@@ -952,7 +975,7 @@ struct ImageEditTestCase {
                   Text('文字')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(currentWatermark.text)
+                  Text(this.watermarkConfigs[this.currentWatermarkIndex].text)
                     .fontSize(14)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -963,7 +986,7 @@ struct ImageEditTestCase {
                   Text('位置')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(currentWatermark.position)
+                  Text(this.watermarkConfigs[this.currentWatermarkIndex].position)
                     .fontSize(14)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -974,7 +997,7 @@ struct ImageEditTestCase {
                   Text('透明度')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${Math.round(currentWatermark.opacity * 100)}%`)
+                  Text(`${Math.round(this.watermarkConfigs[this.currentWatermarkIndex].opacity * 100)}%`)
                     .fontSize(14)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -985,7 +1008,7 @@ struct ImageEditTestCase {
                   Text('字体大小')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentWatermark.fontSize}px`)
+                  Text(`${this.watermarkConfigs[this.currentWatermarkIndex].fontSize}px`)
                     .fontSize(14)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -1004,7 +1027,7 @@ struct ImageEditTestCase {
               Column()
                 .width(20)
                 .height(20)
-                .backgroundColor(currentWatermark.color)
+                .backgroundColor(this.watermarkConfigs[this.currentWatermarkIndex].color)
                 .borderRadius(4)
                 .border({ width: 1, color: Color.Gray })
                 .margin({ right: 16 })
@@ -1013,9 +1036,9 @@ struct ImageEditTestCase {
                 .fontSize(12)
                 .fontColor(Color.Gray)
                 .margin({ right: 8 })
-              Text(currentWatermark.shadow ? '开启' : '关闭')
+              Text(this.watermarkConfigs[this.currentWatermarkIndex].shadow ? '开启' : '关闭')
                 .fontSize(12)
-                .fontColor(currentWatermark.shadow ? Color.Green : Color.Gray)
+                .fontColor(this.watermarkConfigs[this.currentWatermarkIndex].shadow ? Color.Green : Color.Gray)
             }
             .justifyContent(FlexAlign.Start)
             .alignItems(VerticalAlign.Center)
@@ -1024,7 +1047,7 @@ struct ImageEditTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, top: 16 })
+          .margin({ left: 16, right: 16, top: 16 })
         }
       }
     }
@@ -1045,7 +1068,7 @@ struct ImageEditTestCase {
               Column() {
                 // 文字叠加预览
                 Stack() {
-                  Image($r('app.media.icon'))
+                  Image($r('app.media.startIcon'))
                     .width(80)
                     .height(80)
                     .borderRadius(4)
@@ -1118,7 +1141,7 @@ struct ImageEditTestCase {
         .padding(16)
         .backgroundColor(Color.White)
         .borderRadius(8)
-        .margin({ horizontal: 16, top: 8 })
+        .margin({ left: 16, right: 16, top: 8 })
       }
     }
   }
@@ -1137,13 +1160,13 @@ struct ImageEditTestCase {
             GridItem() {
               Column() {
                 // 调整效果预览
-                Image($r('app.media.icon'))
+                Image($r('app.media.startIcon'))
                   .width(70)
                   .height(70)
                   .borderRadius(4)
                   .brightness(adjustment.brightness)
                   .contrast(adjustment.contrast)
-                  .saturation(adjustment.saturation)
+                  .saturate(adjustment.saturation)
                   .border({ 
                     width: index === this.currentAdjustmentIndex ? 3 : 1, 
                     color: index === this.currentAdjustmentIndex ? Color.Blue : Color.Gray 
@@ -1173,7 +1196,6 @@ struct ImageEditTestCase {
 
         // 当前调整详情
         if (this.currentAdjustmentIndex < this.adjustmentConfigs.length) {
-          const currentAdjustment = this.adjustmentConfigs[this.currentAdjustmentIndex]
           Column() {
             Text('当前调整参数')
               .fontSize(14)
@@ -1186,7 +1208,7 @@ struct ImageEditTestCase {
                   Text('亮度')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentAdjustment.brightness}%`)
+                  Text(`${this.adjustmentConfigs[this.currentAdjustmentIndex].brightness}%`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -1197,7 +1219,7 @@ struct ImageEditTestCase {
                   Text('对比度')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentAdjustment.contrast}%`)
+                  Text(`${this.adjustmentConfigs[this.currentAdjustmentIndex].contrast}%`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -1208,7 +1230,7 @@ struct ImageEditTestCase {
                   Text('饱和度')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentAdjustment.saturation}%`)
+                  Text(`${this.adjustmentConfigs[this.currentAdjustmentIndex].saturation}%`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -1227,7 +1249,7 @@ struct ImageEditTestCase {
                   Text('锐度')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentAdjustment.sharpness}`)
+                  Text(`${this.adjustmentConfigs[this.currentAdjustmentIndex].sharpness}`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -1238,7 +1260,7 @@ struct ImageEditTestCase {
                   Text('色温')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentAdjustment.temperature}`)
+                  Text(`${this.adjustmentConfigs[this.currentAdjustmentIndex].temperature}`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -1249,7 +1271,7 @@ struct ImageEditTestCase {
                   Text('色调')
                     .fontSize(12)
                     .fontColor(Color.Gray)
-                  Text(`${currentAdjustment.tint}`)
+                  Text(`${this.adjustmentConfigs[this.currentAdjustmentIndex].tint}`)
                     .fontSize(16)
                     .fontWeight(FontWeight.Bold)
                 }
@@ -1265,7 +1287,7 @@ struct ImageEditTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, top: 16 })
+          .margin({ left: 16, right: 16, top: 16 })
         }
       }
     }
@@ -1285,13 +1307,13 @@ struct ImageEditTestCase {
             GridItem() {
               Column() {
                 // 滤镜效果预览
-                Image($r('app.media.icon'))
+                Image($r('app.media.startIcon'))
                   .width(70)
                   .height(70)
                   .borderRadius(4)
                   .brightness(filter.adjustment.brightness)
                   .contrast(filter.adjustment.contrast)
-                  .saturation(filter.adjustment.saturation)
+                  .saturate(filter.adjustment.saturation)
                   .border({ 
                     width: index === this.currentFilterIndex ? 3 : 1, 
                     color: index === this.currentFilterIndex ? Color.Blue : Color.Gray 
@@ -1321,59 +1343,58 @@ struct ImageEditTestCase {
 
         // 当前滤镜详情
         if (this.currentFilterIndex < this.filterPresets.length) {
-          const currentFilter = this.filterPresets[this.currentFilterIndex]
           Column() {
-            Text(`当前滤镜: ${currentFilter.name}`)
+            Text(`当前滤镜: ${this.filterPresets[this.currentFilterIndex].name}`)
               .fontSize(14)
               .fontWeight(FontWeight.Medium)
               .margin({ bottom: 12 })
 
             // 滤镜参数显示
             Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.Start }) {
-              Text(`亮度: ${currentFilter.adjustment.brightness}%`)
+              Text(`亮度: ${this.filterPresets[this.currentFilterIndex].adjustment.brightness}%`)
                 .fontSize(12)
                 .fontColor(Color.Gray)
-                .padding({ horizontal: 8, vertical: 4 })
+                .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                 .backgroundColor('#F0F0F0')
                 .borderRadius(4)
                 .margin({ right: 8, bottom: 8 })
 
-              Text(`对比度: ${currentFilter.adjustment.contrast}%`)
+              Text(`对比度: ${this.filterPresets[this.currentFilterIndex].adjustment.contrast}%`)
                 .fontSize(12)
                 .fontColor(Color.Gray)
-                .padding({ horizontal: 8, vertical: 4 })
+                .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                 .backgroundColor('#F0F0F0')
                 .borderRadius(4)
                 .margin({ right: 8, bottom: 8 })
 
-              Text(`饱和度: ${currentFilter.adjustment.saturation}%`)
+              Text(`饱和度: ${this.filterPresets[this.currentFilterIndex].adjustment.saturation}%`)
                 .fontSize(12)
                 .fontColor(Color.Gray)
-                .padding({ horizontal: 8, vertical: 4 })
+                .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                 .backgroundColor('#F0F0F0')
                 .borderRadius(4)
                 .margin({ right: 8, bottom: 8 })
 
-              Text(`锐度: ${currentFilter.adjustment.sharpness}`)
+              Text(`锐度: ${this.filterPresets[this.currentFilterIndex].adjustment.sharpness}`)
                 .fontSize(12)
                 .fontColor(Color.Gray)
-                .padding({ horizontal: 8, vertical: 4 })
+                .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                 .backgroundColor('#F0F0F0')
                 .borderRadius(4)
                 .margin({ right: 8, bottom: 8 })
 
-              Text(`色温: ${currentFilter.adjustment.temperature}`)
+              Text(`色温: ${this.filterPresets[this.currentFilterIndex].adjustment.temperature}`)
                 .fontSize(12)
                 .fontColor(Color.Gray)
-                .padding({ horizontal: 8, vertical: 4 })
+                .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                 .backgroundColor('#F0F0F0')
                 .borderRadius(4)
                 .margin({ right: 8, bottom: 8 })
 
-              Text(`色调: ${currentFilter.adjustment.tint}`)
+              Text(`色调: ${this.filterPresets[this.currentFilterIndex].adjustment.tint}`)
                 .fontSize(12)
                 .fontColor(Color.Gray)
-                .padding({ horizontal: 8, vertical: 4 })
+                .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                 .backgroundColor('#F0F0F0')
                 .borderRadius(4)
                 .margin({ right: 8, bottom: 8 })
@@ -1383,7 +1404,7 @@ struct ImageEditTestCase {
           .padding(16)
           .backgroundColor('#FAFAFA')
           .borderRadius(8)
-          .margin({ horizontal: 16, top: 16 })
+          .margin({ left: 16, right: 16, top: 16 })
         }
       }
     }
@@ -1434,16 +1455,16 @@ struct ImageEditTestCase {
         .padding(16)
         .backgroundColor(Color.White)
         .borderRadius(8)
-        .margin({ horizontal: 16 })
+        .margin({ left: 16, right: 16 })
 
         // 批处理队列列表
         Text('批处理队列')
           .fontSize(14)
           .fontWeight(FontWeight.Medium)
-          .margin({ top: 16, bottom: 8, horizontal: 16 })
+          .margin({ top: 16, bottom: 8, left: 16, right: 16 })
 
         List() {
-          ForEach(this.batchProcessingQueue.slice(0, 15), (item: { id: number; operation: string; params: any }) => {
+          ForEach(this.batchProcessingQueue.slice(0, 15), (item: BatchQueueItem) => {
             ListItem() {
               Row() {
                 Text(item.id.toString())
@@ -1468,7 +1489,7 @@ struct ImageEditTestCase {
           })
         }
         .height(300)
-        .margin({ horizontal: 16, bottom: 16 })
+        .margin({ left: 16, right: 16, bottom: 16 })
       }
     }
   }
@@ -1518,13 +1539,13 @@ struct ImageEditTestCase {
         .padding(16)
         .backgroundColor(Color.White)
         .borderRadius(8)
-        .margin({ horizontal: 16 })
+        .margin({ left: 16, right: 16 })
 
         // 历史记录列表
         Text('详细历史')
           .fontSize(14)
           .fontWeight(FontWeight.Medium)
-          .margin({ top: 16, bottom: 8, horizontal: 16 })
+          .margin({ top: 16, bottom: 8, left: 16, right: 16 })
 
         List() {
           ForEach(this.processingHistory.slice(0, 20), (history: ProcessingHistory) => {
@@ -1548,7 +1569,7 @@ struct ImageEditTestCase {
                 Text(history.success ? '成功' : '失败')
                   .fontSize(12)
                   .fontColor(history.success ? Color.Green : Color.Red)
-                  .padding({ horizontal: 8, vertical: 4 })
+                  .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                   .backgroundColor(history.success ? '#E8F5E8' : '#FFEBEE')
                   .borderRadius(4)
               }
@@ -1560,13 +1581,13 @@ struct ImageEditTestCase {
           })
         }
         .height(400)
-        .margin({ horizontal: 16, bottom: 16 })
+        .margin({ left: 16, right: 16, bottom: 16 })
       }
     }
   }
 
   // 工具方法
-  private getWatermarkPosition(watermark: WatermarkConfig, containerWidth: number, containerHeight: number): { x: number; y: number } {
+  private getWatermarkPosition(watermark: WatermarkConfig, containerWidth: number, containerHeight: number): Position {
     const padding = 4
     switch (watermark.position) {
       case 'top-left':
@@ -1591,7 +1612,7 @@ struct ImageEditTestCase {
 
   private getAverageFontSize(): number {
     if (this.textOverlays.length === 0) return 0
-    const sum = this.textOverlays.reduce((acc, overlay) => acc + overlay.fontSize, 0)
+    const sum = this.textOverlays.reduce((acc, overlay) => acc + overlay.size, 0)
     return Math.round(sum / this.textOverlays.length)
   }
 

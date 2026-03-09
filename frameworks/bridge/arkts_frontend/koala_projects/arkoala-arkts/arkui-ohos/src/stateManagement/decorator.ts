@@ -153,6 +153,11 @@ export interface EnvOptions<T> {
     initValue?: T
 }
 
+export interface MakeMonitorOptions {
+  owner?: IVariableOwner;
+  functionName?: string;
+}
+
 export interface IEnvDecoratedVariable<T> extends IDecoratedImmutableVariable<T>, IDecoratedV2Variable<T> {};
 
 export interface IStateMgmtFactory {
@@ -256,6 +261,7 @@ export interface IStateMgmtFactory {
     ): ILocalStoragePropRefDecoratedVariable<T>;
     makeComputed<T>(computeFunction: ComputeCallback<T>, varName: string): IComputedDecoratedVariable<T>;
     makeMonitor(pathLabmda: IMonitorPathInfo[], monitorFunction: MonitorCallback, owningView?: IVariableOwner): IMonitorDecoratedVariable;
+    makeMonitor(pathInfos: IMonitorPathInfo[], monitorCallback: MonitorCallback, options?: MakeMonitorOptions): IMonitorDecoratedVariable;
     makeEnv<T>(
         owningView: IVariableOwner,
         envValue: string,

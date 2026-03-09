@@ -475,7 +475,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress005, TestSize.Le
     ASSERT_NE(richEditorPattern, nullptr);
 
     GestureEvent info;
-    richEditorPattern->touchedFingerCount_ = 0;
+    richEditorPattern->touchedFingers_.clear();
     richEditorPattern->HandleLongPress(info);
     EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
 }
@@ -494,7 +494,8 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress006, TestSize.Le
     GestureEvent info;
 
     richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
-    richEditorPattern->touchedFingerCount_ = 1;
+    richEditorPattern->touchedFingers_.clear();
+    richEditorPattern->touchedFingers_.insert(0);
     richEditorPattern->selectOverlay_->isHandleMoving_ = false;
     std::list<FingerInfo> fingetList;
     fingetList.push_back(FingerInfo());

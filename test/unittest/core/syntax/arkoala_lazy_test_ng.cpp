@@ -104,7 +104,7 @@ const int32_t CACHED_COUNT = 2;
 
 /**
  * @tc.name: ArkoalaLazyNodeTest001
- * @tc.desc: Test ArkoalaLazyNode GetFrameChildByIndex.
+ * @tc.desc: Test ArkoalaLazyNode GetFrameChildByIndex
  * @tc.type: FUNC
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest001)
@@ -162,7 +162,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest001)
 
 /**
  * @tc.name: ArkoalaLazyNodeTest002
- * @tc.desc: Test ArkoalaLazyNode GetChildByIndex.
+ * @tc.desc: Test ArkoalaLazyNode GetChildByIndex
  * @tc.type: FUNC
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest002)
@@ -202,7 +202,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest002)
 
 /**
  * @tc.name: ArkoalaLazyNodeTest003
- * @tc.desc: Test ArkoalaLazyNode GetFrameNode.
+ * @tc.desc: Test ArkoalaLazyNode GetFrameNode
  * @tc.type: FUNC
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest003)
@@ -222,7 +222,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest003)
 
 /**
  * @tc.name: ArkoalaLazyNodeTest004
- * @tc.desc: Test ArkoalaLazyNode DumpInfo.
+ * @tc.desc: Test ArkoalaLazyNode DumpInfo
  * @tc.type: FUNC
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest004)
@@ -246,7 +246,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest004)
 
 /**
  * @tc.name: ArkoalaLazyNodeTest005
- * @tc.desc: Test ArkoalaLazyNode OnDataChange.
+ * @tc.desc: Test ArkoalaLazyNode OnDataChange
  * @tc.type: FUNC
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest005)
@@ -259,7 +259,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest005)
 
 /**
  * @tc.name: ArkoalaLazyNodeTest006
- * @tc.desc: Test ArkoalaLazyNode OnDataChange.
+ * @tc.desc: Test ArkoalaLazyNode OnDataChange
  * @tc.type: FUNC
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest006)

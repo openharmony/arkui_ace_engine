@@ -26,7 +26,7 @@ struct SourceSizeTest {
 
   build() {
     Column() {
-      Image($r('app.media.1'))
+      Image($r('app.media.startIcon'))
         .width(300)
         .height(300)
         .attributeModifier(this.modifier)

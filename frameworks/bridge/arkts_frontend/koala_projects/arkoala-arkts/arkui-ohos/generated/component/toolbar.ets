@@ -57,6 +57,9 @@ export class ArkToolBarItemPeer extends PeerNode {
         ArkUIGeneratedNativeModule._ToolBarItemInterface_setToolBarItemOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
+        return;
+    }
 }
 export enum ToolBarItemPlacement {
     TOP_BAR_LEADING = 0,
@@ -68,6 +71,9 @@ export interface ToolBarItemOptions {
 export interface ToolBarItemAttribute {
     setToolBarItemOptions(options?: ToolBarItemOptions): this {
         throw new Error('Unimplemented method setToolBarItemOptions')
+    }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        throw new Error("Unimplemented method debugLine")
     }
     attributeModifier(value: AttributeModifier<ToolBarItemAttribute> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -82,6 +88,9 @@ export class ArkToolBarItemComponent extends ComponentBase implements ToolBarIte
         const options_casted = options as (ToolBarItemOptions | undefined)
         this.getPeer()?.setToolBarItemOptionsAttribute(options_casted)
         this.applyOptionsFinish('ToolBarItemAttribute');
+        return this
+    }
+    public debugLine(sourceLine: string, moduleName?: string): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ToolBarItemAttribute> | undefined): this {

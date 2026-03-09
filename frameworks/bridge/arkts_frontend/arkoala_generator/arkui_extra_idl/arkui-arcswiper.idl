@@ -21,6 +21,7 @@ import arkui.component.dataPanel;
 import arkui.component.swiper.SwiperAnimationEvent as SwiperAnimationEvent;
 import arkui.component.swiper.OnSwiperAnimationStartCallback as OnSwiperAnimationStartCallback;
 import arkui.component.units;
+import ohos.arkui.ArcSwiper.ArcSwiperContentAnimatedTransition as ArcSwiperContentAnimatedTransition;
 
 callback Callback_I32_Void = void (i32 index);
 
@@ -42,6 +43,14 @@ interface ArcSwiperControllerHelper {
     static void showNext(pointer node);
     static void showPrevious(pointer node);
     static void finishAnimation(pointer node, optional VoidCallback callback_);
+};
+
+interface ArcSwiperContentTransitionProxyInner {
+    attribute i32 selectedIndex;
+    attribute i32 index;
+    attribute f64 position;
+    attribute f64 mainAxisLength;
+    void finishTransition();
 };
 
 dictionary ArcDirectionInner {
@@ -69,6 +78,6 @@ interface ArcSwiperExtender {
     static void onAnimationEnd(pointer node, (AnimationEndHandler or undefined) handler);
     static void onGestureSwipe(pointer node, (GestureSwipeHandler or undefined) handler);
     static void effectMode(pointer node, (EdgeEffect or undefined) edgeEffect);
-    static void customContentTransition(pointer node, (SwiperContentAnimatedTransition or undefined) transition);
+    static void customContentTransition(pointer node, (ArcSwiperContentAnimatedTransition or undefined) transition);
     static void disableTransitionAnimation(pointer node, (boolean or undefined) disabled);
 };

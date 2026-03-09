@@ -2106,7 +2106,6 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode>& node, RefPt
             if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_NEW_PASSWORD) {
                 nodeInfoWrap->SetValue(autoFillNewPassword);
                 pattern->SetAutoFillNewPassword("");
-                break;
             }
         }
     }

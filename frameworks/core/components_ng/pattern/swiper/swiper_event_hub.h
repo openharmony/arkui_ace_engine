@@ -106,6 +106,13 @@ public:
         swiperId_ = swiperId;
     }
 
+    void SetTabsId(int32_t tabsId)
+    {
+        tabsId_ = tabsId;
+    }
+
+    void ReportComponentChangeEvent(const std::string& type, int32_t currentIndex, float offset = 0.0f) const;
+
     void FireIndicatorChangeEvent(int32_t index) const
     {
         if (changeIndicatorEvent_) {
@@ -156,6 +163,7 @@ private:
     GestureSwipeEvent gestureSwipeEvent_;
     int32_t aniStartCalledCount_ = 0;
     std::function<void()> delayCallback_;
+    std::optional<int32_t> tabsId_;
     int32_t swiperId_ = -1;
 };
 

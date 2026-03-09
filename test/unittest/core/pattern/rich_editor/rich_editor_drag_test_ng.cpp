@@ -1201,19 +1201,18 @@ HWTEST_F(RichEditorDragTestNg, HandleCursorOnDragMoved001, TestSize.Level2)
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    EXPECT_NE(notifyDragEvent, nullptr);
+
     /**
      * @tc.steps: step2. change parameter and call function.
      */
     richEditorPattern->isCursorAlwaysDisplayed_ = true;
-    richEditorPattern->HandleCursorOnDragMoved(notifyDragEvent);
+    richEditorPattern->HandleCursorOnDragMoved();
     EXPECT_EQ(richEditorPattern->caretVisible_, true);
     /**
      * @tc.steps: step2. change parameter and call function.
      */
     richEditorPattern->isCursorAlwaysDisplayed_ = false;
-    richEditorPattern->HandleCursorOnDragMoved(notifyDragEvent);
+    richEditorPattern->HandleCursorOnDragMoved();
     EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, true);
 }
 

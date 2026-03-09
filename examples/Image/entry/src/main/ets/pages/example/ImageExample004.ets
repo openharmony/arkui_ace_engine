@@ -16,7 +16,7 @@
 import { image } from '@kit.ImageKit'
 
 /**
- * 开启图像AI分析
+ * 开启图像 AI 分析
  */
 @Entry
 @Component
@@ -29,7 +29,7 @@ struct ImageExample4 {
   }
 
   async aboutToAppear() {
-    this.imagePixelMap = await this.getPixmapFromMedia($r('app.media.app_icon'))
+    this.imagePixelMap = await this.getPixmapFromMedia($r('app.media.startIcon'))
   }
 
   build() {
@@ -38,7 +38,7 @@ struct ImageExample4 {
         .enableAnalyzer(true)
         .width(200)
         .height(200)
-        .margin({bottom:10})
+        .margin({ bottom: 10 })
       Button('getTypes')
         .width(80)
         .height(80)
@@ -47,8 +47,13 @@ struct ImageExample4 {
         })
     }
   }
+
   private async getPixmapFromMedia(resource: Resource) {
-    let unit8Array = await getContext(this)?.resourceManager?.getMediaContent({
+    let context = this.getUIContext().getHostContext()
+    if (!context) {
+      return undefined
+    }
+    let unit8Array = await context.resourceManager.getMediaContent({
       bundleName: resource.bundleName,
       moduleName: resource.moduleName,
       id: resource.id

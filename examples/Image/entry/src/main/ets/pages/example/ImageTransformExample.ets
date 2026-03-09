@@ -82,7 +82,7 @@ struct ImageRoundedCornersExample {
             .fontColor(Color.Black)
 
           Stack() {
-            Image($r('app.media.app_icon'))
+            Image($r('app.media.startIcon'))
               .width(250)
               .height(250)
               .objectFit(ImageFit.Cover)

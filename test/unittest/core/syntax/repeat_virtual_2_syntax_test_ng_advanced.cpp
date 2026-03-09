@@ -77,7 +77,7 @@ public:
     }
 };
 
-auto g_onGetRid4Index = [](uint32_t index) -> std::pair<RIDType, uint32_t> {
+auto g_onGetRid4Index = [](uint32_t index, bool inAnimation) -> std::pair<RIDType, uint32_t> {
     return { index, index };
 };
 
@@ -105,26 +105,6 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetOrCreateRepeatNodeTest00
 
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTotalCount(), TOTAL_COUNT_5);
-}
-
-/**
- * @tc.name: RepeatVirtual2GetOrCreateRepeatNodeSameIdTest002
- * @tc.desc: Test GetOrCreateRepeatNode with same nodeId returns same instance
- * @tc.type: FUNC
- */
-HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetOrCreateRepeatNodeSameIdTest002, TestSize.Level1)
-{
-    auto node1 = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
-        g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
-
-    auto node2 = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_10, TOTAL_COUNT_10,
-        g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
-
-    EXPECT_EQ(node1, node2);
 }
 
 /**

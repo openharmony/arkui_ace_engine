@@ -78,8 +78,9 @@ export function applyAttributeModifierNoCommonMethod<T, MethodSet extends T, Met
         isInit = attributeUpdater!.isInit;
         attributeUpdater!.isInit = false;
         let needUpdate: boolean = false;
+        let needInitializeModifier: boolean = false;
         if (!attributeUpdater.peerNode_) {
-            attributeUpdater.initializeModifier(attributeSet_ as Object as T);
+            needInitializeModifier = true;
             needUpdate = true;
         } else if (node !== attributeUpdater.peerNode_) {
             attributeUpdater.onComponentChanged(attributeSet_ as Object as T);
@@ -96,6 +97,9 @@ export function applyAttributeModifierNoCommonMethod<T, MethodSet extends T, Met
                 receiver.applyAttributesFinish();
                 return receiver as Object as T;
             };
+        }
+        if (needInitializeModifier) {
+            attributeUpdater.initializeModifier(attributeUpdater.attribute!);
         }
     }
     let stateValue = 0;

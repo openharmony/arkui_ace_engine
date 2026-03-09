@@ -5337,6 +5337,154 @@
     },
     {
         "first_introduced": "24",
+        "name": "OH_ArkUI_PointerEvent_CreateClonedPointerEvent"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_PointerEvent_CreatePointerEvent"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_PointerEvent_DestroyClonedPointerEvent"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetActionType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetSourceType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetToolType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetPressure"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetPressureByIndex"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetEventTime"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetDeviceId"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetTargetDisplayId"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetChangedFingerId"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetFingerIdByIndex"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetChangedWindowPosition"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetWindowPositionByIndex"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetChangedScreenPosition"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetScreenPositionByIndex"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetChangedGlobalDisplayPosition"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetGlobalDisplayPositionByIndex"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetHandleId"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetTiltAngle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetRollAngle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetPressedKeys"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetChangedTouchArea"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetTouchAreaByIndex"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetChangedInteractionHand"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetInteractionHandByIndex"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetPressedTimeByIndex"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetPinchAxisScaleValue"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetHorizontalAxisScaleValue"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetVerticalAxisScaleValue"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetScrollStep"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetMouseButton"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetRawDeltaX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetRawDeltaY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ClonedEvent_SetPressedButtons"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_PointerEvent_PostClonedEventWithStrategy"
+    },
+    {
+        "first_introduced": "24",
         "name": "OH_ArkUI_TextEditorTextStyle_Destroy"
     },
     {

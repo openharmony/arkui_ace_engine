@@ -61,6 +61,9 @@ export class ArkContainerSpanPeer extends PeerNode {
         ArkUIGeneratedNativeModule._ContainerSpanAttribute_setTextBackgroundStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
+        return;
+    }
 }
 export interface ContainerSpanAttribute {
     setContainerSpanOptions(): this {
@@ -71,6 +74,9 @@ export interface ContainerSpanAttribute {
     }
     attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
+    }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        throw new Error('Unimplemented method debugLine')
     }
 }
 
@@ -100,6 +106,9 @@ export class ArkContainerSpanComponent extends ComponentBase implements Containe
     }
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
+    }
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        return this
     }
 }
 

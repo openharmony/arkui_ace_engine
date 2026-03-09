@@ -60,6 +60,7 @@ group("core_common_unittest") {
     "plugin:plugin_manager_test",
     "recorder:event_recorder_test",
     "resource:resource_manager_test",
+    "resource:resource_parse_utils_test_ng",
     "statistic_event:statistic_event_test",
   ]
 }

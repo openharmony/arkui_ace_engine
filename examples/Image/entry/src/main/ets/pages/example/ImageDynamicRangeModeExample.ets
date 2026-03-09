@@ -31,7 +31,7 @@ struct ImageDynamicRangeModeExample {
       Column({ space: 15 }) {
         Text('STANDARD (标准模式)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(200)
             .height(200)
             .dynamicRangeMode(DynamicRangeMode.STANDARD)
@@ -48,7 +48,7 @@ struct ImageDynamicRangeModeExample {
       Column({ space: 15 }) {
         Text('HIGH (高动态范围)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(200)
             .height(200)
             .dynamicRangeMode(DynamicRangeMode.HIGH)
@@ -65,7 +65,7 @@ struct ImageDynamicRangeModeExample {
       Column({ space: 15 }) {
         Text('CONSTRAINT (约束模式)')
           .fontSize(16)
-        Image($r('app.media.app_icon'))
+        Image($r('app.media.startIcon'))
             .width(200)
             .height(200)
             .dynamicRangeMode(DynamicRangeMode.CONSTRAINT)

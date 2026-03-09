@@ -1959,6 +1959,11 @@ void ScrollPattern::ReportOnItemScrollEvent(const std::string& event)
         "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
 
+void ScrollPattern::FillReportOnItemStopParams(std::unique_ptr<JsonValue>& params)
+{
+    params->Put("offset", GetCurrentPosition());
+}
+
 int32_t ScrollPattern::OnInjectionEvent(const std::string& command)
 {
     return OnInjectionEventByRatio(command);

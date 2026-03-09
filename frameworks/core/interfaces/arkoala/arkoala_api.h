@@ -2260,9 +2260,9 @@ struct ArkVelocityFieldOptions {
 };
 
 struct ArkUICheckboxSettingData {
-    ArkUIOptionalInt selectColor;
-    ArkUIOptionalInt unselectedColor;
-    ArkUIOptionalInt strokeColor;
+    ArkUIOptionalUint selectColor;
+    ArkUIOptionalUint unselectedColor;
+    ArkUIOptionalUint strokeColor;
 };
 
 typedef struct {
@@ -8010,6 +8010,11 @@ struct ArkUIRichEditorModifier {
         ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, ArkUI_Int32 heightStyle, ArkUI_Int32 widthStyle);
     void* (*getRichEditorGlyphPositionAtCoordinate)(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy);
     ArkUITextLineMetrics (*getRichEditorLineMetrics)(ArkUINodeHandle node, ArkUI_Int32 lineNumber);
+    void* (*getRichEditorCharacterPositionAtCoordinate)(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy);
+    void (*getRichEditorGlyphRangeForCharacterRange)(
+        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
+    void (*getRichEditorCharacterRangeForGlyphRange)(
+        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
     void (*setTypingParagraphStyle)(ArkUINodeHandle node, const ArkUIRichEditorParagraphStyle& paragraphStyle);
     void (*setRichEditorTypingStyle)(ArkUINodeHandle node, const ArkUIRichEditorTextStyle& style);
     ArkUIRichEditorTextStyle (*getRichEditorTypingStyle)(ArkUINodeHandle node);

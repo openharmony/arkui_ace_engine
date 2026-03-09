@@ -1,0 +1,28 @@
+{
+  "float": [
+    {
+      "name": "page_text_font_size",
+      "value": "50fp"
+    },
+    {
+      "name": "x",
+      "value": "-2"
+    },
+    {
+      "name": "y",
+      "value": "-2"
+    },
+    {
+      "name": "width",
+      "value": "304"
+    },
+    {
+      "name": "height",
+      "value": "130"
+    },
+    {
+      "name": "fillOpacity",
+      "value": "0.8"
+    }
+  ]
+}

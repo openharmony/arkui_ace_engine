@@ -91,6 +91,7 @@ import { WaterFlowSectionsInterface } from "#generated";
 import { CustomBuilderT, CustomNodeBuilderT, ResponseType } from '#generated'
 import { CommonModifier } from '#generated'
 import { CallbackTransformer } from './../CallbackTransformer'
+import { ArcSwiperContentTransitionProxy, ArcSwiperContentTransitionProxyInternal} from '@ohos.arkui.ArcSwiper'
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -640,6 +641,14 @@ export namespace extractors {
   export function fromComponentContentPtr(ptr: KPointer): ComponentContent {
     const x: Object = {};
     return x as ComponentContent;
+  }
+
+  export function toArcSwiperContentTransitionProxyPtr(value: ArcSwiperContentTransitionProxy): KPointer {
+    return toPeerPtr(value);
+  }
+  export function fromArcSwiperContentTransitionProxyPtr(ptr: KPointer): ArcSwiperContentTransitionProxy {
+    let proxy = ArcSwiperContentTransitionProxyInternal.fromPtr(ptr);
+    return proxy as ArcSwiperContentTransitionProxy;
   }
 
   export function transform_Ark_ColorMetrics_to_Ark_ColorMetricsExt(colorMetrics: ColorMetrics): ColorMetricsExt {

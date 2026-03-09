@@ -19,6 +19,7 @@ import { StateContext } from 'arkui.incremental.runtime.state'
 import { InteropNativeModule, nullptr, pointer } from '@koalaui/interop'
 import { int32 } from '@koalaui/common'
 import { PeerNode } from '../PeerNode'
+import { InternalListener } from './DataChangeListener'
 import { setNeedCreate } from '../ArkComponentRoot'
 import { IDataSource } from '../component/lazyForEach'
 import { OnMoveHandler, ItemDragEventHandler, LazyForEachOps } from '#generated'
@@ -60,6 +61,21 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     if (pool.total !== dataSource.totalCount()) {
         console.log(`dataSource totalCount changed from ${pool.total} to ${dataSource.totalCount()}`)
         pool.total = dataSource.totalCount()
+    }
+
+    let listener = remember(() => { 
+        let changeCounter = STATE_MGMT_FACTORY.makeStaticLocal<int32>('__backing_value_change_counter', 0) 
+        let res = new InternalListener(changeCounter) 
+        dataSource.registerDataChangeListener(res) 
+        return res 
+    }) 
+    listener.version.get() // subscribe 
+    // first item index that's affected by DataChange 
+    const changeIndex = listener.flush(node.getPeerPtr(), pool.activeStart) 
+    if (changeIndex < Number.POSITIVE_INFINITY) { 
+        scheduleCallback(() => { 
+            pool.pruneBy((index: int32) => index >= changeIndex) 
+        }) 
     }
 
     const currentRenderingComponent = ObserveSingleton.instance.renderingComponent
@@ -127,7 +143,7 @@ class LazyItemPool implements Disposable {
     private _parent: PeerNode
     private _componentRoot?: Object
     private _moveFromTo?: [int32, int32] = undefined // used to track moveFromTo in onMove event
-    public activeStart?: int32 
+    public activeStart?: int32
     public total: int32 = 0 // total count of data source
     disposed: boolean = false
 
@@ -215,7 +231,8 @@ class LazyItemPool implements Disposable {
      */
     updateActiveRange(start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) {
         // update activeStart from backend call
-        this.activeStart = start
+        let activeStart: int32 = Math.max(0, start - cacheStart).toInt()
+        this.activeStart = activeStart
         try {
             this.pruneBy(index => {
                 index = this.convertFromToIndexRevert(index)

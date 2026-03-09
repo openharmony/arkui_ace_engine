@@ -59,7 +59,7 @@ struct ImageLoadingPriorityExample {
         Column({ space: 10 }) {
           Text('主图:')
             .fontSize(14)
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .width(200)
             .height(100)
             .border({ width: 2, color: this.loadSrcSuccess ? Color.Green : Color.Red })
@@ -76,7 +76,7 @@ struct ImageLoadingPriorityExample {
         Column({ space: 10 }) {
           Text('备图:')
           .fontSize(14)
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .width(200)
             .height(100)
             .border({ width: 2, color: this.loadAltSuccess ? Color.Green : Color.Orange })

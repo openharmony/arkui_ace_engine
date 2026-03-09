@@ -752,7 +752,8 @@ HWTEST_F(TextPickerOtherTestNg, TextPickerLayoutPropertyToJsonValue002, TestSize
     pickerProperty->ToJsonValue(json, filter);
 
     EXPECT_EQ(json->GetString("defaultPickerItemHeight"), "0.00px");
-    EXPECT_EQ(json->GetString("gradientHeight"), "0.00px");
+    auto defaultGradientHeight = theme->GetGradientHeight().ToString();
+    EXPECT_EQ(json->GetString("gradientHeight"), defaultGradientHeight.c_str());
     EXPECT_EQ(json->GetString("canLoop"), "true");
     EXPECT_EQ(json->GetString("selected"), "0");
     EXPECT_EQ(json->GetString("value"), "");

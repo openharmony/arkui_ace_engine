@@ -174,6 +174,9 @@ class CustomComponentLifecycle {
     }
 
     public addObserver(target: CustomComponentLifecycleObserver): void {
+        if (target === undefined || target === null) {
+            return;
+        }
         this.owningView_['__newLifecycleNeedWork__Internal'] = true;
         if (!this.observers_.includes(target)) {
             this.observers_.push(target);
@@ -181,6 +184,9 @@ class CustomComponentLifecycle {
     }
 
     public removeObserver(target: CustomComponentLifecycleObserver): void {
+        if (target === undefined || target === null) {
+            return;
+        }
         this.observers_ = this.observers_.filter(obs => obs !== target);
     }
 

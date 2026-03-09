@@ -69,6 +69,10 @@ public:
         ResetContentClip();
     }
 
+    void DumpInfo();
+
+    void DumpInfo(std::unique_ptr<JsonValue>& json);
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_GROUP(ScrollBarProperty, ScrollBarProperty);

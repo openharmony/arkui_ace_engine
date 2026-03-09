@@ -48,7 +48,7 @@ struct ImageThumbnail {
             .fontSize(16)
             .fontColor(Color.Gray)
 
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .width(150)
             .height(150)
             .objectFit(ImageFit.Cover)
@@ -99,7 +99,7 @@ struct ImageThumbnail {
           Row({ space: 20 }) {
             // 缩略图
             Column({ space: 10 }) {
-              Image($r('app.media.app_icon'))
+              Image($r('app.media.startIcon'))
                 .width(this.customWidth / 2)
                 .height(this.customHeight / 2)
                 .objectFit(ImageFit.Cover)
@@ -211,7 +211,7 @@ struct ImageThumbnail {
             ForEach(this.sizePresets, (size: string) => {
               const dims = this.sizeMap.get(size) || [100, 100];
               Column({ space: 8 }) {
-                Image($r('app.media.app_icon'))
+                Image($r('app.media.startIcon'))
                   .width(dims[0] / 3)
                   .height(dims[1] / 3)
                   .objectFit(ImageFit.Cover)

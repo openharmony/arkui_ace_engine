@@ -27,6 +27,7 @@ export struct DialogIndex {
   paths: NavListItem[] = [
     { name: 'AlertDialog', path: 'AlertDialog' },
     { name: 'ActionSheet', path: 'ActionSheet' },
+    { name: 'ActionSheetAdvanced', path: 'ActionSheetAdvanced' },
     { name: 'CustomDialog', path: 'CustomDialog' },
     { name: 'PromptAction', path: 'PromptAction' },
     { name: 'DialogController', path: 'DialogController' },

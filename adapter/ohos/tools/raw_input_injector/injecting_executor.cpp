@@ -18,10 +18,13 @@
 #include <thread>
 
 #include "input_manager.h"
+#include "key_event.h"
 
 namespace OHOS {
 namespace Ace {
-
+namespace {
+constexpr int32_t MAX_PRESSED_COUNT = 30;
+}
 int32_t InjectingExecutor::GetPointerActionFromCommandType(CommandType type)
 {
     switch (type) {
@@ -132,6 +135,78 @@ bool InjectingExecutor::InjectOnePonterEvent(
         ret = true;
     }
     return ret;
+}
+
+void HandleKeyDown(std::shared_ptr<MMI::KeyEvent> keyEvent, int32_t keyCode,
+    const std::vector<int32_t>& pressedKeys, std::vector<int32_t>& globalDownKeys)
+{
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    for (int32_t pCode : pressedKeys) {
+        if (std::find(globalDownKeys.begin(), globalDownKeys.end(), pCode) == globalDownKeys.end()) {
+            globalDownKeys.push_back(pCode);
+        }
+    }
+    if (std::find(globalDownKeys.begin(), globalDownKeys.end(), keyCode) == globalDownKeys.end()) {
+        globalDownKeys.push_back(keyCode);
+    }
+    for (int32_t code : globalDownKeys) {
+        MMI::KeyEvent::KeyItem item;
+        item.SetKeyCode(code);
+        item.SetPressed(true);
+        keyEvent->AddKeyItem(item);
+    }
+}
+
+void HandleKeyUp(std::shared_ptr<MMI::KeyEvent> keyEvent, int32_t keyCode,
+    const std::vector<int32_t>& pressedKeys, std::vector<int32_t>& globalDownKeys)
+{
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_UP);
+    std::vector<int32_t> upKeys;
+    upKeys.push_back(keyCode);
+    for (int32_t pCode : pressedKeys) {
+        upKeys.push_back(pCode);
+    }
+    for (int32_t upCode : upKeys) {
+        auto iter = std::find(globalDownKeys.begin(), globalDownKeys.end(), upCode);
+        if (iter != globalDownKeys.end()) {
+            globalDownKeys.erase(iter);
+        }
+    }
+    for (int32_t code : globalDownKeys) {
+        MMI::KeyEvent::KeyItem item;
+        item.SetKeyCode(code);
+        item.SetPressed(true);
+        keyEvent->AddKeyItem(item);
+    }
+    for (int32_t code : upKeys) {
+        MMI::KeyEvent::KeyItem item;
+        item.SetKeyCode(code);
+        item.SetPressed(false);
+        keyEvent->AddKeyItem(item);
+    }
+}
+
+bool InjectingExecutor::InjectKeyEvent(int32_t type, int32_t keyCode,
+    const std::vector<int32_t>& pressedKeys, std::vector<int32_t>& globalDownKeys)
+{
+    auto keyEvent = MMI::KeyEvent::Create();
+    if (!keyEvent) {
+        std::cout << "Create key event failed" << std::endl;
+        return false;
+    }
+
+    keyEvent->SetKeyCode(keyCode);
+    if (type == 'd') {
+        HandleKeyDown(keyEvent, keyCode, pressedKeys, globalDownKeys);
+    } else if (type == 'u') {
+        HandleKeyUp(keyEvent, keyCode, pressedKeys, globalDownKeys);
+    }
+    if (globalDownKeys.size() > MAX_PRESSED_COUNT) {
+        std::cout << "pressed button count should less than " << MAX_PRESSED_COUNT << std::endl;
+        return false;
+    }
+    MMI::InputManager::GetInstance()->SimulateInputEvent(keyEvent);
+    return true;
 }
 
 } // namespace Ace

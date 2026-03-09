@@ -98,12 +98,11 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest001, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", 1, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child = AceType::MakeRefPtr<FrameNode>("child", 1, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to pattern builderFunc
      */
@@ -146,12 +145,12 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest002, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to pattern builderFunc
      */
@@ -194,12 +193,11 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest003, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", 0, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child = AceType::MakeRefPtr<FrameNode>("child", 0, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to pattern builderFunc
      */
@@ -242,12 +240,11 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest004, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", BIG_INT, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child = AceType::MakeRefPtr<FrameNode>("child", BIG_INT, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to pattern builderFunc
      */
@@ -290,12 +287,12 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest005, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_BIG_INT, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_BIG_INT, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to pattern builderFunc
      */
@@ -338,12 +335,11 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest006, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child = AceType::MakeRefPtr<FrameNode>("", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
 
     /**
      * @tc.steps: step4. Set parameters to pattern builderFunc
@@ -387,12 +383,12 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest007, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to loadingProgressModelNG builderFunc
      */
@@ -504,12 +500,12 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest010, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to loadingProgressModelNG builderFunc
      */
@@ -565,12 +561,12 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest011, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to loadingProgressModelNG builderFunc
      */
@@ -626,12 +622,11 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest012, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", 1, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child = AceType::MakeRefPtr<FrameNode>("child", 1, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to pattern builderFunc
      */
@@ -683,12 +678,12 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest013, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to pattern builderFunc
      */
@@ -744,12 +739,11 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest014, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", 0, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child = AceType::MakeRefPtr<FrameNode>("child", 0, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to pattern builderFunc
      */
@@ -805,12 +799,11 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest015, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", BIG_INT, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child = AceType::MakeRefPtr<FrameNode>("child", BIG_INT, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to pattern builderFunc
      */
@@ -866,12 +859,12 @@ HWTEST_F(LoadingProgressNodeTestNg, LoadingProgressNodeTest016, TestSize.Level1)
      * @tc.steps: step3. Make builderFunc
      */
     auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(CHECKED, config.enableloading_);
-                EXPECT_EQ(CHECKED, config.enabled_);
-                RefPtr<FrameNode> child =
-                    AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_BIG_INT, AceType::MakeRefPtr<Pattern>());
-                return child;
-            };
+        EXPECT_EQ(CHECKED, config.enableloading_);
+        EXPECT_EQ(CHECKED, config.enabled_);
+        RefPtr<FrameNode> child =
+            AceType::MakeRefPtr<FrameNode>("child", NEGATIVE_BIG_INT, AceType::MakeRefPtr<Pattern>());
+        return child;
+    };
     /**
      * @tc.steps: step4. Set parameters to pattern builderFunc
      */

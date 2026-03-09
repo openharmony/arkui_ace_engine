@@ -397,19 +397,11 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest005, TestSize.Level
         .Times(NEVER_ONCE);
     contentChangeMgr->OnPageTransitionEnd(nullptr);
 
-    SetScrollingNodes();
-    EXPECT_TRUE(contentChangeMgr->IsScrolling());
-    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _))
-        .Times(NEVER_ONCE);
-    contentChangeMgr->OnPageTransitionEnd(node);
-    ResetScrollingNodes();
-
     /**
      * @tc.steps: step3. call OnPageTransitionEnd under normal conditions.
      * @tc.expected: ReportContentChangeEvent called once.
      */
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
-    EXPECT_FALSE(contentChangeMgr->IsScrolling());
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::PAGE, simpleTree))
         .Times(AtLeast(AT_LEAST_ONCE));
     contentChangeMgr->OnPageTransitionEnd(node);
@@ -516,18 +508,11 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest007, TestSize.Level
     contentChangeMgr->OnSwiperChangeEnd(nullptr, false);
     EXPECT_TRUE(contentChangeMgr->changedSwiperNodes_.empty());
 
-    SetScrollingNodes();
-    EXPECT_TRUE(contentChangeMgr->IsScrolling());
-    contentChangeMgr->OnSwiperChangeEnd(node, false);
-    ResetScrollingNodes();
-    EXPECT_TRUE(contentChangeMgr->changedSwiperNodes_.empty());
-
     /**
      * @tc.steps: step3. call OnSwiperChangeEnd under normal conditions.
      * @tc.expected: changedSwiperNodes_ is not empty.
      */
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
-    EXPECT_FALSE(contentChangeMgr->IsScrolling());
     contentChangeMgr->OnSwiperChangeEnd(node, false);
     EXPECT_FALSE(contentChangeMgr->changedSwiperNodes_.empty());
 
@@ -576,19 +561,11 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest008, TestSize.Level
         .Times(NEVER_ONCE);
     contentChangeMgr->OnDialogChangeEnd(nullptr, true);
 
-    SetScrollingNodes();
-    EXPECT_TRUE(contentChangeMgr->IsScrolling());
-    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _))
-        .Times(NEVER_ONCE);
-    contentChangeMgr->OnDialogChangeEnd(node, true);
-    ResetScrollingNodes();
-
     /**
      * @tc.steps: step3. call OnDialogChangeEnd under normal conditions.
      * @tc.expected: ReportContentChangeEvent called once.
      */
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
-    EXPECT_FALSE(contentChangeMgr->IsScrolling());
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::DIALOG, showSimpleTree))
         .Times(AtLeast(AT_LEAST_ONCE));
     contentChangeMgr->OnDialogChangeEnd(node, true);

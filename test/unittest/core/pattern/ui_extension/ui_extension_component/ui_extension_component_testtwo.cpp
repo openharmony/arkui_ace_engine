@@ -1591,6 +1591,39 @@ HWTEST_F(UIExtensionComponentTestTwoNg, EmbeddedComponentTest001, TestSize.Level
 }
 
 /**
+ * @tc.name: ExecuteDumpTask001
+ * @tc.desc: Test Func AddExtraInfoWithParamConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, ExecuteDumpTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct UIExtensionNode and get pattern
+     */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test Func AddExtraInfoWithParamConfig
+     */
+    auto json = JsonUtil::CreateSharedPtrJson();
+    ParamConfig config;
+    std::vector<std::string> params;
+    params.push_back("-allInfoWithParamConfigTotal");
+    params.push_back("1");
+    params.push_back(config.interactionInfo ? "1" : "0");
+    params.push_back(config.accessibilityInfo ? "1" : "0");
+    params.push_back(config.cacheNodes ? "1" : "0");
+    params.push_back(config.withWeb ? "1" : "0");
+    params.push_back(config.withUIExtension ? "1" : "0");
+    pattern->ExecuteDumpTask(json, params, uiextensionNode);
+    EXPECT_EQ(json->GetString("$child-uec"), "");
+}
+
+/**
  * @tc.name: UIExtensionComponentTouchTest001
  * @tc.desc: Test UIExtension HandleTouch windowLeave
  * @tc.type: FUNC

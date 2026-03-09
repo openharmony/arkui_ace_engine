@@ -15,7 +15,7 @@
 
 /// <reference path='./import.ts' />
 function loadComponent() {
-  if (globalThis.__ArkComponent__ !== undefined && loadComponent.componentObj === undefined) {
+  if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
     class ArkCheckboxComponent extends globalThis.__ArkComponent__ {
       constructor(nativePtr, classType) {
         super(nativePtr, classType);
@@ -523,6 +523,7 @@ class JSCheckbox extends JSViewAbstract {
 }
 
 function createComponent(nativePtr, classType) {
+  loadComponent();
   if (loadComponent.componentObj !== undefined) {
     return new loadComponent.componentObj.component(nativePtr, classType);
   }
@@ -530,12 +531,14 @@ function createComponent(nativePtr, classType) {
 }
 
 function getCheckboxWidthModifier() {
+  loadComponent();
   if (loadComponent.componentObj !== undefined) {
     return loadComponent.componentObj.widthModifier;
   }
   return undefined;
 }
 function getCheckboxHeightModifier() {
+  loadComponent();
   if (loadComponent.componentObj !== undefined) {
     return loadComponent.componentObj.heightModifier;
   }

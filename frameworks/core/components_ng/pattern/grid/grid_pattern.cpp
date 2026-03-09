@@ -1515,6 +1515,11 @@ int32_t GridPattern::GetItemIndex(double x, double y) const
     return -1;
 }
 
+int32_t GridPattern::GetFirstIndex() const
+{
+    return startIndex_;
+}
+
 void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     SetScrollSource(SCROLL_FROM_JUMP);

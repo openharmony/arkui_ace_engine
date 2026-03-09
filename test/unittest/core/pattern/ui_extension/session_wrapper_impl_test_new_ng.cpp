@@ -1370,6 +1370,12 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg040, TestSize.L
     platformContainerHandler->allowCrossProcessNesting_ = true;
     sessionWrapper->UpdateWantPtr(wantPtr);
     EXPECT_FALSE(wantPtr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
+    
+    auto uiExtensionParams = wantPtr->GetParams().GetWantParams("ohos.system.window.uiextension.params");
+    auto windowMode = uiExtensionParams.GetIntParam("ohos.system.window.mode", 1000);
+    EXPECT_EQ(windowMode, 0);
+    windowMode = uiExtensionParams.GetIntParam("invalid.key", 1000);
+    EXPECT_EQ(windowMode, 1000);
 }
 
 /**

@@ -99,14 +99,14 @@ struct ImageBlendModeExample {
 
           Stack() {
             // 底层图片
-            Image($r('app.media.app_icon'))
+            Image($r('app.media.startIcon'))
               .width(300)
               .height(250)
               .objectFit(ImageFit.Cover)
               .borderRadius(15)
 
             // 顶层图片（应用混合模式）
-            Image($r('app.media.png'))
+            Image($r('app.media.startIcon'))
               .width(300)
               .height(250)
               .objectFit(ImageFit.Cover)

@@ -437,6 +437,18 @@ export class ArkSpanPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SpanAttribute_setOnClick1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (moduleName !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const moduleNameTmpValue  = moduleName!
+            thisSerializer.writeString(moduleNameTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface TextBackgroundStyle {
     color?: ResourceColor;
@@ -513,6 +525,9 @@ export interface SpanAttribute {
     }
     attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
+    }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        throw new Error("Unimplemented method debugLine")
     }
 }
 
@@ -659,6 +674,15 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
     }
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
+    }
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        if (this.checkPriority("debugLine")) {
+            const sourceLine_casted = sourceLine as (string)
+            const moduleName_casted = moduleName as (string | undefined)
+            this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
+            return this
+        }
+        return this
     }
 }
 

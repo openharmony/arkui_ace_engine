@@ -1113,6 +1113,25 @@ HWTEST_F(ImagePatternTestNg, ImageHandleCopyTest001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ImageHandleCopyTest002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImageHandleCopyTest002, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    imagePattern->HandleCopy();
+    EXPECT_NE(imagePattern->clipboard_, nullptr);
+}
+
+/**
  * @tc.name: TestCreateImageDfxConfig001
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
@@ -3021,6 +3040,140 @@ HWTEST_F(ImagePatternTestNg, ImagePatternLoadImageDataIfNeed001, TestSize.Level0
 }
 
 /**
+ * @tc.name: UpdateDrawableDescriptor001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, UpdateDrawableDescriptor001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    
+    auto drawable = AceType::MakeRefPtr<DrawableDescriptor>();
+    ASSERT_NE(drawable, nullptr);
+    imagePattern->UpdateDrawableDescriptor(drawable);
+    EXPECT_EQ(imagePattern->drawable_, drawable);
+}
+
+/**
+ * @tc.name: AnimatedDrawableControllAnimation001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, AnimatedDrawableControllAnimation001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
+    imagePattern->previousVisibility_ = true;
+    
+    auto animatedDrawable = AceType::MakeRefPtr<DrawableDescriptor>();
+    ASSERT_NE(animatedDrawable, nullptr);
+    imagePattern->drawable_ = animatedDrawable;
+    
+    int32_t nodeId = frameNode->GetId();
+    imagePattern->AnimatedDrawableControllAnimation(nodeId);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATED_DRAWABLE);
+    EXPECT_TRUE(imagePattern->previousVisibility_);
+    EXPECT_EQ(imagePattern->drawable_, animatedDrawable);
+}
+
+/**
+ * @tc.name: ResetDrawableDescriptor001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ResetDrawableDescriptor001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    
+    auto drawable = AceType::MakeRefPtr<DrawableDescriptor>();
+    ASSERT_NE(drawable, nullptr);
+    imagePattern->drawable_ = drawable;
+    auto contentMod = AceType::MakeRefPtr<ImageContentModifier>(WeakPtr(imagePattern));
+    imagePattern->contentMod_ = contentMod;
+    
+    imagePattern->ResetDrawableDescriptor();
+    EXPECT_EQ(imagePattern->drawable_, nullptr);
+}
+
+/**
+ * @tc.name: SetImageType001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, SetImageType001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
+    ImageType imageType = ImageType::BASE;
+    imagePattern->SetImageType(imageType);
+    EXPECT_EQ(imagePattern->imageType_, imageType);
+}
+
+/**
+ * @tc.name: OnNotifyMemoryLevel001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnNotifyMemoryLevel001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    uint32_t level = 0;
+    imagePattern->OnNotifyMemoryLevel(level);
+    EXPECT_NE(imagePattern, nullptr);
+}
+
+/**
+ * @tc.name: OnAttachToMainRenderTree001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnAttachToMainRenderTree001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->isRecycledImage_ = true;
+    imagePattern->OnAttachToMainRenderTree();
+    EXPECT_NE(imagePattern, nullptr);
+}
+
+/**
+ * @tc.name: OnOffscreenProcessResource001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnOffscreenProcessResource001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    imagePattern->isRecycledImage_ = true;
+    imagePattern->OnOffscreenProcessResource();
+    EXPECT_NE(imagePattern, nullptr);
+}
+
+/**
  * @tc.name: TestImageSourceInfoGetSrcType001
  * @tc.desc: Verify srcType is correctly mapped from ImageSourceInfo.
  * @tc.type: FUNC
@@ -3452,6 +3605,24 @@ HWTEST_F(ImagePatternTestNg, SetFrameOffsetForOverlayNode001, TestSize.Level0)
     imagePattern->SetFrameOffsetForOverlayNode();
     EXPECT_NE(frameNode, nullptr);
     EXPECT_NE(imagePattern, nullptr);
+}
+
+/**
+ * @tc.name: SetFrameOffsetForOverlayNode002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, SetFrameOffsetForOverlayNode002, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    auto frameNodeOverLay = CreateImageNode("", "", nullptr);
+    frameNode->overlayNode_ = frameNodeOverLay;
+    imagePattern->SetFrameOffsetForOverlayNode();
+    EXPECT_NE(frameNode->overlayNode_, nullptr);
 }
 
 /**

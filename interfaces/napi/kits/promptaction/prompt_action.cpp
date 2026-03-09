@@ -20,6 +20,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container_scope.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/button/button_theme.h"
@@ -53,6 +54,12 @@ const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode
 const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
 const std::vector<DialogDisplayMode> DIALOG_DISPLAY_MODE = {
     DialogDisplayMode::SCREEN_BASED, DialogDisplayMode::WINDOW_BASED };
+
+std::string GetDelegateErrorMessage()
+{
+    auto currentIdAndReason = ContainerScope::CurrentIdWithReason();
+    return AceEngine::GetEnhancedContextBNotFoundMessage(currentIdAndReason.second, Container::CurrentIdSafely());
+}
 
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
@@ -482,7 +489,7 @@ bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_
         toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
-            NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "Can not get delegate." + GetDelegateErrorMessage(), ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
         TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
@@ -494,7 +501,7 @@ bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found." + GetDelegateErrorMessage(), ERROR_CODE_INTERNAL_ERROR);
         return false;
     }
     if (toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
@@ -594,7 +601,7 @@ void CloseToast(napi_env env, int32_t toastId, NG::ToastShowMode showMode)
         if (delegate) {
             delegate->CloseToast(toastId, std::move(toastCloseCallback));
         } else {
-            NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "Can not get delegate." + GetDelegateErrorMessage(), ERROR_CODE_INTERNAL_ERROR);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
         SubwindowManager::GetInstance()->CloseToast(toastId, showMode, std::move(toastCloseCallback));
@@ -602,7 +609,7 @@ void CloseToast(napi_env env, int32_t toastId, NG::ToastShowMode showMode)
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found." + GetDelegateErrorMessage(), ERROR_CODE_INTERNAL_ERROR);
     }
     if (showMode == NG::ToastShowMode::DEFAULT) {
         delegate->CloseToast(toastId, std::move(toastCloseCallback));
@@ -1948,7 +1955,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
             napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
             napi_value msg = nullptr;
-            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            std::string strMsg =
+                ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." + GetDelegateErrorMessage();
             napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
             napi_value error = nullptr;
             napi_create_error(env, code, msg, &error);
@@ -1977,7 +1985,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
         napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
         napi_value msg = nullptr;
-        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
+        std::string strMsg =
+            ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." + GetDelegateErrorMessage();
         napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
         napi_value error = nullptr;
         napi_create_error(env, code, msg, &error);
@@ -2282,7 +2291,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
             napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
             napi_value msg = nullptr;
-            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            std::string strMsg =
+                ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." + GetDelegateErrorMessage();
             napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
             napi_value error = nullptr;
             napi_create_error(env, code, msg, &error);
@@ -2310,7 +2320,8 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         std::string strCode = std::to_string(ERROR_CODE_INTERNAL_ERROR);
         napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
         napi_value msg = nullptr;
-        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
+        std::string strMsg =
+            ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." + GetDelegateErrorMessage();
         napi_create_string_utf8(env, strMsg.c_str(), strMsg.length(), &msg);
         napi_value error = nullptr;
         napi_create_error(env, code, msg, &error);
@@ -2767,7 +2778,8 @@ void OpenCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncCo
             delegate->OpenCustomDialog(promptDialogAttr, std::move(openCallback));
         } else {
             // throw internal error
-            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            std::string strMsg =
+                ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." + GetDelegateErrorMessage();
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
@@ -2779,7 +2791,8 @@ void OpenCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncCo
         delegate->OpenCustomDialog(promptDialogAttr, std::move(openCallback));
     } else {
         // throw internal error
-        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
+        std::string strMsg =
+            ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." + GetDelegateErrorMessage();
         JSPromptThrowInterError(env, asyncContext, strMsg);
     }
 #endif
@@ -3063,7 +3076,8 @@ void CloseCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncC
         } else {
             // throw internal error
             napi_create_promise(env, &asyncContext->deferred, nullptr);
-            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            std::string strMsg =
+                ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." + GetDelegateErrorMessage();
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
@@ -3084,7 +3098,8 @@ void CloseCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncC
     } else {
         // throw internal error
         napi_create_promise(env, &asyncContext->deferred, nullptr);
-        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
+        std::string strMsg =
+            ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." + GetDelegateErrorMessage();
         JSPromptThrowInterError(env, asyncContext, strMsg);
     }
 #endif
@@ -3158,7 +3173,8 @@ void UpdateCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& async
         } else {
             // throw internal error
             napi_create_promise(env, &asyncContext->deferred, nullptr);
-            std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate.";
+            std::string strMsg =
+                ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "Can not get delegate." + GetDelegateErrorMessage();
             JSPromptThrowInterError(env, asyncContext, strMsg);
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
@@ -3171,7 +3187,8 @@ void UpdateCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& async
     } else {
         // throw internal error
         napi_create_promise(env, &asyncContext->deferred, nullptr);
-        std::string strMsg = ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found.";
+        std::string strMsg =
+            ErrorToMessage(ERROR_CODE_INTERNAL_ERROR) + "UI execution context not found." + GetDelegateErrorMessage();
         JSPromptThrowInterError(env, asyncContext, strMsg);
     }
 #endif

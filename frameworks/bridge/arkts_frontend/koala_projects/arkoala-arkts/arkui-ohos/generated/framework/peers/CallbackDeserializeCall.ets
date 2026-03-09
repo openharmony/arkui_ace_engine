@@ -22,6 +22,8 @@ import { AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, Callba
 import { SwiperAnimationEvent_serializer, SwiperContentTransitionProxy_serializer, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult_serializer, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperContentTransitionProxy, SwiperContentWillScrollResult } from './../../component/swiper'
 import { ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
 import { ButtonConfiguration_serializer, ButtonTriggerClickCallback, ButtonConfiguration } from './../../component/button'
+import { ArcSwiperContentTransitionProxy_serializer } from './../ohos.arkui.ArcSwiper'
+import { ArcSwiperContentTransitionProxy } from '@ohos.arkui.ArcSwiper'
 import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializer, VoidCallback, Area, ResourceStr, Resource as arkui_component_units_Resource, Length, LengthMetrics as arkui_component_units_LengthMetrics, ConstraintSizeOptions, SizeOptions } from './../../component/units'
 import { global_resource_Resource_serializer } from './../resource'
 import { TextMenuItem_serializer, DeleteValue_serializer, EditableTextChangeValue_serializer, IMEClient_serializer, InsertValue_serializer, StyledStringChangeValue_serializer, TextRange_serializer, EditableTextOnChangeCallback, PreviewText_serializer, TextChangeOptions_serializer, OnCreateMenuCallback, OnDidChangeCallback, OnMenuItemClickCallback, OnPrepareMenuCallback, TextMenuItem, DeleteValue, EditableTextChangeValue, IMEClient, InsertValue, StyledStringChangeValue, TextRange, PreviewText, TextChangeOptions } from './../../component/textCommon'
@@ -190,6 +192,12 @@ export function deserializeAndCallCallback_AccessibilityActionInterceptResult_Vo
     const call = (ResourceHolder.instance().get(resourceId) as ((value: AccessibilityActionInterceptResult) => void))
     let value: AccessibilityActionInterceptResult = AccessibilityActionInterceptResult.fromValue(thisDeserializer.readInt32())
     call(value)
+}
+export function deserializeAndCallCallback_ArcSwiperContentTransitionProxy(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as ohos_base_Callback<ArcSwiperContentTransitionProxy>)
+    let data: ArcSwiperContentTransitionProxy = (ArcSwiperContentTransitionProxy_serializer.read(thisDeserializer) as ArcSwiperContentTransitionProxy)
+    call(data)
 }
 export function deserializeAndCallCallback_Area_Area_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -4222,6 +4230,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_BUTTONMODIFIERBUILDER: return deserializeAndCallButtonModifierBuilder(thisDeserializer);
         case CallbackKind.KIND_BUTTONTRIGGERCLICKCALLBACK: return deserializeAndCallButtonTriggerClickCallback(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_ACCESSIBILITYACTIONINTERCEPTRESULT_VOID: return deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_ARCSWIPERCONTENTTRANSITIONPROXY: return deserializeAndCallCallback_ArcSwiperContentTransitionProxy(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_AREA_AREA_VOID: return deserializeAndCallCallback_Area_Area_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_ARRAY_I32_VOID: return deserializeAndCallCallback_Array_I32_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_ARRAY_RESOURCE_VOID: return deserializeAndCallCallback_Array_Resource_Void(thisDeserializer);

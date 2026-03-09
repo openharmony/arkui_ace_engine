@@ -17,12 +17,12 @@ import { matrix4 } from '@kit.ArkUI';
 @Entry
 @Component
 struct Index {
-  @State imageSrc: Resource | PixelMap | string = $r('app.media.test1');
+  @State imageSrc: Resource | PixelMap | string = $r('app.media.startIcon');
   @State currentIndex: number = 0;
   @State imageSrcList: Array<string | Resource | PixelMap> = [
-    $r('app.media.test1'),
-    $r('app.media.test2'),
-    $r('app.media.test3'),
+    $r('app.media.startIcon'),
+    $r('app.media.background'),
+    $r('app.media.foreground'),
   ];
 
   // Image布局
@@ -34,7 +34,7 @@ struct Index {
   @State alignSelfValue: ItemAlign = ItemAlign.Auto;
 
   // Image属性
-  @State altSrc: Resource = $r('app.media.test3');
+  @State altSrc: Resource = $r('app.media.foreground');
   @State objectFit: ImageFit = ImageFit.Cover;
   @State matrix: ImageMatrix = matrix4.identity();
   @State objectRepeat: ImageRepeat = ImageRepeat.NoRepeat;
@@ -361,7 +361,7 @@ struct Index {
   @Builder
   buildErrorIndicator() {
     Column() {
-      Image($r('app.media.test4'))
+      Image($r('app.media.startIcon'))
         .width(50)
         .height(50)
       Text('加载失败')

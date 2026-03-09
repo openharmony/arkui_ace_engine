@@ -329,7 +329,7 @@ void ContentChangeManager::OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode)
 {
     CHECK_NULL_VOID(keyNode);
     OnTransitionRemoved(keyNode->GetId());
-    if (!IsContentChangeDetectEnable() || IsScrolling()) {
+    if (!IsContentChangeDetectEnable()) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnPageTransitionEnd");
@@ -367,7 +367,7 @@ void ContentChangeManager::OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, b
 {
     CHECK_NULL_VOID(keyNode);
     OnTransitionRemoved(keyNode->GetId());
-    if (!IsContentChangeDetectEnable() || IsScrolling()) {
+    if (!IsContentChangeDetectEnable()) {
         return;
     }
 
@@ -377,7 +377,7 @@ void ContentChangeManager::OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, b
 
 void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode || IsScrolling()) {
+    if (!IsContentChangeDetectEnable() || !keyNode) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnDialogChangeEnd");
@@ -562,7 +562,7 @@ void ContentChangeManager::OnScrollRemoved(int32_t nodeId)
 
 void ContentChangeManager::OnTransitionAdded(int32_t nodeId)
 {
-    if (!IsContentChangeDetectEnable() || IsScrolling()) {
+    if (!IsContentChangeDetectEnable()) {
         return;
     }
     transitioningNodes_.emplace(nodeId);

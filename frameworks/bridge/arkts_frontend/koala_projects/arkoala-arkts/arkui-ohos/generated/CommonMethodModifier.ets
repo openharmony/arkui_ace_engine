@@ -320,6 +320,8 @@ export class CommonMethodModifier implements CommonMethod {
     public _accessibilityGroup_0_1value?: AccessibilityOptions | undefined
     public _onGestureRecognizerJudgeBegin_1_0value?: GestureRecognizerJudgeBeginCallback | undefined
     public _onGestureRecognizerJudgeBegin_1_1value?: boolean | undefined
+    public _debugLine_0_0value?: string
+    public _debugLine_0_1value?: string | undefined
     applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkCommonMethodPeer;
@@ -3955,6 +3957,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[212] != 0)
+        {
+            switch (flagArray[212]) {
+                case 1: {
+                    peer.setDebugLineAttribute((this._debugLine_0_0value as string), (this._debugLine_0_1value as string | undefined));
+                    flagArray[212] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[212] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[212] = 0;
+                }
+            }
+        }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
         this._state = modifier._state;
@@ -6538,6 +6557,17 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[212] != 0)
+        {
+            switch (flagArray[212]) {
+                case 1:
+                case 3: {
+                    break;
+                }
+                default: {
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -8706,6 +8736,19 @@ export class CommonMethodModifier implements CommonMethod {
             this._state.fireChange()
         } else {
             this._flagArray[211] = 3
+        }
+        return this
+    }
+    debugLine(sourceLine: string, moduleName?: string): this {
+        if (((this._flagArray[212]) == (0)) || ((this._debugLine_0_0value) !== (sourceLine)) || ((this._debugLine_0_1value) !== (moduleName)))
+        {
+            this._flagArray[212] = 1
+            this._debugLine_0_0value = sourceLine
+            this._debugLine_0_1value = moduleName
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[212] = 3
         }
         return this
     }

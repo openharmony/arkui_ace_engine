@@ -44,15 +44,15 @@ struct DrawingLatticeTest {
 
   build() {
     Column() {
-      Image($r('app.media.1'))
+      Image($r('app.media.startIcon'))
         .width(150)
         .height(150)
         .resizable({lattice: this.lattice})
-      Image($r('app.media.1'))
+      Image($r('app.media.startIcon'))
         .width(150)
         .height(150)
         .attributeModifier(this.modifier)
-      Image($r('app.media.1'))
+      Image($r('app.media.startIcon'))
         .width(150)
         .height(150)
         .resizable({
@@ -64,7 +64,7 @@ struct DrawingLatticeTest {
           }
         })
       SelfImage({
-        resource: $r('app.media.1'),
+        resource: $r('app.media.startIcon'),
         lattice: {
           xDivs: [30, 150],
           yDivs: [40, 280]
@@ -73,7 +73,7 @@ struct DrawingLatticeTest {
         .width(150)
         .height(150)
       SelfImage({
-        resource: $r('app.media.1'),
+        resource: $r('app.media.startIcon'),
         slice: {
           left: 30,
           top: 150,

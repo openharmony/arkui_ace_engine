@@ -47,7 +47,7 @@ struct Index {
           .width(100)
           .height(100)
           .onClick((event)=>{
-            this.decodeHdrImage($r('app.media.cat'))
+            this.decodeHdrImage($r('app.media.startIcon'))
           })
         Image(this.pixelMap)
           .width(this.s.width)

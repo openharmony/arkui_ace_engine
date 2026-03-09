@@ -680,7 +680,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     float positionX = (selectArea.Left() + selectArea.Right() - menuWidth) / 2.0f;
     auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
-    auto downHandlePaint = downHandle.paintRect + windowOffset;
+    auto downHandlePaint = downHandle.GetPaintRect() + windowOffset;
     auto downHandleIsReallyShow = hasKeyboard ? ((LessOrEqual((double)downHandlePaint.Bottom(),
         (double)keyboardInsert.start)) ? true : false) : downHandle.isShow;
     auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;

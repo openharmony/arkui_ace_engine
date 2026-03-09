@@ -449,8 +449,9 @@ HWTEST_F(WebPatternWebTest, ProcessVirtualKeyBoardShow, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
     webPattern->drawSizeCache_.SetHeight(50.00);
-    ASSERT_TRUE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 100.00, true));
     webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    ASSERT_TRUE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 100.00, true));
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
     webPattern->drawSizeCache_.SetHeight(50.00);
     EXPECT_FALSE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 0.00, true));

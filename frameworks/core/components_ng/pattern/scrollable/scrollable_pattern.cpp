@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
@@ -72,6 +73,49 @@ const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
 const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
 const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
+
+bool IsScrollable(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto tag = frameNode->GetTag();
+    if (tag == V2::LIST_ETS_TAG || tag == V2::SCROLL_ETS_TAG || tag == V2::WATERFLOW_ETS_TAG ||
+        tag == V2::GRID_ETS_TAG) {
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_RETURN(pattern, false);
+        if ((pattern->IsAtBottom() && pattern->IsAtTop()) || !pattern->IsScrollable()) {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+RefPtr<FrameNode> FindParentScrollable(const RefPtr<FrameNode>& child)
+{
+    CHECK_NULL_RETURN(child, nullptr);
+    CHECK_RUN_ON(UI);
+    auto parentFrameNode = child->GetAncestorNodeOfFrame(true);
+    while (parentFrameNode) {
+        if (IsScrollable(parentFrameNode)) {
+            return parentFrameNode;
+        }
+        parentFrameNode = parentFrameNode->GetAncestorNodeOfFrame(true);
+    }
+    return nullptr;
+}
+
+bool UpdateCurrentOffsetByTargetId(int32_t targetId)
+{
+    auto targetNode = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(targetId);
+    CHECK_NULL_RETURN(targetNode, false);
+    auto target = AceType::DynamicCast<FrameNode>(targetNode);
+    CHECK_NULL_RETURN(target, false);
+    auto scrollable = FindParentScrollable(target);
+    CHECK_NULL_RETURN(scrollable, false);
+
+    ScrollablePattern::ScrollToTarget(scrollable, target, 0.0f, ScrollAlign::NONE);
+    return true;
+}
 } // namespace
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
@@ -3618,6 +3662,7 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
         host->GetTag().c_str());
     ReportOnItemStopEvent();
+    ReportOnItemScrollStop("OnScrollStop");
     if (onScrollStop) {
         onScrollStop();
     }
@@ -4233,27 +4278,7 @@ void ScrollablePattern::GetPaintPropertyDumpInfo()
 {
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     if (paintProperty) {
-        switch (paintProperty->GetScrollBarMode().value_or(DisplayMode::OFF)) {
-            case DisplayMode::OFF: {
-                DumpLog::GetInstance().AddDesc("innerScrollBarState: OFF");
-                break;
-            }
-            case DisplayMode::AUTO: {
-                DumpLog::GetInstance().AddDesc("innerScrollBarState: AUTO");
-                break;
-            }
-            case DisplayMode::ON: {
-                DumpLog::GetInstance().AddDesc("innerScrollBarState: ON");
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-        auto scrollBarWidth = paintProperty->GetScrollBarWidth();
-        scrollBarWidth.has_value() ? DumpLog::GetInstance().AddDesc(std::string("scrollBarWidth: ")
-            .append(paintProperty->GetScrollBarWidth().value().ToString()))
-            : DumpLog::GetInstance().AddDesc("scrollBarWidth: None");
+        paintProperty->DumpInfo();
     }
 }
 
@@ -4345,10 +4370,16 @@ void ScrollablePattern::DumpAdvanceInfo()
     GetAxisDumpInfo();
     GetPanDirectionDumpInfo();
     GetPaintPropertyDumpInfo();
+    backToTop_ ? DumpLog::GetInstance().AddDesc("backToTop: true")
+            : DumpLog::GetInstance().AddDesc("backToTop: false");
     GetScrollEnabled() ? DumpLog::GetInstance().AddDesc("enableScrollInteraction: true")
                        : DumpLog::GetInstance().AddDesc("enableScrollInteraction: false");
     DumpLog::GetInstance().AddDesc(std::string("friction: ").append(std::to_string(friction_)));
     DumpLog::GetInstance().AddDesc(std::string("flingSpeedLimit: ").append(std::to_string(GetMaxFlingVelocity())));
+    auto layoutProperty = GetLayoutProperty<ScrollableLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->DumpInfo();
+    }
     DumpLog::GetInstance().AddDesc("==========================eventsFiredInfos==============================");
     for (const auto& info : eventsFiredInfos_) {
         DumpLog::GetInstance().AddDesc(info.ToString());
@@ -4467,26 +4498,7 @@ void ScrollablePattern::GetPaintPropertyDumpInfo(std::unique_ptr<JsonValue>& jso
 {
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     if (paintProperty) {
-        switch (paintProperty->GetScrollBarMode().value_or(DisplayMode::OFF)) {
-            case DisplayMode::OFF: {
-                json->Put("innerScrollBarState", "OFF");
-                break;
-            }
-            case DisplayMode::AUTO: {
-                json->Put("innerScrollBarState", "AUTO");
-                break;
-            }
-            case DisplayMode::ON: {
-                json->Put("innerScrollBarState", "ON");
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-        auto scrollBarWidth = paintProperty->GetScrollBarWidth();
-        json->Put("scrollBarWidth",
-            scrollBarWidth.has_value() ? paintProperty->GetScrollBarWidth().value().ToString().c_str() : "None");
+        paintProperty->DumpInfo(json);
     }
 }
 
@@ -4615,10 +4627,14 @@ void ScrollablePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     GetAxisDumpInfo(json);
     GetPanDirectionDumpInfo(json);
     GetPaintPropertyDumpInfo(json);
+    json->Put("backToTop", backToTop_);
     json->Put("enableScrollInteraction", GetScrollEnabled());
     json->Put("friction", friction_);
     json->Put("flingSpeedLimit", std::to_string(GetMaxFlingVelocity()).c_str());
-    json->Put("eventsFiredInfos", friction_);
+    auto layoutProperty = GetLayoutProperty<ScrollableLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->DumpInfo(json);
+    }
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
     for (const auto& info : eventsFiredInfos_) {
         std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
@@ -5085,17 +5101,24 @@ void ScrollablePattern::ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyN
     mgr->OnScrollChangeStart(keyNode);
 }
 
-std::string ScrollablePattern::ParseCommand(
-    const std::string& command, int& reportEventId, float& moveRatio, bool& isScrollByRatio)
+std::string ScrollablePattern::ParseCommand(const std::string& command, ScrollOnInjectionEventInfo& info)
 {
     auto json = JsonUtil::ParseJsonString(command);
     if (!json || json->IsNull()) {
         return std::string("");
     }
-    isScrollByRatio = json->Contains("ratio") && json->Contains("eventId");
-    if (isScrollByRatio) {
-        reportEventId = json->GetInt("eventId");
-        moveRatio = json->GetDouble("ratio");
+    if (json->Contains("eventId")) {
+        info.reportEventId = json->GetInt("eventId");
+        if (json->Contains("ratio")) {
+            info.isScrollByRatio = true;
+            info.ratio = json->GetDouble("ratio");
+        } else if (json->Contains("offset")) {
+            info.isScrollByOffset = true;
+            info.scrollOffset = json->GetDouble("offset");
+        } else if (json->Contains("targetId")) {
+            info.isScrollByTargetId = true;
+            info.targetId = json->GetInt("targetId");
+        }
     }
     return json->GetString("cmd");
 }
@@ -5148,23 +5171,64 @@ void ScrollablePattern::ReportOnItemStopEvent()
         ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
 
+void ScrollablePattern::ReportOnItemScrollStop(const std::string& event)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::string scrollEvent = "";
+    scrollEvent = host->GetHostTag() + "." + event;
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    FillReportOnItemStopParams(params);
+    params->Put("isInjection", lastScrollFromInjection_);
+    auto eventData = JsonUtil::Create();
+    CHECK_NULL_VOID(eventData);
+    eventData->Put("name", scrollEvent.c_str());
+    eventData->Put("params", params);
+
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("nodeId", host->GetId());
+    json->Put("event", eventData);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", json);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SCROLL);
+    lastScrollFromInjection_ = false;
+}
+
+void ScrollablePattern::FillReportOnItemStopParams(std::unique_ptr<JsonValue>& params)
+{
+    auto index = GetFirstIndex();
+    params->Put("topIndex", index);
+    return;
+}
+
 int32_t ScrollablePattern::OnInjectionEventByRatio(const std::string& command)
 {
-    int reportEventId = 0;
-    float ratio = 0.0f;
-    bool isScrollByRatio = false;
-    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
+    ScrollOnInjectionEventInfo info;
+    std::string ret = ParseCommand(command, info);
+    lastScrollFromInjection_ = true;
 
-    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f)) {
-        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+    if (LessNotEqual(info.ratio, 0.0f) || GreatNotEqual(info.ratio, 1.0f)) {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, info.reportEventId);
         return RET_FAILED;
     }
     if (ret == "scrollForward") {
-        HandleScrollByRatio(isScrollByRatio, true, ratio, reportEventId);
+        HandleScrollByRatio(info.isScrollByRatio, true, info.ratio, info.reportEventId);
     } else if (ret == "scrollBackward") {
-        HandleScrollByRatio(isScrollByRatio, false, ratio, reportEventId);
+        HandleScrollByRatio(info.isScrollByRatio, false, info.ratio, info.reportEventId);
+    } else if (ret == "scrollByOffset") {
+        HandleScrollByOffset(info.scrollOffset, info.reportEventId);
+    } else if (ret == "scrollByTargetId") {
+        HandleScrollByTargetId(info.targetId, info.reportEventId);
     } else {
-        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, info.reportEventId);
         return RET_FAILED;
     }
     return RET_SUCCESS;
@@ -5206,6 +5270,33 @@ void ScrollablePattern::HandleScrollByRatio(bool isScrollByRatio, bool reverse, 
         }
     } else {
         ScrollPage(reverse);
+    }
+}
+
+void ScrollablePattern::HandleScrollByOffset(double scrollOffset, int reportEventId)
+{
+    SetIsOverScroll(false);
+    StopAnimate();
+    if ((IsAtBottom() && scrollOffset > 0) || (IsAtTop() && scrollOffset < 0) || !IsScrollable()) {
+        ReportScroll(false, ScrollError::SCROLL_NOT_SCROLLABLE_ERROR, reportEventId);
+        return;
+    }
+    auto position = GetTotalOffset() + scrollOffset;
+    AnimateTo(position, -1, nullptr, true, false, false);
+    ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+}
+void ScrollablePattern::HandleScrollByTargetId(int32_t targetId, int reportEventId)
+{
+    SetIsOverScroll(false);
+    StopAnimate();
+    if (!IsScrollable()) {
+        ReportScroll(false, ScrollError::SCROLL_NOT_SCROLLABLE_ERROR, reportEventId);
+        return;
+    }
+    if (UpdateCurrentOffsetByTargetId(targetId)) {
+        ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+    } else {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
     }
 }
 } // namespace OHOS::Ace::NG

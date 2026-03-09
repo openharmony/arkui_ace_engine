@@ -34,8 +34,7 @@ NG::TextClockModelNG* GetTextClockModel()
     if (model == nullptr) {
         auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextClock");
         if (module == nullptr) {
-            LOGF("Can't find TextClock dynamic module");
-            abort();
+            LOGF_ABORT("Can't find TextClock dynamic module");
         }
         model = reinterpret_cast<NG::TextClockModelNG*>(module->GetModel());
     }

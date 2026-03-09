@@ -29,7 +29,7 @@ struct resourceImageDemo02 {
         .margin({ top: 30 })
 
       // $r references a static resource defined in media resources
-      Image($r('app.media.img_logo'))
+      Image($r('app.media.startIcon'))
         .width('40%')
         .height('auto')
         .margin({ top: 40 })
