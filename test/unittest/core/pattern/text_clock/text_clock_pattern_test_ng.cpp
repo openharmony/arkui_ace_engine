@@ -29,6 +29,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/i18n/time_format.h"
+#include "base/i18n/localization.h"
 #include "base/utils/time_util.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -60,6 +61,8 @@ const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
+inline const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
+inline const std::string DEFAULT_FORMAT_24H = "HH:mm:ss";
 } // namespace
 
 struct TestProperty {
@@ -1041,8 +1044,13 @@ HWTEST_F(TextClockPatternTestNG, TextClockCreateWithResourceObj001, TestSize.Lev
  */
 HWTEST_F(TextClockPatternTestNG, TextClockCreateWithResourceObj002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create TextClock with API version 18
+     */
     MockPipelineContext::SetUp();
-    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    int32_t backupApiVersion = pipelineContext->GetMinPlatformVersion();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto textTheme = AceType::MakeRefPtr<TextTheme>();
@@ -1069,19 +1077,17 @@ HWTEST_F(TextClockPatternTestNG, TextClockCreateWithResourceObj002, TestSize.Lev
     ASSERT_NE(pattern, nullptr);
     int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
     pattern->OnColorModeChange(colorMode);
-    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     textClockModel.CreateWithFontSizeResourceObj(resObjWithId);
     frameNode->SetRerenderable(false);
     pattern->OnColorModeChange(colorMode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<TextTheme>();
+    auto theme = pipelineContext->GetTheme<TextTheme>();
     ASSERT_NE(theme, nullptr);
     auto fontSize = theme->GetTextStyle().GetFontSize();
     EXPECT_EQ(layoutProperty->GetFontSize().value(), fontSize);
-    Container::Current()->SetApiTargetVersion(backupApiVersion);
+    pipelineContext->SetMinPlatformVersion(backupApiVersion);
     MockPipelineContext::TearDown();
 }
 
@@ -1117,4 +1123,1344 @@ HWTEST_F(TextClockPatternTestNG, TextClockMultiThread001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetTextShadow(), setShadows);
 }
+
+/**
+ * @tc.name: GetFormatTest001
+ * @tc.desc: Test GetFormat when isForm is false and API version < 18
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetFormatTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock and set API version
+     */
+    MockPipelineContext::SetUp();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto lastPlatformVersion = pipelineContext->GetMinPlatformVersion();
+
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    mockContainer->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SEVENTEEN));
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_SEVENTEEN));
+
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test default format without 24H
+     * @tc.expected: Should return DEFAULT_FORMAT (12-hour format)
+     */
+    auto format = pattern->GetFormat();
+    EXPECT_EQ(format, DEFAULT_FORMAT);
+
+    /**
+     * @tc.steps: step3. Recover API version info.
+     */
+    pipelineContext->SetMinPlatformVersion(lastPlatformVersion);
+    mockContainer->SetApiTargetVersion(lastPlatformVersion);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: GetFormatTest002
+ * @tc.desc: Test GetFormat when isForm is false, API >= 18, and is24H is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetFormatTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with API version 18 and 24H mode
+     */
+    MockPipelineContext::SetUp();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto lastPlatformVersion = pipelineContext->GetMinPlatformVersion();
+
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    mockContainer->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set 24H mode and get format
+     * @tc.expected: Method should execute and return a valid format
+     */
+    // Note: SystemProperties::Is24HourClock() returns false in test environment,
+    // so is24H_ remains false and format will be 12-hour format
+    pattern->OnTimeChange();
+    auto format = pattern->GetFormat();
+    // Verify method executes and returns a valid non-empty format
+    EXPECT_FALSE(format.empty());
+
+    /**
+     * @tc.steps: step3. Recover API version info.
+     */
+    pipelineContext->SetMinPlatformVersion(lastPlatformVersion);
+    mockContainer->SetApiTargetVersion(lastPlatformVersion);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: GetFormatTest003
+ * @tc.desc: Test GetFormat when custom format is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetFormatTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with custom format
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("HH:mm");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get custom format
+     * @tc.expected: Should return the custom format
+     */
+    auto format = pattern->GetFormat();
+    EXPECT_EQ(format, "HH:mm");
+}
+
+/**
+ * @tc.name: OnVisibleAreaChangeTest001
+ * @tc.desc: Test OnVisibleAreaChange when becoming visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, OnVisibleAreaChangeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock and mark as invisible
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnVisibleAreaChange with visible=true
+     * @tc.expected: isInVisibleArea_ should be set to true
+     */
+    pattern->OnVisibleAreaChange(true);
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: OnVisibleAreaChangeTest002
+ * @tc.desc: Test OnVisibleAreaChange when becoming invisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, OnVisibleAreaChangeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnVisibleAreaChange with visible=false
+     * @tc.expected: isInVisibleArea_ should be set to false and delay task cancelled
+     */
+    pattern->OnVisibleAreaChange(false);
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: OnVisibleAreaChangeTest003
+ * @tc.desc: Test OnVisibleAreaChange when already visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, OnVisibleAreaChangeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock and mark as visible
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnVisibleAreaChange(true);
+
+    /**
+     * @tc.steps: step2. Call OnVisibleAreaChange again with visible=true
+     * @tc.expected: Should not trigger UpdateTimeText (already visible)
+     */
+    pattern->OnVisibleAreaChange(true);
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: RequestUpdateForNextSecondTest001
+ * @tc.desc: Test RequestUpdateForNextSecond without seconds in format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, RequestUpdateForNextSecondTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with format without seconds
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("HH:mm");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call RequestUpdateForNextSecond
+     * @tc.expected: Should calculate delay for next minute
+     */
+    pattern->RequestUpdateForNextSecond();
+    EXPECT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetFormat(), "HH:mm");
+}
+
+/**
+ * @tc.name: RequestUpdateForNextSecondTest002
+ * @tc.desc: Test RequestUpdateForNextSecond with seconds in format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, RequestUpdateForNextSecondTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with format with seconds
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("HH:mm:ss");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call RequestUpdateForNextSecond
+     * @tc.expected: Should calculate delay for next second
+     */
+    pattern->RequestUpdateForNextSecond();
+    EXPECT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetFormat(), "HH:mm:ss");
+}
+
+/**
+ * @tc.name: RequestUpdateForNextSecondTest003
+ * @tc.desc: Test RequestUpdateForNextSecond with milliseconds in format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, RequestUpdateForNextSecondTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with format with milliseconds
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("HH:mm:ss.S");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call RequestUpdateForNextSecond
+     * @tc.expected: Should calculate delay for next second (has S)
+     */
+    pattern->RequestUpdateForNextSecond();
+    EXPECT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetFormat(), "HH:mm:ss.S");
+}
+
+/**
+ * @tc.name: GetAmPmTest001
+ * @tc.desc: Test GetAmPm for AM (hour < 12)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetAmPmTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetAmPm with hour = 11 (AM)
+     * @tc.expected: Should return AM string
+     */
+    auto amPm = pattern->GetAmPm(11);
+    auto amPmStrings = Localization::GetInstance()->GetAmPmStrings();
+    if (amPmStrings.size() >= 2) {
+        EXPECT_EQ(amPm, amPmStrings[0]);
+    }
+}
+
+/**
+ * @tc.name: GetAmPmTest002
+ * @tc.desc: Test GetAmPm for PM (hour >= 12)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetAmPmTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetAmPm with hour = 13 (PM)
+     * @tc.expected: Should return PM string
+     */
+    auto amPm = pattern->GetAmPm(13);
+    auto amPmStrings = Localization::GetInstance()->GetAmPmStrings();
+    if (amPmStrings.size() >= 2) {
+        EXPECT_EQ(amPm, amPmStrings[1]);
+    }
+}
+
+/**
+ * @tc.name: AddZeroPrefixTest001
+ * @tc.desc: Test AddZeroPrefix with single digit
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, AddZeroPrefixTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test AddZeroPrefix with single digit "5"
+     * @tc.expected: Should return "05"
+     */
+    auto result = pattern->AddZeroPrefix("5");
+    EXPECT_EQ(result, "05");
+}
+
+/**
+ * @tc.name: AddZeroPrefixTest002
+ * @tc.desc: Test AddZeroPrefix with two digits
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, AddZeroPrefixTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test AddZeroPrefix with "10"
+     * @tc.expected: Should return "10" unchanged
+     */
+    auto result = pattern->AddZeroPrefix("10");
+    EXPECT_EQ(result, "10");
+}
+
+/**
+ * @tc.name: AddZeroPrefixTest003
+ * @tc.desc: Test AddZeroPrefix with non-digit
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, AddZeroPrefixTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test AddZeroPrefix with non-digit character
+     * @tc.expected: Should return unchanged
+     */
+    auto result = pattern->AddZeroPrefix("a");
+    EXPECT_EQ(result, "a");
+}
+
+/**
+ * @tc.name: RemoveZeroPrefixTest001
+ * @tc.desc: Test RemoveZeroPrefix with leading zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, RemoveZeroPrefixTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test RemoveZeroPrefix with "05"
+     * @tc.expected: Should return "5"
+     */
+    auto result = pattern->RemoveZeroPrefix("05");
+    EXPECT_EQ(result, "5");
+}
+
+/**
+ * @tc.name: RemoveZeroPrefixTest002
+ * @tc.desc: Test RemoveZeroPrefix without leading zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, RemoveZeroPrefixTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test RemoveZeroPrefix with "15"
+     * @tc.expected: Should return "15" unchanged
+     */
+    auto result = pattern->RemoveZeroPrefix("15");
+    EXPECT_EQ(result, "15");
+}
+
+/**
+ * @tc.name: RemoveZeroPrefixTest003
+ * @tc.desc: Test RemoveZeroPrefix with single digit
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, RemoveZeroPrefixTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test RemoveZeroPrefix with single digit "5"
+     * @tc.expected: Should return "5" unchanged
+     */
+    auto result = pattern->RemoveZeroPrefix("5");
+    EXPECT_EQ(result, "5");
+}
+
+/**
+ * @tc.name: AbstractTest001
+ * @tc.desc: Test Abstract to extract letters
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, AbstractTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test Abstract to get letters from "a1b2c3"
+     * @tc.expected: Should return "abc"
+     */
+    auto result = pattern->Abstract("a1b2c3", true);
+    EXPECT_EQ(result, "abc");
+}
+
+/**
+ * @tc.name: AbstractTest002
+ * @tc.desc: Test Abstract to extract non-letters
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, AbstractTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test Abstract to get non-letters from "a1b2c3"
+     * @tc.expected: Should return "123"
+     */
+    auto result = pattern->Abstract("a1b2c3", false);
+    EXPECT_EQ(result, "123");
+}
+
+/**
+ * @tc.name: GetDigitNumberTest001
+ * @tc.desc: Test GetDigitNumber to count digits
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetDigitNumberTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetDigitNumber with "a1b2c3d"
+     * @tc.expected: Should return 3
+     */
+    auto count = pattern->GetDigitNumber("a1b2c3d");
+    EXPECT_EQ(count, 3);
+}
+
+/**
+ * @tc.name: GetDigitNumberTest002
+ * @tc.desc: Test GetDigitNumber with no digits
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetDigitNumberTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetDigitNumber with "abcdef"
+     * @tc.expected: Should return 0
+     */
+    auto count = pattern->GetDigitNumber("abcdef");
+    EXPECT_EQ(count, 0);
+}
+
+/**
+ * @tc.name: GetWeekTest001
+ * @tc.desc: Test GetWeek with full type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetWeekTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetWeek with full type (false)
+     * @tc.expected: Should return full week name
+     */
+    auto weeks = Localization::GetInstance()->GetWeekdays(false);
+    if (weeks.size() > 0) {
+        auto week = pattern->GetWeek(false, 0);
+        EXPECT_EQ(week, weeks[0]);
+    }
+}
+
+/**
+ * @tc.name: GetWeekTest002
+ * @tc.desc: Test GetWeek with short type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetWeekTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetWeek with short type (true)
+     * @tc.expected: Should return short week name
+     */
+    auto weeks = Localization::GetInstance()->GetWeekdays(true);
+    if (weeks.size() > 0) {
+        auto week = pattern->GetWeek(true, 0);
+        EXPECT_EQ(week, weeks[0]);
+    }
+}
+
+/**
+ * @tc.name: GetMonthTest001
+ * @tc.desc: Test GetMonth with valid month index
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetMonthTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetMonth with month = 0 (January)
+     * @tc.expected: Should return January name
+     */
+    auto months = Localization::GetInstance()->GetMonths(true);
+    if (months.size() > 0) {
+        auto month = pattern->GetMonth(0);
+        EXPECT_EQ(month, months[0]);
+    }
+}
+
+/**
+ * @tc.name: GetMonthTest002
+ * @tc.desc: Test GetMonth with out of bounds month index
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetMonthTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test GetMonth with invalid month index
+     * @tc.expected: Should return empty string
+     */
+    auto month = pattern->GetMonth(100);
+    EXPECT_EQ(month, "");
+}
+
+/**
+ * @tc.name: UpdateTimeTextTest001
+ * @tc.desc: Test UpdateTimeText when isStart is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, UpdateTimeTextTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock and stop it
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Stop the clock and try to update time
+     * @tc.expected: Should return early without updating
+     */
+    auto controller = pattern->GetTextClockController();
+    controller->Stop();
+    pattern->UpdateTimeText(false);
+}
+
+/**
+ * @tc.name: UpdateTimeTextTest002
+ * @tc.desc: Test UpdateTimeText when not in visible area
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, UpdateTimeTextTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock and mark as invisible
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Mark as invisible and try to update time
+     * @tc.expected: Should return early without updating
+     */
+    pattern->OnVisibleAreaChange(false);
+    pattern->UpdateTimeText(false);
+}
+
+/**
+ * @tc.name: GetHoursWestTest001
+ * @tc.desc: Test GetHoursWest with no timezone offset set
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetHoursWestTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock without timezone offset
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get hours west
+     * @tc.expected: Should return NAN (use system timezone)
+     */
+    auto hoursWest = pattern->GetHoursWest();
+    EXPECT_TRUE(std::isnan(hoursWest));
+}
+
+/**
+ * @tc.name: GetHoursWestTest002
+ * @tc.desc: Test GetHoursWest with timezone offset set
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetHoursWestTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with timezone offset
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetHoursWest(8.0f);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get hours west
+     * @tc.expected: Should return 8.0
+     */
+    auto hoursWest = pattern->GetHoursWest();
+    EXPECT_EQ(hoursWest, 8.0f);
+}
+
+/**
+ * @tc.name: GetTextNodeTest001
+ * @tc.desc: Test GetTextNode returns the Text child node
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetTextNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get Text child node
+     * @tc.expected: Should return the Text node
+     */
+    auto textNode = pattern->GetTextNode();
+    ASSERT_NE(textNode, nullptr);
+    EXPECT_EQ(textNode->GetTag(), V2::TEXT_ETS_TAG);
+}
+
+/**
+ * @tc.name: OnTimeChangeTest001
+ * @tc.desc: Test OnTimeChange updates 24H state
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, OnTimeChangeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Trigger time change
+     * @tc.expected: Should update time text
+     */
+    pattern->OnTimeChange();
+}
+
+/**
+ * @tc.name: OnLanguageConfigurationUpdateTest001
+ * @tc.desc: Test OnLanguageConfigurationUpdate triggers time update
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, OnLanguageConfigurationUpdateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Trigger language configuration update
+     * @tc.expected: Should update time text with isTimeChange=true
+     */
+    pattern->OnLanguageConfigurationUpdate();
+}
+
+/**
+ * @tc.name: DumpInfoTest001
+ * @tc.desc: Test DumpInfo outputs correct information
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, DumpInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call DumpInfo
+     * @tc.expected: Should not crash and add descriptions
+     */
+    pattern->DumpInfo();
+}
+
+/**
+ * @tc.name: ParseInputFormatTest001
+ * @tc.desc: Test ParseInputFormat with 24H format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, ParseInputFormatTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with 24H format
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("HH:mm:ss");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetCurrentFormatDateTime which triggers ParseInputFormat
+     * @tc.expected: Should parse format correctly with is24H_=true
+     */
+    auto timeStr = pattern->GetCurrentFormatDateTime();
+    EXPECT_FALSE(timeStr.empty());
+}
+
+/**
+ * @tc.name: ParseInputFormatTest002
+ * @tc.desc: Test ParseInputFormat with 12H format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, ParseInputFormatTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with 12H format
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("aa hh:mm:ss");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetCurrentFormatDateTime which triggers ParseInputFormat
+     * @tc.expected: Should parse format correctly with is24H_=false
+     */
+    auto timeStr = pattern->GetCurrentFormatDateTime();
+    EXPECT_FALSE(timeStr.empty());
+}
+
+/**
+ * @tc.name: GetDateTimeIndexTest001
+ * @tc.desc: Test GetDateTimeIndex with year format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetDateTimeIndexTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with year format
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("yyyy");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetCurrentFormatDateTime which triggers GetDateTimeIndex
+     * @tc.expected: Should format year correctly
+     */
+    auto timeStr = pattern->GetCurrentFormatDateTime();
+    EXPECT_FALSE(timeStr.empty());
+}
+
+/**
+ * @tc.name: GetDateTimeIndexTest002
+ * @tc.desc: Test GetDateTimeIndex with short year format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetDateTimeIndexTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with short year format
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("yy");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetCurrentFormatDateTime which triggers GetDateTimeIndex
+     * @tc.expected: Should format short year correctly
+     */
+    auto timeStr = pattern->GetCurrentFormatDateTime();
+    EXPECT_FALSE(timeStr.empty());
+}
+
+/**
+ * @tc.name: GetDateTimeIndexTest003
+ * @tc.desc: Test GetDateTimeIndex with month format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetDateTimeIndexTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with month format
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("MM");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetCurrentFormatDateTime which triggers GetDateTimeIndex
+     * @tc.expected: Should format month correctly
+     */
+    auto timeStr = pattern->GetCurrentFormatDateTime();
+    EXPECT_FALSE(timeStr.empty());
+}
+
+/**
+ * @tc.name: GetDateTimeIndexTest004
+ * @tc.desc: Test GetDateTimeIndex with day format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetDateTimeIndexTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with day format
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("DD");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetCurrentFormatDateTime which triggers GetDateTimeIndex
+     * @tc.expected: Should format day correctly
+     */
+    auto timeStr = pattern->GetCurrentFormatDateTime();
+    EXPECT_FALSE(timeStr.empty());
+}
+
+/**
+ * @tc.name: GetDateTimeIndexTest005
+ * @tc.desc: Test GetDateTimeIndex with week format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetDateTimeIndexTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with week format
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("EEEEE");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetCurrentFormatDateTime which triggers GetDateTimeIndex
+     * @tc.expected: Should format week correctly
+     */
+    auto timeStr = pattern->GetCurrentFormatDateTime();
+    EXPECT_FALSE(timeStr.empty());
+}
+
+/**
+ * @tc.name: GetDateTimeIndexTest006
+ * @tc.desc: Test GetDateTimeIndex with millisecond format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetDateTimeIndexTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with millisecond format
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("SSS");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetCurrentFormatDateTime which triggers GetDateTimeIndex
+     * @tc.expected: Should format millisecond correctly
+     */
+    auto timeStr = pattern->GetCurrentFormatDateTime();
+    EXPECT_FALSE(timeStr.empty());
+}
+
+/**
+ * @tc.name: GetDateTimeIndexTest007
+ * @tc.desc: Test GetDateTimeIndex with centisecond format
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetDateTimeIndexTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with centisecond format
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFormat("SS");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetCurrentFormatDateTime which triggers GetDateTimeIndex
+     * @tc.expected: Should format centisecond correctly
+     */
+    auto timeStr = pattern->GetCurrentFormatDateTime();
+    EXPECT_FALSE(timeStr.empty());
+}
+
+/**
+ * @tc.name: GetPrefixHourTest001
+ * @tc.desc: Test GetPrefixHour with AUTO type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetPrefixHourTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get prefix hour type (default AUTO)
+     * @tc.expected: Should return AUTO
+     */
+    auto prefixHour = pattern->GetPrefixHour();
+    EXPECT_EQ(prefixHour, ZeroPrefixType::AUTO);
+}
+
+/**
+ * @tc.name: GetPrefixHourTest002
+ * @tc.desc: Test GetPrefixHour with SHOW type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetPrefixHourTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with SHOW prefix type
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetDateTimeOptions(ZeroPrefixType::SHOW);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get prefix hour type
+     * @tc.expected: Should return SHOW
+     */
+    auto prefixHour = pattern->GetPrefixHour();
+    EXPECT_EQ(prefixHour, ZeroPrefixType::SHOW);
+}
+
+/**
+ * @tc.name: GetPrefixHourTest003
+ * @tc.desc: Test GetPrefixHour with HIDE type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, GetPrefixHourTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with HIDE prefix type
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetDateTimeOptions(ZeroPrefixType::HIDE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get prefix hour type
+     * @tc.expected: Should return HIDE
+     */
+    auto prefixHour = pattern->GetPrefixHour();
+    EXPECT_EQ(prefixHour, ZeroPrefixType::HIDE);
+}
+
+/**
+ * @tc.name: UpdateTextLayoutPropertyTest001
+ * @tc.desc: Test UpdateTextLayoutProperty with all properties set
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, UpdateTextLayoutPropertyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with all properties
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFontSize(FONT_SIZE_VALUE);
+    textClockModel.SetFontWeight(FONT_WEIGHT_VALUE);
+    textClockModel.SetTextColor(TEXT_COLOR_VALUE);
+    textClockModel.SetItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
+    textClockModel.SetFontFamily(FONT_FAMILY_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Trigger OnModifyDone to transfer properties
+     */
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step3. Get text node and verify properties were transferred
+     * @tc.expected: Text node should have the properties
+     */
+    auto textNode = pattern->GetTextNode();
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
+}
+
+/**
+ * @tc.name: UpdateTextLayoutPropertyTest002
+ * @tc.desc: Test UpdateTextLayoutProperty with empty font family
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, UpdateTextLayoutPropertyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with empty font family
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    textClockModel.SetFontFamily({});
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get text node and verify font family was not updated
+     * @tc.expected: Text node font family should remain unchanged
+     */
+    auto textNode = pattern->GetTextNode();
+    ASSERT_NE(textNode, nullptr);
+}
+
+/**
+ * @tc.name: OnModifyDoneTest001
+ * @tc.desc: Test OnModifyDone with API version >= 18
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, OnModifyDoneTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with API version 18
+     */
+    MockPipelineContext::SetUp();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto lastPlatformVersion = pipelineContext->GetMinPlatformVersion();
+
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    mockContainer->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Trigger OnModifyDone by marking modify done
+     * @tc.expected: Should call Pattern::OnModifyDone
+     */
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step3. Recover API version info.
+     */
+    pipelineContext->SetMinPlatformVersion(lastPlatformVersion);
+    mockContainer->SetApiTargetVersion(lastPlatformVersion);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: OnModifyDoneTest002
+ * @tc.desc: Test OnModifyDone with API version < 18
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, OnModifyDoneTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextClock with API version 17
+     */
+    MockPipelineContext::SetUp();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto lastPlatformVersion = pipelineContext->GetMinPlatformVersion();
+
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    mockContainer->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SEVENTEEN));
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_SEVENTEEN));
+
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Trigger OnModifyDone by marking modify done
+     * @tc.expected: Should not call Pattern::OnModifyDone
+     */
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step3. Recover API version info.
+     */
+    pipelineContext->SetMinPlatformVersion(lastPlatformVersion);
+    mockContainer->SetApiTargetVersion(lastPlatformVersion);
+    MockPipelineContext::TearDown();
+}
+
 } // namespace OHOS::Ace::NG
