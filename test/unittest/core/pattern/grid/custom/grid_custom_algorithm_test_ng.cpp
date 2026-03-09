@@ -487,4 +487,197 @@ HWTEST_F(GridCustomAlgorithmTestNg, UpdateTotalOffset_NegativePrevOffset_006, Te
     EXPECT_EQ(algorithm->info_.totalOffset_, expectedTotalOffset);
 }
 
+/**
+ * @tc.name: GetItemPos_NotInMatrix_001
+ * @tc.desc: Test GetItemPos when item is not in gridMatrix_ (returns -1)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomAlgorithmTestNg, GetItemPos_NotInMatrix_001, TestSize.Level1)
+{
+    auto algorithm = CreateTestAlgorithm();
+
+    // Setup: gridMatrix_ is empty, so GetItemPos should return {-1, -1}
+    algorithm->info_.gridMatrix_.clear();
+
+    // Call GetItemPos for any index
+    auto pos = algorithm->info_.GetItemPos(5);
+
+    // Verify: pos.second should be -1 when item is not in matrix
+    EXPECT_EQ(pos.first, -1);
+    EXPECT_EQ(pos.second, -1);
+}
+
+/**
+ * @tc.name: GetItemPos_InMatrix_002
+ * @tc.desc: Test GetItemPos when item is in gridMatrix_ (returns valid position)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomAlgorithmTestNg, GetItemPos_InMatrix_002, TestSize.Level1)
+{
+    auto algorithm = CreateTestAlgorithm();
+
+    // Setup: Set crossCount_ for FindInMatrix to work correctly
+    algorithm->info_.crossCount_ = 2;
+
+    // Setup: Add items sequentially in gridMatrix_
+    // Line 0: items 0, 1
+    // Line 1: items 2, 3
+    // Line 2: items 4, 5  <- item 5 is at line 2, column 1
+    algorithm->info_.gridMatrix_[0][0] = 0;
+    algorithm->info_.gridMatrix_[0][1] = 1;
+    algorithm->info_.gridMatrix_[1][0] = 2;
+    algorithm->info_.gridMatrix_[1][1] = 3;
+    algorithm->info_.gridMatrix_[2][0] = 4;
+    algorithm->info_.gridMatrix_[2][1] = 5; // item 5 is at line 2, column 1
+
+    // Call GetItemPos for item 5
+    auto pos = algorithm->info_.GetItemPos(5);
+
+    // Verify: pos should be {column, line} = {1, 2}
+    EXPECT_EQ(pos.first, 1);  // column
+    EXPECT_EQ(pos.second, 2); // line (pos.second != -1)
+}
+
+/**
+ * @tc.name: GetItemPos_With6NodesGroupLayout_003
+ * @tc.desc: Test GetItemPos with 6-nodes-group irregular layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomAlgorithmTestNg, GetItemPos_With6NodesGroupLayout_003, TestSize.Level1)
+{
+    auto algorithm = CreateTestAlgorithm();
+
+    // Setup: Set crossCount_ for FindInMatrix to work correctly
+    algorithm->info_.crossCount_ = 3;
+
+    // Setup: Simulate 6-nodes-group layout structure
+    // Group 0: items 0-5, where 0 and 4 are irregular (2x2)
+    // Line 0: items 0, 1, 2  (max index = 2)
+    // Line 1: items 0, 2, 3  (max index = 3)
+    // Line 2: items 3, 4, 4  (max index = 4)
+    // Line 3: items 5, 4, 4  (max index = 5)
+    algorithm->info_.gridMatrix_[0][0] = 0;
+    algorithm->info_.gridMatrix_[0][1] = 1;
+    algorithm->info_.gridMatrix_[0][2] = 2;
+
+    algorithm->info_.gridMatrix_[1][0] = 0;
+    algorithm->info_.gridMatrix_[1][1] = 2;
+    algorithm->info_.gridMatrix_[1][2] = 3;
+
+    algorithm->info_.gridMatrix_[2][0] = 3;
+    algorithm->info_.gridMatrix_[2][1] = 4; // item 4 first appears at line 2, column 1
+    algorithm->info_.gridMatrix_[2][2] = 4;
+
+    algorithm->info_.gridMatrix_[3][0] = 5;
+    algorithm->info_.gridMatrix_[3][1] = 4;
+    algorithm->info_.gridMatrix_[3][2] = 4;
+
+    // Test: GetItemPos for item 4 (should find first occurrence at line 2, column 1)
+    auto pos4 = algorithm->info_.GetItemPos(4);
+
+    // Verify: item 4 should be found in matrix at line 2, column 1
+    EXPECT_EQ(pos4.first, 1);
+    EXPECT_EQ(pos4.second, 2);
+
+    // Test: GetItemPos for item 3 (appears at line 2, column 0)
+    auto pos3 = algorithm->info_.GetItemPos(3);
+
+    // Verify: item 3 should be found in matrix at line 2, column 0
+    EXPECT_EQ(pos3.first, 0);
+    EXPECT_EQ(pos3.second, 2);
+}
+
+/**
+ * @tc.name: PreloadItemsBranch_StartIndexNotInMatrix_004
+ * @tc.desc: Test PreloadItems branch logic when startIndex is not in gridMatrix_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomAlgorithmTestNg, PreloadItemsBranch_StartIndexNotInMatrix_004, TestSize.Level1)
+{
+    auto algorithm = CreateTestAlgorithm();
+
+    // Setup: startIndex_ = 5, but gridMatrix_ is empty
+    algorithm->info_.startIndex_ = 5;
+    algorithm->info_.endIndex_ = 8;
+
+    // Verify: GetItemPos(5) should return {-1, -1}
+    auto pos = algorithm->info_.GetItemPos(5);
+    EXPECT_EQ(pos.second, -1);
+}
+
+/**
+ * @tc.name: PreloadItemsBranch_StartIndexInMatrix_005
+ * @tc.desc: Test PreloadItems branch logic when startIndex is already in gridMatrix_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomAlgorithmTestNg, PreloadItemsBranch_StartIndexInMatrix_005, TestSize.Level1)
+{
+    auto algorithm = CreateTestAlgorithm();
+
+    // Setup: Set crossCount_ for FindInMatrix to work correctly
+    algorithm->info_.crossCount_ = 2;
+
+    // Setup: startIndex_ = 5, and gridMatrix_ contains item 5
+    algorithm->info_.startIndex_ = 5;
+    algorithm->info_.endIndex_ = 8;
+
+    // Add items sequentially in gridMatrix_
+    // Line 0: items 0, 1
+    // Line 1: items 2, 3
+    // Line 2: items 4, 5  <- item 5 is at line 2, column 1
+    // Line 3: items 6, 7
+    algorithm->info_.gridMatrix_[0][0] = 0;
+    algorithm->info_.gridMatrix_[0][1] = 1;
+    algorithm->info_.gridMatrix_[1][0] = 2;
+    algorithm->info_.gridMatrix_[1][1] = 3;
+    algorithm->info_.gridMatrix_[2][0] = 4;
+    algorithm->info_.gridMatrix_[2][1] = 5; // item 5 is at line 2, column 1
+    algorithm->info_.gridMatrix_[3][0] = 6;
+    algorithm->info_.gridMatrix_[3][1] = 7;
+
+    // Verify: GetItemPos(5) should return valid position
+    auto pos = algorithm->info_.GetItemPos(5);
+
+    // Verify: item 5 is at line 2, column 1
+    EXPECT_EQ(pos.first, 1);
+    EXPECT_EQ(pos.second, 2);
+}
+
+/**
+ * @tc.name: PreloadItemsBranch_With6NodesGroupDemoOptions_006
+ * @tc.desc: Test PreloadItems branch logic with Get6NodesGroupDemoOptions layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomAlgorithmTestNg, PreloadItemsBranch_With6NodesGroupDemoOptions_006, TestSize.Level1)
+{
+    // Setup layout options with 6-nodes-group pattern
+    const int32_t childrenCount = 12;
+    const float itemMainSize = ITEM_MAIN_SIZE;
+    GridLayoutOptions options = Get6NodesGroupDemoOptions(childrenCount, itemMainSize);
+
+    // Verify: irregular indexes include 0, 4, 6, 10 (every 6 nodes, positions 0 and 4)
+    EXPECT_TRUE(options.irregularIndexes.count(0) > 0);
+    EXPECT_TRUE(options.irregularIndexes.count(4) > 0);
+    EXPECT_TRUE(options.irregularIndexes.count(6) > 0);
+    EXPECT_TRUE(options.irregularIndexes.count(10) > 0);
+
+    // Verify: callbacks are properly set
+    EXPECT_TRUE(options.getStartIndexByIndex != nullptr);
+    EXPECT_TRUE(options.getStartIndexByOffset != nullptr);
+
+    // Test getStartIndexByIndex callback for item 4 (irregular item)
+    auto startInfo4 = options.getStartIndexByIndex(4);
+
+    // Verify: item 4 returns startIndex=3, startLine=2
+    EXPECT_EQ(startInfo4.startIndex, 3);
+    EXPECT_EQ(startInfo4.startLine, 2);
+
+    // Test getStartIndexByIndex callback for item 5 (regular item)
+    auto startInfo5 = options.getStartIndexByIndex(5);
+
+    // Verify: item 5 returns startIndex=3, startLine=2
+    EXPECT_EQ(startInfo5.startIndex, 3);
+    EXPECT_EQ(startInfo5.startLine, 2);
+}
+
 } // namespace OHOS::Ace::NG
