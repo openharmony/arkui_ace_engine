@@ -954,9 +954,6 @@ class JSRichEditor extends JSViewAbstract {
     static onCopy(callback) {
         getUINativeModule().richEditor.setOnCopy(true, callback);
     }
-    static onShare(callback) {
-        getUINativeModule().richEditor.setOnShare(true, callback);
-    }
     static onWillAttachIME(callback) {
         getUINativeModule().richEditor.setOnWillAttachIME(true, callback);
     }

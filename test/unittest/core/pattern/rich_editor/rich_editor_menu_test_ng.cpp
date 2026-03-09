@@ -1354,16 +1354,25 @@ HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions003, TestSize.Level0)
  */
 HWTEST_F(RichEditorMenuTestNg, HandleOnShare001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. init pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. attach node
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
 
+    /**
+     * @tc.steps: step3. HandleOnShare
+     */
     richEditorPattern->HandleOnShare();
     auto value = richEditorPattern->selectOverlay_->GetSelectedText();
     int32_t ret = value.length();

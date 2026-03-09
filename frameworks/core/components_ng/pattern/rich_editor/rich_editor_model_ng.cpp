@@ -761,21 +761,6 @@ void RichEditorModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(NG::T
     eventHub->SetOnCopy(std::move(func));
 }
 
-void RichEditorModelNG::SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func)
-{
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnShare(std::move(func));
-}
-
-void RichEditorModelNG::SetOnShare(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnShare(std::move(func));
-}
-
 void RichEditorModelNG::SetOnWillAttachIME(IMEAttachCallback&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();

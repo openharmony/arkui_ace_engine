@@ -74,18 +74,6 @@ void SetRichEditorFocusable(ArkUINodeHandle node, ArkUI_Bool focusable)
     ViewAbstract::SetFocusable(frameNode, focusable);
 }
 
-void SetRichEditorOnShare(ArkUINodeHandle node, void* callback)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (callback) {
-        auto onShare = reinterpret_cast<std::function<void(NG::TextCommonEvent&)>*>(callback);
-        RichEditorModelNG::SetOnShare(frameNode, std::move(*onShare));
-    } else {
-        RichEditorModelNG::SetOnShare(frameNode, nullptr);
-    }
-}
-
 void SetRichEditorSelectDetectConfig(ArkUINodeHandle node, const ArkUI_Uint32* values,
     ArkUI_Uint32 valuesSize)
 {
@@ -1913,7 +1901,6 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .setRichEditorPreviewMenuParam= SetRichEditorPreviewMenuParam,
         .setRichEditorBindSelectionMenuJS = SetRichEditorBindSelectionMenuJS,
         .setRichEditorFocusable = SetRichEditorFocusable,
-        .setRichEditorOnShare = SetRichEditorOnShare,
         .setRichEditorSelectDetectConfig = SetRichEditorSelectDetectConfig,
         .resetRichEditorSelectDetectConfig = ResetRichEditorSelectDetectConfig,
         .setRichEditorEnableDataDetector = SetRichEditorDetectEnable,

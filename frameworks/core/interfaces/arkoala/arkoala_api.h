@@ -7865,7 +7865,6 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorBindSelectionMenuJS)(ArkUINodeHandle node, ArkUI_Uint32 editorType, ArkUI_Uint32 responseType,
         void* buildFunc, ArkUI_SelectMenuParam* menuParam);
     void (*setRichEditorFocusable)(ArkUINodeHandle node, ArkUI_Bool focusable);
-    void (*setRichEditorOnShare)(ArkUINodeHandle node, void* callback);
     void (*setRichEditorSelectDetectConfig)(ArkUINodeHandle node, const ArkUI_Uint32* values, ArkUI_Uint32 valuesSize);
     void (*resetRichEditorSelectDetectConfig)(ArkUINodeHandle node);
     void (*setRichEditorEnableDataDetector)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);

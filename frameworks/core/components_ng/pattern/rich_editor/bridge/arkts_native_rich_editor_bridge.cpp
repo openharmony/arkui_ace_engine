@@ -82,7 +82,7 @@ void RichEditorBridge::RegisterRichEditorAttributes(Local<panda::ObjectRef> obje
         "resetIncludeFontPadding", "setFallbackLineSpacing", "resetFallbackLineSpacing", "setUndoStyle",
         "resetUndoStyle", "setScrollBarColor", "resetScrollBarColor", "setSelectedDragPreviewStyle",
         "resetSelectedDragPreviewStyle", "setSingleLine", "resetSingleLine", "setBindSelectionMenu",
-        "setEnableSelectedDataDetector", "setClip", "setFocusable", "setSelectedDataDetectorConfig", "setOnShare",
+        "setEnableSelectedDataDetector", "setClip", "setFocusable", "setSelectedDataDetectorConfig",
         "setCustomKeyboardJS"
     };
 
@@ -175,7 +175,6 @@ void RichEditorBridge::RegisterRichEditorAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetClip),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetFocusable),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetSelectDetectConfig),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnShare),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCustomKeyboardJS),
     };
 
@@ -2232,41 +2231,6 @@ void CreateCommonEvent(EcmaVM *vm, TextCommonEvent& event, panda::Local<panda::J
         panda::FunctionRef::New(vm, JsPreventDefault));
     eventObject->SetNativePointerField(vm, NUM_0, static_cast<void*>(&event));
     params[NUM_0] = { eventObject };
-}
-
-ArkUINativeModuleValue RichEditorBridge::SetOnShare(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM *vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    if (isJsView && !callbackArg->IsFunction(vm)) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    auto frameNode = isJsView ?
-        ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(TextCommonEvent&)> callback = [vm, frameNode, isJsView,
-        func = panda::CopyableGlobal(vm, func)](TextCommonEvent& event) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        panda::Local<panda::JSValueRef> params[NUM_1];
-        CreateCommonEvent(vm, event, params);
-        auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
-        if (isJsView) {
-            ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
-        }
-    };
-    nodeModifiers->getRichEditorModifier()->setRichEditorOnShare(
-        nativeNode, reinterpret_cast<void*>(&callback));
-    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue RichEditorBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtimeCallInfo)
