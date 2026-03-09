@@ -639,10 +639,6 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         return this.__commonStyles? (this.__commonStyles as Array<(instance: CommonMethod) => void>).length > 0 : false;
     }
 
-    // manually override CommonMethod methods so it has no effects.
-    override id(value: string | undefined): this {
-        return this;
-    }
     override reuseId(value: string | undefined): this {
         return this;
     }
