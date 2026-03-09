@@ -8968,7 +8968,7 @@ void WebDelegate::OnCreateAISession(WebAgentClientImpl::AISessionType type, cons
     }, "ArkUIWebCreateAISession");
 
     if (!result) {
-        callback(1, "default AI session create is not supported");
+        callback(WebAgentClientImpl::FAILURE, "default AI session create is not supported");
     }
 }
 

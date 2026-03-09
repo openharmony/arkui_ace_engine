@@ -86,8 +86,6 @@ constexpr int32_t CREDENTIAL_UKEY = 4;
 const char* CAPABILITY_NOT_SUPPORTED_ERROR_MSG = "Capability not supported.";
 const char* HUKS_CRYPTO_EXTENSION_CAPABILITY = "SystemCapability.Security.Huks.CryptoExtension";
 
-constexpr uint32_t MAX_AI_SESSION_TYPE = 7;
-
 bool g_huksCryptoExtensionAbility = false;
 
 void EraseSpace(std::string& data)

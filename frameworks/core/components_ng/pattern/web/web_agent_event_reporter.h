@@ -51,8 +51,6 @@ public:
     void AIPostTask(const std::function<void()>& task, TaskExecutor::TaskType taskType, const std::string& name,
         uint32_t delay = 0);
 
-    constexpr static size_t MAX_AI_SESSION_TYPE = 7;
-
     void SetAISessionOptions(uint32_t type, const AISessionCallback&& onCreateAISession,
         const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)
     {

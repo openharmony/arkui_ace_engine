@@ -173,6 +173,8 @@ const std::string DEFAULT_SERIF_FONT_FAMILY = "serif";
 const std::string DEFAULT_STANDARD_FONT_FAMILY = "sans-serif";
 const std::string DEFAULT_SCROLLBAR_COLOR = "sys.color.ohos_id_color_foreground";
 
+constexpr uint32_t MAX_AI_SESSION_TYPE = 7;
+
 class HitTestResult : public virtual AceType {
     DECLARE_ACE_TYPE(HitTestResult, AceType);
 
