@@ -998,7 +998,6 @@ void WebClientImpl::OnLargestContentfulPaint(
         return;
     }
     ContainerScope scope(instanceId);
-
     delegate->OnLargestContentfulPaint(details);
 }
 
