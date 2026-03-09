@@ -229,6 +229,10 @@ public:
 
     void SetNavMenuItemNeedFocus(bool navMenuItemNeedFocus);
 
+    int32_t OnInjectionEvent(const std::string& command) override;
+
+    void ReportButtonClickResult();
+
 protected:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;

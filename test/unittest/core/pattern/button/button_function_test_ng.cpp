@@ -1518,4 +1518,269 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest020, TestSize.Level1)
     EXPECT_EQ(buttonLayoutProperty->GetButtonRoleValue(), ButtonRole::NORMAL);
     EXPECT_EQ(buttonLayoutProperty->GetButtonStyleValue(), ButtonStyleMode::NORMAL);
 }
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest001
+ * @tc.desc: Test ButtonPattern::OnInjectionEvent success path and ReportButtonClickResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get button pattern
+     * @tc.expected: step2. pattern is not null
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. test valid command with onButtonClick
+     * @tc.expected: step3. OnInjectionEvent returns RET_SUCCESS
+     */
+    std::string validCommand = R"({"cmd":"onButtonClick"})";
+    int32_t result = buttonPattern->OnInjectionEvent(validCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    /**
+     * @tc.steps: step4. test command with extra fields
+     * @tc.expected: step4. OnInjectionEvent returns RET_SUCCESS (extra fields ignored)
+     */
+    std::string extraFieldsCommand = R"({"cmd":"onButtonClick","extra":"data","timestamp":12345})";
+    result = buttonPattern->OnInjectionEvent(extraFieldsCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    /**
+     * @tc.steps: step5. call ReportButtonClickResult directly
+     * @tc.expected: step5. function executes without crash
+     */
+    buttonPattern->ReportButtonClickResult();
+}
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest002
+ * @tc.desc: Test ButtonPattern::OnInjectionEvent with null host and invalid commands
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get button pattern
+     * @tc.expected: step2. pattern is not null
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. test invalid JSON commands
+     * @tc.expected: step3. all return RET_FAILED
+     */
+    std::vector<std::string> invalidCommands = {
+        "invalid json string",
+        "",
+        "{}",
+        "{cmd:onButtonClick}"
+    };
+    
+    for (const auto& cmd : invalidCommands) {
+        int32_t result = buttonPattern->OnInjectionEvent(cmd);
+        EXPECT_EQ(result, RET_FAILED);
+    }
+
+    /**
+     * @tc.steps: step4. test wrong command types
+     * @tc.expected: step4. all return RET_FAILED
+     */
+    std::vector<std::string> wrongCommands = {
+        R"({"cmd":"onOtherEvent"})",
+        R"({"data":"value"})",
+        R"({"cmd":""})",
+        R"({"cmd":123})"
+    };
+    
+    for (const auto& cmd : wrongCommands) {
+        int32_t result = buttonPattern->OnInjectionEvent(cmd);
+        EXPECT_EQ(result, RET_FAILED);
+    }
+}
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest003
+ * @tc.desc: Test ButtonPattern::OnInjectionEvent and ReportButtonClickResult with null host
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button pattern without host
+     */
+    auto buttonPattern = AceType::MakeRefPtr<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnInjectionEvent with valid command
+     * @tc.expected: step2. returns RET_FAILED due to null host
+     */
+    std::string validCommand = R"({"cmd":"onButtonClick"})";
+    int32_t result = buttonPattern->OnInjectionEvent(validCommand);
+    EXPECT_EQ(result, RET_FAILED);
+    
+    /**
+     * @tc.steps: step3. call OnInjectionEvent with invalid command
+     * @tc.expected: step3. returns RET_FAILED (host null check happens before JSON parse)
+     */
+    result = buttonPattern->OnInjectionEvent("invalid");
+    EXPECT_EQ(result, RET_FAILED);
+    
+    /**
+     * @tc.steps: step4. call ReportButtonClickResult with null host
+     * @tc.expected: step4. function returns early without crash
+     */
+    buttonPattern->ReportButtonClickResult();
+}
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest004
+ * @tc.desc: Test ButtonPattern::OnInjectionEvent with multiple buttons
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create first button
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    auto frameNode1 = CreateLabelButtonParagraph("Button1", testProperty);
+    ASSERT_NE(frameNode1, nullptr);
+    
+    /**
+     * @tc.steps: step2. create second button
+     */
+    auto frameNode2 = CreateLabelButtonParagraph("Button2", testProperty);
+    ASSERT_NE(frameNode2, nullptr);
+
+    /**
+     * @tc.steps: step3. get button patterns
+     */
+    auto buttonPattern1 = frameNode1->GetPattern<ButtonPattern>();
+    auto buttonPattern2 = frameNode2->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern1, nullptr);
+    ASSERT_NE(buttonPattern2, nullptr);
+
+    /**
+     * @tc.steps: step4. test valid command on both buttons
+     * @tc.expected: step4. both return RET_SUCCESS
+     */
+    std::string validCmd = R"({"cmd":"onButtonClick"})";
+    EXPECT_EQ(buttonPattern1->OnInjectionEvent(validCmd), RET_SUCCESS);
+    EXPECT_EQ(buttonPattern2->OnInjectionEvent(validCmd), RET_SUCCESS);
+
+    /**
+     * @tc.steps: step5. test invalid command on both buttons
+     * @tc.expected: step5. both return RET_FAILED
+     */
+    std::string invalidCmd = "invalid";
+    EXPECT_EQ(buttonPattern1->OnInjectionEvent(invalidCmd), RET_FAILED);
+    EXPECT_EQ(buttonPattern2->OnInjectionEvent(invalidCmd), RET_FAILED);
+
+    /**
+     * @tc.steps: step6. test wrong command on both buttons
+     * @tc.expected: step6. both return RET_FAILED
+     */
+    std::string wrongCmd = R"({"cmd":"wrong"})";
+    EXPECT_EQ(buttonPattern1->OnInjectionEvent(wrongCmd), RET_FAILED);
+    EXPECT_EQ(buttonPattern2->OnInjectionEvent(wrongCmd), RET_FAILED);
+}
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest005
+ * @tc.desc: Test disabled button
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create disabled button
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get button pattern and event hub
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. disable the button
+     */
+    eventHub->SetEnabled(false);
+
+    /**
+     * @tc.steps: step4. send injection command to disabled button
+     * @tc.expected: step4. returns RET_FAILED because button is disabled
+     */
+    std::string validCmd = R"({"cmd":"onButtonClick"})";
+    int32_t result = buttonPattern->OnInjectionEvent(validCmd);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest006
+ * @tc.desc: Test geometryNode is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get button pattern
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. set geometryNode to null
+     */
+    frameNode->SetGeometryNode(nullptr);
+
+    /**
+     * @tc.steps: step4. send injection command
+     * @tc.expected: step4. returns RET_SUCCESS (should handle null geometryNode gracefully)
+     */
+    std::string validCmd = R"({"cmd":"onButtonClick"})";
+    int32_t result = buttonPattern->OnInjectionEvent(validCmd);
+    EXPECT_EQ(result, RET_SUCCESS);
+}
 } // namespace OHOS::Ace::NG

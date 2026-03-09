@@ -19,6 +19,7 @@
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components/theme/shadow_theme.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -747,6 +748,7 @@ void ButtonPattern::InitTouchEvent()
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch up");
             buttonPattern->HandleNormalStyle();
             buttonPattern->UpdateTexOverflow(buttonPattern->isHover_ || buttonPattern->isFocus_);
+            buttonPattern->ReportButtonClickResult();
         }
     };
     eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, touchListener_, true);
@@ -763,6 +765,68 @@ void ButtonPattern::OnAfterModifyDone()
         auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
         Recorder::NodeDataCache::Get().PutString(host, inspectorId, text);
     }
+}
+
+int32_t ButtonPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    ACE_UINODE_TRACE(host);
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return RET_FAILED;
+    }
+    auto cmdType = json->GetString("cmd");
+    if (cmdType != "onButtonClick") {
+        return RET_FAILED;
+    }
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, RET_FAILED);
+    if (!eventHub->IsEnabled()) {
+        return RET_FAILED;
+    }
+    double x = 0.0;
+    double y = 0.0;
+    auto geometryNode = host->GetGeometryNode();
+    auto frameRect = geometryNode ? geometryNode->GetFrameRect() : RectF();
+    const double HALF_RATIO = 2.0;
+    x = frameRect.Width() / HALF_RATIO;
+    y = frameRect.Height() / HALF_RATIO;
+    HandlePressedStyle();
+    SetButtonPress(x, y);
+
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    if (gestureEventHub) {
+        auto clickEvent = gestureEventHub->GetClickEvent();
+        if (clickEvent) {
+            GestureEvent info;
+            info.SetLocalLocation(Offset(x, y));
+            clickEvent(info);
+        }
+    }
+    ReportButtonClickResult();
+    return RET_SUCCESS;
+}
+
+void ButtonPattern::ReportButtonClickResult()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonResult = JsonUtil::Create();
+    CHECK_NULL_VOID(buttonResult);
+    auto id = host->GetId();
+    buttonResult->Put("nodeId", id);
+
+    buttonResult->Put("event", "onButtonClick");
+    buttonResult->Put("result", "success");
+
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("ButtonResult", buttonResult);
+
+    auto manager = UiSessionManager::GetInstance();
+    CHECK_NULL_VOID(manager);
+    manager->ReportComponentChangeEvent("buttonClick", json->ToString(), 0);
 }
 
 void ButtonPattern::InitHoverEvent()
