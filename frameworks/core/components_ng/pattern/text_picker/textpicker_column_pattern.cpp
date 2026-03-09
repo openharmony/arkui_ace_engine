@@ -1448,6 +1448,7 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
         return;
     }
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
+        stopHaptic_ = true;
         if (InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0), true)) {
             HandleScrollStopEventCallback(true);
         }

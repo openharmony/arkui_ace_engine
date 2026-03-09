@@ -482,6 +482,7 @@ void PickerColumnPattern::HandleDragStart(const GestureEvent& event)
 void PickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
+        stopHaptic_ = true;
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0f), true);
         return;
     }
