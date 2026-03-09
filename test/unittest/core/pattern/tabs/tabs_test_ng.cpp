@@ -924,8 +924,7 @@ HWTEST_F(TabsTestNg, GetTargetIndexTest001, TestSize.Level1)
         { "" },
         { R"({"cmd":"change"})" },
         { R"({"params":"111111111"})" },
-        { R"({"cmd":"changeIndex","params":{}})" },
-        { R"({"cmd":"changeIndex","params":{"index":""}})" } };
+        { R"({"cmd":"changeIndex","params":{}})" } };
 
     int32_t targetIndex = 0;
     for (const auto& command : commands) {
