@@ -1203,12 +1203,29 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RichEditorOverlayTestNg004, TestSize.Lev
 
     richEditorPattern->selectOverlay_->enableHandleLevel_ = true;
     richEditorPattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
-    auto isShow1 = richEditorPattern->selectOverlay_->CheckHandleVisible(RectF(0.0f, 0.0f, 10.0f, 10.0f));
-    EXPECT_EQ(isShow1, true);
+    auto handleRect = RectF(0.0f, 0.0f, 10.0f, 10.0f);
+    auto startPoint = OffsetF(5.0f, 0.0f);
+    auto endPoint = OffsetF(5.0f, 10.0f);
+    auto width = handleRect.Width();
+    bool isShow = richEditorPattern->selectOverlay_->CheckHandleVisible(handleRect);
+    EXPECT_EQ(isShow, true);
 
     richEditorPattern->selectOverlay_->isSingleHandle_ = true;
-    auto isShow2 = richEditorPattern->selectOverlay_->CheckHandleVisible(RectF(0.0f, 0.0f, 10.0f, 10.0f));
-    EXPECT_EQ(isShow2, true);
+    isShow = richEditorPattern->selectOverlay_->CheckHandleVisible(handleRect);
+    EXPECT_EQ(isShow, true);
+    isShow = richEditorPattern->selectOverlay_->CheckHandleIsVisibleWithTransform(startPoint, endPoint, width);
+    EXPECT_EQ(isShow, false);
+
+    isShow = richEditorPattern->selectOverlay_->CheckHandleVisible(RectF(0.0f, 0.0f, 0.0f, 0.0f));
+    EXPECT_EQ(isShow, false);
+    isShow = richEditorPattern->selectOverlay_->CheckHandleIsVisibleWithTransform(startPoint, endPoint, 0.0f);
+    EXPECT_EQ(isShow, false);
+
+    richEditorPattern->selectOverlay_->isUsingMouse_ = true;
+    isShow = richEditorPattern->selectOverlay_->CheckHandleVisible(handleRect);
+    EXPECT_EQ(isShow, false);
+    isShow = richEditorPattern->selectOverlay_->CheckHandleIsVisibleWithTransform(startPoint, endPoint, width);
+    EXPECT_EQ(isShow, false);
 }
 
 /**
