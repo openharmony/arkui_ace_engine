@@ -1326,4 +1326,374 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest006, TestSize.Le
     rect = controller->CalculateEmptyValueCaretRect();
     EXPECT_EQ(rect.Height(), 45);
 }
+
+/**
+ * @tc.name: HandleButtonFocusEvent001
+ * @tc.desc: Test HandleButtonFocusEvent when host is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, HandleButtonFocusEvent001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern without proper initialization to test null host branch
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset needResetFocusColor_ flag before test
+     */
+    pattern->needResetFocusColor_ = false;
+
+    /**
+     * @tc.steps: step3. Pass null responseArea to test null check
+     */
+    RefPtr<TextInputResponseArea> nullResponseArea = nullptr;
+
+    /**
+     * @tc.expected: step4. Function should return early when host is null (CHECK_NULL_VOID)
+     */
+    pattern->HandleButtonFocusEvent(nullResponseArea);
+    ASSERT_FALSE(pattern->needResetFocusColor_);
+}
+
+/**
+ * @tc.name: HandleButtonFocusEvent002
+ * @tc.desc: Test HandleButtonFocusEvent normal flow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, HandleButtonFocusEvent002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with password type
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Get focus
+     */
+    GetFocus();
+    pattern_->needResetFocusColor_ = false;
+
+    /**
+     * @tc.steps: step3. Get response area from pattern
+     */
+    auto responseArea = pattern_->GetResponseArea();
+    ASSERT_NE(responseArea, nullptr);
+
+    /**
+     * @tc.expected: step4. Function should execute successfully with valid parameters
+     */
+    pattern_->HandleButtonFocusEvent(responseArea);
+    EXPECT_TRUE(pattern_->needResetFocusColor_);
+}
+
+/**
+ * @tc.name: HandleButtonFocusEvent003
+ * @tc.desc: Test HandleButtonFocusEvent when responseArea is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, HandleButtonFocusEvent003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with proper initialization
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->textFieldOverlayModifier_, nullptr);
+    GetFocus();
+    pattern_->needResetFocusColor_ = false;
+
+    /**
+     * @tc.steps: step2. Pass null responseArea to test null check branch
+     */
+    RefPtr<TextInputResponseArea> nullResponseArea = nullptr;
+
+    /**
+     * @tc.expected: step3. Function should return early when responseArea is null
+     */
+    pattern_->HandleButtonFocusEvent(nullResponseArea);
+    ASSERT_FALSE(pattern_->needResetFocusColor_);
+}
+
+/**
+ * @tc.name: HandleButtonFocusEvent004
+ * @tc.desc: Test HandleButtonFocusEvent normal flow with focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, HandleButtonFocusEvent004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with proper initialization
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Get focus and reset needResetFocusColor_ flag
+     */
+    GetFocus();
+    pattern_->needResetFocusColor_ = false;
+
+    /**
+     * @tc.steps: step3. Get response area from pattern
+     */
+    auto responseArea = pattern_->GetResponseArea();
+    ASSERT_NE(responseArea, nullptr);
+
+    /**
+     * @tc.steps: step4. Call HandleButtonFocusEvent with focus
+     */
+    pattern_->HandleButtonFocusEvent(responseArea);
+
+    /**
+     * @tc.expected: step5. needResetFocusColor_ should be set to true after function call
+     */
+    EXPECT_TRUE(pattern_->needResetFocusColor_);
+}
+
+/**
+ * @tc.name: HandleButtonFocusEvent005
+ * @tc.desc: Test HandleButtonFocusEvent when has focus and needResetFocusColor_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, HandleButtonFocusEvent005, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with VISIBLE_PASSWORD type to enable response area
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Get focus and reset needResetFocusColor_ flag
+     */
+    GetFocus();
+    pattern_->needResetFocusColor_ = false;
+
+    /**
+     * @tc.steps: step3. Get response area from pattern
+     */
+    auto responseArea = pattern_->GetResponseArea();
+    ASSERT_NE(responseArea, nullptr);
+
+    /**
+     * @tc.steps: step4. Call HandleButtonFocusEvent to test focus branch
+     */
+    pattern_->HandleButtonFocusEvent(responseArea);
+
+    /**
+     * @tc.expected: step5. needResetFocusColor_ should be set to true after function call
+     */
+    EXPECT_TRUE(pattern_->needResetFocusColor_);
+}
+
+/**
+ * @tc.name: HandleButtonFocusEvent006
+ * @tc.desc: Test HandleButtonFocusEvent when does not have focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, HandleButtonFocusEvent006, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with VISIBLE_PASSWORD type
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Do NOT get focus, keep needResetFocusColor_ as default (true)
+     */
+    pattern_->needResetFocusColor_ = false;
+
+    /**
+     * @tc.steps: step3. Get response area from pattern
+     */
+    auto responseArea = pattern_->GetResponseArea();
+    ASSERT_NE(responseArea, nullptr);
+
+    /**
+     * @tc.steps: step4. Call HandleButtonFocusEvent without focus
+     */
+    pattern_->HandleButtonFocusEvent(responseArea);
+
+    /**
+     * @tc.expected: step5. needResetFocusColor_ should be set to true after function call
+     */
+    EXPECT_TRUE(pattern_->needResetFocusColor_);
+}
+
+/**
+ * @tc.name: HandleButtonFocusEvent007
+ * @tc.desc: Test HandleButtonFocusEvent when needResetFocusColor_ is true (else branch)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, HandleButtonFocusEvent007, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with VISIBLE_PASSWORD type
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Get focus but keep needResetFocusColor_ as true
+     */
+    GetFocus();
+    pattern_->needResetFocusColor_ = true;
+
+    /**
+     * @tc.steps: step3. Get response area from pattern
+     */
+    auto responseArea = pattern_->GetResponseArea();
+    ASSERT_NE(responseArea, nullptr);
+
+    /**
+     * @tc.steps: step4. Call HandleButtonFocusEvent with needResetFocusColor_ = true
+     */
+    pattern_->HandleButtonFocusEvent(responseArea);
+
+    /**
+     * @tc.expected: step5. Function should execute else branch and set needResetFocusColor_ to true
+     */
+    EXPECT_TRUE(pattern_->needResetFocusColor_);
+}
+
+/**
+ * @tc.name: HandleButtonFocusEvent008
+ * @tc.desc: Test HandleButtonFocusEvent with CleanNodeResponseArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, HandleButtonFocusEvent008, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with clean node style enabled
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetCleanNodeStyle(CleanNodeStyle::INPUT);
+        model.SetIsShowCancelButton(true);
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Get focus and reset needResetFocusColor_ flag
+     */
+    GetFocus();
+    pattern_->needResetFocusColor_ = false;
+    pattern_->ProcessCancelButton();
+
+    /**
+     * @tc.steps: step3. Get clean node response area
+     */
+    auto cleanNodeResponseArea = pattern_->GetCleanNodeResponseArea();
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+
+    /**
+     * @tc.steps: step4. Call HandleButtonFocusEvent with clean node response area
+     */
+    pattern_->HandleButtonFocusEvent(cleanNodeResponseArea);
+
+    /**
+     * @tc.expected: step5. Function should execute successfully with clean node response area
+     */
+    EXPECT_TRUE(pattern_->needResetFocusColor_);
+}
+
+/**
+ * @tc.name: HandleButtonFocusEvent009
+ * @tc.desc: Test HandleButtonFocusEvent with PasswordResponseArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, HandleButtonFocusEvent009, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with password type to enable password response area
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    ASSERT_NE(pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Get focus and reset needResetFocusColor_ flag
+     */
+    GetFocus();
+    pattern_->needResetFocusColor_ = false;
+
+    /**
+     * @tc.steps: step3. Get response area which is PasswordResponseArea for password type
+     */
+    auto responseArea = pattern_->GetResponseArea();
+    ASSERT_NE(responseArea, nullptr);
+
+    /**
+     * @tc.steps: step4. Call HandleButtonFocusEvent with response area
+     */
+    pattern_->HandleButtonFocusEvent(responseArea);
+
+    /**
+     * @tc.expected: step5. needResetFocusColor_ should be set to true after function call
+     */
+    EXPECT_TRUE(pattern_->needResetFocusColor_);
+}
+
+/**
+ * @tc.name: HandleButtonFocusEvent010
+ * @tc.desc: Test HandleButtonFocusEvent complete flow with all branches covered
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, HandleButtonFocusEvent010, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern with proper initialization
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->textFieldOverlayModifier_, nullptr);
+
+    /**
+     * @tc.steps: step2. Get focus to enable focus branch
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. First call with needResetFocusColor_ = false (focus branch)
+     */
+    pattern_->needResetFocusColor_ = false;
+    auto responseArea = pattern_->GetResponseArea();
+    ASSERT_NE(responseArea, nullptr);
+    pattern_->HandleButtonFocusEvent(responseArea);
+
+    /**
+     * @tc.expected: step4. needResetFocusColor_ should be true after first call
+     */
+    EXPECT_TRUE(pattern_->needResetFocusColor_);
+
+    /**
+     * @tc.steps: step5. Second call with needResetFocusColor_ = true (else branch)
+     */
+    pattern_->HandleButtonFocusEvent(responseArea);
+
+    /**
+     * @tc.expected: step6. needResetFocusColor_ should still be true after second call
+     */
+    EXPECT_TRUE(pattern_->needResetFocusColor_);
+}
 } // namespace OHOS::Ace::NG
