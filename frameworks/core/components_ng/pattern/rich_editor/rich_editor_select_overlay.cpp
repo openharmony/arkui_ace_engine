@@ -77,8 +77,9 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetSecondHandleInfo()
 bool RichEditorSelectOverlay::CheckHandleIsVisibleWithTransform(
     const OffsetF& startPoint, const OffsetF& endPoint, float epsilon)
 {
-    if (IsUsingMouse()) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "No need to check handle visible");
+    if (IsUsingMouse() || NearEqual(epsilon, 0.0f)) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "No need to check handle visible usingMouse:%{public}d width:%{public}f",
+            IsUsingMouse(), epsilon);
         return false;
     }
     return BaseTextSelectOverlay::CheckHandleIsVisibleWithTransform(startPoint, endPoint, epsilon);
@@ -90,8 +91,9 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     CHECK_NULL_RETURN(pattern, false);
     auto host = pattern->GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (IsUsingMouse()) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "No need to show handle when using mouse");
+    if (IsUsingMouse() || paintRect.IsEmpty()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "No need to check handle visible usingMouse:%{public}d rectEmpty:%{public}d",
+            IsUsingMouse(), paintRect.IsEmpty());
         return false;
     }
 
