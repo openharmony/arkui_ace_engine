@@ -148,6 +148,54 @@ void WebAgentClientImpl::ReportEventJson(const std::string& json)
     delegate->ReportEventJson(json);
 }
 
+void WebAgentClientImpl::OnCreateAISession(AISessionType type, const std::string& id, const std::string& params,
+    std::shared_ptr<NWeb::NWebStringVectorValueCallback> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnCreateAISession: type: %{public}d, id: %{public}s", type, id.c_str());
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    const auto wrappedCallback = [id, callback = std::move(callback)](uint32_t state, const std::string& content) {
+        if (state == RUNNING) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "OnCreateAISession running: id: %{public}s, content: %{public}s",
+                id.c_str(), content.c_str());
+            return;
+        }
+        if (state == FAILURE) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "OnCreateAISession failed: id: %{public}s, content: %{public}s",
+                id.c_str(), content.c_str());
+        }
+        callback->OnReceiveValue({ std::to_string(state), content });
+    };
+    delegate->OnCreateAISession(type, id, params, std::move(wrappedCallback));
+}
+
+void WebAgentClientImpl::OnExecuteAIAction(AISessionType type, const std::string& id, const std::string& params,
+    std::shared_ptr<NWeb::NWebStringVectorValueCallback> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnExecuteAIAction: type: %{public}d, id: %{public}s", type, id.c_str());
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    const auto wrappedCallback = [id, callback = std::move(callback)](uint32_t state, const std::string& content) {
+        if (state == FAILURE) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "OnExecuteAIAction failed: id: %{public}s, content: %{public}s",
+                id.c_str(), content.c_str());
+        }
+        callback->OnReceiveValue({ std::to_string(state), content });
+    };
+    delegate->OnExecuteAIAction(type, id, params, std::move(wrappedCallback));
+}
+
+void WebAgentClientImpl::OnDestroyAISession(AISessionType type, const std::string& id)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnDestroyAISession: type: %{public}d, id: %{public}s", type, id.c_str());
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnDestroyAISession(type, id);
+}
+
 std::string SpanstringConvertHtmlImpl::SpanstringConvertHtml(const std::vector<uint8_t> &content)
 {
     ContainerScope scope(instanceId_);

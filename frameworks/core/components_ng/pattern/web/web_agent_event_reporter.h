@@ -51,6 +51,15 @@ public:
     void AIPostTask(const std::function<void()>& task, TaskExecutor::TaskType taskType, const std::string& name,
         uint32_t delay = 0);
 
+    void SetAISessionOptions(uint32_t type, const AISessionCallback&& onCreateAISession,
+        const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession);
+
+    AISessionCallback GetOnCreateAISession(uint32_t type);
+
+    AISessionCallback GetOnExecuteAIAction(uint32_t type);
+
+    AISessionCallback GetOnDestroyAISession(uint32_t type);
+
     enum class WebEventType { Unknown, Tap, LongPress, ScrollStart, ScrollEnd, PinchEnd };
 
     WebEventType ParseEventType(const std::string& str);
@@ -63,6 +72,9 @@ public:
 
 private:
     WeakPtr<Pattern> pattern_;
+    AISessionCallback onCreateAISessionArray_[MAX_AI_SESSION_TYPE] = { nullptr };
+    AISessionCallback onExecuteAIActionArray_[MAX_AI_SESSION_TYPE] = { nullptr };
+    AISessionCallback onDestroyAISessionArray_[MAX_AI_SESSION_TYPE] = { nullptr };
 
 protected:
     virtual RectF ConvertToWindow(const RectF& rect, bool addComponentOffset = true);

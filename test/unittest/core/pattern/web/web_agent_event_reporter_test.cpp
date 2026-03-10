@@ -737,4 +737,302 @@ HWTEST_F(WebAgentEventReporterTest, ReportAndAdvanceScrollQueue_StartAndEnd, Tes
 #endif
 }
 
+/**
+ * @tc.name: SetAISessionOptions_ValidType
+ * @tc.desc: Test SetAISessionOptions with valid type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, SetAISessionOptions_ValidType, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    
+    auto onCreate = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    auto onExecute = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    auto onDestroy = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    
+    reporter->SetAISessionOptions(0, std::move(onCreate), std::move(onExecute), std::move(onDestroy));
+    
+    auto retrievedCreate = reporter->GetOnCreateAISession(0);
+    auto retrievedExecute = reporter->GetOnExecuteAIAction(0);
+    auto retrievedDestroy = reporter->GetOnDestroyAISession(0);
+    
+    EXPECT_NE(retrievedCreate, nullptr);
+    EXPECT_NE(retrievedExecute, nullptr);
+    EXPECT_NE(retrievedDestroy, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: SetAISessionOptions_BoundaryType
+ * @tc.desc: Test SetAISessionOptions with boundary type (MAX_AI_SESSION_TYPE - 1).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, SetAISessionOptions_BoundaryType, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    
+    auto onCreate = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    auto onExecute = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    auto onDestroy = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    
+    uint32_t boundaryType = MAX_AI_SESSION_TYPE - 1;
+    reporter->SetAISessionOptions(boundaryType, std::move(onCreate), std::move(onExecute), std::move(onDestroy));
+    
+    auto retrievedCreate = reporter->GetOnCreateAISession(boundaryType);
+    auto retrievedExecute = reporter->GetOnExecuteAIAction(boundaryType);
+    auto retrievedDestroy = reporter->GetOnDestroyAISession(boundaryType);
+    
+    EXPECT_NE(retrievedCreate, nullptr);
+    EXPECT_NE(retrievedExecute, nullptr);
+    EXPECT_NE(retrievedDestroy, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: SetAISessionOptions_InvalidType
+ * @tc.desc: Test SetAISessionOptions with invalid type (>= MAX_AI_SESSION_TYPE).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, SetAISessionOptions_InvalidType, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    
+    auto onCreate = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    auto onExecute = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    auto onDestroy = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    
+    uint32_t invalidType = MAX_AI_SESSION_TYPE;
+    reporter->SetAISessionOptions(invalidType, std::move(onCreate), std::move(onExecute), std::move(onDestroy));
+    
+    auto retrievedCreate = reporter->GetOnCreateAISession(invalidType);
+    auto retrievedExecute = reporter->GetOnExecuteAIAction(invalidType);
+    auto retrievedDestroy = reporter->GetOnDestroyAISession(invalidType);
+    
+    EXPECT_EQ(retrievedCreate, nullptr);
+    EXPECT_EQ(retrievedExecute, nullptr);
+    EXPECT_EQ(retrievedDestroy, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: SetAISessionOptions_Overwrite
+ * @tc.desc: Test SetAISessionOptions overwriting existing callbacks.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, SetAISessionOptions_Overwrite, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    
+    bool firstCalled = false;
+    bool secondCalled = false;
+    
+    auto onCreate1 = [&firstCalled](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) {
+        firstCalled = true;
+        return true;
+    };
+    auto onExecute1 = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    auto onDestroy1 = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    
+    reporter->SetAISessionOptions(1, std::move(onCreate1), std::move(onExecute1), std::move(onDestroy1));
+    
+    auto onCreate2 = [&secondCalled](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) {
+        secondCalled = true;
+        return true;
+    };
+    auto onExecute2 = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    auto onDestroy2 = [](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+    
+    reporter->SetAISessionOptions(1, std::move(onCreate2), std::move(onExecute2), std::move(onDestroy2));
+    
+    auto retrievedCreate = reporter->GetOnCreateAISession(1);
+    ASSERT_NE(retrievedCreate, nullptr);
+    
+    retrievedCreate("", "", [](uint32_t, const std::string&) {});
+    
+    EXPECT_FALSE(firstCalled);
+    EXPECT_TRUE(secondCalled);
+#endif
+}
+
+/**
+ * @tc.name: GetOnCreateAISession_Unset
+ * @tc.desc: Test GetOnCreateAISession when callback is not set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, GetOnCreateAISession_Unset, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    
+    auto callback = reporter->GetOnCreateAISession(0);
+    EXPECT_EQ(callback, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: GetOnCreateAISession_Set
+ * @tc.desc: Test GetOnCreateAISession when callback is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, GetOnCreateAISession_Set, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    
+    bool callbackCalled = false;
+    auto onCreate = [&callbackCalled](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) {
+        callbackCalled = true;
+        return true;
+    };
+    
+    reporter->SetAISessionOptions(2, std::move(onCreate), nullptr, nullptr);
+    
+    auto callback = reporter->GetOnCreateAISession(2);
+    ASSERT_NE(callback, nullptr);
+    
+    callback("", "", [](uint32_t, const std::string&) {});
+    
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: GetOnExecuteAIAction_Unset
+ * @tc.desc: Test GetOnExecuteAIAction when callback is not set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, GetOnExecuteAIAction_Unset, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    
+    auto callback = reporter->GetOnExecuteAIAction(0);
+    EXPECT_EQ(callback, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: GetOnExecuteAIAction_Set
+ * @tc.desc: Test GetOnExecuteAIAction when callback is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, GetOnExecuteAIAction_Set, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    
+    bool callbackCalled = false;
+    auto onExecute = [&callbackCalled](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) {
+        callbackCalled = true;
+        return true;
+    };
+    
+    reporter->SetAISessionOptions(3, nullptr, std::move(onExecute), nullptr);
+    
+    auto callback = reporter->GetOnExecuteAIAction(3);
+    ASSERT_NE(callback, nullptr);
+    
+    callback("", "", [](uint32_t, const std::string&) {});
+    
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: GetOnDestroyAISession_Unset
+ * @tc.desc: Test GetOnDestroyAISession when callback is not set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, GetOnDestroyAISession_Unset, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    
+    auto callback = reporter->GetOnDestroyAISession(0);
+    EXPECT_EQ(callback, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: GetOnDestroyAISession_Set
+ * @tc.desc: Test GetOnDestroyAISession when callback is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, GetOnDestroyAISession_Set, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    
+    bool callbackCalled = false;
+    auto onDestroy = [&callbackCalled](const std::string&, const std::string&,
+        const std::function<void(uint32_t, const std::string&)>&&) {
+        callbackCalled = true;
+        return true;
+    };
+    
+    reporter->SetAISessionOptions(4, nullptr, nullptr, std::move(onDestroy));
+    
+    auto callback = reporter->GetOnDestroyAISession(4);
+    ASSERT_NE(callback, nullptr);
+    
+    callback("", "", [](uint32_t, const std::string&) {});
+    
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: AISessionCallbacks_MultipleTypes
+ * @tc.desc: Test setting and getting callbacks for multiple AI session types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, AISessionCallbacks_MultipleTypes, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<WebAgentEventReporter>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    
+    for (uint32_t i = 0; i < MAX_AI_SESSION_TYPE; ++i) {
+        auto onCreate = [i](const std::string&, const std::string&,
+            const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+        auto onExecute = [i](const std::string&, const std::string&,
+            const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+        auto onDestroy = [i](const std::string&, const std::string&,
+            const std::function<void(uint32_t, const std::string&)>&&) { return true; };
+        
+        reporter->SetAISessionOptions(i, std::move(onCreate), std::move(onExecute), std::move(onDestroy));
+    }
+    
+    for (uint32_t i = 0; i < MAX_AI_SESSION_TYPE; ++i) {
+        auto createCallback = reporter->GetOnCreateAISession(i);
+        auto executeCallback = reporter->GetOnExecuteAIAction(i);
+        auto destroyCallback = reporter->GetOnDestroyAISession(i);
+        
+        EXPECT_NE(createCallback, nullptr);
+        EXPECT_NE(executeCallback, nullptr);
+        EXPECT_NE(destroyCallback, nullptr);
+    }
+#endif
+}
+
 } // namespace OHOS::Ace::NG

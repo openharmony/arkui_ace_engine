@@ -39,6 +39,8 @@ using ScriptRegexItems = std::map<std::string, std::vector<std::pair<std::string
 using ScriptItemsByOrder = std::vector<std::string>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
 using OnKeyEventCallback = std::function<void(KeyEventInfo& keyEventInfo)>;
+using AISessionCallback = std::function<bool(
+    const std::string&, const std::string&, const std::function<void(uint32_t, const std::string&)>&&)>;
 
 enum MixedModeContent {
     MIXED_CONTENT_ALWAYS_ALLOW = 0,
@@ -170,6 +172,8 @@ const std::string DEFAULT_SANS_SERIF_FONT_FAMILY = "sans-serif";
 const std::string DEFAULT_SERIF_FONT_FAMILY = "serif";
 const std::string DEFAULT_STANDARD_FONT_FAMILY = "sans-serif";
 const std::string DEFAULT_SCROLLBAR_COLOR = "sys.color.ohos_id_color_foreground";
+
+constexpr uint32_t MAX_AI_SESSION_TYPE = 7;
 
 class HitTestResult : public virtual AceType {
     DECLARE_ACE_TYPE(HitTestResult, AceType);

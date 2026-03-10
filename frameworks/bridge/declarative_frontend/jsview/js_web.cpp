@@ -54,6 +54,7 @@
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 #include "bridge/js_frontend/engine/common/js_engine.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "core/components/web/web_transfer_api.h"
 
 #define ARKWEB_CREATE_JS_OBJECT(nativeClass, jsClass, funName, eventValue)                                     \
@@ -2337,6 +2338,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onGeolocationShow", &JSWeb::OnGeolocationShow);
     JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
     JSClass<JSWeb>::StaticMethod("onShowFileSelector", &JSWeb::OnFileSelectorShow);
+    JSClass<JSWeb>::StaticMethod("aiSessionOptions", &JSWeb::AISessionOptions);
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
@@ -4273,6 +4275,75 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
         return false;
     };
     WebModel::GetInstance()->SetOnFileSelectorShow(jsCallback);
+}
+
+void WrapAISessionCallback(const JSRef<JSObject>& option, const std::string& funcName,
+    AISessionCallback& aiSessionCallback)
+{
+    JSRef<JSVal> funcVal = option->GetProperty(funcName.c_str());
+    if (!funcVal->IsFunction()) {
+        return;
+    }
+    aiSessionCallback = [option, func = JSRef<JSFunc>::Cast(funcVal)](const std::string& id,
+            const std::string& params, const std::function<void(uint32_t, const std::string&)>&& callback) {
+        napi_env env = GetNapiEnv();
+        if (!env) {
+            return false;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+        auto adapter = runtime->NewFunction(
+            [callback = std::move(callback)](shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
+                    const std::vector<shared_ptr<JsValue>>& args, int32_t argc) -> shared_ptr<JsValue> {
+                if (argc > 0) {
+                    auto state = args[0]->ToInt32(runtime);
+                    auto content = args[1]->ToString(runtime);
+                    callback(state, content);
+                }
+                return runtime->NewUndefined();
+            }
+        );
+        JSRef<JSVal> argv[] = {
+            JSRef<JSVal>::Make(ToJSValue(id)),
+            JSRef<JSVal>::Make(ToJSValue(params)),
+            JSRef<JSVal>::Make(std::static_pointer_cast<ArkJSValue>(adapter)->GetValue(runtime))
+        };
+        JSRef<JSVal> result = func->Call(option, ArraySize(argv), argv);
+        napi_close_handle_scope(env, scope);
+        return result->ToBoolean();
+    };
+}
+
+void JSWeb::AISessionOptions(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsArray()) {
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> val = array->GetValueAt(i);
+        if (!val->IsObject()) {
+            continue;
+        }
+        JSRef<JSObject> option = JSRef<JSObject>::Cast(val);
+        JSRef<JSVal> aiSessionType = option->GetProperty("aiSessionType");
+        uint32_t type = 0;
+        if (aiSessionType->IsNumber()) {
+            type = aiSessionType->ToNumber<uint32_t>();
+        }
+        if (type == 0 || type > MAX_AI_SESSION_TYPE) {
+            continue;
+        }
+        AISessionCallback onCreateAISession = nullptr;
+        WrapAISessionCallback(option, "onCreateAISession", onCreateAISession);
+        AISessionCallback onExecuteAIAction = nullptr;
+        WrapAISessionCallback(option, "onExecuteAIAction", onExecuteAIAction);
+        AISessionCallback onDestroyAISession = nullptr;
+        WrapAISessionCallback(option, "onDestroyAISession", onDestroyAISession);
+        WebModel::GetInstance()->SetAISessionOptions(type - 1,
+            std::move(onCreateAISession), std::move(onExecuteAIAction), std::move(onDestroyAISession));
+    }
 }
 
 JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)

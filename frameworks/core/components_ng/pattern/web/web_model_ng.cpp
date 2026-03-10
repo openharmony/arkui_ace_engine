@@ -438,6 +438,15 @@ void WebModelNG::SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* i
     webEventHub->SetOnFileSelectorShowEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetAISessionOptions(uint32_t type, const AISessionCallback&& onCreateAISession,
+    const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
+        std::move(onExecuteAIAction), std::move(onDestroyAISession));
+}
+
 void WebModelNG::SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;

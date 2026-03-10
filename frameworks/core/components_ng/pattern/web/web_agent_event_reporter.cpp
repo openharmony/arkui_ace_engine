@@ -338,4 +338,39 @@ void WebAgentEventReporter::AIPostTask(
     TAG_LOGD(AceLogTag::ACE_WEB, "WebAgentEventReporter::AIPostTask end, result: %{public}d", result);
 }
 
+void WebAgentEventReporter::SetAISessionOptions(uint32_t type, const AISessionCallback&& onCreateAISession,
+    const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)
+{
+    if (type >= MAX_AI_SESSION_TYPE) {
+        return;
+    }
+    onCreateAISessionArray_[type] = std::move(onCreateAISession);
+    onExecuteAIActionArray_[type] = std::move(onExecuteAIAction);
+    onDestroyAISessionArray_[type] = std::move(onDestroyAISession);
+}
+
+AISessionCallback WebAgentEventReporter::GetOnCreateAISession(uint32_t type)
+{
+    if (type >= MAX_AI_SESSION_TYPE) {
+        return nullptr;
+    }
+    return onCreateAISessionArray_[type];
+}
+
+AISessionCallback WebAgentEventReporter::GetOnExecuteAIAction(uint32_t type)
+{
+    if (type >= MAX_AI_SESSION_TYPE) {
+        return nullptr;
+    }
+    return onExecuteAIActionArray_[type];
+}
+
+AISessionCallback WebAgentEventReporter::GetOnDestroyAISession(uint32_t type)
+{
+    if (type >= MAX_AI_SESSION_TYPE) {
+        return nullptr;
+    }
+    return onDestroyAISessionArray_[type];
+}
+
 } // namespace OHOS::Ace::NG
