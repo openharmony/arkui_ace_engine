@@ -1651,6 +1651,11 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     UINode::OnAttachToMainTree(recursive);
     auto context = GetContext();
     CHECK_NULL_VOID(context);
+
+    if (!lpxAttributes_.empty()) {
+        context->RegisterLpxDirtyNode(WeakClaim(this));
+    }
+
     auto predictLayoutNode = std::move(predictLayoutNode_);
     for (auto& node : predictLayoutNode) {
         auto frameNode = node.Upgrade();
@@ -1901,6 +1906,10 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
         const auto& safeAreaManager = context->GetSafeAreaManager();
         if (safeAreaManager) {
             safeAreaManager->RemoveRestoreNode(WeakClaim(this));
+        }
+
+        if (!lpxAttributes_.empty()) {
+            context->UnRegisterLpxDirtyNode(WeakClaim(this));
         }
     }
     auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
@@ -8273,5 +8282,27 @@ void FrameNode::ReplacePattern(const RefPtr<Pattern>& newPattern)
         paintProperty_->SetHost(WeakClaim(this));
     }
     InitializePatternAndContext();
+}
+
+void FrameNode::RegisterLpxAttribute(LpxAttribute attribute)
+{
+    auto prevSize = lpxAttributes_.size();
+
+    lpxAttributes_.emplace(attribute);
+    if ((prevSize == 0 && lpxAttributes_.size() == 1) && IsOnMainTree()) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        context->RegisterLpxDirtyNode(WeakClaim(this));
+    }
+}
+
+void FrameNode::UnRegisterLpxAttribute(LpxAttribute attribute)
+{
+    lpxAttributes_.erase(attribute);
+    if (lpxAttributes_.empty()) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        context->UnRegisterLpxDirtyNode(WeakClaim(this));
+    }
 }
 } // namespace OHOS::Ace::NG

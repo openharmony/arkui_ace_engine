@@ -3758,4 +3758,118 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg333, TestSize.Level1)
     EXPECT_EQ(partSection.find(std::to_string(CHILD_A_ID)), std::string::npos);
     EXPECT_NE(partSection.find(std::to_string(CHILD_B_ID)), std::string::npos);
 }
+
+/**
+ * @tc.name: FrameNodeLpxAttribute001
+ * @tc.desc: Test registering LPX attributes before attach does not register pipeline dirty nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeLpxAttribute001, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "lpxNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_FALSE(frameNode->IsOnMainTree());
+
+    frameNode->RegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+    EXPECT_TRUE(context->lpxDirtyNodes_.empty());
+}
+
+/**
+ * @tc.name: FrameNodeLpxAttribute002
+ * @tc.desc: Test register and unregister LPX attributes on main tree updates pipeline dirty nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeLpxAttribute002, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "lpxNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    ASSERT_TRUE(frameNode->IsOnMainTree());
+
+    frameNode->RegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+    EXPECT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->RegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+    EXPECT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->RegisterLpxAttribute(LpxAttribute::ALWAYS);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 2);
+    EXPECT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
+    EXPECT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->UnRegisterLpxAttribute(LpxAttribute::ALWAYS);
+    EXPECT_TRUE(frameNode->lpxAttributes_.empty());
+    EXPECT_TRUE(context->lpxDirtyNodes_.empty());
+}
+
+/**
+ * @tc.name: FrameNodeLpxAttribute003
+ * @tc.desc: Test attach and detach automatically register and unregister LPX dirty nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeLpxAttribute003, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "lpxNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->RegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+
+    EXPECT_TRUE(context->lpxDirtyNodes_.empty());
+
+    frameNode->AttachToMainTree(true, AceType::RawPtr(context));
+    EXPECT_TRUE(frameNode->IsOnMainTree());
+    EXPECT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->DetachFromMainTree(true);
+    EXPECT_TRUE(context->lpxDirtyNodes_.empty());
+}
+
+/**
+ * @tc.name: FrameNodeLpxAttribute004
+ * @tc.desc: Test SetRootRect marks LPX dirty nodes with PROPERTY_UPDATE_MEASURE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeLpxAttribute004, TestSize.Level1)
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->lpxDirtyNodes_.clear();
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "lpxNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    ASSERT_TRUE(frameNode->IsOnMainTree());
+
+    frameNode->RegisterLpxAttribute(LpxAttribute::LPX_FONT_SIZE);
+    ASSERT_EQ(context->lpxDirtyNodes_.size(), 1);
+
+    frameNode->layoutProperty_->CleanDirty();
+    frameNode->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+
+    context->SetRootRect(context->rootWidth_, context->rootHeight_, 0.0);
+
+    EXPECT_EQ(frameNode->layoutProperty_->propertyChangeFlag_ & PROPERTY_UPDATE_MEASURE, PROPERTY_UPDATE_MEASURE);
+}
 } // namespace OHOS::Ace::NG

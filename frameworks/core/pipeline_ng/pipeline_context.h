@@ -1401,6 +1401,10 @@ public:
     void AddAsyncLoadTask(std::function<void()>&& task);
     void FlushAsyncLoadTask() override;
 
+    void RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
+    void UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
+    void MarkLpxDirtyNodes();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1787,6 +1791,7 @@ private:
     RefPtr<InspectorOffscreenNodesMgr> inspectorOffscreenNodesMgr_;
     bool xComponentDisplayConstraintEnabled_ = false;
     OnDrawChildrenInfoMap onDrawChildrenInfoMap_;
+    std::set<WeakPtr<FrameNode>> lpxDirtyNodes_;
 };
 
 /**
