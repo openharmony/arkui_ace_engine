@@ -2,6 +2,8 @@
   "src": [
     "pages/Index",
     "pages/SizeExample/SizeExampleRouter",
+    "pages/ColumnSplitExample/ColumnSplitExampleRouter",
+    "pages/RowSplitExample/RowSplitExampleRouter",
     "pages/SizeExample/SizeExample01",
     "pages/SizeExample/SizeExample02",
     "pages/SizeExample/SizeExample03",
@@ -14,6 +16,15 @@
     "pages/SizeExample/SizeExample10",
     "pages/SizeExample/SizeExample11",
     "pages/SizeExample/SizeExample12",
-    "pages/SizeExample/SizeExample13"
+    "pages/SizeExample/SizeExample13",
+    "pages/SizeExample/SizeExample14",
+    "pages/SizeExample/SizeExample15",
+    "pages/SizeExample/SizeExample16",
+    "pages/SizeExample/SizeExample17",
+    "pages/SizeExample/SizeExample18",
+    "pages/SizeExample/SizeExample19",
+    "pages/ColumnSplitExample/ColumnSplitExample1",
+    "pages/ColumnSplitExample/ColumnSplitExample2",
+    "pages/RowSplitExample/RowSplitExample1"
   ]
 }
