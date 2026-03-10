@@ -22,7 +22,6 @@
 #include <vector>
 
 #include "base/utils/macros.h"
-#include "core/accessibility/accessibility_node.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/grid_layout/grid_layout_component.h"
 #include "core/pipeline/base/component.h"
@@ -48,6 +47,10 @@
 #include "frameworks/core/components/touch_listener/touch_listener_component.h"
 #include "frameworks/core/components/transform/transform_component.h"
 #include "frameworks/core/components_v2/inspector/inspector_composed_component.h"
+
+namespace OHOS::Ace {
+class AccessibilityManager;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
     using JsPageRadioGroups = std::unordered_map<std::string, RadioGroupComponent<std::string>>;
