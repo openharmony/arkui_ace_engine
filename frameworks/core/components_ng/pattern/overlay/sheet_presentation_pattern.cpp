@@ -2462,6 +2462,9 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
 
 void SheetPresentationPattern::TranslateTo(float height)
 {
+    if (GetDismissProcess()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
