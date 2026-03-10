@@ -4288,7 +4288,7 @@ void WrapAISessionCallback(const JSRef<JSObject>& option, const std::string& fun
             const std::string& params, const std::function<void(uint32_t, const std::string&)>&& callback) {
         napi_env env = GetNapiEnv();
         if (!env) {
-            return;
+            return false;
         }
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
