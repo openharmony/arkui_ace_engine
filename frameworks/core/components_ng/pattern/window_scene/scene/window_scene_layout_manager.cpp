@@ -211,6 +211,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
             GetWindowName(node).c_str(), width, height);
         return;
     }
+    auto matrix = globalGeometry->GetAbsMatrix();
     if (ancestorInfo.isAncestorRecent) {
         uiParam.rect_ = { localGeometry->GetX(), localGeometry->GetY(), width, height };
     } else {
@@ -218,9 +219,10 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
         uiParam.rect_ = { absRect.GetLeft(), absRect.GetTop(), width, height };
         uiParam.scaleX_ = absRect.GetWidth() / width;
         uiParam.scaleY_ = absRect.GetHeight() / height;
+        uiParam.rsScaleX_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_X);
+        uiParam.rsScaleY_ = matrix.Get(Rosen::Drawing::Matrix::SCALE_Y);
     }
     uiParam.needSync_ = ancestorInfo.notSyncPosition ? false : true;
-    auto matrix = globalGeometry->GetAbsMatrix();
     // based on transform scene coordinate system to compute trans pos
     uiParam.transX_ = std::floor(matrix.Get(Rosen::Drawing::Matrix::TRANS_X) -
         (rsNode->GetGlobalPositionX() - ancestorInfo.transScenePosX));
