@@ -466,6 +466,7 @@ public:
     }
 
     SheetType GetSheetType() const;
+    bool IsBreakpointMatch();
     bool IsPhoneInLandScape();
     bool IsShowCloseIcon();
     void InitSheetMode();

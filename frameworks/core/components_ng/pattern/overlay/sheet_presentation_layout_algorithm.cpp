@@ -637,7 +637,7 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const float par
     CHECK_NULL_RETURN(sheetPattern, sheetWidth);
     switch (sheetType_) {
         case SheetType::SHEET_BOTTOM:
-            if (sheetPattern->IsPhoneInLandScape()) {
+            if (sheetPattern->IsBreakpointMatch()) {
                 sheetWidth = std::min(static_cast<float>(SHEET_LANDSCAPE_WIDTH.ConvertToPx()), parentConstraintWidth);
                 break;
             }

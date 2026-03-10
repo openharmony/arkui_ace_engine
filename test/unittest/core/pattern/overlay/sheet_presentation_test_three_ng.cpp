@@ -559,11 +559,24 @@ HWTEST_F(SheetPresentationTestThreeNg, GetWidthByScreenSizeType001, TestSize.Lev
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
     sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_BOTTOM;
-    // Make IsPhoneInLandScape return true
-    sheetTheme_->sheetType_ = "auto";
-    auto foldWindow = AceType::DynamicCast<MockFoldableWindow>(FoldableWindow::CreateFoldableWindow(0));
-    EXPECT_CALL(*foldWindow, IsFoldExpand()).WillRepeatedly(Return(false));
-    SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
+    // Make IsBreakpointMatch return true
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto host = sheetPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    ASSERT_NE(windowManager, nullptr);
+    windowManager->SetHeightBreakpointCallback(
+        []() -> HeightBreakpoint {
+        return HeightBreakpoint::HEIGHT_SM;
+    });
+    windowManager->SetWidthBreakpointCallback(
+        []() -> WidthBreakpoint {
+        return WidthBreakpoint::WIDTH_MD;
+    });
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
