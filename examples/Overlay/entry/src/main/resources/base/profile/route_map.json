@@ -392,6 +392,36 @@
       "buildFunction": "PopupListBuilder"
     },
     {
+      "name": "PopupAnimationTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupAnimationTest.ets",
+      "buildFunction": "PopupAnimationBuilder"
+    },
+    {
+      "name": "PopupLifecycleTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupLifecycleTest.ets",
+      "buildFunction": "PopupLifecycleBuilder"
+    },
+    {
+      "name": "PopupNestedTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupNestedTest.ets",
+      "buildFunction": "PopupNestedBuilder"
+    },
+    {
+      "name": "PopupTouchTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupTouchTest.ets",
+      "buildFunction": "PopupTouchBuilder"
+    },
+    {
+      "name": "PopupTabsTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupTabsTest.ets",
+      "buildFunction": "PopupTabsBuilder"
+    },
+    {
+      "name": "PopupWaterFlowTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupWaterFlowTest.ets",
+      "buildFunction": "PopupWaterFlowBuilder"
+    },
+    {
       "name": "TipsAvoidTest",
       "pageSourceFile": "src/main/ets/pages/components/popup/tipsAvoidTest.ets",
       "buildFunction": "TipsAvoidBuilder"
