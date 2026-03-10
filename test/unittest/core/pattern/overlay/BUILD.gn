@@ -52,5 +52,7 @@ ace_unittest("overlay_manager_test_ng") {
     "sheet_showInSubwindow_test_ng.cpp",
     "sheet_wrapper_layout_test_ng.cpp",
     "sheet_wrapper_paint_test_ng.cpp",
+    "sheet_wrapper_layout_test_one_ng.cpp",
+    "sheet_wrapper_layout_test_two_ng.cpp",
   ]
 }
