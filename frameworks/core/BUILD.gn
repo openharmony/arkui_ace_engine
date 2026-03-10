@@ -322,14 +322,7 @@ template("ace_core_source_set") {
     ]
 
     external_deps = []
-    if (ace_engine_feature_enable_event_extra_handling &&
-        defined(
-            vendor_configs.ace_engine_advanced_enable_event_extra_handling)) {
-      sources += vendor_configs.ace_engine_advanced_enable_event_extra_handling
-      sources +=
-          vendor_configs.ace_engine_advanced_enable_event_compatible_handling
-      external_deps += vendor_configs.ace_engine_advanced_enable_event_compatible_handling_deps
-    } else {
+    if (!ace_engine_feature_enable_event_extra_handling) {
       sources += [ "event/event_info_convertor.cpp" ]
     }
 
@@ -955,16 +948,11 @@ template("ace_core_ng_source_set") {
       defines += [ "FFRT_SUPPORT" ]
       external_deps += [ "ffrt:libffrt" ]
     }
-    if (ace_engine_feature_enable_event_extra_handling &&
-        defined(
-            vendor_configs.ace_engine_advanced_enable_event_extra_handling)) {
-      sources += vendor_configs.ace_engine_advanced_enable_event_extra_handling
-      sources +=
-          vendor_configs.ace_engine_advanced_enable_event_compatible_handling
-      external_deps += vendor_configs.ace_engine_advanced_enable_event_compatible_handling_deps
-    } else {
+
+    if (!ace_engine_feature_enable_event_extra_handling) {
       sources += [ "event/event_info_convertor.cpp" ]
     }
+
     if (ace_engine_feature_enable_long_press_gesture_extra_handling && defined(
             vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling)) {
       sources += vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling

@@ -88,6 +88,14 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/picker/picker_haptic_factory.cpp",
     ]
 
+    if (ace_engine_feature_enable_event_extra_handling) {
+      sources += [
+        "$ace_root/adapter/ohos/entrance/event_compatible/compatible_interface.cpp",
+        "$ace_root/adapter/ohos/entrance/event_compatible/compatible_manager_ext.cpp",
+        "$ace_root/adapter/ohos/entrance/event_convertor/event_info_convertor.cpp",
+      ]
+    }
+
     if (enable_audio_framework && enable_player_framework) {
       sources += [
         "$ace_root/adapter/ohos/entrance/picker/picker_haptic_controller.cpp",
@@ -115,7 +123,8 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/interfaces/inner_api/ui_session:ui_session",
     ]
 
-    external_deps = [
+    external_deps = [ "cJSON:cjson" ]
+    external_deps += [
       "ability_base:base",
       "ability_base:configuration",
       "ability_base:extractortool",
