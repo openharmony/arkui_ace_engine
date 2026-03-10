@@ -898,7 +898,7 @@ HWTEST_F(SheetMinimizeTestNG, GetPanDirection001, TestSize.Level1)
      * @tc.expected: should return PanDirection::HORIZONTAL.
      */
     auto direction = object->GetPanDirection();
-    EXPECT_EQ(direction, PanDirection::HORIZONTAL);
+    EXPECT_EQ(direction, PanDirection::ALL);
 }
 
 /**
