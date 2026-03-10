@@ -2694,6 +2694,10 @@ class LazyArkWaterFlowComponent extends ArkScrollable {
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }
+  initialize(value) {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
   columnsGap(value) {
     this.lazyComponent.columnsGap(value);
     return this;
