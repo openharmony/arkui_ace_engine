@@ -670,7 +670,8 @@ void DatePickerModelNG::SetStartDate(FrameNode* frameNode, const PickerDate& val
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
     datePickerPattern->SetStartDate(value);
-    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, StartDate, datePickerPattern->GetStartDateLunar());
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, StartDate, datePickerPattern->GetStartDateLunar(), frameNode);
 }
 
 void DatePickerModelNG::SetEndDate(FrameNode* frameNode, const PickerDate& value)
@@ -679,7 +680,8 @@ void DatePickerModelNG::SetEndDate(FrameNode* frameNode, const PickerDate& value
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
     datePickerPattern->SetEndDate(value);
-    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, EndDate, datePickerPattern->GetEndDateLunar());
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, EndDate, datePickerPattern->GetEndDateLunar(), frameNode);
 }
 
 void DatePickerModelNG::SetSelectedDate(FrameNode* frameNode, const PickerDate& value)
@@ -688,7 +690,8 @@ void DatePickerModelNG::SetSelectedDate(FrameNode* frameNode, const PickerDate& 
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
     datePickerPattern->SetSelectDate(value);
-    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedDate, datePickerPattern->GetSelectDate());
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, SelectedDate, datePickerPattern->GetSelectDate(), frameNode);
 }
 
 void DatePickerModelNG::SetMode(FrameNode* frameNode, const DatePickerMode& value)
@@ -697,7 +700,7 @@ void DatePickerModelNG::SetMode(FrameNode* frameNode, const DatePickerMode& valu
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
     datePickerPattern->SetMode(value);
-    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Mode, value);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Mode, value, frameNode);
 }
 
 void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)

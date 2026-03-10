@@ -139,6 +139,8 @@ public:
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);
 
+    void InitColumnsOrder(RefPtr<FrameNode>* columns) const;
+
     void SolarColumnsBuilding(const PickerDate& current);
 
     void LunarColumnsBuilding(const LunarDate& current);
@@ -816,6 +818,7 @@ public:
     void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
     void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
     void UpdateDateOrder();
+    bool IsNotSetStartEndDate();
 
 private:
     void OnModifyDone() override;
@@ -877,6 +880,11 @@ private:
         std::function<void(const Dimension&)> updateFontSizeFunc,
         std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
     bool OnThemeScopeUpdateMultiThread();
+    void FillSolarMonthDaysOptions(const PickerDate& current, RefPtr<FrameNode>& monthDaysColumn);
+    void ProcessDayOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn, uint32_t index,
+        bool isLeapMonth, uint32_t lunarLeapMonth);
+    void AdjustLunarStartEndMonthDay(
+        const LunarDate& current, uint32_t& month, uint32_t& day, const LunarDate& dateLunar);
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;

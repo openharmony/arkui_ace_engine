@@ -412,7 +412,7 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest002, TestSize.Level1)
      */
     DatePickerModel::GetInstance()->SetCanLoop(true);
     columnPattern_->SetCurrentIndex(2);
-    EXPECT_TRUE(columnPattern_->CanMove(true));
+    EXPECT_FALSE(columnPattern_->CanMove(true));
 }
 
 /**
@@ -596,13 +596,13 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest007, TestSize.Level1)
 
 /**
  * @tc.name: DatePickerCanLoopTest008
- * @tc.desc: Test GetCanLoopFromLayoutProperty.
+ * @tc.desc: Test GetCanLoopFromLayoutPropertyWithStartEnd.
  * @tc.type: FUNC
  */
 HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create columnNode and default canLoop is true.
+     * @tc.steps: step1. Create columnNode and default canLoop is false.
      */
     CreateDatePickerColumnNode();
     ASSERT_NE(columnNode_, nullptr);
@@ -610,7 +610,7 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    EXPECT_TRUE(columnPattern_->GetCanLoopFromLayoutProperty());
+    EXPECT_FALSE(columnPattern_->GetCanLoopFromLayoutPropertyWithStartEnd());
 
     /**
      * @tc.steps: step2. Set canLoop value to false.
@@ -618,9 +618,9 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
     DatePickerModelNG::SetCanLoop(frameNode, false);
 
     /**
-     * @tc.steps: step3. GetCanLoopFromLayoutProperty.
+     * @tc.steps: step3. GetCanLoopFromLayoutPropertyWithStartEnd.
      */
-    EXPECT_FALSE(columnPattern_->GetCanLoopFromLayoutProperty());
+    EXPECT_FALSE(columnPattern_->GetCanLoopFromLayoutPropertyWithStartEnd());
 }
 
 /**
@@ -655,7 +655,7 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest009, TestSize.Level1)
     KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
     columnPattern_->SetCurrentIndex(0);
     datePickerPattern->OnKeyEvent(keyEventUp);
-    EXPECT_EQ(columnPattern_->GetCurrentIndex(), 2);
+    EXPECT_EQ(columnPattern_->GetCurrentIndex(), 0);
 
     /**
      * @tc.steps: step3. Call OnKeyEvent while canLoop is false.

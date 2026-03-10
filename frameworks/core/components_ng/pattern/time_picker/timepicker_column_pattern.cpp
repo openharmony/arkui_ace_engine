@@ -364,6 +364,11 @@ uint32_t TimePickerColumnPattern::GetOptionCount() const
     return static_cast<uint32_t>(totalOptionCount);
 }
 
+uint32_t TimePickerColumnPattern::GetActualOptionCount() const
+{
+    return GetOptionCount();
+}
+
 void TimePickerColumnPattern::FlushCurrentOptions(
     bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties, bool isTossPlaying)
 {
@@ -420,7 +425,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(
         int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
         int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
-        if ((NotLoopOptions() || !GetCanLoopFromLayoutProperty()) && !virtualIndexValidate) {
+        if ((NotLoopOptions() || !GetCanLoopFromLayoutPropertyWithStartEnd()) && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent(u"");
         } else {
             auto optionValue = timePickerRowPattern->GetOptionsValue(host, optionIndex);
@@ -489,7 +494,7 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 
 bool TimePickerColumnPattern::CanMove(bool isDown) const
 {
-    if (GetCanLoopFromLayoutProperty()) {
+    if (GetCanLoopFromLayoutPropertyWithStartEnd()) {
         CHECK_NULL_RETURN(NotLoopOptions(), true);
     }
     auto host = GetHost();
@@ -502,7 +507,7 @@ bool TimePickerColumnPattern::CanMove(bool isDown) const
     return nextVirtualIndex >= 0 && nextVirtualIndex < totalOptionCount;
 }
 
-bool TimePickerColumnPattern::GetCanLoopFromLayoutProperty() const
+bool TimePickerColumnPattern::GetCanLoopFromLayoutPropertyWithStartEnd() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);

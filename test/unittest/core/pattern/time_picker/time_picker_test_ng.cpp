@@ -668,7 +668,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode001, TestSize.Level0)
     ASSERT_NE(hourColumn, nullptr);
     auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(hourColumnPattern, nullptr);
-    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutProperty(), false);
+    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutPropertyWithStartEnd(), false);
 }
 
 /**
@@ -692,7 +692,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode002, TestSize.Level0)
     ASSERT_NE(hourColumn, nullptr);
     auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(hourColumnPattern, nullptr);
-    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutProperty(), true);
+    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutPropertyWithStartEnd(), true);
 }
 
 /**
@@ -773,7 +773,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode005, TestSize.Level0)
     PickerTime endTime = PickerTime(22, 58, 58);
     timePickerRowPattern->SetStartTime(startTime);
     timePickerRowPattern->SetEndTime(endTime);
-    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutProperty(), false);
+    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutPropertyWithStartEnd(), false);
 }
 
 /**

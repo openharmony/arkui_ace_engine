@@ -96,11 +96,12 @@ public:
         uint32_t showCount, bool isDown, double scale) = 0;
     virtual void InitTextFontFamily() = 0;
     virtual uint32_t GetOptionCount() const = 0;
+    virtual uint32_t GetActualOptionCount() const = 0;
     virtual const Color& GetButtonHoverColor() const = 0;
     virtual const Color& GetButtonBgColor() const = 0;
     virtual const Color& GetButtonPressColor() const = 0;
     virtual bool CanMove(bool isDown) const = 0;
-    virtual bool GetCanLoopFromLayoutProperty() const = 0;
+    virtual bool GetCanLoopFromLayoutPropertyWithStartEnd() const = 0;
     virtual std::string GetCurrentOption() const = 0;
 
     virtual uint32_t GetShowCount() const

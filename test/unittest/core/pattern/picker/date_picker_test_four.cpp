@@ -1535,6 +1535,50 @@ HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateColumnChildPositionTest002
+ * @tc.desc: Test DatePickerColumnPattern UpdateColumnChildPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    auto options = columnPattern_->GetOptions();
+    auto pickerDates = options[columnNode_];
+    pickerDates.clear();
+    uint32_t startDay = 11;
+    uint32_t endDay = 30;
+    PickerDateF emptyPickerDate;
+    pickerDates.resize(startDay > 0 ? startDay - 1 : 0, emptyPickerDate);
+    for (uint32_t day = startDay; day <= endDay; day++) {
+        pickerDates.emplace_back(PickerDateF::CreateDay(day, false));
+    }
+    options[columnNode_] = pickerDates;
+    columnPattern_->options_ = options;
+
+    /**
+     * @tc.steps: step2. Call UpdateColumnChildPosition in different situation.
+     * @tc.expected: offsetCurSet_ and yOffset_ is set.
+     */
+    columnPattern_->SetCurrentIndex(15);
+    columnPattern_->UpdateColumnChildPosition(OFFSET_Y);
+    PickerOptionProperty datePickerOptionProperty;
+    datePickerOptionProperty.prevDistance = TEST_FONT_SIZE;
+    datePickerOptionProperty.nextDistance = DOWN_FONT_SIZE;
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
+    columnPattern_->showCount_ = 0;
+    columnPattern_->yLast_ = 0.0f;
+    columnPattern_->yOffset_ = 0.0f;
+    columnPattern_->UpdateColumnChildPosition(OFFSET_Y);
+    EXPECT_FLOAT_EQ(columnPattern_->offsetCurSet_, OFFSET_Y);
+    EXPECT_FLOAT_EQ(columnPattern_->yOffset_, OFFSET_Y);
+}
+
+/**
  * @tc.name: DatePickerDialogViewTest002
  * @tc.desc: Test DatePickerDialogView::Show for api16.
  * @tc.type: FUNC

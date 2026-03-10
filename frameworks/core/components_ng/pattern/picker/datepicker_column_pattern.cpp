@@ -56,6 +56,7 @@ constexpr float FONTWEIGHT = 0.5f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr uint32_t NEXT_COLOUM_DIFF = 1;
 } // namespace
+const PickerDateF DatePickerColumnPattern::emptyPickerDate_;
 
 void DatePickerColumnPattern::OnModifyDone()
 {
@@ -310,7 +311,8 @@ void DatePickerColumnPattern::FlushCurrentOptions(
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
     }
-    bool isLoop_ = dataPickerRowLayoutProperty->GetCanLoopValue(true);
+    bool isLoop_ =
+        datePickerPattern->IsNotSetStartEndDate() ? dataPickerRowLayoutProperty->GetCanLoopValue(true) : false;
     auto actualOptionCount = showOptionCount < child.size() ? showOptionCount : child.size();
     for (uint32_t index = 0; index < actualOptionCount; index++) {
         currentChildIndex_ = static_cast<int32_t>(index);
@@ -475,6 +477,27 @@ int32_t DatePickerColumnPattern::CalcScrollIndex(
     return nextIndex;
 }
 
+void DatePickerColumnPattern::GetStartIndex(uint32_t& startIndex, uint32_t& totalCount)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto options = GetOptions();
+    auto it = options.find(host);
+    CHECK_NULL_VOID(it != options.end());
+    totalCount = static_cast<uint32_t>(options[host].size());
+    uint32_t actualTotalOptionCount = 0;
+    for (auto& option : options[host]) {
+        if (option == emptyPickerDate_) {
+            continue;
+        }
+        actualTotalOptionCount++;
+    }
+    CHECK_NULL_VOID(actualTotalOptionCount);
+    if (totalCount != actualTotalOptionCount) {
+        startIndex = totalCount - actualTotalOptionCount;
+    }
+}
+
 void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
@@ -482,13 +505,10 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     PickerScrollDirection dir = dragDelta > 0.0 ? PickerScrollDirection::DOWN : PickerScrollDirection::UP;
     if (!CanMove(LessNotEqual(static_cast<double>(dragDelta), 0.0))) {
         auto currentIndex = GetCurrentIndex();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto options = GetOptions();
-        auto it = options.find(host);
-        CHECK_NULL_VOID(it != options.end());
-        auto totalCount = options[host].size();
-        if ((currentIndex == 0 && dir == PickerScrollDirection::DOWN && GreatOrEqual(yOffset_, 0.0)) ||
+        uint32_t totalCount = 0;
+        uint32_t startIndex = 0;
+        GetStartIndex(startIndex, totalCount);
+        if ((currentIndex == startIndex && dir == PickerScrollDirection::DOWN && GreatOrEqual(yOffset_, 0.0)) ||
             (currentIndex == totalCount - 1 && dir == PickerScrollDirection::UP && LessOrEqual(yOffset_, 0.0))) {
             return;
         }
@@ -526,19 +546,24 @@ bool DatePickerColumnPattern::CanMove(bool isDown) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    bool canLoop = GetCanLoopFromLayoutProperty();
+    bool canLoop = GetCanLoopFromLayoutPropertyWithStartEnd();
     // When CanLoop is true and NotLoopOptions is false(which means LoopOptions are satisfied), CanMove returns true;
     // otherwise, validate the index legality.
     if (canLoop && !NotLoopOptions()) {
         return true;
     }
     int totalOptionCount = static_cast<int>(GetOptionCount());
+    int actualTotalOptionCount = static_cast<int>(GetActualOptionCount());
+    int32_t startIndex = 0;
+    if (totalOptionCount != actualTotalOptionCount) {
+        startIndex = totalOptionCount - actualTotalOptionCount;
+    }
 
     auto datePickerColumnPattern = host->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(datePickerColumnPattern, false);
     int currentIndex = static_cast<int>(datePickerColumnPattern->GetCurrentIndex());
     int nextVirtualIndex = isDown ? currentIndex + 1 : currentIndex - 1;
-    return nextVirtualIndex >= 0 && nextVirtualIndex < totalOptionCount;
+    return nextVirtualIndex >= startIndex && nextVirtualIndex < totalOptionCount;
 }
 
 void DatePickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme)
@@ -616,6 +641,22 @@ uint32_t DatePickerColumnPattern::GetOptionCount() const
     return static_cast<uint32_t>(totalOptionCount);
 }
 
+uint32_t DatePickerColumnPattern::GetActualOptionCount() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    auto options = GetOptions();
+    CHECK_EQUAL_RETURN(options.count(host), 0, 0);
+    uint32_t actualTotalOptionCount = 0;
+    for (auto& option : options[host]) {
+        if (option == emptyPickerDate_) {
+            continue;
+        }
+        actualTotalOptionCount++;
+    }
+    return static_cast<uint32_t>(actualTotalOptionCount);
+}
+
 bool DatePickerColumnPattern::GetOptionItemCount(uint32_t& itemCounts)
 {
     auto pipeline = GetContext();
@@ -631,7 +672,7 @@ bool DatePickerColumnPattern::IsLanscape(uint32_t itemCount)
     return (itemCount == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER);
 }
 
-bool DatePickerColumnPattern::GetCanLoopFromLayoutProperty() const
+bool DatePickerColumnPattern::GetCanLoopFromLayoutPropertyWithStartEnd() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -641,13 +682,15 @@ bool DatePickerColumnPattern::GetCanLoopFromLayoutProperty() const
     CHECK_NULL_RETURN(stackNode, false);
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_RETURN(parentNode, false);
+    auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(datePickerPattern, false);
     auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
-    return dataPickerRowLayoutProperty->GetCanLoopValue(true);
+    return datePickerPattern->IsNotSetStartEndDate() ? dataPickerRowLayoutProperty->GetCanLoopValue(true) : false;
 }
 
 bool DatePickerColumnPattern::IsTossNeedToStop()
 {
-    return !GetCanLoopFromLayoutProperty();
+    return !GetCanLoopFromLayoutPropertyWithStartEnd();
 }
 
 std::string DatePickerColumnPattern::GetCurrentOption() const

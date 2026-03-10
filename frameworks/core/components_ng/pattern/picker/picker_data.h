@@ -123,7 +123,7 @@ public:
 
     bool operator==(const PickerDate& other) const
     {
-        return year_ < other.year_ && month_ < other.month_ && day_ == other.day_;
+        return year_ == other.year_ && month_ == other.month_ && day_ == other.day_;
     }
 
 private:
@@ -336,6 +336,12 @@ public:
         date.lunar = lunar;
         date.leap = leap;
         return date;
+    }
+
+    bool operator==(const PickerDateF& other) const
+    {
+        return year == other.year && month == other.month && day == other.day && lunar == other.lunar &&
+               leap == other.leap;
     }
 };
 
