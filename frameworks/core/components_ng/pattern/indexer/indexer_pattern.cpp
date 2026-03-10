@@ -2045,8 +2045,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
                 TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "item %{public}d is selected", actualIndex);
                 onSelected(actualIndex); // fire onSelected with an item's index from original array
             }
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected",
-                ComponentEventType::COMPONENT_EVENT_SELECT);
+            ReportSelectChangeData(host->GetId(), selectIndex);
             TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER,
                 "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected", GetHost()->GetId());
         }
@@ -2286,5 +2285,99 @@ void IndexerPattern::ReportPoupSelectEvent()
         ComponentEventType::COMPONENT_EVENT_SELECT);
     TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onPopupSelect",
         GetHost()->GetId());
+}
+
+void IndexerPattern::ReportInjectionEvent(bool result, std::string reason)
+{
+    auto alphabetIndexerResult = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_VOID(alphabetIndexerResult);
+    alphabetIndexerResult->Put("event", "setAlphabetIndexer");
+    if (result) {
+        alphabetIndexerResult->Put("result", "success");
+    } else {
+        alphabetIndexerResult->Put("result", "fail");
+        alphabetIndexerResult->Put("reason", reason.c_str());
+    }
+
+    auto json = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("alphabetIndexerResult", alphabetIndexerResult);
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
+        ComponentEventType::COMPONENT_EVENT_SELECT);
+}
+
+bool IndexerPattern::ParseCommand(const std::string& command, int32_t& selected)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return false;
+    }
+    auto cmdType = json->GetString("cmd");
+    if (cmdType != "setAlphabetIndexer") {
+        return false;
+    }
+    auto paramJson = json->GetValue("params");
+    CHECK_NULL_RETURN(paramJson, false);
+    if (!paramJson->IsObject()) {
+        return false;
+    }
+    if (!paramJson->Contains("value")) {
+        return false;
+    }
+    if (!paramJson->GetValue("value")->IsNumber()) {
+        return false;
+    }
+    selected = paramJson->GetInt("value");
+    return true;
+}
+
+int32_t IndexerPattern::OnInjectionEvent(const std::string& command)
+{
+    int select = selected_;
+    bool ret = ParseCommand(command, select);
+    if (!ret) {
+        ReportInjectionEvent(false, "InvalidCommand");
+        TAG_LOGE(AceLogTag::ACE_ALPHABET_INDEXER, "OnInjectionEvent InvalidCommand");
+        return RET_FAILED;
+    }
+    if (select < 0 || select >= itemCount_) {
+        ReportInjectionEvent(false, "InvalidIndex");
+        TAG_LOGE(AceLogTag::ACE_ALPHABET_INDEXER, "OnInjectionEvent InvalidIndex");
+        return RET_FAILED;
+    }
+    if (select == selected_ && collapsedIndex_ == lastCollapsedIndex_) {
+        ReportInjectionEvent(true, "");
+        return RET_SUCCESS;
+    }
+    selected_ = select;
+    FireOnSelect(selected_, false);
+    selectedChangedForHaptic_ = lastSelected_ != selected_ || collapsedIndex_ != lastCollapsedIndex_;
+    lastSelected_ = select;
+    lastCollapsedIndex_ = collapsedIndex_;
+    if (isHover_) {
+        IndexerPressInAnimation();
+    }
+    childFocusIndex_ = -1;
+    childHoverIndex_ = -1;
+    ApplyIndexChanged(true, true);
+    ReportInjectionEvent(true, "");
+    return RET_SUCCESS;
+}
+
+void IndexerPattern::ReportSelectChangeData(int32_t nodeId, int32_t currentIndex)
+{
+    auto result = JsonUtil::Create();
+    auto resultParams = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    CHECK_NULL_VOID(resultParams);
+
+    result->Put("nodeId", nodeId);
+    result->Put("event", "Indexer.onSelect");
+    std::string currentIndexStr = std::to_string(currentIndex);
+    resultParams->Put("index", currentIndexStr.c_str());
+    result->Put("params", resultParams);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SELECT);
 }
 } // namespace OHOS::Ace::NG

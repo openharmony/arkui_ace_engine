@@ -7501,8 +7501,9 @@ int32_t SwiperPattern::OnInjectionEvent(const std::string& command)
     CHECK_NULL_RETURN(host, RET_FAILED);
     auto pattern = host->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(pattern, RET_FAILED);
+    auto nodeId = host->GetId();
     SwiperUISessionAdapter adapter(pattern);
-    return adapter.OnInjectionEvent(command);
+    return adapter.OnInjectionEvent(nodeId, command);
 }
 
 GestureState SwiperPattern::GetGestureState()
