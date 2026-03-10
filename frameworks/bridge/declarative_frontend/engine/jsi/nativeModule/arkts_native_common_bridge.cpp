@@ -35,7 +35,6 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
-#include "core/common/event_info_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -8976,9 +8975,14 @@ ArkUINativeModuleValue CommonBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtimeCal
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto eventObj = FrameNodeBridge::CreateTouchEventInfo(vm, info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new TouchEventInfo(info);
+        auto eventObj = FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         function->Call(vm, function.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
+        info.SetPreventDefault(infoPtr->IsPreventDefault());
     };
     NG::ViewAbstract::SetOnTouch(frameNode, std::move(onTouch));
     return panda::JSValueRef::Undefined(vm);
@@ -9583,7 +9587,9 @@ ArkUINativeModuleValue CommonBridge::SetOnMouse(ArkUIRuntimeCallInfo* runtimeCal
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<MouseInfo>(info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new MouseInfo(info);
         auto obj = FrameNodeBridge::CreateMouseInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
@@ -10910,7 +10916,7 @@ ArkUINativeModuleValue CommonBridge::RegisterFrameNodeDestructorCallback(ArkUIRu
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, std::shared_ptr<AxisInfo> infoPtr)
+Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo* infoPtr)
 {
     CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     const Offset& globalOffset = infoPtr->GetGlobalLocation();
@@ -10951,16 +10957,9 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, std::share
         panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()),
         panda::FunctionRef::New(vm, ArkTSUtils::JsHasAxis) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-    auto eventInfoManager = FrameNodeBridge::GetEventInfoManager();
-    if (eventInfoManager == nullptr) {
-        obj->SetNativePointerFieldCount(vm, 1);
-        obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()));
-        return obj;
-    }
-    auto eventId = eventInfoManager->AddAxisInfo(infoPtr);
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Add AxisEventInfo: %{public}d", eventId);
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()), FrameNodeBridge::ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_AXIS_INFO);
+    obj->SetNativePointerField(
+        vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_AXIS_INFO);
     return obj;
 }
 
@@ -10985,7 +10984,9 @@ ArkUINativeModuleValue CommonBridge::SetOnAxisEvent(ArkUIRuntimeCallInfo* runtim
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<AxisInfo>(info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new AxisInfo(info);
         auto obj = CreateAxisEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
@@ -11435,11 +11436,16 @@ ArkUINativeModuleValue CommonBridge::SetOnTouchIntercept(ArkUIRuntimeCallInfo* r
         CHECK_EQUAL_RETURN(function.IsEmpty(), true, HitTestMode::HTMDEFAULT);
         CHECK_EQUAL_RETURN(function->IsFunction(vm), false, HitTestMode::HTMDEFAULT);
         PipelineContext::SetCallBackNode(node);
-        auto touchEventObj = FrameNodeBridge::CreateTouchEventInfo(vm, info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new TouchEventInfo(info);
+        auto touchEventObj = FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr);
         HitTestMode hitTestMode = NG::HitTestMode::HTMDEFAULT;
         auto hitTestModeValue = ConvertHitTestMode(vm, hitTestMode);
         panda::Local<panda::JSValueRef> params[NUM_2] = { touchEventObj, hitTestModeValue };
         auto value = function->Call(vm, function.ToLocal(), params, NUM_2);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
+        info.SetPreventDefault(infoPtr->IsPreventDefault());
         if (value->IsNumber()) {
             return static_cast<NG::HitTestMode>(value->ToNumber(vm)->Value());
         }

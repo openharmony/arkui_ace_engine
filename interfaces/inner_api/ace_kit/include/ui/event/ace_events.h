@@ -100,16 +100,6 @@ public:
         targetDisplayId_ = targetDisplayId;
     }
 
-    void SetEventId(int32_t eventId)
-    {
-        eventId_ = eventId;
-    }
-
-    int32_t GetEventId() const
-    {
-        return eventId_;
-    }
-
     SourceType GetSourceDevice() const
     {
         return deviceType_;
@@ -296,8 +286,6 @@ protected:
     int64_t deviceId_ = 0;
     // Will be used in drag.
     int32_t targetDisplayId_ = 0;
-    // Used in event info manager
-    int32_t eventId_ = -1;
     bool stopPropagation_ = false;
     bool preventDefault_ = false;
     std::string patternName_;

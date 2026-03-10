@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 enum NativePtrTag {
     NATIVE_PTR_TAG_AXIS_INFO = 0,
     NATIVE_PTR_TAG_MOUSE_INFO,
+    NATIVE_PTR_TAG_TOUCH_EVENT_INFO,
 };
 
 class FrameNodeBridge {
@@ -46,12 +47,11 @@ public:
     static void FireLayoutCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal<panda::ObjectRef>> object,
         OffsetF& position, Local<panda::StringRef> funcName);
     static std::function<void(OffsetF& position)> GetLayoutFunc(EcmaVM* vm, Local<panda::ObjectRef> obj);
-    static RefPtr<EventInfoManager> GetEventInfoManager();
     static void ReleaseNativePtrFunc(void* env, void* nativePtr, void* data);
-    static Local<panda::ObjectRef> CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info);
+    static Local<panda::ObjectRef> CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo* infoPtr);
     static Local<panda::ObjectRef> CreateTouchEventInfoObj(EcmaVM* vm, TouchEventInfo& info);
     static Local<panda::ObjectRef> CreateGestureEventInfo(EcmaVM* vm, GestureEvent& info);
-    static Local<panda::ObjectRef> CreateMouseInfo(EcmaVM* vm, std::shared_ptr<MouseInfo> infoPtr);
+    static Local<panda::ObjectRef> CreateMouseInfo(EcmaVM* vm, MouseInfo* infoPtr);
     static Local<panda::ObjectRef> CreateMouseInfoObj(EcmaVM* vm, MouseInfo& info);
     static Local<panda::ObjectRef> CreateHoverInfo(EcmaVM* vm, HoverInfo& info);
     static ArkUINativeModuleValue MakeFrameNodeInfo(EcmaVM* vm, ArkUINodeHandle frameNode);

@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "bridge/declarative_frontend/jsview/js_touch_handler.h"
@@ -67,12 +68,17 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onTouch");
         PipelineContext::SetCallBackNode(node);
-        auto eventObj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr =  new TouchEventInfo(info);
+        auto eventObj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         ACE_BENCH_MARK_TRACE("OnTouchEvent_end type:%d",
             static_cast<int32_t>(info.GetChangedTouches().size() > 0 ?
             info.GetChangedTouches().front().GetTouchType() : static_cast<TouchType>(0)));
         func->Call(vm, func.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
+        info.SetPreventDefault(infoPtr->IsPreventDefault());
     };
     ViewAbstractModel::GetInstance()->SetOnTouch(std::move(onTouch));
 }
