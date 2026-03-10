@@ -3333,6 +3333,7 @@
       OHOS::Ace::FrameReport::*;
       OHOS::Ace::Framework::AccessibilityNodeManager::AddSubPipelineContext*;
       OHOS::Ace::Framework::AccessibilityNodeManager::Create*;
+      OHOS::Ace::Framework::AccessibilityNodeManager::SetRunningPage*;
       OHOS::Ace::Framework::CreateCurve*;
       OHOS::Ace::Framework::DOMDocument::*;
       OHOS::Ace::Framework::JsAcePage::*;
@@ -3354,6 +3355,8 @@
       OHOS::Ace::Frontend::*;
       OHOS::Ace::Gradient::*;
       OHOS::Ace::GridColModel::*;
+      OHOS::Ace::GridColumnInfo::GetMaxWidth*;
+      OHOS::Ace::GridContainerInfo::GetMarginLeft*;
       OHOS::Ace::GridItemModel::*;
       OHOS::Ace::GridModel::*;
       OHOS::Ace::GridRowModel::*;
@@ -3531,6 +3534,7 @@
       OHOS::Ace::NG::WaterFlowSections::*;
       OHOS::Ace::NG::XComponentPattern::*;
       OHOS::Ace::OffscreenContextModel::*;
+      OHOS::Ace::OptionComponent::CheckOptionModify*;
       OHOS::Ace::PageTransitionComponent::*;
       OHOS::Ace::PageTransitionModel::*;
       OHOS::Ace::ParseFontFeatureSettings*;
