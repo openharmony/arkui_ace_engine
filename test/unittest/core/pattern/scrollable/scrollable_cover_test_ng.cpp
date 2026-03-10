@@ -461,17 +461,25 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest003, TestSize.Level1)
 HWTEST_F(ScrollableCoverTestNg, HandleTouchCancel001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create a scrollable and set scrollOverCallback and isSpringAnimationStop
+     * @tc.steps: step1. Create a scrollable and set outBoundaryCallback and scrollOverCallback
      */
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     bool isCalled = false;
+    bool isBoundaryCalled = false;
+    auto outBoundaryCallback = [&isBoundaryCalled](bool userCurrentDelta) {
+        isBoundaryCalled = true;
+        return true;
+    };
     auto scrollOverCallback = [&isCalled](double velocity) { isCalled = true; };
     scrollable->state_ = Scrollable::AnimationState::IDLE;
+    scrollable->outBoundaryCallback_ = outBoundaryCallback;
     scrollable->scrollOverCallback_ = scrollOverCallback;
     /**
-     * @tc.steps: step2. HandleTouchCancel and scrollOverCallback are properly called
+     * @tc.steps: step2. HandleTouchCancel and scrollOverCallback are properly
+                         called when outBoundaryCallback returns true
      */
     scrollable->HandleTouchCancel();
+    EXPECT_TRUE(isBoundaryCalled);
     EXPECT_TRUE(isCalled);
 }
 
