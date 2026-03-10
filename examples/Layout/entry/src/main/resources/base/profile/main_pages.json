@@ -1,0 +1,19 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/SizeExample/SizeExampleRouter",
+    "pages/SizeExample/SizeExample01",
+    "pages/SizeExample/SizeExample02",
+    "pages/SizeExample/SizeExample03",
+    "pages/SizeExample/SizeExample04",
+    "pages/SizeExample/SizeExample05",
+    "pages/SizeExample/SizeExample06",
+    "pages/SizeExample/SizeExample07",
+    "pages/SizeExample/SizeExample08",
+    "pages/SizeExample/SizeExample09",
+    "pages/SizeExample/SizeExample10",
+    "pages/SizeExample/SizeExample11",
+    "pages/SizeExample/SizeExample12",
+    "pages/SizeExample/SizeExample13"
+  ]
+}
