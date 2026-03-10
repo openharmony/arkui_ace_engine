@@ -24,14 +24,18 @@ ohos_unittest("arkui_feature_param_manager_test") {
   public_configs = [ ":arkui_feature_param_manager_config" ]
   sources = [
     "arkui_feature_param_manager_test.cpp",
+    "extra_modules_manager_test.cpp",
     "parser_test.cpp",
 
     # xml parser
     "$ace_root/adapter/ohos/capability/feature_config/config_parser_base.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/extra_modules/extra_modules_manager_impl.cpp",
     "$ace_root/adapter/ohos/capability/feature_config/feature_param_manager.cpp",
     "$ace_root/adapter/ohos/capability/feature_config/features/sync_load_parser.cpp",
     "$ace_root/adapter/ohos/capability/feature_config/features/ui_correction_parser.cpp",
     "$ace_root/adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.cpp",
+    "$ace_root/frameworks/base/json/json_util.cpp",
+    "$ace_root/frameworks/core/components_ng/base/inspector_filter.cpp",
 
     # mock
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
@@ -43,6 +47,7 @@ ohos_unittest("arkui_feature_param_manager_test") {
   external_deps = [
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock",
     "googletest:gtest_main",

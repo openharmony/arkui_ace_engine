@@ -22,6 +22,7 @@
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
+#include "frameworks/core/common/extra_modules/extra_modules_manager.h"
 
 namespace OHOS::Ace {
 #define ADD_PARSER_MODEL(cls)         \
@@ -49,6 +50,7 @@ void FeatureParamManager::Init(const std::string& bundleName, std::vector<OHOS::
     MetaDataParseEntry(metaData);
     FeatureParamParseEntry(bundleName);
     UICorrectionParamParseEntry(bundleName);
+    ExtraModulesManager::GetInstance().Init();
 }
 
 void FeatureParamManager::MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metadata>& metaData)
