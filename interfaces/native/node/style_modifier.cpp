@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -7499,7 +7499,7 @@ int32_t SetScrollBy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             y, static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_VP), static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_PX));
     }
     auto* fullImpl = GetFullImpl();
-    if (node->type == ARKUI_NODE_SCROLL || node->type == ARKUI_NODE_WATER_FLOW) {
+    if (node->type == ARKUI_NODE_SCROLL || node->type == ARKUI_NODE_WATER_FLOW || node->type == ARKUI_NODE_GRID) {
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollBy(node->uiNodeHandle, x, y);
     } else if (node->type == ARKUI_NODE_LIST) {
         fullImpl->getNodeModifiers()->getListModifier()->setScrollBy(node->uiNodeHandle, x, y);
@@ -18700,13 +18700,18 @@ const ArkUI_AttributeItem* GetGridNodeAdapter(ArkUI_NodeHandle node)
 int32_t SetGridCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
-    if (item->size != 1) {
+    if (item->size < NUM_1) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].i32, NUM_0)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getGridModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
+    ArkUI_Bool isShown = DEFAULT_FALSE;
+    if (item->size > NUM_1 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
+        isShown = item->value[1].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getGridModifier()->setShowCached(node->uiNodeHandle, isShown);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -18716,12 +18721,16 @@ void ResetGridCachedCount(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
 
     fullImpl->getNodeModifiers()->getGridModifier()->resetCachedCount(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getGridModifier()->resetShowCached(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetGridCachedCount(ArkUI_NodeHandle node)
 {
     ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getGridModifier()->getCachedCount(node->uiNodeHandle);
+    ArkUI_Int32 isShown = GetFullImpl()->getNodeModifiers()->getGridModifier()->getShowCached(node->uiNodeHandle);
     g_numberValues[0].i32 = value;
+    g_numberValues[1].i32 = isShown;
+    g_attributeItem.size = NUM_2;
     return &g_attributeItem;
 }
 

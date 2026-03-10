@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -6744,6 +6744,7 @@ typedef enum {
 
     /**
      * @brief Scroll a specified distance.
+     * List/Scroll/WaterFlow support since API version 12, Grid support since API version 26.0.0.
      * 
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].f32：Horizontal scrolling distance in vp; \n
@@ -8199,6 +8200,13 @@ typedef enum {
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: number of cached items in the water flow adapter. \n
+     * .value[1].i32: whether to display cached nodes. 0 means not display, 1 means display.
+     * This parameter is optional, default value is 0. This parameter is supported since API version 26.0.0.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: number of cached items in the grid adapter. \n
+     * .value[1].i32: whether to display cached nodes. 0 means not display, 1 means display.
+     * This parameter is supported since API version 26.0.0.\n
      */
     NODE_GRID_CACHED_COUNT,
 

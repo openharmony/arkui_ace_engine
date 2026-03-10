@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1824,6 +1824,222 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeFontConfigsTest002, TestSize.Level1)
 
     OH_ArkUI_FontConfigs_SetFontWeightConfigs(nullptr, nullptr);
     OH_ArkUI_FontConfigs_Destroy(nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeGridCachedCountTest001
+ * @tc.desc: Test NODE_GRID_CACHED_COUNT with cachedCount only.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridCachedCountTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gridNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(gridNode, nullptr);
+
+    // Set cachedCount only
+    ArkUI_NumberValue value[] = { { .i32 = 5 } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_GRID_CACHED_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    // Get and verify
+    auto result = nodeAPI->getAttribute(gridNode, NODE_GRID_CACHED_COUNT);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 5);
+    EXPECT_EQ(result->value[1].i32, 0); // showCached defaults to false
+
+    // Reset
+    EXPECT_EQ(nodeAPI->resetAttribute(gridNode, NODE_GRID_CACHED_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
+    result = nodeAPI->getAttribute(gridNode, NODE_GRID_CACHED_COUNT);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 1); // cachedCount defaults to 1
+    EXPECT_EQ(result->value[1].i32, 0); // showCached defaults to false
+
+    nodeAPI->disposeNode(gridNode);
+}
+
+/**
+ * @tc.name: NativeNodeGridCachedCountTest002
+ * @tc.desc: Test NODE_GRID_CACHED_COUNT with both cachedCount and showCached.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridCachedCountTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gridNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(gridNode, nullptr);
+
+    // Set both cachedCount and showCached
+    ArkUI_NumberValue value[] = { { .i32 = 3 }, { .i32 = 1 } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_GRID_CACHED_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    // Get and verify
+    auto result = nodeAPI->getAttribute(gridNode, NODE_GRID_CACHED_COUNT);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 3);
+    EXPECT_EQ(result->value[1].i32, 1);
+
+    nodeAPI->disposeNode(gridNode);
+}
+
+/**
+ * @tc.name: NativeNodeGridCachedCountTest003
+ * @tc.desc: Test NODE_GRID_CACHED_COUNT with negative value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridCachedCountTest003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gridNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(gridNode, nullptr);
+
+    // First set a valid value
+    ArkUI_NumberValue value[] = { { .i32 = 5 }, { .i32 = 1 } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_GRID_CACHED_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    // Try to set negative value (should fail but keep previous valid value)
+    ArkUI_NumberValue negativeValue[] = { { .i32 = -1 } };
+    ArkUI_AttributeItem negativeItem = { negativeValue, sizeof(negativeValue) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_GRID_CACHED_COUNT, &negativeItem), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    // Verify previous values are kept
+    auto result = nodeAPI->getAttribute(gridNode, NODE_GRID_CACHED_COUNT);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 5); // Previous cachedCount is kept
+    EXPECT_EQ(result->value[1].i32, 1); // Previous showCached is kept
+
+    nodeAPI->disposeNode(gridNode);
+}
+
+/**
+ * @tc.name: NativeNodeGridCachedCountTest004
+ * @tc.desc: Test NODE_GRID_CACHED_COUNT with invalid showCached value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridCachedCountTest004, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gridNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(gridNode, nullptr);
+
+    // Set with invalid showCached (should use default false)
+    ArkUI_NumberValue value[] = { { .i32 = 3 }, { .i32 = 5 } }; // 5 is out of range
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_GRID_CACHED_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    // Get and verify (showCached should be default false)
+    auto result = nodeAPI->getAttribute(gridNode, NODE_GRID_CACHED_COUNT);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->value[0].i32, 3);
+    EXPECT_EQ(result->value[1].i32, 0); // default false
+
+    nodeAPI->disposeNode(gridNode);
+}
+
+/**
+ * @tc.name: NativeNodeGridCachedCountTest005
+ * @tc.desc: Test NODE_GRID_CACHED_COUNT with zero size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridCachedCountTest005, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gridNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(gridNode, nullptr);
+
+    // Set with zero size (should fail)
+    ArkUI_NumberValue value[] = { { .i32 = 3 } };
+    ArkUI_AttributeItem item = { value, 0 };
+    EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_GRID_CACHED_COUNT, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    nodeAPI->disposeNode(gridNode);
+}
+
+/**
+ * @tc.name: NativeNodeGridScrollByTest001
+ * @tc.desc: Test NODE_SCROLL_BY for Grid node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridScrollByTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gridNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(gridNode, nullptr);
+
+    // Scroll by (100, 200)
+    ArkUI_NumberValue value[] = { { .f32 = 100.0f }, { .f32 = 200.0f } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_SCROLL_BY, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    nodeAPI->disposeNode(gridNode);
+}
+
+/**
+ * @tc.name: NativeNodeGridScrollByTest002
+ * @tc.desc: Test NODE_SCROLL_BY for Grid with negative values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridScrollByTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gridNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(gridNode, nullptr);
+
+    // Scroll by negative values
+    ArkUI_NumberValue value[] = { { .f32 = -50.0f }, { .f32 = -100.0f } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_SCROLL_BY, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    nodeAPI->disposeNode(gridNode);
+}
+
+/**
+ * @tc.name: NativeNodeGridScrollByTest003
+ * @tc.desc: Test NODE_SCROLL_BY for Grid with zero values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridScrollByTest003, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gridNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(gridNode, nullptr);
+
+    // Scroll by (0, 0)
+    ArkUI_NumberValue value[] = { { .f32 = 0.0f }, { .f32 = 0.0f } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_SCROLL_BY, &item), ARKUI_ERROR_CODE_NO_ERROR);
+
+    nodeAPI->disposeNode(gridNode);
+}
+
+/**
+ * @tc.name: NativeNodeGridScrollByTest004
+ * @tc.desc: Test NODE_SCROLL_BY with insufficient parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeGridScrollByTest004, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gridNode = nodeAPI->createNode(ARKUI_NODE_GRID);
+    ASSERT_NE(gridNode, nullptr);
+
+    // Try with only one parameter (should fail)
+    ArkUI_NumberValue value[] = { { .f32 = 100.0f } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    EXPECT_EQ(nodeAPI->setAttribute(gridNode, NODE_SCROLL_BY, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    nodeAPI->disposeNode(gridNode);
 }
 
 } // namespace OHOS::Ace
