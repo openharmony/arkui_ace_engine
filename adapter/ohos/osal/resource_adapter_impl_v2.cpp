@@ -95,12 +95,13 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateV2()
 }
 
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
-    const std::string& bundleName, const std::string& moduleName)
+    const std::string& bundleName, const std::string& moduleName, int32_t& actualInstanceId)
 {
     auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(container, nullptr);
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
     CHECK_NULL_RETURN(aceContainer, nullptr);
+    actualInstanceId = aceContainer->GetInstanceId();
     
     RefPtr<ResourceAdapter> newResourceAdapter = nullptr;
     auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
