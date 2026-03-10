@@ -50,6 +50,7 @@
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "transaction/rs_transaction_proxy.h"
 #endif
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1250,6 +1251,9 @@ void MenuManager::ShowMenu(const RefPtr<OverlayManager>& overlayManager,
         menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         ShowMenuAnimation(menu, overlayManager);
         menu->MarkModifyDone();
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "[ReportComponentChangeEvent] event show");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "show",
+            ComponentEventType::COMPONENT_EVENT_MENU);
     }
 }
 
@@ -1288,6 +1292,9 @@ void MenuManager::ShowMenuInSubWindow(const RefPtr<OverlayManager>& overlayManag
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
 
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "show menu insubwindow",
+        ComponentEventType::COMPONENT_EVENT_MENU);
+    TAG_LOGW(AceLogTag::ACE_OVERLAY, "[ReportComponentChangeEvent] event show menu insubwindow");
     // set subwindow container id in menu.
     auto menuPattern = menu->GetPattern<PopupBasePattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -1307,6 +1314,9 @@ void MenuManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu,
     CHECK_NULL_VOID(overlayManager);
     PopMenuAnimation(menu, overlayManager);
     RemoveMenuFilter(menu);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "hide menu insubwindow",
+        ComponentEventType::COMPONENT_EVENT_MENU);
+    TAG_LOGW(AceLogTag::ACE_OVERLAY, "[ReportComponentChangeEvent] event hide menu insubwindow");
 }
 
 void MenuManager::HideMenuInSubWindow(const RefPtr<OverlayManager>& overlayManager,
@@ -1327,6 +1337,9 @@ void MenuManager::HideMenuInSubWindow(const RefPtr<OverlayManager>& overlayManag
             RemoveMenuFilter(node);
         }
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "hide menu insubwindow",
+        ComponentEventType::COMPONENT_EVENT_MENU);
+    TAG_LOGW(AceLogTag::ACE_OVERLAY, "[ReportComponentChangeEvent] event hide menu insubwindow");
 }
 
 RefPtr<FrameNode> MenuManager::GetMenuNodeWithExistContent(const RefPtr<UINode>& node)
@@ -1382,6 +1395,11 @@ void MenuManager::HideMenu(
     if (maskEnable || menuPreviewMode != MenuPreviewMode::NONE) {
         RemoveMenuFilter(menu);
     }
+    if (HideMenuType::WRAPPER_LOSE_FOCUS == reason) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "[menu ReportComponentChangeEvent] event hide");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "hide",
+            ComponentEventType::COMPONENT_EVENT_MENU);
+    }
 }
 
 void MenuManager::HideAllMenus(const RefPtr<OverlayManager>& overlayManager)
@@ -1389,6 +1407,9 @@ void MenuManager::HideAllMenus(const RefPtr<OverlayManager>& overlayManager)
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide all menus enter");
     CHECK_NULL_VOID(overlayManager);
     auto container = Container::Current();
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "hide all menus",
+        ComponentEventType::COMPONENT_EVENT_MENU);
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "[menu ReportComponentChangeEvent] event hide all menus");
     if (container && container->IsSceneBoardWindow()) {
         auto windowScenes = overlayManager->GetwindowScenes();
         for (const auto& windowScene : windowScenes) {

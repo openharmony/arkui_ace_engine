@@ -49,6 +49,8 @@
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 #include "accessibility_element_info.h"
 #endif
+#include "interfaces/inner_api/ui_session/param_config.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1414,6 +1416,7 @@ bool MenuItemPattern::OnClick()
         onChange(IsSelected());
         RecordChangeEvent();
     }
+    ReportEvent();
     auto menuNode = GetMenu();
     CHECK_NULL_RETURN(menuNode, false);
     ACE_UINODE_TRACE(menuNode);
@@ -1545,6 +1548,9 @@ void CustomMenuItemPattern::HandleOnChange()
         TAG_LOGI(AceLogTag::ACE_MENU, "trigger onChange");
         onChange(IsSelected());
     }
+    auto pattern = host->GetPattern<CustomMenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ReportEvent();
 }
 
 void MenuItemPattern::OnHover(bool isHover)
@@ -2685,6 +2691,7 @@ void MenuItemPattern::SetAccessibilityAction()
                 onChange(pattern->IsSelected());
                 pattern->RecordChangeEvent();
             }
+            pattern->ReportEvent();
             auto context = host->GetRenderContext();
             CHECK_NULL_VOID(context);
             pattern->MarkIsSelected(pattern->IsSelected());
@@ -2715,6 +2722,7 @@ void MenuItemPattern::MarkIsSelected(bool isSelected)
     if (onChange) {
         onChange(isSelected);
     }
+    ReportEvent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (isSelected) {
@@ -3673,5 +3681,27 @@ void MenuItemPattern::UpdateOptionStyle()
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::ReportEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto content = itemProperty->GetContent().value_or("");
+    auto result = InspectorJsonUtil::CreateObject();
+    result->Put("event", "onchange");
+    result->Put("id", host->GetId());
+    result->Put("type", host->GetTag().c_str());
+    result->Put("status", isSelected_ ? "Selected" : "UnSelected");
+    result->Put("text", content.c_str());
+    result->Put("description", host->GetAutoEventParamValue("").c_str());
+    auto json = InspectorJsonUtil::Create();
+    json->Put("onchangeResult", result);
+    std::string jsString = json->ToString();
+    TAG_LOGD(AceLogTag::ACE_MENU, "[menuitem ReportComponentChangeEvent] result %{public}s", jsString.c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", jsString.c_str(),
+        ComponentEventType::COMPONENT_EVENT_MENU);
 }
 } // namespace OHOS::Ace::NG

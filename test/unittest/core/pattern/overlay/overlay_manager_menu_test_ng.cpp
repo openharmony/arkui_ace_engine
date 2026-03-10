@@ -425,6 +425,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest004, TestSize.Level1)
     overlayManager->CleanMenuInSubWindow(targetId);
     overlayManager->FocusOverlayNode(menuNode, false);
     EXPECT_FALSE(menuManager->menuMap_.empty());
+    menuManager->HideMenu(menuNode, overlayManager, targetId, true, HideMenuType::WRAPPER_LOSE_FOCUS);
     EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
     EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
     EXPECT_FALSE(overlayManager->RemoveOverlay(false));
