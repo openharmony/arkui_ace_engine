@@ -97,7 +97,7 @@ void RenderPropertyTestNg::TearDown()
  * @tc.desc: Test cast to RenderPropertyTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderPropertyTestNg, RenderPositionPropertyTest001, TestSize.Level1)
+HWTEST_F(RenderPropertyTestNg, RenderPositionPropertyTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderPositionProperty.
@@ -150,7 +150,7 @@ HWTEST_F(RenderPropertyTestNg, RenderPositionPropertyTest001, TestSize.Level1)
  * @tc.desc: Test cast to RenderPropertyTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest001, TestSize.Level1)
+HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object graphicsProperty.
@@ -180,7 +180,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest001, TestSize.Level1)
  * @tc.desc: Test cast to RenderPropertyTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest002, TestSize.Level1)
+HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object graphicsProperty.
@@ -254,7 +254,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest002, TestSize.Level1)
  * @tc.desc: Test cast to RenderPropertyTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest003, TestSize.Level1)
+HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object graphicsProperty.
@@ -288,7 +288,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest003, TestSize.Level1)
  * @tc.desc: Test cast to RenderPropertyTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderPropertyTestNg, BackgroundPropertyTest001, TestSize.Level1)
+HWTEST_F(RenderPropertyTestNg, BackgroundPropertyTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object backgroundProperty.
@@ -316,7 +316,7 @@ HWTEST_F(RenderPropertyTestNg, BackgroundPropertyTest001, TestSize.Level1)
  * @tc.desc: Test cast to RenderPropertyTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderPropertyTestNg, BackgroundPropertyTest002, TestSize.Level1)
+HWTEST_F(RenderPropertyTestNg, BackgroundPropertyTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object backgroundProperty.
