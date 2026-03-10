@@ -17,7 +17,6 @@ import sys
 import glob
 import os
 import time
-import shutil
 
 def main():
     if len(sys.argv) != 10:
@@ -36,7 +35,6 @@ def main():
     idl_pattern = sys.argv[9]
 
     arkts_sdk_path = os.path.dirname(arkts_sdk_path)
-    ohos_out_path = os.path.dirname(arkts_sdk_path)
 
     env = os.environ.copy()
     env["PATH"] = node_bin_path + os.pathsep + env.get("PATH", "")
@@ -64,37 +62,9 @@ def main():
         print("Error: 'npm' command not found. Please ensure Node.js and npm are installed and in PATH.")
         sys.exit(1)
 
-    
-    # step2 ohos component api process
-    # npx @idlizer/runner transform-builder-functions <input_dir>
-    prepared_api_path = os.path.join(ohos_out_path, "idlize_ohos_ets")
-    prepared_api_component_path = os.path.join(ohos_out_path, "idlize_ohos_ets", "api", "arkui", "component")
-    
-    print(f"Step 2: Processing OHOS component API...")
-    if os.path.exists(prepared_api_path):
-        print(f"Removing existing prepared_api_path: {prepared_api_path}")
-        shutil.rmtree(prepared_api_path)
-    
-    print(f"Copying {arkts_sdk_path} to {prepared_api_path}")
-    shutil.copytree(arkts_sdk_path, prepared_api_path)
-    
-    print(f"Running transform-builder-functions on {prepared_api_component_path}")
-    transform_cmd = [npx, "@idlizer/runner", "transform-builder-functions", prepared_api_component_path]
-    try:
-        subprocess.run(transform_cmd, env=env, cwd=script_dir, check=True, capture_output=True, text=True)
-        print("transform-builder-functions completed successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error: transform-builder-functions failed with exit code {e.returncode}")
-        print("STDOUT:", e.stdout)
-        print("STDERR:", e.stderr)
-        sys.exit(1)
-    except FileNotFoundError:
-        print("Error: 'npx' command not found. Please ensure Node.js and npm are installed and in PATH.")
-        sys.exit(1)
-    
-    # step3 generate code
+    # step2 generate code
     cmd = [
-        npx, "@idlizer/runner", "m3", prepared_api_path,
+        npx, "@idlizer/runner", "m3", arkts_sdk_path,
         idl_pattern,
         "--sdk-stage", "prepared",
         "--arkgen-options-file", arkgen_options_file,
@@ -105,8 +75,8 @@ def main():
         "--etsgen", f"{npx} @idlizer/etsgen",
         "--output", output_dir
     ]
-    
-    print(f"Step 3: Generation. Running command: {' '.join(cmd)}")
+
+    print(f"Step 2: Generation. Running command: {' '.join(cmd)}")
 
     try:
         result = subprocess.run(cmd, env=env, check=True, cwd=script_dir, capture_output=True, text=True)
