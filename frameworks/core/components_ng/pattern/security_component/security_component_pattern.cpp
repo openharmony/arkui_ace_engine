@@ -738,8 +738,16 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
         buttonLayoutProp->UpdateBorderRadius(
             BorderRadiusProperty(scLayoutProp->GetBackgroundBorderRadius().value()));
     }
+    auto pipeline = scNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+    CHECK_NULL_VOID(theme);
     if (scPaintProp->GetBackgroundColor().has_value()) {
         buttonRender->UpdateBackgroundColor(scPaintProp->GetBackgroundColor().value());
+    } else if (scLayoutProp->GetBackgroundType().value_or(BUTTON_TYPE_NULL) == BUTTON_TYPE_NULL) {
+        buttonRender->UpdateBackgroundColor(Color::TRANSPARENT);
+    } else {
+        buttonRender->UpdateBackgroundColor(theme->GetBackgroundColor());
     }
     if (scPaintProp->GetBackgroundBorderColor().has_value()) {
         BorderColorProperty borderColor;
