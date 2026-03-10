@@ -870,7 +870,9 @@ struct SimpleSegmentButtonV2 {
     ) {
       return;
     }
-    this.$selectedIndex?.(selectedIndex);
+    this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
+      this.$selectedIndex?.(selectedIndex);
+    });
   }
 
   private updateItemScale(scale: double) {
