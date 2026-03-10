@@ -109,6 +109,7 @@ import { CallbackTransformer } from './../CallbackTransformer'
 import { ArcSwiperContentTransitionProxy, ArcSwiperContentTransitionProxyInternal} from '@ohos.arkui.ArcSwiper'
 import { CustomSpan } from "#generated";
 import { CustomSpanWrapper } from "#generated";
+import { default as text } from '@ohos.graphics.text'
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -120,6 +121,14 @@ export namespace extractors {
 
   export function toInputMethodExtraConfigPtr(config: InputMethodExtraConfig): KPointer {
     return ArkUIAniModule._Extractors_ToInputMethodExtraConfigPtr(config);
+  }
+
+  export function toTextParagraphPtr(paragraph: text.Paragraph): KPointer {
+    return ArkUIAniModule._Extractors_ToTextParagraphPtr(paragraph);
+  }
+
+  export function fromTextParagraphPtr(ptr: KPointer): text.Paragraph {
+    return ArkUIAniModule._Extractors_FromTextParagraphPtr(ptr);
   }
 
   export function toComponentContentBasePtr(value: ComponentContentBase): KPointer {

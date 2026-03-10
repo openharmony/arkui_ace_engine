@@ -914,6 +914,9 @@ typedef struct Ark_text_FontFeature Ark_text_FontFeature;
 typedef struct Opt_text_FontFeature Opt_text_FontFeature;
 typedef struct Ark_text_FontVariation Ark_text_FontVariation;
 typedef struct Opt_text_FontVariation Opt_text_FontVariation;
+typedef struct text_ParagraphPeer text_ParagraphPeer;
+typedef struct text_ParagraphPeer* Ark_text_Paragraph;
+typedef struct Opt_text_Paragraph Opt_text_Paragraph;
 typedef struct TextAreaControllerPeer TextAreaControllerPeer;
 typedef struct TextAreaControllerPeer* Ark_TextAreaController;
 typedef struct Opt_TextAreaController Opt_TextAreaController;
@@ -1337,6 +1340,8 @@ typedef struct Array_text_FontFeature Array_text_FontFeature;
 typedef struct Opt_Array_text_FontFeature Opt_Array_text_FontFeature;
 typedef struct Array_text_FontVariation Array_text_FontVariation;
 typedef struct Opt_Array_text_FontVariation Opt_Array_text_FontVariation;
+typedef struct Array_text_Paragraph Array_text_Paragraph;
+typedef struct Opt_Array_text_Paragraph Opt_Array_text_Paragraph;
 typedef struct Array_text_TextBox Array_text_TextBox;
 typedef struct Opt_Array_text_TextBox Opt_Array_text_TextBox;
 typedef struct Array_text_TextShadow Array_text_TextShadow;
@@ -3123,6 +3128,8 @@ typedef struct Ark_TextChangeOptions Ark_TextChangeOptions;
 typedef struct Opt_TextChangeOptions Opt_TextChangeOptions;
 typedef struct Ark_TextDecorationOptions Ark_TextDecorationOptions;
 typedef struct Opt_TextDecorationOptions Opt_TextDecorationOptions;
+typedef struct Ark_TextLayoutOptions Ark_TextLayoutOptions;
+typedef struct Opt_TextLayoutOptions Opt_TextLayoutOptions;
 typedef struct Ark_TextMarqueeOptions Ark_TextMarqueeOptions;
 typedef struct Opt_TextMarqueeOptions Opt_TextMarqueeOptions;
 typedef struct Ark_TextMenuItem Ark_TextMenuItem;
@@ -9122,6 +9129,10 @@ typedef struct Opt_text_FontVariation {
     Ark_Tag tag;
     Ark_text_FontVariation value;
 } Opt_text_FontVariation;
+typedef struct Opt_text_Paragraph {
+    Ark_Tag tag;
+    Ark_text_Paragraph value;
+} Opt_text_Paragraph;
 typedef struct Opt_TextAreaController {
     Ark_Tag tag;
     Ark_TextAreaController value;
@@ -10778,6 +10789,15 @@ typedef struct Opt_Array_text_FontVariation {
     Ark_Tag tag;
     Array_text_FontVariation value;
 } Opt_Array_text_FontVariation;
+typedef struct Array_text_Paragraph {
+    /* kind: ContainerType */
+    Ark_text_Paragraph* array;
+    Ark_Int32 length;
+} Array_text_Paragraph;
+typedef struct Opt_Array_text_Paragraph {
+    Ark_Tag tag;
+    Array_text_Paragraph value;
+} Opt_Array_text_Paragraph;
 typedef struct Array_text_TextBox {
     /* kind: ContainerType */
     Ark_text_TextBox* array;
@@ -20028,6 +20048,14 @@ typedef struct Opt_TextDecorationOptions {
     Ark_Tag tag;
     Ark_TextDecorationOptions value;
 } Opt_TextDecorationOptions;
+typedef struct Ark_TextLayoutOptions {
+    /* kind: Interface */
+    Opt_LengthMetrics constraintWidth;
+} Ark_TextLayoutOptions;
+typedef struct Opt_TextLayoutOptions {
+    Ark_Tag tag;
+    Ark_TextLayoutOptions value;
+} Opt_TextLayoutOptions;
 typedef struct Ark_TextMarqueeOptions {
     /* kind: Interface */
     Ark_Boolean start;
@@ -28791,6 +28819,8 @@ typedef struct GENERATED_ArkUIGlobalScope_ohos_fontAccessor {
 typedef struct GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor {
     Ark_Float64 (*measureText)(const Ark_MeasureOptions* options);
     Ark_SizeOptions (*measureTextSize)(const Ark_MeasureOptions* options);
+    Array_text_Paragraph (*getParagraphs)(Ark_StyledString styledString,
+                                          const Opt_TextLayoutOptions* options);
 } GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor;
 
 typedef struct GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor {

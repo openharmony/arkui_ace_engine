@@ -4809,6 +4809,8 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScope_ohos_measure_utils_measureText(thisArray: KSerializerBuffer, thisLength: KInt): KDouble
     @ani.unsafe.Quick
     native static _GlobalScope_ohos_measure_utils_measureTextSize(thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _GlobalScope_ohos_measure_utils_getParagraphs(styledString: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _GlobalScopeUicontextFontScale_isFollowingSystemFontScale(): boolean
     @ani.unsafe.Direct

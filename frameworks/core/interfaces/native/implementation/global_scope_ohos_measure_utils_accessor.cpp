@@ -14,10 +14,17 @@
  */
 
 #include "base/utils/measure_util.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+
+#ifndef ACE_UNITTEST
+#include "core/components_ng/render/adapter/txt_paragraph.h"
+#include "core/interfaces/native/implementation/text_paragraph_peer.h"
+#endif
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -224,12 +231,55 @@ Ark_SizeOptions MeasureTextSizeImpl(const Ark_MeasureOptions* options)
         .height = Converter::ArkValue<Opt_Length>(textSize.Height())
     };
 }
+Array_text_Paragraph GetParagraphsImpl(Ark_StyledString styledString,
+                                       const Opt_TextLayoutOptions* options)
+{
+#ifndef ACE_UNITTEST
+    Array_text_Paragraph result = {nullptr, 0};
+    CHECK_NULL_RETURN(styledString, result);
+    auto spanString = styledString->GetString();
+    CHECK_NULL_RETURN(spanString, result);
+
+    std::optional<double> constraintWidth(0.0);
+    if (options->tag != INTEROP_TAG_UNDEFINED && options->value.constraintWidth.tag != INTEROP_TAG_UNDEFINED) {
+        constraintWidth = Converter::OptConvert<CalcDimension>(options->value.constraintWidth)->ConvertToPx();
+    }
+    auto paraVec = OHOS::Ace::SpanString::GetLayoutInfo(spanString, constraintWidth);
+    if (paraVec.empty()) {
+        return result;
+    }
+
+    std::vector<Ark_text_Paragraph> paragraphs;
+    paragraphs.reserve(paraVec.size());
+
+    for (const auto& para : paraVec) {
+        auto paragraph = OHOS::Ace::AceType::DynamicCast<TxtParagraph>(para);
+        if (!paragraph) {
+            continue;
+        }
+        auto peer = PeerUtils::CreatePeer<text_ParagraphPeer>(paragraph->GetParagraphUniquePtr());
+        if (peer == nullptr) {
+            continue;
+        }
+        paragraphs.emplace_back(peer);
+    }
+
+    if (paragraphs.empty()) {
+        return result;
+    }
+    result = Converter::ArkValue<Array_text_Paragraph>(paragraphs, Converter::FC);
+    return result;
+#else
+    return {nullptr, 0};
+#endif // ACE_UNITTEST
+}
 } // GlobalScope_ohos_measure_utilsAccessor
 const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* GetGlobalScope_ohos_measure_utilsAccessor()
 {
     static const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor GlobalScope_ohos_measure_utilsAccessorImpl {
         GlobalScope_ohos_measure_utilsAccessor::MeasureTextImpl,
         GlobalScope_ohos_measure_utilsAccessor::MeasureTextSizeImpl,
+        GlobalScope_ohos_measure_utilsAccessor::GetParagraphsImpl,
     };
     return &GlobalScope_ohos_measure_utilsAccessorImpl;
 }

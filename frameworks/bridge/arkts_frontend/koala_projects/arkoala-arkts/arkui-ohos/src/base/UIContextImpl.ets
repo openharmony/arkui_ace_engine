@@ -86,6 +86,7 @@ import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
 import { FreeRootNode } from '../CallbackTransformer';
 import { StyledString } from "arkui/component/styledString"
+import { default as text } from "@ohos.graphics.text"
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -148,6 +149,24 @@ export class MeasureUtilsImpl extends MeasureUtils {
         let sizeOptions = GlobalScope_ohos_measure_utils.measureTextSize(options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return sizeOptions;
+    }
+    public getParagraphs(styledString: StyledString, options?: TextLayoutOptions): Array<text.Paragraph> {
+        const impl: GetParagraphsImpl = new GetParagraphsImpl(this.instanceId_);
+        return impl.getParagraphsImpl(styledString, options);
+    }
+}
+
+class GetParagraphsImpl {
+    static { loadLibrary('text_engine_ani.z') }
+    instanceId_: int32;
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+    public getParagraphsImpl(styledString: StyledString, options?: TextLayoutOptions): Array<text.Paragraph> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let paragraphs = GlobalScope_ohos_measure_utils.getParagraphs(styledString, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return paragraphs;
     }
 }
 

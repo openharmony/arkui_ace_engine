@@ -1842,4 +1842,19 @@ HWTEST_F(TextFieldUXTest, SetPlaceholderColorInfo003, TestSize.Level1)
     pattern_->SetPlaceholderColorInfo("文字测试");
     EXPECT_EQ(pattern_->placeholderColorInfo_, "[文字测试]");
 }
+
+/**
+ * @tc.name: SetPlaceholderColorInfo004
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetPlaceholderColorInfo004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->SetPlaceholderColorInfo("!!!");
+    EXPECT_EQ(pattern_->placeholderColorInfo_, "[!!!]");
+}
 } // namespace OHOS::Ace::NG

@@ -25,6 +25,7 @@
 #endif
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/implementation/text_modifier_peer.h"
+#include "core/interfaces/native/implementation/text_paragraph_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -77,6 +78,16 @@ void* ToIMEExtraCfgPeer(void* extraConfigPtr)
 #endif
 }
 
+void* ToTextParagraphPeer(void* ptr)
+{
+    auto* paragraphPtr = reinterpret_cast<std::unique_ptr<OHOS::Rosen::Typography>*>(ptr);
+    if (paragraphPtr == nullptr || *paragraphPtr == nullptr) {
+        return nullptr;
+    }
+    return reinterpret_cast<void*>(PeerUtils::CreatePeer<text_ParagraphPeer>(std::move(*paragraphPtr)));
+}
+
+
 const ArkUIAniTextBasedModifier* GetTextBasedAniModifier()
 {
     static const ArkUIAniTextBasedModifier impl = {
@@ -85,6 +96,7 @@ const ArkUIAniTextBasedModifier* GetTextBasedAniModifier()
         .fromTextModifierPeer = OHOS::Ace::NG::FromTextModifierPeer,
         .toTextModifierPeer = OHOS::Ace::NG::ToTextModifierPeer,
         .toIMEExtraCfgPeer = OHOS::Ace::NG::ToIMEExtraCfgPeer,
+        .toTextParagraphPeer = OHOS::Ace::NG::ToTextParagraphPeer,
     };
     return &impl;
 }

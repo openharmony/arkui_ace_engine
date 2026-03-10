@@ -106,6 +106,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToInputMethodExtraConfigPtr)
         },
         ani_native_function {
+            "_Extractors_ToTextParagraphPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToTextParagraphPtr)
+        },
+        ani_native_function {
+            "_Extractors_FromTextParagraphPtr",
+            "l:C{@ohos.graphics.text.text.Paragraph}",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsFromTextParagraphPtr)
+        },
+        ani_native_function {
             "_Image_ResizableOptions",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ImageResizableOptions)
