@@ -38,6 +38,8 @@ public:
     static ArkUINativeModuleValue ResetBackToTop(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetScrollBarMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetScrollBarMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetAutoAdjustScrollBarMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetAutoAdjustScrollBarMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnWillScroll(ArkUIRuntimeCallInfo* runtimeCallInfo);

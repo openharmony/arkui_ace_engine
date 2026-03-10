@@ -289,6 +289,10 @@ public:
     {
         return info_.contentStartOffset_;
     }
+    float GetContentEndOffset() const override
+    {
+        return info_.contentEndOffset_;
+    }
 
     int32_t GetFirstIndex() const override;
 

@@ -464,6 +464,10 @@ public:
     {
         return 0.0f;
     }
+    virtual float GetContentEndOffset() const
+    {
+        return 0.0f;
+    }
     // main size of all children
     virtual float GetTotalHeight() const
     {
@@ -1117,6 +1121,12 @@ private:
 
     void RegisterScrollBarEventTask();
     void RegisterScrollBarOverDragEventTask();
+    void RegisterScrollBarMarginCallback();
+    std::pair<double, double> GetAutoAdjustAvoidOffset();
+    void CalcPaddingAvoidDistByMainAxis(
+        const std::unique_ptr<PaddingProperty>& property, std::pair<double, double>& offset, bool isRtl);
+    void CalcBorderWidthAvoidDistByMainAxis(
+        const std::unique_ptr<BorderWidthProperty>& property, std::pair<double, double>& offset, bool isRtl);
     bool OnScrollPosition(double& offset, int32_t source);
     void ProcessNavBarReactOnStart();
     float ProcessNavBarReactOnUpdate(float offset);

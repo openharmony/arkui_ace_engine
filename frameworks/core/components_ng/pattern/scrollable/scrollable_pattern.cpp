@@ -1369,6 +1369,80 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     RegisterScrollBarOverDragEventTask();
 }
 
+void ScrollablePattern::RegisterScrollBarMarginCallback()
+{
+    CHECK_NULL_VOID(scrollBar_);
+    scrollBar_->SetGetAvoidScrollBarMargin([weak = WeakClaim(this)]() -> std::pair<double, double> {
+        std::pair<double, double> result = { 0.0, 0.0 };
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, result);
+        return pattern->GetAutoAdjustAvoidOffset();
+    });
+}
+
+std::pair<double, double> ScrollablePattern::GetAutoAdjustAvoidOffset()
+{
+    std::pair<double, double> result = { 0.0, 0.0 };
+    auto layoutProperty = GetLayoutProperty<ScrollableLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, result);
+    auto isRtl = IsRTL();
+    result.first += GetContentStartOffset();
+    result.second += GetContentEndOffset();
+    if (IsReverse()) {
+        std::swap(result.first, result.second);
+    }
+    CalcPaddingAvoidDistByMainAxis(layoutProperty->GetPaddingProperty(), result, isRtl);
+    CalcPaddingAvoidDistByMainAxis(layoutProperty->GetSafeAreaPaddingProperty(), result, isRtl);
+    CalcBorderWidthAvoidDistByMainAxis(layoutProperty->GetBorderWidthProperty(), result, isRtl);
+    return result;
+}
+
+void ScrollablePattern::CalcPaddingAvoidDistByMainAxis(
+    const std::unique_ptr<PaddingProperty>& property, std::pair<double, double>& offset, bool isRtl)
+{
+    CHECK_NULL_VOID(property);
+    if (axis_ == Axis::HORIZONTAL) {
+        if (property->start || property->end) {
+            auto startPadding = property->start.value_or(CalcLength()).GetDimension().ConvertToPx();
+            auto endPadding = property->end.value_or(CalcLength()).GetDimension().ConvertToPx();
+            if (isRtl) {
+                std::swap(startPadding, endPadding);
+            }
+            offset.first += startPadding;
+            offset.second += endPadding;
+        } else {
+            offset.first += property->left.value_or(CalcLength()).GetDimension().ConvertToPx();
+            offset.second += property->right.value_or(CalcLength()).GetDimension().ConvertToPx();
+        }
+    } else {
+        offset.first += property->top.value_or(CalcLength()).GetDimension().ConvertToPx();
+        offset.second += property->bottom.value_or(CalcLength()).GetDimension().ConvertToPx();
+    }
+}
+
+void ScrollablePattern::CalcBorderWidthAvoidDistByMainAxis(
+    const std::unique_ptr<BorderWidthProperty>& property, std::pair<double, double>& offset, bool isRtl)
+{
+    CHECK_NULL_VOID(property);
+    if (axis_ == Axis::HORIZONTAL) {
+        if (property->startDimen || property->endDimen) {
+            auto startBorder = property->startDimen.value_or(Dimension()).ConvertToPx();
+            auto endBorder = property->endDimen.value_or(Dimension()).ConvertToPx();
+            if (isRtl) {
+                std::swap(startBorder, endBorder);
+            }
+            offset.first += startBorder;
+            offset.second += endBorder;
+        } else {
+            offset.first += property->leftDimen.value_or(Dimension()).ConvertToPx();
+            offset.second += property->rightDimen.value_or(Dimension()).ConvertToPx();
+        }
+    } else {
+        offset.first += property->topDimen.value_or(Dimension()).ConvertToPx();
+        offset.second += property->bottomDimen.value_or(Dimension()).ConvertToPx();
+    }
+}
+
 bool ScrollablePattern::CanOverScrollWithDelta(double delta, bool isNestScroller)
 {
     if (isNestScroller && GetNestedScroll().NeedParent()) {
@@ -1491,6 +1565,7 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         scrollBar_ = CreateScrollBar();
         CHECK_NULL_VOID(scrollBar_);
         RegisterScrollBarEventTask();
+        RegisterScrollBarMarginCallback();
     } else {
         oldDisplayMode = scrollBar_->GetDisplayMode();
     }
@@ -1570,6 +1645,12 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
                 scrollBar_->SetScrollBarMargin(scrollableBarMargin.value());
                 scrollBar_->FlushBarWidth();
             }
+        } else if (scrollBar_->GetAutoAdjustScrollBarMargin() != property->GetAutoAdjustScrollBarMargin()) {
+            scrollBar_->SetAutoAdjustScrollBarMargin(property->GetAutoAdjustScrollBarMargin());
+            scrollBar_->FlushBarWidth();
+        }
+        if (scrollBar_->GetAutoAdjustScrollBarMargin().value_or(false)) {
+            scrollBar_->NeedUpdateAutoAdjustScrollBarMargin();
         }
     }
 }

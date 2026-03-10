@@ -109,6 +109,20 @@ class ScrollBarMarginModifier extends ModifierWithKey<ScrollBarMargin> {
   }
 }
 
+class AutoAdjustScrollBarMarginModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('autoAdjustScrollBarMargin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scrollable.resetAutoAdjustScrollBarMargin(node);
+    } else {
+      getUINativeModule().scrollable.setAutoAdjustScrollBarMargin(node, this.value);
+    }
+  }
+}
+
 class OnWillStopDraggingModifier extends ModifierWithKey<(velocity: number) => void> {
   constructor(value: (velocity: number) => void) {
     super(value);
@@ -261,6 +275,10 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
     }
     scrollBarMargin(margin: ScrollBarMargin): T {
       modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, margin);
+      return this;
+    }
+    autoAdjustScrollBarMargin(value: boolean): T {
+      modifierWithKey(this._modifiersWithKeys, AutoAdjustScrollBarMarginModifier.identity, AutoAdjustScrollBarMarginModifier, value);
       return this;
     }
     onWillStopDragging(callback: (velocity: number) => void) : this {

@@ -3166,6 +3166,10 @@ void ArkUINativeModule::RegisterScrollableAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetScrollBarMargin));
     scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarMargin"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::ResetScrollBarMargin));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoAdjustScrollBarMargin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetAutoAdjustScrollBarMargin));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoAdjustScrollBarMargin"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::ResetAutoAdjustScrollBarMargin));
     scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillStopDragging"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetOnWillStopDragging));
     scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillStopDragging"),

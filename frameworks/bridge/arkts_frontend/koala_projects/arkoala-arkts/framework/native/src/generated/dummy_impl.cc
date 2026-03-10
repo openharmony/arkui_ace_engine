@@ -11557,6 +11557,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetAutoAdjustScrollBarMarginImpl(Ark_NativePointer node,
+                                          const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setAutoAdjustScrollBarMargin(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetNestedScrollImpl(Ark_NativePointer node,
                              const Opt_NestedScrollOptions* value)
     {
@@ -22552,6 +22563,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollableCommonMethodModifier::SetScrollBarColorImpl,
             ScrollableCommonMethodModifier::SetScrollBarWidthImpl,
             ScrollableCommonMethodModifier::SetScrollBarMarginImpl,
+            ScrollableCommonMethodModifier::SetAutoAdjustScrollBarMarginImpl,
             ScrollableCommonMethodModifier::SetNestedScrollImpl,
             ScrollableCommonMethodModifier::SetEnableScrollInteractionImpl,
             ScrollableCommonMethodModifier::SetFrictionImpl,

@@ -405,6 +405,10 @@ public:
     {
         return contentStartOffset_;
     }
+    float GetContentEndOffset() const override
+    {
+        return contentEndOffset_;
+    }
 
     bool FreeOverScrollWithDelta(Axis axis, double delta) override;
 

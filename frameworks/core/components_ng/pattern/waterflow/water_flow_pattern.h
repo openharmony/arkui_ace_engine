@@ -237,6 +237,10 @@ public:
     {
         return layoutInfo_->contentStartOffset_;
     }
+    float GetContentEndOffset() const override
+    {
+        return layoutInfo_->contentEndOffset_;
+    }
 
     int32_t GetFirstIndex() const override;
 private:

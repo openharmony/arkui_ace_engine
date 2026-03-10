@@ -645,6 +645,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ScrollableCommonMethod_setScrollBarMargin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _ScrollableCommonMethod_setAutoAdjustScrollBarMargin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _ScrollableCommonMethod_setNestedScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _ScrollableCommonMethod_setEnableScrollInteraction(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void

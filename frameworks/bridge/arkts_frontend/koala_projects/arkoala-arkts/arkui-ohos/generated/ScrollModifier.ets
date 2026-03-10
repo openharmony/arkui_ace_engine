@@ -74,6 +74,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     public _edgeEffect_0_0value?: EdgeEffect | undefined
     public _edgeEffect_0_1value?: EdgeEffectOptions | undefined
     public _scrollBarMargin_0_0value?: ScrollBarMargin | undefined
+    public _autoAdjustScrollBarMargin_0_0value?: boolean | undefined
     public _contentStartOffset_0_0value?: double | global_resource_Resource | undefined
     public _contentEndOffset_0_0value?: double | global_resource_Resource | undefined
     public _onWillStartDragging_0_0value?: VoidCallback | undefined
@@ -528,7 +529,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         if (flagArray[25] != 0) {
             switch (flagArray[25]) {
                 case 1: {
-                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | global_resource_Resource | undefined));
+                    peer.setAutoAdjustScrollBarMarginAttribute((this._autoAdjustScrollBarMargin_0_0value as boolean | undefined));
                     flagArray[25] = 2;
                     break;
                 }
@@ -538,14 +539,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[25] = 0;
-                    peer.setContentStartOffsetAttribute((undefined as double | global_resource_Resource | undefined));
+                    peer.setAutoAdjustScrollBarMarginAttribute((undefined as boolean | undefined));
                 }
             }
         }
         if (flagArray[26] != 0) {
             switch (flagArray[26]) {
                 case 1: {
-                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | global_resource_Resource | undefined));
+                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | global_resource_Resource | undefined));
                     flagArray[26] = 2;
                     break;
                 }
@@ -555,14 +556,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[26] = 0;
-                    peer.setContentEndOffsetAttribute((undefined as double | global_resource_Resource | undefined));
+                    peer.setContentStartOffsetAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[27] != 0) {
             switch (flagArray[27]) {
                 case 1: {
-                    peer.setOnWillStartDraggingAttribute((this._onWillStartDragging_0_0value as VoidCallback | undefined));
+                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | global_resource_Resource | undefined));
                     flagArray[27] = 2;
                     break;
                 }
@@ -572,14 +573,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[27] = 0;
-                    peer.setOnWillStartDraggingAttribute((undefined as VoidCallback | undefined));
+                    peer.setContentEndOffsetAttribute((undefined as double | global_resource_Resource | undefined));
                 }
             }
         }
         if (flagArray[28] != 0) {
             switch (flagArray[28]) {
                 case 1: {
-                    peer.setOnWillStopDraggingAttribute((this._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
+                    peer.setOnWillStartDraggingAttribute((this._onWillStartDragging_0_0value as VoidCallback | undefined));
                     flagArray[28] = 2;
                     break;
                 }
@@ -589,14 +590,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[28] = 0;
-                    peer.setOnWillStopDraggingAttribute((undefined as OnWillStopDraggingCallback | undefined));
+                    peer.setOnWillStartDraggingAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
         if (flagArray[29] != 0) {
             switch (flagArray[29]) {
                 case 1: {
-                    peer.setOnDidStopDraggingAttribute((this._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
+                    peer.setOnWillStopDraggingAttribute((this._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
                     flagArray[29] = 2;
                     break;
                 }
@@ -606,14 +607,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[29] = 0;
-                    peer.setOnDidStopDraggingAttribute((undefined as OnDidStopDraggingCallback | undefined));
+                    peer.setOnWillStopDraggingAttribute((undefined as OnWillStopDraggingCallback | undefined));
                 }
             }
         }
         if (flagArray[30] != 0) {
             switch (flagArray[30]) {
                 case 1: {
-                    peer.setOnWillStartFlingAttribute((this._onWillStartFling_0_0value as VoidCallback | undefined));
+                    peer.setOnDidStopDraggingAttribute((this._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
                     flagArray[30] = 2;
                     break;
                 }
@@ -623,14 +624,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[30] = 0;
-                    peer.setOnWillStartFlingAttribute((undefined as VoidCallback | undefined));
+                    peer.setOnDidStopDraggingAttribute((undefined as OnDidStopDraggingCallback | undefined));
                 }
             }
         }
         if (flagArray[31] != 0) {
             switch (flagArray[31]) {
                 case 1: {
-                    peer.setOnDidStopFlingAttribute((this._onDidStopFling_0_0value as VoidCallback | undefined));
+                    peer.setOnWillStartFlingAttribute((this._onWillStartFling_0_0value as VoidCallback | undefined));
                     flagArray[31] = 2;
                     break;
                 }
@@ -640,14 +641,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[31] = 0;
-                    peer.setOnDidStopFlingAttribute((undefined as VoidCallback | undefined));
+                    peer.setOnWillStartFlingAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
         if (flagArray[32] != 0) {
             switch (flagArray[32]) {
                 case 1: {
-                    peer.setOnReachStartAttribute((this._onReachStart_0_0value as (() => void) | undefined));
+                    peer.setOnDidStopFlingAttribute((this._onDidStopFling_0_0value as VoidCallback | undefined));
                     flagArray[32] = 2;
                     break;
                 }
@@ -657,14 +658,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[32] = 0;
-                    peer.setOnReachStartAttribute((undefined as (() => void) | undefined));
+                    peer.setOnDidStopFlingAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
         if (flagArray[33] != 0) {
             switch (flagArray[33]) {
                 case 1: {
-                    peer.setOnReachEndAttribute((this._onReachEnd_0_0value as (() => void) | undefined));
+                    peer.setOnReachStartAttribute((this._onReachStart_0_0value as (() => void) | undefined));
                     flagArray[33] = 2;
                     break;
                 }
@@ -674,14 +675,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[33] = 0;
-                    peer.setOnReachEndAttribute((undefined as (() => void) | undefined));
+                    peer.setOnReachStartAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
         if (flagArray[34] != 0) {
             switch (flagArray[34]) {
                 case 1: {
-                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
+                    peer.setOnReachEndAttribute((this._onReachEnd_0_0value as (() => void) | undefined));
                     flagArray[34] = 2;
                     break;
                 }
@@ -691,14 +692,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[34] = 0;
-                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
+                    peer.setOnReachEndAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
         if (flagArray[35] != 0) {
             switch (flagArray[35]) {
                 case 1: {
-                    peer.setClipContentAttribute((this._clipContent_0_0value as ContentClipMode | RectShape | undefined));
+                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
                     flagArray[35] = 2;
                     break;
                 }
@@ -708,14 +709,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[35] = 0;
-                    peer.setClipContentAttribute((undefined as ContentClipMode | RectShape | undefined));
+                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
                 }
             }
         }
         if (flagArray[36] != 0) {
             switch (flagArray[36]) {
                 case 1: {
-                    peer.setDigitalCrownSensitivityAttribute((this._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
+                    peer.setClipContentAttribute((this._clipContent_0_0value as ContentClipMode | RectShape | undefined));
                     flagArray[36] = 2;
                     break;
                 }
@@ -725,14 +726,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[36] = 0;
-                    peer.setDigitalCrownSensitivityAttribute((undefined as CrownSensitivity | undefined));
+                    peer.setClipContentAttribute((undefined as ContentClipMode | RectShape | undefined));
                 }
             }
         }
         if (flagArray[37] != 0) {
             switch (flagArray[37]) {
                 case 1: {
-                    peer.setBackToTopAttribute((this._backToTop_0_0value as boolean | undefined));
+                    peer.setDigitalCrownSensitivityAttribute((this._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
                     flagArray[37] = 2;
                     break;
                 }
@@ -742,14 +743,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[37] = 0;
-                    peer.setBackToTopAttribute((undefined as boolean | undefined));
+                    peer.setDigitalCrownSensitivityAttribute((undefined as CrownSensitivity | undefined));
                 }
             }
         }
         if (flagArray[38] != 0) {
             switch (flagArray[38]) {
                 case 1: {
-                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined));
+                    peer.setBackToTopAttribute((this._backToTop_0_0value as boolean | undefined));
                     flagArray[38] = 2;
                     break;
                 }
@@ -759,6 +760,23 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     flagArray[38] = 0;
+                    peer.setBackToTopAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
+                case 1: {
+                    peer.setFadingEdgeAttribute((this._fadingEdge_0_0value as boolean | undefined), (this._fadingEdge_0_1value as FadingEdgeOptions | undefined));
+                    flagArray[39] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[39] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[39] = 0;
                     peer.setFadingEdgeAttribute((undefined as boolean | undefined), (undefined as FadingEdgeOptions | undefined));
                 }
             }
@@ -1078,6 +1096,18 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
             switch (flagArray[25]) {
                 case 1:
                 case 3: {
+                    this.autoAdjustScrollBarMargin((modifier._autoAdjustScrollBarMargin_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.autoAdjustScrollBarMargin((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
+                case 1:
+                case 3: {
                     this.contentStartOffset((modifier._contentStartOffset_0_0value as double | global_resource_Resource | undefined));
                     break;
                 }
@@ -1086,8 +1116,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[26] != 0) {
-            switch (flagArray[26]) {
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
                 case 1:
                 case 3: {
                     this.contentEndOffset((modifier._contentEndOffset_0_0value as double | global_resource_Resource | undefined));
@@ -1098,8 +1128,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[27] != 0) {
-            switch (flagArray[27]) {
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
                 case 1:
                 case 3: {
                     this.onWillStartDragging((modifier._onWillStartDragging_0_0value as VoidCallback | undefined));
@@ -1110,8 +1140,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[28] != 0) {
-            switch (flagArray[28]) {
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
                 case 1:
                 case 3: {
                     this.onWillStopDragging((modifier._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
@@ -1122,8 +1152,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[29] != 0) {
-            switch (flagArray[29]) {
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
                 case 1:
                 case 3: {
                     this.onDidStopDragging((modifier._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
@@ -1134,8 +1164,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[30] != 0) {
-            switch (flagArray[30]) {
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
                 case 1:
                 case 3: {
                     this.onWillStartFling((modifier._onWillStartFling_0_0value as VoidCallback | undefined));
@@ -1146,8 +1176,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[31] != 0) {
-            switch (flagArray[31]) {
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
                 case 1:
                 case 3: {
                     this.onDidStopFling((modifier._onDidStopFling_0_0value as VoidCallback | undefined));
@@ -1158,8 +1188,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[32] != 0) {
-            switch (flagArray[32]) {
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
                 case 1:
                 case 3: {
                     this.onReachStart((modifier._onReachStart_0_0value as (() => void) | undefined));
@@ -1170,8 +1200,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[33] != 0) {
-            switch (flagArray[33]) {
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
                 case 1:
                 case 3: {
                     this.onReachEnd((modifier._onReachEnd_0_0value as (() => void) | undefined));
@@ -1182,8 +1212,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[34] != 0) {
-            switch (flagArray[34]) {
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
                 case 1:
                 case 3: {
                     this.flingSpeedLimit((modifier._flingSpeedLimit_0_0value as double | undefined));
@@ -1194,8 +1224,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[35] != 0) {
-            switch (flagArray[35]) {
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
                 case 1:
                 case 3: {
                     this.clipContent((modifier._clipContent_0_0value as ContentClipMode | RectShape | undefined));
@@ -1206,8 +1236,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[36] != 0) {
-            switch (flagArray[36]) {
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
                 case 1:
                 case 3: {
                     this.digitalCrownSensitivity((modifier._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
@@ -1218,8 +1248,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[37] != 0) {
-            switch (flagArray[37]) {
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
                 case 1:
                 case 3: {
                     this.backToTop((modifier._backToTop_0_0value as boolean | undefined));
@@ -1230,8 +1260,8 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
-        if (flagArray[38] != 0) {
-            switch (flagArray[38]) {
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
                 case 1:
                 case 3: {
                     this.fadingEdge((modifier._fadingEdge_0_0value as boolean | undefined), (modifier._fadingEdge_0_1value as FadingEdgeOptions | undefined));
@@ -1494,144 +1524,154 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         }
         return this
     }
-    contentStartOffset(value: double | global_resource_Resource | undefined): this {
-        if (((this._flagArray[25]) == (0)) || (true)) {
+    autoAdjustScrollBarMargin(value: boolean | undefined): this {
+        if (((this._flagArray[25]) == (0)) || ((this._autoAdjustScrollBarMargin_0_0value) !== (value))) {
             this._flagArray[25] = 1
-            this._contentStartOffset_0_0value = value
+            this._autoAdjustScrollBarMargin_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[25] = 3
         }
         return this
     }
-    contentEndOffset(value: double | global_resource_Resource | undefined): this {
+    contentStartOffset(value: double | global_resource_Resource | undefined): this {
         if (((this._flagArray[26]) == (0)) || (true)) {
             this._flagArray[26] = 1
-            this._contentEndOffset_0_0value = value
+            this._contentStartOffset_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[26] = 3
         }
         return this
     }
-    onWillStartDragging(value: VoidCallback | undefined): this {
+    contentEndOffset(value: double | global_resource_Resource | undefined): this {
         if (((this._flagArray[27]) == (0)) || (true)) {
             this._flagArray[27] = 1
-            this._onWillStartDragging_0_0value = value
+            this._contentEndOffset_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[27] = 3
         }
         return this
     }
-    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+    onWillStartDragging(value: VoidCallback | undefined): this {
         if (((this._flagArray[28]) == (0)) || (true)) {
             this._flagArray[28] = 1
-            this._onWillStopDragging_0_0value = value
+            this._onWillStartDragging_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[28] = 3
         }
         return this
     }
-    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
         if (((this._flagArray[29]) == (0)) || (true)) {
             this._flagArray[29] = 1
-            this._onDidStopDragging_0_0value = value
+            this._onWillStopDragging_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[29] = 3
         }
         return this
     }
-    onWillStartFling(value: VoidCallback | undefined): this {
+    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
         if (((this._flagArray[30]) == (0)) || (true)) {
             this._flagArray[30] = 1
-            this._onWillStartFling_0_0value = value
+            this._onDidStopDragging_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[30] = 3
         }
         return this
     }
-    onDidStopFling(value: VoidCallback | undefined): this {
+    onWillStartFling(value: VoidCallback | undefined): this {
         if (((this._flagArray[31]) == (0)) || (true)) {
             this._flagArray[31] = 1
-            this._onDidStopFling_0_0value = value
+            this._onWillStartFling_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[31] = 3
         }
         return this
     }
-    onReachStart(value: (() => void) | undefined): this {
+    onDidStopFling(value: VoidCallback | undefined): this {
         if (((this._flagArray[32]) == (0)) || (true)) {
             this._flagArray[32] = 1
-            this._onReachStart_0_0value = value
+            this._onDidStopFling_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[32] = 3
         }
         return this
     }
-    onReachEnd(value: (() => void) | undefined): this {
+    onReachStart(value: (() => void) | undefined): this {
         if (((this._flagArray[33]) == (0)) || (true)) {
             this._flagArray[33] = 1
-            this._onReachEnd_0_0value = value
+            this._onReachStart_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[33] = 3
         }
         return this
     }
-    flingSpeedLimit(value: double | undefined): this {
-        if (((this._flagArray[34]) == (0)) || ((this._flingSpeedLimit_0_0value) !== (value))) {
+    onReachEnd(value: (() => void) | undefined): this {
+        if (((this._flagArray[34]) == (0)) || (true)) {
             this._flagArray[34] = 1
-            this._flingSpeedLimit_0_0value = value
+            this._onReachEnd_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[34] = 3
         }
         return this
     }
-    clipContent(value: ContentClipMode | RectShape | undefined): this {
-        if (((this._flagArray[35]) == (0)) || (true)) {
+    flingSpeedLimit(value: double | undefined): this {
+        if (((this._flagArray[35]) == (0)) || ((this._flingSpeedLimit_0_0value) !== (value))) {
             this._flagArray[35] = 1
-            this._clipContent_0_0value = value
+            this._flingSpeedLimit_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[35] = 3
         }
         return this
     }
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+    clipContent(value: ContentClipMode | RectShape | undefined): this {
         if (((this._flagArray[36]) == (0)) || (true)) {
             this._flagArray[36] = 1
-            this._digitalCrownSensitivity_0_0value = value
+            this._clipContent_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[36] = 3
         }
         return this
     }
-    backToTop(value: boolean | undefined): this {
-        if (((this._flagArray[37]) == (0)) || ((this._backToTop_0_0value) !== (value))) {
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        if (((this._flagArray[37]) == (0)) || (true)) {
             this._flagArray[37] = 1
-            this._backToTop_0_0value = value
+            this._digitalCrownSensitivity_0_0value = value
             this._state.fireChange()
         } else {
             this._flagArray[37] = 3
         }
         return this
     }
-    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
-        if (((this._flagArray[38]) == (0)) || ((this._fadingEdge_0_0value) !== (enabled)) || (true)) {
+    backToTop(value: boolean | undefined): this {
+        if (((this._flagArray[38]) == (0)) || ((this._backToTop_0_0value) !== (value))) {
             this._flagArray[38] = 1
+            this._backToTop_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[38] = 3
+        }
+        return this
+    }
+    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+        if (((this._flagArray[39]) == (0)) || ((this._fadingEdge_0_0value) !== (enabled)) || (true)) {
+            this._flagArray[39] = 1
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
             this._state.fireChange()
         } else {
-            this._flagArray[38] = 3
+            this._flagArray[39] = 3
         }
         return this
     }

@@ -118,6 +118,14 @@ void SetScrollBarMarginImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<ScrollBarMargin>(value);
     ScrollableModelStatic::SetScrollBarMargin(frameNode, convValue.value_or(scrollBarMargin));
 }
+void SetAutoAdjustScrollBarMargin(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ScrollableModelStatic::SetAutoAdjustScrollBarMargin(frameNode, convValue);
+}
 void SetNestedScrollImpl(Ark_NativePointer node,
                          const Opt_NestedScrollOptions* value)
 {
@@ -408,6 +416,7 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::SetScrollBarColorImpl,
         ScrollableCommonMethodModifier::SetScrollBarWidthImpl,
         ScrollableCommonMethodModifier::SetScrollBarMarginImpl,
+        ScrollableCommonMethodModifier::SetAutoAdjustScrollBarMargin,
         ScrollableCommonMethodModifier::SetNestedScrollImpl,
         ScrollableCommonMethodModifier::SetEnableScrollInteractionImpl,
         ScrollableCommonMethodModifier::SetFrictionImpl,

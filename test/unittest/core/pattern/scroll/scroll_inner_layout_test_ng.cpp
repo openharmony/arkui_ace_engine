@@ -800,4 +800,171 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion002, TestSize.Level1)
 
     EXPECT_EQ(scrollBar_->needAdaptAnimation_, false);
 }
+
+/**
+ * @tc.name: SetRectTrickRegion003
+ * @tc.desc: Test SetRectTrickRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion003, TestSize.Level1)
+{
+    constexpr double distance = 10.0;
+    CalcDimension padding(distance);
+    CreateScroll();
+    ViewAbstractModelNG model;
+    model.SetPadding(padding);
+    model.SetSafeAreaPadding(padding);
+    NG::ScrollableModelNG::SetContentStartOffset(frameNode_.GetRawPtr(), distance);
+    NG::ScrollableModelNG::SetContentEndOffset(frameNode_.GetRawPtr(), distance);
+    NG::ScrollableModelNG::SetAutoAdjustScrollBarMargin(frameNode_.GetRawPtr(), true);
+    double totalDistance = distance + distance + distance;
+    CreateContent();
+    CreateScrollDone();
+
+    constexpr double estimatedHeight = 500.0;
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(WIDTH, HEIGHT);
+    scrollBar_->outBoundary_ = 0.0;
+    ScrollBarMargin scrollBarMargin;
+    scrollBarMargin.start_ = Dimension();
+    scrollBarMargin.end_ = Dimension();
+    scrollBar_->SetPositionMode(PositionMode::RIGHT);
+    scrollBar_->normalWidthUpdate_ = false;
+    scrollBar_->positionModeUpdate_ = false;
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Top(), totalDistance);
+    EXPECT_EQ(
+        scrollBar_->GetActiveRect().Bottom(), totalDistance + (HEIGHT - totalDistance * 2) * HEIGHT / estimatedHeight);
+
+    scrollBar_->scrollBarMargin_ = scrollBarMargin;
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Top(), 0.0);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Bottom(), HEIGHT * HEIGHT / estimatedHeight);
+}
+
+/**
+ * @tc.name: SetRectTrickRegion004
+ * @tc.desc: Test SetRectTrickRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Enable auto-adjust scrollBar margin in horizontal mode,
+     *                  with padding/safe-area padding/content start&end offsets.
+     * @tc.expected: When scrollBarMargin_ is not explicitly set, activeRect uses the
+     *               auto-adjusted margin (totalDistance).
+     */
+    constexpr double distance = 10.0;
+    CalcDimension padding(distance);
+    CreateScroll();
+    ViewAbstractModelNG model;
+    model.SetPadding(padding);
+    model.SetSafeAreaPadding(padding);
+    ScrollModelNG::SetAxis(frameNode_.GetRawPtr(), Axis::HORIZONTAL);
+    NG::ScrollableModelNG::SetContentStartOffset(frameNode_.GetRawPtr(), distance);
+    NG::ScrollableModelNG::SetContentEndOffset(frameNode_.GetRawPtr(), distance);
+    NG::ScrollableModelNG::SetAutoAdjustScrollBarMargin(frameNode_.GetRawPtr(), true);
+    // padding + safeAreaPadding + contentStart/End offsets
+    double totalDistance = distance + distance + distance;
+    CreateContent();
+    CreateScrollDone();
+
+    constexpr double estimatedHeight = 500.0;
+    constexpr double minHeight = 79.0;
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(WIDTH, HEIGHT);
+    scrollBar_->minHeight_ = Dimension(minHeight);
+    scrollBar_->outBoundary_ = 0.0;
+    ScrollBarMargin scrollBarMargin;
+    scrollBarMargin.start_ = Dimension();
+    scrollBarMargin.end_ = Dimension();
+    scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar_->normalWidthUpdate_ = false;
+    scrollBar_->positionModeUpdate_ = false;
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Left(), totalDistance);
+    EXPECT_EQ(
+        scrollBar_->GetActiveRect().Right(), totalDistance + (WIDTH - totalDistance * 2) * WIDTH / estimatedHeight);
+
+    /**
+     * @tc.steps: step2. Set explicit (zero) scrollBarMargin_ and re-calc.
+     * @tc.expected: activeRect should start from 0 with no margin.
+     */
+    scrollBar_->scrollBarMargin_ = scrollBarMargin;
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Left(), 0.0);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Right(), WIDTH * WIDTH / estimatedHeight);
+}
+
+/**
+ * @tc.name: SetRectTrickRegion005
+ * @tc.desc: Test SetRectTrickRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Enable RTL horizontal scroll with start padding and auto-adjust scrollBar margin.
+     * @tc.expected: activeRect is computed from the right side under RTL.
+     */
+    constexpr double distance = 10.0;
+    NG::PaddingProperty localizePadding;
+    localizePadding.start = CalcLength(distance);
+    CreateScroll();
+    ViewAbstractModelNG model;
+    model.SetPaddings(localizePadding);
+    ScrollModelNG::SetAxis(frameNode_.GetRawPtr(), Axis::HORIZONTAL);
+    NG::ScrollableModelNG::SetAutoAdjustScrollBarMargin(frameNode_.GetRawPtr(), true);
+    layoutProperty_->layoutDirection_ = TextDirection::RTL;
+    CreateContent();
+    CreateScrollDone();
+
+    constexpr double estimatedHeight = 500.0;
+    constexpr double minHeight = 79.0;
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(WIDTH, HEIGHT);
+    scrollBar_->minHeight_ = Dimension(minHeight);
+    scrollBar_->outBoundary_ = 0.0;
+    scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar_->normalWidthUpdate_ = false;
+    scrollBar_->positionModeUpdate_ = false;
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Left(), WIDTH - distance - (WIDTH - distance) * WIDTH / estimatedHeight);
+    EXPECT_EQ(scrollBar_->GetActiveRect().Right(), WIDTH - distance);
+}
+
+/**
+ * @tc.name: SetRectTrickRegion006
+ * @tc.desc: Test SetRectTrickRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegion006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Enable auto-adjust scrollBar margin, but set content start/end offsets
+     *                  larger than the view size.
+     * @tc.expected: The active width is invalid and returns the default empty Dimension().
+     */
+    CreateScroll();
+    NG::ScrollableModelNG::SetContentStartOffset(frameNode_.GetRawPtr(), HEIGHT);
+    NG::ScrollableModelNG::SetContentEndOffset(frameNode_.GetRawPtr(), HEIGHT);
+    NG::ScrollableModelNG::SetAutoAdjustScrollBarMargin(frameNode_.GetRawPtr(), true);
+    CreateContent();
+    CreateScrollDone();
+
+    pattern_->contentStartOffset_ = HEIGHT;
+    pattern_->contentEndOffset_ = HEIGHT;
+    constexpr double estimatedHeight = 500.0;
+    constexpr double minHeight = 79.0;
+    Offset offsetView = Offset(0.0, 0.0);
+    Size sizeView = Size(WIDTH, HEIGHT);
+    scrollBar_->minHeight_ = Dimension(minHeight);
+    scrollBar_->outBoundary_ = 0.0;
+    scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar_->normalWidthUpdate_ = false;
+    scrollBar_->positionModeUpdate_ = false;
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, estimatedHeight, 0);
+    EXPECT_EQ(scrollBar_->GetNormalWidth(), Dimension());
+}
 } // namespace OHOS::Ace::NG

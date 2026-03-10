@@ -309,6 +309,34 @@ ArkUINativeModuleValue ScrollableBridge::ResetScrollBarMargin(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ScrollableBridge::SetAutoAdjustScrollBarMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> autoAdjustArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    if (!autoAdjustArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getScrollableModifier()->resetAutoAdjustScrollBarMargin(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getScrollableModifier()->setAutoAdjustScrollBarMargin(
+        nativeNode, autoAdjustArg->ToBoolean(vm)->Value());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollableBridge::ResetAutoAdjustScrollBarMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getScrollableModifier()->resetAutoAdjustScrollBarMargin(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ScrollableBridge::SetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

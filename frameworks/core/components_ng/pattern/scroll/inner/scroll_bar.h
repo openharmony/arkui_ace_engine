@@ -383,6 +383,19 @@ public:
     {
         return scrollBarMargin_;
     }
+    void NeedUpdateAutoAdjustScrollBarMargin()
+    {
+        isScrollBarMarginUpdate_ = true;
+    }
+    void SetAutoAdjustScrollBarMargin(std::optional<bool> autoAdjust)
+    {
+        autoAdjustScrollBarMargin_ = autoAdjust;
+        isScrollBarMarginUpdate_ = true;
+    }
+    const std::optional<bool>& GetAutoAdjustScrollBarMargin() const
+    {
+        return autoAdjustScrollBarMargin_;
+    }
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult, bool inBarRect = false);
@@ -468,6 +481,11 @@ public:
     void SetCanOverScrollWithDeltaFunc(std::function<bool(double)>&& func)
     {
         canOverScrollWithDelta_ = std::move(func);
+    }
+
+    void SetGetAvoidScrollBarMargin(std::function<std::pair<double, double>()>&& func)
+    {
+        getAvoidScrollBarMargin_ = std::move(func);
     }
 
 protected:
@@ -748,6 +766,7 @@ private:
     CancelableCallback<void()> disappearDelayTask_;
     Axis axis_ = Axis::VERTICAL;
     std::optional<ScrollBarMargin> scrollBarMargin_;
+    std::optional<bool> autoAdjustScrollBarMargin_;
     DragFRCSceneCallback dragFRCSceneCallback_;
     OnDidStopDraggingEvent scrollBarOnDidStopDraggingCallback_;
     OnDidStopFlingEvent scrollBarOnDidStopFlingCallback_;
@@ -779,6 +798,10 @@ private:
     float scrollBarFlingVelocity_ = 0.0f;
     bool isTouchScreen_ = false;
     bool dragEndReachEdge_ = false;
+
+    // pair.first: Padding + SafeAreaPadding + ContentStartOffset
+    // pair.second: ContentEndOffset + SafeAreaPadding + Padding
+    std::function<std::pair<double, double>()> getAvoidScrollBarMargin_;
 };
 
 } // namespace OHOS::Ace::NG

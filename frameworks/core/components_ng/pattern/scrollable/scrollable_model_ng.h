@@ -129,6 +129,10 @@ public:
     static void CreateWithResourceObjContentEndOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
     static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetAutoAdjustScrollBarMargin(std::optional<bool> autoAdjust);
+    static void SetAutoAdjustScrollBarMargin(FrameNode* frameNode, std::optional<bool> autoAdjust);
+    static void ResetAutoAdjustScrollBarMargin(FrameNode* frameNode);
+    static bool GetAutoAdjustScrollBarMargin(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

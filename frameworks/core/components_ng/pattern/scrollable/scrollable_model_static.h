@@ -65,6 +65,7 @@ public:
     static void SetOnDidStopDragging(FrameNode* frameNode, OnDidStopDraggingEvent&& event);
     static void SetOnWillStartFling(FrameNode* frameNode, OnWillStartFlingEvent&& event);
     static void SetOnDidStopFling(FrameNode* frameNode, OnDidStopFlingEvent&& event);
+    static void SetAutoAdjustScrollBarMargin(FrameNode* frameNode, std::optional<bool> autoAdjust);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<CrownSensitivity>& sensitivity);
