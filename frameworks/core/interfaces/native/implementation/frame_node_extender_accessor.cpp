@@ -88,19 +88,39 @@ constexpr int32_t ERROR_CODE_RENDER_NOT_ADOPTED_NODE = 106408;
 constexpr int32_t ERROR_CODE_PARAM_INVALID = 401;
 
 // Thread validation macros
-#define CHECK_NODE_ON_VALID_THREAD(node) \
+#define CHECK_NODE_ON_VALID_THREAD_VOID(node) \
     do { \
         if (!MultiThreadBuildManager::CheckNodeOnValidThread(node)) { \
             OHOS::Ace::NG::AccessorUtils::ThrowTSException( \
-                ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD, "The node is running on valid thread."); \
+                ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD, "The node is not running on valid thread."); \
+            return; \
         } \
     } while (0)
 
-#define CHECK_ON_UI_THREAD() \
+#define CHECK_ON_UI_THREAD_VOID() \
     do { \
         if (!MultiThreadBuildManager::CheckOnUIThread()) { \
             OHOS::Ace::NG::AccessorUtils::ThrowTSException( \
                 ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD, "The node is not running on main thread."); \
+            return; \
+        } \
+    } while (0)
+
+#define CHECK_NODE_ON_VALID_THREAD_RETURN(node, ret) \
+    do { \
+        if (!MultiThreadBuildManager::CheckNodeOnValidThread(node)) { \
+            OHOS::Ace::NG::AccessorUtils::ThrowTSException( \
+                ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD, "The node is not running on valid thread."); \
+            return ret; \
+        } \
+    } while (0)
+
+#define CHECK_ON_UI_THREAD_RETURN(ret) \
+    do { \
+        if (!MultiThreadBuildManager::CheckOnUIThread()) { \
+            OHOS::Ace::NG::AccessorUtils::ThrowTSException( \
+                ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD, "The node is not running on main thread."); \
+            return ret; \
         } \
     } while (0)
 
@@ -176,7 +196,7 @@ Ark_NativePointer GetDestroyImpl()
 Ark_Boolean IsModifiableImpl(Ark_NativePointer peer)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(false);
     auto frameNodePeer = reinterpret_cast<FrameNodePeer*>(peer);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
     CHECK_NULL_RETURN(peerNode, false);
@@ -192,7 +212,7 @@ Ark_Int32 AppendChildImpl(Ark_FrameNode peer,
     CHECK_NULL_RETURN(currentUINodeRef, ERROR_CODE_PARAM_INVALID);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(currentUINodeRef));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(currentUINodeRef), 0);
     auto childPeerNode = FrameNodePeer::GetFrameNodeByPeer(child);
     CHECK_NULL_RETURN(childPeerNode, ERROR_CODE_PARAM_INVALID);
     auto childNode = AceType::DynamicCast<UINode>(childPeerNode);
@@ -218,7 +238,7 @@ Ark_Int32 InsertChildAfterImpl(Ark_NativePointer peer,
     CHECK_NULL_RETURN(currentUINodeRef, ERROR_CODE_PARAM_INVALID);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(currentUINodeRef));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(currentUINodeRef), 0);
     auto childPeerNodePeer = reinterpret_cast<FrameNodePeer*>(child);
     auto childPeerNode = FrameNodePeer::GetFrameNodeByPeer(childPeerNodePeer);
     CHECK_NULL_RETURN(childPeerNode, ERROR_CODE_PARAM_INVALID);
@@ -250,7 +270,7 @@ void RemoveChildImpl(Ark_FrameNode peer,
     CHECK_NULL_VOID(currentUINodeRef);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(currentUINodeRef));
+    CHECK_NODE_ON_VALID_THREAD_VOID(AceType::RawPtr(currentUINodeRef));
     auto nodePeer = FrameNodePeer::GetFrameNodeByPeer(child);
     CHECK_NULL_VOID(nodePeer);
     auto childNode = AceType::DynamicCast<UINode>(nodePeer);
@@ -267,7 +287,7 @@ void ClearChildrenImpl(Ark_FrameNode peer)
     CHECK_NULL_VOID(currentUINodeRef);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(currentUINodeRef));
+    CHECK_NODE_ON_VALID_THREAD_VOID(AceType::RawPtr(currentUINodeRef));
     currentUINodeRef->Clean();
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
@@ -298,7 +318,7 @@ Ark_NativePointer GetChildImpl(Ark_FrameNode peer,
     CHECK_NULL_RETURN(peerNode, nullptr);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(peerNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(peerNode), nullptr);
     auto indexInt = Converter::Convert<int32_t>(index);
     if (indexInt < 0) {
         return nullptr;
@@ -314,7 +334,7 @@ Ark_NativePointer GetFirstChildImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, nullptr);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(peerNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(peerNode), nullptr);
     peerNode->GetAllChildrenWithBuild(false);
     auto child = peerNode->GetFrameNodeChildByIndex(0, false, true);
     CHECK_NULL_RETURN(child, nullptr);
@@ -337,7 +357,7 @@ Ark_NativePointer GetNextSiblingImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, nullptr);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(peerNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(peerNode), nullptr);
     auto parent = GetParentNode(peerNode);
     CHECK_NULL_RETURN(parent, nullptr);
     parent->GetAllChildrenWithBuild(false);
@@ -353,7 +373,7 @@ Ark_NativePointer GetPreviousSiblingImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, nullptr);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(peerNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(peerNode), nullptr);
     auto parent = GetParentNode(peerNode);
     CHECK_NULL_RETURN(parent, nullptr);
     parent->GetAllChildrenWithBuild(false);
@@ -369,7 +389,7 @@ Ark_NativePointer GetParentImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, nullptr);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(peerNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(peerNode), nullptr);
     auto parent = GetParentNode(peerNode);
     CHECK_NULL_RETURN(parent, nullptr);
     return FrameNodePeer::Create(parent);
@@ -380,7 +400,7 @@ Ark_Int32 GetChildrenCountImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, 0);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(peerNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(peerNode), 0);
     return peerNode->GetAllChildrenWithBuild(false).size();
 }
 void DisposeImpl(Ark_FrameNode peer)
@@ -405,7 +425,7 @@ void DisposeImpl(Ark_FrameNode peer)
 Ark_Vector2 GetPositionToWindowImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetPositionToWindowImpl!");
         return {};
@@ -421,7 +441,7 @@ Ark_Vector2 GetPositionToWindowImpl(Ark_FrameNode peer)
 Ark_Vector2 GetPositionToParentImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetPositionToParentImpl!");
         return {};
@@ -438,7 +458,7 @@ Ark_Vector2 GetPositionToParentImpl(Ark_FrameNode peer)
 Ark_Size GetMeasuredSizeImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetMeasuredSizeImpl!");
         return {};
@@ -454,7 +474,7 @@ Ark_Size GetMeasuredSizeImpl(Ark_FrameNode peer)
 Ark_Vector2 GetLayoutPositionImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetLayoutPositionImpl!");
         return {};
@@ -473,7 +493,7 @@ Ark_String GetIdImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(frameNode, {});
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(frameNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(frameNode), Converter::ArkValue<Ark_String>("", Converter::FC));
     auto inspectorId = frameNode->GetInspectorId().value_or("");
     return Converter::ArkValue<Ark_String>(inspectorId, Converter::FC);
 }
@@ -483,7 +503,7 @@ Ark_Int32 GetUniqueIdImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(frameNode, 0);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(frameNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(frameNode), 0);
     return Converter::ArkValue<Ark_Int32>(frameNode->GetId());
 }
 Ark_String GetNodeTypeImpl(Ark_FrameNode peer)
@@ -492,7 +512,7 @@ Ark_String GetNodeTypeImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(frameNode, {});
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(frameNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(frameNode), Converter::ArkValue<Ark_String>("", Converter::FC));
     auto nodeType = frameNode->GetTag();
     return Converter::ArkValue<Ark_String>(nodeType, Converter::FC);
 }
@@ -503,7 +523,7 @@ Ark_Float64 GetOpacityImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, errValue);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(peerNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(peerNode), 0.0);
     auto opacity = ViewAbstract::GetOpacity(Referenced::RawPtr(peerNode));
     return Converter::ArkValue<Ark_Float64>(opacity);
 }
@@ -513,7 +533,7 @@ Ark_Boolean IsVisibleImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(frameNode, false);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(frameNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(frameNode), false);
     auto isVisible = frameNode->IsVisible();
     auto parentNode = frameNode->GetParent();
     while (isVisible && parentNode) {
@@ -531,13 +551,13 @@ Ark_Boolean IsClipToFrameImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(frameNode, false);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(frameNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(frameNode), false);
     return ViewAbstract::GetClip(Referenced::RawPtr(frameNode));
 }
 Ark_Boolean IsAttachedImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(false);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, false);
     auto isOnMainTree = frameNode->IsOnMainTree();
@@ -546,7 +566,7 @@ Ark_Boolean IsAttachedImpl(Ark_FrameNode peer)
 Ark_String GetInspectorInfoImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(Converter::ArkValue<Ark_String>("", Converter::FC));
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, {});
     auto inspectorInfo = NG::Inspector::GetInspectorOfNode(frameNode);
@@ -554,7 +574,7 @@ Ark_String GetInspectorInfoImpl(Ark_FrameNode peer)
 }
 void InvalidateImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CustomFrameNodePattern>();
@@ -566,7 +586,7 @@ void InvalidateImpl(Ark_FrameNode peer)
 }
 void DisposeTreeImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(frameNode);
     auto parent = frameNode->GetParent();
@@ -583,7 +603,7 @@ void DisposeTreeImpl(Ark_FrameNode peer)
 void AddSupportedUIStatesImpl(
     Ark_FrameNode peer, Ark_Int32 uiStates, const UIStatesChangeHandler* statesChangeHandler, Ark_Boolean excludeInner)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(frameNode);
     frameNode->CreateEventHubInner();
@@ -606,7 +626,7 @@ void AddSupportedUIStatesImpl(
 void RemoveSupportedUIStatesImpl(Ark_FrameNode peer,
                                  Ark_Int32 uiStates)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(frameNode);
     
@@ -617,7 +637,7 @@ void RemoveSupportedUIStatesImpl(Ark_FrameNode peer,
 }
 Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer, Ark_Boolean options)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(false);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, false);
     static const std::vector<const char*> nodeTypeArray = { OHOS::Ace::V2::SCROLL_ETS_TAG,
@@ -639,7 +659,7 @@ Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer, Ark_Boolean options)
 }
 Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(false);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, false);
     return frameNode->isCrossLanguageAttributeSetting();
@@ -647,7 +667,7 @@ Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
 void SetMeasuredSizeImpl(Ark_FrameNode peer,
                          const Ark_Size* size)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     CHECK_NULL_VOID(size);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
@@ -660,7 +680,7 @@ void SetMeasuredSizeImpl(Ark_FrameNode peer,
 void SetLayoutPositionImpl(Ark_FrameNode peer,
                            const Ark_Vector2* position)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     CHECK_NULL_VOID(position);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
@@ -673,7 +693,7 @@ void SetLayoutPositionImpl(Ark_FrameNode peer,
 void MeasureImpl(Ark_FrameNode peer,
                  const Ark_LayoutConstraint* constraint)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
     CHECK_NULL_VOID(constraint);
@@ -714,7 +734,7 @@ void MeasureImpl(Ark_FrameNode peer,
 void LayoutImpl(Ark_FrameNode peer,
                 const Ark_Vector2* position)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     CHECK_NULL_VOID(position);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
@@ -728,7 +748,7 @@ void LayoutImpl(Ark_FrameNode peer,
 
 void SetNeedsLayoutImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
     peerNode->MarkDirtyNode(ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT);
@@ -736,7 +756,7 @@ void SetNeedsLayoutImpl(Ark_FrameNode peer)
 
 Ark_Vector2 GetPositionToScreenImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetPositionToScreenImpl!");
         return {};
@@ -751,7 +771,7 @@ Ark_Vector2 GetPositionToScreenImpl(Ark_FrameNode peer)
 
 Ark_Vector2 GetGlobalPositionOnDisplayImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetGlobalPositionOnDisplayImpl!");
         return {};
@@ -766,7 +786,7 @@ Ark_Vector2 GetGlobalPositionOnDisplayImpl(Ark_FrameNode peer)
 
 Ark_Vector2 GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode,  Converter::ArkValue<Ark_Vector2>(OffsetF()));
     auto offset = peerNode->GetPositionToWindowWithTransform();
@@ -777,7 +797,7 @@ Ark_Vector2 GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
 
 Ark_Vector2 GetPositionToParentWithTransformImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetPositionToParentWithTransformImpl!");
         return {};
@@ -792,7 +812,7 @@ Ark_Vector2 GetPositionToParentWithTransformImpl(Ark_FrameNode peer)
 
 Ark_Vector2 GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetPositionToScreenWithTransformImpl!");
         return {};
@@ -808,7 +828,7 @@ Ark_Vector2 GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
 Ark_NodeEdgesLengthMetrics GetUserConfigBorderWidthImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetUserConfigBorderWidthImpl!");
         return {};
@@ -828,7 +848,7 @@ Ark_NodeEdgesLengthMetrics GetUserConfigBorderWidthImpl(Ark_FrameNode peer)
 Ark_NodeEdgesLengthMetrics GetUserConfigPaddingImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetUserConfigPaddingImpl!");
         return {};
@@ -848,7 +868,7 @@ Ark_NodeEdgesLengthMetrics GetUserConfigPaddingImpl(Ark_FrameNode peer)
 Ark_NodeEdgesLengthMetrics GetUserConfigMarginImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetUserConfigMarginImpl!");
         return {};
@@ -868,7 +888,7 @@ Ark_NodeEdgesLengthMetrics GetUserConfigMarginImpl(Ark_FrameNode peer)
 Ark_SizeTLengthMetrics GetUserConfigSizeImpl(Ark_FrameNode peer)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     if (!peer) {
         LOGW("This frameNode nullptr when GetUserConfigSizeImpl!");
         return {};
@@ -914,7 +934,7 @@ Ark_Int32 MoveToImpl(Ark_FrameNode peer,
                      Ark_Int32 index)
 {
     // UI thread validation - must be called on UI thread
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(0);
     auto indexInt = Converter::Convert<int32_t>(index);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, ERROR_CODE_PARAM_INVALID);
@@ -960,7 +980,7 @@ Ark_Int32 GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, errValue);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(peerNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(peerNode), 0);
     auto child = peerNode->GetFrameNodeChildByIndex(0, false, false);
     CHECK_NULL_RETURN(child, errValue);
     auto* childNode = reinterpret_cast<FrameNode*>(child);
@@ -975,7 +995,7 @@ Ark_Int32 GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, errValue);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(peerNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(peerNode), 0);
     size_t size = static_cast<size_t>(peerNode->GetTotalChildCountWithoutExpanded());
     CHECK_NULL_RETURN(size > 0, errValue);
     auto child = peerNode->GetFrameNodeChildByIndex(size - 1, false, false);
@@ -1030,7 +1050,7 @@ Ark_NativePointer GetFrameNodeByUniqueIdImpl(Ark_Int32 id)
 }
 void ReuseImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
@@ -1040,7 +1060,7 @@ void ReuseImpl(Ark_FrameNode peer)
 }
 void RecycleImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
@@ -1085,7 +1105,7 @@ Ark_Boolean CreateAnimationImpl(Ark_FrameNode peer,
                                 const Array_F64* endValue,
                                 const Ark_AnimateParam* param)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(false);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, false);
     auto frameNode = AceType::DynamicCast<OHOS::Ace::NG::FrameNode>(peerNode);
@@ -1125,7 +1145,7 @@ Ark_Boolean CreateAnimationImpl(Ark_FrameNode peer,
 }
 Ark_Boolean CancelAnimationsImpl(Ark_FrameNode peer, const Array_AnimationPropertyType* properties)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(false);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, false);
     auto frameNode = AceType::DynamicCast<OHOS::Ace::NG::FrameNode>(peerNode);
@@ -1145,7 +1165,7 @@ Ark_Boolean CancelAnimationsImpl(Ark_FrameNode peer, const Array_AnimationProper
 Array_F64 GetNodePropertyValueImpl(Ark_FrameNode peer,
                                    Ark_AnimationPropertyType property)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, {});
     auto frameNode = AceType::DynamicCast<FrameNode>(peerNode);
@@ -1254,7 +1274,7 @@ Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(frameNode, nullptr);
 
     // Thread validation for multithread support
-    CHECK_NODE_ON_VALID_THREAD(AceType::RawPtr(frameNode));
+    CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(frameNode), {});
     auto ret = PeerUtils::CreatePeer<UICommonEventPeer>();
     ret->node = frameNode;
     return ret;
@@ -1312,19 +1332,19 @@ Array_F64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark_Vec
 
 Array_F64 ConvertPositionToWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByLocal)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     return ConvertPositionWithWindow(peer, positionByLocal, false);
 }
 
 Array_F64 ConvertPositionFromWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByWindow)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     return ConvertPositionWithWindow(peer, positionByWindow, true);
 }
 
 Ark_Int32 AdoptChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(0);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, ERROR_CODE_NODE_CAN_NOT_ADOPT_TO);
     auto currentUINodeRef = AceType::DynamicCast<FrameNode>(peerNode);
@@ -1350,7 +1370,7 @@ Ark_Int32 AdoptChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
 
 Ark_Int32 RemoveAdoptedChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(0);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
     auto currentUINodeRef = AceType::DynamicCast<FrameNode>(peerNode);
@@ -1380,7 +1400,7 @@ Ark_Int32 RemoveAdoptedChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
 Ark_InteractionEventBindingInfo GetInteractionEventBindingInfoImpl(Ark_FrameNode peer,
                                                                    Ark_EventQueryType eventType)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN({});
     Ark_InteractionEventBindingInfo info {};
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, info);
@@ -1398,7 +1418,7 @@ Ark_InteractionEventBindingInfo GetInteractionEventBindingInfoImpl(Ark_FrameNode
 }
 Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(false);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, false);
     auto frameNode = AceType::DynamicCast<FrameNode>(peerNode);
@@ -1408,7 +1428,7 @@ Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
 }
 void ApplyAttributesFinishImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_VOID();
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_VOID(peerNode);
     auto frameNode = AceType::DynamicCast<FrameNode>(peerNode);
@@ -1417,7 +1437,7 @@ void ApplyAttributesFinishImpl(Ark_FrameNode peer)
 }
 Ark_Boolean IsOnMainTreeImpl(Ark_FrameNode peer)
 {
-    CHECK_ON_UI_THREAD();
+    CHECK_ON_UI_THREAD_RETURN(false);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, false);
     auto isOnMainTree = frameNode->IsOnMainTree();

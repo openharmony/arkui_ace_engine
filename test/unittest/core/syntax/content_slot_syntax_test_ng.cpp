@@ -398,4 +398,71 @@ HWTEST_F(ContentSlotSyntaxTestNg, OnAttachToMainTree001, TestSize.Level1)
     EXPECT_TRUE(detachcallbackRet);
     EXPECT_FALSE(nodeContent->onMainTree_);
 }
+
+/**
+ * @tc.name: OnAttachToMainTreeDuplicate001
+ * @tc.desc: Test for duplicate OnAttachToMainTree calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentSlotSyntaxTestNg, OnAttachToMainTreeDuplicate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call OnAttachToMainTree first time
+     * @tc.expected: callback executed once
+     */
+    auto nodeContent = AceType::RawPtr(nodeContentPtr_);
+    ASSERT_NE(nodeContent, nullptr);
+    ContentSlotModel::Create(nodeContent);
+    int32_t attachCallbackCount = 0;
+    std::function<void()> attachcallback = [&attachCallbackCount]() { attachCallbackCount++; };
+    nodeContent->SetAttachToMainTreeCallback(move(attachcallback));
+    nodeContent->OnAttachToMainTree();
+    EXPECT_EQ(attachCallbackCount, 1);
+    EXPECT_TRUE(nodeContent->onMainTree_);
+
+    /**
+     * @tc.steps: step2. Call OnAttachToMainTree second time (duplicate)
+     * @tc.expected: callback not executed again
+     */
+    nodeContent->OnAttachToMainTree();
+    EXPECT_EQ(attachCallbackCount, 1);
+    EXPECT_TRUE(nodeContent->onMainTree_);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeDuplicate001
+ * @tc.desc: Test for duplicate OnDetachFromMainTree calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentSlotSyntaxTestNg, OnDetachFromMainTreeDuplicate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Attach to main tree first
+     * @tc.expected: attached successfully
+     */
+    auto nodeContent = AceType::RawPtr(nodeContentPtr_);
+    ASSERT_NE(nodeContent, nullptr);
+    ContentSlotModel::Create(nodeContent);
+    nodeContent->OnAttachToMainTree();
+    EXPECT_TRUE(nodeContent->onMainTree_);
+
+    /**
+     * @tc.steps: step2. Call OnDetachFromMainTree first time
+     * @tc.expected: callback executed once
+     */
+    int32_t detachCallbackCount = 0;
+    std::function<void()> detachcallback = [&detachCallbackCount]() { detachCallbackCount++; };
+    nodeContent->SetDetachFromMainTreeCallback(move(detachcallback));
+    nodeContent->OnDetachFromMainTree();
+    EXPECT_EQ(detachCallbackCount, 1);
+    EXPECT_FALSE(nodeContent->onMainTree_);
+
+    /**
+     * @tc.steps: step3. Call OnDetachFromMainTree second time (duplicate)
+     * @tc.expected: callback not executed again
+     */
+    nodeContent->OnDetachFromMainTree();
+    EXPECT_EQ(detachCallbackCount, 1);
+    EXPECT_FALSE(nodeContent->onMainTree_);
+}
 } // namespace OHOS::Ace::NG
