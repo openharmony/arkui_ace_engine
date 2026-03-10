@@ -45,6 +45,22 @@
       "value": "半模态无极跟随主窗口拖拽移动"
     },
     {
+      "name": "SideSheet9",
+      "value": "SideSheet通过宽度回调挤压页面"
+    },
+    {
+      "name": "MaxHeight1",
+      "value": "半模态最大高度"
+    },
+    {
+      "name": "AvoidKeyboard1",
+      "value": "半模态避让键盘"
+    },
+    {
+      "name": "AvoidKeyboard2",
+      "value": "Resize_only"
+    },
+    {
       "name": "MultiDevice1",
       "value": "全模态"
     },
