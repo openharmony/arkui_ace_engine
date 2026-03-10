@@ -1105,9 +1105,6 @@ bool TabsPattern::GetTargetIndex(const std::string& command, int32_t& targetInde
         return false;
     }
     auto originIndex = paramJson->GetString("index");
-    if (!StringUtils::IsNumber(originIndex)) {
-        return false;
-    }
     targetIndex = StringUtils::StringToInt(originIndex);
     return true;
 }
