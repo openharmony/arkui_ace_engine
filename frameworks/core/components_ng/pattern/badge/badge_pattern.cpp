@@ -537,7 +537,10 @@ void BadgePattern::OnColorConfigurationUpdate()
         UpdateBadgePositionY(badgeTheme->GetBadgePositionY());
     }
     if (!layoutProperty->GetBadgeFontSizeByuser().value_or(false)) {
-        UpdateFontSize(badgeTheme->GetBadgeFontSize(), true);
+        auto badgeFontSize = layoutProperty->GetBadgeFontSize();
+        if (badgeFontSize.has_value() && badgeFontSize.value() != UNDEFINED_DIMENSION) {
+            UpdateFontSize(badgeTheme->GetBadgeFontSize(), true);
+        }
     }
 
     if (!layoutProperty->GetBadgeCircleSizeByuser().value_or(false)) {
