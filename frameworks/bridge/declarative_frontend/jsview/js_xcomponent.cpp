@@ -35,6 +35,7 @@
 
 namespace OHOS::Ace {
 namespace {
+constexpr int32_t HDR_BRIGHTNESS_PARAM_SIZE = 2;
 XComponentType ConvertToXComponentType(const std::string& type)
 {
     if (type == "surface") {
@@ -824,15 +825,24 @@ void JSXComponent::JsHdrBrightness(const JSCallbackInfo& args)
 {
     ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::SURFACE || args.Length() != 1) {
+    if (type != XComponentType::SURFACE || args.Length() < 1 || args.Length() > HDR_BRIGHTNESS_PARAM_SIZE) {
         return;
     }
     // set hdrBrightness on SurfaceNode when type is SURFACE
+    float hdrBrightness = 1.0f;
     if (args[0]->IsNumber()) {
-        float hdrBrightness = args[0]->ToNumber<float>();
-        XComponentModel::GetInstance()->HdrBrightness(std::clamp(hdrBrightness, 0.0f, 1.0f));
+        hdrBrightness = args[0]->ToNumber<float>();
+        hdrBrightness = std::clamp(hdrBrightness, 0.0f, 1.0f);
+    }
+
+    // Parse optional HdrType parameter
+    if (args.Length() == HDR_BRIGHTNESS_PARAM_SIZE && args[1]->IsNumber()) {
+        int32_t hdrTypeValue = args[1]->ToNumber<int32_t>();
+        HdrType hdrType = static_cast<HdrType>(hdrTypeValue);
+        XComponentModel::GetInstance()->HdrBrightness(hdrBrightness, hdrType);
     } else {
-        XComponentModel::GetInstance()->HdrBrightness(1.0f);
+        // Use default single-parameter method for backward compatibility
+        XComponentModel::GetInstance()->HdrBrightness(hdrBrightness);
     }
 }
 

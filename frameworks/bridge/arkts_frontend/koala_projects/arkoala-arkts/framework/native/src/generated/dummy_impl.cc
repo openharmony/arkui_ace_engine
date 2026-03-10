@@ -21079,13 +21079,55 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetHdrBrightnessImpl(Ark_NativePointer node,
-                              const Opt_Float64* value)
+                              const Opt_Float64* brightness,
+                              const Opt_Int32* type)
     {
         if (!needGroupedLog(1)) {
             return;
         }
         string out("setHdrBrightness(");
+        WriteToString(&out, brightness);
+        out.append(", ");
+        WriteToString(&out, type);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetEnableTransparentLayerImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setEnableTransparentLayer(");
         WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetHdrBrightness0Impl(Ark_NativePointer node,
+                               const Opt_Float64* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setHdrBrightness0(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetHdrBrightness1Impl(Ark_NativePointer node,
+                               const Opt_Float64* brightness,
+                               const Opt_HdrType* type)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setHdrBrightness1(");
+        WriteToString(&out, brightness);
+        out.append(", ");
+        WriteToString(&out, type);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -23547,7 +23589,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             XComponentAttributeModifier::SetEnableAnalyzerImpl,
             XComponentAttributeModifier::SetEnableSecureImpl,
             XComponentAttributeModifier::SetEnableTransparentLayerImpl,
-            XComponentAttributeModifier::SetHdrBrightnessImpl,
+            XComponentAttributeModifier::SetHdrBrightness0Impl,
+            XComponentAttributeModifier::SetHdrBrightness1Impl,
         };
         return &ArkUIXComponentModifierImpl;
     }

@@ -5092,6 +5092,14 @@ typedef struct Opt_HapticFeedbackMode {
     Ark_Tag tag;
     Ark_HapticFeedbackMode value;
 } Opt_HapticFeedbackMode;
+typedef enum Ark_HdrType {
+    ARK_HDR_TYPE_DEFAULT = 0,
+    ARK_HDR_TYPE_AIHDR = 1,
+} Ark_HdrType;
+typedef struct Opt_HdrType {
+    Ark_Tag tag;
+    Ark_HdrType value;
+} Opt_HdrType;
 typedef enum Ark_HeightBreakpoint {
     ARK_HEIGHT_BREAKPOINT_HEIGHT_SM = 0,
     ARK_HEIGHT_BREAKPOINT_HEIGHT_MD = 1,
@@ -27272,8 +27280,11 @@ typedef struct GENERATED_ArkUIXComponentModifier {
                             const Opt_Boolean* value);
     void (*setEnableTransparentLayer)(Ark_NativePointer node,
                                       const Opt_Boolean* value);
-    void (*setHdrBrightness)(Ark_NativePointer node,
-                             const Opt_Float64* value);
+    void (*setHdrBrightness0)(Ark_NativePointer node,
+                              const Opt_Float64* value);
+    void (*setHdrBrightness1)(Ark_NativePointer node,
+                              const Opt_Float64* brightness,
+                              const Opt_HdrType* type);
 } GENERATED_ArkUIXComponentModifier;
 
 // Accessors

@@ -20,7 +20,7 @@ import { CommonMethodModifier } from './CommonMethodModifier'
 import { AttributeModifier } from '#handwritten'
 import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
 import { PeerNode } from './PeerNode'
-import { ArkXComponentPeer, XComponentAttribute } from './component/xcomponent'
+import { ArkXComponentPeer, XComponentAttribute, HdrType } from './component/xcomponent'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
 import { CommonMethod } from './component/common'
@@ -49,6 +49,8 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
     public _enableSecure_0_0value?: boolean | undefined
     public _enableTransparentLayer_0_0value?: boolean | undefined
     public _hdrBrightness_0_0value?: double | undefined
+    public _hdrBrightness_1_0value?: double | undefined
+ 	public _hdrBrightness_1_1value?: HdrType | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
@@ -145,7 +147,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         if (flagArray[5] != 0) {
             switch (flagArray[5]) {
                 case 1: {
-                    peer.setHdrBrightnessAttribute((this._hdrBrightness_0_0value as double | undefined));
+                    peer.setHdrBrightness0Attribute((this._hdrBrightness_0_0value as double | undefined));
                     flagArray[5] = 2;
                     break;
                 }
@@ -155,7 +157,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
                 }
                 default: {
                     flagArray[5] = 0;
-                    peer.setHdrBrightnessAttribute((undefined as double | undefined));
+                    peer.setHdrBrightness0Attribute((undefined as double | undefined));
                 }
             }
         }
@@ -297,6 +299,19 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
             this._state.fireChange()
         } else {
             this._flagArray[5] = 3
+        }
+        return this
+    }
+    hdrBrightness(brightness: double | undefined, type?: HdrType): this {
+        if (((this._flagArray[6]) == (0)) || ((this._hdrBrightness_1_0value) !== (brightness)) || (true))
+        {
+            this._flagArray[6] = 1
+            this._hdrBrightness_1_0value = brightness
+            this._hdrBrightness_1_1value = type
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[6] = 3
         }
         return this
     }

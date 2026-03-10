@@ -6151,6 +6151,15 @@ void RosenRenderContext::SetHDRBrightness(float hdrBrightness)
     rsSurfaceNode->SetHDRBrightness(hdrBrightness);
 }
 
+void RosenRenderContext::SetHDRBrightness(float hdrBrightness, uint32_t type)
+{
+    FREE_RS_CONTEXT_CHECK(SetHDRBrightness, hdrBrightness);
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetHDRBrightnessWithType(hdrBrightness, type);
+}
+
 void RosenRenderContext::SetImageHDRPresent(bool hdrPresent)
 {
     FREE_RS_CONTEXT_CHECK(SetImageHDRPresent, hdrPresent);

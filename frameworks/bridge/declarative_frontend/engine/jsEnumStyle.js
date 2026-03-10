@@ -5201,6 +5201,12 @@ let CameraCaptureState;
   CameraCaptureState[CameraCaptureState.ACTIVE = 2] = 'ACTIVE';
 })(CameraCaptureState || (CameraCaptureState = {}));
 
+let HdrType;
+(function (HdrType) {
+  HdrType[HdrType.DEFAULT = 0] = 'DEFAULT';
+  HdrType[HdrType.AIHDR = 1] = 'AIHDR';
+})(HdrType || (HdrType = {}));
+
 let MicrophoneCaptureState;
 (function (MicrophoneCaptureState) {
   MicrophoneCaptureState[MicrophoneCaptureState.NONE = 0] = 'NONE';

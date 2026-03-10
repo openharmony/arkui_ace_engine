@@ -8727,16 +8727,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Opt_Boolean* value)
     {
     }
-    void SetEnableSecureImpl(Ark_NativePointer node,
-                             const Opt_Boolean* value)
-    {
-    }
     void SetEnableTransparentLayerImpl(Ark_NativePointer node,
                                        const Opt_Boolean* value)
     {
     }
-    void SetHdrBrightnessImpl(Ark_NativePointer node,
-                              const Opt_Float64* value)
+    void SetHdrBrightness0Impl(Ark_NativePointer node,
+                               const Opt_Float64* value)
+    {
+    }
+    void SetHdrBrightness1Impl(Ark_NativePointer node,
+                               const Opt_Float64* brightness,
+                               const Opt_HdrType* type)
     {
     }
     } // XComponentAttributeModifier
@@ -11197,7 +11198,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             XComponentAttributeModifier::SetEnableAnalyzerImpl,
             XComponentAttributeModifier::SetEnableSecureImpl,
             XComponentAttributeModifier::SetEnableTransparentLayerImpl,
-            XComponentAttributeModifier::SetHdrBrightnessImpl,
+            XComponentAttributeModifier::SetHdrBrightness0Impl,
+            XComponentAttributeModifier::SetHdrBrightness1Impl,
         };
         return &ArkUIXComponentModifierImpl;
     }
