@@ -1485,4 +1485,32 @@ HWTEST_F(SheetPresentationTestSixNg, SheetTransitionForOverlay002, TestSize.Leve
     EXPECT_EQ(sheetPattern->GetNeedDoubleAvoidAfterLayout(), true);
     SheetPresentationTestSixNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: TranslateTo001
+ * @tc.desc: Test TranslateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSixNg, TranslateTo001, TestSize.Level1)
+{
+    SheetPresentationTestSixNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_TRUE(renderContext->GetTransformTranslate() == std::nullopt);
+
+
+    sheetPattern->isDismissProcess_ = true;
+    renderContext->UpdateTransformTranslate({ 0.0f, 100.0f, 0.0f });
+    sheetPattern->TranslateTo(200);
+    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 100.0f);
+    SheetPresentationTestSixNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG
