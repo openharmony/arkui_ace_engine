@@ -54,6 +54,31 @@ struct Index {
             router.pushUrl({ url: 'pages/example/ImageAnimatorExample016' })
           })
 
+          Button('router ImageAnimatorExample017').onClick(() => {
+            console.log('router ImageAnimatorExample017');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorExample017' })
+          })
+
+          Button('router ImageAnimatorExample018').onClick(() => {
+            console.log('router ImageAnimatorExample018');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorExample018' })
+          })
+
+          Button('router ImageAnimatorTest010').onClick(() => {
+            console.log('router ImageAnimatorTest010');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorTest010' })
+          })
+
+          Button('router ImageAnimatorTest011').onClick(() => {
+            console.log('router ImageAnimatorTest011');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorTest011' })
+          })
+
+          Button('router ImageAnimatorTest012').onClick(() => {
+            console.log('router ImageAnimatorTest012');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorTest012' })
+          })
+
         }
       }
     }

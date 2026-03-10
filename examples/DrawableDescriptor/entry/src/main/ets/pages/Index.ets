@@ -28,6 +28,9 @@ struct Index {
     "AnimatedDrawableDescriptorTestResource",
     "AnimatedDrawableDescriptorTestLayout",
     "AnimatedDrawableDescriptorTestFrameDurations",
+    "DrawableDescriptorLoadTest",
+    "DrawableDescriptorBoundaryTest",
+    "AnimationOptionsAdvancedTest",
   ]
 
   build() {
