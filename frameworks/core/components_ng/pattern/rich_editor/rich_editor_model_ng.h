@@ -53,7 +53,6 @@ public:
     void SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func) override;
     void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
-    void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
         const OnMenuItemClickCallback&& onMenuItemClick,
@@ -132,7 +131,6 @@ public:
     static void SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
-    static void SetOnShare(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
     void SetEnterKeyType(TextInputAction value) override;
     static void SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action);

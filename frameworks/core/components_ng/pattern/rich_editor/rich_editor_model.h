@@ -429,7 +429,6 @@ public:
     virtual void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
-    virtual void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnWillAttachIME(IMEAttachCallback&& func) {};
     virtual void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick,
