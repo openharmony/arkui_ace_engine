@@ -18,6 +18,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "base/utils/resource_configuration.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 
 #define protected public
 #define private public
@@ -39,7 +40,15 @@ std::string MakeCacheKey(const std::string& bundleName, const std::string& modul
     return bundleName + "." + moduleName + "." + std::to_string(instanceId);
 }
 }
-class ResourceManagerTest : public testing::Test {};
+class ResourceManagerTest : public testing::Test {
+public:
+    void TearDown() override
+    {
+        ResetMockResourceData();
+        ResourceManager::GetInstance().Reset();
+        ResourceManager::GetInstance().resourceAdapters_.clear();
+    }
+};
 
 /**
  * @tc.name: ResourceManagerTest001
@@ -100,8 +109,6 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest001, TestSize.Level1)
      * @tc.expect: true.
      */
     EXPECT_EQ(ResourceManager::GetInstance().GetResourceAdapter(DEFAULT_INSTANCE_ID), resourceAdapter);
-
-    ResourceManager::GetInstance().resourceAdapters_.clear();
 }
 
 /**
@@ -155,8 +162,6 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest002, TestSize.Level1)
      * @tc.steps: step9. clear all cache.
      * @tc.expect: cache not have default adapter.
      */
-    ResourceManager::GetInstance().Reset();
-    ResourceManager::GetInstance().resourceAdapters_.clear();
     auto result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     EXPECT_FALSE(result);
 }
@@ -206,9 +211,6 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest003, TestSize.Level1)
     ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     result = ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, DEFAULT_INSTANCE_ID);
     EXPECT_FALSE(result);
-
-    ResourceManager::GetInstance().Reset();
-    ResourceManager::GetInstance().resourceAdapters_.clear();
 }
 
 /**
@@ -293,5 +295,34 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest006, TestSize.Level1)
     RefPtr<ResourceObject> resourceObject;
     auto resAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
     EXPECT_EQ(resAdapter, nullptr);
+}
+
+/**
+ * @tc.name: ResourceManagerTest007
+ * @tc.desc: Test GetOrCreateResourceAdapter caches adapter with the actual instanceId returned by factory.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceManagerTest, ResourceManagerTest007, TestSize.Level1)
+{
+    constexpr int32_t resourceObjectInstanceId = 0;
+    constexpr int32_t actualInstanceId = 1;
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, resourceObjectInstanceId);
+
+    SetMockResourceAdapterInstanceId(actualInstanceId);
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+
+    ASSERT_NE(resourceAdapter, nullptr);
+    EXPECT_EQ(ResourceManager::GetInstance().cache_.size(), 1);
+    EXPECT_EQ(
+        ResourceManager::GetInstance().cache_.find(MakeCacheKey(bundleName, moduleName, resourceObjectInstanceId)),
+        ResourceManager::GetInstance().cache_.end());
+    EXPECT_NE(ResourceManager::GetInstance().cache_.find(MakeCacheKey(bundleName, moduleName, actualInstanceId)),
+        ResourceManager::GetInstance().cache_.end());
+    EXPECT_EQ(
+        ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, resourceObjectInstanceId), nullptr);
+    EXPECT_EQ(
+        ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, actualInstanceId), resourceAdapter);
 }
 } // namespace OHOS::Ace
