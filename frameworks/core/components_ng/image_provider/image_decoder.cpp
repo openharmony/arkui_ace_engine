@@ -207,10 +207,12 @@ void ImageDecoder::HandleDecodeFormat(
     auto mimeType = imageSource->GetEncodedFormat();
     if (mimeType == IMAGE_JPEG_MIME) {
         config.desiredDecodeFormat = PixelFormat::NV21;
+        config.allocatorType = AllocatorType::DMA_ALLOC;
         return;
     } else if (mimeType == IMAGE_HEIC_MIME || mimeType == IMAGE_HEIF_MIME) {
         if (imageSource->IsHeifWithoutAlpha()) {
             config.desiredDecodeFormat = PixelFormat::NV21;
+            config.allocatorType = AllocatorType::DMA_ALLOC;
             return;
         }
     }

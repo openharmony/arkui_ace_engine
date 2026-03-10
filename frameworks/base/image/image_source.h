@@ -26,6 +26,7 @@ struct PixelMapConfig {
     bool isHdrDecoderNeed = false;
     PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN;
     PixelFormat desiredDecodeFormat = PixelFormat::UNKNOWN;
+    AllocatorType allocatorType = AllocatorType::DEFAULT;
 
     bool operator==(const PixelMapConfig& other) const
     {
