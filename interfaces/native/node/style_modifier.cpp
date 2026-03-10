@@ -19313,8 +19313,16 @@ int32_t SetChainWeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
+    ArkUI_Float32 horizontal = ZERO_F;
+    ArkUI_Float32 vertical = ZERO_F;
+    if (item->size > 0) {
+        horizontal = item->value[0].f32;
+    }
+    if (item->size > NUM_1) {
+        vertical = item->value[1].f32;
+    }
     fullImpl->getNodeModifiers()->getCommonModifier()->setChainWeight(
-        node->uiNodeHandle, item->value[0].f32, item->value[1].f32);
+        node->uiNodeHandle, horizontal, vertical);
     return ERROR_CODE_NO_ERROR;
 }
 
