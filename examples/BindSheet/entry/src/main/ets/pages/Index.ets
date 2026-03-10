@@ -43,6 +43,15 @@ struct Index {
           .width('100%').fontSize('20vp')
           .margin({ bottom: 15})
           .onClick(()=>{ router.pushUrl({url: 'pages/accessibilityModal/Index'}) })
+        Button($r('app.string.MaxHeight1'))
+ 	           .width('100%').fontSize('20vp')
+ 	           .margin({ bottom: 15})
+ 	           .onClick(()=>{ router.pushUrl({url: 'pages/maxHeight/Index'}) })
+ 	 
+ 	         Button($r('app.string.AvoidKeyboard1'))
+ 	           .width('100%').fontSize('20vp')
+ 	           .margin({ bottom: 15})
+ 	           .onClick(()=>{ router.pushUrl({url: 'pages/avoidKeyboard/Index'}) })
       }
       .width('100%')
     }
