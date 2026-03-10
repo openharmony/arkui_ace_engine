@@ -427,6 +427,10 @@ class ShapeMask extends BaseShape {
   }
 }
 
+function checkCornerRadiusValid(corners: CornerRadius): boolean {
+  return !!(corners && (corners.topLeft) && (corners.topRight) && (corners.bottomRight) && (corners.bottomLeft));
+}
+
 class RenderNode {
   private _isDisposed: boolean;
   private childrenList: Array<RenderNode>;
@@ -915,43 +919,45 @@ class RenderNode {
     } else {
       this.shapeMaskValue = shapeMask;
     }
-    if (this.shapeMaskValue.rect !== null) {
+    if (this.shapeMaskValue.rect !== null && this.shapeMaskValue.rect !== undefined) {
       const rectMask = this.shapeMaskValue.rect;
       getUINativeModule().renderNode.setRectMask(
         this.nodePtr, rectMask.left, rectMask.top, rectMask.right, rectMask.bottom,
         this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
-    } else if (this.shapeMaskValue.circle !== null) {
+    } else if (this.shapeMaskValue.circle !== null && this.shapeMaskValue.circle !== undefined) {
       const circle = this.shapeMaskValue.circle;
       getUINativeModule().renderNode.setCircleMask(
         this.nodePtr, circle.centerX, circle.centerY, circle.radius,
         this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
-    } else if (this.shapeMaskValue.roundRect !== null) {
-      const roundRect = this.shapeMask.roundRect;
+    } else if (this.shapeMaskValue.roundRect !== null && this.shapeMaskValue.roundRect !== undefined) {
+      const roundRect = this.shapeMaskValue.roundRect;
       const corners = roundRect.corners;
       const rect = roundRect.rect;
-      getUINativeModule().renderNode.setRoundRectMask(
-        this.nodePtr,
-        corners.topLeft.x,
-        corners.topLeft.y,
-        corners.topRight.x,
-        corners.topRight.y,
-        corners.bottomLeft.x,
-        corners.bottomLeft.y,
-        corners.bottomRight.x,
-        corners.bottomRight.y,
-        rect.left,
-        rect.top,
-        rect.right,
-        rect.bottom,
-        this.shapeMaskValue.fillColor,
-        this.shapeMaskValue.strokeColor,
-        this.shapeMaskValue.strokeWidth);
-    } else if (this.shapeMaskValue.oval !== null) {
+      if (checkCornerRadiusValid(corners) && rect) {
+        getUINativeModule().renderNode.setRoundRectMask(
+          this.nodePtr,
+          corners.topLeft.x,
+          corners.topLeft.y,
+          corners.topRight.x,
+          corners.topRight.y,
+          corners.bottomLeft.x,
+          corners.bottomLeft.y,
+          corners.bottomRight.x,
+          corners.bottomRight.y,
+          rect.left,
+          rect.top,
+          rect.right,
+          rect.bottom,
+          this.shapeMaskValue.fillColor,
+          this.shapeMaskValue.strokeColor,
+          this.shapeMaskValue.strokeWidth);
+      }
+    } else if (this.shapeMaskValue.oval !== null && this.shapeMaskValue.oval !== undefined) {
       const oval = this.shapeMaskValue.oval;
       getUINativeModule().renderNode.setOvalMask(
         this.nodePtr, oval.left, oval.top, oval.right, oval.bottom,
         this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
-    } else if (this.shapeMaskValue.path !== null) {
+    } else if (this.shapeMaskValue.path !== null && this.shapeMaskValue.path !== undefined) {
       const path = this.shapeMaskValue.path;
       getUINativeModule().renderNode.setPath(
         this.nodePtr, path.commands, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
@@ -966,38 +972,40 @@ class RenderNode {
     } else {
       this.shapeClipValue = shapeClip;
     }
-    if (this.shapeClipValue.rect !== null) {
+    if (this.shapeClipValue.rect !== null && this.shapeClipValue.rect !== undefined) {
       const rectClip = this.shapeClipValue.rect;
       getUINativeModule().renderNode.setRectClip(
         this.nodePtr, rectClip.left, rectClip.top, rectClip.right, rectClip.bottom);
-    } else if (this.shapeClipValue.circle !== null) {
+    } else if (this.shapeClipValue.circle !== null && this.shapeClipValue.circle !== undefined) {
       const circle = this.shapeClipValue.circle;
       getUINativeModule().renderNode.setCircleClip(
         this.nodePtr, circle.centerX, circle.centerY, circle.radius);
-    } else if (this.shapeClipValue.roundRect !== null) {
+    } else if (this.shapeClipValue.roundRect !== null && this.shapeClipValue.roundRect !== undefined) {
       const roundRect = this.shapeClipValue.roundRect;
       const corners = roundRect.corners;
       const rect = roundRect.rect;
-      getUINativeModule().renderNode.setRoundRectClip(
-        this.nodePtr,
-        corners.topLeft.x,
-        corners.topLeft.y,
-        corners.topRight.x,
-        corners.topRight.y,
-        corners.bottomLeft.x,
-        corners.bottomLeft.y,
-        corners.bottomRight.x,
-        corners.bottomRight.y,
-        rect.left,
-        rect.top,
-        rect.right,
-        rect.bottom);
-    } else if (this.shapeClipValue.oval !== null) {
+      if (checkCornerRadiusValid(corners) && rect) {
+        getUINativeModule().renderNode.setRoundRectClip(
+          this.nodePtr,
+          corners.topLeft.x,
+          corners.topLeft.y,
+          corners.topRight.x,
+          corners.topRight.y,
+          corners.bottomLeft.x,
+          corners.bottomLeft.y,
+          corners.bottomRight.x,
+          corners.bottomRight.y,
+          rect.left,
+          rect.top,
+          rect.right,
+          rect.bottom);
+      }
+    } else if (this.shapeClipValue.oval !== null && this.shapeClipValue.oval !== undefined) {
       const oval = this.shapeClipValue.oval;
       getUINativeModule().renderNode.setOvalClip(
         this.nodePtr, oval.left, oval.top, oval.right, oval.bottom,
       );
-    } else if (this.shapeClipValue.path !== null) {
+    } else if (this.shapeClipValue.path !== null && this.shapeClipValue.path !== undefined) {
       const path = this.shapeClipValue.path;
       getUINativeModule().renderNode.setPathClip(
         this.nodePtr, path.commands);
