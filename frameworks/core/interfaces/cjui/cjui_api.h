@@ -3225,8 +3225,7 @@ struct CJUISelectModifier {
     void (*resetMenuBgBlurStyle)(ArkUINodeHandle node);
     void (*setSelectValue)(ArkUINodeHandle node, ArkUI_CharPtr* values, ArkUI_CharPtr* icons, ArkUI_Uint32 length);
     void (*resetSelectValue)(ArkUINodeHandle node);
-    void (*setSelectDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*setSelectDivider)(ArkUINodeHandle node, const ArkUISelectDividerArgs* dividerArgs);
     void (*resetSelectDivider)(ArkUINodeHandle node);
     void (*resetSelectDividerNull)(ArkUINodeHandle node);
     void (*setSelectDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
@@ -3234,7 +3233,7 @@ struct CJUISelectModifier {
     void (*setAvoidance)(ArkUINodeHandle node, ArkUI_Int32 mode);
     void (*resetAvoidance)(ArkUINodeHandle node);
     void (*setMenuOutline)(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int32 widthSize,
-        const ArkUI_Uint32* color, ArkUI_Int32 colorSize);
+        const ArkUI_Uint32* color, ArkUI_Int32 colorSize,  void** resObjs, size_t unitSize);
     void (*resetMenuOutline)(ArkUINodeHandle node);
 };
 

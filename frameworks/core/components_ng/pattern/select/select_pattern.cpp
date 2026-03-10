@@ -2126,6 +2126,19 @@ void SelectPattern::OnColorConfigurationUpdate()
     SetColorByUser(host, selectTheme);
 }
 
+void SelectPattern::SetSpinnerColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
+{
+    CHECK_NULL_VOID(props);
+    if (!props->GetArrowModifierSetByUserValue(false)) {
+        return;
+    }
+    CHECK_NULL_VOID(spinner_);
+    auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(spinnerLayoutProperty);
+    spinnerLayoutProperty->UpdateSymbolColorList({theme->GetSpinnerSymbolColor()});
+    spinner_->MarkModifyDone();
+}
+
 void SelectPattern::SetMenuBackgroundColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props)
 {
     CHECK_NULL_VOID(props);
@@ -2163,11 +2176,51 @@ void SelectPattern::SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<S
     CHECK_NULL_VOID(theme);
     auto props = host->GetPaintProperty<SelectPaintProperty>();
     CHECK_NULL_VOID(props);
-    auto themeBgcolor = theme->GetMenuBlendBgColor() ? theme->GetBackgroundColor() : Color::TRANSPARENT;
-    SetMenuBackgroundColorByUser(themeBgcolor, props);
+    auto layoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    auto  color = theme->GetMenuBlendBgColor() ? theme->GetBackgroundColor() : Color::TRANSPARENT;
+    SetMenuBackgroundColorByUser(color, props);
     SetModifierByUser(theme, props);
+    SetSpinnerColorByUser(theme, props);
+    RestoreDividerToDefault(theme, props);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SelectPattern::SetOptionFontColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
+{
+    CHECK_NULL_VOID(props);
+    if (props->GetOptionFontColorSetByUserValue(false)) {
+        return;
+    }
+    SetOptionFontColor(theme->GetMenuFontColor());
+}
+
+
+void SelectPattern::RestoreDividerToDefault(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
+{
+    CHECK_NULL_VOID(props);
+    CHECK_NULL_VOID(theme);
+    
+    if (!props->GetDividerStrokeWidthSetByUserValue(false)) {
+        divider_.strokeWidth = theme->GetDefaultDividerWidth();
+    }
+    if (!props->GetDividerColorSetByUserValue(false)) {
+        divider_.color = theme->GetLineColor();
+    }
+    
+    if (!props->GetDividerStartMarginSetByUserValue(false)) {
+        divider_.startMargin = -1.0_vp;
+    }
+    
+    if (!props->GetDividerEndMarginSetByUserValue(false)) {
+        divider_.endMargin = -1.0_vp;
+    }
+
+    if (!props->GetDividerStrokeWidthSetByUserValue(false) || !props->GetDividerColorSetByUserValue(false) ||
+        !props->GetDividerStartMarginSetByUserValue(false) || !props->GetDividerEndMarginSetByUserValue(false)) {
+        SetDivider(divider_);
+    }
 }
 
 void SelectPattern::UpdateMenuChildColorConfiguration(
@@ -2562,6 +2615,9 @@ bool SelectPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 
 void SelectPattern::SetDivider(const SelectDivider& divider)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        divider_ = divider;
+    }
     const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     CHECK_NULL_VOID(menuItemModifier);
     for (auto&& option : options_) {
@@ -2603,6 +2659,9 @@ void SelectPattern::ResetFontColor()
 
 void SelectPattern::SetDividerMode(const std::optional<DividerMode>& mode)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        dividerMode_ = mode;
+    }
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     ACE_UINODE_TRACE(menu);
@@ -2843,6 +2902,16 @@ void SelectPattern::SetSelectedOptionBgColorByUser(const RefPtr<SelectTheme>& th
     }
 }
 
+void SelectPattern::SetSelectedOptionFontColorByUser(const RefPtr<SelectTheme>& theme,
+    const RefPtr<SelectPaintProperty>& props)
+{
+    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(props);
+    if (!props->GetSelectedOptionFontColorSetByUserValue(false)) {
+        SetSelectedOptionFontColor(theme->GetSelectedColor());
+    }
+}
+
 void SelectPattern::SetModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
 {
     CHECK_NULL_VOID(theme);
@@ -2881,4 +2950,15 @@ FocusPattern SelectPattern::GetFocusPattern() const
     focusPattern.SetStyleType(focusStyleType);
     return focusPattern;
 }
+
+SelectDivider SelectPattern::GetDivider() const
+{
+    return divider_;
+}
+
+std::optional<DividerMode> SelectPattern::GetDividerMode() const
+{
+    return dividerMode_;
+}
+
 } // namespace OHOS::Ace::NG

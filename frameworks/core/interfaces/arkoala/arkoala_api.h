@@ -2750,6 +2750,33 @@ struct GlyphCharacterRange {
     ArkUI_Int32 glyphEnd;
 };
 
+struct ArkUISelectDividerArgs {
+    ArkUI_Uint32 color;
+    const ArkUI_Float32* values;
+    const ArkUI_Int32* units;
+    ArkUI_Int32 length;
+    void* strokeWidthRawPtr;
+    void* colorRawPtr;
+    void* startMarginRawPtr;
+    void* endMarginRawPtr;
+    ArkUI_Bool hasStrokeWidth;
+    ArkUI_Bool hasColor;
+    ArkUI_Bool hasStartMargin;
+    ArkUI_Bool hasEndMargin;
+};
+
+struct ArkUISelectDividerStyleArgs {
+    ArkUIMenuDividerOptions* dividerInfo;
+    void* strokeWidthRawPtr;
+    void* colorRawPtr;
+    void* startMarginRawPtr;
+    void* endMarginRawPtr;
+    ArkUI_Bool hasStrokeWidth;
+    ArkUI_Bool hasColor;
+    ArkUI_Bool hasStartMargin;
+    ArkUI_Bool hasEndMargin;
+};
+
 struct ArkUICommonModifier {
     ArkUI_Int32 (*setOnTouchTestDoneCallback)(ArkUINodeHandle node, void* userData,
         void (*touchTestDone)(
@@ -7609,20 +7636,19 @@ struct ArkUISelectModifier {
     void (*resetMenuBgColor)(ArkUINodeHandle node);
     void (*setMenuBgBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 style);
     void (*resetMenuBgBlurStyle)(ArkUINodeHandle node);
-    void (*setSelectDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*setSelectDivider)(ArkUINodeHandle node, const ArkUISelectDividerArgs* dividerArgs);
     void (*resetSelectDivider)(ArkUINodeHandle node);
     void (*resetSelectDividerNull)(ArkUINodeHandle node);
     void (*setSelectDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
     void (*resetSelectDirection)(ArkUINodeHandle node);
-    void (*setSelectDividerStyle)(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemDividerInfo);
+    void (*setSelectDividerStyle)(ArkUINodeHandle node, const ArkUISelectDividerStyleArgs* dividerStyleArgs);
     void (*resetSelectDividerStyle)(ArkUINodeHandle node);
     void (*setAvoidance)(ArkUINodeHandle node, ArkUI_Int32 modeValue);
     void (*resetAvoidance)(ArkUINodeHandle node);
     void (*setOnSelect)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node,
         int32_t index, ArkUI_CharPtr text));
     void (*setMenuOutline)(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int32 widthSize,
-        const ArkUI_Uint32* color, ArkUI_Int32 colorSize);
+        const ArkUI_Uint32* color, ArkUI_Int32 colorSize,  void** resObjs, size_t unitSize);
     void (*resetMenuOutline)(ArkUINodeHandle node);
     void (*setSelectSymbolValue)(ArkUINodeHandle node, ArkUI_CharPtr* values,
         void** symbolFunction, ArkUI_Uint32 length);

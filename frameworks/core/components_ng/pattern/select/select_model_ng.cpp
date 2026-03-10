@@ -1174,9 +1174,9 @@ void SelectModelNG::SetSelectedOptionTextModifier(
 
 void SelectModelNG::SetMenuOutline(const MenuParam& menuParam)
 {
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetMenuOutline(menuParam);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetMenuOutline(frameNode, menuParam);
 }
 
 void SelectModelNG::SetMenuOutline(FrameNode* frameNode, const MenuParam& menuParam)
@@ -1185,6 +1185,25 @@ void SelectModelNG::SetMenuOutline(FrameNode* frameNode, const MenuParam& menuPa
     auto pattern = frameNode->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuOutline(menuParam);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    pattern->AddResObj("selectMenuOutline", AceType::MakeRefPtr<ResourceObject>(),
+        [myMenuParam = menuParam, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) mutable {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            if (myMenuParam.outlineColor.has_value()) {
+                auto outlineColor = myMenuParam.outlineColor.value();
+                outlineColor.ReloadResources();
+                myMenuParam.outlineColor = outlineColor;
+            }
+            if (myMenuParam.outlineWidth.has_value()) {
+                auto outlineWidth = myMenuParam.outlineWidth.value();
+                outlineWidth.ReloadResources();
+                myMenuParam.outlineWidth = outlineWidth;
+            }
+            auto pattern = frameNode->GetPattern<SelectPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetMenuOutline(myMenuParam);
+        });
 }
 
 void SelectModelNG::SetShowInSubWindow(bool isShowInSubWindow)
@@ -1380,6 +1399,115 @@ void SelectModelNG::SetMenuSystemMaterial(FrameNode* frameNode, const RefPtr<UiM
         CHECK_NULL_VOID(pattern);
         pattern->SetMenuSystemMaterial(menuSystemMaterial);
     }
+}
+
+void SelectModelNG::SetDividerPropertiesSetByUser(bool strokeWidth, bool color, bool startMargin, bool endMargin)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetDividerPropertiesSetByUser(frameNode, strokeWidth, color, startMargin, endMargin);
+}
+
+void SelectModelNG::SetDividerPropertiesSetByUser(
+    FrameNode* frameNode, bool strokeWidth, bool color, bool startMargin, bool endMargin)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto props = frameNode->GetPaintProperty<SelectPaintProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateDividerStrokeWidthSetByUser(strokeWidth);
+    props->UpdateDividerColorSetByUser(color);
+    props->UpdateDividerStartMarginSetByUser(startMargin);
+    props->UpdateDividerEndMarginSetByUser(endMargin);
+}
+
+void SelectModelNG::CreateWithDividerResourceObj(
+    const RefPtr<ResourceObject>& resObj, const SelectDividerResourceType& type)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithDividerResourceObj(frameNode, resObj, type);
+}
+
+std::string DividerResourceTypeToString(const SelectDividerResourceType& type)
+{
+    switch (type) {
+        case SelectDividerResourceType::STROKE_WIDTH:
+            return "StrokeWidth";
+        case SelectDividerResourceType::START_MARGIN:
+            return "StartMargin";
+        case SelectDividerResourceType::END_MARGIN:
+            return "EndMargin";
+        case SelectDividerResourceType::COLOR:
+            return "Color";
+    }
+    return "Unknown";
+}
+
+void SelectModelNG::CreateWithDividerResourceObj(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const SelectDividerResourceType& type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "selectDivider" + DividerResourceTypeToString(type);
+    pattern->RemoveResObj(key);
+    if (!resObj) {
+        return;
+    }
+    auto&& updateFunc = [type, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(resObj);
+        SelectDivider divider = pattern->GetDivider();
+        bool updated = false;
+        switch (type) {
+            case SelectDividerResourceType::STROKE_WIDTH: {
+                Dimension value;
+                if (!ResourceParseUtils::ConvertFromResObjNG(resObj, value)) {
+                    break;
+                }
+                divider.strokeWidth = value;
+                updated = true;
+                break;
+            }
+            case SelectDividerResourceType::START_MARGIN: {
+                Dimension value;
+                if (!ResourceParseUtils::ConvertFromResObjNG(resObj, value)) {
+                    break;
+                }
+                divider.startMargin = value;
+                updated = true;
+                break;
+            }
+            case SelectDividerResourceType::END_MARGIN: {
+                Dimension value;
+                if (!ResourceParseUtils::ConvertFromResObjNG(resObj, value)) {
+                    break;
+                }
+                divider.endMargin = value;
+                updated = true;
+                break;
+            }
+            case SelectDividerResourceType::COLOR: {
+                Color value;
+                if (!ResourceParseUtils::ParseResColor(resObj, value)) {
+                    break;
+                }
+                divider.color = value;
+                updated = true;
+                break;
+            }
+        }
+        if (!updated) {
+            return;
+        }
+        pattern->SetDivider(divider);
+        if (pattern->GetDividerMode().has_value()) {
+            pattern->SetDividerMode(pattern->GetDividerMode());
+        }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 } // namespace OHOS::Ace::NG

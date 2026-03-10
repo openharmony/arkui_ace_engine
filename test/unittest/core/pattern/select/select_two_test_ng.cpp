@@ -1667,4 +1667,26 @@ HWTEST_F(SelectTwoTestNg, UpdateMenuBorderStyle008, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(selectPattern->UpdateMenuBorderStyle(menuNode));
 }
 
+/**
+ * @tc.name: SetDividerByUser
+ * @tc.desc: Test SetDivider by User
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTwoTestNg, SetDividerByUser001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select pattern
+     * @tc.expected: Objects are created successfully
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    selectModelInstance.SetDividerPropertiesSetByUser();
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    auto res = props->GetDividerColorSetByUser().value();
+    EXPECT_EQ(res, true);
+}
 } // namespace OHOS::Ace::NG

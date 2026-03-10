@@ -890,9 +890,11 @@ void JSSelect::SetMenuBackgroundColor(const JSCallbackInfo& info)
     }
     Color menuBackgroundColor;
     RefPtr<ResourceObject> resObj;
+    bool isValidValue = true;
     if (!ParseJsColor(info[0], menuBackgroundColor, resObj)) {
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
             menuBackgroundColor = Color::TRANSPARENT;
+            isValidValue = false;
         } else {
             return;
         }
@@ -901,7 +903,7 @@ void JSSelect::SetMenuBackgroundColor(const JSCallbackInfo& info)
         menuBackgroundColor.ColorToString().c_str());
     SelectModel::GetInstance()->SetMenuBackgroundColor(menuBackgroundColor);
     if (SystemProperties::ConfigChangePerform()) {
-        SelectModel::GetInstance()->SetMenuBackgroundColorByUser();
+        SelectModel::GetInstance()->SetMenuBackgroundColorByUser(isValidValue);
         SelectModel::GetInstance()->CreateWithColorResourceObj(resObj, SelectColorType::MENU_BACKGROUND_COLOR);
     }
 }
@@ -947,6 +949,14 @@ void JSSelect::SetDivider(const JSCallbackInfo& info)
     Dimension defaultStrokeWidth = 0.0_vp;
     Dimension defaultMargin = -1.0_vp;
     Color defaultColor = Color::TRANSPARENT;
+    bool hasStrokeWidth = false;
+    bool hasColor = false;
+    bool hasStartMargin = false;
+    bool hasEndMargin = false;
+    RefPtr<ResourceObject> strokeWidthResObj;
+    RefPtr<ResourceObject> colorResObj;
+    RefPtr<ResourceObject> startMarginResObj;
+    RefPtr<ResourceObject> endMarginResObj;
     // Set default strokeWidth and color
     if (selectTheme) {
         defaultStrokeWidth = selectTheme->GetDefaultDividerWidth();
@@ -961,28 +971,45 @@ void JSSelect::SetDivider(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
 
         Dimension strokeWidth = defaultStrokeWidth;
-        if (ConvertFromJSValueNG(obj->GetProperty("strokeWidth"), strokeWidth) && CheckDividerValue(strokeWidth)) {
+        if (ConvertFromJSValueNG(obj->GetProperty("strokeWidth"), strokeWidth, strokeWidthResObj) &&
+            CheckDividerValue(strokeWidth)) {
             divider.strokeWidth = strokeWidth;
+            hasStrokeWidth = true;
         }
 
         Color color = defaultColor;
-        if (ConvertFromJSValue(obj->GetProperty("color"), color)) {
+        if (ConvertFromJSValue(obj->GetProperty("color"), color, colorResObj)) {
             divider.color = color;
+            hasColor = true;
         }
 
         Dimension startMargin = defaultMargin;
-        if (ConvertFromJSValueNG(obj->GetProperty("startMargin"), startMargin) && CheckDividerValue(startMargin)) {
+        if (ConvertFromJSValueNG(obj->GetProperty("startMargin"), startMargin, startMarginResObj) &&
+            CheckDividerValue(startMargin)) {
             divider.startMargin = startMargin;
+            hasStartMargin = true;
         }
 
         Dimension endMargin = defaultMargin;
-        if (ConvertFromJSValueNG(obj->GetProperty("endMargin"), endMargin) &&  CheckDividerValue(endMargin)) {
+        if (ConvertFromJSValueNG(obj->GetProperty("endMargin"), endMargin, endMarginResObj) &&
+            CheckDividerValue(endMargin)) {
             divider.endMargin = endMargin;
+            hasEndMargin = true;
         }
     } else if (info.Length() >= 1 && info[0]->IsNull()) {
         divider.strokeWidth = 0.0_vp;
     }
     SelectModel::GetInstance()->SetDivider(divider);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto selectModel = SelectModel::GetInstance();
+        selectModel->SetDividerPropertiesSetByUser(hasStrokeWidth, hasColor, hasStartMargin, hasEndMargin);
+        selectModel->CreateWithDividerResourceObj(
+            strokeWidthResObj, OHOS::Ace::SelectDividerResourceType::STROKE_WIDTH);
+        selectModel->CreateWithDividerResourceObj(
+            startMarginResObj, OHOS::Ace::SelectDividerResourceType::START_MARGIN);
+        selectModel->CreateWithDividerResourceObj(endMarginResObj, OHOS::Ace::SelectDividerResourceType::END_MARGIN);
+        selectModel->CreateWithDividerResourceObj(colorResObj, OHOS::Ace::SelectDividerResourceType::COLOR);
+    }
 }
 
 void JSSelect::SetDividerStyle(const JSCallbackInfo& info)
@@ -991,6 +1018,14 @@ void JSSelect::SetDividerStyle(const JSCallbackInfo& info)
     Dimension defaultStrokeWidth = 0.0_vp;
     Dimension defaultMargin = -1.0_vp;
     Color defaultColor = Color::TRANSPARENT;
+    RefPtr<ResourceObject> strokeWidthResObj;
+    RefPtr<ResourceObject> colorResObj;
+    RefPtr<ResourceObject> startMarginResObj;
+    RefPtr<ResourceObject> endMarginResObj;
+    bool hasStrokeWidth = false;
+    bool hasColor = false;
+    bool hasStartMargin = false;
+    bool hasEndMargin = false;
     auto selectTheme = GetTheme<SelectTheme>();
     if (selectTheme) {
         defaultStrokeWidth = selectTheme->GetDefaultDividerWidth();
@@ -1005,17 +1040,25 @@ void JSSelect::SetDividerStyle(const JSCallbackInfo& info)
         divider.isDividerStyle = true;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         CalcDimension value;
-        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), value) && value.IsNonNegative()) {
+        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), value, strokeWidthResObj) &&
+            value.IsNonNegative()) {
             divider.strokeWidth = value;
+            hasStrokeWidth = true;
         }
-        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("startMargin"), value) && value.IsNonNegative()) {
+        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("startMargin"), value, startMarginResObj) &&
+            value.IsNonNegative()) {
             divider.startMargin = value;
+            hasStartMargin = true;
         }
-        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("endMargin"), value) && value.IsNonNegative()) {
+        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("endMargin"), value, endMarginResObj) &&
+            value.IsNonNegative()) {
             divider.endMargin = value;
+            hasEndMargin = true;
         }
-        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color, colorResObj)) {
             divider.color = defaultColor;
+        } else {
+            hasColor = true;
         }
         auto modeVal = obj->GetProperty("mode");
         if (modeVal->IsNumber() && modeVal->ToNumber<int32_t>() == 1) {
@@ -1025,6 +1068,16 @@ void JSSelect::SetDividerStyle(const JSCallbackInfo& info)
     } else {
         divider.isDividerStyle = false;
         SelectModel::GetInstance()->SetDivider(divider);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        auto selectModel = SelectModel::GetInstance();
+        selectModel->CreateWithDividerResourceObj(
+            strokeWidthResObj, OHOS::Ace::SelectDividerResourceType::STROKE_WIDTH);
+        selectModel->CreateWithDividerResourceObj(
+            startMarginResObj, OHOS::Ace::SelectDividerResourceType::START_MARGIN);
+        selectModel->CreateWithDividerResourceObj(endMarginResObj, OHOS::Ace::SelectDividerResourceType::END_MARGIN);
+        selectModel->CreateWithDividerResourceObj(colorResObj, OHOS::Ace::SelectDividerResourceType::COLOR);
+        selectModel->SetDividerPropertiesSetByUser(hasStrokeWidth, hasColor, hasStartMargin, hasEndMargin);
     }
 }
 

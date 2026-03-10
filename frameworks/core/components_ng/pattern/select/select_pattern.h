@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -276,6 +277,12 @@ public:
     void SetMenuBackgroundColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props);
     void SetModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
     void SetOptionBgColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props);
+    void SetSpinnerColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetOptionFontColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    SelectDivider GetDivider() const;
+    std::optional<DividerMode> GetDividerMode() const;
+    void RestoreDividerToDefault(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetSelectedOptionFontColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
 
 private:
     void OnAttachToFrameNode() override;
@@ -442,6 +449,8 @@ private:
     std::function<void(WeakPtr<NG::FrameNode>)> textOptionApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply_ = nullptr;
     std::optional<Color> menuBackgroundColor_;
+    SelectDivider divider_;
+    std::optional<DividerMode> dividerMode_;
 };
 
 class SelectJsonUtil {
