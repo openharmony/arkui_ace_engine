@@ -1888,6 +1888,525 @@ HWTEST_F(DatePickerColumnTest, DatePickerPatternTest021, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DatePickerPatternTest022
+ * @tc.desc: Test GetOptionCount with bounded solar date range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, DatePickerPatternTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pickerPattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    PickerDate startDate(2025, 5, 15);
+    PickerDate endDate(2025, 7, 3);
+
+    pickerPattern->SetStartDate(startDate);
+    pickerPattern->SetEndDate(endDate);
+
+    auto dataPickerRowLayoutProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(dataPickerRowLayoutProperty, nullptr);
+    dataPickerRowLayoutProperty->ResetStartDate();
+    dataPickerRowLayoutProperty->ResetEndDate();
+
+    /**
+     * @tc.steps: step2. Build solar columns and resolve day column pattern.
+     */
+    PickerDate current(2025, 6, 16);
+    pickerPattern->SolarColumnsBuilding(current);
+    EXPECT_EQ(pickerPattern->lunar_, false);
+
+    int32_t index = 0;
+    RefPtr<FrameNode> columns[3];
+    for (const auto& stackChild : frameNode->GetChildren()) {
+        ASSERT_NE(stackChild, nullptr);
+        auto blendChild = stackChild->GetLastChild();
+        ASSERT_NE(blendChild, nullptr);
+        auto child = blendChild->GetLastChild();
+        auto iter = std::find_if(pickerPattern->datePickerColumns_.begin(), pickerPattern->datePickerColumns_.end(),
+            [tag = child->GetId()](const auto& c) {
+                auto column = c.Upgrade();
+                return column && column->GetId() == tag;
+            });
+        columns[index] = (iter == pickerPattern->datePickerColumns_.end()) ? nullptr : (*iter).Upgrade();
+        index++;
+    }
+    ASSERT_NE(columns[2], nullptr);
+    auto datePickerColumnPattern = columns[2]->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(datePickerColumnPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify total options and actual options in day column.
+     */
+    EXPECT_EQ(datePickerColumnPattern->GetOptionCount(), 30);
+    EXPECT_EQ(datePickerColumnPattern->GetActualOptionCount(), 21);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest023
+ * @tc.desc: Test LunarColumnsBuilding for leap-month constrained range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, DatePickerPatternTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker pattern and configure lunar start and end dates.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    LunarDate startDate;
+    startDate.year = 2023;
+    startDate.month = 2;
+    startDate.day = 5;
+    startDate.isLeapMonth = true;
+    LunarDate endDate = startDate;
+    endDate.day = 10;
+
+    auto layoutProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateStartDate(startDate);
+    layoutProperty->UpdateEndDate(endDate);
+
+    /**
+     * @tc.steps: step2. Build lunar columns using current leap-month date.
+     */
+    LunarDate current;
+    current.year = 2023;
+    current.month = 2;
+    current.day = 6;
+    current.isLeapMonth = true;
+    datePickerPattern->LunarColumnsBuilding(current);
+
+    auto allChildNode = datePickerPattern->GetAllChildNode();
+    auto monthNode = allChildNode["month"];
+    auto dayNode = allChildNode["day"];
+    ASSERT_NE(monthNode, nullptr);
+    ASSERT_NE(dayNode, nullptr);
+
+    auto monthOptions = datePickerPattern->GetAllOptions(monthNode);
+    EXPECT_EQ(monthOptions.size(), 3);
+    EXPECT_EQ(monthOptions[2].month.value_or(0), 2);
+    EXPECT_TRUE(monthOptions[2].leap);
+
+    auto monthPattern = monthNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthPattern, nullptr);
+    EXPECT_EQ(monthPattern->GetCurrentIndex(), static_cast<uint32_t>(2));
+
+    auto dayOptions = datePickerPattern->GetAllOptions(dayNode);
+    EXPECT_EQ(dayOptions.size(), 10);
+
+    auto dayPattern = dayNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(dayPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify month and day option ranges and selected indices.
+     */
+    EXPECT_EQ(dayPattern->GetCurrentIndex(), 5);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest024
+ * @tc.desc: Test LunarColumnsBuilding when current date is before start date.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, DatePickerPatternTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker pattern and set cross-year lunar date range.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    LunarDate startDate;
+    startDate.year = 2024;
+    startDate.month = 8;
+    startDate.day = 9;
+    startDate.isLeapMonth = false;
+
+    LunarDate endDate;
+    endDate.year = 2025;
+    endDate.month = 2;
+    endDate.day = 3;
+    endDate.isLeapMonth = false;
+
+    auto layoutProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateStartDate(startDate);
+    layoutProperty->UpdateEndDate(endDate);
+
+    /**
+     * @tc.steps: step2. Build lunar columns with an earlier current date.
+     */
+    LunarDate current;
+    current.year = 2024;
+    current.month = 1;
+    current.day = 1;
+    current.isLeapMonth = false;
+    datePickerPattern->LunarColumnsBuilding(current);
+
+    auto allChildNode = datePickerPattern->GetAllChildNode();
+    auto monthNode = allChildNode["month"];
+    auto dayNode = allChildNode["day"];
+    ASSERT_NE(monthNode, nullptr);
+    ASSERT_NE(dayNode, nullptr);
+
+    auto monthOptions = datePickerPattern->GetAllOptions(monthNode);
+    EXPECT_EQ(monthOptions.size(), 12);
+    EXPECT_FALSE(monthOptions[6].month.has_value());
+    EXPECT_EQ(monthOptions[7].month.value_or(0), 8);
+    EXPECT_FALSE(monthOptions[7].leap);
+
+    auto dayOptions = datePickerPattern->GetAllOptions(dayNode);
+    auto maxDay = datePickerPattern->GetLunarMaxDay(current.year, current.month, current.isLeapMonth);
+    EXPECT_EQ(dayOptions.size(), maxDay);
+
+    auto dayPattern = dayNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(dayPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify placeholder month, day size, and selected index.
+     */
+    EXPECT_EQ(dayPattern->GetCurrentIndex(), 0);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest025
+ * @tc.desc: Test FillSolarMonthDaysOptions for bounded single-year range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, DatePickerPatternTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker pattern and get month-days column.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    RefPtr<FrameNode> monthDaysColumn = datePickerPattern->GetColumn(columnNode_->GetId());
+    ASSERT_NE(monthDaysColumn, nullptr);
+
+    /**
+     * @tc.steps: step2. Fill month-day options with configured solar boundaries.
+     */
+    datePickerPattern->startDateSolar_ = PickerDate(2024, 3, 10);
+    datePickerPattern->endDateSolar_ = PickerDate(2024, 5, 20);
+    PickerDate current(2024, 4, 15);
+    datePickerPattern->FillSolarMonthDaysOptions(current, monthDaysColumn);
+
+    auto options = datePickerPattern->GetAllOptions(monthDaysColumn);
+    ASSERT_EQ(options.size(), 141);
+    EXPECT_FALSE(options.front().month.has_value());
+    EXPECT_FALSE(options.front().day.has_value());
+
+    EXPECT_EQ(options[69].month.value_or(0), 3);
+    EXPECT_EQ(options[69].day.value_or(0), 10);
+    EXPECT_EQ(options.back().month.value_or(0), 5);
+    EXPECT_EQ(options.back().day.value_or(0), 20);
+
+    auto monthDaysPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthDaysPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify boundary options and current index.
+     */
+    EXPECT_EQ(monthDaysPattern->GetCurrentIndex(), 105);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest026
+ * @tc.desc: Test FillSolarMonthDaysOptions for full current-year options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, DatePickerPatternTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker pattern and get month-days column.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    RefPtr<FrameNode> monthDaysColumn = datePickerPattern->GetColumn(columnNode_->GetId());
+    ASSERT_NE(monthDaysColumn, nullptr);
+
+    /**
+     * @tc.steps: step2. Fill month-day options under wide solar date range.
+     */
+    datePickerPattern->startDateSolar_ = PickerDate(2023, 3, 10);
+    datePickerPattern->endDateSolar_ = PickerDate(2025, 5, 20);
+    PickerDate current(2024, 1, 1);
+    datePickerPattern->FillSolarMonthDaysOptions(current, monthDaysColumn);
+
+    auto options = datePickerPattern->GetAllOptions(monthDaysColumn);
+    ASSERT_EQ(options.size(), 366U);
+    EXPECT_EQ(options.front().month.value_or(0), 1U);
+    EXPECT_EQ(options.front().day.value_or(0), 1U);
+
+    auto monthDaysPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthDaysPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify option count, first option, and current index.
+     */
+    EXPECT_EQ(monthDaysPattern->GetCurrentIndex(), 0);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest027
+ * @tc.desc: Test ProcessDayOptions in default non-leap branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, DatePickerPatternTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker pattern and get month-days column.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    RefPtr<FrameNode> monthDaysColumn = datePickerPattern->GetColumn(columnNode_->GetId());
+    ASSERT_NE(monthDaysColumn, nullptr);
+
+    LunarDate current;
+    current.year = 2024;
+    current.month = 1;
+    current.day = 2;
+    current.isLeapMonth = false;
+
+    /**
+     * @tc.steps: step2. Process day options with current lunar date and month index.
+     */
+    datePickerPattern->ProcessDayOptions(current, monthDaysColumn, 1, false, 0);
+
+    auto options = datePickerPattern->GetAllOptions(monthDaysColumn);
+    ASSERT_EQ(options.size(), 161);
+    EXPECT_EQ(options.front().month.value_or(0), 0);
+    EXPECT_EQ(options.front().day.value_or(0), 0);
+
+    auto monthDaysPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthDaysPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify option content and selected index.
+     */
+    EXPECT_EQ(monthDaysPattern->GetCurrentIndex(), 133);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest028
+ * @tc.desc: Test ProcessDayOptions with same-month lunar start/end limits.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, DatePickerPatternTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker pattern and set same-month lunar boundaries.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    RefPtr<FrameNode> monthDaysColumn = datePickerPattern->GetColumn(columnNode_->GetId());
+    ASSERT_NE(monthDaysColumn, nullptr);
+
+    uint32_t lunarLeapMonth = 2;
+    uint32_t leapYear = 2023;
+
+    uint32_t index = 3;
+    LunarDate startDate;
+    startDate.year = leapYear;
+    startDate.month = index;
+    startDate.day = 5;
+    startDate.isLeapMonth = false;
+    LunarDate endDate = startDate;
+    endDate.day = 10;
+
+    auto layoutProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateStartDate(startDate);
+    layoutProperty->UpdateEndDate(endDate);
+    datePickerPattern->startDateLunar_ = startDate;
+    datePickerPattern->endDateLunar_ = endDate;
+
+    LunarDate current;
+    current.year = leapYear;
+    current.month = index;
+    current.day = 6;
+    current.isLeapMonth = false;
+
+    /**
+     * @tc.steps: step2. Process day options with configured leap-month context.
+     */
+    datePickerPattern->ProcessDayOptions(current, monthDaysColumn, index, false, lunarLeapMonth);
+
+    auto options = datePickerPattern->GetAllOptions(monthDaysColumn);
+    ASSERT_EQ(options.size(), 142);
+    EXPECT_FALSE(options[0].month.has_value());
+    EXPECT_EQ(options[4].month.value_or(0), 0);
+    EXPECT_EQ(options[4].day.value_or(0), 0);
+    EXPECT_EQ(options.back().day.value_or(0), 10);
+
+    auto monthDaysPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthDaysPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify placeholder, boundary day, and current index.
+     */
+    EXPECT_EQ(monthDaysPattern->GetCurrentIndex(), 137);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest029
+ * @tc.desc: Test ProcessDayOptions with leap-month constrained range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, DatePickerPatternTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker pattern and set leap-month boundaries.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    RefPtr<FrameNode> monthDaysColumn = datePickerPattern->GetColumn(columnNode_->GetId());
+    ASSERT_NE(monthDaysColumn, nullptr);
+
+    uint32_t lunarLeapMonth = 2;
+    uint32_t leapYear = 2023;
+
+    LunarDate startDate;
+    startDate.year = leapYear;
+    startDate.month = lunarLeapMonth;
+    startDate.day = 10;
+    startDate.isLeapMonth = true;
+    LunarDate endDate = startDate;
+    endDate.day = 20;
+
+    auto layoutProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateStartDate(startDate);
+    layoutProperty->UpdateEndDate(endDate);
+    datePickerPattern->startDateLunar_ = startDate;
+    datePickerPattern->endDateLunar_ = endDate;
+
+    LunarDate current;
+    current.year = leapYear;
+    current.month = lunarLeapMonth;
+    current.day = 2;
+    current.isLeapMonth = false;
+
+    /**
+     * @tc.steps: step2. Process day options in leap-month scenario.
+     */
+    datePickerPattern->ProcessDayOptions(current, monthDaysColumn, lunarLeapMonth, false, lunarLeapMonth);
+
+    auto options = datePickerPattern->GetAllOptions(monthDaysColumn);
+    ASSERT_EQ(options.size(), 162);
+    EXPECT_FALSE(options.front().month.has_value());
+    EXPECT_FALSE(options.back().month.has_value());
+
+    auto monthDaysPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthDaysPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify option padding and current index.
+     */
+    EXPECT_EQ(monthDaysPattern->GetCurrentIndex(), 133);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest030
+ * @tc.desc: Test ProcessDayOptions across normal month and leap month.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, DatePickerPatternTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create picker pattern and set normal/leap month boundaries.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    RefPtr<FrameNode> monthDaysColumn = datePickerPattern->GetColumn(columnNode_->GetId());
+    ASSERT_NE(monthDaysColumn, nullptr);
+
+    uint32_t lunarLeapMonth = 2;
+    uint32_t leapYear = 2023;
+
+    LunarDate startDate;
+    startDate.year = leapYear;
+    startDate.month = lunarLeapMonth;
+    startDate.day = 1;
+    startDate.isLeapMonth = false;
+    LunarDate endDate;
+    endDate.year = leapYear;
+    endDate.month = lunarLeapMonth;
+    endDate.day = 5;
+    endDate.isLeapMonth = true;
+
+    auto layoutProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateStartDate(startDate);
+    layoutProperty->UpdateEndDate(endDate);
+    datePickerPattern->startDateLunar_ = startDate;
+    datePickerPattern->endDateLunar_ = endDate;
+
+    LunarDate current;
+    current.year = leapYear;
+    current.month = lunarLeapMonth;
+    current.day = 3;
+    current.isLeapMonth = true;
+
+    /**
+     * @tc.steps: step2. Process day options with leap-month current date.
+     */
+    datePickerPattern->ProcessDayOptions(current, monthDaysColumn, lunarLeapMonth, true, lunarLeapMonth);
+
+    auto options = datePickerPattern->GetAllOptions(monthDaysColumn);
+    ASSERT_EQ(options.size(), 137);
+    EXPECT_EQ(options.front().day.value_or(0), 0);
+    EXPECT_EQ(options.back().day.value_or(0), 5);
+
+    auto monthDaysPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthDaysPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify day boundaries and current index.
+     */
+    EXPECT_EQ(monthDaysPattern->GetCurrentIndex(), 134);
+}
+
+/**
  * @tc.name: CreateItemTouchEventListener001
  * @tc.desc: Test DatePickerColumn CreateItemTouchEventListener.
  * @tc.type: FUNC

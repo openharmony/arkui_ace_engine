@@ -72,7 +72,7 @@ public:
     void UpdateColumnChildPosition(double offsetY) override;
     bool CanMove(bool isDown) const override;
     bool IsTossNeedToStop() override;
-    bool GetCanLoopFromLayoutProperty() const override;
+    bool GetCanLoopFromLayoutPropertyWithStartEnd() const override;
 
     const std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>>& GetOptions() const
     {
@@ -131,8 +131,10 @@ private:
         uint32_t showCount, bool isDown, double scale) override;
     void InitTextFontFamily() override;
     uint32_t GetOptionCount() const override;
+    uint32_t GetActualOptionCount() const override;
     bool GetOptionItemCount(uint32_t& itemCounts) override;
     bool IsLanscape(uint32_t itemCount) override;
+    void GetStartIndex(uint32_t& startIndex, uint32_t& totalCount);
 
     std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>> options_;
     int32_t currentChildIndex_ = 0;
@@ -157,6 +159,7 @@ private:
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
+    static const PickerDateF emptyPickerDate_;
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
     friend class PickerColumnPatternCircleUtils<DatePickerColumnPattern>;
 };
