@@ -39,9 +39,19 @@ template<>
 ImageSpanAttribute Convert(const Ark_ImageAttachmentLayoutStyle& value)
 {
     ImageSpanAttribute imageStyle;
-    imageStyle.marginProp = OptConvert<MarginProperty>(value.margin);
-    imageStyle.paddingProp = OptConvert<MarginProperty>(value.padding);
+    CalcDimension dim;
+    imageStyle.marginProp = OptConvert<MarginProperty>(value.margin).value_or(
+        NG::ConvertToCalcPaddingProperty(dim, dim, dim, dim));
+    imageStyle.paddingProp = OptConvert<MarginProperty>(value.padding).value_or(
+        NG::ConvertToCalcPaddingProperty(dim, dim, dim, dim));
     imageStyle.borderRadius = OptConvert<BorderRadiusProperty>(value.borderRadius);
+    if (!imageStyle.borderRadius) {
+        dim.Reset();
+        NG::BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(dim);
+        borderRadius.multiValued = false;
+        imageStyle.borderRadius = borderRadius;
+    }
     return imageStyle;
 }
 
@@ -175,37 +185,19 @@ void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribut
         dst.margin = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(
             ArkValueFromOptPadding(src.marginProp.value()));
     } else {
-        Ark_Padding defaultArkMargin = {
-            .top = ArkValue<Opt_Length>(0.0f),
-            .right = ArkValue<Opt_Length>(0.0f),
-            .bottom = ArkValue<Opt_Length>(0.0f),
-            .left = ArkValue<Opt_Length>(0.0f),
-        };
-        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(defaultArkMargin);
+        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty());
     }
     if (src.paddingProp) {
         dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(
             ArkValueFromOptPadding(src.paddingProp.value()));
     } else {
-        Ark_Padding defaultArkPadding = {
-            .top = ArkValue<Opt_Length>(0.0f),
-            .right = ArkValue<Opt_Length>(0.0f),
-            .bottom = ArkValue<Opt_Length>(0.0f),
-            .left = ArkValue<Opt_Length>(0.0f),
-        };
-        dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(defaultArkPadding);
+        dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty());
     }
     if (src.borderRadius) {
         dst.borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(
             ArkValueFromOptBorderRadius(src.borderRadius.value()));
     } else {
-        Ark_BorderRadiuses defaultArkBorder = {
-            .topLeft = ArkValue<Opt_Length>(0.0f),
-            .topRight = ArkValue<Opt_Length>(0.0f),
-            .bottomLeft = ArkValue<Opt_Length>(0.0f),
-            .bottomRight = ArkValue<Opt_Length>(0.0f),
-        };
-        dst.borderRadius =  ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(defaultArkBorder);
+        dst.borderRadius =  ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty());
     }
 }
 } // namespace Converter

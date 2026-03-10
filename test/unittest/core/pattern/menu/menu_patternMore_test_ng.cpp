@@ -1132,11 +1132,11 @@ HWTEST_F(MenuPattern2TestNg, GetMenuOffset002, TestSize.Level1)
 }
 
 /**
- * @tc.name:  IsSelectOverlayDefaultModeRightClickMenu001
- * @tc.desc: Test  IsSelectOverlayDefaultModeRightClickMenu
+ * @tc.name:  IsSelectOverlayShowInSubWindow001
+ * @tc.desc: Test  IsSelectOverlayShowInSubWindow
  * @tc.type: FUNC
  */
-HWTEST_F(MenuPattern2TestNg, IsSelectOverlayDefaultModeRightClickMenu001, TestSize.Level1)
+HWTEST_F(MenuPattern2TestNg, IsSelectOverlayShowInSubWindow001, TestSize.Level1)
 {
     auto menuWrapperNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
@@ -1156,8 +1156,8 @@ HWTEST_F(MenuPattern2TestNg, IsSelectOverlayDefaultModeRightClickMenu001, TestSi
 
     menuWrapperPattern->SetIsSelectOverlaySubWindowWrapper(false);
 
-    bool res = menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
-    EXPECT_TRUE(res);
+    bool res = menuPattern->IsSelectOverlayShowInSubWindow();
+    EXPECT_FALSE(res);
 }
 
 /**

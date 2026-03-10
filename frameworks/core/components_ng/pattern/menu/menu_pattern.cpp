@@ -2928,13 +2928,13 @@ float MenuPattern::GetSelectMenuWidthFromTheme() const
     return finalWidth;
 }
 
-bool MenuPattern::IsSelectOverlayDefaultModeRightClickMenu()
+bool MenuPattern::IsSelectOverlayShowInSubWindow()
 {
-    CHECK_NULL_RETURN(IsSelectOverlayRightClickMenu(), false);
+    CHECK_NULL_RETURN(IsSelectOverlayRightClickMenu() || IsSelectOverlaySubMenu(), false);
     auto menuWrapper = GetMenuWrapper();
     CHECK_NULL_RETURN(menuWrapper, false);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, false);
-    return !menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper();
+    return menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper();
 }
 } // namespace OHOS::Ace::NG

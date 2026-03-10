@@ -677,7 +677,7 @@ public:
 
     float GetSelectMenuWidthFromTheme() const;
 
-    bool IsSelectOverlayDefaultModeRightClickMenu();
+    bool IsSelectOverlayShowInSubWindow();
     void RemoveLastNodeDivider(const RefPtr<UINode>& lastNode);
     void UpdateMenuItemDivider();
     void UpdateDividerProperty(const RefPtr<FrameNode>& dividerNode, const std::optional<V2::ItemDivider>& divider);

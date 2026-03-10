@@ -569,10 +569,10 @@ HWTEST_F(MenuLayout1TwoTestNg, MenuLayoutAlgorithmTestNg044, TestSize.Level1)
 
     selectTheme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
-    layoutAlgorithm->InitCanExpandCurrentWindow(false, property);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false, property, menuPattern);
 
     menuPattern->isSelectMenu_ = true;
-    layoutAlgorithm->InitCanExpandCurrentWindow(false, property);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false, property, menuPattern);
 }
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg045
@@ -608,7 +608,9 @@ HWTEST_F(MenuLayout1TwoTestNg, MenuLayoutAlgorithmTestNg045, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     layoutAlgorithm->Measure(&layoutWrapper);
     layoutAlgorithm->Layout(&layoutWrapper);
-    layoutAlgorithm->InitCanExpandCurrentWindow(false, property);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false, property, menuPattern);
 }
 
 /**

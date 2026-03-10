@@ -1931,11 +1931,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern081, TestSize.Level0)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
+    /**
+     * @tc.steps: step2. get pattern
+     */
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 0;
     pattern->inlineSelectAllFlag_ = true;
+    /**
+     * @tc.steps: step3. HandleOnSelectAll
+     */
     pattern->HandleOnSelectAll(true, false, false);
     pattern->selectOverlay_->isUsingMouse_ = true;
     pattern->HandleOnSelectAll(false, false, false);
