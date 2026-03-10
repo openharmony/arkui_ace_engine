@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 - 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,13 @@ struct Index {
     { title: '示例35：菜单基本功能_28_混合手势菜单/MenuTestLevel0_25', url: 'pages/Examples/MenuTestLevel0_25' },
     { title: '示例35：菜单基本功能_29_菜单控制opt属性systemMaterial测试/MenuTestLevel0_26', url: 'pages/Examples/MenuTestLevel0_26' },
     { title: '示例35：菜单基本功能_30_菜单宽度/MenuTestLevel0_8', url: 'pages/Examples/MenuTestLevel0_8' },
+    { title: '示例36：高级菜单选项配置', url: 'pages/Examples/MenuAdvancedOptions' },
+    { title: '示例37：菜单位置放置示例', url: 'pages/Examples/MenuPlacementDemo' },
+    { title: '示例38：菜单动画效果示例', url: 'pages/Examples/MenuAnimationDemo' },
+    { title: '示例39：嵌套子菜单示例', url: 'pages/Examples/MenuNestedSubMenu' },
+    { title: '示例40：菜单与预览图结合示例', url: 'pages/Examples/MenuWithPreview' },
+    { title: '示例41：菜单遮罩效果示例', url: 'pages/Examples/MenuMaskDemo' },
+    { title: '示例42：菜单系统材质示例', url: 'pages/Examples/MenuSystemMaterial' },
   ]
 
   build() {
