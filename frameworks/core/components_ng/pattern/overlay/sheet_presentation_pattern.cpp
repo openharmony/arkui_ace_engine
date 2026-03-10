@@ -123,7 +123,7 @@ void SheetPresentationPattern::OnModifyDone()
     InitFoldCreaseRegion();
 }
 
-bool SheetPresentationPattern::IsWidthMDandHeightSM()
+bool SheetPresentationPattern::IsBreakpointMatch()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);

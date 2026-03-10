@@ -199,11 +199,11 @@ HWTEST_F(SheetPresentationTestTwoNg, SetSheetType001, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsWidthMDandHeightSM001
- * @tc.desc: Increase the coverage of SheetPresentationPattern::IsWidthMDandHeightSM function.
+ * @tc.name: IsBreakpointMatch001
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::IsBreakpointMatch function.
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPresentationTestTwoNg, IsWidthMDandHeightSM001, TestSize.Level1)
+HWTEST_F(SheetPresentationTestTwoNg, IsBreakpointMatch001, TestSize.Level1)
 {
     SheetPresentationTestTwoNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
@@ -227,7 +227,7 @@ HWTEST_F(SheetPresentationTestTwoNg, IsWidthMDandHeightSM001, TestSize.Level1)
         return WidthBreakpoint::WIDTH_SM;
     });
 
-    bool retFirst = sheetPattern->IsWidthMDandHeightSM();
+    bool retFirst = sheetPattern->IsBreakpointMatch();
     EXPECT_FALSE(retFirst);
 
     windowManager->SetHeightBreakpointCallback(
@@ -239,7 +239,7 @@ HWTEST_F(SheetPresentationTestTwoNg, IsWidthMDandHeightSM001, TestSize.Level1)
         return WidthBreakpoint::WIDTH_MD;
     });
 
-    bool retSecond = sheetPattern->IsWidthMDandHeightSM();
+    bool retSecond = sheetPattern->IsBreakpointMatch();
     EXPECT_TRUE(retSecond);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }

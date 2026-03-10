@@ -559,7 +559,7 @@ HWTEST_F(SheetPresentationTestThreeNg, GetWidthByScreenSizeType001, TestSize.Lev
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
     sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_BOTTOM;
-    // Make IsWidthMDandHeightSM return true
+    // Make IsBreakpointMatch return true
 
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
