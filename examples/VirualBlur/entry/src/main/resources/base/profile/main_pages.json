@@ -1,0 +1,19 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/commonEts",
+    "pages/commonModify",
+    "pages/ets/blur",
+    "pages/ets/backdropBlur",
+    "pages/ets/backgroundBlurStyle",
+    "pages/ets/foregroundEffect",
+    "pages/ets/foregroundBlurStyle",
+    "pages/ets/backgroundEffect",
+    "pages/modify/blur",
+    "pages/modify/backdropBlur",
+    "pages/modify/backgroundBlurStyle",
+    "pages/modify/foregroundEffect",
+    "pages/modify/foregroundBlurStyle",
+    "pages/modify/backgroundEffect"
+  ]
+}
