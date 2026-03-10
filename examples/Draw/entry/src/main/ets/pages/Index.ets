@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,252 +13,48 @@
  * limitations under the License.
  */
 
+import router from '@ohos.router'
+
+export interface DataClass {
+  title: string
+  page: string
+}
+
 @Entry
 @Component
-struct ShapeExample {
-  scroller: Scroller = new Scroller();
+struct Index {
+  data: DataClass[] = [
+    {
+      title: 'ShapeExample',
+      page: 'pages/ShapeExample/ShapeExample'
+    },
+  ]
+
   build() {
-    Column({ space: 10 }) {
-      Scroll(this.scroller) {
-        Column({ space: 10 }) {
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: '-2',
-            y: '-2',
-            width: '304',
-            height: '130'
-          })
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: $r('app.float.x'),
-            y: $r('app.float.y'),
-            width: $r('app.float.width'),
-            height: $r('app.float.height')
-          })
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: undefined,
-            y: undefined,
-            width: undefined,
-            height: undefined
-          })
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .fill(0x317AF7)
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .fill('rgb(255, 100, 255)')
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .fill(Color.Blue)
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .fill($r('app.color.Gray'))
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .fillOpacity(0.8)
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .fillOpacity('0.8')
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .fillOpacity($r('app.float.fillOpacity'))
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .stroke(0x317AF7)
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .stroke('rgb(255, 100, 255)')
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .stroke(Color.Blue)
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .stroke($r('app.color.Gray'))
-
-          Shape() {
-            Rect().width(300).height(50)
-            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
-            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
-          }
-          .width(350)
-          .height(140)
-          .viewPort({
-            x: -2,
-            y: -2,
-            width: 304,
-            height: 130
-          })
-          .stroke(0x317AF7)
-          .strokeDashArray([20])
+    Column() {
+      Column() {
+        List({ space: '8vp' }) {
+          ForEach(this.data, (item: DataClass) => {
+            ListItem() {
+              Button(item.title)
+                .width('100%')
+                .onClick(() => {
+                  router.pushUrl({ url: item.page })
+                })
+            }
+            .width('100%')
+            .padding({ left: '8vp', right: '8vp' })
+          }, (item: DataClass) => item.title)
         }
+        .scrollBar(BarState.Off)
       }
-    }.width('100%').margin({ top: 15 })
+      .width(250)
+      .height(200)
+      .backgroundColor($r('sys.color.background_primary'))
+      .justifyContent(FlexAlign.Center)
+      .flexGrow(1)
+    }
+    .height('100%')
+    .width('100%')
   }
 }
