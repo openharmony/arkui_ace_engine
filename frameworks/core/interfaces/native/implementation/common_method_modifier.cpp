@@ -2169,10 +2169,9 @@ void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src, ConvContext *c
 {
     auto tagOpt = src.GetTag();
     if (tagOpt.has_value()) {
-        dst.tag.tag = InteropTag::INTEROP_TAG_STRING;
-        dst.tag.value = Converter::ArkValue<Ark_String>(tagOpt.value(), Converter::FC);
+        dst.tag = Converter::ArkValue<Opt_String>(tagOpt.value(), Converter::FC);
     } else {
-        dst.tag.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+        dst.tag = Converter::ArkValue<Opt_String>();
     }
     dst.type = ArkValue<Ark_GestureControl_GestureType>(src.GetType());
     dst.isSystemGesture = ArkValue<Ark_Boolean>(src.IsSystemGesture());

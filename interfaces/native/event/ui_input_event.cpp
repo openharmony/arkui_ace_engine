@@ -4877,6 +4877,9 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetPressedButtons(
             if (!mouseEvent) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
+            if (mouseEvent->pressedButtons) {
+                delete[] mouseEvent->pressedButtons;
+            }
             mouseEvent->pressedButtons = new int[length]();
             for (int i = 0; i < length; ++i) {
                 mouseEvent->pressedButtons[i] = pressedButtons[i];
@@ -5028,7 +5031,7 @@ ArkUI_ErrorCode OH_ArkUI_PointerEvent_DestroyClonedPointerEvent(const ArkUI_UIIn
             auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
             if (mouseEvent) {
                 if (mouseEvent->pressedButtons) {
-                    delete mouseEvent->pressedButtons;
+                    delete[] mouseEvent->pressedButtons;
                     mouseEvent->pressedButtons = nullptr;
                 }
                 delete mouseEvent;
