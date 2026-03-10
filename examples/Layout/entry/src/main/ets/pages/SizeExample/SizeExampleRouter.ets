@@ -76,6 +76,30 @@ struct Index {
       title: 'SizeExample13',
       page: 'pages/SizeExample/SizeExample13'
     },
+    {
+      title: 'SizeExample14',
+      page: 'pages/SizeExample/SizeExample14'
+    },
+    {
+      title: 'SizeExample15',
+      page: 'pages/SizeExample/SizeExample15'
+    },
+    {
+      title: 'SizeExample16',
+      page: 'pages/SizeExample/SizeExample16'
+    },
+    {
+      title: 'SizeExample17',
+      page: 'pages/SizeExample/SizeExample17'
+    },
+    {
+      title: 'SizeExample18',
+      page: 'pages/SizeExample/SizeExample18'
+    },
+    {
+      title: 'SizeExample19',
+      page: 'pages/SizeExample/SizeExample19'
+    },
   ]
 
   build() {
