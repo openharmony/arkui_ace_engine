@@ -571,6 +571,76 @@ HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanItemApiIsolation001
+ * @tc.desc: Verify ImageSpanItem does not inherit base text styles below API 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SpanItemApiIsolation001, TestSize.Level1)
+{
+    auto span = AceType::MakeRefPtr<ImageSpanItem>();
+    span->fontStyle->UpdateFontSize(Dimension(18.0, DimensionUnit::VP));
+    span->textLineStyle->UpdateLineHeight(Dimension(24.0, DimensionUnit::VP));
+    int originApi = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
+
+    auto sameBase = span->GetSameStyleSpanItem(true);
+    auto sameSpan = AceType::DynamicCast<ImageSpanItem>(sameBase);
+
+    MockContainer::Current()->SetApiTargetVersion(originApi);
+    ASSERT_NE(sameSpan, nullptr);
+    bool hasFontSize = sameSpan->fontStyle && sameSpan->fontStyle->HasFontSize();
+    bool hasLineHeight = sameSpan->textLineStyle && sameSpan->textLineStyle->HasLineHeight();
+    EXPECT_FALSE(hasFontSize);
+    EXPECT_FALSE(hasLineHeight);
+}
+
+/**
+ * @tc.name: SpanItemApiIsolation002
+ * @tc.desc: Verify ImageSpanItem inherits base text styles on API 26+.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SpanItemApiIsolation002, TestSize.Level1)
+{
+    auto span = AceType::MakeRefPtr<ImageSpanItem>();
+    span->fontStyle->UpdateFontSize(Dimension(20.0, DimensionUnit::VP));
+    span->textLineStyle->UpdateLineHeight(Dimension(28.0, DimensionUnit::VP));
+    int originApi = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto sameBase = span->GetSameStyleSpanItem(true);
+    auto sameSpan = AceType::DynamicCast<ImageSpanItem>(sameBase);
+
+    MockContainer::Current()->SetApiTargetVersion(originApi);
+    ASSERT_NE(sameSpan, nullptr);
+    ASSERT_TRUE(sameSpan->fontStyle && sameSpan->textLineStyle);
+    EXPECT_EQ(sameSpan->fontStyle->GetFontSize().value_or(Dimension()), Dimension(20.0, DimensionUnit::VP));
+    EXPECT_EQ(sameSpan->textLineStyle->GetLineHeight().value_or(Dimension()), Dimension(28.0, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: SpanItemApiIsolation003
+ * @tc.desc: Verify CustomSpanItem inherits base text styles on API 26+.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SpanItemApiIsolation003, TestSize.Level1)
+{
+    auto span = AceType::MakeRefPtr<CustomSpanItem>();
+    span->fontStyle->UpdateFontSize(Dimension(16.0, DimensionUnit::VP));
+    span->textLineStyle->UpdateLineHeight(Dimension(22.0, DimensionUnit::VP));
+    int originApi = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto sameBase = span->GetSameStyleSpanItem(true);
+    auto sameSpan = AceType::DynamicCast<CustomSpanItem>(sameBase);
+
+    MockContainer::Current()->SetApiTargetVersion(originApi);
+    ASSERT_NE(sameSpan, nullptr);
+    ASSERT_TRUE(sameSpan->fontStyle && sameSpan->textLineStyle);
+    EXPECT_EQ(sameSpan->fontStyle->GetFontSize().value_or(Dimension()), Dimension(16.0, DimensionUnit::VP));
+    EXPECT_EQ(sameSpan->textLineStyle->GetLineHeight().value_or(Dimension()), Dimension(22.0, DimensionUnit::VP));
+}
+
+/**
  * @tc.name: ConstructTextStyles001
  * @tc.desc: test ConstructTextStyles of multiple paragraph.
  * @tc.type: FUNC
