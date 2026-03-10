@@ -3767,7 +3767,9 @@ int32_t FrameNode::GetAllDepthChildrenCount()
 }
 
 void FrameNode::OnAccessibilityEvent(
-    AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType) const
+    AccessibilityEventType eventType,
+    WindowsContentChangeTypes windowsContentChangeType,
+    bool sendByNode)
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         AccessibilityEvent event;
@@ -3776,7 +3778,11 @@ void FrameNode::OnAccessibilityEvent(
         event.nodeId = GetAccessibilityId();
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
-        pipeline->SendEventToAccessibility(event);
+        if (sendByNode) {
+            pipeline->SendEventToAccessibilityWithNode(event, Claim(this));
+        } else {
+            pipeline->SendEventToAccessibility(event);
+        }
     }
 }
 
