@@ -332,7 +332,6 @@ void SecurityComponentModelNG::SetDefaultBackgroundButton(const RefPtr<FrameNode
         buttonRadius = secCompTheme->GetDefaultBorderRadius();
     }
     buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
-    renderContext->UpdateBackgroundColor(secCompTheme->GetBackgroundColor());
     buttonLayoutProperty->UpdateType(static_cast<ButtonType>(type));
 }
 
