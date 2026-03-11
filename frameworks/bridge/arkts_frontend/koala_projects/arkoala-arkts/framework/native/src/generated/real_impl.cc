@@ -8655,6 +8655,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                          const Opt_Boolean* value)
     {
     }
+    void SetAiSessionOptionsImpl(Ark_NativePointer node,
+                                 const Opt_Array_AISessionEvent* value)
+    {
+    }
     void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                         const Opt_String* tag,
                                         const Opt_String* type)
@@ -11163,6 +11167,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
             WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
             WebAttributeModifier::SetEnableDefaultContextMenuImpl,
+            WebAttributeModifier::SetAiSessionOptionsImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
         };

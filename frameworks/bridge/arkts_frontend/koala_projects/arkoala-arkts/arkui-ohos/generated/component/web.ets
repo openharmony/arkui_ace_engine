@@ -3231,6 +3231,22 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableDefaultContextMenu(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setAiSessionOptionsAttribute(value: Array<AISessionEvent> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeInt32((valueTmpValue.length).toInt())
+            for (let valueTmpValueCounterI = 0; valueTmpValueCounterI < valueTmpValue.length; valueTmpValueCounterI++) {
+                const valueTmpValueTmpElement: AISessionEvent = valueTmpValue[valueTmpValueCounterI]
+                AISessionEvent_serializer.write(thisSerializer, valueTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setAiSessionOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setRegisterNativeEmbedRuleAttribute(tag: string | undefined, type: string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (tag !== undefined) {
@@ -4275,6 +4291,9 @@ export interface WebAttribute extends CommonMethod {
     enableDefaultContextMenu(value: boolean | undefined): this {
         throw new Error('Unimplemented method enableDefaultContextMenu')
     }
+    aiSessionOptions(value: Array<AISessionEvent> | undefined): this {
+        throw new Error('Unimplemented method aiSessionOptions')
+    }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         throw new Error('Unimplemented method registerNativeEmbedRule')
     }
@@ -4345,6 +4364,30 @@ export enum MicrophoneCaptureState {
     PAUSED = 1,
     ACTIVE = 2
 }
+export type OnCreateAISession = (id: string, params: string, result: OnAISessionCallback) => boolean;
+export type OnExecuteAIAction = (id: string, params: string, result: OnAISessionCallback) => void;
+export type OnDestroyAISession = (id: string) => void;
+export interface AISessionEvent {
+    aiSessionType: AISessionType;
+    onCreateAISession: OnCreateAISession;
+    onExecuteAIAction: OnExecuteAIAction;
+    onDestroyAISession: OnDestroyAISession;
+}
+export enum AISessionType {
+    TRANSLATOR = 1,
+    LANGUAGE_DETECTOR = 2,
+    SUMMARIZER = 3,
+    WRITER = 4,
+    REWRITER = 5,
+    PROMPT = 6,
+    PROOFREADER = 7
+}
+export enum AISessionResultType {
+    SUCCESS = 0,
+    FAILURE = 1,
+    RUNNING = 2
+}
+export type OnAISessionCallback = (state: AISessionResultType, content: string) => void;
 export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttribute {
     getPeer(): ArkWebPeer {
         return (this.peer as ArkWebPeer)
@@ -5081,6 +5124,11 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         this.getPeer()?.setEnableDefaultContextMenuAttribute(value_casted)
         return this
     }
+    public aiSessionOptions(value: Array<AISessionEvent> | undefined): this {
+        const value_casted = value as (Array<AISessionEvent> | undefined)
+        this.getPeer()?.setAiSessionOptionsAttribute(value_casted)
+        return this
+    }
     public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         const tag_casted = tag as (string | undefined)
         const type_casted = type as (string | undefined)
@@ -5652,6 +5700,79 @@ export class AdsBlockedDetails_serializer {
         })
         const adsBlockedTmpResult: Array<string> = adsBlockedTmpBuf
         let value: AdsBlockedDetails = ({url: urlTmpResult, adsBlocked: adsBlockedTmpResult} as AdsBlockedDetails)
+        return value
+    }
+}
+export class AISessionEvent_serializer {
+    public static write(buffer: SerializerBase, value: AISessionEvent): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForAiSessionType = value.aiSessionType
+        valueSerializer.writeInt32(valueHolderForAiSessionType.valueOf())
+        const valueHolderForOnCreateAISession = value.onCreateAISession
+        valueSerializer.holdAndWriteCallback(valueHolderForOnCreateAISession)
+        const valueHolderForOnExecuteAIAction = value.onExecuteAIAction
+        valueSerializer.holdAndWriteCallback(valueHolderForOnExecuteAIAction)
+        const valueHolderForOnDestroyAISession = value.onDestroyAISession
+        valueSerializer.holdAndWriteCallback(valueHolderForOnDestroyAISession)
+    }
+    public static read(buffer: DeserializerBase): AISessionEvent {
+        let valueDeserializer: DeserializerBase = buffer
+        const aiSessionTypeTmpResult: AISessionType = AISessionType.fromValue(valueDeserializer.readInt32())
+        const onCreateAISessionTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+        const onCreateAISessionTmpBufBufCall: KPointer = valueDeserializer.readPointer()
+        const onCreateAISessionTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
+        const onCreateAISessionTmpBufClosure = (id: string, params: string, result: OnAISessionCallback):boolean => {
+            const onCreateAISessionTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+            onCreateAISessionTmpBufBufArgsSerializer.writeInt32(onCreateAISessionTmpBufBufResource.resourceId);
+            onCreateAISessionTmpBufBufArgsSerializer.writePointer(onCreateAISessionTmpBufBufCall);
+            onCreateAISessionTmpBufBufArgsSerializer.writePointer(onCreateAISessionTmpBufBufCallSync);
+            onCreateAISessionTmpBufBufArgsSerializer.writeString(id);
+            onCreateAISessionTmpBufBufArgsSerializer.writeString(params);
+            onCreateAISessionTmpBufBufArgsSerializer.holdAndWriteCallback(result);
+            let onCreateAISessionTmpBufBufContinuationValue: boolean | undefined;
+            const onCreateAISessionTmpBufBufContinuationCallback: ((isSelected: boolean) => void) = (value: boolean):void => {
+            onCreateAISessionTmpBufBufContinuationValue = value;
+        }
+            onCreateAISessionTmpBufBufArgsSerializer.holdAndWriteCallback(onCreateAISessionTmpBufBufContinuationCallback);
+            InteropNativeModule._CallCallbackSync(10, 1327781825, onCreateAISessionTmpBufBufArgsSerializer.asBuffer(), onCreateAISessionTmpBufBufArgsSerializer.length());
+            onCreateAISessionTmpBufBufArgsSerializer.release();
+            return (onCreateAISessionTmpBufBufContinuationValue as boolean);
+        }
+        resourceFinalizerRegister(onCreateAISessionTmpBufClosure, onCreateAISessionTmpBufBufResource)
+        const onCreateAISessionTmpResult: OnCreateAISession = onCreateAISessionTmpBufClosure
+        const onExecuteAIActionTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+        const onExecuteAIActionTmpBufBufCall: KPointer = valueDeserializer.readPointer()
+        const onExecuteAIActionTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
+        const onExecuteAIActionTmpBufClosure = (id: string, params: string, result: OnAISessionCallback):void => {
+            const onExecuteAIActionTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+            onExecuteAIActionTmpBufBufArgsSerializer.writeInt32(onExecuteAIActionTmpBufBufResource.resourceId);
+            onExecuteAIActionTmpBufBufArgsSerializer.writePointer(onExecuteAIActionTmpBufBufCall);
+            onExecuteAIActionTmpBufBufArgsSerializer.writePointer(onExecuteAIActionTmpBufBufCallSync);
+            onExecuteAIActionTmpBufBufArgsSerializer.writeString(id);
+            onExecuteAIActionTmpBufBufArgsSerializer.writeString(params);
+            onExecuteAIActionTmpBufBufArgsSerializer.holdAndWriteCallback(result);
+            InteropNativeModule._CallCallbackSync(10, -999036774, onExecuteAIActionTmpBufBufArgsSerializer.asBuffer(), onExecuteAIActionTmpBufBufArgsSerializer.length());
+            onExecuteAIActionTmpBufBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(onExecuteAIActionTmpBufClosure, onExecuteAIActionTmpBufBufResource)
+        const onExecuteAIActionTmpResult: OnExecuteAIAction = onExecuteAIActionTmpBufClosure
+        const onDestroyAISessionTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+        const onDestroyAISessionTmpBufBufCall: KPointer = valueDeserializer.readPointer()
+        const onDestroyAISessionTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
+        const onDestroyAISessionTmpBufClosure = (id: string):void => {
+            const onDestroyAISessionTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+            onDestroyAISessionTmpBufBufArgsSerializer.writeInt32(onDestroyAISessionTmpBufBufResource.resourceId);
+            onDestroyAISessionTmpBufBufArgsSerializer.writePointer(onDestroyAISessionTmpBufBufCall);
+            onDestroyAISessionTmpBufBufArgsSerializer.writePointer(onDestroyAISessionTmpBufBufCallSync);
+            onDestroyAISessionTmpBufBufArgsSerializer.writeString(id);
+            InteropNativeModule._CallCallbackSync(10, -597243033, onDestroyAISessionTmpBufBufArgsSerializer.asBuffer(), onDestroyAISessionTmpBufBufArgsSerializer.length());
+            onDestroyAISessionTmpBufBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(onDestroyAISessionTmpBufClosure, onDestroyAISessionTmpBufBufResource)
+        const onDestroyAISessionTmpResult: OnDestroyAISession = onDestroyAISessionTmpBufClosure
+        let value: AISessionEvent = ({aiSessionType: aiSessionTypeTmpResult, onCreateAISession: onCreateAISessionTmpResult, onExecuteAIAction: onExecuteAIActionTmpResult, onDestroyAISession: onDestroyAISessionTmpResult} as AISessionEvent)
         return value
     }
 }

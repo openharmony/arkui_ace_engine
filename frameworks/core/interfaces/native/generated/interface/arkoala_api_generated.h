@@ -1177,6 +1177,8 @@ typedef struct arkui_component_idlize_Callback_I32_Void arkui_component_idlize_C
 typedef struct Opt_arkui_component_idlize_Callback_I32_Void Opt_arkui_component_idlize_Callback_I32_Void;
 typedef struct Array_AcceptableFileType Array_AcceptableFileType;
 typedef struct Opt_Array_AcceptableFileType Opt_Array_AcceptableFileType;
+typedef struct Array_AISessionEvent Array_AISessionEvent;
+typedef struct Opt_Array_AISessionEvent Opt_Array_AISessionEvent;
 typedef struct Array_AlertDialogButtonOptions Array_AlertDialogButtonOptions;
 typedef struct Opt_Array_AlertDialogButtonOptions Opt_Array_AlertDialogButtonOptions;
 typedef struct Array_AnimationPropertyType Array_AnimationPropertyType;
@@ -1831,6 +1833,8 @@ typedef struct NavExtender_PageMapNodeBuilder NavExtender_PageMapNodeBuilder;
 typedef struct Opt_NavExtender_PageMapNodeBuilder Opt_NavExtender_PageMapNodeBuilder;
 typedef struct OnAdsBlockedCallback OnAdsBlockedCallback;
 typedef struct Opt_OnAdsBlockedCallback Opt_OnAdsBlockedCallback;
+typedef struct OnAISessionCallback OnAISessionCallback;
+typedef struct Opt_OnAISessionCallback Opt_OnAISessionCallback;
 typedef struct OnAlphabetIndexerPopupSelectCallback OnAlphabetIndexerPopupSelectCallback;
 typedef struct Opt_OnAlphabetIndexerPopupSelectCallback Opt_OnAlphabetIndexerPopupSelectCallback;
 typedef struct OnAlphabetIndexerRequestPopupDataCallback OnAlphabetIndexerRequestPopupDataCallback;
@@ -1847,8 +1851,12 @@ typedef struct OnContentScrollCallback OnContentScrollCallback;
 typedef struct Opt_OnContentScrollCallback Opt_OnContentScrollCallback;
 typedef struct OnContextMenuHideCallback OnContextMenuHideCallback;
 typedef struct Opt_OnContextMenuHideCallback Opt_OnContextMenuHideCallback;
+typedef struct OnCreateAISession OnCreateAISession;
+typedef struct Opt_OnCreateAISession Opt_OnCreateAISession;
 typedef struct OnCreateMenuCallback OnCreateMenuCallback;
 typedef struct Opt_OnCreateMenuCallback Opt_OnCreateMenuCallback;
+typedef struct OnDestroyAISession OnDestroyAISession;
+typedef struct Opt_OnDestroyAISession Opt_OnDestroyAISession;
 typedef struct OnDetectBlankScreenCallback OnDetectBlankScreenCallback;
 typedef struct Opt_OnDetectBlankScreenCallback Opt_OnDetectBlankScreenCallback;
 typedef struct OnDidChangeCallback OnDidChangeCallback;
@@ -1857,6 +1865,8 @@ typedef struct OnDidStopDraggingCallback OnDidStopDraggingCallback;
 typedef struct Opt_OnDidStopDraggingCallback Opt_OnDidStopDraggingCallback;
 typedef struct OnDragEventCallback OnDragEventCallback;
 typedef struct Opt_OnDragEventCallback Opt_OnDragEventCallback;
+typedef struct OnExecuteAIAction OnExecuteAIAction;
+typedef struct Opt_OnExecuteAIAction Opt_OnExecuteAIAction;
 typedef struct OnFirstMeaningfulPaintCallback OnFirstMeaningfulPaintCallback;
 typedef struct Opt_OnFirstMeaningfulPaintCallback Opt_OnFirstMeaningfulPaintCallback;
 typedef struct OnFirstScreenPaintCallback OnFirstScreenPaintCallback;
@@ -2101,6 +2111,8 @@ typedef struct Ark_AccessibilityOptions Ark_AccessibilityOptions;
 typedef struct Opt_AccessibilityOptions Opt_AccessibilityOptions;
 typedef struct Ark_AdsBlockedDetails Ark_AdsBlockedDetails;
 typedef struct Opt_AdsBlockedDetails Opt_AdsBlockedDetails;
+typedef struct Ark_AISessionEvent Ark_AISessionEvent;
+typedef struct Opt_AISessionEvent Opt_AISessionEvent;
 typedef struct Ark_AlertDialogTextStyleOptions Ark_AlertDialogTextStyleOptions;
 typedef struct Opt_AlertDialogTextStyleOptions Opt_AlertDialogTextStyleOptions;
 typedef struct Ark_AnimationNumberRange Ark_AnimationNumberRange;
@@ -3805,6 +3817,28 @@ typedef struct Opt_AdaptiveColor {
     Ark_Tag tag;
     Ark_AdaptiveColor value;
 } Opt_AdaptiveColor;
+typedef enum Ark_AISessionResultType {
+    ARK_AISESSION_RESULT_TYPE_SUCCESS = 0,
+    ARK_AISESSION_RESULT_TYPE_FAILURE = 1,
+    ARK_AISESSION_RESULT_TYPE_RUNNING = 2,
+} Ark_AISessionResultType;
+typedef struct Opt_AISessionResultType {
+    Ark_Tag tag;
+    Ark_AISessionResultType value;
+} Opt_AISessionResultType;
+typedef enum Ark_AISessionType {
+    ARK_AISESSION_TYPE_TRANSLATOR = 1,
+    ARK_AISESSION_TYPE_LANGUAGE_DETECTOR = 2,
+    ARK_AISESSION_TYPE_SUMMARIZER = 3,
+    ARK_AISESSION_TYPE_WRITER = 4,
+    ARK_AISESSION_TYPE_REWRITER = 5,
+    ARK_AISESSION_TYPE_PROMPT = 6,
+    ARK_AISESSION_TYPE_PROOFREADER = 7,
+} Ark_AISessionType;
+typedef struct Opt_AISessionType {
+    Ark_Tag tag;
+    Ark_AISessionType value;
+} Opt_AISessionType;
 typedef enum Ark_Alignment {
     ARK_ALIGNMENT_TOP_START = 0,
     ARK_ALIGNMENT_TOP = 1,
@@ -10060,6 +10094,15 @@ typedef struct Opt_Array_AcceptableFileType {
     Ark_Tag tag;
     Array_AcceptableFileType value;
 } Opt_Array_AcceptableFileType;
+typedef struct Array_AISessionEvent {
+    /* kind: ContainerType */
+    Ark_AISessionEvent* array;
+    Ark_Int32 length;
+} Array_AISessionEvent;
+typedef struct Opt_Array_AISessionEvent {
+    Ark_Tag tag;
+    Array_AISessionEvent value;
+} Opt_Array_AISessionEvent;
 typedef struct Array_AlertDialogButtonOptions {
     /* kind: ContainerType */
     Ark_AlertDialogButtonOptions* array;
@@ -13227,6 +13270,16 @@ typedef struct Opt_OnAdsBlockedCallback {
     Ark_Tag tag;
     OnAdsBlockedCallback value;
 } Opt_OnAdsBlockedCallback;
+typedef struct OnAISessionCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, Ark_AISessionResultType state, const Ark_String content);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_AISessionResultType state, const Ark_String content);
+} OnAISessionCallback;
+typedef struct Opt_OnAISessionCallback {
+    Ark_Tag tag;
+    OnAISessionCallback value;
+} Opt_OnAISessionCallback;
 typedef struct OnAlphabetIndexerPopupSelectCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13307,6 +13360,16 @@ typedef struct Opt_OnContextMenuHideCallback {
     Ark_Tag tag;
     OnContextMenuHideCallback value;
 } Opt_OnContextMenuHideCallback;
+typedef struct OnCreateAISession {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String id, const Ark_String params, const OnAISessionCallback result, const synthetic_Callback_Boolean_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String id, const Ark_String params, const OnAISessionCallback result, const synthetic_Callback_Boolean_Void continuation);
+} OnCreateAISession;
+typedef struct Opt_OnCreateAISession {
+    Ark_Tag tag;
+    OnCreateAISession value;
+} Opt_OnCreateAISession;
 typedef struct OnCreateMenuCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13317,6 +13380,16 @@ typedef struct Opt_OnCreateMenuCallback {
     Ark_Tag tag;
     OnCreateMenuCallback value;
 } Opt_OnCreateMenuCallback;
+typedef struct OnDestroyAISession {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String id);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String id);
+} OnDestroyAISession;
+typedef struct Opt_OnDestroyAISession {
+    Ark_Tag tag;
+    OnDestroyAISession value;
+} Opt_OnDestroyAISession;
 typedef struct OnDetectBlankScreenCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13357,6 +13430,16 @@ typedef struct Opt_OnDragEventCallback {
     Ark_Tag tag;
     OnDragEventCallback value;
 } Opt_OnDragEventCallback;
+typedef struct OnExecuteAIAction {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String id, const Ark_String params, const OnAISessionCallback result);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String id, const Ark_String params, const OnAISessionCallback result);
+} OnExecuteAIAction;
+typedef struct Opt_OnExecuteAIAction {
+    Ark_Tag tag;
+    OnExecuteAIAction value;
+} Opt_OnExecuteAIAction;
 typedef struct OnFirstMeaningfulPaintCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14575,6 +14658,17 @@ typedef struct Opt_AdsBlockedDetails {
     Ark_Tag tag;
     Ark_AdsBlockedDetails value;
 } Opt_AdsBlockedDetails;
+typedef struct Ark_AISessionEvent {
+    /* kind: Interface */
+    Ark_AISessionType aiSessionType;
+    OnCreateAISession onCreateAISession;
+    OnExecuteAIAction onExecuteAIAction;
+    OnDestroyAISession onDestroyAISession;
+} Ark_AISessionEvent;
+typedef struct Opt_AISessionEvent {
+    Ark_Tag tag;
+    Ark_AISessionEvent value;
+} Opt_AISessionEvent;
 typedef struct Ark_AlertDialogTextStyleOptions {
     /* kind: Interface */
     Opt_WordBreak wordBreak;
@@ -27239,6 +27333,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                               const Opt_OnMicrophoneCaptureStateChangeCallback* value);
     void (*setEnableDefaultContextMenu)(Ark_NativePointer node,
                                         const Opt_Boolean* value);
+    void (*setAiSessionOptions)(Ark_NativePointer node,
+                                const Opt_Array_AISessionEvent* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,
                                        const Opt_String* tag,
                                        const Opt_String* type);
