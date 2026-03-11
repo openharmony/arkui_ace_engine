@@ -384,18 +384,31 @@ HWTEST_F(TextTestSixNg, ParagraphManagerTestNG001, TestSize.Level1)
 /**
  * @tc.name: ResetTextEffectBeforeLayoutTest001
  * @tc.desc: Test ResetTextEffectBeforeLayout when textEffectStrategy is NONE
+ * @tc.type: FUNC
  */
 HWTEST_F(TextTestSixNg, ResetTextEffectBeforeLayoutTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
 
+    /**
+     * @tc.steps: step2. Update TextEffectStrategy to NONE
+     */
     auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::NONE);
 
+    /**
+     * @tc.steps: step3. Call ResetTextEffectBeforeLayout and verify return true
+     */
     bool result = pattern->ResetTextEffectBeforeLayout();
     EXPECT_TRUE(result);
 
+    /**
+     * @tc.steps: step4. Update TextEffectStrategy to FLIP and call with false parameter
+     */
     layoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::FLIP);
 
     result = pattern->ResetTextEffectBeforeLayout(false);
@@ -405,25 +418,38 @@ HWTEST_F(TextTestSixNg, ResetTextEffectBeforeLayoutTest001, TestSize.Level1)
 /**
  * @tc.name: GetOrCreateTextEffectTest001
  * @tc.desc: Test GetOrCreateTextEffect when need to reset text effect
+ * @tc.type: FUNC
  */
 HWTEST_F(TextTestSixNg, GetOrCreateTextEffectTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create TextPattern with FLIP strategy
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::FLIP);
 
+    /**
+     * @tc.steps: step2. Call GetOrCreateTextEffect with initial content and verify not needing update
+     */
     bool needUpdate = false;
     std::u16string content = u"123";
     auto result = pattern->GetOrCreateTextEffect(content, needUpdate);
     EXPECT_NE(result, nullptr);
     EXPECT_FALSE(needUpdate);
 
+    /**
+     * @tc.steps: step3. Change content and verify needUpdate becomes true
+     */
     content = u"124";
     result = pattern->GetOrCreateTextEffect(content, needUpdate);
     EXPECT_NE(result, nullptr);
     EXPECT_TRUE(needUpdate);
 
+    /**
+     * @tc.steps: step4. Change strategy to NONE and verify result is nullptr
+     */
     layoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::NONE);
 
     result = pattern->GetOrCreateTextEffect(content, needUpdate);
@@ -433,11 +459,19 @@ HWTEST_F(TextTestSixNg, GetOrCreateTextEffectTest001, TestSize.Level1)
 /**
  * @tc.name: RegularMatchNumbersTest001
  * @tc.desc: Test RegularMatchNumbers with empty content
+ * @tc.type: FUNC
  */
 HWTEST_F(TextTestSixNg, RegularMatchNumbersTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+
+    /**
+     * @tc.steps: step2. Call RegularMatchNumbers with empty content
+     */
     std::u16string content = u"";
     bool result = pattern->RegularMatchNumbers(content);
     EXPECT_FALSE(result);
@@ -446,11 +480,19 @@ HWTEST_F(TextTestSixNg, RegularMatchNumbersTest001, TestSize.Level1)
 /**
  * @tc.name: RegularMatchNumbersTest002
  * @tc.desc: Test RegularMatchNumbers with pure numbers
+ * @tc.type: FUNC
  */
 HWTEST_F(TextTestSixNg, RegularMatchNumbersTest002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+
+    /**
+     * @tc.steps: step2. Call RegularMatchNumbers with pure numbers content
+     */
     std::u16string content = u"1234567890";
     bool result = pattern->RegularMatchNumbers(content);
     EXPECT_TRUE(result);
@@ -459,18 +501,26 @@ HWTEST_F(TextTestSixNg, RegularMatchNumbersTest002, TestSize.Level1)
 /**
  * @tc.name: CreateOrUpdateTextEffectTest001
  * @tc.desc: Test CreateOrUpdateTextEffect with non-number content
+ * @tc.type: FUNC
  */
 HWTEST_F(TextTestSixNg, CreateOrUpdateTextEffectTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create TextPattern, layoutAlgorithm and paragraph
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     auto layoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
 
-    // Non-number content should not create text effect
+    /**
+     * @tc.steps: step2. Call CreateOrUpdateTextEffect with non-number content
+     */
     layoutAlgorithm->CreateOrUpdateTextEffect(nullptr, paragraph, pattern, u"abc");
 
-    // Verify no text effect was created
+    /**
+     * @tc.steps: step3. Verify no text effect was created
+     */
     auto textEffect = pattern->GetTextEffect();
     EXPECT_EQ(textEffect, nullptr);
 }
@@ -478,28 +528,38 @@ HWTEST_F(TextTestSixNg, CreateOrUpdateTextEffectTest001, TestSize.Level1)
 /**
  * @tc.name: RelayoutResetOrUpdateTextEffect001
  * @tc.desc: Test Update When Values Change
+ * @tc.type: FUNC
  */
 HWTEST_F(TextTestSixNg, RelayoutResetOrUpdateTextEffect001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
-    // Set up textEffect_ with initial values.
+    /**
+     * @tc.steps: step2. Set up textEffect_ with initial values
+     */
     textPattern->textEffect_ = TextEffect::CreateTextEffect();
     auto textEffect = AceType::DynamicCast<MockTextEffect>(textPattern->textEffect_);
     ASSERT_NE(textEffect, nullptr);
     textEffect->direction_ = TextFlipDirection::DOWN;
     textEffect->enableBlur_ = false;
 
-    // Call the function with new values (should return -1)
+    /**
+     * @tc.steps: step3. Call RelayoutResetOrUpdateTextEffect with new values
+     */
     textLayoutProperty->UpdateTextFlipDirection(TextFlipDirection::UP);
     textLayoutProperty->UpdateTextFlipEnableBlur(true);
     textLayoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::FLIP);
     textPattern->RelayoutResetOrUpdateTextEffect();
 
-    // Verify updates occurred (return value -1)
+    /**
+     * @tc.steps: step4. Verify updates occurred
+     */
     EXPECT_EQ(textEffect->direction_, TextFlipDirection::UP);
     EXPECT_EQ(textEffect->enableBlur_, true);
 }
@@ -511,16 +571,642 @@ HWTEST_F(TextTestSixNg, RelayoutResetOrUpdateTextEffect001, TestSize.Level1)
  */
 HWTEST_F(TextTestSixNg, IsSelectableAndCopyTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(textLayoutProperty, nullptr);
 
-    // 设置 SELECTABLE 模式和非 None copyOption
+    /**
+     * @tc.steps: step2. Set SELECTABLE mode and non-None copyOption
+     */
     textLayoutProperty->UpdateTextSelectableMode(TextSelectableMode::SELECTABLE_FOCUSABLE);
     pattern->copyOption_ = CopyOptions::Local;
     pattern->textEffect_ = TextEffect::CreateTextEffect(); // textEffect 不为空
 
+    /**
+     * @tc.steps: step3. Call IsSelectableAndCopy and verify result
+     */
     EXPECT_FALSE(pattern->IsSelectableAndCopy());
+}
+
+/**
+ * @tc.name: TextPatternOnWindowHide001
+ * @tc.desc: Test TextPattern OnWindowHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternOnWindowHide001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call OnWindowHide
+     */
+    pattern->OnWindowHide();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternOnWindowShow001
+ * @tc.desc: Test TextPattern OnWindowShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternOnWindowShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call OnWindowShow
+     */
+    pattern->OnWindowShow();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternCloseSelectOverlay001
+ * @tc.desc: Test TextPattern CloseSelectOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternCloseSelectOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call CloseSelectOverlay
+     */
+    pattern->CloseSelectOverlay();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternCloseSelectOverlay002
+ * @tc.desc: Test TextPattern CloseSelectOverlay with animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternCloseSelectOverlay002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call CloseSelectOverlay with animation
+     */
+    pattern->CloseSelectOverlay(true);
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternResetSelection001
+ * @tc.desc: Test TextPattern ResetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternResetSelection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call ResetSelection
+     */
+    pattern->ResetSelection();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternGetTextContentLength001
+ * @tc.desc: Test TextPattern GetTextContentLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternGetTextContentLength001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call GetTextContentLength and verify result
+     */
+    int32_t length = pattern->GetTextContentLength();
+    EXPECT_EQ(length, 0);
+}
+
+/**
+ * @tc.name: TextPatternCanAIEntityDrag001
+ * @tc.desc: Test TextPattern CanAIEntityDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternCanAIEntityDrag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call CanAIEntityDrag and verify result
+     */
+    bool result = pattern->CanAIEntityDrag();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: TextPatternCheckAIPreviewMenuEnable001
+ * @tc.desc: Test TextPattern CheckAIPreviewMenuEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternCheckAIPreviewMenuEnable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call CheckAIPreviewMenuEnable and verify result
+     */
+    bool result = pattern->CheckAIPreviewMenuEnable();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: TextPatternIsAiSelected001
+ * @tc.desc: Test TextPattern IsAiSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternIsAiSelected001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call IsAiSelected and verify result
+     */
+    bool result = pattern->IsAiSelected();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: TextPatternIsPreviewMenuShow001
+ * @tc.desc: Test TextPattern IsPreviewMenuShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternIsPreviewMenuShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call IsPreviewMenuShow and verify result
+     */
+    bool result = pattern->IsPreviewMenuShow();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: TextPatternDragNodeDetachFromParent001
+ * @tc.desc: Test TextPattern DragNodeDetachFromParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternDragNodeDetachFromParent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call DragNodeDetachFromParent
+     */
+    pattern->DragNodeDetachFromParent();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternShowAIEntityMenuForCancel001
+ * @tc.desc: Test TextPattern ShowAIEntityMenuForCancel
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternShowAIEntityMenuForCancel001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call ShowAIEntityMenuForCancel
+     */
+    pattern->ShowAIEntityMenuForCancel();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternIsSelectAll001
+ * @tc.desc: Test TextPattern IsSelectAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternIsSelectAll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call IsSelectAll and verify result
+     */
+    bool result = pattern->IsSelectAll();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: TextPatternHiddenMenu001
+ * @tc.desc: Test TextPattern HiddenMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternHiddenMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call HiddenMenu
+     */
+    pattern->HiddenMenu();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternOnAttachToFrameNode001
+ * @tc.desc: Test TextPattern OnAttachToFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternOnAttachToFrameNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call OnAttachToFrameNode
+     */
+    pattern->OnAttachToFrameNode();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternOnDetachFromFrameNode001
+ * @tc.desc: Test TextPattern OnDetachFromFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternOnDetachFromFrameNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call OnDetachFromFrameNode
+     */
+    pattern->OnDetachFromFrameNode(frameNode.GetRawPtr());
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternOnAttachToMainTree001
+ * @tc.desc: Test TextPattern OnAttachToMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternOnAttachToMainTree001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call OnAttachToMainTree
+     */
+    pattern->OnAttachToMainTree();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternOnDetachFromMainTree001
+ * @tc.desc: Test TextPattern OnDetachFromMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternOnDetachFromMainTree001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call OnDetachFromMainTree
+     */
+    pattern->OnDetachFromMainTree();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternResetAISelected001
+ * @tc.desc: Test TextPattern ResetAISelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternResetAISelected001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call ResetAISelected
+     */
+    pattern->ResetAISelected(AIResetSelectionReason::CLOSE_CONTEXT_MENU);
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternIsAskCeliaSupported001
+ * @tc.desc: Test TextPattern IsAskCeliaSupported
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternIsAskCeliaSupported001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call IsAskCeliaSupported and verify result
+     */
+    bool result = pattern->IsAskCeliaSupported();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: TextPatternHandleOnCopy001
+ * @tc.desc: Test TextPattern HandleOnCopy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternHandleOnCopy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call HandleOnCopy
+     */
+    pattern->HandleOnCopy();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternHandleOnAskCelia001
+ * @tc.desc: Test TextPattern HandleOnAskCelia
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternHandleOnAskCelia001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call HandleOnAskCelia
+     */
+    pattern->HandleOnAskCelia();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternHandleAIMenuOption001
+ * @tc.desc: Test TextPattern HandleAIMenuOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternHandleAIMenuOption001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call HandleAIMenuOption with test option
+     */
+    pattern->HandleAIMenuOption("test_option");
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternStartVibratorByLongPress001
+ * @tc.desc: Test TextPattern StartVibratorByLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternStartVibratorByLongPress001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call StartVibratorByLongPress
+     */
+    pattern->StartVibratorByLongPress();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternPreviewDragNodeHideAnimation001
+ * @tc.desc: Test TextPattern PreviewDragNodeHideAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternPreviewDragNodeHideAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call PreviewDragNodeHideAnimation
+     */
+    pattern->PreviewDragNodeHideAnimation();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternShowAIEntityMenuForCancel002
+ * @tc.desc: Test ShowAIEntityMenuForCancel with null data detector
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternShowAIEntityMenuForCancel002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Set dataDetectorAdapter to null and call ShowAIEntityMenuForCancel
+     */
+    pattern->dataDetectorAdapter_ = nullptr;
+    pattern->ShowAIEntityMenuForCancel();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternShowAIEntityMenuForCancel003
+ * @tc.desc: Test ShowAIEntityMenuForCancel with null preview controller
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternShowAIEntityMenuForCancel003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Set previewController to null and call ShowAIEntityMenuForCancel
+     */
+    pattern->previewController_ = nullptr;
+    pattern->ShowAIEntityMenuForCancel();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternShowAIEntityMenuForCancel004
+ * @tc.desc: Test ShowAIEntityMenuForCancel when preview menu is showing
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSixNg, TextPatternShowAIEntityMenuForCancel004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and FrameNode
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    pattern->frameNode_ = hostNode;
+
+    /**
+     * @tc.steps: step2. Call ShowAIEntityMenuForCancel
+     */
+    pattern->ShowAIEntityMenuForCancel();
+    EXPECT_NE(pattern, nullptr);
 }
 } // namespace OHOS::Ace::NG

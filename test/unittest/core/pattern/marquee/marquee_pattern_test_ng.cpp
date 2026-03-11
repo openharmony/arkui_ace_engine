@@ -531,4 +531,233 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_ChangeSecondChildVisibility004, Te
     
     EXPECT_TRUE(textLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE);
 }
+
+/**
+ * @tc.name: MarqueePattern_FireStartEvent001
+ * @tc.desc: Test FireStartEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_FireStartEvent001, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    marqueeModel->FireStartEvent();
+    EXPECT_NE(marqueeModel, nullptr);
+}
+
+/**
+ * @tc.name: MarqueePattern_FireBounceEvent001
+ * @tc.desc: Test FireBounceEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_FireBounceEvent001, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    marqueeModel->FireBounceEvent();
+    EXPECT_NE(marqueeModel, nullptr);
+}
+
+/**
+ * @tc.name: MarqueePattern_FireFinishEvent001
+ * @tc.desc: Test FireFinishEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_FireFinishEvent001, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    marqueeModel->FireFinishEvent();
+    EXPECT_NE(marqueeModel, nullptr);
+}
+
+/**
+ * @tc.name: MarqueePattern_StoreProperties001
+ * @tc.desc: Test StoreProperties
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_StoreProperties001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    marqueeModel.StoreProperties();
+    EXPECT_EQ(marqueeModel.IsRunMarquee(), false);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetMarqueeSpacing002
+ * @tc.desc: Test GetMarqueeSpacing with spacing set
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetMarqueeSpacing002, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateMarqueeSpacing(Dimension(15.0));
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    auto spacing = marqueeModel->GetMarqueeSpacing();
+    EXPECT_GT(spacing, 0.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetScrollAmount002
+ * @tc.desc: Test GetScrollAmount with custom value
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetScrollAmount002, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    paintProperty->UpdateScrollAmount(12.0);
+    frameNode->paintProperty_ = paintProperty;
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    auto amount = marqueeModel->GetScrollAmount();
+    EXPECT_GT(amount, 0.0);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalculateStart002
+ * @tc.desc: Test CalculateStart with different direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalculateStart002, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateDirection(MarqueeDirection::RIGHT);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    auto start = marqueeModel->CalculateStart();
+    EXPECT_EQ(start, 0.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_CalculateEnd002
+ * @tc.desc: Test CalculateEnd with different direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_CalculateEnd002, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Marquee", 1, pattern, false);
+    auto layoutProperty = frameNode->GetLayoutProperty<MarqueeLayoutProperty>();
+    layoutProperty->UpdateDirection(MarqueeDirection::RIGHT);
+    WeakPtr<FrameNode> hostNode(frameNode);
+    auto marqueeModel = AceType::MakeRefPtr<MarqueePattern>();
+    marqueeModel->frameNode_ = hostNode;
+    auto end = marqueeModel->CalculateEnd();
+    EXPECT_EQ(end, 0.0f);
+}
+
+/**
+ * @tc.name: MarqueePattern_ChangeAnimationPlayStatus001
+ * @tc.desc: Test ChangeAnimationPlayStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_ChangeAnimationPlayStatus001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    marqueeModel.ChangeAnimationPlayStatus();
+    EXPECT_FALSE(marqueeModel.IsRunMarquee());
+}
+
+/**
+ * @tc.name: MarqueePattern_UpdateNodeInitialPos001
+ * @tc.desc: Test UpdateNodeInitialPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_UpdateNodeInitialPos001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    marqueeModel.UpdateNodeInitialPos();
+    EXPECT_FALSE(marqueeModel.IsRunMarquee());
+}
+
+/**
+ * @tc.name: MarqueePattern_UpdateNodeInitialPos002
+ * @tc.desc: Test UpdateNodeInitialPos with cancel=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_UpdateNodeInitialPos002, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    marqueeModel.UpdateNodeInitialPos(true);
+    EXPECT_FALSE(marqueeModel.IsRunMarquee());
+}
+
+/**
+ * @tc.name: MarqueePattern_ProcessVisibleAreaCallback001
+ * @tc.desc: Test ProcessVisibleAreaCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_ProcessVisibleAreaCallback001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    marqueeModel.ProcessVisibleAreaCallback();
+    EXPECT_FALSE(marqueeModel.IsRunMarquee());
+}
+
+/**
+ * @tc.name: MarqueePattern_PauseAnimation001
+ * @tc.desc: Test PauseAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_PauseAnimation001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    marqueeModel.PauseAnimation();
+    EXPECT_FALSE(marqueeModel.IsRunMarquee());
+}
+
+/**
+ * @tc.name: MarqueePattern_ResumeAnimation001
+ * @tc.desc: Test ResumeAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_ResumeAnimation001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    marqueeModel.ResumeAnimation();
+    EXPECT_FALSE(marqueeModel.IsRunMarquee());
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection001
+ * @tc.desc: Test GetTextDirection with LTR content
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto direction = marqueeModel.GetTextDirection("Hello World", TextDirection::LTR);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: MarqueePattern_GetTextDirection002
+ * @tc.desc: Test GetTextDirection with RTL content
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetTextDirection002, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    auto direction = marqueeModel.GetTextDirection("\u0591Hello", TextDirection::LTR);
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
 } // namespace OHOS::Ace::NG
