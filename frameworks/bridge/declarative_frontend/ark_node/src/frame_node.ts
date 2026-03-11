@@ -72,8 +72,8 @@ errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child'
 declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
 declare type UIStatesChangeHandlerCallback = (currentUIStates: number) => void;
 
-function getFrameNodeRawPtr(frameNode: FrameNode): number {
-  return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
+function getFrameNodeRawPtr(nodePtr: NodePtr): number {
+  return getUINativeModule().frameNode.getFrameNodeRawPtr(nodePtr);
 }
 
 class FrameNode {
@@ -112,8 +112,10 @@ class FrameNode {
     this._childList = new Map();
     if (type === 'BuilderRootFrameNode') {
       this.renderNode_ = new RenderNode(type);
-      this.renderNode_.setFrameNode(new WeakRef(this));
-      return;
+      if (nativePointer === null || nativePointer === undefined) {
+        this.renderNode_.setFrameNode(new WeakRef(this));
+        return;
+      }
     }
     if (type === 'ProxyFrameNode') {
       return;
@@ -962,8 +964,8 @@ class ImmutableFrameNode extends FrameNode {
 }
 
 class BuilderRootFrameNode extends ImmutableFrameNode {
-  constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode') {
-    super(uiContext, type);
+  constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode', ptr?: number) {
+    super(uiContext, type, undefined, ptr);
   }
   getType(): string {
     return 'BuilderRootFrameNode';

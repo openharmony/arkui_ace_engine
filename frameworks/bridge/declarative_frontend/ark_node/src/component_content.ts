@@ -19,6 +19,7 @@ class ComponentContentCommonBase extends Content {
   private attachNodeRef_: NativeStrongRef;
   private parentWeak_: WeakRef<FrameNode> | undefined;
   private _isDisposed: boolean;
+  protected instanceId_: number;
   constructor() {
     super();
     this._isDisposed = false;
@@ -30,6 +31,13 @@ class ComponentContentCommonBase extends Content {
 
   public getFrameNode(): FrameNode | null | undefined {
     return this.builderNode_.getFrameNodeWithoutCheck();
+  }
+  public getFrameNodePtr(): NodePtr | undefined{
+    let frameNode = this.builderNode_.getFrameNode();
+    if (frameNode !== null) {
+      return frameNode.nodePtr_;
+    }
+    return undefined;
   }
   public setAttachedParent(parent: WeakRef<FrameNode> | undefined) {
     this.parentWeak_ = parent;
@@ -60,6 +68,10 @@ class ComponentContentCommonBase extends Content {
     this.detachFromParent();
     this.attachNodeRef_?.dispose();
     this.builderNode_?.dispose();
+  }
+
+  public isTransferred(): boolean {
+    return false;
   }
 
   public isDisposed(): boolean {
@@ -95,14 +107,22 @@ class ComponentContentCommonBase extends Content {
   public inheritFreezeOptions(enable: boolean): void {
     this.builderNode_.inheritFreezeOptions(enable);
   }
+
+  public getInstanceId(): number {
+    return this.instanceId_;
+  }
 }
 
 class ComponentContent extends ComponentContentCommonBase {
-  constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object, options?: BuildOptions) {
+  constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object, options?: BuildOptions,
+    nodePtr?: number, frameNodePtr?: number) {
     super();
-    let builderNode = new BuilderNode(uiContext, {});
+    let builderNode = new BuilderNode(uiContext, {}, nodePtr, frameNodePtr);
+    this.instanceId_ = uiContext.instanceId_;
     this.builderNode_ = builderNode;
-    this.builderNode_.build(builder, params ?? undefined, options);
+    if (nodePtr === undefined && frameNodePtr === undefined) {
+      this.builderNode_.build(builder, params ?? undefined, options);
+    }
   }
 }
 

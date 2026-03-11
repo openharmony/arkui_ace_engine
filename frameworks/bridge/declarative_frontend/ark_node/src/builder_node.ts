@@ -86,10 +86,10 @@ class BuilderNode extends BuilderNodeCommonBase {
   public engineParams_: Object | undefined | null;
   public _proxyObjectEngineParam: Object | undefined | null;
   public updateEngineParams_: Object | undefined | null;
-  constructor(uiContext: UIContext, options: RenderOptions) {
+  constructor(uiContext: UIContext, options: RenderOptions, nodePtr?: number, frameNodePtr?: number) {
     super();
     this.updateEngineParams_ = null;
-    const jsBuilderNode = new JSBuilderNode(uiContext, options, new WeakRef(this));
+    const jsBuilderNode = new JSBuilderNode(uiContext, options, new WeakRef(this), nodePtr, frameNodePtr);
     this._JSBuilderNode = jsBuilderNode;
     let id = Symbol('BuilderRootFrameNode');
     BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
@@ -136,7 +136,7 @@ class JSBuilderNode extends BaseNode {
   public __parentViewOfBuildNode?: WeakRef<ViewBuildNodeBase>;
   private activeCount_: number;
   constructor(uiContext: UIContext, options?: RenderOptions,
-    builderNodeRef?: WeakRef<BuilderNode> | WeakRef<ReactiveBuilderNode>) {
+    builderNodeRef?: WeakRef<BuilderNode> | WeakRef<ReactiveBuilderNode>, nodePtr?: number, frameNodePtr?: number) {
     super(uiContext, options);
     this.uiContext_ = uiContext;
     this.updateFuncByElmtId = new UpdateFuncsByElmtId();
@@ -149,6 +149,12 @@ class JSBuilderNode extends BaseNode {
     this.__parentViewOfBuildNode = undefined;
     this.host_ = builderNodeRef;
     this.activeCount_ = 1;
+    if (nodePtr !== undefined) {
+      this._nativeRef = getUINativeModule().frameNode.createNativeStrongRefWithPtrVal(nodePtr);
+    }
+    if (frameNodePtr !== undefined) {
+      this.frameNode_ = new BuilderRootFrameNode(this.uiContext_, 'BuilderRootFrameNode', frameNodePtr);
+    }
   }
   public findProvidePU__(providePropName: string): ObservedPropertyAbstractPU<any> | undefined {
     if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {

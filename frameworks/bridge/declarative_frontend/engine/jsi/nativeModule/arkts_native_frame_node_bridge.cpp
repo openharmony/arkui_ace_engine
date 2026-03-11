@@ -711,6 +711,18 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionFromWindow(ArkUIRuntimeCa
     return valueArray;
 }
 
+ArkUINativeModuleValue FrameNodeBridge::CreateNativeStrongRefWithPtrVal(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNumber()) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    int64_t ptr = firstArg->ToNumber(vm)->Value();
+    auto nodePtr = AceType::Claim(reinterpret_cast<AceType*>(ptr));
+    return NativeUtilsBridge::CreateStrongRef(vm, nodePtr);
+}
+
 void FrameNodeBridge::SetDrawFunc(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     CHECK_NULL_VOID(frameNode);

@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-import { UIContext } from "@ohos/arkui/UIContext"
-import { FrameNode } from "./FrameNode"
-import { Content } from "./Content"
-import { KPointer, pointer } from "@koalaui/interop"
-import { BuilderNode, BuildOptions, voidBuilderFunc, TBuilderFunc } from "./BuilderNode"
-import { WrappedBuilder } from "#generated"
-import { RecordData } from "@ohos.base"
+import { UIContext } from '@ohos/arkui/UIContext'
+import { UIContextImpl } from './base/UIContextImpl'
+import { FrameNode } from './FrameNode'
+import { Content } from './Content'
+import { KPointer, pointer } from '@koalaui/interop'
+import { BuilderNode, BuildOptions, voidBuilderFunc, TBuilderFunc } from './BuilderNode'
+import { WrappedBuilder } from '#generated'
+import { RecordData } from '@ohos.base'
+import { int32 } from '@koalaui/common'
+import { ArkUIAniModule } from 'arkui.ani'
 
 export interface ComponentContentBase extends Content {
     getNodePtr(): KPointer | undefined;
@@ -29,52 +32,89 @@ export class ComponentContent<T = undefined> implements ComponentContentBase {
     // the name of "builderNode_" is used in ace_engine/interfaces/native/node/native_node_ani.cpp.
     private builderNode_: BuilderNode<T>;
     private parentWeak_?: WeakRef<FrameNode>;
-    private attachedNodeRef_?:pointer;
+    private attachedNodeRef_?: pointer;
+    private instanceId_: int32;
+    private isDisposed_: boolean;
+
+    constructor(uiContext: UIContext, nodePtr: KPointer, frameNodePtr: KPointer) {
+        this.builderNode_ = new BuilderNode<T>(uiContext, nodePtr, frameNodePtr);
+        this.instanceId_ = (uiContext as UIContextImpl).instanceId_;
+    }
+
     //@ts-ignore
     constructor(uiContext: UIContext, builder: WrappedBuilder<TBuilderFunc<T>>, params: T) {
         let builderNode = new BuilderNode<T>(uiContext);
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, params);
+        this.instanceId_ = (uiContext as UIContextImpl).instanceId_;
     }
 
     constructor(uiContext: UIContext, builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options: BuildOptions) {
         let builderNode = new BuilderNode<T>(uiContext);
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder, params, options);
+        this.instanceId_ = (uiContext as UIContextImpl).instanceId_;
     }
 
     constructor(uiContext: UIContext, builder: WrappedBuilder<voidBuilderFunc>) {
         let builderNode = new BuilderNode<T>(uiContext);
         this.builderNode_ = builderNode;
         this.builderNode_.build(builder);
+        this.instanceId_ = (uiContext as UIContextImpl).instanceId_;
     }
 
     update(params: T): void {
         this.builderNode_.update(params);
     }
+
     getFrameNode(): FrameNode | null | undefined {
         return this.builderNode_.getFrameNodeWithoutCheck();
     }
+
     getNodePtr(): KPointer | undefined {
         // point to struct FrameNodePeer or undefined
         return this.builderNode_.getNodePtr();
     }
+
+    getBuilderRootNode(): KPointer | undefined {
+        return this.builderNode_.getBuilderRootNode();
+    }
+
+    isTransferred(): boolean {
+        return false;
+    }
+
+    isDisposed(): boolean {
+        ArkUIAniModule._CheckThreadValid(true, 0);
+        return this.isDisposed_ && (this.builderNode_?.isDisposed() ?? true);
+    }
+
+    getInstanceId(): int32 {
+        return this.instanceId_;
+    }
+
     reuse(param?: RecordData): void {
         this.builderNode_.reuse(param);
     }
+
     recycle(): void {
         this.builderNode_.recycle();
     }
+
     dispose(): void {
+        this.isDisposed_ = true;
         this.detachFromParent();
         this.builderNode_?.dispose();
     }
+
     updateConfiguration(): void {
         this.builderNode_.updateConfiguration();
     }
+
     setAttachedParent(frameNode?: WeakRef<FrameNode>): void {
         this.parentWeak_ = frameNode;
     }
+
     detachFromParent(): void {
         if (this.parentWeak_ === undefined) {
             return;

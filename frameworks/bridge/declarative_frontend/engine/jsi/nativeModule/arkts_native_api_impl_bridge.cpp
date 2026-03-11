@@ -2537,6 +2537,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ClearBuilderNode));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "clearChildren"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ClearChildren));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createNativeStrongRefWithPtrVal"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateNativeStrongRefWithPtrVal));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getChildrenCount"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetChildrenCount));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getChild"),
