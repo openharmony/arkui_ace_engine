@@ -28,6 +28,7 @@ export struct ToastIndex {
     { name: 'Toast', path: 'Toast' },
     { name: 'showToastTest', path: 'showToastTest' },
     { name: 'toastPositionTest', path: 'toastPositionTest' },
+    { name: 'ToastScene', path: 'ToastScene' },
   ]
 
   build() {
