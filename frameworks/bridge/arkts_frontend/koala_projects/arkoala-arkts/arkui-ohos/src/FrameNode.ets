@@ -482,13 +482,13 @@ export class FrameNode implements MaterializedBase {
     }
     public dispose(): void {
         if (this.peer?.ptr) {
+            ArkUIAniModule._CheckThreadValid(false, this.peer!.ptr!);
             this.peer?.close();
         }
         this.nodePtr_ = undefined;
         this.renderNode_?.resetNodePtr();
     }
     public isDisposed(): boolean {
-        ArkUIAniModule._CheckThreadValid(true, 0);
         return (this.nodePtr_ == undefined);
     }
     public resetNodePtr(): void {
