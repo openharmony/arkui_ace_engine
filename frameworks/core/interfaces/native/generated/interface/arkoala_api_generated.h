@@ -22302,6 +22302,7 @@ typedef struct Ark_ContextMenuOptions {
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_BarState scrollBar;
 } Ark_ContextMenuOptions;
 typedef struct Opt_ContextMenuOptions {
     Ark_Tag tag;
@@ -22526,6 +22527,7 @@ typedef struct Ark_MenuOptions {
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_BarState scrollBar;
     Opt_ResourceStr title;
     Opt_Boolean showInSubWindow;
 } Ark_MenuOptions;

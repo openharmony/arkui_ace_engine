@@ -52,6 +52,7 @@ public:
     static void InitMenuParamColorMode(NG::MenuParam& menuParam);
     static void ParseMenuPreviewBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
     static void SetSheetRenderStrategy(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    static void ParseMenuScrollBar(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
 private:
     static void ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam,
         NG::BorderColorProperty& outlineColor);

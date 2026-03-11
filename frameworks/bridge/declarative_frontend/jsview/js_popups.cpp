@@ -1581,6 +1581,17 @@ void JSViewPopups::ParseMenuAvoidKeyboard(const JSRef<JSObject>& menuOptions, NG
     }
 }
 
+void JSViewPopups::ParseMenuScrollBar(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto scrollBarValue = menuOptions->GetProperty("scrollBar");
+    if (scrollBarValue->IsNumber()) {
+        auto barState = scrollBarValue->ToNumber<int32_t>();
+        if (barState >= static_cast<int32_t>(DisplayMode::OFF) && barState <= static_cast<int32_t>(DisplayMode::ON)) {
+            menuParam.scrollBar = static_cast<DisplayMode>(barState);
+        }
+    }
+}
+
 void JSViewPopups::ParseMenuParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1622,6 +1633,7 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuMaskType(menuOptions, menuParam);
     JSViewPopups::ParseMenuSystemMaterial(menuOptions, menuParam);
     JSViewPopups::ParseAnchorPositionParam(menuOptions, menuParam);
+    JSViewPopups::ParseMenuScrollBar(menuOptions, menuParam);
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
 }
 

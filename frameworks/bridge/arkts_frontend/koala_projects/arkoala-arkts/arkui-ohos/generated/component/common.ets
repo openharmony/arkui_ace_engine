@@ -27,7 +27,7 @@ import { CallbackTransformer } from './../CallbackTransformer'
 import { unifiedDataChannel_UnifiedData_serializer } from './../framework/ohos.data.unifiedDataChannel'
 import { default as unifiedDataChannel } from '@ohos.data.unifiedDataChannel'
 import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, LengthMetrics as arkui_component_units_LengthMetrics, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer } from './units'
-import { KeyType, KeySource, Color as arkui_component_enums_Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from './enums'
+import { KeyType, KeySource, Color as arkui_component_enums_Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from './enums'
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { Resource as global_resource_Resource } from 'global.resource'
@@ -7617,6 +7617,7 @@ export interface ContextMenuOptions {
     keyboardAvoidMode?: MenuKeyboardAvoidMode;
     minKeyboardAvoidDistance?: arkui_Graphics_LengthMetrics;
     systemMaterial?: SystemUiMaterial;
+    scrollBar?: BarState;
 }
 export interface MenuOptions extends ContextMenuOptions {
     title?: ResourceStr;
@@ -19392,6 +19393,14 @@ export class ContextMenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForScrollBar = value.scrollBar
+        if (valueHolderForScrollBar !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForScrollBarTmpValue = (valueHolderForScrollBar as BarState)
+            valueSerializer.writeInt32(valueHolderForScrollBarTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ContextMenuOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -19844,7 +19853,13 @@ export class ContextMenuOptions_serializer {
             systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
         }
         const systemMaterialTmpResult: SystemUiMaterial | undefined = systemMaterialTmpBuf
-        let value: ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, systemMaterial: systemMaterialTmpResult} as ContextMenuOptions)
+        const scrollBarTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let scrollBarTmpBuf: BarState | undefined = undefined
+        if ((scrollBarTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            scrollBarTmpBuf = BarState.fromValue(valueDeserializer.readInt32())
+        }
+        const scrollBarTmpResult: BarState | undefined = scrollBarTmpBuf
+        let value: ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, systemMaterial: systemMaterialTmpResult, scrollBar: scrollBarTmpResult} as ContextMenuOptions)
         return value
     }
 }
@@ -21143,6 +21158,14 @@ export class MenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForScrollBar = value.scrollBar
+        if (valueHolderForScrollBar !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForScrollBarTmpValue = (valueHolderForScrollBar as BarState)
+            valueSerializer.writeInt32(valueHolderForScrollBarTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForTitle = value.title
         if (valueHolderForTitle !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -21619,6 +21642,12 @@ export class MenuOptions_serializer {
             systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
         }
         const systemMaterialTmpResult: SystemUiMaterial | undefined = systemMaterialTmpBuf
+        const scrollBarTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let scrollBarTmpBuf: BarState | undefined = undefined
+        if ((scrollBarTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            scrollBarTmpBuf = BarState.fromValue(valueDeserializer.readInt32())
+        }
+        const scrollBarTmpResult: BarState | undefined = scrollBarTmpBuf
         const titleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let titleTmpBuf: ResourceStr | undefined = undefined
         if ((titleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -21640,7 +21669,7 @@ export class MenuOptions_serializer {
             showInSubWindowTmpBuf = valueDeserializer.readBoolean()
         }
         const showInSubWindowTmpResult: boolean | undefined = showInSubWindowTmpBuf
-        let value: MenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, systemMaterial: systemMaterialTmpResult, title: titleTmpResult, showInSubWindow: showInSubWindowTmpResult} as MenuOptions)
+        let value: MenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, systemMaterial: systemMaterialTmpResult, scrollBar: scrollBarTmpResult, title: titleTmpResult, showInSubWindow: showInSubWindowTmpResult} as MenuOptions)
         return value
     }
 }
