@@ -1141,3 +1141,5 @@ ArkThemeWhiteList.whiteList = [
     'Swiper',
     'Text',
 ];
+
+export default { ArkThemeScopeManager };

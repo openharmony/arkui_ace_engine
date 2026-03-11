@@ -98,7 +98,6 @@ extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkCommon_abc_start[];
 extern const char _binary_arkDynamicComponent_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
-extern const char _binary_arkTheme_abc_start[];
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 extern const char _binary_jsPreload_abc_start[];
 extern const char _binary_jsPreload_abc_end[];
@@ -110,7 +109,6 @@ extern const char _binary_jsUIContext_abc_end[];
 extern const char _binary_arkCommon_abc_end[];
 extern const char _binary_arkDynamicComponent_abc_end[];
 extern const char _binary_arkComponent_abc_end[];
-extern const char _binary_arkTheme_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
@@ -118,7 +116,6 @@ extern const char* _binary_jsUIContext_abc_end;
 extern const char* _binary_arkCommon_abc_end;
 extern const char* _binary_arkDynamicComponent_abc_end;
 extern const char* _binary_arkComponent_abc_end;
-extern const char* _binary_arkTheme_abc_end;
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -275,13 +272,6 @@ inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
     std::string str("arkui_binary_arkComponent_abc_loadFile");
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start, str);
-}
-
-inline bool PreloadArkTheme(const shared_ptr<JsRuntime>& runtime)
-{
-    std::string str("arkui_binary_arkTheme_abc_loadFile");
-    return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_arkTheme_abc_start, _binary_arkTheme_abc_end - _binary_arkTheme_abc_start, str);
 }
 
 bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
@@ -595,7 +585,6 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             PreloadArkCommon(runtime_);
             PreloadArkComponent(runtime_);
             PreloadArkDynamicComponent(runtime_);
-            PreloadArkTheme(runtime_);
         }
     }
 
@@ -624,7 +613,6 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadArkCommon(runtime_);
         PreloadArkComponent(runtime_);
         PreloadArkDynamicComponent(runtime_);
-        PreloadArkTheme(runtime_);
         PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
@@ -790,14 +778,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
         return;
     }
 
-    // preload ark styles
-    bool arkThemeResult = PreloadArkTheme(arkRuntime);
-    if (!arkThemeResult) {
-        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
-        globalRuntime_ = nullptr;
-        return;
-    }
-
     isModulePreloaded_ = evalResult;
     {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
@@ -941,14 +921,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
     // preload ark declarative component
     bool arkDeclarativeComponentResult = PreloadArkDynamicComponent(arkRuntime);
     if (!arkDeclarativeComponentResult) {
-        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
-        globalRuntime_ = nullptr;
-        return;
-    }
-
-    // preload ark styles
-    bool arkThemeResult = PreloadArkTheme(arkRuntime);
-    if (!arkThemeResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
@@ -3658,14 +3630,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
 
     // preload state management
     isModulePreloaded_ = PreloadStateManagement(arkRuntime);
-
-    // preload ark styles
-    bool arkThemeResult = PreloadArkTheme(arkRuntime);
-    if (!arkThemeResult) {
-        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
-        globalRuntime_ = nullptr;
-        return;
-    }
 
     {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
