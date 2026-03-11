@@ -223,19 +223,12 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESV
             const setSource = ((value: T): void => {
                 state.set(value);
             });
-            const fireChange = (): void => {
-                state.fireChange();
-            }
-            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
             const setProxyValue = ((value: T): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
             });
             state.setProxyValue = setProxyValue;
-            const notifyProxy = (): void => {
-                proxy.invokeMethod('syncPeerHasChanged');
-            };
-            state.addWatch(notifyProxy);
         }
         return state.getProxy()!;
     } else if (isProvide) {
@@ -244,19 +237,12 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESV
             const setSource = ((value: T): void => {
                 state.set(value);
             });
-            const fireChange = (): void => {
-                state.fireChange();
-            }
-            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
             const setProxyValue = ((value: T): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
             });
             state.setProxyValue = setProxyValue;
-            const notifyProxy = (): void => {
-                proxy.invokeMethod('syncPeerHasChanged');
-            };
-            state.addWatch(notifyProxy);
         }
         return state.getProxy()!;
     } else if (isProp) {
@@ -265,19 +251,12 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESV
             const setSource = ((value: T): void => {
                 state.set(value);
             });
-            const fireChange = (): void => {
-                state.fireChange();
-            }
-            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
             const setProxyValue = ((value: T): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
             });
             state.setProxyValue = setProxyValue;
-            const notifyProxy = (): void => {
-                proxy.invokeMethod('syncPeerHasChanged');
-            };
-            state.addWatch(notifyProxy);
         }
         return state.getProxy()!;
     } else if (isPropRef) {
@@ -286,19 +265,12 @@ export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>): ESV
             const setSource = ((value: T): void => {
                 state.set(value);
             });
-            const fireChange = (): void => {
-                state.fireChange();
-            }
-            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource), ESValue.wrap(fireChange));
+            const proxy = createState.invoke(ESValue.wrap(state), ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
             const setProxyValue = ((value: T): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
             });
             state.setProxyValue = setProxyValue;
-            const notifyProxy = (): void => {
-                proxy.invokeMethod('syncPeerHasChanged');
-            };
-            state.addWatch(notifyProxy);
         }
         return state.getProxy()!;
     }
@@ -1053,14 +1025,6 @@ function createCompatibleStaticState<T>(dynamicValue: Object): ProvideDecoratedV
         const setSource = ((newVal: T): void => {
             stateVar.set(newVal);
         });
-        const fireChange = (): void => {
-            stateVar.fireChange();
-        }
-        global.getProperty('updateNotifyCallback').invoke(value, ESValue.wrap(fireChange));
-        const notifyProxy = (): void => {
-            value.invokeMethod('syncPeerHasChanged');
-        };
-        stateVar.addWatch(notifyProxy);
         global.getProperty('updateSetValueCallback').invoke(value, ESValue.wrap(setSource));
         return stateVar;
     }

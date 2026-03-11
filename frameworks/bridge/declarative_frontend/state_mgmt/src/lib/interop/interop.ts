@@ -59,10 +59,9 @@ class SubscribeInterop implements ISinglePropertyChangeSubscriber<Object>{
 type setValue<T> = (value: T) => void;
 type WatchFuncType = (propertyName: string) => void;
 
-function createStateVariable<T>(staticState: Object, value: T, setValueCallback: setValue<T>, notifyCallback: () => void): ObservedPropertyPU<T> {
+function createStateVariable<T>(staticState: Object, value: T, setValueCallback: setValue<T>): ObservedPropertyPU<T> {
     const proxy = new ObservedPropertyPU(value, undefined, 'proxy');
     proxy._setInteropValueForStaticState = setValueCallback;
-    proxy._notifyInteropFireChange = notifyCallback;
     proxy.setProxy(staticState);
     return proxy;
 }
@@ -71,9 +70,6 @@ function updateSetValueCallback(observedProperty, setValueCallback): void {
     observedProperty._setInteropValueForStaticState = setValueCallback;
 }
 
-function updateNotifyCallback(observedProperty, notifyCallback): void {
-    observedProperty._notifyInteropFireChange = notifyCallback;
-}
 
 function viewPUCreate(component: ViewPU): void {
     ViewPU.create(component);

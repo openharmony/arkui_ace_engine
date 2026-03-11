@@ -98,7 +98,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         this.checkValueIsNotFunction(newValue);
         let value: T = uiUtils.makeV1Observed(newValue);
         if (isDynamicObject(newValue)) {
-            const value = getObservedObject(newValue);
+            value = getObservedObject(newValue);
             this.backing_.setNoCheck(value);
         } else {
             // for interop

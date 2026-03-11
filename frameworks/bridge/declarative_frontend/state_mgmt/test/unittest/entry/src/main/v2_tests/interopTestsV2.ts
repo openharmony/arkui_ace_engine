@@ -39,7 +39,6 @@ declare class SubscribeInterop {
 declare class ObservedPropertyPU<T> {
   constructor(value: T, owner?: Object, info?: string);
   _setInteropValueForStaticState?: (value: T) => void;
-  _notifyInteropFireChange?: () => void;
   staticWatchFunc?: Object;
   setProxy(proxy: Object): void;
   set(value: T): void;
@@ -143,10 +142,8 @@ declare function createStateVariable<T>(
   staticState: Object,
   value: T,
   setValueCallback: (value: T) => void,
-  notifyCallback: () => void
 ): ObservedPropertyPU<T>;
 declare function updateSetValueCallback<T>(observedProperty: ObservedPropertyPU<T>, setValueCallback: (value: T) => void): void;
-declare function updateNotifyCallback<T>(observedProperty: ObservedPropertyPU<T>, notifyCallback: () => void): void;
 declare function getRawObjectForInterop(value: Object): Object;
 declare function staticStateBindObservedObject(
   value: Object,
@@ -310,12 +307,8 @@ export class InteropTestsV2 implements ITestFile {
       const setValueCallback = (_value: number): void => {
         InteropTestsV2.callbackCounter += 1;
       };
-      const notifyCallback = (): void => {
-        InteropTestsV2.callbackCounter += 10;
-      };
-      const proxy = createStateVariable<number>(staticState, 1, setValueCallback, notifyCallback);
+      const proxy = createStateVariable<number>(staticState, 1, setValueCallback);
       eq((proxy as any)._setInteropValueForStaticState === setValueCallback, true, 'set callback saved');
-      eq((proxy as any)._notifyInteropFireChange === notifyCallback, true, 'notify callback saved');
     });
   }
 
@@ -328,18 +321,6 @@ export class InteropTestsV2 implements ITestFile {
       };
       updateSetValueCallback<number>(proxy, callback);
       eq((proxy as any)._setInteropValueForStaticState === callback, true, 'setter callback replaced');
-    });
-  }
-
-  /* Verify callback update helper can replace notify callback. */
-  public testUpdateNotifyCallbackReplace(): void {
-    InteropTestsV2._skipWhenMissing('updateNotifyCallback', () => {
-      const proxy = new ObservedPropertyPU<number>(0, undefined, 'proxy');
-      const callback = (): void => {
-        InteropTestsV2.callbackCounter += 5;
-      };
-      updateNotifyCallback<number>(proxy, callback);
-      eq((proxy as any)._notifyInteropFireChange === callback, true, 'notify callback replaced');
     });
   }
 
