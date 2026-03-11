@@ -19,7 +19,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "arkoala_api_generated.h"
 
-struct CustomSpanNativePeer : public OHOS::Ace::CustomSpan {
+struct CustomSpanNativePeer final : public OHOS::Ace::CustomSpan {
     DECLARE_ACE_TYPE(CustomSpanNativePeer, OHOS::Ace::CustomSpan);
 
     using SpanSet = std::set<OHOS::Ace::WeakPtr<OHOS::Ace::SpanStringBase>>;
@@ -27,7 +27,8 @@ struct CustomSpanNativePeer : public OHOS::Ace::CustomSpan {
     CustomSpanNativePeer(CustomSpanNativePeer& other, int32_t start, int32_t end)
         : OHOS::Ace::CustomSpan(other.GetOnMeasure(), other.GetOnDraw(), start, end),
           spanStringBaseSet_(other.spanStringBaseSet_),
-          obj_(other.obj_)
+          obj_(other.obj_),
+          isOriginal_(false)
     {
         if (obj_.resource.hold) {
             (*obj_.resource.hold)(obj_.resource.resourceId);
@@ -35,7 +36,7 @@ struct CustomSpanNativePeer : public OHOS::Ace::CustomSpan {
     }
 
 public:
-    CustomSpanNativePeer() : OHOS::Ace::CustomSpan(), spanStringBaseSet_(new SpanSet()), isOriginal_(true) {}
+    CustomSpanNativePeer() : OHOS::Ace::CustomSpan(), spanStringBaseSet_(new SpanSet()), obj_({}), isOriginal_(true) {}
     ~CustomSpanNativePeer() override
     {
         if (!isOriginal_ && obj_.resource.release) {

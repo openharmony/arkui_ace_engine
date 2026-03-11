@@ -735,6 +735,9 @@ export namespace extractors {
       }
   }
   export function transform_Ark_CustomSpanWrapper_to_Ark_CustomSpan(value: CustomSpanWrapper): CustomSpan {
+      if (!(value.managed instanceof CustomSpan)) {
+        throw new Error("Invalid managed object type in CustomSpanWrapper");
+      }
       return value.managed as CustomSpan
   }
 }
