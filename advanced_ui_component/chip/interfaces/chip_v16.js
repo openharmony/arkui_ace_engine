@@ -1286,6 +1286,12 @@ export class ChipComponent extends ViewPU {
             Button.accessibilityText(this.getCloseIconAccessibilityText());
             Button.accessibilityDescription(this.getCloseIconAccessibilityDescription());
             Button.accessibilityLevel(this.getCloseIconAccessibilityLevel());
+            Button.responseRegion({
+              x: { "id": -1, "type": 10002, params: ['sys.float.chip_touch_hot_zone_x'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+              y: { "id": -1, "type": 10002, params: ['sys.float.chip_touch_hot_zone_y'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+              width: { "id": -1, "type": 10002, params: ['sys.float.chip_touch_hot_zone_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+              height: { "id": -1, "type": 10002, params: ['sys.float.chip_touch_hot_zone_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+            });
             Button.onClick(() => {
               if (!this.isChipEnabled()) {
                 return;
