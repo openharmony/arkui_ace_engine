@@ -1056,6 +1056,12 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest002, TestSize.Level1)
     pattern->textClockController_ = nullptr;
     pattern->InitUpdateTimeTextCallBack();
     EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(FORMAT_DATA));
+    
+    /**
+     * @tc.steps: step6. Clean up mock objects.
+     * @tc.expected: Mock objects are properly destructed.
+     */
+    MockPipelineContext::TearDown();
 }
 
 /**
