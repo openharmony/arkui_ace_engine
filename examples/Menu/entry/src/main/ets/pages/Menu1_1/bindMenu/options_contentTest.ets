@@ -15,7 +15,7 @@
 
 @Entry
 @Component
-struct options_contentTest {
+struct option_contentTest {
   @State select: boolean = true;
   @State MenuOptions:MenuOptions = {title:undefined}
   // $r('app.media.xxx')需要替换为开发者所需的图像资源文件。

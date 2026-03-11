@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-class MyPickerModifier1 implements AttributeModifier<ButtonAttribute> {
+class PickerModifier1 implements AttributeModifier<ButtonAttribute> {
   isDark: boolean = false
   applyNormalAttribute(instance: ButtonAttribute): void {
     instance.bindMenu([
@@ -35,9 +35,9 @@ class MyPickerModifier1 implements AttributeModifier<ButtonAttribute> {
 
 @Entry
 @Component
-struct BindMenu_modifier {
+struct bindMenu_modifier {
   @State message: string = 'bindMenu';
-  @State modifier1: MyPickerModifier1 = new MyPickerModifier1()
+  @State modifier1: PickerModifier1 = new PickerModifier1()
 
   build() {
     Column() {
