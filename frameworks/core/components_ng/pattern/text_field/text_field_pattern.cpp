@@ -13182,7 +13182,7 @@ void TextFieldPattern::UpdateMarginResource()
         (isRTL ? margin->end : margin->start);
     userMargin.right = margin->right.has_value() ? margin->right :
         (isRTL ? margin->start : margin->end);
-    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin, frameNode);
 }
 
 Offset TextFieldPattern::GetCaretClickLocalOffset(const Offset& offset)

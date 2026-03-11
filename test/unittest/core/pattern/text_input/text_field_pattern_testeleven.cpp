@@ -1889,4 +1889,129 @@ HWTEST_F(TextFieldPatternTesteleven, UpdateBorderResource003, TestSize.Level1)
     EXPECT_TRUE(paintProperty->HasBorderColorFlagByUser());
     EXPECT_TRUE(paintProperty->HasBorderWidthFlagByUser());
 }
+
+/**
+ * @tc.name: UpdateMarginResource001
+ * @tc.desc: Test UpdateMarginResource with LTR layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, UpdateMarginResource001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField node with LTR layout
+     * @tc.expected: MarginByUser should be set
+     */
+    CreateTextField("", "");
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Set user margin in layout property
+     */
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    MarginProperty margin;
+    margin.top = CalcLength(10.0, DimensionUnit::VP);
+    margin.bottom = CalcLength(5.0, DimensionUnit::VP);
+    margin.left = CalcLength(3.0, DimensionUnit::VP);
+    margin.right = CalcLength(3.0, DimensionUnit::VP);
+    layoutProperty->UpdateMargin(margin);
+
+    /**
+     * @tc.steps: step3. Call UpdateMarginResource
+     * @tc.expected: MarginByUser should be set
+     */
+    pattern_->UpdateMarginResource();
+
+    /**
+     * @tc.steps: step4. Verify results
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    EXPECT_TRUE(paintProperty->HasMarginByUser());
+}
+
+/**
+ * @tc.name: UpdateMarginResource002
+ * @tc.desc: Test UpdateMarginResource with RTL layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, UpdateMarginResource002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField node with RTL layout
+     * @tc.expected: Margin should be mirrored correctly for RTL
+     */
+    CreateTextField("", "");
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Set layout direction to RTL
+     */
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+
+    /**
+     * @tc.steps: step3. Set user margin with start/end values
+     */
+    MarginProperty margin;
+    margin.top = CalcLength(10.0, DimensionUnit::VP);
+    margin.bottom = CalcLength(5.0, DimensionUnit::VP);
+    margin.start = CalcLength(3.0, DimensionUnit::VP);
+    margin.end = CalcLength(5.0, DimensionUnit::VP);
+    layoutProperty->UpdateMargin(margin);
+
+    /**
+     * @tc.steps: step4. Call UpdateMarginResource
+     * @tc.expected: MarginByUser should be set
+     */
+    pattern_->UpdateMarginResource();
+
+    /**
+     * @tc.steps: step5. Verify results
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    EXPECT_TRUE(paintProperty->HasMarginByUser());
+}
+
+/**
+ * @tc.name: UpdateMarginResource003
+ * @tc.desc: Test UpdateMarginResource with existing user margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, UpdateMarginResource003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextField node
+     * @tc.expected: MarginByUser should be set
+     */
+    CreateTextField("", "");
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Set user margin
+     */
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    MarginProperty margin;
+    margin.top = CalcLength(8.0, DimensionUnit::VP);
+    margin.bottom = CalcLength(12.0, DimensionUnit::VP);
+    margin.left = CalcLength(4.0, DimensionUnit::VP);
+    margin.right = CalcLength(16.0, DimensionUnit::VP);
+    layoutProperty->UpdateMargin(margin);
+
+    /**
+     * @tc.steps: step3. Call UpdateMarginResource
+     * @tc.expected: MarginByUser should be set
+     */
+    pattern_->UpdateMarginResource();
+
+    /**
+     * @tc.steps: step4. Verify results
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    EXPECT_TRUE(paintProperty->HasMarginByUser());
+}
 } // namespace OHOS::Ace::NG
