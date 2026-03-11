@@ -104,7 +104,7 @@ void ScrollablePaintProperty::DumpInfo(std::unique_ptr<JsonValue>& json)
         const char* clipMode = "DEFAULT";
         switch (clipContent.value().first) {
             case ContentClipMode::CONTENT_ONLY:
-                clipMode = "CONTENT_ONLY_ONLY";
+                clipMode = "CONTENT_ONLY";
                 break;
             case ContentClipMode::BOUNDARY:
                 clipMode = "BOUNDARY";

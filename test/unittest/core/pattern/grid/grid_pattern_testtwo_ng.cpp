@@ -173,7 +173,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo001, TestSize.Level1)
     frameNode->layoutProperty_ = gridLayoutProperty;
     gridPattern->frameNode_ = frameNode;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[37], "GridLayoutOptions:null\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "GridLayoutOptions:null\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -195,7 +198,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo002, TestSize.Level1)
     info.scrollAlign_ = ScrollAlign::NONE;
     gridPattern->info_ = info;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[70], "ScrollAlign:NONE\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "ScrollAlign:NONE\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -217,7 +223,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo003, TestSize.Level1)
     info.scrollAlign_ = ScrollAlign::CENTER;
     gridPattern->info_ = info;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[70], "ScrollAlign:CENTER\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "ScrollAlign:CENTER\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -239,7 +248,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo004, TestSize.Level1)
     info.scrollAlign_ = ScrollAlign::END;
     gridPattern->info_ = info;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[70], "ScrollAlign:END\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "ScrollAlign:END\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -261,7 +273,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo005, TestSize.Level1)
     info.scrollAlign_ = ScrollAlign::START;
     gridPattern->info_ = info;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[70], "ScrollAlign:START\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "ScrollAlign:START\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -282,7 +297,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo006, TestSize.Level1)
     GridLayoutInfo info;
     gridPattern->info_ = info;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[70], "ScrollAlign:AUTO\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "ScrollAlign:AUTO\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -301,7 +319,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo007, TestSize.Level1)
     frameNode->layoutProperty_ = gridLayoutProperty;
     gridPattern->frameNode_ = frameNode;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[69], "AlignItems:GridItemAlignment.DEFAULT\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "AlignItems:GridItemAlignment.DEFAULT\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -327,7 +348,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo008, TestSize.Level1)
     info.gridMatrix_ = gridMatrix;
     gridPattern->info_ = info;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[71], "-----------start print gridMatrix------------\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "-----------start print gridMatrix------------\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -353,7 +377,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo009, TestSize.Level1)
     info.lineHeightMap_ = lineHeightMap;
     gridPattern->info_ = info;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_NE(DumpLog::GetInstance().description_[62], "-----------start print gridMatrix------------\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "-----------start print gridMatrix------------\n");
+    EXPECT_EQ(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -379,7 +406,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo010, TestSize.Level1)
     info.lineHeightMap_ = lineHeightMap;
     gridPattern->info_ = info;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[71], "-----------start print lineHeightMap------------\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "-----------start print lineHeightMap------------\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -405,7 +435,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo011, TestSize.Level1)
     info.irregularItemsPosition_ = irregularItemsPosition;
     gridPattern->info_ = info;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[71], "-----------start print irregularItemsPosition_------------\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "-----------start print irregularItemsPosition_------------\n");
+    EXPECT_NE(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -431,7 +464,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo012, TestSize.Level1)
     info.irregularItemsPosition_ = irregularItemsPosition;
     gridPattern->info_ = info;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_NE(DumpLog::GetInstance().description_[62], "-----------start print lineHeightMap------------\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "-----------start print lineHeightMap------------\n");
+    EXPECT_EQ(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
@@ -459,7 +495,10 @@ HWTEST_F(GridTestNg, DumpAdvanceInfo013, TestSize.Level1)
     info.lineHeightMap_ = lineHeightMap;
     gridPattern->info_ = info;
     gridPattern->DumpAdvanceInfo();
-    EXPECT_NE(DumpLog::GetInstance().description_[64], "-----------start print irregularItemsPosition_------------\n");
+    auto it = std::find(DumpLog::GetInstance().description_.begin(),
+                        DumpLog::GetInstance().description_.end(),
+                        "-----------start print irregularItemsPosition_------------\n");
+    EXPECT_EQ(it, DumpLog::GetInstance().description_.end());
 }
 
 /**
