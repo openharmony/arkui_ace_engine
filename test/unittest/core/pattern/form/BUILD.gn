@@ -192,6 +192,7 @@ ohos_unittest("form_special_style_test") {
   external_deps = [
     "bundle_framework:appexecfwk_base",
     "form_fwk:fmskit_native",
+    "ipc:ipc_single",
   ]
 }
 
@@ -214,6 +215,7 @@ ohos_unittest("form_snapshot_util_test") {
   external_deps = [
     "form_fwk:fmskit_native",
     "image_framework:image_native",
+    "ipc:ipc_single",
     "googletest:gmock",
     "googletest:gtest_main",
   ]

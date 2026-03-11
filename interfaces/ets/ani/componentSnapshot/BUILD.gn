@@ -26,6 +26,7 @@ ohos_shared_library("componentSnapshot_ani") {
     "image_framework:image",
     "image_framework:image_native",
     "image_framework:image_taihe",
+    "ipc:ipc_single",
     "napi:ace_napi",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
