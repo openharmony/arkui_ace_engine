@@ -75,6 +75,9 @@ struct Index {
     { title: '示例44：菜单基本功能_32_Menu: font|fontColor|radius/MenuTestLevel0_9', url: 'pages/Examples/MenuTestLevel0_9' },
     { title: '示例45：菜单基本功能_33_验证Menu的customBuilder1/MenuTestLevel1_0', url: 'pages/Examples/MenuTestLevel1_0' },
     { title: '示例46：菜单基本功能_34_验证Menu的customBuilder2/MenuTestLevel1_1', url: 'pages/Examples/MenuTestLevel1_1' },
+    { title: '示例47：菜单样式定制示例', url: 'pages/bindMenu/MenuStyleCustomization' },
+    { title: '示例48：菜单交互模式示例', url: 'pages/bindMenu/MenuInteractionModes' },
+    { title: '示例49：高级菜单布局示例', url: 'pages/bindMenu/MenuAdvancedLayout' },
   ]
 
   build() {
