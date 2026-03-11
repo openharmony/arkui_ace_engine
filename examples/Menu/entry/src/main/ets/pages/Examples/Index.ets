@@ -71,6 +71,10 @@ struct Index {
     { title: '示例40：菜单与预览图结合示例', url: 'pages/Examples/MenuWithPreview' },
     { title: '示例41：菜单遮罩效果示例', url: 'pages/Examples/MenuMaskDemo' },
     { title: '示例42：菜单系统材质示例', url: 'pages/Examples/MenuSystemMaterial' },
+    { title: '示例43：菜单基本功能_31_bindContextMenu_previewAnimationOptions/MenuTestLevel0_7', url: 'pages/Examples/MenuTestLevel0_7' },
+    { title: '示例44：菜单基本功能_32_Menu: font|fontColor|radius/MenuTestLevel0_9', url: 'pages/Examples/MenuTestLevel0_9' },
+    { title: '示例45：菜单基本功能_33_验证Menu的customBuilder1/MenuTestLevel1_0', url: 'pages/Examples/MenuTestLevel1_0' },
+    { title: '示例46：菜单基本功能_34_验证Menu的customBuilder2/MenuTestLevel1_1', url: 'pages/Examples/MenuTestLevel1_1' },
   ]
 
   build() {
