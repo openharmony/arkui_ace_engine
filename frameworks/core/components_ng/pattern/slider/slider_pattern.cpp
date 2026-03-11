@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/log/dump_log.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -1873,6 +1875,7 @@ void SliderPattern::FireChangeEvent(int32_t mode)
         return;
     }
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);
+    ReportChangeEvent(value_, mode);
     valueChangeFlag_ = false;
     SendAccessibilityValueEvent(mode);
 }
@@ -2462,7 +2465,7 @@ void SliderPattern::ResetSuffix()
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-void SliderPattern::SetSliderValue(double value, int32_t mode)
+void SliderPattern::SetSliderValue(double value, int32_t mode, bool isNotifyRecovery)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2472,12 +2475,12 @@ void SliderPattern::SetSliderValue(double value, int32_t mode)
     if (!enabled) {
         return;
     }
-    UpdateValue(value);
+    UpdateValue(value, isNotifyRecovery);
     FireChangeEvent(mode);
     OnModifyDone();
 }
 
-void SliderPattern::UpdateValue(float value)
+void SliderPattern::UpdateValue(float value, bool isNotifyRecovery)
 {
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider update value %{public}d %{public}f", panMoveFlag_, value);
     if (!panMoveFlag_) {
@@ -2486,8 +2489,9 @@ void SliderPattern::UpdateValue(float value)
         sliderPaintProperty->UpdateValue(value);
     }
     auto host = GetHost();
-    FREE_NODE_CHECK(host, UpdateValue, host);
-    if (CalcSliderValue()) {
+    FREE_NODE_CHECK(host, UpdateValue, host, isNotifyRecovery);
+    auto isExceptionValueRecovery = CalcSliderValue() && isNotifyRecovery;
+    if (isExceptionValueRecovery) {
         NotifyExceptionValueRecoveryEvent();
     }
     FireBuilder();
@@ -2896,5 +2900,54 @@ int32_t SliderPattern::CheckAccessibilityStepCount()
     auto min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
     auto max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
     return (scrollStep > (max - min) / step) ? DEFAULT_STEP : scrollStep;
+}
+
+bool SliderPattern::ParseCommand(const std::string& command, float& value)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    CHECK_NE_RETURN(json->IsObject(), true, false);
+    auto cmdType = json->GetString("cmd");
+    CHECK_NE_RETURN(cmdType, "SetSliderValue", false);
+    auto paramJson = json->GetValue("params");
+    CHECK_NE_RETURN(paramJson->IsObject(), true, false);
+    auto valueJson = paramJson->GetValue("value");
+    CHECK_NE_RETURN(valueJson->IsNumber(), true, false);
+    value = static_cast<float>(valueJson->GetDouble());
+    return true;
+}
+
+int32_t SliderPattern::OnInjectionEvent(const std::string& command)
+{
+    float value = 0.0f;
+    auto ret = ParseCommand(command, value);
+    CHECK_EQUAL_RETURN(ret, false, RET_FAILED);
+    int32_t mode = SliderChangeMode::End;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, RET_FAILED);
+    float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+    float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
+    value = GetValueInValidRange(sliderPaintProperty, value, min, max);
+    SetSliderValue(value, mode, false);
+    return RET_SUCCESS;
+}
+
+void SliderPattern::ReportChangeEvent(float value, int32_t mode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("nodeId", nodeId);
+    params->Put("value", value);
+    params->Put("mode", mode);
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("event", "Slider.onChange");
+    json->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
 }
 } // namespace OHOS::Ace::NG

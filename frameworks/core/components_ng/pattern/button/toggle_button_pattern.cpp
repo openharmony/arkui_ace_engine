@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
+#include "base/utils/utf_helper.h"
+#include "core/components/text/text_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/property/position_property.h"
-#include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -94,6 +96,7 @@ void ToggleButtonPattern::OnModifyDone()
         auto toggleButtonEventHub = GetEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(toggleButtonEventHub);
         toggleButtonEventHub->UpdateChangeEvent(isOn_.value());
+        ReportChangeEvent(isOn_.value());
     }
     GetIsTextFade();
     FireBuilder();
@@ -464,6 +467,7 @@ void ToggleButtonPattern::MarkIsSelected(bool isSelected)
     auto eventHub = GetEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateChangeEvent(isSelected);
+    ReportChangeEvent(isSelected);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (isSelected) {
@@ -623,6 +627,7 @@ void ToggleButtonPattern::OnClick()
     auto buttonEventHub = GetEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->UpdateChangeEvent(!isLastSelected);
+    ReportChangeEvent(!isLastSelected);
     HandleOnOffStyle(!isOn_.value(), isFocus_);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -869,5 +874,45 @@ void ToggleButtonPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const Ins
 {
     Pattern::ToTreeJson(json, config);
     json->Put(TreeKey::CHECKED, isOn_ ? "true" : "false");
+}
+
+bool ToggleButtonPattern::ParseCommand(const std::string& command, bool& isOn)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    CHECK_NE_RETURN(json->IsObject(), true, false);
+    auto cmdType = json->GetString("cmd");
+    CHECK_NE_RETURN(cmdType, "SetToggleIsOn", false);
+    auto paramJson = json->GetValue("params");
+    CHECK_NE_RETURN(paramJson->IsObject(), true, false);
+    auto isOnJson = paramJson->GetValue("isOn");
+    CHECK_NE_RETURN(isOnJson->IsBool(), true, false);
+    isOn = isOnJson->GetBool();
+    return true;
+}
+
+int32_t ToggleButtonPattern::OnInjectionEvent(const std::string& command)
+{
+    bool isOn = false;
+    auto ret = ParseCommand(command, isOn);
+    CHECK_EQUAL_RETURN(ret, false, RET_FAILED);
+    SetButtonPress(isOn);
+    return RET_SUCCESS;
+}
+
+void ToggleButtonPattern::ReportChangeEvent(bool isOn)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("nodeId", nodeId);
+    params->Put("isOn", isOn);
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("event", "Toggle.onChange");
+    json->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
 }
 } // namespace OHOS::Ace::NG

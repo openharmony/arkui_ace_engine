@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/log/dump_log.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/toggle/toggle_theme.h"
@@ -319,6 +321,7 @@ void SwitchPattern::MarkIsSelected(bool isSelected)
     auto eventHub = GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateChangeEvent(isSelected);
+    ReportChangeEvent(isSelected);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
@@ -383,11 +386,13 @@ float SwitchPattern::GetSwitchContentOffsetX() const
     return geometryNode->GetContentOffset().GetX();
 }
 
-void SwitchPattern::UpdateChangeEvent() const
+void SwitchPattern::UpdateChangeEvent()
 {
     auto switchEventHub = GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(switchEventHub);
-    switchEventHub->UpdateChangeEvent(isOn_.value_or(false));
+    auto isOn = isOn_.value_or(false);
+    switchEventHub->UpdateChangeEvent(isOn);
+    ReportChangeEvent(isOn);
 }
 
 void SwitchPattern::OnClick()
@@ -902,5 +907,45 @@ RefPtr<FrameNode> SwitchPattern::BuildContentModifierNode()
     }
     ToggleConfiguration toggleConfiguration(enabled, isOn);
     return (makeFunc_.value())(toggleConfiguration);
+}
+
+bool SwitchPattern::ParseCommand(const std::string& command, bool& isOn)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    CHECK_NE_RETURN(json->IsObject(), true, false);
+    auto cmdType = json->GetString("cmd");
+    CHECK_NE_RETURN(cmdType, "SetToggleIsOn", false);
+    auto paramJson = json->GetValue("params");
+    CHECK_NE_RETURN(paramJson->IsObject(), true, false);
+    auto isOnJson = paramJson->GetValue("isOn");
+    CHECK_NE_RETURN(isOnJson->IsBool(), true, false);
+    isOn = isOnJson->GetBool();
+    return true;
+}
+
+int32_t SwitchPattern::OnInjectionEvent(const std::string& command)
+{
+    bool isOn = false;
+    auto ret = ParseCommand(command, isOn);
+    CHECK_EQUAL_RETURN(ret, false, RET_FAILED);
+    SetSwitchIsOn(isOn);
+    return RET_SUCCESS;
+}
+
+void SwitchPattern::ReportChangeEvent(bool isOn)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("nodeId", nodeId);
+    params->Put("isOn", isOn);
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("event", "Toggle.onChange");
+    json->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
 }
 } // namespace OHOS::Ace::NG

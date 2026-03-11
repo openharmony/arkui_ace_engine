@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
@@ -1509,5 +1510,188 @@ HWTEST_F(ToggleTestNg, ToggleModelTestSetAndGetToggleState, TestSize.Level1)
      */
     auto isOn = ToggleModelNG::GetToggleState(node);
     EXPECT_EQ(isOn, true);
+}
+
+/**
+ * @tc.name: ParseCommand001
+ * @tc.desc: Test SwitchPattern ParseCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ParseCommand001, TestSize.Level1)
+{
+    bool isOn = false;
+    std::string command = "";
+    EXPECT_FALSE(SwitchPattern::ParseCommand(command, isOn));
+    command = "{";
+    EXPECT_FALSE(SwitchPattern::ParseCommand(command, isOn));
+    command = "{}";
+    EXPECT_FALSE(SwitchPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetValue\"}";
+    EXPECT_FALSE(SwitchPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\"}";
+    EXPECT_FALSE(SwitchPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{}}";
+    EXPECT_FALSE(SwitchPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":\"abc\"}}";
+    EXPECT_FALSE(SwitchPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":1}}";
+    EXPECT_FALSE(SwitchPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":true}}";
+    EXPECT_TRUE(SwitchPattern::ParseCommand(command, isOn));
+    EXPECT_EQ(isOn, true);
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":false}}";
+    EXPECT_TRUE(SwitchPattern::ParseCommand(command, isOn));
+    EXPECT_EQ(isOn, false);
+}
+
+/**
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: Test SwitchPattern OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, OnInjectionEvent001, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto switchPattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+    auto switchPaintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(switchPaintProperty, nullptr);
+    ASSERT_EQ(switchPaintProperty->GetIsOnValue(false), false);
+
+    std::string command = "abc";
+    EXPECT_EQ(switchPattern->OnInjectionEvent(command), RET_FAILED);
+
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":true}}";
+    EXPECT_EQ(switchPattern->OnInjectionEvent(command), RET_SUCCESS);
+    EXPECT_EQ(switchPaintProperty->GetIsOnValue(false), true);
+
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":false}}";
+    EXPECT_EQ(switchPattern->OnInjectionEvent(command), RET_SUCCESS);
+    EXPECT_EQ(switchPaintProperty->GetIsOnValue(true), false);
+}
+
+/**
+ * @tc.name: ParseCommand002
+ * @tc.desc: Test ToggleButtonPattern ParseCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ParseCommand002, TestSize.Level1)
+{
+    bool isOn = false;
+    std::string command = "";
+    EXPECT_FALSE(ToggleButtonPattern::ParseCommand(command, isOn));
+    command = "{";
+    EXPECT_FALSE(ToggleButtonPattern::ParseCommand(command, isOn));
+    command = "{}";
+    EXPECT_FALSE(ToggleButtonPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetValue\"}";
+    EXPECT_FALSE(ToggleButtonPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\"}";
+    EXPECT_FALSE(ToggleButtonPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{}}";
+    EXPECT_FALSE(ToggleButtonPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":\"abc\"}}";
+    EXPECT_FALSE(ToggleButtonPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":1}}";
+    EXPECT_FALSE(ToggleButtonPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":true}}";
+    EXPECT_TRUE(ToggleButtonPattern::ParseCommand(command, isOn));
+    EXPECT_EQ(isOn, true);
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":false}}";
+    EXPECT_TRUE(ToggleButtonPattern::ParseCommand(command, isOn));
+    EXPECT_EQ(isOn, false);
+}
+
+/**
+ * @tc.name: OnInjectionEvent002
+ * @tc.desc: Test ToggleButtonPattern OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, OnInjectionEvent002, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[1], false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto toggleButtonPattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(toggleButtonPattern, nullptr);
+    auto toggleButtonPaintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    ASSERT_NE(toggleButtonPaintProperty, nullptr);
+    ASSERT_EQ(toggleButtonPaintProperty->GetIsOnValue(false), false);
+
+    std::string command = "abc";
+    EXPECT_EQ(toggleButtonPattern->OnInjectionEvent(command), RET_FAILED);
+
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":true}}";
+    EXPECT_EQ(toggleButtonPattern->OnInjectionEvent(command), RET_SUCCESS);
+    EXPECT_EQ(toggleButtonPaintProperty->GetIsOnValue(false), true);
+
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":false}}";
+    EXPECT_EQ(toggleButtonPattern->OnInjectionEvent(command), RET_SUCCESS);
+    EXPECT_EQ(toggleButtonPaintProperty->GetIsOnValue(true), false);
+}
+
+/**
+ * @tc.name: ParseCommand003
+ * @tc.desc: Test ParseCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ParseCommand003, TestSize.Level1)
+{
+    bool isOn = false;
+    std::string command = "";
+    EXPECT_FALSE(ToggleCheckBoxPattern::ParseCommand(command, isOn));
+    command = "{";
+    EXPECT_FALSE(ToggleCheckBoxPattern::ParseCommand(command, isOn));
+    command = "{}";
+    EXPECT_FALSE(ToggleCheckBoxPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetValue\"}";
+    EXPECT_FALSE(ToggleCheckBoxPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\"}";
+    EXPECT_FALSE(ToggleCheckBoxPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{}}";
+    EXPECT_FALSE(ToggleCheckBoxPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":\"abc\"}}";
+    EXPECT_FALSE(ToggleCheckBoxPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":1}}";
+    EXPECT_FALSE(ToggleCheckBoxPattern::ParseCommand(command, isOn));
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":true}}";
+    EXPECT_TRUE(ToggleCheckBoxPattern::ParseCommand(command, isOn));
+    EXPECT_EQ(isOn, true);
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":false}}";
+    EXPECT_TRUE(ToggleCheckBoxPattern::ParseCommand(command, isOn));
+    EXPECT_EQ(isOn, false);
+}
+
+/**
+ * @tc.name: OnInjectionEvent003
+ * @tc.desc: Test OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, OnInjectionEvent003, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[0], false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto toggleCheckBoxPattern = frameNode->GetPattern<ToggleCheckBoxPattern>();
+    ASSERT_NE(toggleCheckBoxPattern, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    ASSERT_EQ(checkBoxPaintProperty->GetCheckBoxSelectValue(false), false);
+
+    std::string command = "abc";
+    EXPECT_EQ(toggleCheckBoxPattern->OnInjectionEvent(command), RET_FAILED);
+
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":true}}";
+    EXPECT_EQ(toggleCheckBoxPattern->OnInjectionEvent(command), RET_SUCCESS);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelectValue(false), true);
+
+    command = "{\"cmd\":\"SetToggleIsOn\",\"params\":{\"isOn\":false}}";
+    EXPECT_EQ(toggleCheckBoxPattern->OnInjectionEvent(command), RET_SUCCESS);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelectValue(true), false);
 }
 } // namespace OHOS::Ace::NG
