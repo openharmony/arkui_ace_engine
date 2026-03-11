@@ -1,11 +1,11 @@
-# CLAUDE.md
+# PATTERN
 
-This file provides guidance to Codex when working in `frameworks/core/components_ng/pattern`.
+This file provides guidance to agent when working in `frameworks/core/components_ng/pattern`.
 
 ## Scope and Inheritance
 - This document applies to the Pattern layer under `frameworks/core/components_ng/pattern`.
-- All rules from the repository root `CLAUDE.md` apply here.
-- If a component folder contains its own `CLAUDE.md`, follow it in addition to this file.
+- All rules from the repository root `AGENTS.md` apply here.
+- If a component folder contains its own `AGENTS.md`, follow it in addition to this file.
 
 ## Quick Start
 - Identify the component folder that matches the user request.
@@ -241,5 +241,5 @@ This file provides guidance to Codex when working in `frameworks/core/components
 - Breaking public API semantics without compatibility controls.
 
 ## References
-- Root `CLAUDE.md` for global rules and knowledge base usage.
-- Component specific `CLAUDE.md` files for deeper invariants.
+- Root `AGENTS.md` for global rules and knowledge base usage.
+- Component specific `AGENTS.md` files for deeper invariants.

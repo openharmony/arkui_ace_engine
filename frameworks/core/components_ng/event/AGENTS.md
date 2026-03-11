@@ -1,6 +1,6 @@
 # Event Subdirectory Rules
 
-This document contains specialized rules for the `components_ng/event` directory and **must inherit and comply with** the repository root `CLAUDE.md`.
+This document contains specialized rules for the `components_ng/event` directory and **must inherit and comply with** the repository root `AGENTS.md`.
 This document only describes constraints and knowledge specific to this directory.
 
 Scope: `frameworks/core/components_ng/event/`

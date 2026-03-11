@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to agent when working with code in this repository.
 
 ## Quick Reference
 
@@ -450,7 +450,7 @@ When receiving suggestions or corrections:
 
 ```
 User: "这个函数应该在初始化时调用，对吗？"
-Claude: 让我先查看源码验证...
+Agent: 让我先查看源码验证...
 [Read source file]
 根据 frameworks/xxx/yyy.cpp:456，该函数实际上是在 OnDirtyLayoutWrapperSwap 时调用，而非初始化时。
 ```

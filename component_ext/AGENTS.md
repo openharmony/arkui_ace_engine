@@ -1,6 +1,6 @@
-# CLAUDE.md
+# Component_ext
 
-This file provides guidance to Claude Code when working in `component_ext/`.
+This file provides guidance to agent when working in `component_ext/`.
 
 ## Overview
 
