@@ -250,8 +250,19 @@ HWTEST_F(WindowPatternTest, CreateSnapshotWindow, TestSize.Level0)
         .width_ = 100,
         .height_ = 100,
     };
+    sceneSession_->enablePersistentScaledSnapshot_ = false;
     windowScene_->CreateSnapshotWindow();
     EXPECT_EQ(windowScene_->isBlankForSnapshot_, false);
+
+    sceneSession_->enablePersistentScaledSnapshot_ = true;
+    sceneSession_->SetShowRecent(false);
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isScaledSnapshot_, false);
+
+    sceneSession_->SetShowRecent(true);
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isScaledSnapshot_, true);
+    sceneSession_->SetShowRecent(false);
 
     sceneSession_->layoutRect_ = {
         .posX_ = 100,
