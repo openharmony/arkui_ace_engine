@@ -737,12 +737,11 @@ void RichEditorPattern::HandleEnabled()
     }
 }
 
-void RichEditorPattern::ProcessStyledPlaceholder()
+void RichEditorPattern::RemovePlaceholderImageNodes()
 {
-    CHECK_NULL_VOID(!placeholderImageNodes_.empty());
+    CHECK_NULL_VOID(!placeholderImageNodes_.empty() && !spans_.empty());
     auto host = GetContentHost();
     CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(CheckMeasureFlag());
     for (const auto& node : placeholderImageNodes_) {
         auto imageNode = node.Upgrade();
         CHECK_NULL_CONTINUE(imageNode);
@@ -754,8 +753,11 @@ void RichEditorPattern::ProcessStyledPlaceholder()
 void RichEditorPattern::BeforeCreateLayoutWrapper()
 {
     ACE_SCOPED_TRACE("RichEditorBeforeCreateLayoutWrapper");
-    ProcessStyledPlaceholder();
-    if (!isSpanStringMode_) {
+    // Remove placeholder image nodes since real content exists.
+    RemovePlaceholderImageNodes();
+    bool isShowPlaceholderImage = spans_.empty() && !placeholderImageNodes_.empty();
+    bool needInitSpanItem = !isSpanStringMode_ && !isShowPlaceholderImage;
+    if (needInitSpanItem) {
         TextPattern::PreCreateLayoutWrapper();
         hasUrlSpan_ = std::any_of(spans_.begin(), spans_.end(), URL_SPAN_FILTER);
     } else if (contentMod_) {
@@ -11445,6 +11447,23 @@ bool RichEditorPattern::IsTouchInFrameArea(const PointF& touchPoint)
     return viewPort.IsInRegion(touchPoint);
 }
 
+void RichEditorPattern::MountPlaceholderImageNode(const std::list<RefPtr<NG::SpanItem>>& spans)
+{
+    // Clear existing placeholder image nodes.
+    if (!placeholderImageNodes_.empty()) {
+        auto host = GetContentHost();
+        CHECK_NULL_VOID(host);
+        host->Clean();
+        placeholderImageNodes_.clear();
+    }
+    // Mount new placeholder image nodes.
+    for (const auto& span : spans) {
+        auto imageSpan = DynamicCast<ImageSpanItem>(span);
+        CHECK_NULL_CONTINUE(imageSpan);
+        MountImageNode(imageSpan);
+    }
+}
+
 bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList)
 {
     if (!spans_.empty()) {
@@ -11458,12 +11477,7 @@ bool RichEditorPattern::SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanIt
 {
     CHECK_NULL_RETURN(styledPlaceholder_, false);
     auto spans = styledPlaceholder_->GetSpanItems();
-    placeholderImageNodes_.clear();
-    for (const auto& span : spans) {
-        auto imageSpan = DynamicCast<ImageSpanItem>(span);
-        CHECK_NULL_CONTINUE(imageSpan);
-        MountImageNode(imageSpan);
-    }
+    MountPlaceholderImageNode(spans);
     spanItemList = RichEditorLayoutAlgorithm::ConstructParagraphSpans(spans, isSingleLineMode_);
     if (!isShowPlaceholder_) {
         // On initial placeholder display, reset richTextRect offset with contentRect.

@@ -363,4 +363,38 @@ HWTEST_F(RichEditorSpanAmendTestNg, SetPlaceHolderStyledString, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(0, 0));
 }
 
+/**
+ * @tc.name: PlaceholderImageNode
+ * @tc.desc: test PlaceholderImageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanAmendTestNg, PlaceholderImageNode, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ImageSpanOptions options;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    options.imagePixelMap = pixelMap;
+    auto spanString = AceType::MakeRefPtr<SpanString>(options);
+    ASSERT_NE(spanString, nullptr);
+    richEditorPattern->SetPlaceholderStyledString(spanString);
+    auto& placeholderSpanNodes = richEditorPattern->placeholderImageNodes_;
+    std::vector<std::list<RefPtr<SpanItem>>> spans;
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(placeholderSpanNodes.size(), 1);
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(placeholderSpanNodes.size(), 1);
+    richEditorPattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(placeholderSpanNodes.size(), 1);
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    richEditorPattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(placeholderSpanNodes.empty());
+}
+
 } // namespace OHOS::Ace::NG
