@@ -1907,7 +1907,12 @@ ArkUINativeModuleValue FrameNodeBridge::GetNodeInstanceId(ArkUIRuntimeCallInfo* 
     auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NumberRef::New(vm, -1));
     auto instanceId = frameNode->GetInstanceId();
-    return panda::NumberRef::New(vm, instanceId);
+    CHECK_EQUAL_RETURN(instanceId, -1, panda::NumberRef::New(vm, -1));
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, panda::NumberRef::New(vm, -1));
+    auto uiContextType = container->GetUIContentType();
+    CHECK_EQUAL_RETURN(uiContextType, UIContentType::DYNAMIC_COMPONENT, panda::NumberRef::New(vm, instanceId));
+    return panda::NumberRef::New(vm, -1);
 }
 
 ArkUINativeModuleValue FrameNodeBridge::GetNodeType(ArkUIRuntimeCallInfo* runtimeCallInfo)
