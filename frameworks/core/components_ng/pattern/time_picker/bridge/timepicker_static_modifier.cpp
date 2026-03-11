@@ -205,6 +205,7 @@ void SetOnEnterSelectedAreaImpl(Ark_NativePointer node, const Opt_Callback_TimeP
     }
     auto onEnterSelectedArea = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* event) {
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+        CHECK_NULL_VOID(eventInfo);
         auto resultStr = eventInfo->GetSelectedStr();
         auto result = Converter::ArkValue<Ark_TimePickerResult>(resultStr);
         arkCallback.Invoke(result);

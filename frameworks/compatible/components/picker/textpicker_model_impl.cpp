@@ -34,6 +34,7 @@ void TextPickerModelImpl::Create(RefPtr<PickerTheme> pickerTheme, uint32_t colum
 void TextPickerModelImpl::SetDefaultPickerItemHeight(const Dimension& value)
 {
     auto textPicker = AceType::DynamicCast<PickerTextComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(textPicker);
     textPicker->SetDefaultHeight(true);
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::PickerTextComponent>(stack->GetMainComponent());

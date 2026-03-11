@@ -1133,6 +1133,7 @@ ArkUINativeModuleValue TimePickerBridge::SetOnEnterSelectedArea(ArkUIRuntimeCall
         ACE_SCORING_EVENT("datePicker.onEnterSelectedArea");
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
+        CHECK_NULL_VOID(eventInfo);
         panda::Local<panda::JSValueRef> params[] = { DatePickerChangeEventToJSValue(vm, *eventInfo) };
         auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
         ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
