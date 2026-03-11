@@ -265,6 +265,16 @@
       "pageSourceFile": "src/main/ets/pages/components/overlay/overlayManagerHitTest.ets",
       "buildFunction": "OverlayManagerHitBuilder"
     },
+    {
+      "name": "OverlayManagerScene",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/overlayManagerDemo.ets",
+      "buildFunction": "OverlayManagerSceneBuilder"
+    },
+    {
+      "name": "OverlayManagerBasicApi",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/overlayManagerDemo.ets",
+      "buildFunction": "OverlayManagerBasicApiBuilder"
+    },
 
     {
       "name": "PopupIndex",
