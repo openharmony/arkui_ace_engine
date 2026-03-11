@@ -59,6 +59,18 @@
     "pages/queryApi/Page",
     "pages/onTouchDivider/Index",
     "pages/onTouchDivider/test1",
-    "pages/onTouchDivider/WindowTwo"
+    "pages/onTouchDivider/WindowTwo",
+    "pages/NavDestinationAdaptationImage/ArkUIHDS_NavDestination_0010",
+    "pages/NavDestinationAdaptationImage/ArkUIHDS_NavDestination_0020",
+    "pages/NavDestinationAdaptationImage/ArkUIHDS_NavDestination_0030",
+    "pages/NavDestinationAdaptationImage/ArkUIHDS_NavDestination_0040",
+    "pages/NavDestinationAdaptationImage/ArkUIHDS_NavDestination_0050",
+    "pages/NavDestinationAdaptationImage/Index",
+    "pages/NavigationAdaptationImage/ArkUIHDS_Navigation_0030",
+    "pages/NavigationAdaptationImage/ArkUIHDS_Navigation_0060",
+    "pages/NavigationAdaptationImage/ArkUIHDS_Navigation_0070",
+    "pages/NavigationAdaptationImage/ArkUIHDS_Navigation_0080",
+    "pages/NavigationAdaptationImage/Index",
+    "pages/NavigationAdaptationImage/Navigation6"
   ]
 }
