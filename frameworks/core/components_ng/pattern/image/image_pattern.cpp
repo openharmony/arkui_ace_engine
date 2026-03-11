@@ -436,6 +436,9 @@ void ImagePattern::ReportCompleteLoadEvent(const RefPtr<FrameNode>& host)
 
  void ImagePattern::ReportImageSuccessInfo(const RefPtr<FrameNode>& host)
 {
+    if (host->GetId() == INVALID_ID || GetIsAnimation()) {
+        return;
+    }
     if (imageDfxConfig_.GetSrcType() != static_cast<int32_t>(SrcType::NETWORK) && !(image_->GetPixelMap())) {
         return;
     }
