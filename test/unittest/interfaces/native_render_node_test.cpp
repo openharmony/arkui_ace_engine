@@ -1417,6 +1417,40 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest214, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeRenderNodeTest215
+ * @tc.desc: Test SetRectShapeOptionValue function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest215, TestSize.Level1)
+{
+    auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(rectShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue(rectShape, 10.0f, 20.0f, 30.0f, 40.0f);
+    ASSERT_EQ(rectShape->left, 10.0f);
+    ASSERT_EQ(rectShape->top, 20.0f);
+    ASSERT_EQ(rectShape->right, 40.0f);
+    ASSERT_EQ(rectShape->bottom, 60.0f);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(rectShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest216
+ * @tc.desc: Test SetRoundRectShapeOptionValue function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest216, TestSize.Level1)
+{
+    auto roundRectShape = OH_ArkUI_RenderNodeUtils_CreateRoundRectShapeOption();
+    ASSERT_NE(roundRectShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionValue(roundRectShape, 11.0f, 21.0f, 31.0f, 41.0f);
+    ASSERT_EQ(roundRectShape->left, 11.0f);
+    ASSERT_EQ(roundRectShape->top, 21.0f);
+    ASSERT_EQ(roundRectShape->right, 42.0f);
+    ASSERT_EQ(roundRectShape->bottom, 62.0f);
+    OH_ArkUI_RenderNodeUtils_DisposeRoundRectShapeOption(roundRectShape);
+}
+
+/**
  * @tc.name: NativeRenderNodeAdopterTest001
  * @tc.desc: Test renderNode function.
  * @tc.type: FUNC

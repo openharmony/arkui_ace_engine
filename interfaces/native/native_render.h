@@ -1996,6 +1996,38 @@ void OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(ArkUI_RenderNodeClipOp
  */
 int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_RenderNodeHandle* renderNode);
 
+/**
+ * @brief Sets the bounding rectangle for a rounded rectangle shape option
+ * This function defines the geometric frame of a rounded rectangle by specifying its position and dimensions.
+ *
+ * @param option Pointer to the rounded rectangle shape option to be configured
+ * @param x X-coordinate of the rectangle's top-left corner, determining the left boundary position
+ * @param y Y-coordinate of the rectangle's top-left corner, determining the top boundary position
+ * @param width Width of the rectangle, representing the horizontal extent from the X-coordinate,
+ *     which determines the right boundary position (right = x + width)
+ * @param height Height of the rectangle, representing the vertical extent from the Y-coordinate,
+ *     which determines the bottom boundary position (bottom = y + height)
+ * @since 26.0.0
+ */
+void OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionValue(
+    ArkUI_RoundRectShapeOption* option, float x, float y, float width, float height);
+
+/**
+ * @brief Sets the bounding rectangle for a rectangle shape option
+ * This function defines the geometric frame of a rectangle by specifying its position and dimensions.
+ *
+ * @param option Pointer to the rectangle shape option to be configured
+ * @param x X-coordinate of the rectangle's top-left corner, determining the left boundary position
+ * @param y Y-coordinate of the rectangle's top-left corner, determining the top boundary position
+ * @param width Width of the rectangle, representing the horizontal extent from the X-coordinate,
+ *     which determines the right boundary position (right = x + width)
+ * @param height Height of the rectangle, representing the vertical extent from the Y-coordinate,
+ *     which determines the bottom boundary position (bottom = y + height)
+ * @since 26.0.0
+ */
+void OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue(
+    ArkUI_RectShapeOption* option, float x, float y, float width, float height);
+
 #ifdef __cplusplus
 };
 #endif

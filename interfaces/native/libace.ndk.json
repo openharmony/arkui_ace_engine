@@ -6574,5 +6574,13 @@
  	{
  	    "first_introduced": "24",
  	    "name": "OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange"
- 	}
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionValue"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue"
+    }
 ]
