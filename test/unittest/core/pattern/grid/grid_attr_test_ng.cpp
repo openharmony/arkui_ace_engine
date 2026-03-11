@@ -885,4 +885,40 @@ HWTEST_F(GridAttrTestNg, Gap005, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0);
     EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), HEIGHT / 3);
 }
+
+/**
+ * @tc.name: GetGridController001
+ * @tc.desc: Test GetGridController returns existing controller without replacing positionController_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GetGridController001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone();
+    auto controller = pattern_->positionController_;
+    EXPECT_NE(controller, nullptr);
+
+    auto fetched = GridModelNG::GetOrCreateController(AceType::RawPtr(frameNode_));
+    EXPECT_NE(fetched, nullptr);
+    EXPECT_EQ(fetched, controller);
+    EXPECT_EQ(pattern_->positionController_, controller);
+}
+
+/**
+ * @tc.name: SetGridScrollBarProxy001
+ * @tc.desc: Test SetScrollBarProxy pushes proxy to grid pattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, SetGridScrollBarProxy001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateFixedItems(10);
+    CreateDone();
+    auto proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    pattern_->SetScrollBarProxy(proxy);
+    EXPECT_EQ(pattern_->scrollBarProxy_, proxy);
+}
 } // namespace OHOS::Ace::NG

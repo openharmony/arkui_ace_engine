@@ -1033,12 +1033,33 @@ ArkUINativeModuleValue ListBridge::SetInitialScroller(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     Framework::JSRef<Framework::JSVal> args = info[1];
+    bool isBindController = false;
+    if (runtimeCallInfo->GetArgsNumber() > LIST_ARG_INDEX_2) {
+        Local<JSValueRef> bindArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
+        isBindController = bindArg->IsBoolean() && bindArg->ToBoolean(vm)->Value();
+    }
     if (args->IsObject()) {
         Framework::JSScroller* scroller =
             Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSScroller>();
         RefPtr<Framework::JSScroller> jsScroller = Referenced::Claim(scroller);
         jsScroller->SetInstanceId(Container::CurrentIdSafely());
-        SetScroller(runtimeCallInfo, jsScroller);
+        if (isBindController) {
+            Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+            auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+            auto positionController = GetArkUINodeModifiers()->getListModifier()->getController(nativeNode);
+            auto nodePositionController =
+                AceType::Claim(reinterpret_cast<ScrollControllerBase*>(positionController));
+            jsScroller->SetController(nodePositionController);
+            auto proxy = jsScroller->GetScrollBarProxy();
+            if (!proxy) {
+                proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+                jsScroller->SetScrollBarProxy(proxy);
+            }
+            auto proxyPtr = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(proxy));
+            GetArkUINodeModifiers()->getListModifier()->setScrollBarProxy(nativeNode, proxyPtr);
+        } else {
+            SetScroller(runtimeCallInfo, jsScroller);
+        }
     }
     return panda::JSValueRef::Undefined(vm);
 }
