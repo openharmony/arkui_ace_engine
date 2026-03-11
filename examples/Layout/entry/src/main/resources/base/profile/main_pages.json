@@ -4,6 +4,11 @@
     "pages/SizeExample/SizeExampleRouter",
     "pages/ColumnSplitExample/ColumnSplitExampleRouter",
     "pages/RowSplitExample/RowSplitExampleRouter",
+    "pages/BlankExample/BlankExampleRouter",
+    "pages/ColumnExample/ColumnExampleRouter",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExampleRouter",
+    "pages/FlexExample/FlexExampleRouter",
+
     "pages/SizeExample/SizeExample01",
     "pages/SizeExample/SizeExample02",
     "pages/SizeExample/SizeExample03",
@@ -23,8 +28,35 @@
     "pages/SizeExample/SizeExample17",
     "pages/SizeExample/SizeExample18",
     "pages/SizeExample/SizeExample19",
-    "pages/ColumnSplitExample/ColumnSplitExample1",
-    "pages/ColumnSplitExample/ColumnSplitExample2",
-    "pages/RowSplitExample/RowSplitExample1"
+
+    "pages/ColumnSplitExample/ColumnSplitExample01",
+    "pages/ColumnSplitExample/ColumnSplitExample02",
+
+    "pages/RowSplitExample/RowSplitExample1",
+
+    "pages/BlankExample/BlankExample01",
+    "pages/BlankExample/BlankExample02",
+    "pages/BlankExample/BlankExample03",
+
+    "pages/ColumnExample/ColumnExample01",
+    "pages/ColumnExample/ColumnExample02",
+
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample01",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample02",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample03",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample04",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample05",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample06",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample07",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample08",
+
+    "pages/FlexExample/FlexExample01",
+    "pages/FlexExample/FlexExample02",
+    "pages/FlexExample/FlexExample03",
+    "pages/FlexExample/FlexExample04",
+    "pages/FlexExample/FlexExample05",
+    "pages/FlexExample/FlexExample06",
+    "pages/FlexExample/FlexExample07",
+    "pages/FlexExample/FlexExample08"
   ]
 }

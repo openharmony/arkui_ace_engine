@@ -52,7 +52,7 @@ struct SizeExample15 {
       }
       .size({ width: '90%', height: 140 })
       .backgroundColor(0xAFEEEE)
-      
+
       Flex() {
         Text('layoutWeight(2)')
           .size({ width: '30%', height: 110 }).backgroundColor(0xFFEFD5).textAlign(TextAlign.Center)

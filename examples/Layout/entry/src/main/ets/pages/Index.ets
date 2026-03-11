@@ -36,6 +36,26 @@ struct Index {
       title: 'RowSplitExample',
       page: 'pages/RowSplitExample/RowSplitExampleRouter'
     },
+    {
+      title: 'BlankExample',
+      page: 'pages/BlankExample/BlankExampleRouter'
+    },
+    {
+      title: 'ColumnExample',
+      page: 'pages/ColumnExample/ColumnExampleRouter'
+    },
+    {
+      title: 'ExpandSafeAreaExample',
+      page: 'pages/ExpandSafeAreaExample/ExpandSafeAreaExampleRouter'
+    },
+    {
+      title: 'FlexExample',
+      page: 'pages/FlexExample/FlexExampleRouter'
+    },
+    {
+      title: 'RowExample',
+      page: 'pages/RowExample/RowExampleRouter'
+    },
   ]
 
   build() {

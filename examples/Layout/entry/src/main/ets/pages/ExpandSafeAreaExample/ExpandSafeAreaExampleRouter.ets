@@ -22,15 +22,39 @@ export interface DataClass {
 
 @Entry
 @Component
-struct ColumnSplitIndex {
+struct ExpandSafeAreaIndex {
   data: DataClass[] = [
     {
-      title: 'ColumnSplitExample01',
-      page: 'pages/ColumnSplitExample/ColumnSplitExample01'
+      title: 'ExpandSafeAreaExample01',
+      page: 'pages/ExpandSafeAreaExample/ExpandSafeAreaExample01'
     },
     {
-      title: 'ColumnSplitExample02',
-      page: 'pages/ColumnSplitExample/ColumnSplitExample02'
+      title: 'ExpandSafeAreaExample02',
+      page: 'pages/ExpandSafeAreaExample/ExpandSafeAreaExample02'
+    },
+    {
+      title: 'ExpandSafeAreaExample03',
+      page: 'pages/ExpandSafeAreaExample/ExpandSafeAreaExample03'
+    },
+    {
+      title: 'ExpandSafeAreaExample04',
+      page: 'pages/ExpandSafeAreaExample/ExpandSafeAreaExample04'
+    },
+    {
+      title: 'ExpandSafeAreaExample05',
+      page: 'pages/ExpandSafeAreaExample/ExpandSafeAreaExample05'
+    },
+    {
+      title: 'ExpandSafeAreaExample06',
+      page: 'pages/ExpandSafeAreaExample/ExpandSafeAreaExample06'
+    },
+    {
+      title: 'ExpandSafeAreaExample07',
+      page: 'pages/ExpandSafeAreaExample/ExpandSafeAreaExample07'
+    },
+    {
+      title: 'ExpandSafeAreaExample08',
+      page: 'pages/ExpandSafeAreaExample/ExpandSafeAreaExample08'
     },
   ]
 

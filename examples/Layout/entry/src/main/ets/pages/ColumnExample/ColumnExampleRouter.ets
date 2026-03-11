@@ -22,15 +22,15 @@ export interface DataClass {
 
 @Entry
 @Component
-struct ColumnSplitIndex {
+struct ColumnIndex {
   data: DataClass[] = [
     {
-      title: 'ColumnSplitExample01',
-      page: 'pages/ColumnSplitExample/ColumnSplitExample01'
+      title: 'ColumnExample01',
+      page: 'pages/ColumnExample/ColumnExample01'
     },
     {
-      title: 'ColumnSplitExample02',
-      page: 'pages/ColumnSplitExample/ColumnSplitExample02'
+      title: 'ColumnExample02',
+      page: 'pages/ColumnExample/ColumnExample02'
     },
   ]
 
