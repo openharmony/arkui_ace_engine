@@ -54,7 +54,7 @@ struct SizeExample14 {
         .size({ width: 150, height: 200 })
         .backgroundColor(0xAFEEEE)
       }
-      
+
       Row(){
         Column() {
           Text('layoutWeight(2)')

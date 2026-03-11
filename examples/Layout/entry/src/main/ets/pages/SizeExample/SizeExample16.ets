@@ -13,34 +13,54 @@
  * limitations under the License.
  */
 
+class MyModifier1 implements AttributeModifier<CommonAttribute> {
+  applyNormalAttribute(instance: CommonAttribute): void {
+    instance
+      .width(LayoutPolicy.matchParent)
+      .height(LayoutPolicy.matchParent)
+  }
+}
+class MyModifier2 implements AttributeModifier<CommonAttribute> {
+  applyNormalAttribute(instance: CommonAttribute): void {
+    instance
+      .width(LayoutPolicy.wrapContent)
+      .height(LayoutPolicy.wrapContent)
+  }
+}
+class MyModifier3 implements AttributeModifier<CommonAttribute> {
+  applyNormalAttribute(instance: CommonAttribute): void {
+    instance
+      .width(LayoutPolicy.fixAtIdealSize)
+      .height(LayoutPolicy.fixAtIdealSize)
+  }
+}
+
 @Entry
 @Component
 struct SizeExample16 {
+  @State private Modifier1: MyModifier1 = new MyModifier1
+  @State private Modifier2: MyModifier2 = new MyModifier2
+  @State private Modifier3: MyModifier3 = new MyModifier3
   build() {
     Column() {
       Column() {
-        // matchParent生效时，当前组件会与其父组件内容区大小（180vp * 180vp）相等，同时依旧受自身constraintSize（150vp * 150vp）约束，因此当前组件大小为150vp * 150vp
-        Text("matchParent")
+        Text('matchParent Modifier')
         Flex()
           .backgroundColor('rgb(0, 74, 175)')
-          .width(LayoutPolicy.matchParent)
-          .height(LayoutPolicy.matchParent)
+          .attributeModifier(this.Modifier1)
           .constraintSize({ maxWidth: 150, maxHeight: 150 })
 
-        // wrapContent生效时，当前组件会与其子组件大小（300vp * 300vp）相等，但不能超过父组件内容大小（180vp * 180vp）且会受自身constraintSize（250vp * 250vp）约束，因此当前组件大小为180vp * 180vp
-        Text("wrapContent")
+        Text('wrapContent Modifier')
         Row() {
           Flex()
             .width(300)
             .height(300)
         }
         .backgroundColor('rgb(39, 135, 217)')
-        .width(LayoutPolicy.wrapContent)
-        .height(LayoutPolicy.wrapContent)
+        .attributeModifier(this.Modifier2)
         .constraintSize({ maxWidth: 250, maxHeight: 250 })
 
-        // 从API version 20开始，layoutPolicy支持wrapContent和fixAtIdealSize。fixAtIdealSize生效时，当前组件会与其子组件大小（300vp * 300vp）相等，可以超过父组件内容大小（180vp * 180vp）但会受自身constraintSize（250vp * 250vp）约束，因此当前组件大小为250vp * 250vp
-        Text("fixAtIdealSize")
+        Text('fixAtIdealSize Modifier')
 
         Row() {
           Flex()
@@ -48,15 +68,14 @@ struct SizeExample16 {
             .height(300)
         }
         .backgroundColor('rgb(240, 250, 255)')
-        .width(LayoutPolicy.fixAtIdealSize)
-        .height(LayoutPolicy.fixAtIdealSize)
+        .attributeModifier(this.Modifier3)
         .constraintSize({ maxWidth: 250, maxHeight: 250 })
       }
       .width(200)
       .height(200)
       .padding(10)
     }
-    .width("100%")
-    .height("100%")
+    .width('100%')
+    .height('100%')
   }
 }

@@ -22,15 +22,39 @@ export interface DataClass {
 
 @Entry
 @Component
-struct ColumnSplitIndex {
+struct LayoutIndex {
   data: DataClass[] = [
     {
-      title: 'ColumnSplitExample01',
-      page: 'pages/ColumnSplitExample/ColumnSplitExample01'
+      title: 'FlexExample01',
+      page: 'pages/FlexExample/FlexExample01'
     },
     {
-      title: 'ColumnSplitExample02',
-      page: 'pages/ColumnSplitExample/ColumnSplitExample02'
+      title: 'FlexExample02',
+      page: 'pages/FlexExample/FlexExample02'
+    },
+    {
+      title: 'FlexExample03',
+      page: 'pages/FlexExample/FlexExample03'
+    },
+    {
+      title: 'FlexExample04',
+      page: 'pages/FlexExample/FlexExample04'
+    },
+    {
+      title: 'FlexExample05',
+      page: 'pages/FlexExample/FlexExample05'
+    },
+    {
+      title: 'FlexExample06',
+      page: 'pages/FlexExample/FlexExample06'
+    },
+    {
+      title: 'FlexExample07',
+      page: 'pages/FlexExample/FlexExample07'
+    },
+    {
+      title: 'FlexExample08',
+      page: 'pages/FlexExample/FlexExample08'
     },
   ]
 
