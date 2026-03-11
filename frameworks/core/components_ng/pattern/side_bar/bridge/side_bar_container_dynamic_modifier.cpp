@@ -756,6 +756,7 @@ void SetSideBarOnChangeImpl(ArkUINodeHandle node, void* callback)
 void SetSideBarToolBarManagerImpl(ArkUINodeHandle node)
 {
     auto* sideBarNode = GetFrameNode(node);
+    CHECK_NULL_VOID(sideBarNode);
     auto sideBarPattern = AceType::DynamicCast<NG::SideBarContainerPattern>(sideBarNode->GetPattern());
     if (sideBarPattern) {
         sideBarPattern->InitToolBarManager();

@@ -474,14 +474,16 @@ void SwiperArrowPattern::UpdateArrowContentBySymbol(RefPtr<FrameNode>& buttonNod
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
     bool isRtl = swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (V2::SWIPER_LEFT_ARROW_ETS_TAG == GetHost()->GetTag()) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (V2::SWIPER_LEFT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(
                 isRtl ? swiperIndicatorTheme->GetRightSymbolId() : swiperIndicatorTheme->GetLeftSymbolId()));
         } else {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(swiperIndicatorTheme->GetUpSymbolId()));
         }
-    } else if (V2::SWIPER_RIGHT_ARROW_ETS_TAG == GetHost()->GetTag()) {
+    } else if (V2::SWIPER_RIGHT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(
                 isRtl ? swiperIndicatorTheme->GetLeftSymbolId() : swiperIndicatorTheme->GetRightSymbolId()));
@@ -514,13 +516,15 @@ void SwiperArrowPattern::UpdateArrowContentByImage(RefPtr<FrameNode>& buttonNode
     ImageSourceInfo imageSourceInfo;
     auto swiperLayoutProperty = GetSwiperArrowLayoutProperty();
     CHECK_NULL_VOID(swiperLayoutProperty);
-    if (V2::SWIPER_LEFT_ARROW_ETS_TAG == GetHost()->GetTag()) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (V2::SWIPER_LEFT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
         } else {
             imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG);
         }
-    } else if (V2::SWIPER_RIGHT_ARROW_ETS_TAG == GetHost()->GetTag()) {
+    } else if (V2::SWIPER_RIGHT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
         } else {

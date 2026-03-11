@@ -130,7 +130,9 @@ void ArcSwiperPattern::SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& i
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = indicatorNode->GetPaintProperty<CircleDotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);

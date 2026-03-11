@@ -61,7 +61,9 @@ void ParallelStagePattern::SetPrimaryPage(const RefPtr<FrameNode>& pageNode)
     }
     LogPrimaryChange(primaryPageNode_, pageNode);
     primaryPageNode_ = pageNode;
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     if (pageNode == nullptr) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "set primary page nullptr");
         if (hasDividerNode_) {
@@ -95,7 +97,9 @@ void ParallelStagePattern::FireModeChangeCallback()
 
 void ParallelStagePattern::OnAttachToMainTree()
 {
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -117,7 +121,9 @@ bool ParallelStagePattern::CalculateMode()
 {
     // calculate mode
     PageMode splitMode = PageMode::STACK;
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     auto pipelineContext = hostNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipelineContext->GetForceSplitManager());
@@ -191,7 +197,9 @@ void ParallelStagePattern::OnDirectionConfigurationUpdate()
 
 void ParallelStagePattern::OnDetachFromMainTree()
 {
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(hostNode);
     do {
         CHECK_NULL_BREAK(relatedPage_);
@@ -222,7 +230,9 @@ void ParallelStagePattern::CreateDividerNodeIfNeeded()
         return;
     }
     int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     dividerNode_ = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
     auto dividerLayoutProperty = dividerNode_->GetLayoutProperty<DividerLayoutProperty>();
