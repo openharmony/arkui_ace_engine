@@ -40,6 +40,20 @@ std::string ToString(const TextDirection& textDirection)
     auto iter = BinarySearchFindIndex(table, ArraySize(table), textDirection);
     return iter != -1 ? table[iter].value : "";
 }
+
+std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorList)
+{
+    std::string symbolColorList = "";
+    if (!colorList.empty()) {
+        symbolColorList = colorList[0].ColorToString();
+        symbolColorList += "|PH:" + std::to_string(static_cast<uint8_t>(colorList[0].GetPlaceholder()));
+        for (uint32_t i = 1; i < colorList.size(); ++i) {
+            symbolColorList += ", " + colorList[i].ColorToString();
+            symbolColorList += "|PH:" + std::to_string(static_cast<uint8_t>(colorList[i].GetPlaceholder()));
+        }
+    }
+    return symbolColorList;
+}
 } // namespace StringUtils
 TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight,
     FontStyle fontStyle, const Color& textColor)

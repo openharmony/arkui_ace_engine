@@ -5262,9 +5262,18 @@ void TextPattern::DumpTextStyleInfo()
     dumpLog.AddDesc(
         std::string("FontColor: ")
             .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ToString())
+            .append("|PH:")
+            .append(textStyle_.has_value()
+                        ? std::to_string(static_cast<uint8_t>(textStyle_->GetTextColor().GetPlaceholder()))
+                        : "Na")
             .append(" prop: ")
             .append(
                 textLayoutProp->HasTextColor() ? textLayoutProp->GetTextColorValue(Color::BLACK).ToString() : "Na")
+            .append("|PH:")
+            .append(textLayoutProp->HasTextColor()
+                        ? std::to_string(
+                            static_cast<uint8_t>(textLayoutProp->GetTextColorValue(Color::BLACK).GetPlaceholder()))
+                        : "Na")
             .append(" ForegroundColor: ")
             .append(
             renderContext->HasForegroundColor() ? renderContext->GetForegroundColorValue().ToString() : "Na")
@@ -5438,11 +5447,11 @@ void TextPattern::DumpTextStyleInfo4()
                                         : "Na"));
         dumpLog.AddDesc(
             std::string("SymbolColorList: ")
-                .append(StringUtils::SymbolColorListToString(textStyle_->GetSymbolColorList()))
+                .append(StringUtils::SymbolColorListToStringWithHolder(textStyle_->GetSymbolColorList()))
                 .append(" prop: ")
-                .append(textLayoutProp->HasSymbolColorList()
-                            ? StringUtils::SymbolColorListToString(textLayoutProp->GetSymbolColorList().value())
-                            : "Na"));
+                .append(textLayoutProp->HasSymbolColorList() ? StringUtils::SymbolColorListToStringWithHolder(
+                    textLayoutProp->GetSymbolColorList().value())
+                    : "Na"));
         dumpLog.AddDesc(std::string("CopyOption: ")
                             .append(StringUtils::ToString(copyOption_))
                             .append(" prop: ")
