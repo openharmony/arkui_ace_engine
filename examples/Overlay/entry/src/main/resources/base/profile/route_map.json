@@ -487,6 +487,11 @@
       "buildFunction": "ToastPositionBuilder"
     },
     {
+      "name": "ToastScene",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toastScene.ets",
+      "buildFunction": "ToastSceneBuilder"
+    },
+    {
       "name": "ActionSheetAdvanced",
       "pageSourceFile": "src/main/ets/pages/components/dialog/actionSheetAdvanced.ets",
       "buildFunction": "ActionSheetAdvancedBuilder"
