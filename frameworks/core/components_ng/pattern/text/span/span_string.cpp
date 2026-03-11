@@ -390,12 +390,14 @@ void SpanString::SplitInterval(std::list<RefPtr<SpanBase>>& spans, std::pair<int
         auto oldStart = (*it)->GetStartIndex();
         auto oldEnd = (*it)->GetEndIndex();
         if (intersection->first == oldStart && intersection->second == oldEnd) {
+            (*it)->ClearSpecialData();
             it = spans.erase(it);
             continue;
         }
         if (oldStart < intersection->first && intersection->second < oldEnd) {
             newSpans.emplace_back((*it)->GetSubSpan(oldStart, intersection->first));
             newSpans.emplace_back((*it)->GetSubSpan(intersection->second, oldEnd));
+            (*it)->ClearSpecialData();
             it = spans.erase(it);
             continue;
         }
@@ -1077,6 +1079,7 @@ void SpanString::RemoveSpecialSpan(int32_t start, int32_t end, SpanType type)
         if ((*iter)->GetStartIndex() >= start && (*iter)->GetStartIndex() < end - count) {
             text_.erase((*iter)->GetStartIndex(), 1);
             UpdateSpanMapWithOffset((*iter)->GetStartIndex(), -1);
+            (*iter)->ClearSpecialData();
             iter = spans.erase(iter);
             ++count;
             continue;

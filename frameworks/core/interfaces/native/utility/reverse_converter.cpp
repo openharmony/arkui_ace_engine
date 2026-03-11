@@ -17,6 +17,7 @@
 
 // SORTED_SECTION
 #include "base/utils/string_utils.h"
+#include "core/components/image/image_event.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"

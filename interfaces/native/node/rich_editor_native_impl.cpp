@@ -445,7 +445,7 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_SetTypingParagraphStyl
     OH_ArkUI_TextEditorStyledStringController* controller, OH_ArkUI_TextEditorParagraphStyle* style)
 {
     CHECK_NULL_RETURN(controller && controller->node && style, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    ArkUIRichEditorParagraphStyle paragraphStyle;
+    ArkUIParagraphStyle paragraphStyle;
     paragraphStyle.height = style->height;
     paragraphStyle.textAlign = style->textAlign;
     paragraphStyle.width = style->width;
@@ -963,6 +963,48 @@ ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_GetTypingStyle(
     textStyle.strokeWidth = result.strokeWidth;
     textStyle.strokeColor = result.strokeColor;
     *style = textStyle;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_GetSelection(
+    const OH_ArkUI_TextEditorStyledStringController* controller, uint32_t* start, uint32_t* end)
+{
+    CHECK_NULL_RETURN(controller && controller->node && start && end,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto result = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->
+        getRichEditorModifier()->getSelectionRangeInfo(controller->node->uiNodeHandle);
+    *start = result.first;
+    *end = result.second;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_SetStyledString(
+    const OH_ArkUI_TextEditorStyledStringController* controller, const ArkUI_StyledString_Descriptor* descriptor)
+{
+    CHECK_NULL_RETURN(controller && controller->node && descriptor,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->
+        getRichEditorModifier()->setStyledString(controller->node->uiNodeHandle, descriptor);
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_GetStyledString(
+    const OH_ArkUI_TextEditorStyledStringController* controller, ArkUI_StyledString_Descriptor* descriptor)
+{
+    CHECK_NULL_RETURN(controller && controller->node && descriptor,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->
+        getRichEditorModifier()->getStyledString(controller->node->uiNodeHandle, descriptor);
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_TextEditorStyledStringController_SetStyledPlaceholder(
+    const OH_ArkUI_TextEditorStyledStringController* controller, const ArkUI_StyledString_Descriptor* descriptor)
+{
+    CHECK_NULL_RETURN(controller && controller->node && descriptor,
+        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->
+        getRichEditorModifier()->setStyledPlaceholder(controller->node->uiNodeHandle, descriptor);
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 #ifdef __cplusplus

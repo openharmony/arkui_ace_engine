@@ -447,6 +447,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_RICH_EDITOR_ON_CUT;
         case NODE_TEXT_EDITOR_ON_COPY:
             return ON_RICH_EDITOR_ON_COPY;
+        case NODE_TEXT_EDITOR_ON_WILL_CHANGE:
+            return ON_RICH_EDITOR_ON_WILL_CHANGE;
+        case NODE_TEXT_EDITOR_ON_DID_CHANGE:
+            return ON_RICH_EDITOR_ON_DID_CHANGE;
         case NODE_ON_NEED_SOFTKEYBOARD:
             return ON_NEED_SOFTKEYBOARD;
         default:
@@ -767,6 +771,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_EDITOR_ON_CUT;
         case ON_RICH_EDITOR_ON_COPY:
             return NODE_TEXT_EDITOR_ON_COPY;
+        case ON_RICH_EDITOR_ON_WILL_CHANGE:
+            return NODE_TEXT_EDITOR_ON_WILL_CHANGE;
+        case ON_RICH_EDITOR_ON_DID_CHANGE:
+            return NODE_TEXT_EDITOR_ON_DID_CHANGE;
         case ON_NEED_SOFTKEYBOARD:
             return NODE_ON_NEED_SOFTKEYBOARD;
         default:
@@ -896,6 +904,12 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case PREVENTABLE_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->preventableEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case TEXT_EDITOR_CHANGE_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->textEditorChangeEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
@@ -1337,6 +1351,11 @@ int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_Nu
         if (keyBoardData != nullptr) {
             keyBoardData->data[0].i32 = value[0].i32;
         }
+    } else if (event->kind == NODE_TEXT_EDITOR_ON_WILL_CHANGE) {
+        auto* changeEvent = reinterpret_cast<ArkUITextEditorChangeEvent*>(&(originNodeEvent->textEditorChangeEvent));
+        if (changeEvent != nullptr) {
+            changeEvent->returnValue = value[0].i32;
+        }
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -1370,6 +1389,17 @@ ArkUI_TouchTestInfo* OH_ArkUI_NodeEvent_GetTouchTestInfo(ArkUI_NodeEvent* nodeEv
         return nullptr;
     }
     return touchTestInfo;
+}
+
+OH_ArkUI_TextEditorChangeEvent* OH_ArkUI_NodeEvent_GetTextEditorOnWillChangeEvent(ArkUI_NodeEvent* event)
+{
+    CHECK_NULL_RETURN(event, nullptr);
+    CHECK_NULL_RETURN(event->category == static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT), nullptr);
+    CHECK_NULL_RETURN(event->kind == static_cast<int32_t>(NODE_TEXT_EDITOR_ON_WILL_CHANGE), nullptr);
+    auto* origin = reinterpret_cast<ArkUINodeEvent*>(event->origin);
+    CHECK_NULL_RETURN(origin, nullptr);
+    auto* changeEvent = reinterpret_cast<OH_ArkUI_TextEditorChangeEvent*>(&origin->textEditorChangeEvent);
+    return changeEvent;
 }
 #ifdef __cplusplus
 };

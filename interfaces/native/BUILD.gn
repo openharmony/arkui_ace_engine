@@ -101,7 +101,8 @@ ohos_shared_library("ace_ndk") {
     "node/textpicker_option.cpp",
     "node/waterflow_section_option.cpp",
     "node/text_native_impl.cpp",
-    "node/rich_editor_native_impl.cpp"
+    "node/rich_editor_native_impl.cpp",
+    "node/span_style_native_impl.cpp"
   ]
   external_deps = [ "bounds_checking_function:libsec_shared" ]
   deps = []
@@ -122,6 +123,7 @@ ohos_shared_library("ace_ndk") {
       "graphic_2d:native_drawing_ndk",
       "hilog:libhilog",
       "image_framework:pixelmap",
+      "image_framework:image_native",
       "ipc:ipc_core",
       "napi:ace_napi",
       "resource_management:global_resmgr",

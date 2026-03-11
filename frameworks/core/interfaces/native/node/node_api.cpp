@@ -21,7 +21,7 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
@@ -59,6 +59,7 @@
 #include "core/interfaces/native/node/rich_editor_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/select_modifier.h"
+#include "core/interfaces/native/node/styled_string_impl.h"
 #include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
@@ -2726,88 +2727,6 @@ const ArkUIExtendedNodeAPI* GetExtendedAPI()
     return &impl_extended;
 }
 
-ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptor()
-{
-    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor create");
-    return new ArkUI_StyledString_Descriptor();
-}
-
-void DestroyArkUIStyledStringDescriptor(ArkUI_StyledString_Descriptor* descriptor)
-{
-    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor destroy");
-    CHECK_NULL_VOID(descriptor);
-    if (descriptor->html) {
-        delete descriptor->html;
-        descriptor->html = nullptr;
-    }
-    if (descriptor->spanString) {
-        auto* spanString = reinterpret_cast<SpanString*>(descriptor->spanString);
-        delete spanString;
-        descriptor->spanString = nullptr;
-    }
-    delete descriptor;
-    descriptor = nullptr;
-}
-
-ArkUI_Int32 UnmarshallStyledStringDescriptor(
-    uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor)
-{
-    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "UnmarshallStyledStringDescriptor");
-    CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ARKUI_ERROR_CODE_PARAM_INVALID);
-    std::vector<uint8_t> vec(buffer, buffer + bufferSize);
-    SpanString* spanString = new SpanString(u"");
-    std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshallCallback;
-    spanString->DecodeTlvExt(vec, spanString, std::move(unmarshallCallback));
-    descriptor->spanString = reinterpret_cast<void*>(spanString);
-    return ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_Int32 MarshallStyledStringDescriptor(
-    uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor, size_t* resultSize)
-{
-    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "MarshallStyledStringDescriptor");
-    CHECK_NULL_RETURN(buffer && resultSize && descriptor, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(descriptor->spanString, ARKUI_ERROR_CODE_INVALID_STYLED_STRING);
-    auto spanStringRawPtr = reinterpret_cast<SpanString*>(descriptor->spanString);
-    std::vector<uint8_t> tlvData;
-    spanStringRawPtr->EncodeTlv(tlvData);
-    *resultSize = tlvData.size();
-    if (bufferSize < *resultSize) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    auto data = tlvData.data();
-    std::copy(data, data + *resultSize, buffer);
-    return ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-const char* ConvertToHtml(ArkUI_StyledString_Descriptor* descriptor)
-{
-    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ConvertToHtml");
-    CHECK_NULL_RETURN(descriptor && descriptor->spanString, "");
-    auto spanStringRawPtr = reinterpret_cast<SpanString*>(descriptor->spanString);
-    auto htmlStr = HtmlUtils::ToHtml(spanStringRawPtr);
-    char* html = new char[htmlStr.length() + 1];
-    CHECK_NULL_RETURN(html, "");
-    std::copy(htmlStr.begin(), htmlStr.end(), html);
-    html[htmlStr.length()] = '\0';
-    descriptor->html = html;
-    return descriptor->html;
-}
-
-const ArkUIStyledStringAPI* GetStyledStringAPI()
-{
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIStyledStringAPI impl {
-        .createArkUIStyledStringDescriptor = CreateArkUIStyledStringDescriptor,
-        .destroyArkUIStyledStringDescriptor = DestroyArkUIStyledStringDescriptor,
-        .unmarshallStyledStringDescriptor = UnmarshallStyledStringDescriptor,
-        .marshallStyledStringDescriptor = MarshallStyledStringDescriptor,
-        .convertToHtml = ConvertToHtml
-    };
-    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
-    return &impl;
-}
-
 ArkUISnapshotOptions* CreateSnapshotOptions()
 {
     ArkUISnapshotOptions* snapshotOptions = new ArkUISnapshotOptions();
@@ -2904,7 +2823,7 @@ ArkUIFullNodeAPI impl_full = {
     .getExtendedAPI = GetExtendedAPI,         // Extended
     .getNodeAdapterAPI = NodeAdapter::GetNodeAdapterAPI,         // adapter.
     .getDragAdapterAPI = DragAdapter::GetDragAdapterAPI,        // drag adapter.
-    .getStyledStringAPI = GetStyledStringAPI,     // StyledStringAPI
+    .getStyledStringAPI = StyledStringAdapter::GetStyledStringAPI,     // StyledStringAPI
     .getSnapshotAPI = GetComponentSnapshotAPI,     // SyncSnapshot
     .getMultiThreadManagerAPI = GetMultiThreadManagerAPI, // MultiThreadManagerAPI
     .getRuntimeInit = RuntimeInit::GetRuntimeInit, // RuntimeInit

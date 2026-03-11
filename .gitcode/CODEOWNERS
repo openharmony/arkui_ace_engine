@@ -3020,6 +3020,8 @@ frameworks/core/interfaces/native/node/stepper_item_modifier.cpp @arkui_navigati
 frameworks/core/interfaces/native/node/stepper_item_modifier.h @arkui_navigation
 frameworks/core/interfaces/native/node/stepper_modifier.cpp @arkui_navigation
 frameworks/core/interfaces/native/node/stepper_modifier.h @arkui_navigation
+frameworks/core/interfaces/native/node/styled_string_impl.cpp @arkui_rich_editor
+frameworks/core/interfaces/native/node/styled_string_impl.h @arkui_rich_editor
 frameworks/core/interfaces/native/node/swiper_controller_modifier.cpp @arkui_navigation
 frameworks/core/interfaces/native/node/swiper_controller_modifier.h @arkui_navigation
 frameworks/core/interfaces/native/node/tab_content_modifier.cpp @arkui_navigation
@@ -3120,6 +3122,8 @@ interfaces/native/node/text_native_impl.h @huawei_g_five
 interfaces/native/node/text_native_impl.cpp @huawei_g_five
 interfaces/native/node/rich_editor_native_impl.h @arkui_rich_editor
 interfaces/native/node/rich_editor_native_impl.cpp @arkui_rich_editor
+interfaces/native/node/span_style_native_impl.h @arkui_rich_editor
+interfaces/native/node/span_style_native_impl.cpp @arkui_rich_editor
 
 [ANI Interfaces]
 interfaces/ets/ani/componentSnapshot/src/componentSnapshot.cpp @ArkUI_Event
@@ -3739,6 +3743,7 @@ test/unittest/interfaces/ui_input_event_test.cpp @ArkUI_Event
 test/unittest/interfaces/ace_ui_input_event/ @ArkUI_Event
 test/unittest/interfaces/ace_gesture/ @ArkUI_Event
 test/unittest/interfaces/form_render/ @form_framework
+test/unittest/interfaces/native_styled_string_test.cpp @arkui_rich_editor
 test/unittest/frameworks/core/common/ace_engine_test.cpp @arkui_framework_xnode
 test/unittest/frameworks/core/common/container_scope_test.cpp @arkui_framework_xnode
 test/unittest/frameworks/core/common/BUILD.gn @arkui_framework_xnode

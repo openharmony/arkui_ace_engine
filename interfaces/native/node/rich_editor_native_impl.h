@@ -37,7 +37,7 @@ struct OH_ArkUI_TextEditorStyledStringController {
 
 struct OH_ArkUI_TextEditorParagraphStyle {
     ArkUI_TextAlignment textAlign;
-    OH_PixelmapNative* leadingMarginPixelMap;
+    OH_PixelmapNative* leadingMarginPixelMap = nullptr;
     uint32_t width;
     uint32_t height;
     ArkUI_WordBreak wordBreak;

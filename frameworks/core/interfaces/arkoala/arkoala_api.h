@@ -673,9 +673,11 @@ struct ArkUIRichEditorPlaceholderOptionsStruct {
     ArkUI_Uint32 fontColor;
 };
 
-struct ArkUIRichEditorParagraphStyle {
+// Note: Not all member variables are used in different scenarios.
+struct ArkUIParagraphStyle {
     ArkUI_Int32 textAlign;
     void* leadingMarginPixelMap;
+    std::vector<uint8_t> pixelMapRawData;
     ArkUI_Uint32 width;
     ArkUI_Uint32 height;
     ArkUI_Int32 wordBreak;
@@ -683,6 +685,22 @@ struct ArkUIRichEditorParagraphStyle {
     ArkUI_Uint32 paragraphSpacing;
     ArkUI_Int32 textVerticalAlignment;
     ArkUI_Int32 textDirection;
+    ArkUI_Float32 textIndent;
+    std::optional<int32_t> maxLines;
+    ArkUI_Int32 overflow;
+    void* onDrawLeadingMargin;
+    void* onGetLeadingMargin;
+};
+
+struct ArkUILeadingMarginSpanDrawInfo {
+    float x;
+    float top;
+    float bottom;
+    float baseline;
+    ArkUI_Int32 direction;
+    ArkUI_Uint32 start;
+    ArkUI_Uint32 end;
+    bool first;
 };
 
 struct ArkUIShadowOptions {
@@ -1371,6 +1389,7 @@ enum ArkUIEventCategory {
     CHILD_TOUCH_TEST_EVENT = 20,
     PREVENTABLE_EVENT = 21,
     DIGITAL_CROWN_EVENT = 22,
+    TEXT_EDITOR_CHANGE_EVENT = 23,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -1582,6 +1601,8 @@ enum ArkUIEventSubKind {
     ON_RICH_EDITOR_ON_SUBMIT,
     ON_RICH_EDITOR_ON_CUT,
     ON_RICH_EDITOR_ON_COPY,
+    ON_RICH_EDITOR_ON_WILL_CHANGE,
+    ON_RICH_EDITOR_ON_DID_CHANGE,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -1907,6 +1928,15 @@ struct ArkUIPreventableEvent {
     ArkUI_Int32 subKind;
 };
 
+struct ArkUITextEditorChangeEvent {
+    ArkUI_Int32 subKind;
+    ArkUI_Int32 returnValue;
+    ArkUI_Int32 start;
+    ArkUI_Int32 end;
+    void* previewStyledString;
+    void* replacementStyledString;
+};
+
 struct ArkUINodeEvent {
     ArkUI_Int32 kind; // Actually ArkUIEventCategory.
     ArkUI_Int32 nodeId;
@@ -1934,6 +1964,7 @@ struct ArkUINodeEvent {
         ArkUITouchTestInfo touchTestInfo;
         ArkUIPreventableEvent preventableEvent;
         ArkUICrownEvent crownEvent;
+        ArkUITextEditorChangeEvent textEditorChangeEvent;
     };
 };
 
@@ -2706,6 +2737,131 @@ struct ArkUITextLineMetrics {
 
 struct ArkUISelectedDragPreviewStyle {
     ArkUI_Uint32 color;
+};
+
+struct ArkUICustomSpanMetrics {
+    float width;
+    float height;
+};
+
+struct ArkUICustomSpanDrawInfo {
+    float optionsX;
+    float optionsLineTop;
+    float optionsLineBottom;
+    float optionsBaseLine;
+};
+
+struct ArkUITextStyle {
+    uint32_t fontColor;
+    std::string fontFamily;
+    float fontSize;
+    uint32_t fontWeight;
+    ArkUI_Int32 fontStyle;
+    float strokeWidth;
+    uint32_t strokeColor;
+    ArkUI_Int32 superscript;
+};
+
+struct ArkUIGestureStyle {
+    std::function<void(ArkUINodeEvent&)> onClick;
+    void* onNapiClick = nullptr;
+    std::function<void(ArkUINodeEvent&)> onLongPress;
+    void* onNapiLongPress = nullptr;
+    std::function<void(ArkUINodeEvent&)> onTouch;
+    void* onNapiTouch = nullptr;
+};
+
+struct ArkUITextShadowStyle {
+    std::vector<ArkUIShadowOptions> textShadow;
+};
+
+struct ArkUIDecorationStyle {
+    ArkUI_Uint32 color;
+    ArkUI_Int32 type;
+    ArkUI_Int32 style;
+    float thicknessScale;
+    bool enableMultiType;
+};
+
+struct ArkUIBaselineOffsetStyle {
+    float baselineOffset;
+};
+
+struct ArkUILetterSpacingStyle {
+    float letterSpacing;
+};
+
+struct ArkUILineHeightStyle {
+    float lineHeight;
+};
+
+struct ArkUIBackgroundColorStyle {
+    ArkUI_Uint32 color;
+    float topLeftRadius;
+    float topRightRadius;
+    float bottomLeftRadius;
+    float bottomRightRadius;
+};
+
+struct ArkUIUrlStyle {
+    std::string url;
+};
+
+struct ArkUIUserDataSpan {
+    void* userData = nullptr;
+};
+
+struct ArkUICustomSpan {
+    void* onMeasure = nullptr;
+    void* onDraw = nullptr;
+};
+
+struct ArkUIMargin {
+    float top;
+    float right;
+    float bottom;
+    float left;
+};
+
+struct ArkUIImageAttachment {
+    void* pixelMap = nullptr;
+    std::vector<uint8_t> pixelMapRawData;
+    std::string resource;
+    std::optional<float> width;
+    std::optional<float> height;
+    ArkUI_Int32 verticalAlign;
+    ArkUI_Int32 objectFit;
+    ArkUIMargin margin;
+    ArkUIMargin padding;
+    float topLeftRadius;
+    float topRightRadius;
+    float bottomLeftRadius;
+    float bottomRightRadius;
+    std::vector<float> colorFilter;
+    void* drawingColorFilter = nullptr;
+    bool syncLoad;
+    bool supportSvg;
+    std::optional<bool> isPixelMap = std::nullopt;
+    std::optional<bool> isDrawingColorFilter = std::nullopt;
+};
+
+struct ArkUISpanStyle {
+    ArkUI_Int32 start;
+    ArkUI_Int32 length;
+    ArkUI_Int32 styledKey;
+    ArkUITextStyle textStyle;
+    ArkUITextShadowStyle textShadowStyle;
+    ArkUIGestureStyle gestureStyle;
+    ArkUIParagraphStyle paragraphStyle;
+    ArkUIDecorationStyle decorationStyle;
+    ArkUIBaselineOffsetStyle baselineOffsetStyle;
+    ArkUILetterSpacingStyle letterSpacingStyle;
+    ArkUILineHeightStyle lineHeightStyle;
+    ArkUIUrlStyle urlStyle;
+    ArkUIBackgroundColorStyle backgroundColorStyle;
+    ArkUIUserDataSpan userDataSpan;
+    ArkUICustomSpan customSpan;
+    ArkUIImageAttachment imageAttachment;
 };
 
 struct ArkUIBorderWidthOption {
@@ -8014,13 +8170,17 @@ struct ArkUIRichEditorModifier {
         ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
     void (*getRichEditorCharacterRangeForGlyphRange)(
         ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
-    void (*setTypingParagraphStyle)(ArkUINodeHandle node, const ArkUIRichEditorParagraphStyle& paragraphStyle);
+    void (*setTypingParagraphStyle)(ArkUINodeHandle node, const ArkUIParagraphStyle& paragraphStyle);
     void (*setRichEditorTypingStyle)(ArkUINodeHandle node, const ArkUIRichEditorTextStyle& style);
     ArkUIRichEditorTextStyle (*getRichEditorTypingStyle)(ArkUINodeHandle node);
     void (*setRichEditorBindSelectionMenu)(ArkUINodeHandle node, ArkUIRichEditorBindMenuParam* menuParam);
     void (*resetRichEditorBindSelectionMenu)(ArkUINodeHandle node);
     void* (*getEventSetHandler)(uint32_t kind);
     void* (*getEventResetHandler)(uint32_t kind);
+    std::pair<uint32_t, uint32_t> (*getSelectionRangeInfo)(ArkUINodeHandle node);
+    void (*setStyledString)(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* descriptor);
+    void (*getStyledString)(ArkUINodeHandle node, ArkUI_StyledString_Descriptor* descriptor);
+    void (*setStyledPlaceholder)(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* descriptor);
 };
 
 struct ArkUIRichEditorControllerModifier {
@@ -9058,12 +9218,45 @@ struct ArkUIExtendedNodeAPI {
 
 struct ArkUIStyledStringAPI {
     ArkUI_StyledString_Descriptor* (*createArkUIStyledStringDescriptor)();
+    ArkUI_StyledString_Descriptor* (*createArkUIStyledStringDescriptorWithString)(ArkUI_CharPtr value,
+        const std::vector<ArkUISpanStyle>& styles);
+    ArkUI_StyledString_Descriptor* (*createArkUIStyledStringDescriptorWithImage)(ArkUIImageAttachment value);
+    ArkUI_StyledString_Descriptor* (*createArkUIStyledStringDescriptorWithCustomSpan)(ArkUICustomSpan value);
     void (*destroyArkUIStyledStringDescriptor)(ArkUI_StyledString_Descriptor* str);
     ArkUI_Int32 (*unmarshallStyledStringDescriptor)(
         uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* str);
     ArkUI_Int32 (*marshallStyledStringDescriptor)(
         uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* str, size_t* resultSize);
     ArkUI_CharPtr (*convertToHtml)(ArkUI_StyledString_Descriptor* str);
+    ArkUI_Int32 (*getLength)(const ArkUI_StyledString_Descriptor* descriptor, ArkUI_Int32* length);
+    ArkUI_Int32 (*getString)(const ArkUI_StyledString_Descriptor* descriptor, char* buffer, ArkUI_Int32 bufferSize,
+        ArkUI_Int32* writeLength);
+    ArkUI_Int32 (*isEqual)(const ArkUI_StyledString_Descriptor* firstDescriptor,
+        const ArkUI_StyledString_Descriptor* secondDescriptor, bool* isEqual);
+    ArkUI_Int32 (*subStyledString)(const ArkUI_StyledString_Descriptor* descriptor,
+        ArkUI_StyledString_Descriptor* subDescriptor, ArkUI_Uint32 start, ArkUI_Uint32 length);
+    ArkUI_Int32 (*getStyles)(const ArkUI_StyledString_Descriptor* descriptor, ArkUI_Uint32 start, ArkUI_Uint32 length,
+        ArkUI_Int32 styledKey, std::vector<ArkUISpanStyle>& styles);
+    ArkUI_Int32 (*fromHtml)(ArkUI_StyledString_Descriptor* descriptor, ArkUI_CharPtr html);
+    ArkUI_Int32 (*replaceString)(
+        ArkUI_StyledString_Descriptor* descriptor, ArkUI_Uint32 start, ArkUI_Uint32 length, ArkUI_CharPtr string);
+    ArkUI_Int32 (*insertString)(ArkUI_StyledString_Descriptor* descriptor, ArkUI_Uint32 start, ArkUI_CharPtr string);
+    ArkUI_Int32 (*removeString)(ArkUI_StyledString_Descriptor* descriptor, ArkUI_Uint32 start, ArkUI_Uint32 length);
+    ArkUI_Int32 (*replaceStyle)(ArkUI_StyledString_Descriptor* descriptor, const ArkUISpanStyle& spanStyle);
+    ArkUI_Int32 (*setStyle)(ArkUI_StyledString_Descriptor* descriptor, const ArkUISpanStyle& spanStyle);
+    ArkUI_Int32 (*removeStyle)(ArkUI_StyledString_Descriptor* descriptor, ArkUI_Uint32 start, ArkUI_Uint32 length,
+        ArkUI_Int32 styledKey);
+    ArkUI_Int32 (*clearStyles)(ArkUI_StyledString_Descriptor* descriptor);
+    ArkUI_Int32 (*replaceStyledString)(ArkUI_StyledString_Descriptor* descriptor, ArkUI_Uint32 start,
+        ArkUI_Uint32 length, const ArkUI_StyledString_Descriptor* other);
+    ArkUI_Int32 (*insertStyledString)(
+        ArkUI_StyledString_Descriptor* descriptor, ArkUI_Uint32 start, const ArkUI_StyledString_Descriptor* other);
+    ArkUI_Int32 (*appendStyledString)(
+        ArkUI_StyledString_Descriptor* descriptor, const ArkUI_StyledString_Descriptor* other);
+    ArkUI_Int32 (*invalidateCustomSpan)(const ArkUI_StyledString_Descriptor* descriptor);
+    void (*getReplacementStyledString)(const ArkUITextEditorChangeEvent* event,
+        ArkUI_StyledString_Descriptor* descriptor);
+    void (*getPreviewStyledString)(const ArkUITextEditorChangeEvent* event, ArkUI_StyledString_Descriptor* descriptor);
 };
 
 typedef enum {
