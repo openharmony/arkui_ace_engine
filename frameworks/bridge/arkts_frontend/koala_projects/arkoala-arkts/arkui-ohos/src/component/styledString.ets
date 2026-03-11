@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
+// this file will be merged with ../generated/component/styledString.ets at the preprocessor step of abc compilation.
 import { CustomSpanNative } from './idlize'
-import { CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo } from './styledString'
-import { DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 
 export abstract class CustomSpan {
     public readonly nativeObj: CustomSpanNative
