@@ -239,7 +239,7 @@ void SetSearchDirection(ArkUINodeHandle node, ArkUI_Uint32 textDirection)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    if (textDirection < 0 || textDirection >= TEXT_DIRECTIONS.size()) {
+    if (textDirection >= TEXT_DIRECTIONS.size()) {
         SearchModelNG::ResetTextDirection(frameNode);
         return;
     }
