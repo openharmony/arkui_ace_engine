@@ -1148,6 +1148,7 @@ public:
     }
 
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+    void MountPlaceholderImageNode(const std::list<RefPtr<NG::SpanItem>>& spans);
     bool SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
     bool SetStringPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
@@ -1597,6 +1598,7 @@ private:
     void CalcCaretInfoByClick(const Offset& touchOffset);
     std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
+    void RemovePlaceholderImageNodes();
     void ProcessStyledPlaceholder();
     void HandleAISpanHoverEvent(const MouseInfo& info) override;
     void InitMouseEvent();
