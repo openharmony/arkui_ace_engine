@@ -53,6 +53,26 @@ struct Index {
       page: 'pages/FlexExample/FlexExampleRouter'
     },
     {
+      title: 'FolderStackExample',
+      page: 'pages/FolderStackExample/FolderStackExampleRouter'
+    },
+    {
+      title: 'FoldSplitContainerExample',
+      page: 'pages/FoldSplitContainerExample/FoldSplitContainerExampleRouter'
+    },
+    {
+      title: 'GridColExample',
+      page: 'pages/GridColExample/GridColExampleRouter'
+    },
+    {
+      title: 'GridContainerExample',
+      page: 'pages/GridContainerExample/GridContainerExampleRouter'
+    },
+    {
+      title: 'GridRowExample',
+      page: 'pages/GridRowExample/GridRowExampleRouter'
+    },
+    {
       title: 'RowExample',
       page: 'pages/RowExample/RowExampleRouter'
     },
