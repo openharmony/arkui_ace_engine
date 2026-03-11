@@ -19,47 +19,93 @@
 #include <utility>
 
 #include "animation/ani_global_reference.h"
+#include "common/common_module.h"
 #include "load.h"
 #include "log/log.h"
 
 namespace OHOS::Ace::Ani {
 ani_long NodeAdapterConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object nodeAdapter)
 {
+    CHECK_NULL_RETURN(env, 0);
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return 0;
     }
     auto nodeAdapterRef = std::make_shared<AniGlobalReference>(env, nodeAdapter);
-    auto onAttachToNode = [env, nodeAdapterRef](ani_double nodeId) {
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    auto onAttachToNode = [vm, nodeAdapterRef](ani_double nodeId) {
+        CHECK_NULL_VOID(vm);
+        ani_env* env;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
         env->Object_CallMethodByName_Void(
             reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onAttachToNodePtr", "d:", nodeId);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
     };
-    auto onDetachFromNode = [env, nodeAdapterRef]() {
+    auto onDetachFromNode = [vm, nodeAdapterRef]() {
+        CHECK_NULL_VOID(vm);
+        ani_env* env;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
         env->Object_CallMethodByName_Void(
             reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onDetachFromNodePtr", ":");
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
     };
-    auto onGetId = [env, nodeAdapterRef](ani_int index) -> int32_t {
+    auto onGetId = [vm, nodeAdapterRef](ani_int index) -> int32_t {
+        CHECK_NULL_RETURN(vm, -1);
+        ani_env* env;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_RETURN(env, -1);
         ani_int nodeId = index;
         ani_int id;
         env->Object_CallMethodByName_Int(
             reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onGetChildId", "i:i", &id, nodeId);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
         return static_cast<int32_t>(id);
     };
-    auto onCreateChild = [env, nodeAdapterRef](ani_double index) -> ani_long {
+    auto onCreateChild = [vm, nodeAdapterRef](ani_double index) -> ani_long {
+        CHECK_NULL_RETURN(vm, 0);
+        ani_env* env;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_RETURN(env, 0);
         ani_double nodeId = index;
         ani_long node;
         env->Object_CallMethodByName_Long(
             reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onCreateNewNodePtr", "d:l", &node, nodeId);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
         return node;
     };
-    auto onDisposeChild = [env, nodeAdapterRef](ani_double node, ani_double id) {
+    auto onDisposeChild = [vm, nodeAdapterRef](ani_double node, ani_double id) {
+        CHECK_NULL_VOID(vm);
+        ani_env* env;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
         env->Object_CallMethodByName_Void(
             reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onDisposeNodePtr", "dd:", id, node);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
     };
 
-    auto onUpdateChild = [env, nodeAdapterRef](ani_double node, ani_double id) {
+    auto onUpdateChild = [vm, nodeAdapterRef](ani_double node, ani_double id) {
+        CHECK_NULL_VOID(vm);
+        ani_env* env;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
         env->Object_CallMethodByName_Void(
             reinterpret_cast<ani_fn_object>(nodeAdapterRef->GetValue()), "onUpdateNodePtr", "dd:", id, node);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
     };
 
     NodeAdapterInfo info = { .onAttachToNode = std::move(onAttachToNode),
