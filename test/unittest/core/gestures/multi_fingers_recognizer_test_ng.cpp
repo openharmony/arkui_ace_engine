@@ -470,4 +470,262 @@ HWTEST_F(MultiFingersRecognizerTestNg, GetGestureInfoString003, TestSize.Level1)
     result = clickRecognizer->GetGestureInfoString();
     EXPECT_THAT(result, HasSubstr("BTP:[,0->(1,2)]"));
 }
+
+/**
+ * @tc.name: IsNeedResetStatusTest001
+ * @tc.desc: Test IsNeedResetStatus with non-zero valid fingers count
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, IsNeedResetStatusTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 1;
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    fingersRecognizer->touchPoints_[0] = event;
+
+    bool result = fingersRecognizer->IsNeedResetStatus();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsNeedResetStatusTest002
+ * @tc.desc: Test IsNeedResetStatus with zero valid fingers and null group
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, IsNeedResetStatusTest002, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 0;
+
+    bool result = fingersRecognizer->IsNeedResetStatus();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsNeedResetStatusTest003
+ * @tc.desc: Test IsNeedResetStatus with zero valid fingers and non-null group
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, IsNeedResetStatusTest003, TestSize.Level1)
+{
+    std::vector<RefPtr<NGGestureRecognizer>> emptyRecognizers;
+    auto recognizerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(emptyRecognizers);
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    clickRecognizer->gestureGroup_ = recognizerGroup;
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 0;
+
+    bool result = fingersRecognizer->IsNeedResetStatus();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsNeedResetStatusTest004
+ * @tc.desc: Test IsNeedResetStatus with multi-fingers group needing reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, IsNeedResetStatusTest004, TestSize.Level1)
+{
+    auto clickRecognizer1 = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    auto clickRecognizer2 = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizer1, clickRecognizer2 };
+    auto recognizerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    
+    RefPtr<MultiFingersRecognizer> fingersRecognizer1 = clickRecognizer1;
+    RefPtr<MultiFingersRecognizer> fingersRecognizer2 = clickRecognizer2;
+    fingersRecognizer1->currentFingers_ = 0;
+    fingersRecognizer2->currentFingers_ = 0;
+
+    bool result = fingersRecognizer1->IsNeedResetStatus();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsNeedResetStatusTest005
+ * @tc.desc: Test IsNeedResetStatus with multi-fingers group not needing reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, IsNeedResetStatusTest005, TestSize.Level1)
+{
+    auto clickRecognizer1 = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    auto clickRecognizer2 = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = { clickRecognizer1, clickRecognizer2 };
+    auto recognizerGroup = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    
+    RefPtr<MultiFingersRecognizer> fingersRecognizer1 = clickRecognizer1;
+    RefPtr<MultiFingersRecognizer> fingersRecognizer2 = clickRecognizer2;
+    fingersRecognizer1->currentFingers_ = 0;
+    fingersRecognizer2->currentFingers_ = 1;
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    fingersRecognizer2->touchPoints_[0] = event;
+
+    bool result = recognizerGroup->IsNeedResetStatus();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: DumpGestureInfoTest001
+ * @tc.desc: Test DumpGestureInfo with null gestureInfo_
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, DumpGestureInfoTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->gestureInfo_ = nullptr;
+
+    std::string result = fingersRecognizer->DumpGestureInfo();
+    EXPECT_EQ(result, "allowedTypes: [all]");
+}
+
+/**
+ * @tc.name: DumpGestureInfoTest002
+ * @tc.desc: Test DumpGestureInfo with empty allowedTypes
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, DumpGestureInfoTest002, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+
+    std::string result = fingersRecognizer->DumpGestureInfo();
+    EXPECT_EQ(result, "allowedTypes: [all]");
+}
+
+/**
+ * @tc.name: DumpGestureInfoTest003
+ * @tc.desc: Test DumpGestureInfo with single allowedType
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, DumpGestureInfoTest003, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    std::set<SourceTool> allowedTypes = { SourceTool::FINGER };
+    fingersRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+
+    std::string result = fingersRecognizer->DumpGestureInfo();
+    EXPECT_EQ(result, "allowedTypes: [1]");
+}
+
+/**
+ * @tc.name: DumpGestureInfoTest004
+ * @tc.desc: Test DumpGestureInfo with multiple allowedTypes
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, DumpGestureInfoTest004, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    std::set<SourceTool> allowedTypes = { SourceTool::FINGER, SourceTool::PEN, SourceTool::MOUSE };
+    fingersRecognizer->gestureInfo_->SetAllowedTypes(allowedTypes);
+
+    std::string result = fingersRecognizer->DumpGestureInfo();
+    EXPECT_EQ(result, "allowedTypes: [1, 2, 7]");
+}
+
+/**
+ * @tc.name: CheckCurrentFingersTest001
+ * @tc.desc: Test CheckCurrentFingers with negative currentFingers_
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingersTest001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = -1;
+    fingersRecognizer->touchPoints_.clear();
+
+    fingersRecognizer->CheckCurrentFingers();
+    EXPECT_NE(fingersRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: CheckCurrentFingersTest002
+ * @tc.desc: Test CheckCurrentFingers with zero currentFingers_
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingersTest002, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 0;
+    fingersRecognizer->touchPoints_.clear();
+
+    fingersRecognizer->CheckCurrentFingers();
+    EXPECT_NE(fingersRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: CheckCurrentFingersTest003
+ * @tc.desc: Test CheckCurrentFingers with positive currentFingers_ equal to touchPoints size
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingersTest003, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 2;
+    
+    TouchEvent event1;
+    event1.id = 1;
+    TouchEvent event2;
+    event2.id = 2;
+    fingersRecognizer->touchPoints_[1] = event1;
+    fingersRecognizer->touchPoints_[2] = event2;
+
+    fingersRecognizer->CheckCurrentFingers();
+    EXPECT_NE(fingersRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: CheckCurrentFingersTest004
+ * @tc.desc: Test CheckCurrentFingers with positive currentFingers_ greater than touchPoints size
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingersTest004, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 3;
+    
+    TouchEvent event1;
+    event1.id = 1;
+    TouchEvent event2;
+    event2.id = 2;
+    fingersRecognizer->touchPoints_[1] = event1;
+    fingersRecognizer->touchPoints_[2] = event2;
+
+    fingersRecognizer->CheckCurrentFingers();
+    EXPECT_NE(fingersRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: CheckCurrentFingersTest005
+ * @tc.desc: Test CheckCurrentFingers with positive currentFingers_ less than touchPoints size
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, CheckCurrentFingersTest005, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(5, 5);
+    RefPtr<MultiFingersRecognizer> fingersRecognizer = clickRecognizer;
+    fingersRecognizer->currentFingers_ = 1;
+    
+    TouchEvent event1;
+    event1.id = 1;
+    TouchEvent event2;
+    event2.id = 2;
+    fingersRecognizer->touchPoints_[1] = event1;
+    fingersRecognizer->touchPoints_[2] = event2;
+
+    fingersRecognizer->CheckCurrentFingers();
+    EXPECT_NE(fingersRecognizer, nullptr);
+}
 }; // namespace OHOS::Ace::NG
