@@ -1,6 +1,15 @@
 {
   "src": [
     "pages/Index",
-    "pages/ShapeExample/ShapeExample"
+    "pages/ShapeExample/ShapeExample",
+    "pages/VideoExample/VideoExampleRouter",
+    "pages/VideoExample/VideoExample1",
+    "pages/VideoExample/VideoExample2",
+    "pages/VideoExample/VideoExample3",
+    "pages/VideoExample/VideoExample4",
+    "pages/VideoExample/VideoExample5",
+    "pages/VideoExample/VideoExample6",
+    "pages/VideoExample/VideoExample7",
+    "pages/VideoExample/VideoExample8"
   ]
 }

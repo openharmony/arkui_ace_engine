@@ -257,6 +257,254 @@ struct ShapeExample {
           })
           .stroke(0x317AF7)
           .strokeDashArray([20])
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeDashOffset(10)
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeDashOffset('10')
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeDashOffset($r('app.float.strokeDashOffset'))
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeLineCap(LineCapStyle.Round)
+          .strokeWidth(4)
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeLineJoin(LineJoinStyle.Miter)
+          .strokeMiterLimit(10)
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeLineJoin(LineJoinStyle.Miter)
+          .strokeMiterLimit('10')
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeLineJoin(LineJoinStyle.Miter)
+          .strokeMiterLimit($r('app.float.strokeDashOffset'))
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeWidth('4')
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeWidth($r('app.float.strokeDashOffset'))
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeWidth('4')
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeWidth($r('app.float.strokeDashOffset'))
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeWidth(4)
+          .strokeOpacity(0.8)
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeWidth(4)
+          .strokeOpacity('0.8')
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .strokeWidth(4)
+          .strokeOpacity($r('app.float.fillOpacity'))
+
+          Shape() {
+            Rect().width(300).height(50)
+            Ellipse().width(300).height(50).offset({ x: 0, y: 60 })
+            Path().width(300).height(10).commands('M0 0 L900 0').offset({ x: 0, y: 120 })
+          }
+          .width(350)
+          .height(140)
+          .viewPort({
+            x: -2,
+            y: -2,
+            width: 304,
+            height: 130
+          })
+          .stroke(0x317AF7)
+          .antiAlias(false)
+          
         }
       }
     }.width('100%').margin({ top: 15 })

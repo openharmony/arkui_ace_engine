@@ -25,12 +25,36 @@ export interface DataClass {
 struct Index {
   data: DataClass[] = [
     {
-      title: 'ShapeExample',
-      page: 'pages/ShapeExample/ShapeExample'
+      title: 'VideoExample1',
+      page: 'pages/VideoExample/VideoExample1'
     },
     {
-      title: 'VideoExample',
-      page: 'pages/VideoExample/VideoExampleRouter'
+      title: 'VideoExample2',
+      page: 'pages/VideoExample/VideoExample2'
+    },
+    {
+      title: 'VideoExample3',
+      page: 'pages/VideoExample/VideoExample3'
+    },
+    {
+      title: 'VideoExample4',
+      page: 'pages/VideoExample/VideoExample4'
+    },
+    {
+      title: 'VideoExample5',
+      page: 'pages/VideoExample/VideoExample5'
+    },
+    {
+      title: 'VideoExample6',
+      page: 'pages/VideoExample/VideoExample6'
+    },
+    {
+      title: 'VideoExample7',
+      page: 'pages/VideoExample/VideoExample7'
+    },
+    {
+      title: 'VideoExample8',
+      page: 'pages/VideoExample/VideoExample8'
     },
   ]
 
