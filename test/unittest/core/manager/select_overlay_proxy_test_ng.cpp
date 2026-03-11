@@ -111,7 +111,7 @@ HWTEST_F(SelectOverlayProxyTestNg, SelectOverlayProxyTest001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SelectOverlayProxyTestNg, SelectOverlayProxyTest002, TestSize.Level1)
+HWTEST_F(SelectOverlayProxyTestNg, SelectOverlayProxyTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. construct a SelectOverlayProxy
