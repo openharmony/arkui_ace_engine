@@ -19,7 +19,6 @@ import { ArkCommonMethodPeer, CommonMethod, TerminationInfo } from "./common"
 import { BusinessError, Callback } from '#external'
 import { default as Want } from "@ohos.app.ability.Want"
 import { ErrorCallback } from "@ohos.base"
-import { UIExtensionOptions } from "./uiExtensionComponent.ets"
 import { EmbeddedType } from "./enums"
 import { ArkUIAniUiextensionModal, ArkUIAniUIExtensionOptions, ArkUIAniModule, ArkUIAniUiextensionProxyModal } from "arkui.ani"
 
