@@ -375,6 +375,9 @@ if (ace_engine_feature_enable_form_size_change_animation) {
   ace_common_defines += [ "FORM_SIZE_CHANGE_ANIMATION" ]
 }
 
+# Enable full test suite compilation for TDD
+ace_enable_full_test_suite = false
+
 # Enable ArkUI static instructive code
 ace_engine_feature_enable_static_instructive_code = false
 

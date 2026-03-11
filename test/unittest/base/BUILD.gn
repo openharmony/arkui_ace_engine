@@ -29,6 +29,19 @@ ace_unittest("geometry_test") {
     "subwindow_manager_test.cpp",
     "transform_util_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "base_test_min.cpp",
+      "base_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "base_test_min.cpp",
+      "base_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("util_test") {
@@ -46,6 +59,15 @@ ace_unittest("util_test") {
     "utf_helper_testone_ng.cpp",
     "utf_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "base_test_min.cpp",
+    ]
+  } else {
+    sources += [ "base_test_min.cpp" ]
+  }
 
   external_deps = [
     "bounds_checking_function:libsec_shared",

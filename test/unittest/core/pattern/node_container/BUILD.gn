@@ -20,4 +20,16 @@ ace_unittest("node_container_test_ng") {
     "node_container_test_ng.cpp",
     "node_container_pattern_test_ng_ai.cpp",
   ]
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "node_container_test_min.cpp",
+      "node_container_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "node_container_test_min.cpp",
+      "node_container_test_core.cpp",
+    ]
+  }
 }

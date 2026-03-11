@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("slider_test_ng") {
   module_name = "DialogSet-Tips"
   type = "new"
+
   sources = [
     "slider_Extend_one_test_ng.cpp",
     "slider_Extend_test_ng.cpp",
@@ -32,4 +33,11 @@ ace_unittest("slider_test_ng") {
     "slider_pattern_two_test_ng.cpp",
     "slider_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "slider_test_core.cpp" ]
+  } else {
+    sources += [ "slider_test_core.cpp" ]
+  }
 }

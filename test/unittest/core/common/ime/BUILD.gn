@@ -18,6 +18,19 @@ ace_unittest("ime_test") {
   type = "new"
   sources = [ "ime_test.cpp" ]
 
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "ime_test_min.cpp",
+      "ime_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "ime_test_min.cpp",
+      "ime_test_core.cpp",
+    ]
+  }
+
   external_deps = [ "ability_base:base" ]
   external_deps += [
     "c_utils:utils",

@@ -124,6 +124,7 @@ ace_unittest("ressched_report_test") {
     "ressched_touch_optimizer_test.cpp",
     "ressched_touch_optimizer_two_test.cpp",
   ]
+
   extra_deps = []
   extra_deps += [ "$ace_root/test/unittest:ace_unittest_log" ]
 }

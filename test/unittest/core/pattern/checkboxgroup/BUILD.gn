@@ -24,4 +24,17 @@ ace_unittest("checkboxgroup_test_ng") {
     "checkboxgroup_test_ng.cpp",
     "checkboxgroup_test_two_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "checkboxgroup_test_min.cpp",
+      "checkboxgroup_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "checkboxgroup_test_min.cpp",
+      "checkboxgroup_test_core.cpp",
+    ]
+  }
 }

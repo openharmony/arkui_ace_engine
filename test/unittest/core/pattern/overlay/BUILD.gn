@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("overlay_manager_test_ng") {
   module_name = "Animation-TransitionEffect"
   type = "new"
+
   sources = [
     "$ace_root/interfaces/napi/kits/promptaction/prompt_controller.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
@@ -55,4 +56,11 @@ ace_unittest("overlay_manager_test_ng") {
     "sheet_wrapper_layout_test_one_ng.cpp",
     "sheet_wrapper_layout_test_two_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "overlay_manager_test_core.cpp" ]
+  } else {
+    sources += [ "overlay_manager_test_core.cpp" ]
+  }
 }

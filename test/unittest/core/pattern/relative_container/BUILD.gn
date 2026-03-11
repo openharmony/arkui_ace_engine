@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("relative_container_test_ng") {
   type = "new"
   module_name = "Layout-RelativeContainer"
+
   sources = [
     "feature/relative_container_barrier_test_ng.cpp",
     "feature/relative_container_guideline_test_ng.cpp",
@@ -32,4 +33,18 @@ ace_unittest("relative_container_test_ng") {
     "old_cases/relative_container_testtwo_ng.cpp",
     "relative_container_base_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "relative_container_test_min.cpp",
+      "relative_container_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "relative_container_test_min.cpp",
+      "relative_container_test_core.cpp",
+    ]
+  }
+
 }

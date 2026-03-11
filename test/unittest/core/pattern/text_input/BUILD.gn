@@ -48,8 +48,20 @@ ace_unittest("text_input_test") {
     "text_input_wordbreak_test.cpp",
     "text_select_controller_test.cpp",
   ]
-  cflags = [ "-fno-access-control" ]
 
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "text_input_test_min.cpp",
+      "text_input_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "text_input_test_min.cpp",
+      "text_input_test_core.cpp",
+    ]
+  }
+  cflags = [ "-fno-access-control" ]
   external_deps = []
 }
 
@@ -67,6 +79,7 @@ ace_unittest("text_field_test_ng") {
     "text_field_test_ng_two.cpp",
     "text_input_base.cpp",
   ]
+
   cflags = [ "-fno-access-control" ]
 
   external_deps = []
@@ -94,6 +107,18 @@ ace_unittest("text_input_pattern_test") {
     "text_field_pattern_for_tv.cpp",
     "text_field_pattern_ai_menu_option_test.cpp",
   ]
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "text_input_test_min.cpp",
+      "text_input_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "text_input_test_min.cpp",
+      "text_input_test_core.cpp",
+    ]
+  }
   cflags = [ "-fno-access-control" ]
 
   external_deps = []
@@ -107,6 +132,7 @@ ace_unittest("text_emoji_test") {
     "text_input_base.cpp",
     "text_input_emoji_test.cpp",
   ]
+
   cflags = [ "-fno-access-control" ]
 
   external_deps = [

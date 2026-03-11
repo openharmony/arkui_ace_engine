@@ -21,4 +21,17 @@ ace_unittest("image_animator_test_ng") {
     "image_animator_pattern_test_ng.cpp",
     "image_animator_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "image_animator_test_min.cpp",
+      "image_animator_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "image_animator_test_min.cpp",
+      "image_animator_test_core.cpp",
+    ]
+  }
 }

@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("scroll_test_ng") {
   module_name = "ScrollingSet-Scroll"
   type = "new"
+
   sources = [
     "free_scroll_test.cpp",
     "scroll_accessibility_test_ng.cpp",
@@ -36,4 +37,11 @@ ace_unittest("scroll_test_ng") {
     "scroll_test_ng.cpp",
     "scroll_zoom_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "scroll_test_core.cpp" ]
+  } else {
+    sources += [ "scroll_test_core.cpp" ]
+  }
 }

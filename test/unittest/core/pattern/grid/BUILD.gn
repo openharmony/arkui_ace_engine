@@ -49,6 +49,13 @@ ace_unittest("grid_test_regular") {
     "grid_scroller_event_testtwo_ng.cpp",
     "grid_sync_load_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources += [ "grid_test_core.cpp" ]
+  } else {
+    sources += [ "grid_test_core.cpp" ]
+  }
 }
 
 ace_unittest("grid_test_ng") {
@@ -65,6 +72,13 @@ ace_unittest("grid_test_ng") {
     "layout_info_test.cpp",
     "grid_generated_layout_info_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources += [ "grid_test_core.cpp" ]
+  } else {
+    sources += [ "grid_test_core.cpp" ]
+  }
 }
 
 ace_unittest("grid_static_test_ng") {
@@ -74,6 +88,13 @@ ace_unittest("grid_static_test_ng") {
     "grid_static_test_ng.cpp",
     "grid_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "grid_static_test_core.cpp" ]
+  } else {
+    sources += [ "grid_static_test_core.cpp" ]
+  }
 }
 
 ace_unittest("grid_test_custom") {
@@ -87,4 +108,11 @@ ace_unittest("grid_test_custom") {
     "custom/grid_custom_scroller_test_ng.cpp",
     "custom/grid_custom_layout_algorithm_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "grid_custom_test_core.cpp" ]
+  } else {
+    sources += [ "grid_custom_test_core.cpp" ]
+  }
 }

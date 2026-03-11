@@ -43,4 +43,17 @@ ace_unittest("gestures_test_ng") {
     "swipe_recognizer_test_ng.cpp",
     "tap_gesture_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "gestures_test_min.cpp",
+      "gestures_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "gestures_test_min.cpp",
+      "gestures_test_core.cpp",
+    ]
+  }
 }

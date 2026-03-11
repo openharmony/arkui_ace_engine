@@ -49,6 +49,19 @@ ace_unittest("drag_drop_manager_test_ng") {
     "drag_drop_manager_test_ng_plus.cpp",
     "drag_drop_manager_test_ng_property_config.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "manager_test_min.cpp",
+      "manager_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "manager_test_min.cpp",
+      "manager_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("drag_drop_initiating_state_test_ng") {

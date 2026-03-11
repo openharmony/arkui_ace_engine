@@ -57,4 +57,17 @@ ace_unittest("navigation_test_ng") {
     "title_bar_test_ng.cpp",
     "tool_bar_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "navigation_test_min.cpp",
+      "navigation_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "navigation_test_min.cpp",
+      "navigation_test_core.cpp",
+    ]
+  }
 }

@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("select_overlay_test_ng") {
   module_name = "CommonProperties-Overlay"
   type = "new"
+
   sources = [
     "select_overlay_content_modifier_test_ng.cpp",
     "select_overlay_paint_method_test_ng.cpp",
@@ -32,4 +33,11 @@ ace_unittest("select_overlay_test_ng") {
     "select_overlay_node_test_tdd.cpp",
     "select_overlay_pattern_test_tdd.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "select_overlay_test_core.cpp" ]
+  } else {
+    sources += [ "select_overlay_test_core.cpp" ]
+  }
 }

@@ -48,6 +48,19 @@ ace_unittest("window_scene_test") {
     "$ace_root/test/unittest/core/pattern/window_scene/window_scene_test.cpp",
   ]
 
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "window_scene_test_min.cpp",
+      "window_scene_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "window_scene_test_min.cpp",
+      "window_scene_test_core.cpp",
+    ]
+  }
+
   external_deps = [
     "ability_runtime:abilitykit_native",
     "ability_runtime:napi_common",

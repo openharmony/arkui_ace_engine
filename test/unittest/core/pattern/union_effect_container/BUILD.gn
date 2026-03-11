@@ -23,4 +23,16 @@ ace_unittest("union_effect_container_test") {
     "$ace_root/test/mock/core/render/mock_rosen_render_context.cpp",
     "union_effect_container_model_ng_test.cpp",
   ]
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "union_effect_container_test_min.cpp",
+      "union_effect_container_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "union_effect_container_test_min.cpp",
+      "union_effect_container_test_core.cpp",
+    ]
+  }
 }

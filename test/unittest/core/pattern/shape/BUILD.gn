@@ -50,4 +50,17 @@ ace_unittest("shape_test_ng") {
     "shape_container_pattern_test_ng.cpp",
     "shape_pattern_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "shape_test_min.cpp",
+      "shape_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "shape_test_min.cpp",
+      "shape_test_core.cpp",
+    ]
+  }
 }

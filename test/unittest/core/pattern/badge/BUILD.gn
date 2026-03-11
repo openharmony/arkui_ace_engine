@@ -21,4 +21,15 @@ ace_unittest("badge_test_ng") {
     "badge_test_ng.cpp",
     "badge_test_tojson.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "badge_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "badge_test_core.cpp",
+    ]
+  }
 }

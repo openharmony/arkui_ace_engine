@@ -16,8 +16,16 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("navigator_test_ng") {
   module_name = "NavigationSet-ArcSwiper"
   type = "new"
+
   sources = [
     "navigator_event_hub_test_ng.cpp",
     "navigator_pattern_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "navigator_test_core.cpp" ]
+  } else {
+    sources += [ "navigator_test_core.cpp" ]
+  }
 }

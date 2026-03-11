@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("list_test_ng") {
   module_name = "DialogSet-Common"
   type = "new"
+
   sources = [
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
@@ -53,4 +54,11 @@ ace_unittest("list_test_ng") {
     "list_sync_load_test_ng.cpp",
     "list_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "list_test_core.cpp" ]
+  } else {
+    sources += [ "list_test_core.cpp" ]
+  }
 }

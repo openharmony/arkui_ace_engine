@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("menu_test_ng") {
   module_name = "CommonProperties-LayoutAndBorder"
   type = "new"
+
   sources = [
     "custommenuitem_pattern_test_ng.cpp",
     "menu_accessibility_property_test_ng.cpp",
@@ -58,4 +59,11 @@ ace_unittest("menu_test_ng") {
     "menuwrapper_test_two_ng.cpp",
     "submenu_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "menu_test_core.cpp" ]
+  } else {
+    sources += [ "menu_test_core.cpp" ]
+  }
 }

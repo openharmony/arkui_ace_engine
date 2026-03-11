@@ -20,6 +20,19 @@ ace_unittest("interfaces_test") {
     "$ace_root/frameworks/core/interfaces/native/node/node_adapter_impl.cpp",
     "native/node/node_adapter_impl_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "core_interfaces_test_min.cpp",
+      "core_interfaces_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "core_interfaces_test_min.cpp",
+      "core_interfaces_test_core.cpp",
+    ]
+  }
 }
 
 group("core_interfaces_unittest") {

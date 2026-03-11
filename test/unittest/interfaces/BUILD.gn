@@ -62,6 +62,7 @@ ohos_unittest("ui_content_tdd_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",                                                                                                                           
     "$ace_root/interfaces/inner_api/ace/ui_content.cpp",                                                                                                                              
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",                                                                                                                          
@@ -163,10 +164,24 @@ ohos_unittest("ui_event_test") {
 ace_unittest("extension_custom_node_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
+
   sources = [
     "$ace_root/frameworks/core/interfaces/native/node/extension_custom_node.cpp",
     "extension_custom_node_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "interfaces_test_min.cpp",
+      "interfaces_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "interfaces_test_min.cpp",
+      "interfaces_test_core.cpp",
+    ]
+  }
 }
 
 ohos_unittest("ace_forward_compatibility_test") {

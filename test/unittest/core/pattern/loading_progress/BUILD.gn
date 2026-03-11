@@ -16,10 +16,18 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("loading_progress_test_ng") {
   type = "new"
   module_name = "InfoShowSet-LoadingProgress"
+
   sources = [
     "loading_progress_node_test_ng.cpp",
     "loading_progress_setbuilder_test_ng.cpp",
     "loading_progress_test_ng.cpp",
     "loading_progress_value_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "loading_progress_test_core.cpp" ]
+  } else {
+    sources += [ "loading_progress_test_core.cpp" ]
+  }
 }
