@@ -17,6 +17,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -761,23 +762,48 @@ void ResetMenuBgBlurStyle(ArkUINodeHandle node)
     SelectModelNG::SetMenuBackgroundBlurStyle(frameNode, styleOption);
 }
 
-void SetSelectDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
-    const ArkUI_Int32* units, ArkUI_Int32 length)
+RefPtr<ResourceObject> ClaimDividerResourceObj(void* rawPtr)
+{
+    if (!rawPtr) {
+        return nullptr;
+    }
+    auto* resource = reinterpret_cast<ResourceObject*>(rawPtr);
+    return AceType::Claim(resource);
+}
+
+void RegisterDividerResource(FrameNode* frameNode, void* rawPtr, SelectDividerResourceType type)
+{
+    auto resObj = ClaimDividerResourceObj(rawPtr);
+    SelectModelNG::CreateWithDividerResourceObj(frameNode, resObj, type);
+}
+
+void SetSelectDivider(ArkUINodeHandle node, const ArkUISelectDividerArgs* args)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-
-    if (length != DEFAULT_GROUP_DIVIDER_VALUES_COUNT) {
+    CHECK_NULL_VOID(args);
+    CHECK_NULL_VOID(args->values);
+    CHECK_NULL_VOID(args->units);
+    if (args->length != DEFAULT_GROUP_DIVIDER_VALUES_COUNT) {
         return;
     }
 
     NG::SelectDivider divider;
-    divider.color = Color(color);
-    divider.strokeWidth = Dimension(values[0], static_cast<OHOS::Ace::DimensionUnit>(units[0]));
-    divider.startMargin = Dimension(values[1], static_cast<OHOS::Ace::DimensionUnit>(units[1]));
-    divider.endMargin = Dimension(values[2], static_cast<OHOS::Ace::DimensionUnit>(units[2]));
-
+    divider.color = Color(args->color);
+    divider.strokeWidth = Dimension(args->values[0], static_cast<OHOS::Ace::DimensionUnit>(args->units[0]));
+    divider.startMargin = Dimension(args->values[1], static_cast<OHOS::Ace::DimensionUnit>(args->units[1]));
+    divider.endMargin = Dimension(args->values[2], static_cast<OHOS::Ace::DimensionUnit>(args->units[2]));
     SelectModelNG::SetDivider(frameNode, divider);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    SelectModelNG::SetDividerPropertiesSetByUser(frameNode, static_cast<bool>(args->hasStrokeWidth),
+        static_cast<bool>(args->hasColor), static_cast<bool>(args->hasStartMargin),
+        static_cast<bool>(args->hasEndMargin));
+    RegisterDividerResource(frameNode, args->strokeWidthRawPtr, SelectDividerResourceType::STROKE_WIDTH);
+    RegisterDividerResource(frameNode, args->colorRawPtr, SelectDividerResourceType::COLOR);
+    RegisterDividerResource(frameNode, args->startMarginRawPtr, SelectDividerResourceType::START_MARGIN);
+    RegisterDividerResource(frameNode, args->endMarginRawPtr, SelectDividerResourceType::END_MARGIN);
 }
 
 void ResetSelectDivider(ArkUINodeHandle node)
@@ -802,6 +828,14 @@ void ResetSelectDivider(ArkUINodeHandle node)
         divider.endMargin = defaultMargin;
     }
     SelectModelNG::SetDivider(frameNode, divider);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    SelectModelNG::SetDividerPropertiesSetByUser(frameNode, false, false, false, false);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::STROKE_WIDTH);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::COLOR);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::START_MARGIN);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::END_MARGIN);
 }
 
 void ResetSelectDividerNull(ArkUINodeHandle node)
@@ -825,6 +859,14 @@ void ResetSelectDividerNull(ArkUINodeHandle node)
         divider.endMargin = defaultMargin;
     }
     SelectModelNG::SetDivider(frameNode, divider);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    SelectModelNG::SetDividerPropertiesSetByUser(frameNode, false, false, false, false);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::STROKE_WIDTH);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::COLOR);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::START_MARGIN);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::END_MARGIN);
 }
 
 void SetSelectDirection(ArkUINodeHandle node, ArkUI_Int32 direction)
@@ -841,11 +883,15 @@ void ResetSelectDirection(ArkUINodeHandle node)
     SelectModelNG::SetLayoutDirection(frameNode, DEFAULT_SELECT_DIRECTION);
 }
 
-void SetSelectDividerStyle(ArkUINodeHandle node, ArkUIMenuDividerOptions* dividerInfo)
+void SetSelectDividerStyle(ArkUINodeHandle node, const ArkUISelectDividerStyleArgs* args)
 {
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(args);
+    CHECK_NULL_VOID(args->dividerInfo);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
+    const auto* dividerInfo = args->dividerInfo;
     NG::SelectDivider divider;
     divider.isDividerStyle = true;
     divider.strokeWidth = Dimension(dividerInfo->strokeWidth.value,
@@ -857,12 +903,30 @@ void SetSelectDividerStyle(ArkUINodeHandle node, ArkUIMenuDividerOptions* divide
         static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->endMargin.units));
     DividerMode mode = dividerInfo->mode == 1 ? DividerMode::EMBEDDED_IN_MENU: DividerMode::FLOATING_ABOVE_MENU;
     SelectModelNG::SetDividerStyle(frameNode, divider, mode);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    SelectModelNG::SetDividerPropertiesSetByUser(frameNode, static_cast<bool>(args->hasStrokeWidth),
+        static_cast<bool>(args->hasColor), static_cast<bool>(args->hasStartMargin),
+        static_cast<bool>(args->hasEndMargin));
+    RegisterDividerResource(frameNode, args->strokeWidthRawPtr, SelectDividerResourceType::STROKE_WIDTH);
+    RegisterDividerResource(frameNode, args->colorRawPtr, SelectDividerResourceType::COLOR);
+    RegisterDividerResource(frameNode, args->startMarginRawPtr, SelectDividerResourceType::START_MARGIN);
+    RegisterDividerResource(frameNode, args->endMarginRawPtr, SelectDividerResourceType::END_MARGIN);
 }
 
 void ResetSelectDividerStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     SelectModelNG::ResetDividerStyle(frameNode);
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    SelectModelNG::SetDividerPropertiesSetByUser(frameNode, false, false, false, false);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::STROKE_WIDTH);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::COLOR);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::START_MARGIN);
+    RegisterDividerResource(frameNode, nullptr, SelectDividerResourceType::END_MARGIN);
 }
 
 void SetOnSelectExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node,
@@ -894,8 +958,42 @@ void SetOptionalBorderColor(
     offset = offset + OFFSET_OF_UNIT;
 }
 
+#define ADD_RADIUS_RESOURCE(resObjPtr, borderColorProp, colorMember) \
+    auto colorMember##Update = [](const RefPtr<ResourceObject>& obj, BorderColorProperty& prop) { \
+        Color color; \
+        ResourceParseUtils::ParseResColor(obj, color); \
+        prop.colorMember = color; \
+    }; \
+    colorMember##ResObj->DecRefCount(); \
+    const std::string resourceKey = std::string("outlineColor.") + #colorMember; \
+    (borderColorProp).AddResource(resourceKey, colorMember##ResObj, std::move(colorMember##Update))
+
+void AddRadiusResource(BorderColorProperty& borderColors, void** resObjs)
+{
+    auto* leftResPtr = reinterpret_cast<ResourceObject*>(resObjs[0]);
+    auto leftColorResObj = AceType::Claim(leftResPtr);
+    auto* rightResPtr = reinterpret_cast<ResourceObject*>(resObjs[1]);
+    auto rightColorResObj = AceType::Claim(rightResPtr);
+    auto* topResPtr = reinterpret_cast<ResourceObject*>(resObjs[2]);
+    auto topColorResObj = AceType::Claim(topResPtr);
+    auto* bottomResPtr = reinterpret_cast<ResourceObject*>(resObjs[3]);
+    auto bottomColorResObj = AceType::Claim(bottomResPtr);
+    if (leftColorResObj) {
+        ADD_RADIUS_RESOURCE(resObjs[0], borderColors, leftColor);
+    }
+    if (rightColorResObj) {
+        ADD_RADIUS_RESOURCE(resObjs[1], borderColors, rightColor);
+    }
+    if (topColorResObj) {
+        ADD_RADIUS_RESOURCE(resObjs[2], borderColors, topColor);
+    }
+    if (bottomColorResObj) {
+        ADD_RADIUS_RESOURCE(resObjs[3], borderColors, bottomColor);
+    }
+}
+
 void SetMenuOutline(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int32 widthSize, const ArkUI_Uint32* color,
-    ArkUI_Int32 colorSize)
+    ArkUI_Int32 colorSize, void** resObjs, size_t unitSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -918,6 +1016,10 @@ void SetMenuOutline(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int3
     SetOptionalBorderColor(borderColors.rightColor, color, colorSize, colorOffset);
     SetOptionalBorderColor(borderColors.topColor, color, colorSize, colorOffset);
     SetOptionalBorderColor(borderColors.bottomColor, color, colorSize, colorOffset);
+    if (SystemProperties::ConfigChangePerform()) {
+        CHECK_NULL_VOID(resObjs);
+        AddRadiusResource(borderColors, resObjs);
+    }
     menuParam.outlineColor = borderColors;
     SelectModelNG::SetMenuOutline(frameNode, menuParam);
 }

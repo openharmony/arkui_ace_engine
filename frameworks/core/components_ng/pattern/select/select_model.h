@@ -84,6 +84,12 @@ struct SelectResObjParam {
     RefPtr<ResourceObject> iconResObj = nullptr;
 };
 
+enum class SelectDividerResourceType {
+    STROKE_WIDTH,
+    START_MARGIN,
+    END_MARGIN,
+    COLOR,
+};
 class ACE_FORCE_EXPORT SelectModel {
 public:
     static SelectModel* GetInstance();
@@ -134,6 +140,10 @@ public:
     virtual void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
     virtual void SetDivider(const NG::SelectDivider& divider);
     virtual void SetDividerStyle(const NG::SelectDivider& divider, const DividerMode& mode);
+    virtual void CreateWithDividerResourceObj(
+        const RefPtr<ResourceObject>& resObj, const SelectDividerResourceType& type) {};
+    virtual void SetDividerPropertiesSetByUser(
+        bool strokeWidth = true, bool color = true, bool startMargin = true, bool endMargin = true) {};
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize);
     virtual void SetLayoutDirection(TextDirection value);
     virtual ControlSize GetControlSize();

@@ -85,6 +85,11 @@ public:
     void SetDivider(const NG::SelectDivider& divider) override;
     void SetDividerStyle(const NG::SelectDivider& divider, const DividerMode& mode) override;
     void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, const SelectColorType& type) override;
+    void CreateWithDividerResourceObj(
+        const RefPtr<ResourceObject>& resObj, const SelectDividerResourceType& type) override;
+    void SetDividerPropertiesSetByUser(
+        bool strokeWidth = true, bool color = true, bool startMargin = true, bool endMargin = true) override;
+        
     void CreateWithValueIconResourceObj(const std::vector<SelectResObjParam>& resObjVec) override;
     void CreateWithIntegerResourceObj(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj) override;
@@ -98,6 +103,8 @@ public:
     static void CreateWithStringResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetDivider(FrameNode* frameNode, const NG::SelectDivider& divider);
     static void SetDividerStyle(FrameNode* frameNode, const NG::SelectDivider& divider, const DividerMode& mode);
+    static void CreateWithDividerResourceObj(
+        FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const SelectDividerResourceType& type);
     static void ResetDividerStyle(FrameNode* frameNode);
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
     void SetLayoutDirection(TextDirection value) override;
@@ -181,7 +188,8 @@ public:
     static void SetKeyboardAvoidMode(FrameNode* frameNode, const std::optional<MenuKeyboardAvoidMode>& mode);
     static void SetMinKeyboardAvoidDistance(FrameNode* frameNode, const std::optional<Dimension>& distance);
     static void SetMenuSystemMaterial(FrameNode* frameNode, const RefPtr<UiMaterial>& menuSystemMaterial);
-
+    static void SetDividerPropertiesSetByUser(FrameNode* frameNode,
+        bool strokeWidth = true, bool color = true, bool startMargin = true, bool endMargin = true);
 private:
     void AddResObjWithCallBack(
         std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const SelectOptionType& optionType);
