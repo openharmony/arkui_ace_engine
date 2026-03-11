@@ -11261,6 +11261,8 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
         auto infoPtr = new MouseInfo(mouseInfo);
         auto eventObj = NG::FrameNodeBridge::CreateMouseInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnMouseEvent_end type:%d button:%d", static_cast<int32_t>(infoPtr->GetAction()),
+            static_cast<int32_t>(infoPtr->GetButton()));
         func->Call(vm, func.ToLocal(), params, 1);
         mouseInfo.SetStopPropagation(infoPtr->IsStopPropagation());
     };
