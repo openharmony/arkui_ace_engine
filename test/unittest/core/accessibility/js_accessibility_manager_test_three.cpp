@@ -85,9 +85,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, IsTagInEmbedComponent001, TestSize.Lev
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin IsTagInEmbedComponent001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test IsTagInEmbedComponent
+     */
     std::string embedTag = "embeddedObject";
     bool result = jsAccessibilityManager->IsTagInEmbedComponent(embedTag);
     EXPECT_TRUE(result);
@@ -104,9 +110,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, IsTagInEmbedComponent002, TestSize.Lev
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin IsTagInEmbedComponent002";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test IsTagInEmbedComponent
+     */
     std::string nonEmbedTag = "text";
     bool result = jsAccessibilityManager->IsTagInEmbedComponent(nonEmbedTag);
     EXPECT_FALSE(result);
@@ -123,9 +135,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, IsTagInEmbedComponent003, TestSize.Lev
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin IsTagInEmbedComponent003";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test IsTagInEmbedComponent
+     */
     std::string emptyTag = "";
     bool result = jsAccessibilityManager->IsTagInEmbedComponent(emptyTag);
     EXPECT_FALSE(result);
@@ -142,9 +160,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, UpdateVirtualNodeFocus001, TestSize.Le
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin UpdateVirtualNodeFocus001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test UpdateVirtualNodeFocus
+     */
     jsAccessibilityManager->lastFrameNode_.Reset();
     jsAccessibilityManager->UpdateVirtualNodeFocus();
 
@@ -162,9 +186,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, GetUECAccessibilityParentRectInfo001, 
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin GetUECAccessibilityParentRectInfo001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetUECAccessibilityParentRectInfo
+     */
     AccessibilityParentRectInfo rectInfo = jsAccessibilityManager->GetUECAccessibilityParentRectInfo();
 
     EXPECT_EQ(rectInfo.left, 0);
@@ -184,9 +214,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, UpdateUECAccessibilityParentRectInfo00
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin UpdateUECAccessibilityParentRectInfo001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. construct inputRectInfo
+     */
     AccessibilityParentRectInfo inputRectInfo;
     inputRectInfo.left = 100;
     inputRectInfo.top = 200;
@@ -194,6 +230,9 @@ HWTEST_F(JsAccessibilityManagerTestThree, UpdateUECAccessibilityParentRectInfo00
     inputRectInfo.scaleY = 2.0f;
     inputRectInfo.isChanged = true;
 
+    /**
+     * @tc.steps: step3. test UpdateUECAccessibilityParentRectInfo
+     */
     jsAccessibilityManager->UpdateUECAccessibilityParentRectInfo(inputRectInfo);
 
     AccessibilityParentRectInfo resultRectInfo = jsAccessibilityManager->GetUECAccessibilityParentRectInfo();
@@ -212,9 +251,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, ConvertAceAction001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin ConvertAceAction001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test ConvertAceAction
+     */
     Accessibility::ActionType result = jsAccessibilityManager->ConvertAceAction(AceAction::ACTION_CLICK);
     EXPECT_EQ(result, Accessibility::ActionType::ACCESSIBILITY_ACTION_CLICK);
 
@@ -245,9 +290,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, ConvertAceAction002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin ConvertAceAction002";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test ConvertAceAction
+     */
     Accessibility::ActionType result = jsAccessibilityManager->ConvertAceAction(AceAction::ACTION_SCROLL_FORWARD);
     EXPECT_EQ(result, Accessibility::ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD);
 
@@ -266,9 +317,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, ConvertAceAction003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin ConvertAceAction003";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test ConvertAceAction
+     */
     Accessibility::ActionType result = jsAccessibilityManager->ConvertAceAction(AceAction::ACTION_SET_TEXT);
     EXPECT_EQ(result, Accessibility::ActionType::ACCESSIBILITY_ACTION_SET_TEXT);
 
@@ -302,9 +359,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, ConvertAceAction004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin ConvertAceAction004";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test ConvertAceAction
+     */
     Accessibility::ActionType result =
         jsAccessibilityManager->ConvertAceAction(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
     EXPECT_EQ(result, Accessibility::ActionType::ACCESSIBILITY_ACTION_NEXT_TEXT);
@@ -327,9 +390,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, ConvertAceAction005, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin ConvertAceAction005";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test ConvertAceAction
+     */
     Accessibility::ActionType result = jsAccessibilityManager->ConvertAceAction(static_cast<AceAction>(999));
     EXPECT_EQ(result, Accessibility::ActionType::ACCESSIBILITY_ACTION_INVALID);
 
@@ -345,9 +414,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, SubscribeToastObserver001, TestSize.Le
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin SubscribeToastObserver001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test SubscribeToastObserver
+     */
     bool result = jsAccessibilityManager->SubscribeToastObserver();
 
     SUCCEED();
@@ -364,9 +439,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, UnsubscribeToastObserver001, TestSize.
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin UnsubscribeToastObserver001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test UnsubscribeToastObserver
+     */
     jsAccessibilityManager->SubscribeToastObserver();
     bool result = jsAccessibilityManager->UnsubscribeToastObserver();
 
@@ -384,9 +465,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, SubscribeStateObserver001, TestSize.Le
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin SubscribeStateObserver001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test SubscribeStateObserver
+     */
     auto context = MockPipelineContext::GetCurrentContext();
     jsAccessibilityManager->SetPipelineContext(context);
 
@@ -407,9 +494,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, UnsubscribeStateObserver001, TestSize.
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin UnsubscribeStateObserver001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test UnsubscribeStateObserver
+     */
     auto context = MockPipelineContext::GetCurrentContext();
     jsAccessibilityManager->SetPipelineContext(context);
 
@@ -431,9 +524,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, GenerateAccessibilityWorkMode001, Test
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin GenerateAccessibilityWorkMode001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GenerateAccessibilityWorkMode
+     */
     AccessibilityWorkMode workMode = jsAccessibilityManager->GenerateAccessibilityWorkMode();
 
     SUCCEED();
@@ -450,9 +549,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, GetScaleX001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin GetScaleX001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetScaleX
+     */
     float scaleX = jsAccessibilityManager->GetScaleX();
     EXPECT_EQ(scaleX, 1.0f);
 
@@ -468,9 +573,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, GetScaleY001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin GetScaleY001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetScaleY
+     */
     float scaleY = jsAccessibilityManager->GetScaleY();
     EXPECT_EQ(scaleY, 1.0f);
 
@@ -486,9 +597,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, GetWindowId001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin GetWindowId001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetWindowId
+     */
     uint32_t windowId = jsAccessibilityManager->GetWindowId();
     EXPECT_EQ(windowId, 0);
 
@@ -504,9 +621,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, SetWindowId001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin SetWindowId001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test SetWindowId
+     */
     uint32_t testWindowId = 12345;
     jsAccessibilityManager->SetWindowId(testWindowId);
 
@@ -525,9 +648,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, IsReentrantLimit001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin IsReentrantLimit001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test IsReentrantLimit
+     */
     bool isReentrantLimit = jsAccessibilityManager->IsReentrantLimit();
     EXPECT_FALSE(isReentrantLimit);
 
@@ -543,9 +672,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, SetReentrantLimit001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin SetReentrantLimit001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test SetReentrantLimit
+     */
     jsAccessibilityManager->SetReentrantLimit(true);
     EXPECT_TRUE(jsAccessibilityManager->IsReentrantLimit());
 
@@ -564,9 +699,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, GetIsIgnoreAllAction001, TestSize.Leve
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin GetIsIgnoreAllAction001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetIsIgnoreAllAction
+     */
     bool isIgnoreAllAction = jsAccessibilityManager->GetIsIgnoreAllAction();
     EXPECT_FALSE(isIgnoreAllAction);
 
@@ -582,9 +723,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, SetIsIgnoreAllAction001, TestSize.Leve
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin SetIsIgnoreAllAction001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test SetIsIgnoreAllAction
+     */
     jsAccessibilityManager->SetIsIgnoreAllAction(true);
     EXPECT_TRUE(jsAccessibilityManager->GetIsIgnoreAllAction());
 
@@ -603,9 +750,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, SaveLast001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin SaveLast001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test SaveLast
+     */
     int64_t testElementId = 999;
     auto pattern = AceType::MakeRefPtr<NG::Pattern>();
     auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
@@ -626,9 +779,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, SaveCurrentFocusNodeSize001, TestSize.
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin SaveCurrentFocusNodeSize001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test SaveCurrentFocusNodeSize
+     */
     auto pattern = AceType::MakeRefPtr<NG::Pattern>();
     auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
 
@@ -648,9 +807,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, UpdateViewScale001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin UpdateViewScale001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test UpdateViewScale
+     */
     auto context = MockPipelineContext::GetCurrentContext();
     jsAccessibilityManager->SetPipelineContext(context);
 
@@ -670,9 +835,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, UpdatePageMode001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin UpdatePageMode001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test UpdatePageMode
+     */
     std::string testPageMode = "FULL_SILENT";
     jsAccessibilityManager->UpdatePageMode(testPageMode);
 
@@ -690,9 +861,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, GetTreeId001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin GetTreeId001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetTreeId
+     */
     int32_t treeId = jsAccessibilityManager->GetTreeId();
     EXPECT_EQ(treeId, 0);
 
@@ -708,9 +885,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, GetTreeId002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin GetTreeId002";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetTreeId
+     */
     int32_t instanceId = 1;
     int32_t treeId = jsAccessibilityManager->GetTreeId(instanceId);
 
@@ -728,9 +911,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, IsScreenReaderEnabled001, TestSize.Lev
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin IsScreenReaderEnabled001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test IsScreenReaderEnabled
+     */
     bool isEnabled = jsAccessibilityManager->IsScreenReaderEnabled();
     EXPECT_FALSE(isEnabled);
 
@@ -746,9 +935,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, ClearCurrentFocus001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin ClearCurrentFocus001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test ClearCurrentFocus
+     */
     auto context = MockPipelineContext::GetCurrentContext();
     jsAccessibilityManager->SetPipelineContext(context);
 
@@ -768,9 +963,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, ShouldSkipAccessibilityStateChange001,
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin ShouldSkipAccessibilityStateChange001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test ShouldSkipAccessibilityStateChange
+     */
     RefPtr<PipelineBase> nullPipeline = nullptr;
     bool result = jsAccessibilityManager->ShouldSkipAccessibilityStateChange(nullPipeline);
     EXPECT_FALSE(result);
@@ -787,9 +988,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, ShouldSkipAccessibilityStateChange002,
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin ShouldSkipAccessibilityStateChange002";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test ShouldSkipAccessibilityStateChange
+     */
     auto context = MockPipelineContext::GetCurrentContext();
     jsAccessibilityManager->SetPipelineContext(context);
 
@@ -809,9 +1016,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, ReleaseCacheEvent001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin ReleaseCacheEvent001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test ReleaseCacheEvent
+     */
     jsAccessibilityManager->ReleaseCacheEvent();
 
     SUCCEED();
@@ -828,9 +1041,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, ReleaseUIExtCacheEvent001, TestSize.Le
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin ReleaseUIExtCacheEvent001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test ReleaseUIExtCacheEvent
+     */
     jsAccessibilityManager->ReleaseUIExtCacheEvent();
 
     SUCCEED();
@@ -847,9 +1066,15 @@ HWTEST_F(JsAccessibilityManagerTestThree, ResetBlockedEvent001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin ResetBlockedEvent001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test ResetBlockedEvent
+     */
     jsAccessibilityManager->ResetBlockedEvent();
 
     SUCCEED();
@@ -866,12 +1091,21 @@ HWTEST_F(JsAccessibilityManagerTestThree, AddFrameNodeToUecStatusVec001, TestSiz
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin AddFrameNodeToUecStatusVec001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. construct frameNode
+     */
     auto pattern = AceType::MakeRefPtr<NG::Pattern>();
     auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
 
+    /**
+     * @tc.steps: step3. test AddFrameNodeToUecStatusVec
+     */
     jsAccessibilityManager->AddFrameNodeToUecStatusVec(frameNode);
 
     SUCCEED();
@@ -888,12 +1122,21 @@ HWTEST_F(JsAccessibilityManagerTestThree, AddFrameNodeToDefaultFocusList001, Tes
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin AddFrameNodeToDefaultFocusList001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. construct frameNode
+     */
     auto pattern = AceType::MakeRefPtr<NG::Pattern>();
     auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
 
+    /**
+     * @tc.steps: step3. test AddFrameNodeToDefaultFocusList
+     */
     jsAccessibilityManager->AddFrameNodeToDefaultFocusList(frameNode, true);
 
     SUCCEED();
@@ -910,12 +1153,21 @@ HWTEST_F(JsAccessibilityManagerTestThree, AddDefaultFocusNode001, TestSize.Level
 {
     GTEST_LOG_(INFO) << "JsAccessibilityManagerTestThree-begin AddDefaultFocusNode001";
 
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. construct frameNode
+     */
     auto pattern = AceType::MakeRefPtr<NG::Pattern>();
     auto frameNode = NG::FrameNode::CreateFrameNode("testNode", 1, pattern, true);
 
+    /**
+     * @tc.steps: step3. test AddDefaultFocusNode
+     */
     jsAccessibilityManager->AddDefaultFocusNode(frameNode);
 
     SUCCEED();
