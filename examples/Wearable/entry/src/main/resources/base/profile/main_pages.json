@@ -12,6 +12,10 @@
     "pages/ArcButton/ArcButtonExample009",
     "pages/ArcButton/ArcButtonExample010",
     "pages/ArcButton/ArcButtonExample011",
-    "pages/ArcButton/ArcButtonExample012"
+    "pages/ArcButton/ArcButtonExample012",
+    "pages/ArcSlider/ArcSliderExample001",
+    "pages/ArcSlider/ArcSliderExample002",
+    "pages/ArcSlider/ArcSliderExample003",
+    "pages/ArcSlider/ArcSliderExample004"
   ]
 }
