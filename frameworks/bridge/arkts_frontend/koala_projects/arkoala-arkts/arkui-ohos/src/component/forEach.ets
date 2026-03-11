@@ -81,10 +81,11 @@ class ForEachManager {
     node?: PeerNode
     keys: Array<int32> = new Array<int32>()
     additionalChild: Array<pointer> = new Array<pointer>()
+    lastKeysCount: number = -1;  // -1 indicates uninitialized (first render)
 }
 
 /** @memo:intrinsic */
-function forEachAttach<T>(receiver: ArkForEachComponent<T>, manager: ForEachManager) {
+function forEachAttach<T>(receiver: ArkForEachComponent<T>, manager: ForEachManager): boolean {
     manager.additionalChild = new Array<pointer>()
     let newKeys = new Array<int32>()
     let duplicateIndex = new Array<int32>()
@@ -141,6 +142,16 @@ function forEachAttach<T>(receiver: ArkForEachComponent<T>, manager: ForEachMana
         createAndUpdate();
         manager.node = node;
     });
+
+    // Check if data has changed by comparing key counts and diff indices
+    // Skip FinishRender on first render, only call it on data updates
+    if (manager.lastKeysCount === -1) {
+        manager.lastKeysCount = newKeys.length;
+        return false;
+    }
+    const hasDataChanged = (newKeys.length !== manager.lastKeysCount) || (diffIndex.length > 0);
+    manager.lastKeysCount = newKeys.length;
+    return hasDataChanged;
 }
 
 /** @memo */
@@ -162,7 +173,7 @@ export function ForEachImpl<T>(
         throw new Error('key generator is not a function. Application error!');
     }
     let manager = remember(() => new ForEachManager())
-    forEachAttach<T>(receiver, manager);
+    const hasDataChanged = forEachAttach<T>(receiver, manager);
 
     /**
      * provide onMove callbacks to the backend if onMove is set, and reset callbacks if onMove is unset
@@ -172,5 +183,8 @@ export function ForEachImpl<T>(
         receiver.onMoveEvent,
         receiver.itemDragEvent);
 
-    ArkUIAniModule._ForEach_FinishRender(manager.node!.getPeerPtr());
+    // Only call FinishRender when data has changed to optimize performance
+    if (hasDataChanged) {
+        ArkUIAniModule._ForEach_FinishRender(manager.node!.getPeerPtr());
+    }
 }
