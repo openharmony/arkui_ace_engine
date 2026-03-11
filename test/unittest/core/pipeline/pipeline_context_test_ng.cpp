@@ -3273,5 +3273,161 @@ HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNod
     ASSERT_NE(tagValue, nullptr);
     EXPECT_EQ(tagValue->GetString(), "navNode");
 }
+
+/**
+ * @tc.name: SetAfterRenderZindexRebuild005
+ * @tc.desc: Test SetAfterRenderZindexRebuild with boundary values
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, SetAfterRenderZindexRebuild005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: SetAfterRenderZindexRebuild with negative, zero, and max int32 values
+     * @tc.expected: All values are stored correctly
+     */
+    context_->SetAfterRenderZindexRebuild(-1);
+    context_->SetAfterRenderZindexRebuild(0);
+    context_->SetAfterRenderZindexRebuild(INT32_MAX);
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 3);
+    EXPECT_EQ(context_->idUpdateZOrderIndex_, 3);
+    EXPECT_EQ(context_->idUpdateZOrder_[-1], 0);
+    EXPECT_EQ(context_->idUpdateZOrder_[0], 1);
+    EXPECT_EQ(context_->idUpdateZOrder_[INT32_MAX], 2);
+}
+
+/**
+ * @tc.name: FlushZindexUpdate001
+ * @tc.desc: Test FlushZindexUpdate with empty map
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FlushZindexUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Call FlushZindexUpdate with empty idUpdateZOrder_
+     * @tc.expected: No crash, map and index are cleared
+     */
+    context_->idUpdateZOrderIndex_ = 5;
+
+    context_->FlushZindexUpdate();
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+}
+
+/**
+ * @tc.name: FlushZindexUpdate002
+ * @tc.desc: Test FlushZindexUpdate with multiple nodes including duplicates
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FlushZindexUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Add multiple nodes with duplicates, then flush
+     * @tc.expected: Nodes are processed and map is cleared
+     */
+    constexpr int32_t nodeId1 = 1001;
+    constexpr int32_t nodeId2 = 1002;
+    constexpr int32_t nodeId3 = 1003;
+    constexpr int32_t nodeId4 = 1004;
+
+    auto frameNode1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId1, nullptr);
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId2, nullptr);
+    auto frameNode3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId3, nullptr);
+    auto frameNode4 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId4, nullptr);
+    ElementRegister::GetInstance()->AddUINode(frameNode1);
+    ElementRegister::GetInstance()->AddUINode(frameNode2);
+    ElementRegister::GetInstance()->AddUINode(frameNode3);
+    ElementRegister::GetInstance()->AddUINode(frameNode4);
+
+    context_->SetAfterRenderZindexRebuild(nodeId1);
+    context_->SetAfterRenderZindexRebuild(nodeId2);
+    context_->SetAfterRenderZindexRebuild(nodeId3);
+    context_->SetAfterRenderZindexRebuild(nodeId4);
+    context_->SetAfterRenderZindexRebuild(nodeId1);
+    context_->SetAfterRenderZindexRebuild(nodeId3);
+    context_->SetAfterRenderZindexRebuild(nodeId2);
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 4);
+    EXPECT_EQ(context_->idUpdateZOrder_[nodeId1], 4);
+    EXPECT_EQ(context_->idUpdateZOrder_[nodeId2], 6);
+    EXPECT_EQ(context_->idUpdateZOrder_[nodeId3], 5);
+    EXPECT_EQ(context_->idUpdateZOrder_[nodeId4], 3);
+
+    context_->FlushZindexUpdate();
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+}
+
+/**
+ * @tc.name: FlushZindexUpdate003
+ * @tc.desc: Test FlushZindexUpdate with consecutive flush calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FlushZindexUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Add nodes, flush, then flush again
+     * @tc.expected: No crash on consecutive flushes
+     */
+    constexpr int32_t nodeId1 = 1001;
+    constexpr int32_t nodeId2 = 1002;
+
+    auto frameNode1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId1, nullptr);
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId2, nullptr);
+    ElementRegister::GetInstance()->AddUINode(frameNode1);
+    ElementRegister::GetInstance()->AddUINode(frameNode2);
+
+    context_->SetAfterRenderZindexRebuild(nodeId1);
+    context_->SetAfterRenderZindexRebuild(nodeId2);
+
+    context_->FlushZindexUpdate();
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+
+    context_->FlushZindexUpdate();
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+}
+
+/**
+ * @tc.name: ZindexWorkflow001
+ * @tc.desc: Test complete workflow of SetAfterRenderZindexRebuild and FlushZindexUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, ZindexWorkflow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Add nodes, flush, add more nodes, flush again
+     * @tc.expected: Each flush clears the map correctly
+     */
+    constexpr int32_t nodeId1 = 1001;
+    constexpr int32_t nodeId2 = 1002;
+    constexpr int32_t nodeId3 = 1003;
+
+    auto frameNode1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId1, nullptr);
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId2, nullptr);
+    auto frameNode3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId3, nullptr);
+    ElementRegister::GetInstance()->AddUINode(frameNode1);
+    ElementRegister::GetInstance()->AddUINode(frameNode2);
+    ElementRegister::GetInstance()->AddUINode(frameNode3);
+
+    context_->SetAfterRenderZindexRebuild(nodeId1);
+    context_->SetAfterRenderZindexRebuild(nodeId2);
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 2);
+
+    context_->FlushZindexUpdate();
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+
+    context_->SetAfterRenderZindexRebuild(nodeId3);
+    context_->SetAfterRenderZindexRebuild(nodeId1);
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 2);
+
+    context_->FlushZindexUpdate();
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+}
 } // namespace NG
 } // namespace OHOS::Ace

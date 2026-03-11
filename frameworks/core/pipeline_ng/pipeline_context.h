@@ -1395,6 +1395,9 @@ public:
     }
 
     bool IsDisplayInForceSplitMode() const override;
+    void SetAfterRenderZindexRebuild(int32_t nodeId);
+    void UpdateIdUpdateZOrderIndex();
+    size_t GetIdUpdateZOrderIndex() const;
 
     void SetOnDrawChildrenInfoMap(int32_t parentId, int32_t childId);
 
@@ -1499,6 +1502,7 @@ private:
     void FlushWindowPatternInfo();
     void FlushFocusView();
     void FlushFocusScroll();
+    void FlushZindexUpdate();
 
     void ProcessDelayTasks();
 
@@ -1725,6 +1729,8 @@ private:
     std::map<WeakPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
+    std::unordered_map<int32_t, size_t> idUpdateZOrder_;
+    size_t idUpdateZOrderIndex_ = 0;
 
     RefPtr<FrameNode> predictNode_;
 
