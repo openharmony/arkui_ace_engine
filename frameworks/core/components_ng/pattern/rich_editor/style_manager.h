@@ -364,6 +364,12 @@ public:
         if (updateSpanStyle.updateTextColor.has_value()) {
             font.fontColor = textStyle.GetTextColor();
         }
+        if (updateSpanStyle.updateStrokeWidth.has_value()) {
+            font.strokeWidth = textStyle.GetStrokeWidth();
+        }
+        if (updateSpanStyle.updateStrokeColor.has_value()) {
+            font.strokeColor = textStyle.GetStrokeColor();
+        }
         return AceType::MakeRefPtr<FontSpan>(font, 0, length);
     }
 
