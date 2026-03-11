@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 
 #include "base/log/log_wrapper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_number_utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/jsview/models/gesture_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -300,16 +301,16 @@ void JSTapGesture::Create(const JSCallbackInfo& args)
         JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (count->IsNumber()) {
-            int32_t countNumber = count->ToNumber<int32_t>();
-            countNum = countNumber <= DEFAULT_TAP_COUNT ? DEFAULT_TAP_COUNT : countNumber;
+            countNum = JSNumberUtils::GetInt32WithRangeCheck(
+                count, DEFAULT_TAP_COUNT, DEFAULT_TAP_COUNT, INT_MAX);
         }
         if (fingers->IsNumber()) {
-            int32_t fingersNumber = fingers->ToNumber<int32_t>();
-            fingersNum = fingersNumber <= DEFAULT_TAP_FINGER ? DEFAULT_TAP_FINGER : fingersNumber;
+            fingersNum = JSNumberUtils::GetInt32WithRangeCheck(
+                fingers, DEFAULT_TAP_FINGER, DEFAULT_TAP_FINGER, INT_MAX);
         }
         if (distanceThreshold->IsNumber()) {
-            double distanceThresholdNumber = distanceThreshold->ToNumber<double>();
-            distanceThresholdNum = distanceThresholdNumber < 0? DEFAULT_TAP_DISTANCE : distanceThresholdNumber;
+            distanceThresholdNum = JSNumberUtils::GetDoubleWithRangeCheck(
+                distanceThreshold, DEFAULT_TAP_DISTANCE, 0.0, INFINITY, InfinityCheckMode::REJECT_ALL);
             distanceThresholdNum = Dimension(distanceThresholdNum, DimensionUnit::VP).ConvertToPx();
         }
         if (limitFingerCount->IsBoolean()) {
@@ -336,23 +337,22 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
         JSRef<JSVal> allowableMovement = obj->GetProperty(ALLOWABLE_MOVEMENT);
 
         if (fingers->IsNumber()) {
-            int32_t fingersNumber = fingers->ToNumber<int32_t>();
-            fingersNum = fingersNumber <= DEFAULT_LONG_PRESS_FINGER ? DEFAULT_LONG_PRESS_FINGER : fingersNumber;
+            fingersNum = JSNumberUtils::GetInt32WithRangeCheck(
+                fingers, DEFAULT_LONG_PRESS_FINGER, DEFAULT_LONG_PRESS_FINGER, INT_MAX);
         }
         if (repeat->IsBoolean()) {
             repeatResult = repeat->ToBoolean();
         }
         if (duration->IsNumber()) {
-            int32_t durationNumber = duration->ToNumber<int32_t>();
-            durationNum = durationNumber <= 0 ? DEFAULT_LONG_PRESS_DURATION : durationNumber;
+            durationNum = JSNumberUtils::GetInt32WithRangeCheck(
+                duration, DEFAULT_LONG_PRESS_DURATION, DEFAULT_LONG_PRESS_DURATION, INT_MAX);
         }
         if (limitFingerCount->IsBoolean()) {
             isLimitFingerCount = limitFingerCount->ToBoolean();
         }
         if (allowableMovement->IsNumber()) {
-            double allowableMoveNumber = allowableMovement->ToNumber<double>();
-            allowableMovementNum =
-                allowableMoveNumber <= 0 ? DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT : allowableMoveNumber;
+            allowableMovementNum = JSNumberUtils::GetDoubleWithRangeCheck(
+                allowableMovement, DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT, 0.0, INFINITY, InfinityCheckMode::REJECT_ALL);
         }
     }
     LongPressGestureModel::GetInstance()->Create(
@@ -509,10 +509,9 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
         fingersNum = fingersNumber <= DEFAULT_PAN_FINGER ? DEFAULT_PAN_FINGER : fingersNumber;
     }
     if (speed->IsNumber()) {
-        double speedNumber = speed->ToNumber<double>();
-        speedNum = LessOrEqual(speedNumber, 0.0) ?
-            Dimension(DEFAULT_SLIDE_SPEED, DimensionUnit::VP) :
-            Dimension(speedNumber, DimensionUnit::VP);
+        double speedValue = JSNumberUtils::GetDoubleWithRangeCheck(
+            speed, DEFAULT_SLIDE_SPEED, 0.0, INFINITY, InfinityCheckMode::REJECT_ALL);
+        speedNum = Dimension(speedValue, DimensionUnit::VP);
     }
     if (directionNum->IsNumber()) {
         uint32_t directNum = directionNum->ToNumber<uint32_t>();
@@ -540,13 +539,12 @@ void JSPinchGesture::Create(const JSCallbackInfo& args)
         JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (fingers->IsNumber()) {
-            int32_t fingersNumber = fingers->ToNumber<int32_t>();
-            fingersNum = fingersNumber <= DEFAULT_PINCH_FINGER ? DEFAULT_PINCH_FINGER : fingersNumber;
-            fingersNum = fingersNum > DEFAULT_MAX_PINCH_FINGER ? DEFAULT_PINCH_FINGER : fingersNum;
+            fingersNum = JSNumberUtils::GetInt32WithRangeCheck(
+                fingers, DEFAULT_PINCH_FINGER, DEFAULT_PINCH_FINGER, DEFAULT_MAX_PINCH_FINGER);
         }
         if (distance->IsNumber()) {
-            double distanceNumber = distance->ToNumber<double>();
-            distanceNum = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PINCH_DISTANCE : distanceNumber;
+            distanceNum = JSNumberUtils::GetDoubleWithRangeCheck(
+                distance, DEFAULT_PINCH_DISTANCE, 0.0, INFINITY, InfinityCheckMode::REJECT_ALL);
         }
         if (limitFingerCount->IsBoolean()) {
             isLimitFingerCount = limitFingerCount->ToBoolean();
@@ -568,12 +566,12 @@ void JSRotationGesture::Create(const JSCallbackInfo& args)
         JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (fingers->IsNumber()) {
-            int32_t fingersNumber = fingers->ToNumber<int32_t>();
-            fingersNum = fingersNumber <= DEFAULT_ROTATION_FINGER ? DEFAULT_ROTATION_FINGER : fingersNumber;
+            fingersNum = JSNumberUtils::GetInt32WithRangeCheck(
+                fingers, DEFAULT_SLIDE_FINGER, DEFAULT_SLIDE_FINGER, INT_MAX);
         }
         if (angle->IsNumber()) {
-            double angleNumber = angle->ToNumber<double>();
-            angleNum = LessNotEqual(angleNumber, 0.0) ? DEFAULT_ROTATION_ANGLE : angleNumber;
+            angleNum = JSNumberUtils::GetDoubleWithRangeCheck(
+                angle, DEFAULT_ROTATION_ANGLE, 0.0, INFINITY, InfinityCheckMode::REJECT_ALL);
         }
         if (limitFingerCount->IsBoolean()) {
             isLimitFingerCount = limitFingerCount->ToBoolean();
@@ -589,7 +587,8 @@ void JSGestureGroup::Create(const JSCallbackInfo& args)
     if (args.Length() > 0) {
         auto jsGestureMode = args[0];
         if (jsGestureMode->IsNumber()) {
-            gestureMode = jsGestureMode->ToNumber<int32_t>();
+            gestureMode = JSNumberUtils::GetNumberOrDefault<int32_t>(
+                jsGestureMode, 0, InfinityCheckMode::REJECT_ALL);
         }
     }
 
@@ -652,7 +651,9 @@ void JSGesture::SetAllowedTypes(const JSCallbackInfo& args)
     for (size_t i = 0; i < typesArrLength; ++i) {
         auto type = jsTypesArr->GetValueAt(i);
         if (type->IsNumber()) {
-            allowedTypes.insert(static_cast<SourceTool>(type->ToNumber<int32_t>()));
+            int32_t typeValue = JSNumberUtils::GetNumberOrDefault<int32_t>(
+                type, 0, InfinityCheckMode::REJECT_ALL);
+            allowedTypes.insert(static_cast<SourceTool>(typeValue));
         }
     }
     if (allowedTypes.empty()) {
@@ -703,7 +704,9 @@ void JSPanGestureOption::JSBind(BindingTarget globalObj)
 void JSPanGestureOption::SetDirection(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsNumber()) {
-        PanDirection direction = { static_cast<uint32_t>(args[0]->ToNumber<int32_t>()) };
+        int32_t directionValue = JSNumberUtils::GetNumberOrDefault<int32_t>(
+    args[0], 0, InfinityCheckMode::REJECT_ALL);
+    PanDirection direction = { static_cast<uint32_t>(directionValue) };
         panGestureOption_->SetDirection(direction);
     } else {
         PanDirection directionAll = { PanDirection::ALL };
@@ -714,9 +717,9 @@ void JSPanGestureOption::SetDirection(const JSCallbackInfo& args)
 void JSPanGestureOption::SetDistance(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsNumber()) {
-        auto distance = args[0]->ToNumber<double>();
-        Dimension dimension =
-            LessNotEqual(distance, 0.0) ? DEFAULT_PAN_DISTANCE : Dimension(distance, DimensionUnit::VP);
+        double distanceValue = JSNumberUtils::GetDoubleWithRangeCheck(
+        args[0], DEFAULT_PAN_DISTANCE.Value(), 0.0, INFINITY, InfinityCheckMode::REJECT_ALL);
+        Dimension dimension = Dimension(distanceValue, DimensionUnit::VP);
         panGestureOption_->SetDistance(dimension.ConvertToPx());
     } else {
         panGestureOption_->SetDistance(DEFAULT_PAN_DISTANCE.ConvertToPx());
@@ -726,9 +729,8 @@ void JSPanGestureOption::SetDistance(const JSCallbackInfo& args)
 void JSPanGestureOption::SetFingers(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsNumber()) {
-        auto fingers = args[0]->ToNumber<int32_t>();
-        fingers = fingers <= DEFAULT_PAN_FINGER ? DEFAULT_PAN_FINGER : fingers;
-        fingers = fingers > DEFAULT_MAX_PAN_FINGERS ? DEFAULT_PAN_FINGER : fingers;
+        int32_t fingers = JSNumberUtils::GetInt32WithRangeCheck(
+        args[0], DEFAULT_PAN_FINGER, DEFAULT_PAN_FINGER, DEFAULT_MAX_PAN_FINGERS);
         panGestureOption_->SetFingers(fingers);
     } else {
         panGestureOption_->SetFingers(DEFAULT_PAN_FINGER);
@@ -777,13 +779,14 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
         JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (fingers->IsNumber()) {
-            int32_t fingersNumber = fingers->ToNumber<int32_t>();
-            fingersNum = fingersNumber <= DEFAULT_PAN_FINGER ? DEFAULT_PAN_FINGER : fingersNumber;
+            fingersNum = JSNumberUtils::GetInt32WithRangeCheck(
+                fingers, DEFAULT_PAN_FINGER, DEFAULT_PAN_FINGER, INT_MAX);
         }
         if (distance->IsNumber()) {
-            double distanceNumber = distance->ToNumber<double>();
-            if (!LessNotEqual(distanceNumber, 0.0)) {
-                distanceMap[SourceTool::UNKNOWN] = Dimension(distanceNumber, DimensionUnit::VP);
+            double distanceValue = JSNumberUtils::GetDoubleWithRangeCheck(
+                distance, DEFAULT_PAN_DISTANCE.Value(), 0.0, INFINITY, InfinityCheckMode::REJECT_ALL);
+            if (distanceValue > 0.0) {
+                distanceMap[SourceTool::UNKNOWN] = Dimension(distanceValue, DimensionUnit::VP);
             } else {
                 distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE;
             }
