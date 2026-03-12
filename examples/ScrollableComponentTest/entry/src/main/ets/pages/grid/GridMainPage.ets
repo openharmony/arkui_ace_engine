@@ -59,6 +59,8 @@ struct WaterFlowMainPage {
     new TextList(24, 'GridSwiperDragSort', 'pages/grid/GridSwiperDragSort'),
     new TextList(25, 'EditModeOptions', 'pages/grid/GridEditModeOptions'),
     new TextList(26, 'PageGridDragEvent', 'pages/grid/PageGridDragEvent'),
+    new TextList(27, 'BindControllerDeclare', 'pages/grid/bindController/GridDeclare'),
+    new TextList(28, 'BindControllerCommand', 'pages/grid/bindController/GridCommand'),
   ]
   @State fontSize: Resource | undefined = undefined
 
