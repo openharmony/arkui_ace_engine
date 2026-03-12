@@ -43,10 +43,12 @@ public:
     void UpdateChangeEvent(bool select) const
     {
         if (selectChangeEvent_) {
-            selectChangeEvent_(select);
+            auto selectChangeEvent = selectChangeEvent_;
+            selectChangeEvent(select);
         }
         if (changeEvent_) {
-            changeEvent_(select);
+            auto changeEvent = changeEvent_;
+            changeEvent(select);
         }
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;

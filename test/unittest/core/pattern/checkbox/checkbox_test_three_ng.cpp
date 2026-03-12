@@ -169,15 +169,27 @@ HWTEST_F(CheckBoxThreeTestNG, CheckBoxAccessibilityPropertyTestNg003, TestSize.L
  */
 HWTEST_F(CheckBoxThreeTestNG, CheckBoxUpdateChangeEventTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create CheckBox and set onChange callback.
+     */
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
     bool isSelected = false;
     auto changeEvent = [&isSelected](bool select) { isSelected = select; };
     checkBoxModelNG.SetChangeEvent(changeEvent);
+
+    /**
+     * @tc.steps: step2. Finish node build and get CheckBoxEventHub.
+     */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
     ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Trigger change event and verify callback result.
+     * @tc.expected: isSelected is true.
+     */
     eventHub->UpdateChangeEvent(true);
     EXPECT_EQ(isSelected, true);
 }
