@@ -2124,4 +2124,37 @@ HWTEST_F(NodeContainerTestNg, NodeContainerPatternFireOnBind002, TestSize.Level1
      */
     pattern->FireOnBind(1);
 }
+
+/**
+ * @tc.name: NodeContainerPatternAddBaseNode_InvalidNode
+ * @tc.desc: Test AddBaseNode with invalid node (neither ArkTsFrameNode nor RootBuilderNode).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerPatternAddBaseNode_InvalidNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create nodeContainerNode and pattern.
+     */
+    RefPtr<FrameNode> nodeContainerNode = CreateNode();
+    ASSERT_NE(nodeContainerNode, nullptr);
+    auto pattern = nodeContainerNode->GetPattern<NodeContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Create an invalid child node (not ArkTsFrameNode and not RootBuilderNode).
+     * @tc.expected: The invalid node should be rejected and child should remain null.
+     */
+    auto invalidChildNode = FrameNode::CreateFrameNode("InvalidNode", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(invalidChildNode, nullptr);
+    // Note: By default, FrameNode is not ArkTsFrameNode and not RootBuilderNode
+    EXPECT_FALSE(invalidChildNode->IsArkTsFrameNode());
+    EXPECT_FALSE(invalidChildNode->GetIsRootBuilderNode());
+    
+    pattern->AddBaseNode(invalidChildNode);
+    
+    /**
+     * @tc.steps: step3. Verify the invalid node was not added.
+     * @tc.expected: nodeContainerNode should have no children.
+     */
+    EXPECT_EQ(nodeContainerNode->GetChildAtIndex(0), nullptr);
+}
 } // namespace OHOS::Ace::NG

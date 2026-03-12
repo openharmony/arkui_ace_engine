@@ -51,7 +51,7 @@ const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent", "F
 class BuilderRootNode extends PeerNode {
     public __parent?: ArkBuilderProxyNodePeer;
 
-    protected constructor(peerPtr: pointer, id: int32, name: string = '', flags: int32 = 0) {
+    constructor(peerPtr: pointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags, BuilderRootNodeType)
     }
 
@@ -146,6 +146,10 @@ export class BuilderNode<T = undefined> {
     public _JSBuilderNode: JSBuilderNode<T>;
     // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_ani.cpp.
     private nodePtr_: KPointer | undefined;
+    constructor(uiContext: UIContext, nodePtr: KPointer, frameNodePtr: KPointer) {
+        this._JSBuilderNode = new JSBuilderNode<T>(uiContext, nodePtr, frameNodePtr);
+        BuilderNodeFinalizationRegisterProxy.register<T>(this);     
+    }
     constructor(uiContext: UIContext, options?: RenderOptions) {
         this._JSBuilderNode = new JSBuilderNode<T>(uiContext, options);
         BuilderNodeFinalizationRegisterProxy.register<T>(this);
@@ -198,9 +202,14 @@ export class BuilderNode<T = undefined> {
     public updateConfiguration(): void {
         this._JSBuilderNode.updateConfiguration();
     }
-
     public getNodeWithoutProxy(): pointer | undefined {
         return this._JSBuilderNode.getNodeWithoutProxy();
+    }
+    public getBuilderRootNode(): KPointer | undefined {
+        return this._JSBuilderNode.getBuilderRootNode();
+    }
+    public isDisposed(): boolean {
+        return this._JSBuilderNode.isDisposed();
     }
 }
 
@@ -210,7 +219,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private __builderProxyNode?: ArkBuilderProxyNodePeer;
     private __arg?: T;
     private __rootStage?: ComputableState<BuilderRootNode>;
-    private __manager: StateManager;
+    private __manager?: StateManager;
     private __params?: MutableState<T>;
     private __builder?: WrappedBuilder<TBuilderFunc<T>>;
     private __builder0?: WrappedBuilder<voidBuilderFunc>;
@@ -232,6 +241,11 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builder = undefined;
         this.__frameNode = null;
     }
+    constructor(uiContext: UIContext, nodePtr: KPointer, frameNodePtr: KPointer) {
+        this. __frameNode = new BuilderRootFrameNode<T>(uiContext, 'BuilderRootFrameNode', frameNodePtr);
+        const peerId = PeerNode.nextId();
+        this.__root = new BuilderRootNode(nodePtr, peerId, 'BuilderRootNode');
+    }
     constructor(uiContext: UIContext, options?: RenderOptions) {
         super();
         this.__uiContext = uiContext as UIContextImpl;
@@ -252,7 +266,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__manager = createStateManager()!;
         let uiData = new ContextRecord();
         uiData.uiContext = uiContext;
-        this.__manager.contextData = uiData;
+        this.__manager!.contextData = uiData;
         this.__frameNode = null;
     }
 
@@ -389,6 +403,11 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         return null;
     }
 
+    public getBuilderRootNode(): KPointer | undefined {
+        let ptr = this.__builderRootNode!.getPeerPtr();
+        return ptr ? ptr : undefined;
+    }
+
     public reuse(param?: RecordData): void {
         if (this.__root) {
             let node = findPeerNode(this.__root!);
@@ -443,7 +462,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builderProxyNode?.dispose();
         this.__builderProxyNode = undefined;
         this.__builderRootNode = undefined;
-        this.__manager.reset();
+        this.__manager!.reset();
     }
 
     public dispose(): void {
@@ -456,5 +475,9 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__frameNode = null;
         ArkUIAniModule._Common_Restore_InstanceId();
         this.__isDisposed = true;
+    }
+
+    public isDisposed(): boolean {
+        return this.__isDisposed;
     }
 }

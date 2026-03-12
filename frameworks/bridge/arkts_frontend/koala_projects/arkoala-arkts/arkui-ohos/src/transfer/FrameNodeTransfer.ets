@@ -45,7 +45,8 @@ export class FrameNodeTransfer {
         let uiContext = new UIContextImpl(instanceId as int32);
         let arkUINode = ESValue.load('@ohos.arkui.node').getProperty('default');
         let frameNodeTrans = arkUINode.getProperty('getFrameNodeRawPtr');
-        let point = frameNodeTrans.invoke(input! as Object);
+        let nodePtr = ESValue.wrap(input).getProperty('nodePtr_');
+        let point = frameNodeTrans.invoke(nodePtr! as Object);
         if (point.isUndefined()) {
             throw Error("The FrameNode point is undefined object convert fail.");
         }
