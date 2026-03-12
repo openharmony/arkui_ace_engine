@@ -1561,4 +1561,84 @@ HWTEST_F(TextFieldPatternFuncTest, UpdatePropertyImplStrokeColor001, TestSize.Le
     auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
 }
+
+/**
+ * @tc.name: UpdateMagnifierOffset
+ * @tc.desc: test MagnifierController::UpdateMagnifierOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, UpdateMagnifierOffset, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create magnifier controller and set up necessary components.
+     */
+    pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
+    auto controller = pattern->magnifierController_;
+    ASSERT_NE(controller, nullptr);
+
+    /**
+     * @tc.steps: step3. Set up root node and geometry node.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameSize(SizeF(400.f, 400.f));
+
+    /**
+     * @tc.steps: step4. Set up textFieldNode geometry node with frame size.
+     */
+    auto textFieldGeometryNode = textFieldNode->GetGeometryNode();
+    ASSERT_NE(textFieldGeometryNode, nullptr);
+    textFieldGeometryNode->SetFrameSize(SizeF(300.f, 100.f));
+
+    /**
+     * @tc.steps: step5. Set magnifier node dimensions.
+     */
+    controller->magnifierNodeWidth_ = Dimension(100.f, DimensionUnit::PX);
+    controller->magnifierNodeHeight_ = Dimension(100.f, DimensionUnit::PX);
+
+    /**
+     * @tc.steps: step6. Set local offset within host range.
+     */
+    controller->SetLocalOffset(OffsetF(50.0f, 50.0f));
+
+    /**
+     * @tc.steps: step7. Call UpdateMagnifierOffset and verify result.
+     */
+    auto result = controller->UpdateMagnifierOffset();
+
+    /**
+     * @tc.expected: UpdateMagnifierOffset should return true when magnifier node exists.
+     */
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step8. Verify magnifier frame node was created and has valid geometry.
+     */
+    auto magnifierNode = controller->GetMagnifierNode();
+    ASSERT_NE(magnifierNode, nullptr);
+
+    auto geometryNode = magnifierNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+
+    /**
+     * @tc.expected: Magnifier offset should be set correctly.
+     */
+    auto magnifierOffset = geometryNode->GetFrameOffset();
+    EXPECT_TRUE(magnifierOffset.GetX() >= 0.0f);
+    EXPECT_TRUE(magnifierOffset.GetY() >= 0.0f);
+}
 } // namespace OHOS::Ace::NG
