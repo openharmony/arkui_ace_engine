@@ -1040,7 +1040,12 @@ void WebClientImpl::OnLargestContentfulPaint(
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     CHECK_NULL_VOID(details);
-    ContainerScope scope(delegate->GetInstanceId());
+    auto instanceId = delegate->GetInstanceId();
+    if (instanceId == INSTANCE_ID_UNDEFINED) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "instanceId is undefined! instanceId=%{public}d", instanceId);
+        return;
+    }
+    ContainerScope scope(instanceId);
     delegate->OnLargestContentfulPaint(details);
 }
 
