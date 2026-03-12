@@ -536,6 +536,8 @@
       "OHOS::Ace::Framework::JSContainerBase::Pop()";
       "OHOS::Ace::Framework::JsConverter::ConvertNapiValueToJsVal(napi_value__*)";
       "OHOS::Ace::Framework::JsEngine::GetPixelMapNapiEntry()";
+      "OHOS::Ace::Framework::JsEngine::RegisterDrawChildrenWithParameterInspectorCallback(OHOS::Ace::RefPtr<OHOS::Ace::Framework::InspectorEvent> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::Framework::JsEngine::UnregisterDrawChildrenWithParameterInspectorCallback(OHOS::Ace::RefPtr<OHOS::Ace::Framework::InspectorEvent> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::Framework::JsiEngineInstance::GetFrontendDelegate() const";
       "OHOS::Ace::Framework::JsiEngineInstance::GetRunningPage() const";
       "OHOS::Ace::Framework::JSInteractableView::SetFocusable(bool)";
