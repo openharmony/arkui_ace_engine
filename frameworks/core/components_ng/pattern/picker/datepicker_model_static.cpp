@@ -83,8 +83,11 @@ static void SetupColumnNode(RefPtr<DatePickerPattern>& datePickerPattern,
 
 static void ApplyCircleDialStyle(const RefPtr<FrameNode>& dateNode, const RefPtr<PickerTheme>& pickerTheme)
 {
+    CHECK_NULL_VOID(dateNode);
+    CHECK_NULL_VOID(pickerTheme);
     if (pickerTheme->IsCircleDial()) {
         auto renderContext = dateNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
     }
 }
