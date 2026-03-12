@@ -145,6 +145,7 @@ config("arkoala_native_config") {
     "koala_projects/interop/src/cpp/types",
     "koala_projects/interop/src/cpp/ohos",
     "$ace_root/interfaces/inner_api/ace_kit/include",
+    "$ace_root/frameworks/core/interfaces/native/generated/interface",
   ]
 }
 

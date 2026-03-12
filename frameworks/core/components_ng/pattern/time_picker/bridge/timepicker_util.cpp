@@ -20,7 +20,7 @@
 #include "interfaces/inner_api/ace_kit/include/ui/base/geometry/dimension.h"
 #include "interfaces/inner_api/ace_kit/include/ui/gestures/gesture_event.h"
 
-#include "bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/generated/arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"

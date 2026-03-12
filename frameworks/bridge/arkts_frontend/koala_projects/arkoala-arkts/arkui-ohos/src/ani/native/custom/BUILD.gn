@@ -31,6 +31,7 @@ ohos_shared_library("arkuicustomnode_ani") {
     "//foundation/arkui/ace_engine/frameworks/",
     "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/",
     "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/",
+    "//foundation/arkui/ace_engine/frameworks/core/interfaces/native/generated/interface",
   ]
   sources = [
     "../utils/ani_utils.cpp",

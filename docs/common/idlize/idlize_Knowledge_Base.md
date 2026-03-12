@@ -69,7 +69,9 @@ cd scraper/out
 
 **3. 更新原生头文件**
 
-复制 `scraper/out/generated/libace/generated/interface/arkoala_api_generated.h` 到 `frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h`
+~~复制 `scraper/out/generated/libace/generated/interface/arkoala_api_generated.h` 到 `frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h`~~
+
+> **注意**: `arkoala_api_generated.h` 位于 `frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h`，无需单独复制。
 
 复制 `scraper/out/generated/libace/utility/generated/converter_generated.h` 到 `frameworks/core/interfaces/native/utility/generated/converter_generated.h`
 
