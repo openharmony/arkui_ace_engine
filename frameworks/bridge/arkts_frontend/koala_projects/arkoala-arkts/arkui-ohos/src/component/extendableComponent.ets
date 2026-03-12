@@ -33,7 +33,7 @@ import promptAction from '@ohos/promptAction'
 import { Theme } from '@ohos/arkui/theme';
 import { DecoratedVariableBase } from '../stateManagement/decoratorImpl/decoratorBase';
 import { IDecoratorBaseRegistry } from '../stateManagement/decorator';
-import { IEnvironmentValueBase } from '../stateManagement/decoratorImpl/decoratorEnv';
+import { IEnvironmentValueBase, IEnvVariable, EnvDecoratedVariable } from '../stateManagement/decoratorImpl/decoratorEnv';
 
 export class ExtendableComponentInternal {
     public static fromPtr(ptr: KPointer): ExtendableComponent {
@@ -94,12 +94,16 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private activeChangeListenerForInterop_: Set<(active: boolean, isReuse: boolean) => void> = new Set<(active: boolean, isReuse: boolean) => void>();
     private hasBeenRecycled_: boolean = false;
     private ownedStateVariables_: Array<IDecoratorBaseRegistry> | undefined = undefined;
-    private envVars_: Map<string, Object> = new Map<string, Object>();
+    private envPropertySet: Set<IEnvVariable> = new Set<IEnvVariable>();
+    private envInstanceId: int32 | undefined;
 
     public static finalizationRegistry_: FinalizationRegistry<Object> = new FinalizationRegistry<Object>(
         (destroyProperty: Object) => {
             if (destroyProperty instanceof IEnvironmentValueBase) {
-                (destroyProperty as IEnvironmentValueBase).destroy();
+                (destroyProperty as IEnvironmentValueBase).offWatchFunc();
+                if (EnvDecoratedVariable.instanceIdSet.size > 0) {
+                    EnvDecoratedVariable.instanceIdSet.clear();
+                }
             }
         }
     );
@@ -276,17 +280,24 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         return this.parent_?.__findProvide__Internal<T>(providedPropName);
     }
 
-    __addEnv__Internal(envPropName: string, store: Object): void {
-        this.envVars_.set(envPropName, store);
-        ExtendableComponent.finalizationRegistry_.register(this, store);
+    __addEnvInstance__Internal(envProperty: IEnvVariable): void {
+        this.envPropertySet.add(envProperty);
     }
 
-    __findEnv__Internal(envPropName: string): Object | undefined {
-        const envLocalVar = this.envVars_.get(envPropName);
-        if (envLocalVar !== undefined) {
-            return envLocalVar;
-        }
-        return this.parent_?.__findEnv__Internal(envPropName);
+    checkEnvSetSize(): boolean {
+        return this.envPropertySet.size > 0;
+    }
+
+    getEnvSet(): Set<IEnvVariable> {
+        return this.envPropertySet;
+    }
+
+    getEnvInstance(): int32 | undefined {
+        return this.envInstanceId;
+    }
+
+    setEnvInstance(newInstanceId: int32 | undefined) {
+        this.envInstanceId = newInstanceId;
     }
 
     getownedStateVariables(): Array<IDecoratorBaseRegistry> | undefined {

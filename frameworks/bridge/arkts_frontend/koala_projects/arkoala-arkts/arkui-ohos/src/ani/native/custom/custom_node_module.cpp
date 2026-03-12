@@ -71,6 +71,11 @@ ani_status NativeCustomComponent::BindNativeCustomComponent(ani_env *env)
             nullptr,
             reinterpret_cast<void*>(CustomNodeCallDefaultLayout)
         },
+        ani_native_function {
+            "_CustomNode_EnvFunction",
+            nullptr,
+            reinterpret_cast<void*>(EnvBuildFunction)
+        },
     };
 
     if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
@@ -153,6 +158,56 @@ void NativeCustomComponent::CustomNodeSetBuildFunction(
         }
         env->DestroyLocalScope();
         return AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
+    });
+}
+
+void NativeCustomComponent::EnvBuildFunction(
+    ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_fn_object envFunc)
+{
+    ani_vm *vm = nullptr;
+    env->GetVM(&vm);
+
+    std::shared_ptr<ani_wref> weakRef(new ani_wref, [vm](ani_wref *wref) {
+        ani_env *env = nullptr;
+        if (ANI_OK == vm->GetEnv(ANI_VERSION_1, &env)) {
+            env->WeakReference_Delete(*wref);
+        }
+    });
+
+    if (ANI_OK != env->WeakReference_Create(envFunc, weakRef.get())) {
+        return;
+    }
+
+    auto node = AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
+    if (!node) {
+        return;
+    }
+    node->RegisterUpdateJSInstanceCallback([vm, weakRef](int32_t instanceId) -> void {
+        ACE_SCOPED_TRACE("Env Build Function");
+
+        ani_env *env = nullptr;
+        if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+            return;
+        }
+        if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
+            return;
+        }
+        ani_boolean released;
+        ani_ref localRef;
+        if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef) || released) {
+            env->DestroyLocalScope();
+            return;
+        }
+
+        ani_object valueObject = AniUtils::CreateInt32(env, instanceId);
+        ani_ref valueRef = static_cast<ani_ref>(valueObject);
+        ani_ref resRef;
+        if (ANI_OK != env->FunctionalObject_Call(static_cast<ani_fn_object>(localRef), 1, &valueRef, &resRef)) {
+            env->DestroyLocalScope();
+            return;
+        }
+
+        env->DestroyLocalScope();
     });
 }
 
