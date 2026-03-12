@@ -156,12 +156,13 @@ void MarqueePattern::OnModifyDone()
 
     auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto marqueeUpdateStrategy = layoutProperty->GetMarqueeUpdateStrategy().value_or(MarqueeUpdateStrategy::DEFAULT);
     if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag()) ||
         CheckLayoutFlag(layoutProperty->GetPropertyChangeFlag())) {
         measureChanged_ = true;
     } else if (OnlyPlayStatusChange()) {
         ChangeAnimationPlayStatus();
-    } else {
+    } else if (marqueeUpdateStrategy == MarqueeUpdateStrategy::DEFAULT || !NeedSecondChild()) {
         auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
         CHECK_NULL_VOID(paintProperty);
         auto playStatus = paintProperty->GetPlayerStatus().value_or(false);

@@ -264,6 +264,12 @@ HWTEST_F(MarqueePatternTestNg, MarqueePattern_GetScrollAmount001, TestSize.Level
     MarqueePattern marqueeModel;
     auto amount = marqueeModel.GetScrollAmount();
     EXPECT_EQ(amount, 0.0f);
+
+    /**
+     *  @tc.step test if amonut is 0.0f
+     *
+     */
+    EXPECT_EQ(amount, 0.0f);
 }
 
 /**
