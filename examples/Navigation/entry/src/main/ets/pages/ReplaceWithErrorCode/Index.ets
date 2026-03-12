@@ -1,0 +1,66 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import router from '@ohos.router';
+import { window } from '@kit.ArkUI'
+import { common } from '@kit.AbilityKit'
+
+interface ListCategories {
+  title:string,
+  url:string
+}
+
+@Entry
+@Component
+struct Index {
+  @State message: string = 'Navigation栈replace操作支持返回错误码'
+  private items : ListCategories[] = [
+    {title: '基础场景',url: 'pages/ReplaceWithErrorCode/BasePage'},
+    {title: '栈操作组合',url: 'pages/ReplaceWithErrorCode/CombinationPage'},
+    {title: '生命周期+无感监听', url: 'pages/ReplaceWithErrorCode/lifePage'}
+  ]
+
+  build() {
+    Column() {
+      Text(this.message).fontSize(18).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center).width('100%').backgroundColor("#FF08528A").height(40)
+
+      List({space:'10vp'}) {
+        ForEach(this.items,(item : ListCategories) => {
+          ListItem() {
+            Button(){
+              Row() {
+                Text(item.title).fontSize(14).fontColor(0xffffff).margin({ left: 5, right: 12 }).height(40).padding(5)
+              }
+            }.margin(10)
+            .type(ButtonType.Normal)
+            .backgroundColor(0x317aff)
+            .width('100%')
+            .fontSize(15)
+            .fontColor(0x000000)
+            .labelStyle({maxLines:1, overflow: TextOverflow.MARQUEE})
+            .onClick(() => {
+              console.log('test url', item.url)
+              router.pushUrl({url:item.url})
+            })
+          }
+        })
+      }.expandSafeArea()
+      .alignListItem(ListItemAlign.Center)
+      .width('95%').height('90%')
+    }.width('100%').height('100%').backgroundColor('#FFDDE7F6')
+    .expandSafeArea()
+  }
+}
+
+
