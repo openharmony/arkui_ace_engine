@@ -84,6 +84,22 @@ struct Index {
       title: 'RowExample',
       page: 'pages/RowExample/RowExampleRouter'
     },
+    {
+      title: 'StackExample',
+      page: 'pages/StackExample/StackExample'
+    },
+    {
+      title: 'BorderExample',
+      page: 'pages/BorderExample/BorderExampleRouter'
+    },
+    {
+      title: 'LayoutExample',
+      page: 'pages/LayoutExample/LayoutExampleRouter'
+    },
+    {
+      title: 'MediaqueryExample',
+      page: 'pages/MediaqueryExample/MediaqueryExample'
+    }
   ]
 
   build() {
