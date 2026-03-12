@@ -1434,7 +1434,6 @@ HWTEST_F(AppBarTestNg, TestCreateServicePanelNotFirstTry, TestSize.Level1)
     EXPECT_EQ(appBar->sessionId_, 0);
 }
 
-
 /**
   * @tc.name: UpdateVisibilityOfMenuBarRow001
   * @tc.desc: Test UpdateVisiblityOfMenuBarRow
@@ -1457,5 +1456,28 @@ HWTEST_F(AppBarTestNg, UpdateVisibilityOfMenuBarRow001, TestSize.Level1)
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     AppBarView::UpdateVisibilityOfMenuBarRow(menubarRow, container);
     EXPECT_EQ(layoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: SetRectChangeCallback001
+ * @tc.desc: Test SetRectChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, SetRectChangeCallback001, TestSize.Level1)
+{
+    auto node = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(node, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto hub = node->GetEventHub<EventHub>();
+    ASSERT_NE(hub, nullptr);
+
+    bool isExecute = false;
+    auto callback = [&isExecute](const RectF& oldRect, const RectF& rect) { isExecute = true; };
+    appBar->SetRectChangeCallback(std::move(callback));
+    EXPECT_NE(appBar->rectChangeCallback_, nullptr);
+    appBar->AddInnerOnSizeChangeCallback(node);
+    hub->FireInnerOnSizeChanged(RectF(), RectF());
+    EXPECT_EQ(isExecute, true);
 }
 } // namespace OHOS::Ace::NG

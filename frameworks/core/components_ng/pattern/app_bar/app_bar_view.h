@@ -38,6 +38,9 @@ namespace OHOS::Ace::NG {
  * |--ModalPage(UEC)
  */
 
+using RectChangeFunc = std::function<void(const RectF& oldRect, const RectF& rect)>;
+using RectCallbackDeleter = void(*)(void*);
+
 class ACE_FORCE_EXPORT AppBarView : public Referenced {
 public:
     AppBarView() = default;
@@ -66,6 +69,35 @@ public:
         const RefPtr<PipelineContext>& pipelineContext, std::function<void(const RectF& rect)>&& listener);
     static void RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelineContext, int32_t id);
     void SetMenuBarVisible(bool visible);
+
+    void SetLastRectChangeTime(int64_t time)
+    {
+        lastRectChangeTime_ = time;
+    }
+    int64_t GetLastRectChangeTime() const
+    {
+        return lastRectChangeTime_;
+    }
+
+    void SetRectChangeCallbackContext(void* ctx, RectCallbackDeleter deleter) {
+        rectChangeCallbackRef_ = ctx;
+        rectCallbackDeleter_ = deleter;
+    }
+    void* GetRectChangeCallbackContext() const
+    {
+        return rectChangeCallbackRef_;
+    }
+
+    void SetRectChangeCallback(RectChangeFunc&& callback);
+protected:
+    virtual ~AppBarView()
+    {
+        if (rectChangeCallbackRef_ && rectCallbackDeleter_) {
+            rectCallbackDeleter_(rectChangeCallbackRef_);
+            rectChangeCallbackRef_ = nullptr;
+            rectCallbackDeleter_ = nullptr;
+        }
+    }
 private:
     RefPtr<FrameNode> BuildMenuBarRow();
     RefPtr<FrameNode> BuildMenuBar();
@@ -81,11 +113,16 @@ private:
     void UpdateVisibilityOfMenuBarRow(const RefPtr<FrameNode>& menubarRow, const RefPtr<Container>& container);
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
     static void InitAccessibility(RefPtr<UINode> uiNode);
+    void AddInnerOnSizeChangeCallback(RefPtr<FrameNode> frameNode);
     int32_t sessionId_ = 0;
 
     WeakPtr<FrameNode> atomicService_;
     RefPtr<FrameNode> contentStage_;
     static std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder_;
+    int64_t lastRectChangeTime_ = 0;
+    void* rectChangeCallbackRef_ = nullptr;
+    RectCallbackDeleter rectCallbackDeleter_ = nullptr;
+    RectChangeFunc rectChangeCallback_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_APP_BAR_VIEW_H
