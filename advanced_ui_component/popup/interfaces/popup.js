@@ -71,7 +71,8 @@ export const a1 = {
         minFontSize: 9,
         fontWeight: FontWeight.Medium,
         f2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        responseRegion: { "id": -1, "type": 10002, params: ['sys.float.popup_button_response_region'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
     message: {
         fontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -106,7 +107,8 @@ export const a1 = {
         f2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         j2: '18vp',
-        l2: { "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        l2: { "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        responseRegion: { "id": -1, "type": 10002, params: ['sys.float.popup_close_button_response_region'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
 };
 const b1 = () => {
@@ -212,6 +214,8 @@ export class d1 extends ViewPU {
         this.__titleHeight = new ObservedPropertySimplePU(0, this, "titleHeight");
         this.__applyHeight = new ObservedPropertySimplePU(0, this, "applyHeight");
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, "buttonHeight");
+        this.__firstButtonHeight = new ObservedPropertySimplePU(0, this, "firstButtonHeight");
+        this.__secondButtonHeight = new ObservedPropertySimplePU(0, this, "secondButtonHeight");
         this.__messageMaxWeight = new ObservedPropertyObjectPU(0, this, "messageMaxWeight");
         this.__beforeScreenStatus = new ObservedPropertySimplePU(undefined, this, "beforeScreenStatus");
         this.__currentScreenStatus = new ObservedPropertySimplePU(undefined, this, "currentScreenStatus");
@@ -420,6 +424,18 @@ export class d1 extends ViewPU {
     }
     set buttonHeight(newValue) {
         this.__buttonHeight.set(newValue);
+    }
+    get firstButtonHeight() {
+        return this.__firstButtonHeight.get();
+    }
+    set firstButtonHeight(newValue) {
+        this.__firstButtonHeight.set(newValue);
+    }
+    get secondButtonHeight() {
+        return this.__secondButtonHeight.get();
+    }
+    set secondButtonHeight(newValue) {
+        this.__secondButtonHeight.set(newValue);
     }
     get messageMaxWeight() {
         return this.__messageMaxWeight.get();
@@ -656,6 +672,39 @@ export class d1 extends ViewPU {
     }
     getButtonFontWeight() {
         return this.theme.button.fontWeight;
+    }
+    getBtnResponseRegion(actualWidth, actualHeight, minSizeVp) {
+        if (actualWidth === 0 || actualHeight === 0 || minSizeVp <= 0) {
+            return undefined;
+        }
+        
+        let needExpandWidth = actualWidth === -1 ? false : (actualWidth < minSizeVp);
+        let needExpandHeight = actualHeight < minSizeVp;
+        
+        if (!needExpandWidth && !needExpandHeight) {
+            return undefined;
+        }
+        
+        let regionWidth = needExpandWidth ? minSizeVp : '100%';
+        let regionHeight = needExpandHeight ? minSizeVp : '100%';
+        let offsetX = needExpandWidth ? (minSizeVp - actualWidth) / 2 : 0;
+        let offsetY = needExpandHeight ? (minSizeVp - actualHeight) / 2 : 0;
+        
+        return {
+            x: -offsetX,
+            y: -offsetY,
+            width: regionWidth,
+            height: regionHeight
+        };
+    }
+    getCloseBtnResponseRegion() {
+        let responseRegionValue = this.toVp(this.theme.i2.responseRegion);
+        return this.getBtnResponseRegion(this.theme.i2.size.width,
+            this.theme.i2.size.height, responseRegionValue);
+    }
+    getNormalBtnResponseRegion(height) {
+        let responseRegionValue = this.toVp(this.theme.button.responseRegion);
+        return this.getBtnResponseRegion(-1, height, responseRegionValue);
     }
     getWindowsPadding() {
         let top = this.theme.h2.padding.top;
@@ -952,6 +1001,7 @@ export class d1 extends ViewPU {
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                                     Button.flexShrink(0);
                                     Button.accessibilityText(this.theme.i2.l2);
+                                    Button.responseRegion(this.getCloseBtnResponseRegion());
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -1051,6 +1101,10 @@ export class d1 extends ViewPU {
                                             this.buttons?.[0]?.action();
                                         }
                                     });
+                                    Button.onAreaChange((i1, rect) => {
+                                        this.firstButtonHeight = rect.height;
+                                    });
+                                    Button.responseRegion(this.getNormalBtnResponseRegion(this.firstButtonHeight));
                                 }, Button);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Text.create(this.getFirstButtonText());
@@ -1098,6 +1152,10 @@ export class d1 extends ViewPU {
                                             this.buttons?.[1]?.action();
                                         }
                                     });
+                                    Button.onAreaChange((i1, rect) => {
+                                        this.secondButtonHeight = rect.height;
+                                    });
+                                    Button.responseRegion(this.getNormalBtnResponseRegion(this.secondButtonHeight));
                                 }, Button);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Text.create(this.getSecondButtonText());
@@ -1183,6 +1241,7 @@ export class d1 extends ViewPU {
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                                     Button.flexShrink(0);
                                     Button.accessibilityText(this.theme.i2.l2);
+                                    Button.responseRegion(this.getCloseBtnResponseRegion());
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -1257,6 +1316,10 @@ export class d1 extends ViewPU {
                                             this.buttons?.[0]?.action();
                                         }
                                     });
+                                    Button.onAreaChange((i1, rect) => {
+                                        this.firstButtonHeight = rect.height;
+                                    });
+                                    Button.responseRegion(this.getNormalBtnResponseRegion(this.firstButtonHeight));
                                 }, Button);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Text.create(this.getFirstButtonText());
@@ -1304,6 +1367,10 @@ export class d1 extends ViewPU {
                                             this.buttons?.[1]?.action();
                                         }
                                     });
+                                    Button.onAreaChange((i1, rect) => {
+                                        this.secondButtonHeight = rect.height;
+                                    });
+                                    Button.responseRegion(this.getNormalBtnResponseRegion(this.secondButtonHeight));
                                 }, Button);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Text.create(this.getSecondButtonText());
