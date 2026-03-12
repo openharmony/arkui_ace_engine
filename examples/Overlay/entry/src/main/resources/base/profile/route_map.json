@@ -535,6 +535,11 @@
       "name": "ActionSheetAdvanced",
       "pageSourceFile": "src/main/ets/pages/components/dialog/actionSheetAdvanced.ets",
       "buildFunction": "ActionSheetAdvancedBuilder"
+    },
+    {
+      "name": "AlertDialogExtended",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/alertDialogExtended.ets",
+      "buildFunction": "AlertDialogExtendedBuilder"
     }
   ]
 }
