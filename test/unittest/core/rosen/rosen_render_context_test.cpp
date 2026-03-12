@@ -1801,6 +1801,26 @@ HWTEST_F(RosenRenderContextTest, GetWithRange006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetRSUIContext001
+ * @tc.desc: Test SetRSUIContext001 Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, SetRSUIContext001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    ComponentSnapshot snapshot;
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    snapshot.SetRSUIContext(nullptr, nullptr);
+    frameNode->context_ = AceType::RawPtr(pipeline);
+    snapshot.SetRSUIContext(frameNode, nullptr);
+    frameNode->context_ = nullptr;
+    snapshot.SetRSUIContext(frameNode, nullptr);
+    auto rsUIContext = snapshot.GetRSUIContext(pipeline);
+    EXPECT_EQ(rsUIContext, nullptr);
+}
+
+/**
  * @tc.name: GetRangeIDNode001
  * @tc.desc: Test GetRangeIDNode Func.
  * @tc.type: FUNC
