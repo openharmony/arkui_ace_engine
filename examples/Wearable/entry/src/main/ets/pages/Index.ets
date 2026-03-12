@@ -123,6 +123,49 @@ struct Index {
               console.log('router ArcButtonExample012');
               router.pushUrl({ url: 'pages/ArcButton/ArcButtonExample012' })
             })
+
+          // 分隔线
+          Divider()
+            .width('80%')
+            .margin({ top: 15, bottom: 15 })
+            .color('#E0E0E0')
+
+          Text('ArcSlider 示例')
+            .fontSize(18)
+            .fontWeight(FontWeight.Bold)
+            .margin({ bottom: 10 })
+
+          Button('ArcSliderExample001 - 基础示例')
+            .width('80%')
+            .margin(10)
+            .onClick(() => {
+              console.log('router ArcSliderExample01');
+              router.pushUrl({ url: 'pages/ArcSlider/ArcSliderExample001' })
+            })
+
+          Button('ArcSliderExample002 - ArcSlider演示')
+            .width('80%')
+            .margin(10)
+            .onClick(() => {
+              console.log('router ArcSliderExample01');
+              router.pushUrl({ url: 'pages/ArcSlider/ArcSliderExample002' })
+            })
+
+          Button('ArcSliderExample003 - 样式测试')
+            .width('80%')
+            .margin(10)
+            .onClick(() => {
+              console.log('router ArcSliderExample003');
+              router.pushUrl({ url: 'pages/ArcSlider/ArcSliderExample003' })
+            })
+
+          Button('ArcSliderExample004 - 数值测试')
+            .width('80%')
+            .margin(10)
+            .onClick(() => {
+              console.log('router ArcSliderExample004');
+              router.pushUrl({ url: 'pages/ArcSlider/ArcSliderExample004' })
+            })
         }
         .width('100%')
         .padding({ left: 20, right: 20 })
