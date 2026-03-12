@@ -41,7 +41,6 @@ struct KeyCommand {
     int32_t type = 0;
     int32_t keyCode = DEFAULT_KEY_CODE;
     std::vector<int32_t> pressedKeys;
-    bool pressedKeysState = false;
     bool metaState = false;
     int32_t waitTime = DEFAULT_KEY_WAIT_TIME;
 };
@@ -99,7 +98,6 @@ private:
     bool HandleKeyCommand(int32_t opt, KeyCommand& currentCmd, bool& hasPendingCmd);
     bool HandleKeyWaitCommand(int32_t argc, char* argv[], KeyCommand& currentCmd, bool& hasPendingCmd);
     bool HandleKeyCode(int32_t argc, char* argv[], KeyCommand& currentCmd, bool hasPendingCmd);
-    bool HandleKeyPressedCode(int32_t argc, char* argv[], KeyCommand& currentCmd, bool hasPendingCmd);
     bool HandleKeyMetaCode(int32_t argc, char* argv[], KeyCommand& currentCmd, bool hasPendingCmd);
     void PackInjectActionForOneRound(const std::vector<ConsumeActionInfo>& actionList, int32_t lastActivedFinger,
         int64_t currentTime, std::vector<InjectingInfo>& activedInjectingInfos,

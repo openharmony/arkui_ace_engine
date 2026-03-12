@@ -188,26 +188,6 @@ bool RawInputInjector::HandleKeyCode(int32_t argc, char* argv[], KeyCommand& cur
     return true;
 }
 
-bool RawInputInjector::HandleKeyPressedCode(int32_t argc, char* argv[], KeyCommand& currentCmd, bool hasPendingCmd)
-{
-    if (hasPendingCmd && (currentCmd.type == 'd' || currentCmd.type == 'u')) {
-        std::string pStr;
-        while ((pStr = GetParamFromCurrentPosAndMoveOn(argc, argv)) != "") {
-            if (currentCmd.pressedKeysState) {
-                continue;
-            }
-            int32_t pCode = 0;
-            if (StrToInt(pStr, pCode)) {
-                currentCmd.pressedKeys.push_back(pCode);
-            } else {
-                return false;
-            }
-        }
-    }
-    currentCmd.pressedKeysState = true;
-    return true;
-}
-
 bool RawInputInjector::HandleKeyMetaCode(int32_t argc, char* argv[], KeyCommand& currentCmd, bool hasPendingCmd)
 {
     if (hasPendingCmd && (currentCmd.type == 'd' || currentCmd.type == 'u')) {
@@ -249,9 +229,6 @@ bool RawInputInjector::ParseAndPackCommandForKey(int32_t argc, char* argv[])
                 break;
             case 'c':
                 packRet = HandleKeyCode(argc, argv, currentCmd, hasPendingCmd);
-                break;
-            case 'p':
-                packRet = HandleKeyPressedCode(argc, argv, currentCmd, hasPendingCmd);
                 break;
             case 'm':
                 packRet = HandleKeyMetaCode(argc, argv, currentCmd, hasPendingCmd);
