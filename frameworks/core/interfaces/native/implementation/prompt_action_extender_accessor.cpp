@@ -477,6 +477,10 @@ void updatePopupCommonParamPart1(const Ark_PopupCommonOptions& src, RefPtr<Popup
     if (borderLinearGradientOpt.has_value()) {
         popupParam->SetInnerBorderLinearGradient(borderLinearGradientOpt.value());
     }
+    auto material = OptConvert<UiMaterial*>(src.systemMaterial);
+    if (material.has_value()) {
+        popupParam->SetSystemMaterial(material.value()->Copy());
+    }
 }
 
 void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)

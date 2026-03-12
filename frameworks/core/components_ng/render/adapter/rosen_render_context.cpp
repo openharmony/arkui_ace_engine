@@ -1654,6 +1654,13 @@ void RosenRenderContext::UpdateUiMaterialFilter(const OHOS::Rosen::Filter* mater
     RequestNextFrame();
 }
 
+void RosenRenderContext::SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape)
+{
+    FREE_RS_CONTEXT_CHECK(SetSDFShape, shape);
+    CHECK_NULL_VOID(rsNode_ && shape);
+    rsNode_->SetSDFShape(shape);
+}
+
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
 {
     bool flag = false;

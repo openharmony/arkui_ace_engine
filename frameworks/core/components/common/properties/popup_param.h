@@ -803,6 +803,16 @@ public:
         return isWithTheme_;
     }
 
+    void SetSystemMaterial(RefPtr<UiMaterial> systemMaterial)
+    {
+        systemMaterial_ = systemMaterial;
+    }
+
+    RefPtr<UiMaterial> GetSystemMaterial()
+    {
+        return systemMaterial_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -855,6 +865,7 @@ private:
     std::optional<Dimension> arrowHeight_;
     std::optional<Dimension> radius_;
     std::optional<Shadow> shadow_;
+    RefPtr<UiMaterial> systemMaterial_ = nullptr;
     // Used in NG mode
     StateChangeFunc onStateChange_;
     ButtonProperties primaryButtonProperties_;   // first button.
