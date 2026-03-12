@@ -182,7 +182,7 @@ export interface FoldedRegionLayoutOptions {
  * @since 22 static
  * @noninterop
  */
-export enum PresetSplitRatio {
+export enum PresetSplitRatio:double {
   /**
    * 1:1
    *
