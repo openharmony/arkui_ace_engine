@@ -24,11 +24,11 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/event/touch_event.h"
 
@@ -60,9 +60,7 @@ HWTEST_F(SearchTestTwoNg, testOnEditChange001, TestSize.Level1)
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-    textFieldEventHub->SetOnEditChanged([](bool isChanged) {
-        isChanged = true;
-    });
+    textFieldEventHub->SetOnEditChanged([](bool isChanged) { isChanged = true; });
     /**
      * @tc.expected: Check if the text patterns for the input box are compliant
      */
@@ -329,8 +327,8 @@ HWTEST_F(SearchTestTwoNg, Pattern018, TestSize.Level1)
 
     textFieldPattern->UpdateEditingValue("Text", 0);
     TimeStamp timeStamp;
-    KeyEvent keyEvent(KeyCode::KEY_TAB, KeyAction::DOWN, {KeyCode::KEY_TAB}, 0, timeStamp,
-        0, 0, SourceType::KEYBOARD, {});
+    KeyEvent keyEvent(
+        KeyCode::KEY_TAB, KeyAction::DOWN, { KeyCode::KEY_TAB }, 0, timeStamp, 0, 0, SourceType::KEYBOARD, {});
 
     /**
      * @tc.step: step2. call OnKeyEvent().
@@ -349,7 +347,7 @@ HWTEST_F(SearchTestTwoNg, Pattern018, TestSize.Level1)
     pattern->OnKeyEvent(keyEvent);
     EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::SEARCH_BUTTON);
 
-    KeyEvent keyEventShiftTab(KeyCode::KEY_TAB, KeyAction::DOWN, {KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB}, 0,
+    KeyEvent keyEventShiftTab(KeyCode::KEY_TAB, KeyAction::DOWN, { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }, 0,
         timeStamp, 0, 0, SourceType::KEYBOARD, {});
 
     /**
