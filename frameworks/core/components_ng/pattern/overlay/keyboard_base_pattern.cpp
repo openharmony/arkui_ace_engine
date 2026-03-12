@@ -66,9 +66,11 @@ void KeyboardPattern::DumpInfo()
 
 void KeyboardPattern::OnModifyDone()
 {
-    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    context->AddOnAreaChangeNode(GetHost()->GetId());
+    context->AddOnAreaChangeNode(host->GetId());
 }
 
 void KeyboardPattern::OnAreaChangedInner()

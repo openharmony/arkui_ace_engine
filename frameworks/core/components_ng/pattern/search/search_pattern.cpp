@@ -1791,7 +1791,9 @@ bool SearchPattern::HandleInputChildOnFocus() const
 #if !defined(PREVIEW)
     return false;
 #endif
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
     return true;
 }

@@ -2717,11 +2717,11 @@ std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
             auto textDragPattern = pattern->dragNode_->GetPattern<TextDragPattern>();
             if (textDragPattern) {
                 textDragPattern->UpdateHandleAnimationInfo(info);
-                auto option = pattern->GetHost()->GetDragPreviewOption();
+                auto option = frameNode->GetDragPreviewOption();
                 option.options.shadowPath = textDragPattern->GetBackgroundPath()->ConvertToSVGString();
                 option.options.shadow = Shadow(RICH_DEFAULT_ELEVATION, {0.0, 0.0}, Color(RICH_DEFAULT_SHADOW_COLOR),
                     ShadowStyle::OuterFloatingSM);
-                pattern->GetHost()->SetDragPreviewOptions(option);
+                frameNode->SetDragPreviewOptions(option);
             }
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
@@ -4345,11 +4345,11 @@ void TextFieldPattern::FilterInitializeText()
 
 bool TextFieldPattern::IsDisabled()
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_RETURN(tmpHost, true);
-    auto eventHub = tmpHost->GetEventHub<TextFieldEventHub>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, true);
     return !eventHub->IsEnabled();
 }
@@ -12585,7 +12585,7 @@ void TextFieldPattern::OnAccessibilityEventTextChange(const std::string& changeT
         finalText = changeString;
     }
     event.extraEventInfo.insert({ changeType, finalText });
-    pipeline->SendEventToAccessibilityWithNode(event, GetHost());
+    pipeline->SendEventToAccessibilityWithNode(event, host);
 }
 
 IMEClient TextFieldPattern::GetIMEClientInfo()

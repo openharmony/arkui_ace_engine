@@ -159,7 +159,6 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     bool hasDividerNode = frameNode->HasDividerNode();
     auto searchTheme = GetTheme(frameNode);
     CreateTextField(frameNode, placeholder, value, hasTextFieldNode, searchTheme);
-
     std::string src;
     if (icon.has_value()) {
         src = icon.value();

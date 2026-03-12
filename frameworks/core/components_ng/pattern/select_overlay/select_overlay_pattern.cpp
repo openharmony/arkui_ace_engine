@@ -151,7 +151,9 @@ void SelectOverlayPattern::AddMenuResponseRegion(std::vector<DimensionRect>& res
         safeAreaInsetsLeft = static_cast<float>(safeAreaInsets->left_.end);
         safeAreaInsetsTop = static_cast<float>(safeAreaInsets->top_.end);
     }
-    const auto& children = GetHost()->GetChildren();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
     for (const auto& it : children) {
         auto child = DynamicCast<FrameNode>(it);
         if (child == nullptr) {

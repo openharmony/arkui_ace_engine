@@ -798,11 +798,12 @@ void ServiceCollaborationAceCallback::RemovePopupNode()
     CHECK_NULL_VOID(overlay);
     CHECK_NULL_VOID(info_);
     CHECK_NULL_VOID(info_->pattern.Upgrade());
-    CHECK_NULL_VOID(info_->pattern.Upgrade()->GetHost());
+    auto host = info_->pattern.Upgrade()->GetHost();
+    CHECK_NULL_VOID(host);
     auto pattern = AceType::DynamicCast<RichEditorPattern>(info_->pattern.Upgrade());
     CHECK_NULL_VOID(pattern);
     pattern->RegisiterCaretChangeListener(nullptr);
-    auto targetId = info_->pattern.Upgrade()->GetHost()->GetId();
+    auto targetId = host->GetId();
     auto popupInfo = overlay->GetPopupInfo(targetId);
     popupInfo.markNeedUpdate = true;
     overlay->HidePopup(targetId, popupInfo);
@@ -865,13 +866,17 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
         pattern->RegisiterCaretChangeListener(std::move(func));
         auto row = CreateCustomPopUpNode(category, "");
         CHECK_NULL_RETURN(row, -1);
-        ViewAbstract::BindPopup(popupParam, info_->pattern.Upgrade()->GetHost(), row);
+        auto host = info_->pattern.Upgrade()->GetHost();
+        CHECK_NULL_RETURN(host, -1);
+        ViewAbstract::BindPopup(popupParam, host, row);
         return 0;
     }
     if (code == PHOTO_SENDING) {
         auto popupParam = GetPopupParam(true, onStateChange_);
         auto row = CreateCustomPopUpNode(category, "");
-        ViewAbstract::BindPopup(popupParam, info_->pattern.Upgrade()->GetHost(), row);
+        auto host = info_->pattern.Upgrade()->GetHost();
+        CHECK_NULL_RETURN(host, -1);
+        ViewAbstract::BindPopup(popupParam, host, row);
         return 0;
     }
     if (code == MULTI_PHOTO_SENDING_BACK) {
