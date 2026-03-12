@@ -2234,6 +2234,10 @@ void TextFieldPattern::HandleOnTextMethodInput(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_UINODE_TRACE(host);
+    if ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request VoiceInput, Close CustomKeyboard.");
+        CloseCustomKeyboard();
+    }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::%{public}s", typeName.c_str());
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
@@ -2363,11 +2367,15 @@ void TextFieldPattern::ProcessVoiceButton()
             responseArea = AceType::DynamicCast<VoiceNodeResponseArea>(voiceResponseArea_);
             responseArea->InitResponseArea();
         }
-    } else {
-        if (voiceResponseArea_) {
-            voiceResponseArea_->ClearArea();
-            voiceResponseArea_.Reset();
+        return;
+    }
+    if (voiceResponseArea_) {
+        auto responseArea = AceType::DynamicCast<VoiceNodeResponseArea>(voiceResponseArea_);
+        if (responseArea) {
+            responseArea->UpdateVoiceButtonBackgroundStyle(false);
         }
+        voiceResponseArea_->ClearArea();
+        voiceResponseArea_.Reset();
     }
 }
 
@@ -9700,7 +9708,10 @@ bool TextFieldPattern::IsShowVoiceButtonMode() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetIsShowVoiceButton().value_or(false) && !IsNormalInlineState() && !IsInPasswordMode();
+    auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    return layoutProperty->GetIsShowVoiceButton().value_or(false) && !IsNormalInlineState() &&
+        (inputType == TextInputType::UNSPECIFIED || inputType == TextInputType::TEXT) &&
+        !customKeyboard_ && !customKeyboardBuilder_;
 }
 
 void TextFieldPattern::CheckPasswordAreaState()

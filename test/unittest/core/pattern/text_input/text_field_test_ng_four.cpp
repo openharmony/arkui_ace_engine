@@ -1123,13 +1123,31 @@ HWTEST_F(TextFieldTestNgFour, GetAccessibilityText001, TestSize.Level1)
     EXPECT_EQ(result, "");
 }
 
-
 /**
- * @tc.name: IsShowVoiceButtonMode
+ * @tc.name: IsShowVoiceButtonModeNew
  * @tc.desc: Test for TextInput IsShowVoiceButtonMode
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldTestNgFour, IsShowVoiceButtonMode, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    layoutProperty_->UpdateIsShowVoiceButton(true);
+    TextFieldModelNG::SetInputStyle(AceType::RawPtr(frameNode_), InputStyle::DEFAULT);
+    EXPECT_TRUE(pattern_->IsShowVoiceButtonMode());
+    TextFieldModelNG::SetType(AceType::RawPtr(frameNode_), TextInputType::PHONE);
+    EXPECT_FALSE(pattern_->IsShowVoiceButtonMode());
+}
+
+
+/**
+ * @tc.name: IsShowVoiceButtonMode001
+ * @tc.desc: Test for TextInput IsShowVoiceButtonMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTestNgFour, IsShowVoiceButtonMode001, TestSize.Level0)
 {
     CreateTextField(DEFAULT_TEXT);
     ASSERT_NE(frameNode_, nullptr);
