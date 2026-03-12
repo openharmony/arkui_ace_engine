@@ -13,6 +13,8 @@
     "pages/GridColExample/GridColExampleRouter",
     "pages/GridContainerExample/GridContainerExampleRouter",
     "pages/GridRowExample/GridRowExampleRouter",
+    "pages/PositionExample/PositionExampleRouter",
+    "pages/RelativeContainerExample/RelativeContainerExampleRouter",
 
     "pages/SizeExample/SizeExample01",
     "pages/SizeExample/SizeExample02",
@@ -81,6 +83,25 @@
     "pages/GridContainerExample/GridContainerExample01",
 
     "pages/GridRowExample/GridRowExample01",
-    "pages/GridRowExample/GridRowExample02"
+    "pages/GridRowExample/GridRowExample02",
+
+    "pages/PositionExample/PositionExample01",
+    "pages/PositionExample/PositionExample02",
+    "pages/PositionExample/PositionExample03",
+    "pages/PositionExample/PositionExample04",
+    "pages/PositionExample/PositionExample05",
+    "pages/PositionExample/PositionExample06",
+    "pages/PositionExample/PositionExample07",
+
+    "pages/RelativeContainerExample/RelativeContainerExample01",
+    "pages/RelativeContainerExample/RelativeContainerExample02",
+    "pages/RelativeContainerExample/RelativeContainerExample03",
+    "pages/RelativeContainerExample/RelativeContainerExample04",
+    "pages/RelativeContainerExample/RelativeContainerExample05",
+    "pages/RelativeContainerExample/RelativeContainerExample06",
+    "pages/RelativeContainerExample/RelativeContainerExample07",
+    "pages/RelativeContainerExample/RelativeContainerExample08",
+    "pages/RelativeContainerExample/RelativeContainerExample09",
+    "pages/RelativeContainerExample/RelativeContainerExample10"
   ]
 }
