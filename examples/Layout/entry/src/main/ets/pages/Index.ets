@@ -73,6 +73,14 @@ struct Index {
       page: 'pages/GridRowExample/GridRowExampleRouter'
     },
     {
+      title: 'PositionExample',
+      page: 'pages/PositionExample/PositionExampleRouter'
+    },
+    {
+      title: 'RelativeContainerExample',
+      page: 'pages/RelativeContainerExample/RelativeContainerExampleRouter'
+    },
+    {
       title: 'RowExample',
       page: 'pages/RowExample/RowExampleRouter'
     },
