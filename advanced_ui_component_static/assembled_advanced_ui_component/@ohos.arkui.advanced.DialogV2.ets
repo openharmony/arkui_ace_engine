@@ -23,7 +23,7 @@ import {
     HorizontalAlign, ButtonAttribute, LocalizedMargin, LoadingProgress, LocalizedPadding, CommonMethod, ButtonStyleMode,
     RelativeContainer, BaseGestureEvent, ThemeColorMode, NestedScrollMode, GestureRecognizer, GestureJudgeResult,
     ConstraintSizeOptions, CustomPopupOptions, TextHeightAdaptivePolicy, PopupStateChangeParam, LocalizedAlignRuleOptions,
-    PromptActionDialogController, CustomLayout
+    PromptActionDialogController, CustomLayout, ButtonLabelStyle
   } from '@ohos.arkui.component';
   import {
     Local, Once, Trace, Event, Param, Require, Monitor, PropRef, Provider, IMonitor, Consumer, Computed, ObservedV2,
@@ -118,6 +118,8 @@ import {
     public defaultFocus?: boolean;
     @Trace
     public enabled?: boolean;
+    @Trace
+    public textAlign?: TextAlign;
     constructor(options: AdvancedDialogV2ButtonOptions) {
       this.content = options.content;
       this.action = options.action;
@@ -127,6 +129,7 @@ import {
       this.role = options.role;
       this.defaultFocus = options.defaultFocus;
       this.enabled = options.enabled;
+      this.textAlign = options.textAlign;
     };
   }
   
@@ -139,6 +142,7 @@ import {
     role?: ButtonRole;
     defaultFocus?: boolean;
     enabled?: boolean;
+    textAlign?: TextAlign;
   }
   
   @ComponentV2
@@ -1549,6 +1553,15 @@ import {
       } as Padding;
     }
   
+    private getButtonLabelStyle(buttonOptions: AdvancedDialogV2Button | undefined): ButtonLabelStyle {
+      return {
+        maxLines: 1,
+        maxFontSize: this.buttonMaxFontSize,
+        minFontSize: this.buttonMinFontSize,
+        textAlign: buttonOptions?.textAlign ?? TextAlign.Start
+      } as ButtonLabelStyle;
+    }
+
     @Builder
     buildSingleButton(index: int): void {
       if (this.isNewPropertiesHighPriority(index)) {
@@ -1557,7 +1570,7 @@ import {
             this.isAllFocusFalse, this.getDialogController())
           .role(this.buttons?.[index].role ?? ButtonRole.NORMAL)
           .key(`advanced_dialog_button_${this.keyIndex++}`)
-          .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+          .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
       } else if (this.buttons?.[index].background !== undefined && this.buttons?.[index].fontColor !== undefined) {
         Button(((this.buttons as Array<AdvancedDialogV2Button>)?.[index].content) as ResourceStr)
           .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus,
@@ -1565,21 +1578,21 @@ import {
           .backgroundColor(this.buttons?.[index].background?.color)
           .fontColor(this.buttons?.[index].fontColor?.color)
           .key(`advanced_dialog_button_${this.keyIndex++}`)
-          .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+          .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
       } else if (this.buttons?.[index].background !== undefined) {
         Button(((this.buttons as Array<AdvancedDialogV2Button>)?.[index.toInt()].content) as ResourceStr)
           .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus,
             this.isAllFocusFalse, this.getDialogController())
           .backgroundColor(this.buttons?.[index.toInt()].background?.color)
           .key(`advanced_dialog_button_${this.keyIndex++}`)
-          .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+          .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
       } else {
         Button(((this.buttons as Array<AdvancedDialogV2Button>)?.[index.toInt()].content) as ResourceStr)
           .setButtonProperties(this.buttons?.[index.toInt()], this.isHasDefaultFocus,
             this.isAllFocusFalse, this.getDialogController())
           .fontColor(this.buttons?.[index.toInt()]?.fontColor?.color)
           .key(`advanced_dialog_button_${this.keyIndex++}`)
-          .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+          .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
       }
     }
   
