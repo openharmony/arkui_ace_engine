@@ -196,6 +196,16 @@
     "pages/Scroll/ScrollModifier/scrollBarColor",
     "pages/Scroll/CAPI/ScrollableInfiniteScroll",
     "pages/LazyVGridLayout/LazyVGridLayoutMainPage",
-    "pages/LazyVGridLayout/LazyVGridLayoutAttribute"
+    "pages/LazyVGridLayout/LazyVGridLayoutAttribute",
+    "pages/grid/bindController/GridDeclare",
+    "pages/grid/bindController/GridCommand",
+    "pages/List/bindController/ListDeclare",
+    "pages/List/bindController/ListCommand",
+    "pages/Scroll/bindController/ScrollDeclare",
+    "pages/Scroll/bindController/ScrollCommand",
+    "pages/waterflow/bindController/WaterFlowDeclare",
+    "pages/waterflow/bindController/WaterFlowCommand",
+    "pages/waterflow/bindController/WaterFlowDestroyDeclare",
+    "pages/waterflow/bindController/WaterFlowDestroySubPage"
   ]
 }

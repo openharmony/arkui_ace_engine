@@ -47,7 +47,10 @@ struct WaterFlowMainPage {
     new TextList(13, 'waterFlowIndex', 'pages/waterflow/waterFlowIndex'),
     new TextList(14, 'scrollBarColor', 'pages/waterflow/demo01/scrollBarColor'),
     new TextList(15, 'scrollBarColor', 'pages/waterflow/waterFlowModifier/scrollBarColor'),
-    new TextList(16, 'WaterFlowInfiniteScrollingEarly', 'pages/waterflow/CAPI/WaterFlowInfiniteScrollingEarly')
+    new TextList(16, 'WaterFlowInfiniteScrollingEarly', 'pages/waterflow/CAPI/WaterFlowInfiniteScrollingEarly'),
+    new TextList(17, 'BindControllerDeclare', 'pages/waterflow/bindController/WaterFlowDeclare'),
+    new TextList(18, 'BindControllerCommand', 'pages/waterflow/bindController/WaterFlowCommand'),
+    new TextList(19, 'BindControllerDestroy', 'pages/waterflow/bindController/WaterFlowDestroyDeclare')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
