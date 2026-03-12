@@ -369,4 +369,111 @@ HWTEST_F(NodeRenderStatusMonitorTestNg, CheckSourceTypeChangeTest, testing::ext:
     EXPECT_TRUE(context->CheckSourceTypeChange(SourceType::MOUSE));
     context->lastSourceType_ = SourceType::NONE;
 }
+
+/**
+ * @tc.name: NodeRenderStatusMonitorTestNg010
+ * @tc.desc: Test UnRegisterNodeRenderStatusListener with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg010, testing::ext::TestSize.Level1)
+{
+    ASSERT_NE(monitor_, nullptr);
+    auto sizeBefore = monitor_->nodeRenderStatusListeners_.size();
+    monitor_->UnRegisterNodeRenderStatusListener(nullptr, 0);
+    EXPECT_EQ(monitor_->nodeRenderStatusListeners_.size(), sizeBefore);
+}
+
+/**
+ * @tc.name: NodeRenderStatusMonitorTestNg011
+ * @tc.desc: Test UnRegisterNodeRenderStatusListener with non-existent frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg011, testing::ext::TestSize.Level1)
+{
+    ASSERT_NE(monitor_, nullptr);
+    auto child = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(child, nullptr);
+    auto sizeBefore = monitor_->nodeRenderStatusListeners_.size();
+    monitor_->UnRegisterNodeRenderStatusListener(AceType::RawPtr(child), 0);
+    EXPECT_EQ(monitor_->nodeRenderStatusListeners_.size(), sizeBefore);
+}
+
+/**
+ * @tc.name: NodeRenderStatusMonitorTestNg012
+ * @tc.desc: Test NotifyFrameNodeRelease with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg012, testing::ext::TestSize.Level1)
+{
+    ASSERT_NE(monitor_, nullptr);
+    auto sizeBefore = monitor_->nodeRenderStatusListeners_.size();
+    monitor_->NotifyFrameNodeRelease(nullptr);
+    EXPECT_EQ(monitor_->nodeRenderStatusListeners_.size(), sizeBefore);
+}
+
+/**
+ * @tc.name: NodeRenderStatusMonitorTestNg013
+ * @tc.desc: Test NotifyFrameNodeRelease with non-existent frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg013, testing::ext::TestSize.Level1)
+{
+    ASSERT_NE(monitor_, nullptr);
+    auto child = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(child, nullptr);
+    auto sizeBefore = monitor_->nodeRenderStatusListeners_.size();
+    monitor_->NotifyFrameNodeRelease(AceType::RawPtr(child));
+    EXPECT_EQ(monitor_->nodeRenderStatusListeners_.size(), sizeBefore);
+}
+
+/**
+ * @tc.name: NodeRenderStatusMonitorTestNg014
+ * @tc.desc: Test IsNodeRenderOut with null node
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg014, testing::ext::TestSize.Level1)
+{
+    ASSERT_NE(monitor_, nullptr);
+    auto result = monitor_->IsNodeRenderOut(nullptr);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: NodeRenderStatusMonitorTestNg015
+ * @tc.desc: Test GetNodeCurrentRenderState with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg015, testing::ext::TestSize.Level1)
+{
+    ASSERT_NE(monitor_, nullptr);
+    auto state = monitor_->GetNodeCurrentRenderState(nullptr);
+    EXPECT_EQ(state, NodeRenderState::ABOUT_TO_RENDER_OUT);
+}
+
+/**
+ * @tc.name: NodeRenderStatusMonitorTestNg016
+ * @tc.desc: Test WalkThroughAncestorForStateListener with null listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg016, testing::ext::TestSize.Level1)
+{
+    ASSERT_NE(monitor_, nullptr);
+    auto child = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(child, nullptr);
+    child->layoutProperty_->UpdateVisibility(OHOS::Ace::VisibleType::VISIBLE);
+    child->SetActive(true);
+    child->AttachToMainTree(true);
+    
+    auto func = [](FrameNode* frameNode, NodeRenderState state, RenderMonitorReason reason) {};
+    monitor_->RegisterNodeRenderStatusListener(AceType::RawPtr(child), func, MonitorSourceType::OBSERVER);
+    
+    child->layoutProperty_->UpdateVisibility(OHOS::Ace::VisibleType::INVISIBLE);
+    monitor_->WalkThroughAncestorForStateListener();
+    
+    auto sizeAfter = monitor_->nodeRenderStatusListeners_.size();
+    EXPECT_GT(sizeAfter, 0);
+}
 } // namespace OHOS::Ace::NG
