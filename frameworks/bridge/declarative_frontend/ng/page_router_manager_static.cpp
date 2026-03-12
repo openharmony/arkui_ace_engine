@@ -94,7 +94,6 @@ void RegisterPageCallback(const RefPtr<FrameNode>& frameNode, void* jsViewNode)
 #else
     jsNode->MountToParent(curPageNode);
 #endif
-    curPageNode->MarkDirtyNode();
 }
 
 void ExitToDesktop()
