@@ -1821,4 +1821,169 @@ HWTEST_F(TextFieldPatternFuncTestThree, SetThemeAttr002, TestSize.Level1)
     ASSERT_NE(pattern_->GetHost(), nullptr);
 }
 
+/**
+ * @tc.name: UpdatePropertyImplPlaceholderFontFamily001
+ * @tc.desc: Test UpdatePropertyImpl with placeholderFontFamily property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestThree, UpdatePropertyImplPlaceholderFontFamily001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for placeholderFontFamily
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    std::vector<std::string> fontFamilies = {"Arial", "SanSerif"};
+    value->SetValue(fontFamilies);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with placeholderFontFamily key
+     * @tc.expected: Placeholder font family should be updated
+     */
+    pattern_->UpdatePropertyImpl("placeholderFontFamily", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplPaddingTop001
+ * @tc.desc: Test UpdatePropertyImpl with paddingTop property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestThree, UpdatePropertyImplPaddingTop001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for paddingTop
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    CalcDimension padding(10.0, DimensionUnit::VP);
+    value->SetValue(padding);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with paddingTop key
+     * @tc.expected: Padding top should be updated
+     */
+    pattern_->UpdatePropertyImpl("paddingTop", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplPaddingBottom001
+ * @tc.desc: Test UpdatePropertyImpl with paddingBottom property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestThree, UpdatePropertyImplPaddingBottom001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for paddingBottom
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    CalcDimension padding(10.0, DimensionUnit::VP);
+    value->SetValue(padding);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with paddingBottom key
+     * @tc.expected: Padding bottom should be updated
+     */
+    pattern_->UpdatePropertyImpl("paddingBottom", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplPaddingLeft001
+ * @tc.desc: Test UpdatePropertyImpl with paddingLeft property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestThree, UpdatePropertyImplPaddingLeft001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for paddingLeft
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    CalcDimension padding(10.0, DimensionUnit::VP);
+    value->SetValue(padding);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with paddingLeft key
+     * @tc.expected: Padding left should be updated
+     */
+    pattern_->UpdatePropertyImpl("paddingLeft", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplPaddingRight001
+ * @tc.desc: Test UpdatePropertyImpl with paddingRight property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestThree, UpdatePropertyImplPaddingRight001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for paddingRight
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    CalcDimension padding(10.0, DimensionUnit::VP);
+    value->SetValue(padding);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with paddingRight key
+     * @tc.expected: Padding right should be updated
+     */
+    pattern_->UpdatePropertyImpl("paddingRight", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplMarginTop001
+ * @tc.desc: Test UpdatePropertyImpl with marginTop property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestThree, UpdatePropertyImplMarginTop001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for marginTop
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    CalcDimension margin(10.0, DimensionUnit::VP);
+    value->SetValue(margin);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with marginTop key
+     * @tc.expected: Margin top should be updated
+     */
+    pattern_->UpdatePropertyImpl("marginTop", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+}
 } // namespace OHOS::Ace::NG

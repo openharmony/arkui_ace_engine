@@ -1509,4 +1509,56 @@ HWTEST_F(TextFieldPatternFuncTest, GetSelectAreaFromRectsWithTransform, TestSize
     EXPECT_TRUE(result.Right() <= pattern->contentRect_.Right());
     EXPECT_TRUE(result.Bottom() <= pattern->contentRect_.Bottom());
 }
+
+/**
+ * @tc.name: UpdatePropertyImplScrollBarColor001
+ * @tc.desc: Test UpdatePropertyImpl with scrollBarColor property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, UpdatePropertyImplScrollBarColor001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for scrollBarColor
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    Color scrollBarColor = Color(0xFF0000FF);
+    value->SetValue(scrollBarColor);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with scrollBarColor key
+     * @tc.expected: Scroll bar color should be updated
+     */
+    pattern_->UpdatePropertyImpl("scrollBarColor", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplStrokeColor001
+ * @tc.desc: Test UpdatePropertyImpl with strokeColor property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, UpdatePropertyImplStrokeColor001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for strokeColor
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    Color strokeColor = Color(0xFFFF00FF);
+    value->SetValue(strokeColor);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with strokeColor key
+     * @tc.expected: Stroke color should be updated
+     */
+    pattern_->UpdatePropertyImpl("strokeColor", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
 } // namespace OHOS::Ace::NG

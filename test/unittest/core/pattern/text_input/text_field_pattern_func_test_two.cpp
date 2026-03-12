@@ -1470,4 +1470,530 @@ HWTEST_F(TextFieldPatternFuncTestTwo, TextPatternFunc077, TestSize.Level1)
     textFieldManager->TriggerCustomKeyboardAvoid();
     EXPECT_EQ(keyboardScd->GetPattern<KeyboardPattern>()->safeHeight_, 0);
 }
+
+/**
+ * @tc.name: UpdatePropertyImplMarginBottom001
+ * @tc.desc: Test UpdatePropertyImpl with marginBottom property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplMarginBottom001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for marginBottom
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    CalcDimension margin(10.0, DimensionUnit::VP);
+    value->SetValue(margin);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with marginBottom key
+     * @tc.expected: Margin bottom should be updated
+     */
+    pattern_->UpdatePropertyImpl("marginBottom", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplMarginLeft001
+ * @tc.desc: Test UpdatePropertyImpl with marginLeft property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplMarginLeft001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for marginLeft
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    CalcDimension margin(10.0, DimensionUnit::VP);
+    value->SetValue(margin);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with marginLeft key
+     * @tc.expected: Margin left should be updated
+     */
+    pattern_->UpdatePropertyImpl("marginLeft", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplMarginRight001
+ * @tc.desc: Test UpdatePropertyImpl with marginRight property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplMarginRight001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for marginRight
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    CalcDimension margin(10.0, DimensionUnit::VP);
+    value->SetValue(margin);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with marginRight key
+     * @tc.expected: Margin right should be updated
+     */
+    pattern_->UpdatePropertyImpl("marginRight", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplFontWeight001
+ * @tc.desc: Test UpdatePropertyImpl with fontWeight property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplFontWeight001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for fontWeight
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    std::string fontWeight = "Bold";
+    value->SetValue(fontWeight);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with fontWeight key
+     * @tc.expected: Font weight should be updated
+     */
+    pattern_->UpdatePropertyImpl("fontWeight", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplFontColor001
+ * @tc.desc: Test UpdatePropertyImpl with fontColor property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplFontColor001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for fontColor
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    Color fontColor = Color(0xFF0000FF);
+    value->SetValue(fontColor);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with fontColor key
+     * @tc.expected: Font color should be updated
+     */
+    pattern_->UpdatePropertyImpl("fontColor", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplFontFamily001
+ * @tc.desc: Test UpdatePropertyImpl with fontFamily property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplFontFamily001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for fontFamily
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    std::vector<std::string> fontFamilies = {"Arial", "SanSerif"};
+    value->SetValue(fontFamilies);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with fontFamily key
+     * @tc.expected: Font family should be updated
+     */
+    pattern_->UpdatePropertyImpl("fontFamily", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplErrorString001
+ * @tc.desc: Test UpdatePropertyImpl with errorString property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplErrorString001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for errorString
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    std::u16string errorText = u"Input error";
+    value->SetValue(errorText);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with errorString key
+     * @tc.expected: Error text should be updated and show error text flag set to true
+     */
+    pattern_->UpdatePropertyImpl("errorString", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->GetShowErrorTextValue(false));
+}
+
+/**
+ * @tc.name: UpdatePropertyImplOnIconSrc001
+ * @tc.desc: Test UpdatePropertyImpl with onIconSrc property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplOnIconSrc001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for onIconSrc
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    std::string iconSrc = "icon_show.png";
+    value->SetValue(iconSrc);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with onIconSrc key
+     * @tc.expected: Show password source info should be updated
+     */
+    pattern_->UpdatePropertyImpl("onIconSrc", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplOffIconSrc001
+ * @tc.desc: Test UpdatePropertyImpl with offIconSrc property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplOffIconSrc001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for offIconSrc
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    std::string iconSrc = "icon_hide.png";
+    value->SetValue(iconSrc);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with offIconSrc key
+     * @tc.expected: Hide password source info should be updated
+     */
+    pattern_->UpdatePropertyImpl("offIconSrc", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplInputFilter001
+ * @tc.desc: Test UpdatePropertyImpl with inputFilter property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplInputFilter001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for inputFilter
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    std::string filter = "[0-9]*";
+    value->SetValue(filter);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with inputFilter key
+     * @tc.expected: Input filter should be updated and filter initialize text called
+     */
+    pattern_->UpdatePropertyImpl("inputFilter", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplUnderlineColorTyping001
+ * @tc.desc: Test UpdatePropertyImpl with underlineColorTyping property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplUnderlineColorTyping001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for underlineColorTyping
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    Color underlineColor = Color(0xFFFF0000);
+    value->SetValue(underlineColor);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with underlineColorTyping key
+     * @tc.expected: Typing underline color should be updated
+     */
+    pattern_->UpdatePropertyImpl("underlineColorTyping", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplUnderlineColorNormal001
+ * @tc.desc: Test UpdatePropertyImpl with underlineColorNormal property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplUnderlineColorNormal001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for underlineColorNormal
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    Color underlineColor = Color(0xFF00FF00);
+    value->SetValue(underlineColor);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with underlineColorNormal key
+     * @tc.expected: Normal underline color should be updated
+     */
+    pattern_->UpdatePropertyImpl("underlineColorNormal", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplUnderlineColorError001
+ * @tc.desc: Test UpdatePropertyImpl with underlineColorError property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplUnderlineColorError001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for underlineColorError
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    Color underlineColor = Color(0xFFFF0000);
+    value->SetValue(underlineColor);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with underlineColorError key
+     * @tc.expected: Error underline color should be updated
+     */
+    pattern_->UpdatePropertyImpl("underlineColorError", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplUnderlineColorDisable001
+ * @tc.desc: Test UpdatePropertyImpl with underlineColorDisable property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplUnderlineColorDisable001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for underlineColorDisable
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    Color underlineColor = Color(0xFF808080);
+    value->SetValue(underlineColor);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with underlineColorDisable key
+     * @tc.expected: Disable underline color should be updated
+     */
+    pattern_->UpdatePropertyImpl("underlineColorDisable", value);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplTextIndent001
+ * @tc.desc: Test UpdatePropertyImpl with textIndent property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplTextIndent001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for textIndent
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    CalcDimension textIndent(20.0, DimensionUnit::VP);
+    value->SetValue(textIndent);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with textIndent key
+     * @tc.expected: Text indent should be updated
+     */
+    pattern_->UpdatePropertyImpl("textIndent", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplCancelButtonIconColorDefault001
+ * @tc.desc: Test UpdatePropertyImpl with cancelButtonIconColorDefault property in dark mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplCancelButtonIconColorDefault001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern with cancel button
+     */
+    CreateTextField("", "", [](TextFieldModelNG& model) { model.SetIsShowCancelButton(true); });
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for cancelButtonIconColorDefault
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    value->SetValue(Color::WHITE);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with cancelButtonIconColorDefault key
+     * @tc.expected: Icon color should be updated based on dark mode theme
+     */
+    pattern_->UpdatePropertyImpl("cancelButtonIconColorDefault", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplMinFontScale001
+ * @tc.desc: Test UpdatePropertyImpl with minFontScale property (valid value)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplMinFontScale001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for minFontScale with valid value
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    float minFontScale = 0.5f;
+    value->SetValue(minFontScale);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with minFontScale key
+     * @tc.expected: Min font scale should be updated to 0.5
+     */
+    pattern_->UpdatePropertyImpl("minFontScale", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplMinFontScale002
+ * @tc.desc: Test UpdatePropertyImpl with minFontScale property (value <= 0)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplMinFontScale002, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for minFontScale with invalid value
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    float minFontScale = -0.5f;
+    value->SetValue(minFontScale);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with minFontScale key
+     * @tc.expected: Min font scale should be clamped to 0.0
+     */
+    pattern_->UpdatePropertyImpl("minFontScale", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplMaxFontScale001
+ * @tc.desc: Test UpdatePropertyImpl with maxFontScale property (valid value)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplMaxFontScale001, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for maxFontScale with valid value
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    float maxFontScale = 1.5f;
+    value->SetValue(maxFontScale);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with maxFontScale key
+     * @tc.expected: Max font scale should be updated to 1.5
+     */
+    pattern_->UpdatePropertyImpl("maxFontScale", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyImplMaxFontScale002
+ * @tc.desc: Test UpdatePropertyImpl with maxFontScale property (value <= 1)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTestTwo, UpdatePropertyImplMaxFontScale002, TestSize.Level1)
+{    /**
+     * @tc.steps: step1. Create TextFieldPattern
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    /**
+     * @tc.steps: step2. Create property value for maxFontScale with value <= 1
+     */
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    float maxFontScale = 0.5f;
+    value->SetValue(maxFontScale);
+    /**
+     * @tc.steps: step3. Call UpdatePropertyImpl with maxFontScale key
+     * @tc.expected: Max font scale should be clamped to 1.0
+     */
+    pattern_->UpdatePropertyImpl("maxFontScale", value);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
 } // namespace OHOS::Ace
