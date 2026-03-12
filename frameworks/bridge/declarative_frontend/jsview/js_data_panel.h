@@ -40,6 +40,9 @@ public:
         OHOS::Ace::NG::DataPanelShadow& shadow);
 
 private:
+    static void ParseGradientColor(
+        NG::Gradient& gradient, RefPtr<ResourceObject>& colorResObj, Color& color, int32_t& indx);
+    static void ParseGradientOffset(NG::Gradient& gradient, RefPtr<ResourceObject>& offsetResObj, int32_t& indx);
     static bool ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient);
     static bool ConvertResourceColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient);
     static void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors);

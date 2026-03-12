@@ -178,11 +178,19 @@ void JSDataPanel::ValueColors(const JSCallbackInfo& info)
     DataPanelModel::GetInstance()->SetValueColors(valueColors);
     if (SystemProperties::ConfigChangePerform()) {
         DataPanelModel::GetInstance()->SetValueColorsSetByUser(valueColorsSetByUser);
+        if (!valueColorsSetByUser) {
+            DataPanelModel::GetInstance()->CreateWithResourceObj(
+                OHOS::Ace::DataPanelResourceType::VALUE_COLORS, nullptr);
+        }
     }
 }
 
 void JSDataPanel::TrackBackground(const JSCallbackInfo& info)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        DataPanelModel::GetInstance()->CreateWithResourceObj(
+            OHOS::Ace::DataPanelResourceType::TRACK_BACKGROUND_COLOR, nullptr);
+    }
     if (info.Length() < 1) {
         return;
     }
@@ -190,10 +198,11 @@ void JSDataPanel::TrackBackground(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         bool state = ParseJsColor(info[0], color, resObj);
-        DataPanelModel::GetInstance()->CreateWithResourceObj(
-            OHOS::Ace::DataPanelResourceType::TRACK_BACKGROUND_COLOR, resObj);
+        DataPanelModel::GetInstance()->SetTrackBackgroundSetByUser(state);
         if (state) {
             DataPanelModel::GetInstance()->SetTrackBackground(color);
+            DataPanelModel::GetInstance()->CreateWithResourceObj(
+                OHOS::Ace::DataPanelResourceType::TRACK_BACKGROUND_COLOR, resObj);
         } else {
             DataPanelModel::GetInstance()->ResetTrackBackground();
         }
@@ -208,6 +217,9 @@ void JSDataPanel::TrackBackground(const JSCallbackInfo& info)
 
 void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        DataPanelModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::DataPanelResourceType::STROKE_WIDTH, nullptr);
+    }
     if (info.Length() < 1) {
         return;
     }
@@ -216,9 +228,11 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     if (SystemProperties::ConfigChangePerform()) {
         bool state = ParseJsDimensionVp(info[0], strokeWidthDimension, resObj);
-        DataPanelModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::DataPanelResourceType::STROKE_WIDTH, resObj);
+        DataPanelModel::GetInstance()->SetStrokeWidthSetByUser(state);
         if (state) {
             DataPanelModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+            DataPanelModel::GetInstance()->CreateWithResourceObj(
+                OHOS::Ace::DataPanelResourceType::STROKE_WIDTH, resObj);
         } else {
             DataPanelModel::GetInstance()->ResetStrokeWidth();
         }
@@ -305,10 +319,33 @@ bool JSDataPanel::ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::
     if (colorLength == 0) {
         return false;
     }
-    for (size_t colorIndex = 0; colorIndex < colorLength; ++colorIndex) {
-        OHOS::Ace::NG::GradientColor gradientColor;
-        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
-        gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+    auto jsGradient = jsLinearGradient->GetGradient();
+    auto jsGradientResObj = jsLinearGradient->GetGradientResObj();
+
+    for (size_t i = 0; i < colorLength; i++) {
+        NG::GradientColor gradientColor;
+        Color color = jsGradient.at(i).first;
+        CalcDimension offset = jsGradient.at(i).second;
+        if (SystemProperties::ConfigChangePerform()) {
+            int32_t indx = static_cast<int32_t>(i);
+            if (jsGradientResObj.at(i).first) {
+                ResourceParseUtils::ParseResColor(jsGradientResObj.at(i).first, color);
+            }
+            ParseGradientColor(gradient, jsGradientResObj.at(i).first, color, indx);
+            if (jsGradientResObj.at(i).second) {
+                ResourceParseUtils::ParseResDimensionVp(jsGradientResObj.at(i).second, offset);
+                ParseGradientOffset(gradient, jsGradientResObj.at(i).second, indx);
+            }
+        }
+        if (Negative(offset.ConvertToVp())) {
+            offset = Dimension(0.0, DimensionUnit::VP);
+        }
+
+        if (GreatNotEqual(offset.ConvertToVp(), 1.0)) {
+            offset = Dimension(1.0, DimensionUnit::VP);
+        }
+        gradientColor.SetLinearColor(LinearColor(color));
+        gradientColor.SetDimension(offset);
         gradient.AddColor(gradientColor);
     }
     return true;
@@ -458,5 +495,48 @@ void JSDataPanel::HandleShadowOffsetY(const JSRef<JSVal>& jsOffsetY, double& off
         };
         shadow.AddResource("shadow.offsetY", resY, std::move(updateFuncY));
     }
+}
+
+void JSDataPanel::ParseGradientColor(
+    NG::Gradient& gradient, RefPtr<ResourceObject>& colorResObj, Color& color, int32_t& indx)
+{
+    CompleteResourceObjectFromColor(colorResObj, color, true);
+    auto&& updateFunc = [indx](const RefPtr<ResourceObject>& colorResObj, NG::Gradient& gradient) {
+        std::vector<NG::GradientColor> colorVector = gradient.GetColors();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
+        gradient.ClearColors();
+        for (int32_t index = 0; index < colorLength; index++) {
+            NG::GradientColor gradColor = colorVector[index];
+            if (index == indx) {
+                Color color;
+                ResourceParseUtils::ParseResColor(colorResObj, color);
+                gradColor.SetLinearColor(LinearColor(color));
+            }
+            gradient.AddColor(gradColor);
+        }
+    };
+    std::string key = "LinearGradient.gradient.color" + std::to_string(indx);
+    gradient.AddResource(key, colorResObj, std::move(updateFunc));
+}
+
+void JSDataPanel::ParseGradientOffset(NG::Gradient& gradient, RefPtr<ResourceObject>& offsetResObj, int32_t& indx)
+{
+    CHECK_NULL_VOID(offsetResObj);
+    auto&& updateFunc = [indx](const RefPtr<ResourceObject>& offsetResObj, NG::Gradient& gradient) {
+        std::vector<NG::GradientColor> colorVector = gradient.GetColors();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
+        gradient.ClearColors();
+        for (int32_t index = 0; index < colorLength; index++) {
+            NG::GradientColor gradColor = colorVector[index];
+            if (index == indx) {
+                CalcDimension offset;
+                ResourceParseUtils::ParseResDimensionVp(offsetResObj, offset);
+                gradColor.SetDimension(offset);
+            }
+            gradient.AddColor(gradColor);
+        }
+    };
+    std::string key = "LinearGradient.gradient.offset" + std::to_string(indx);
+    gradient.AddResource(key, offsetResObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::Framework
