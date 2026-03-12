@@ -1578,6 +1578,10 @@ class LazyArkRatingComponent extends ArkComponent {
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }
+  initialize(value) {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
   stars(value) {
     this.lazyComponent.stars(value);
     return this;
@@ -2268,11 +2272,7 @@ class LazyArkSliderComponent extends ArkComponent {
     return 0;
   }
   initialize(value) {
-    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
-      this.lazyComponent.initialize(value[0]);
-    } else {
-      this.lazyComponent.initialize(undefined);
-    }
+    this.lazyComponent.initialize(value);
     return this;
   }
   blockColor(value) {
