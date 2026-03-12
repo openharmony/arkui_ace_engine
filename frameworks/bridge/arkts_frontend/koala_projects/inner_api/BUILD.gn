@@ -26,6 +26,7 @@ ohos_copy("copy_arkui_ets") {
   ]
   sources += [
     "./arkui/base/UIContextUtil.d.ets",
+    "./arkui/base/ArkUIObjectFinalizationRegisterProxy.d.ets",
   ]
   sources += [
     "./arkui/component.d.ets",
