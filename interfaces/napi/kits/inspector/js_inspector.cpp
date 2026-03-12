@@ -37,6 +37,28 @@ static ComponentObserver* GetObserver(napi_env env, napi_value thisVar)
     return observer;
 }
 
+static size_t ParseDrawChildrenArgs(napi_env& env, napi_callback_info& info, napi_value& thisVar, napi_value& cb)
+{
+    const size_t argNum = 1;
+    size_t argc = argNum;
+    napi_value argv[argNum] = { 0 };
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
+
+    if (argc != 1) {
+        return argc;
+    }
+
+    napi_valuetype napiType;
+    NAPI_CALL_BASE(env, napi_typeof(env, argv[0], &napiType), 0);
+    if (napiType == napi_undefined) {
+        return 0;
+    }
+    NAPI_ASSERT_BASE(env, napiType == napi_function, "type mismatch for parameter 1", 0);
+    cb = argv[0];
+    return argc;
+}
+
 static size_t ParseLayoutChildrenArgs(napi_env& env, napi_callback_info& info, napi_value& thisVar, napi_value& cb)
 {
     const size_t argNum = 1;
@@ -125,6 +147,34 @@ void ComponentObserver::callUserFunction(napi_env env, std::list<napi_ref>& cbLi
     napi_close_handle_scope(env, scope);
 }
 
+void ComponentObserver::callUserFunction(napi_env env, std::list<napi_ref>& cbList, napi_value arg)
+{
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    if (scope == nullptr) {
+        return;
+    }
+
+    napi_value arg0 = arg;
+    if (arg0 == nullptr) {
+        return;
+    }
+
+    std::list<napi_value> cbs;
+    for (auto& cbRef : cbList) {
+        napi_value cb = nullptr;
+        if (napi_get_reference_value(env, cbRef, &cb) != napi_ok || cb == nullptr) {
+            continue;
+        }
+        cbs.emplace_back(cb);
+    }
+    for (auto& cb : cbs) {
+        napi_value result = nullptr;
+        napi_call_function(env, nullptr, cb, 1, &arg0, &result);
+    }
+    napi_close_handle_scope(env, scope);
+}
+
 std::list<napi_ref>::iterator ComponentObserver::FindCbList(napi_env env, napi_value cb, CalloutType calloutType)
 {
     if (calloutType == CalloutType::LAYOUTCALLOUT) {
@@ -152,6 +202,15 @@ std::list<napi_ref>::iterator ComponentObserver::FindCbList(napi_env env, napi_v
                 napi_strict_equals(env, refItem, cb, &result);
                 return result;
             });
+    } else if (calloutType == CalloutType::DRAWCHILDRENWITHPARAMETERCALLOUT) {
+        return std::find_if(cbDrawChildrenWithParameterList_.begin(),
+            cbDrawChildrenWithParameterList_.end(), [env, cb](const napi_ref& item) -> bool {
+            bool result = false;
+            napi_value refItem;
+            napi_get_reference_value(env, item, &refItem);
+            napi_strict_equals(env, refItem, cb, &result);
+            return result;
+        });
     } else {
         return std::find_if(cbDrawChildrenList_.begin(),
             cbDrawChildrenList_.end(), [env, cb](const napi_ref& item) -> bool {
@@ -204,6 +263,24 @@ void ComponentObserver::DeleteCallbackFromList(
         cbList.clear();
     } else {
         NAPI_ASSERT_RETURN_VOID(env, (argc == PARA_COUNT && cb != nullptr), "Invalid arguments");
+        auto iter = FindCbList(env, cb, calloutType);
+        if (iter != cbList.end()) {
+            napi_delete_reference(env, *iter);
+            cbList.erase(iter);
+        }
+    }
+}
+
+void ComponentObserver::DeleteOnDrawChildrenCallbackFromList(
+    size_t argc, std::list<napi_ref>& cbList, CalloutType calloutType, napi_value cb, napi_env env)
+{
+    if (argc == 0) {
+        for (auto& item : cbList) {
+            napi_delete_reference(env, item);
+        }
+        cbList.clear();
+    } else {
+        NAPI_ASSERT_RETURN_VOID(env, (argc == 1 && cb != nullptr), "Invalid arguments");
         auto iter = FindCbList(env, cb, calloutType);
         if (iter != cbList.end()) {
             napi_delete_reference(env, *iter);
@@ -284,6 +361,66 @@ void ComponentObserver::FunctionOffLayoutChildren(napi_env& env, napi_value resu
             argc, observer->cbLayoutChildrenList_, CalloutType::LAYOUTCHILDRENCALLOUT, cb, env);
         if (observer->cbLayoutChildrenList_.empty()) {
             observer->UpdateDrawLayoutChildObserver(true, false);
+        }
+        napi_close_handle_scope(env, scope);
+        return nullptr;
+    };
+
+    napi_create_function(env, funName, NAPI_AUTO_LENGTH, Off, nullptr, &funcValue);
+    napi_set_named_property(env, result, funName, funcValue);
+}
+
+void ComponentObserver::FunctionOnDrawChildren(napi_env& env, napi_value result)
+{
+    const char* funName = "onDrawChildren";
+    napi_value funcValue = nullptr;
+    auto On = [](napi_env env, napi_callback_info info) -> napi_value {
+        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
+        if (!jsEngine) {
+            return nullptr;
+        }
+
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        CHECK_NULL_RETURN(scope, nullptr);
+        napi_value thisVar = nullptr;
+        napi_value cb = nullptr;
+        size_t argc = ParseDrawChildrenArgs(env, info, thisVar, cb);
+        NAPI_ASSERT(env, (argc == 1 && thisVar != nullptr && cb != nullptr), "Invalid arguments");
+        ComponentObserver* observer = GetObserver(env, thisVar);
+        if (!observer) {
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
+        observer->AddCallbackToList(
+            cb, observer->cbDrawChildrenWithParameterList_, CalloutType::DRAWCHILDRENWITHPARAMETERCALLOUT, env, scope);
+        observer->UpdateDrawLayoutChildObserver(false, false);
+        return nullptr;
+    };
+    napi_create_function(env, funName, NAPI_AUTO_LENGTH, On, nullptr, &funcValue);
+    napi_set_named_property(env, result, funName, funcValue);
+}
+
+void ComponentObserver::FunctionOffDrawChildren(napi_env& env, napi_value result)
+{
+    const char* funName = "offDrawChildren";
+    napi_value funcValue = nullptr;
+    auto Off = [](napi_env env, napi_callback_info info) -> napi_value {
+        napi_value thisVar = nullptr;
+        napi_value cb = nullptr;
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        CHECK_NULL_RETURN(scope, nullptr);
+        size_t argc = ParseDrawChildrenArgs(env, info, thisVar, cb);
+        ComponentObserver* observer = GetObserver(env, thisVar);
+        if (!observer) {
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
+        observer->DeleteOnDrawChildrenCallbackFromList(argc, observer->cbDrawChildrenWithParameterList_,
+            CalloutType::DRAWCHILDRENWITHPARAMETERCALLOUT, cb, env);
+        if (observer->cbDrawChildrenWithParameterList_.empty()) {
+            observer->UpdateDrawLayoutChildObserver(false, true);
         }
         napi_close_handle_scope(env, scope);
         return nullptr;
@@ -395,6 +532,8 @@ void ComponentObserver::NapiSerializer(napi_env& env, napi_value& result)
 
     FunctionOn(env, result, "on");
     FunctionOff(env, result, "off");
+    FunctionOnDrawChildren(env, result);
+    FunctionOffDrawChildren(env, result);
     FunctionOnLayoutChildren(env, result);
     FunctionOffLayoutChildren(env, result);
     napi_close_handle_scope(env, scope);
@@ -411,12 +550,16 @@ void ComponentObserver::Destroy(napi_env env)
     for (auto& drawChildrenitem : cbDrawChildrenList_) {
         napi_delete_reference(env, drawChildrenitem);
     }
+    for (auto& drawChildrenWithParameteritem : cbDrawChildrenWithParameterList_) {
+        napi_delete_reference(env, drawChildrenWithParameteritem);
+    }
     for (auto& layoutChildrenitem : cbLayoutChildrenList_) {
         napi_delete_reference(env, layoutChildrenitem);
     }
     cbLayoutList_.clear();
     cbDrawList_.clear();
     cbDrawChildrenList_.clear();
+    cbDrawChildrenWithParameterList_.clear();
     cbLayoutChildrenList_.clear();
     auto jsEngine = weakEngine_.Upgrade();
     if (!jsEngine) {
@@ -425,6 +568,7 @@ void ComponentObserver::Destroy(napi_env env)
     jsEngine->UnregisterLayoutInspectorCallback(layoutEvent_, componentId_);
     jsEngine->UnregisterDrawInspectorCallback(drawEvent_, componentId_);
     jsEngine->UnregisterDrawChildrenInspectorCallback(drawChildrenEvent_, componentId_);
+    jsEngine->UnregisterDrawChildrenWithParameterInspectorCallback(drawChildrenWithParameterEvent_, componentId_);
     jsEngine->UnregisterLayoutChildrenInspectorCallback(layoutChildrenEvent_, componentId_);
  
     jsEngine->UnregisterLayoutInspectorCallback(layoutEvent_, uniqueId_);
@@ -513,6 +657,21 @@ static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info inf
     auto drawChildrenCallbackCounter = [observer]() -> bool { return observer->cbDrawChildrenList_.empty(); };
     observer->drawChildrenEvent_ =
         AceType::MakeRefPtr<InspectorEvent>(std::move(drawChildrenCallback), std::move(drawChildrenCallbackCounter));
+    auto drawChildrenWithParameterCallback = [observer, env](std::vector<int32_t> childIds) {
+        napi_value childIdsArray = nullptr;
+        napi_create_array_with_length(env, childIds.size(), &childIdsArray);
+        for (size_t index = 0; index < childIds.size(); ++index) {
+            napi_value element = nullptr;
+            napi_create_int32(env, childIds[index], &element);
+            napi_set_element(env, childIdsArray, index, element);
+        }
+        observer->callUserFunction(env, observer->cbDrawChildrenWithParameterList_, childIdsArray);
+    };
+    auto drawChildrenWithParameterCallbackCounter =
+        [observer]() -> bool { return observer->cbDrawChildrenWithParameterList_.empty(); };
+    observer->drawChildrenWithParameterEvent_ =
+        AceType::MakeRefPtr<InspectorEvent>(std::move(drawChildrenWithParameterCallback),
+        std::move(drawChildrenWithParameterCallbackCounter));
     auto layoutChildrenCallback = [observer, env]() {
         observer->callUserFunction(env, observer->cbLayoutChildrenList_);
     };
@@ -523,6 +682,8 @@ static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info inf
         jsEngine->RegisterLayoutInspectorCallback(observer->layoutEvent_, observer->componentId_);
         jsEngine->RegisterDrawInspectorCallback(observer->drawEvent_, observer->componentId_);
         jsEngine->RegisterDrawChildrenInspectorCallback(observer->drawChildrenEvent_, observer->componentId_);
+        jsEngine->RegisterDrawChildrenWithParameterInspectorCallback(observer->drawChildrenWithParameterEvent_,
+            observer->componentId_);
         jsEngine->RegisterLayoutChildrenInspectorCallback(observer->layoutChildrenEvent_, observer->componentId_);
     } else {
         jsEngine->RegisterLayoutInspectorCallback(observer->layoutEvent_, observer->uniqueId_);

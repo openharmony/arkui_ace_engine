@@ -141,6 +141,25 @@ std::optional<float> ParseDimensionToPx(
     StringExpression::ConvertDal2Rpn(calcLengthOfDimension.CalcValue(), calcRpnexp);
     return ConvertToPx(calcLengthOfDimension, scaleProperty, percentReference, calcRpnexp);
 }
+
+void UpdateNeedRenderInfoAfterRequestFrame(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_VOID(pipeline);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    if (frameNode->GetInspectorId().has_value() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
+        pipeline->SetNeedRenderNode(WeakPtr<FrameNode>(frameNode));
+    }
+    if (ACE_UNLIKELY(frameNode->IsObservedByDrawChildren())) {
+        auto drawChildrenParent = frameNode->GetObserverParentForDrawChildren();
+        CHECK_NULL_VOID(drawChildrenParent);
+        auto parentNode = AceType::DynamicCast<FrameNode>(drawChildrenParent);
+        CHECK_NULL_VOID(parentNode);
+        pipeline->SetNeedRenderForDrawChildrenNode(WeakPtr<FrameNode>(parentNode));
+        pipeline->SetOnDrawChildrenInfoMap(drawChildrenParent->GetId(), frameNode->GetId());
+    }
+}
 } // namespace
 
 class FrameNode::FrameProxy final : public RecursiveLock {
@@ -802,18 +821,22 @@ void FrameNode::InitializePatternAndContext()
     renderContext_->SetRequestFrame([weak = WeakClaim(this)](bool isOffScreenNode) {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
+        bool setPendingRequest = true;
         if (frameNode->IsOnMainTree()) {
             auto context = frameNode->GetContext();
             CHECK_NULL_VOID(context);
             context->RequestFrame();
-            return;
+            setPendingRequest = false;
         } else if (isOffScreenNode) {
             auto context = frameNode->GetOffMainTreeNodeContext();
             CHECK_NULL_VOID(context);
             context->RequestFrame();
-            return;
+            setPendingRequest = false;
         }
-        frameNode->hasPendingRequest_ = true;
+        if (setPendingRequest) {
+            frameNode->hasPendingRequest_ = true;
+        }
+        UpdateNeedRenderInfoAfterRequestFrame(frameNode);
     });
     renderContext_->SetHostNode(WeakClaim(this));
     // Initialize FocusHub
@@ -2632,6 +2655,8 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
             auto frameNode = AceType::DynamicCast<FrameNode>(self->GetObserverParentForDrawChildren());
             CHECK_NULL_VOID(frameNode);
             pipeline->SetNeedRenderForDrawChildrenNode(WeakPtr<FrameNode>(frameNode));
+            pipeline->SetOnDrawChildrenInfoMap((self->GetObserverParentForDrawChildren())->GetId(),
+                self->GetId());
         }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {

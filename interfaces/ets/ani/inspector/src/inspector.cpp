@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <ani.h>
+#include <array>
 #include <string>
 #include <unistd.h>
 #include "base/error/error_code.h"
@@ -28,6 +29,7 @@ namespace {
 const char LAYOUT_TYPE[] = "layout";
 const char DRAW_TYPE[] = "draw";
 const char DRAW_CHILDREN_TYPE[] = "drawChildren";
+const char DRAW_CHILDREN_WITH_PARAMETER_TYPE[] = "drawChildrenWithParameter";
 const char LAYOUT_CHILDREN_TYPE[] = "layoutChildren";
 const char ANI_INSPECTOR_NS[] = "@ohos.arkui.inspector.inspector";
 const char ANI_COMPONENT_OBSERVER_CLS[] = "@ohos.arkui.inspector.inspector.ComponentObserver";
@@ -84,6 +86,13 @@ public:
                 env->Reference_StrictEquals(cb, item, &rs);
                 return rs == ANI_TRUE;
             });
+        } else if (DRAW_CHILDREN_WITH_PARAMETER_TYPE == eventType) {
+            return std::find_if(cbDrawChildrenWithParameterList_.begin(), cbDrawChildrenWithParameterList_.end(),
+                [env, cb](const ani_ref& item) -> bool {
+                ani_boolean rs;
+                env->Reference_StrictEquals(cb, item, &rs);
+                return rs == ANI_TRUE;
+            });
         } else if (LAYOUT_CHILDREN_TYPE == eventType) {
             return std::find_if(cbLayoutChildrenList_.begin(), cbLayoutChildrenList_.end(),
                 [env, cb](const ani_ref& item) -> bool {
@@ -132,7 +141,7 @@ public:
         if (fnList.empty()) {
             if (LAYOUT_CHILDREN_TYPE == eventType) {
                 UpdateDrawLayoutChildrenObserver(true, false);
-            } else if (DRAW_CHILDREN_TYPE == eventType) {
+            } else if (DRAW_CHILDREN_TYPE == eventType || DRAW_CHILDREN_WITH_PARAMETER_TYPE == eventType) {
                 UpdateDrawLayoutChildrenObserver(false, true);
             }
             if (!isDelete) {
@@ -147,7 +156,10 @@ public:
                 arkTsFrontend->UnregisterLayoutInspectorCallback(id_);
                 arkTsFrontend->UnregisterLayoutInspectorCallback(uniqueId_);
             } else if (DRAW_CHILDREN_TYPE == eventType) {
-                arkTsFrontend->UnregisterDrawChildrenInspectorCallback(id_);
+                arkTsFrontend->UnregisterDrawChildrenInspectorCallback(drawChildrenEvent_, id_);
+                arkTsFrontend->UnregisterDrawChildrenInspectorCallback(uniqueId_);
+            } else if (DRAW_CHILDREN_WITH_PARAMETER_TYPE == eventType) {
+                arkTsFrontend->UnregisterDrawChildrenInspectorCallback(drawChildrenEventWithParameter_, id_);
                 arkTsFrontend->UnregisterDrawChildrenInspectorCallback(uniqueId_);
             } else if (LAYOUT_CHILDREN_TYPE == eventType) {
                 arkTsFrontend->UnregisterLayoutChildrenInspectorCallback(id_);
@@ -172,16 +184,79 @@ public:
         for (auto& cb : cbList) {
             TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR,
                 "inspector-ani start to call user function for component %{public}s", id_.c_str());
+            if (cb == nullptr) {
+                continue;
+            }
             env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(cb), vec.size(), vec.data(), &fnReturnVal);
         }
     }
-    
+
+    void CallUserFunctionWithParams(ani_vm* vm, std::list<ani_ref>& cbList, const std::vector<int32_t>& params)
+    {
+        ani_env* env = nullptr;
+        ani_status status;
+        if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+            TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani get env failed status %{public}d", status);
+            return;
+        }
+
+        if (params.empty()) {
+            return;
+        }
+
+        // runtime ANI header provides ani_array + Array_New/Array_Set.
+        // Build a std.core.Int[] and pass it as a single argument.
+        constexpr ani_size kAniLocalRefHeadroom = 16;
+        (void)env->EnsureEnoughReferences(static_cast<ani_size>(params.size()) + kAniLocalRefHeadroom);
+        ani_ref undefinedRef = nullptr;
+        env->GetUndefined(&undefinedRef);
+
+        ani_array paramsArray = nullptr;
+        status = env->Array_New(params.size(), undefinedRef, &paramsArray);
+        if (status != ANI_OK || paramsArray == nullptr) {
+            return;
+        }
+
+        ani_class intClass = nullptr;
+        status = env->FindClass("std.core.Int", &intClass);
+        if (status != ANI_OK || intClass == nullptr) {
+            return;
+        }
+
+        ani_method ctor = nullptr;
+        status = env->Class_FindMethod(intClass, "<ctor>", "i:", &ctor);
+        if (status != ANI_OK || ctor == nullptr) {
+            return;
+        }
+
+        for (ani_size index = 0; index < params.size(); ++index) {
+            ani_object intObj = nullptr;
+            ani_int value = static_cast<ani_int>(params[index]);
+            status = env->Object_New(intClass, ctor, &intObj, value);
+            if (status != ANI_OK || intObj == nullptr) {
+                continue;
+            }
+            env->Array_Set(paramsArray, index, static_cast<ani_ref>(intObj));
+        }
+
+        ani_ref argv[] = { static_cast<ani_ref>(paramsArray) };
+        ani_ref fnReturnVal;
+        for (auto& cb : cbList) {
+            if (cb == nullptr) {
+                continue;
+            }
+            env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(cb), 1, argv, &fnReturnVal);
+        }
+    }
+
     std::list<ani_ref>&  GetCbListByType(const std::string& eventType)
     {
         if (LAYOUT_TYPE == eventType) {
             return cbLayoutList_;
         } else if (DRAW_CHILDREN_TYPE == eventType) {
             return cbDrawChildrenList_;
+        } else if (DRAW_CHILDREN_WITH_PARAMETER_TYPE == eventType) {
+            return cbDrawChildrenWithParameterList_;
         } else if (LAYOUT_CHILDREN_TYPE == eventType) {
             return cbLayoutChildrenList_;
         }
@@ -194,6 +269,8 @@ public:
             return layoutEvent_;
         } else if (DRAW_CHILDREN_TYPE == eventType) {
             return drawChildrenEvent_;
+        } else if (DRAW_CHILDREN_WITH_PARAMETER_TYPE == eventType) {
+            return drawChildrenEventWithParameter_;
         } else if (LAYOUT_CHILDREN_TYPE == eventType) {
             return layoutChildrenEvent_;
         }
@@ -206,6 +283,8 @@ public:
             layoutEvent_ = fun;
         } else if (DRAW_CHILDREN_TYPE == eventType) {
             drawChildrenEvent_ = fun;
+        } else if (DRAW_CHILDREN_WITH_PARAMETER_TYPE == eventType) {
+            drawChildrenEventWithParameter_ = fun;
         } else if (LAYOUT_CHILDREN_TYPE == eventType) {
             layoutChildrenEvent_ = fun;
         } else {
@@ -245,10 +324,12 @@ private:
     std::list<ani_ref> cbLayoutList_;
     std::list<ani_ref> cbDrawList_;
     std::list<ani_ref> cbDrawChildrenList_;
+    std::list<ani_ref> cbDrawChildrenWithParameterList_;
     std::list<ani_ref> cbLayoutChildrenList_;
     RefPtr<InspectorEvent> layoutEvent_;
     RefPtr<InspectorEvent> drawEvent_;
     RefPtr<InspectorEvent> drawChildrenEvent_;
+    RefPtr<InspectorEvent> drawChildrenEventWithParameter_;
     RefPtr<InspectorEvent> layoutChildrenEvent_;
 };
 
@@ -259,6 +340,23 @@ static ComponentObserver* Unwrapp(ani_env *env, ani_object object)
         return nullptr;
     }
     return reinterpret_cast<ComponentObserver *>(nativeAddr);
+}
+
+static void ConvertOnDrawChildrenType(ani_env *env, std::string& type, ani_fn_object fnObj)
+{
+    if (type != DRAW_CHILDREN_TYPE) {
+        return;
+    }
+    ani_object fnObjAsObject = reinterpret_cast<ani_object>(fnObj);
+    ani_class fn1Cls = nullptr;
+    if (env->FindClass("std.core.Function1", &fn1Cls) != ANI_OK || fn1Cls == nullptr) {
+        return;
+    }
+    ani_boolean isFn1 = ANI_FALSE;
+    if (env->Object_InstanceOf(fnObjAsObject, fn1Cls, &isFn1) != ANI_OK || isFn1 != ANI_TRUE) {
+        return;
+    }
+    type = DRAW_CHILDREN_WITH_PARAMETER_TYPE;
 }
 
 static void On(ani_env *env, ani_object object, ani_string type, ani_fn_object fnObj)
@@ -275,7 +373,9 @@ static void On(ani_env *env, ani_object object, ani_string type, ani_fn_object f
             typeStr.c_str());
         return;
     }
-
+    // overload the ets interface 'onLayoutChildren' need to save different callbacks,
+    //  so convert and add new key to callback list.
+    ConvertOnDrawChildrenType(env, typeStr, fnObj);
     auto *observer = Unwrapp(env, object);
     if (observer == nullptr) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani context is null.");
@@ -297,7 +397,7 @@ static void Off(ani_env *env, ani_object object, ani_string type, ani_fn_object 
             typeStr.c_str());
         return;
     }
-
+    ConvertOnDrawChildrenType(env, typeStr, fnObj);
     auto *observer = Unwrapp(env, object);
     if (observer == nullptr) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani context is null.");
@@ -530,6 +630,17 @@ static ani_ref CreateComponentObserver(ani_env* env, ani_object id, const char* 
     observer->SetInspectorFuncByType(DRAW_CHILDREN_TYPE,
         AceType::MakeRefPtr<InspectorEvent>(std::move(drawChildrenCallback), std::move(drawChildrenCallbackCounter)));
 
+    auto drawChildrenCallbackWithParams = [observer, vm](std::vector<int32_t> childIds) -> void {
+        observer->CallUserFunctionWithParams(vm,
+            observer->GetCbListByType(DRAW_CHILDREN_WITH_PARAMETER_TYPE), childIds);
+    };
+    auto drawChildrenCallbackCounterWithParams = [observer]() -> bool {
+        return observer->GetCbListByType(DRAW_CHILDREN_WITH_PARAMETER_TYPE).empty();
+    };
+    observer->SetInspectorFuncByType(DRAW_CHILDREN_WITH_PARAMETER_TYPE,
+        AceType::MakeRefPtr<InspectorEvent>(
+            std::move(drawChildrenCallbackWithParams), std::move(drawChildrenCallbackCounterWithParams)));
+
     auto layoutChildrenCallback = [observer, vm]() -> void {
         observer->CallUserFunction(vm, observer->GetCbListByType(LAYOUT_CHILDREN_TYPE));
     };
@@ -547,6 +658,8 @@ static ani_ref CreateComponentObserver(ani_env* env, ani_object id, const char* 
             observer->GetInspectorFuncByType(DRAW_TYPE), observer->GetObserverKey());
         arkTsFrontend->RegisterDrawChildrenInspectorCallback(
             observer->GetInspectorFuncByType(DRAW_CHILDREN_TYPE), observer->GetObserverKey());
+        arkTsFrontend->RegisterDrawChildrenInspectorCallback(
+            observer->GetInspectorFuncByType(DRAW_CHILDREN_WITH_PARAMETER_TYPE), observer->GetObserverKey());
         arkTsFrontend->RegisterLayoutChildrenInspectorCallback(
             observer->GetInspectorFuncByType(LAYOUT_CHILDREN_TYPE), observer->GetObserverKey());
     } else {
@@ -580,6 +693,8 @@ static void DeleteComponentObserver(ani_env* env, ani_long ptr)
     observer->RemoveCallbackToList(observer->GetCbListByType(DRAW_TYPE), fnObjGlobalRef, DRAW_TYPE, env, true);
     observer->RemoveCallbackToList(
         observer->GetCbListByType(DRAW_CHILDREN_TYPE), fnObjGlobalRef, DRAW_CHILDREN_TYPE, env, true);
+    observer->RemoveCallbackToList(observer->GetCbListByType(DRAW_CHILDREN_WITH_PARAMETER_TYPE),
+        fnObjGlobalRef, DRAW_CHILDREN_WITH_PARAMETER_TYPE, env, true);
     observer->RemoveCallbackToList(
         observer->GetCbListByType(LAYOUT_CHILDREN_TYPE), fnObjGlobalRef, LAYOUT_CHILDREN_TYPE, env, true);
     delete observer;
@@ -628,8 +743,14 @@ bool ANI_ConstructorForAni(ani_env *env)
     }
     
     std::array methodsInspector = {
-        ani_native_function {"on", nullptr, reinterpret_cast<void *>(OHOS::Ace::On)},
-        ani_native_function {"off", nullptr, reinterpret_cast<void *>(OHOS::Ace::Off)},
+        ani_native_function {"on", "C{std.core.String}C{std.core.Function0}:",
+            reinterpret_cast<void *>(OHOS::Ace::On)},
+        ani_native_function {"off", "C{std.core.String}C{std.core.Function0}:",
+            reinterpret_cast<void *>(OHOS::Ace::Off)},
+        ani_native_function {"on", "C{std.core.String}C{std.core.Function1}:",
+            reinterpret_cast<void *>(OHOS::Ace::On)},
+        ani_native_function {"off", "C{std.core.String}C{std.core.Function1}:",
+            reinterpret_cast<void *>(OHOS::Ace::Off)},
     };
     
     if (ANI_OK != env->Class_BindNativeMethods(clsInspector, methodsInspector.data(), methodsInspector.size())) {

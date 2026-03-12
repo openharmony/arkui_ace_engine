@@ -319,7 +319,7 @@ public:
 
     virtual void OnLayoutCompleted(const std::string& componentId) = 0;
     virtual void OnDrawCompleted(const std::string& componentId) = 0;
-    virtual void OnDrawChildrenCompleted(const std::string& componentId) = 0;
+    virtual void OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds) = 0;
     virtual void OnLayoutChildrenCompleted(const std::string& componentId) {};
     virtual bool IsDrawChildrenCallbackFuncExist(const std::string& componentId)
     {

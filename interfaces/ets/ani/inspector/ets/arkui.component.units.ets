@@ -14,3 +14,4 @@
  */
 
 export type VoidCallback = () => void;
+export type ArrayIntCallback = (arr: int[]) => void;

@@ -2648,7 +2648,8 @@ void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId
         TaskExecutor::TaskType::JS, "ArkUIInspectorDrawCompleted");
 }
 
-void FrontendDelegateDeclarative::OnDrawChildrenCompleted(const std::string& componentId)
+void FrontendDelegateDeclarative::OnDrawChildrenCompleted(const std::string& componentId,
+    const std::vector<int32_t>& childIds)
 {
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
@@ -2657,12 +2658,12 @@ void FrontendDelegateDeclarative::OnDrawChildrenCompleted(const std::string& com
     }
 
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), componentId] {
+        [weak = AceType::WeakClaim(this), componentId, childIds] {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
-            delegate->drawChildrenInspectorCallback_(componentId);
+            delegate->drawChildrenInspectorCallback_(componentId, childIds);
         },
         TaskExecutor::TaskType::JS, "ArkUIInspectorDrawChildrenCompleted");
 }

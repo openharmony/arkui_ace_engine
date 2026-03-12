@@ -62,25 +62,6 @@ void RenderContext::RequestNextFrame(bool isOffScreenNode) const
     FREE_NODE_CHECK(node, RequestNextFrame, isOffScreenNode);
     if (requestFrame_) {
         requestFrame_(isOffScreenNode);
-        CHECK_NULL_VOID(node);
-        auto eventHub = node->GetEventHub<NG::EventHub>();
-        if (node->GetInspectorId().has_value() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
-            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetNeedRenderNode(WeakPtr<FrameNode>(node));
-        }
-        {
-            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetNeedRenderNodeByUniqueId(WeakPtr<FrameNode>(node));
-        }
-        if (node->IsObservedByDrawChildren()) {
-            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-            CHECK_NULL_VOID(pipeline);
-
-            auto frameNode = AceType::DynamicCast<FrameNode>(node->GetObserverParentForDrawChildren());
-            pipeline->SetNeedRenderForDrawChildrenNode(WeakPtr<FrameNode>(frameNode));
-        }
     }
 }
 

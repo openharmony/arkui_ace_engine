@@ -102,7 +102,7 @@ public:
     void OnMediaQueryUpdate(bool isSynchronous = false) override;
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
-    void OnDrawChildrenCompleted(const std::string& componentId);
+    void OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds);
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId);
     void FireExternalEvent(const std::string& eventId, const std::string& componentId, uint32_t nodeId, bool isDestroy);
 

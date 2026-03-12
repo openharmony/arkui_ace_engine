@@ -506,4 +506,88 @@ HWTEST_F(RenderContextTestNg, RenderContextTest013, TestSize.Level1)
     EXPECT_EQ(srcimages, "common/images/mmm.jpg");
     ASSERT_NE(renderContext.requestFrame_, nullptr);
 }
+
+/**
+ * @tc.name: RequestNextFrameMultiThread001
+ * @tc.desc: Test cast to RequestNextFrameMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, RequestNextFrameMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object renderContext.
+     */
+    NG::RenderContext renderContext;
+    auto requestFrame = [](bool isOffScreenNode) {
+        srcimages = "common/images/mmm.jpg";
+    };
+
+    /**
+     * @tc.steps: step2. callback SetHostNode.
+     * @tc.expected: step2. The renderContext.GetHost()() is not null.
+     */
+    auto rowFrameNode =
+        NG::FrameNode::CreateFrameNode(TAG_ROOT, 0, AceType::MakeRefPtr<NG::LinearLayoutPattern>(false));
+    renderContext.SetHostNode(rowFrameNode);
+    ASSERT_NE(renderContext.GetHost(), nullptr);
+
+    /**
+     * @tc.steps: step3. callback RequestNextFrameMultiThread.
+     */
+    renderContext.RequestNextFrameMultiThread(true);
+    EXPECT_EQ(renderContext.requestFrame_, nullptr);
+
+    renderContext.SetRequestFrame(requestFrame);
+    ASSERT_NE(renderContext.requestFrame_, nullptr);
+    rowFrameNode->eventHub_ = nullptr;
+    renderContext.RequestNextFrameMultiThread(true);
+    EXPECT_EQ(rowFrameNode->GetInspectorId().has_value(), false);
+
+    rowFrameNode->UpdateInspectorId("test");
+    renderContext.RequestNextFrameMultiThread(true);
+    EXPECT_EQ(rowFrameNode->GetInspectorId().has_value(), true);
+}
+
+/**
+ * @tc.name: RequestNextFrameMultiThread002
+ * @tc.desc: Test cast to RequestNextFrameMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, RequestNextFrameMultiThread002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object renderContext.
+     */
+    NG::RenderContext renderContext;
+    auto requestFrame = [](bool isOffScreenNode) {
+        srcimages = "common/images/mmm.jpg";
+    };
+    auto drawCompletedCallback = []() {
+        srcimages = "common/images/mmm.jpg";
+    };
+
+    /**
+     * @tc.steps: step2. callback SetHostNode.
+     * @tc.expected: step2. The renderContext.GetHost()() is not null.
+     */
+    auto rowFrameNode =
+        NG::FrameNode::CreateFrameNode(TAG_ROOT, 0, AceType::MakeRefPtr<NG::LinearLayoutPattern>(false));
+    renderContext.SetHostNode(rowFrameNode);
+    ASSERT_NE(renderContext.GetHost(), nullptr);
+
+    /**
+     * @tc.steps: step3. callback RequestNextFrameMultiThread.
+     */
+    renderContext.SetRequestFrame(requestFrame);
+    ASSERT_NE(renderContext.requestFrame_, nullptr);
+    renderContext.RequestNextFrameMultiThread(true);
+    ASSERT_EQ(rowFrameNode->GetInspectorId().has_value(), false);
+    auto eventhub = rowFrameNode->GetEventHub<NG::EventHub>();
+    ASSERT_EQ(eventhub, true);
+    EXPECT_EQ(eventhub->HasNDKDrawCompletedCallback(), false);
+
+    eventhub->SetNDKDrawCompletedCallback(drawCompletedCallback);
+    renderContext.RequestNextFrameMultiThread(true);
+    EXPECT_EQ(eventhub->HasNDKDrawCompletedCallback(), true);
+}
 } // namespace OHOS::Ace

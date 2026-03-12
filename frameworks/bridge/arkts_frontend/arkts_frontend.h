@@ -44,6 +44,7 @@ enum class ArkolaMessageType : int32_t {
 };
 
 using InspectorFunc = std::function<void()>;
+using InspectorFuncWithParameter = std::function<void(std::vector<int32_t>)>;
 using CounterFunc = std::function<bool()>;
 using MediaQueryCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
 class InspectorEvent : public virtual AceType {
@@ -51,6 +52,9 @@ class InspectorEvent : public virtual AceType {
 public:
     explicit InspectorEvent(InspectorFunc&& callback, CounterFunc&& counter)
         : callback_(std::move(callback)), counter_(std::move(counter))
+    {}
+    explicit InspectorEvent(InspectorFuncWithParameter&& callback, CounterFunc&& counter)
+        : callbackWithParameter_(std::move(callback)), counter_(std::move(counter))
     {}
     ~InspectorEvent() override = default;
 
@@ -61,6 +65,13 @@ public:
         }
     }
 
+    void operator()(std::vector<int32_t> params) const
+    {
+        if (callbackWithParameter_) {
+            callbackWithParameter_(params);
+        }
+    }
+
     bool HasCallback() const
     {
         return !counter_() ;
@@ -68,6 +79,7 @@ public:
     
 private:
     InspectorFunc callback_;
+    InspectorFuncWithParameter callbackWithParameter_;
     CounterFunc counter_;
 };
 /**
@@ -272,7 +284,7 @@ public:
         );
     }
 
-    void OnDrawChildrenCompleted(const std::string& componentId) override
+    void OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds) override
     {
         auto iter = drawChildrenCallbacks_.find(componentId);
         if (iter == drawChildrenCallbacks_.end()) {
@@ -281,12 +293,14 @@ public:
         if (taskExecutor_ == nullptr) {
             return;
         }
-        auto&& observer = iter->second;
-        taskExecutor_->PostTask(
-            [observer] {
-                (*observer)();
-            }, TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted"
-        );
+        for (auto&& observer : iter->second) {
+            taskExecutor_->PostTask(
+                [observer, childIds] {
+                    (*observer)(childIds);
+                    (*observer)();
+                    }, TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted"
+            );
+        }
     }
 
     void DumpFrontend() const override {}
@@ -357,7 +371,10 @@ public:
     void RegisterDrawChildrenInspectorCallback(const RefPtr<InspectorEvent>& drawChildrenFunc,
         const std::string& componentId)
     {
-        drawChildrenCallbacks_[componentId] = drawChildrenFunc;
+        if (drawChildrenFunc == nullptr) {
+            return;
+        }
+        drawChildrenCallbacks_[componentId].emplace(drawChildrenFunc);
     }
 
     void UnregisterLayoutInspectorCallback(const std::string& componentId)
@@ -370,9 +387,18 @@ public:
         drawCallbacks_.erase(componentId);
     }
 
-    void UnregisterDrawChildrenInspectorCallback(const std::string& componentId)
+    void UnregisterDrawChildrenInspectorCallback(const RefPtr<InspectorEvent>& event, const std::string& componentId)
     {
-        drawChildrenCallbacks_.erase(componentId);
+        if (drawChildrenCallbacks_.empty()) {
+            return;
+        }
+        auto iter = drawChildrenCallbacks_.find(componentId);
+        if (iter != drawChildrenCallbacks_.end()) {
+            iter->second.erase(event);
+            if (iter->second.empty()) {
+                drawChildrenCallbacks_.erase(componentId);
+            }
+        }
     }
 
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override
@@ -381,7 +407,12 @@ public:
         if (iter == drawChildrenCallbacks_.end()) {
             return false;
         }
-        return iter->second->HasCallback();
+        for (const auto& f : iter->second) {
+            if (f && f->HasCallback()) {
+                return true;
+            }
+        }
+        return false;
     }
     void OnLayoutChildrenCompleted(const std::string& componentId) override;
     bool IsLayoutChildrenCallbackFuncExist(const std::string& componentId) override;
@@ -468,7 +499,7 @@ protected:
     
     std::map<std::string, RefPtr<InspectorEvent>> layoutCallbacks_;
     std::map<std::string, RefPtr<InspectorEvent>> drawCallbacks_;
-    std::map<std::string, RefPtr<InspectorEvent>> drawChildrenCallbacks_;
+    std::map<std::string, std::set<RefPtr<InspectorEvent>>> drawChildrenCallbacks_;
     std::map<std::string, RefPtr<InspectorEvent>> layoutChildrenCallbacks_;
     std::map<int32_t, RefPtr<InspectorEvent>> uniqueIdLayoutCallbacks_;
     std::map<int32_t, RefPtr<InspectorEvent>> uniqueIdDrawCallbacks_;
