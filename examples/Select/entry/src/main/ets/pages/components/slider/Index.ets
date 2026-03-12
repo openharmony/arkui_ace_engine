@@ -41,19 +41,18 @@ export struct SliderIndex {
     { name: 'SliderPrefixSuffix', path: 'SliderPrefixSuffix' },
     { name: 'SliderShowSteps', path: 'SliderShowSteps' },
     { name: 'SliderBlockColor', path: 'SliderBlockColor' },
-    { name: 'Slider组合场景16', path: 'SliderLevel16' }
+    { name: 'Slider组合场景16', path: 'SliderLevel16' },
+    { name: 'SliderTrackColorMetrics', path: 'SliderTrackColorMetrics' }
   ]
 
   build() {
     NavDestination() {
-      Scroll() {
-        NavList({
-          pages: this.paths,
-          onPathChange: (item: NavListItem) => {
-            this.pathStack.pushPath({ name: item.path })
-          }
-        })
-      }
+      NavList({
+        pages: this.paths,
+        onPathChange: (item: NavListItem) => {
+          this.pathStack.pushPath({ name: item.path })
+        }
+      })
     }
     .title('Slider')
     .onBackPressed(() => {
