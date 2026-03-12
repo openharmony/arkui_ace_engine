@@ -22,6 +22,8 @@
     "pages/components/dialog/page/ActionSheetAdvanced_Style",
     "pages/components/dialog/page/ActionSheetAdvanced_Events",
     "pages/components/dialog/page/ActionSheetAdvanced_Groups",
-    "pages/components/dialog/page/ActionSheetAdvanced_Icons"
+    "pages/components/dialog/page/ActionSheetAdvanced_Icons",
+    "pages/components/dialog/page/AlertDialogExtended_Alignment",
+    "pages/components/dialog/page/AlertDialogExtended_AutoCancel"
   ]
 }
