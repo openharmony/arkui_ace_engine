@@ -71,7 +71,18 @@ struct DraggableList {
     .layoutWeight(1)
     .padding(10)
     .onItemDragStart((event: ItemDragInfo, itemIndex: number) => {
-      let rect = this.scroller.getItemRect(itemIndex);
+      let rect: RectResult = {
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0
+      };
+      try {
+        rect = this.scroller.getItemRect(itemIndex);
+      } catch (error) {
+        console.error(`Failed to get item rect for index ${itemIndex}:`, error);
+        return;
+      }
       let size: SizeOptions = {
         width: rect.width,
         height: rect.height
@@ -86,7 +97,7 @@ struct DraggableList {
       console.info("Item drag enter at position:", event.x, event.y);
     })
     .onItemDragMove((event: ItemDragInfo, itemIndex: number, insertIndex: number) => {
-      if (this.lastInsertIndex != insertIndex){
+      if (this.lastInsertIndex != insertIndex) {
         console.info("insertIndex change from ", this.lastInsertIndex, "to", insertIndex);
         this.lastInsertIndex = insertIndex;
       }
