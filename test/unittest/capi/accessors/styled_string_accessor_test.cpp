@@ -382,17 +382,17 @@ using namespace testing;
 using namespace testing::ext;
 
 struct StyledStringUnionNull {
-    Ark_Union_String_ImageAttachment_CustomSpan* Union() { return nullptr; }
+    Ark_Union_String_ImageAttachment_CustomSpanWrapper* Union() { return nullptr; }
     Opt_Array_StyleOptions* Styles() { return nullptr; }
     void TearDown() {}
 };
 struct StyledStringUnionString {
-    Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
-            Ark_Union_String_ImageAttachment_CustomSpan, Ark_String>(STRING_TEST_VALUE);
+    Ark_Union_String_ImageAttachment_CustomSpanWrapper value = Converter::ArkUnion<
+            Ark_Union_String_ImageAttachment_CustomSpanWrapper, Ark_String>(STRING_TEST_VALUE);
     Opt_Array_StyleOptions stylesOpt;
     std::unique_ptr<Converter::ArkArrayHolder<Array_StyleOptions>> holderStyles;
 
-    Ark_Union_String_ImageAttachment_CustomSpan* Union()
+    Ark_Union_String_ImageAttachment_CustomSpanWrapper* Union()
     {
         return &value;
     }
@@ -409,13 +409,13 @@ struct StyledStringUnionString {
 };
 
 struct StyledStringUnionImageAttachment {
-    Ark_Union_String_ImageAttachment_CustomSpan* Union()
+    Ark_Union_String_ImageAttachment_CustomSpanWrapper* Union()
     {
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(IMAGEATTACHMENT_TEST_VALUE);
         peer = GeneratedModifier::GetImageAttachmentAccessor()->construct(&inputValue);
-        static Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
-            Ark_Union_String_ImageAttachment_CustomSpan, Ark_ImageAttachment>(peer);
+        static Ark_Union_String_ImageAttachment_CustomSpanWrapper value = Converter::ArkUnion<
+            Ark_Union_String_ImageAttachment_CustomSpanWrapper, Ark_ImageAttachment>(peer);
         return &value;
     }
     Opt_Array_StyleOptions* Styles() { return nullptr; }
@@ -425,18 +425,26 @@ private:
 };
 
 struct StyledStringUnionCustomSpan {
-    Ark_Union_String_ImageAttachment_CustomSpan* Union()
+    Ark_Union_String_ImageAttachment_CustomSpanWrapper* Union()
     {
-        peer = PeerUtils::CreatePeer<CustomSpanPeer>();
-        peer->span = AceType::MakeRefPtr<CustomSpanImpl>();
-        static Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
-            Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpan>(peer);
+        peer = AceType::MakeRefPtr<CustomSpanNativePeer>();
+        peer->IncRefCount();
+        Ark_CustomSpanWrapper wrap {
+            .nativeObj = Referenced::RawPtr(peer)
+        };
+        static Ark_Union_String_ImageAttachment_CustomSpanWrapper value = Converter::ArkUnion<
+            Ark_Union_String_ImageAttachment_CustomSpanWrapper, Ark_CustomSpanWrapper>(wrap);
         return &value;
     }
     Opt_Array_StyleOptions* Styles() { return nullptr; }
-    void TearDown() {}
+    void TearDown()
+    {
+        if (peer) {
+            peer->DecRefCount();
+        }
+    }
 private:
-    CustomSpanPeer* peer = nullptr;
+    RefPtr<CustomSpanNativePeer> peer = nullptr;
 };
 
 template <typename V1>

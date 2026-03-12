@@ -87,8 +87,11 @@ HWTEST_F(MutableStyledStringAccessorTest, DISABLED_constructTest, TestSize.Level
 HWTEST_F(MutableStyledStringAccessorTest, constructTestCustomSpan, TestSize.Level1)
 {
     auto styles = Converter::ArkValue<Opt_Array_StyleOptions>();
-    Ark_CustomSpan customSpan = accessors_->getCustomSpanAccessor()->construct();
-    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpan>(customSpan);
+    Ark_CustomSpanNative customSpan = accessors_->getCustomSpanNativeAccessor()->construct();
+    Ark_CustomSpanWrapper wrap {
+        .nativeObj = customSpan
+    };
+    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpanWrapper, Ark_CustomSpanWrapper>(wrap);
     auto peer = this->accessor_->construct(&value, &styles);
     ASSERT_NE(peer, nullptr);
     ASSERT_NE(peer->GetMutableString(), nullptr);
@@ -671,7 +674,7 @@ HWTEST_F(MutableStyledStringAccessorTest, updateSpansRangeTest001, TestSize.Leve
     const std::u16string testString(u"HelloWorld");
     const int32_t maxLength = testString.length();
     auto arkString = Converter::ArkValue<Ark_String>("HelloWorld");
-    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpan, Ark_String>(arkString);
+    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpanWrapper, Ark_String>(arkString);
     auto textStylePeer = PeerUtils::CreatePeer<TextStylePeer>();
     textStylePeer->span = AceType::MakeRefPtr<FontSpan>(Font { .fontColor = Color::RED });
     Ark_StyleOptions style1 {

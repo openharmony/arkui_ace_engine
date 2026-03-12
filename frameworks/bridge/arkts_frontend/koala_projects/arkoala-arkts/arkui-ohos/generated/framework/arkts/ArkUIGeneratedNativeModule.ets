@@ -4228,19 +4228,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CustomDialogControllerExtender_getState(ptr: KPointer): KInt
     @ani.unsafe.Direct
-    native static _CustomSpan_construct(): KPointer
+    native static _CustomSpanNative_construct(): KPointer
     @ani.unsafe.Direct
-    native static _CustomSpan_getFinalizer(): KPointer
+    native static _CustomSpanNative_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _CustomSpan_invalidate(ptr: KPointer): void
-    @ani.unsafe.Quick
-    native static _CustomSpan_getOnMeasure_callback(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _CustomSpan_setOnMeasure_callback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Quick
-    native static _CustomSpan_getOnDraw_callback(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _CustomSpan_setOnDraw_callback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _CustomSpanNative_invalidate(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _CutEvent_construct(): KPointer
     @ani.unsafe.Direct

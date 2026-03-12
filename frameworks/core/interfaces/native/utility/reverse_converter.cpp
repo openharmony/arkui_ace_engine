@@ -613,6 +613,7 @@ void AssignArkValue(Ark_Frame& dst, const RectF& src)
     dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
+namespace {
 template<typename PeerType, typename AceSpan>
 void CreateStylePeer(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 {
@@ -620,6 +621,25 @@ void CreateStylePeer(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
     peer->span = AceType::DynamicCast<AceSpan>(src);
     dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, PeerType*>(peer);
 }
+void CreateCustomSpanWrapper(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
+{
+    static auto emptyFunc = [](int32_t) {};
+    static Ark_CallbackResource emtpyResource {
+        .resourceId {}, .hold {emptyFunc}, .release {emptyFunc}
+    };
+
+    CHECK_NULL_VOID(src);
+    auto custSpanPeer = AceType::DynamicCast<CustomSpanNativePeer>(src);
+    CHECK_NULL_VOID(custSpanPeer);
+    Ark_CustomSpanWrapper custSpanWrap {
+        .managed {custSpanPeer->GetObject()},
+        .nativeObj {},
+        .onMeasure_callback {.resource {emtpyResource}, .call {}, .callSync {}},
+        .onDraw_callback {.resource {emtpyResource}, .call {}, .callSync {}},
+    };
+    dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_CustomSpanWrapper>(custSpanWrap);
+}
+} // namespace
 
 void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 {
@@ -661,7 +681,7 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
             CreateStylePeer<ImageAttachmentPeer, OHOS::Ace::ImageSpan>(dst, src);
             break;
         case Ace::SpanType::CustomSpan:
-            CreateStylePeer<CustomSpanPeer, OHOS::Ace::NG::CustomSpanImpl>(dst, src);
+            CreateCustomSpanWrapper(dst, src);
             break;
         case Ace::SpanType::ExtSpan: {
             auto userDataSpanHolder = AceType::DynamicCast<UserDataSpanHolder>(src);

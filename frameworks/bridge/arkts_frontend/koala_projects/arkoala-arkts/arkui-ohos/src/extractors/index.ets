@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { int32 } from "@koalaui/common";
 import { KPointer, nullptr } from '@koalaui/interop';
 import { default as image } from "@ohos.multimedia.image";
@@ -92,6 +107,8 @@ import { CustomBuilderT, CustomNodeBuilderT, ResponseType } from '#generated'
 import { CommonModifier } from '#generated'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArcSwiperContentTransitionProxy, ArcSwiperContentTransitionProxyInternal} from '@ohos.arkui.ArcSwiper'
+import { CustomSpan } from "#generated";
+import { CustomSpanWrapper } from "#generated";
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -707,5 +724,20 @@ export namespace extractors {
   }
   export function fromUiEffectHdrBrightnessBlenderPtr(ptr: KPointer): uiEffect.HdrBrightnessBlender {
     throw new Error("Not implemented")
+  }
+
+  export function transform_Ark_CustomSpan_to_Ark_CustomSpanWrapper(value: CustomSpan): CustomSpanWrapper {
+      return {
+          managed: value,
+          nativeObj: value.nativeObj,
+          onDraw_callback: value.onDraw,
+          onMeasure_callback: value.onMeasure,
+      }
+  }
+  export function transform_Ark_CustomSpanWrapper_to_Ark_CustomSpan(value: CustomSpanWrapper): CustomSpan {
+      if (!(value.managed instanceof CustomSpan)) {
+        throw new Error("Invalid managed object type in CustomSpanWrapper");
+      }
+      return value.managed as CustomSpan
   }
 }

@@ -112,7 +112,7 @@ HWTEST_F(TextControllerAccessorTest, closeSelectionMenuTest, TestSize.Level1)
 HWTEST_F(TextControllerAccessorTest, setStyledStringTest, TestSize.Level1)
 {
     const std::string expectedStrValue = "String value";
-    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpan, Ark_String>(expectedStrValue);
+    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpanWrapper, Ark_String>(expectedStrValue);
     auto styles = Converter::ArkValue<Opt_Array_StyleOptions>();
 
     auto styledStringAccessor = GeneratedModifier::GetStyledStringAccessor();

@@ -411,9 +411,9 @@ typedef struct CustomDialogControllerExtenderPeer CustomDialogControllerExtender
 typedef struct CustomDialogControllerExtenderPeer* Ark_CustomDialogControllerExtender;
 typedef struct Opt_CustomDialogControllerExtender Opt_CustomDialogControllerExtender;
 typedef struct Opt_CustomObject Opt_CustomObject;
-typedef struct CustomSpanPeer CustomSpanPeer;
-typedef struct CustomSpanPeer* Ark_CustomSpan;
-typedef struct Opt_CustomSpan Opt_CustomSpan;
+typedef struct CustomSpanNativePeer CustomSpanNativePeer;
+typedef struct CustomSpanNativePeer* Ark_CustomSpanNative;
+typedef struct Opt_CustomSpanNative Opt_CustomSpanNative;
 typedef struct CutEventPeer CutEventPeer;
 typedef struct CutEventPeer* Ark_CutEvent;
 typedef struct Opt_CutEvent Opt_CutEvent;
@@ -1100,8 +1100,6 @@ typedef struct Ark_Union_String_FunctionKey Ark_Union_String_FunctionKey;
 typedef struct Opt_Union_String_FunctionKey Opt_Union_String_FunctionKey;
 typedef struct Ark_Union_String_I32 Ark_Union_String_I32;
 typedef struct Opt_Union_String_I32 Opt_Union_String_I32;
-typedef struct Ark_Union_String_ImageAttachment_CustomSpan Ark_Union_String_ImageAttachment_CustomSpan;
-typedef struct Opt_Union_String_ImageAttachment_CustomSpan Opt_Union_String_ImageAttachment_CustomSpan;
 typedef struct Ark_Union_SwiperAnimationMode_Boolean Ark_Union_SwiperAnimationMode_Boolean;
 typedef struct Opt_Union_SwiperAnimationMode_Boolean Opt_Union_SwiperAnimationMode_Boolean;
 typedef struct Ark_Union_TextInputStyle_TextContentStyle Ark_Union_TextInputStyle_TextContentStyle;
@@ -2231,6 +2229,8 @@ typedef struct Ark_CustomSpanMeasureInfo Ark_CustomSpanMeasureInfo;
 typedef struct Opt_CustomSpanMeasureInfo Opt_CustomSpanMeasureInfo;
 typedef struct Ark_CustomSpanMetrics Ark_CustomSpanMetrics;
 typedef struct Opt_CustomSpanMetrics Opt_CustomSpanMetrics;
+typedef struct Ark_CustomSpanWrapper Ark_CustomSpanWrapper;
+typedef struct Opt_CustomSpanWrapper Opt_CustomSpanWrapper;
 typedef struct Ark_CustomTheme Ark_CustomTheme;
 typedef struct Opt_CustomTheme Opt_CustomTheme;
 typedef struct Ark_DataPanelConfiguration Ark_DataPanelConfiguration;
@@ -2837,6 +2837,8 @@ typedef struct Ark_Union_String_image_PixelMap_Resource Ark_Union_String_image_P
 typedef struct Opt_Union_String_image_PixelMap_Resource Opt_Union_String_image_PixelMap_Resource;
 typedef struct Ark_Union_String_image_PixelMap_Resource_SymbolGlyphModifier Ark_Union_String_image_PixelMap_Resource_SymbolGlyphModifier;
 typedef struct Opt_Union_String_image_PixelMap_Resource_SymbolGlyphModifier Opt_Union_String_image_PixelMap_Resource_SymbolGlyphModifier;
+typedef struct Ark_Union_String_ImageAttachment_CustomSpanWrapper Ark_Union_String_ImageAttachment_CustomSpanWrapper;
+typedef struct Opt_Union_String_ImageAttachment_CustomSpanWrapper Opt_Union_String_ImageAttachment_CustomSpanWrapper;
 typedef struct Ark_Union_String_ItemFillPolicy Ark_Union_String_ItemFillPolicy;
 typedef struct Opt_Union_String_ItemFillPolicy Opt_Union_String_ItemFillPolicy;
 typedef struct Ark_Union_String_Resource Ark_Union_String_Resource;
@@ -8026,10 +8028,10 @@ typedef struct Opt_CustomObject {
     Ark_Tag tag;
     Ark_CustomObject value;
 } Opt_CustomObject;
-typedef struct Opt_CustomSpan {
+typedef struct Opt_CustomSpanNative {
     Ark_Tag tag;
-    Ark_CustomSpan value;
-} Opt_CustomSpan;
+    Ark_CustomSpanNative value;
+} Opt_CustomSpanNative;
 typedef struct Opt_CutEvent {
     Ark_Tag tag;
     Ark_CutEvent value;
@@ -9815,19 +9817,6 @@ typedef struct Opt_Union_String_I32 {
     Ark_Tag tag;
     Ark_Union_String_I32 value;
 } Opt_Union_String_I32;
-typedef struct Ark_Union_String_ImageAttachment_CustomSpan {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_String value0;
-        Ark_ImageAttachment value1;
-        Ark_CustomSpan value2;
-    };
-} Ark_Union_String_ImageAttachment_CustomSpan;
-typedef struct Opt_Union_String_ImageAttachment_CustomSpan {
-    Ark_Tag tag;
-    Ark_Union_String_ImageAttachment_CustomSpan value;
-} Opt_Union_String_ImageAttachment_CustomSpan;
 typedef struct Ark_Union_SwiperAnimationMode_Boolean {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -15181,6 +15170,17 @@ typedef struct Opt_CustomSpanMetrics {
     Ark_Tag tag;
     Ark_CustomSpanMetrics value;
 } Opt_CustomSpanMetrics;
+typedef struct Ark_CustomSpanWrapper {
+    /* kind: Interface */
+    Ark_Object managed;
+    Ark_CustomSpanNative nativeObj;
+    Callback_CustomSpanMeasureInfo_CustomSpanMetrics onMeasure_callback;
+    Callback_DrawContext_CustomSpanDrawInfo_Void onDraw_callback;
+} Ark_CustomSpanWrapper;
+typedef struct Opt_CustomSpanWrapper {
+    Ark_Tag tag;
+    Ark_CustomSpanWrapper value;
+} Opt_CustomSpanWrapper;
 typedef struct Ark_CustomTheme {
     /* kind: Interface */
     Opt_Object colors;
@@ -17202,7 +17202,7 @@ typedef struct Ark_StyledStringValue {
         Ark_ParagraphStyle value7;
         Ark_LineHeightStyle value8;
         Ark_UrlStyle value9;
-        Ark_CustomSpan value10;
+        Ark_CustomSpanWrapper value10;
         Ark_UserDataSpan value11;
         Ark_BackgroundColorStyle value12;
     };
@@ -18481,6 +18481,19 @@ typedef struct Opt_Union_String_image_PixelMap_Resource_SymbolGlyphModifier {
     Ark_Tag tag;
     Ark_Union_String_image_PixelMap_Resource_SymbolGlyphModifier value;
 } Opt_Union_String_image_PixelMap_Resource_SymbolGlyphModifier;
+typedef struct Ark_Union_String_ImageAttachment_CustomSpanWrapper {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_String value0;
+        Ark_ImageAttachment value1;
+        Ark_CustomSpanWrapper value2;
+    };
+} Ark_Union_String_ImageAttachment_CustomSpanWrapper;
+typedef struct Opt_Union_String_ImageAttachment_CustomSpanWrapper {
+    Ark_Tag tag;
+    Ark_Union_String_ImageAttachment_CustomSpanWrapper value;
+} Opt_Union_String_ImageAttachment_CustomSpanWrapper;
 typedef struct Ark_Union_String_ItemFillPolicy {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -28237,18 +28250,12 @@ typedef struct GENERATED_ArkUICustomDialogControllerExtenderAccessor {
     Ark_promptAction_CommonState (*getState)(Ark_CustomDialogControllerExtender peer);
 } GENERATED_ArkUICustomDialogControllerExtenderAccessor;
 
-typedef struct GENERATED_ArkUICustomSpanAccessor {
-    void (*destroyPeer)(Ark_CustomSpan peer);
-    Ark_CustomSpan (*construct)();
+typedef struct GENERATED_ArkUICustomSpanNativeAccessor {
+    void (*destroyPeer)(Ark_CustomSpanNative peer);
+    Ark_CustomSpanNative (*construct)();
     Ark_NativePointer (*getFinalizer)();
-    void (*invalidate)(Ark_CustomSpan peer);
-    Callback_CustomSpanMeasureInfo_CustomSpanMetrics (*getOnMeasure_callback)(Ark_CustomSpan peer);
-    void (*setOnMeasure_callback)(Ark_CustomSpan peer,
-                                  const Callback_CustomSpanMeasureInfo_CustomSpanMetrics* onMeasure_callback);
-    Callback_DrawContext_CustomSpanDrawInfo_Void (*getOnDraw_callback)(Ark_CustomSpan peer);
-    void (*setOnDraw_callback)(Ark_CustomSpan peer,
-                               const Callback_DrawContext_CustomSpanDrawInfo_Void* onDraw_callback);
-} GENERATED_ArkUICustomSpanAccessor;
+    void (*invalidate)(Ark_CustomSpanNative peer);
+} GENERATED_ArkUICustomSpanNativeAccessor;
 
 typedef struct GENERATED_ArkUICutEventAccessor {
     void (*destroyPeer)(Ark_CutEvent peer);
@@ -29331,7 +29338,7 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
 
 typedef struct GENERATED_ArkUIMutableStyledStringAccessor {
     void (*destroyPeer)(Ark_MutableStyledString peer);
-    Ark_MutableStyledString (*construct)(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+    Ark_MutableStyledString (*construct)(const Ark_Union_String_ImageAttachment_CustomSpanWrapper* value,
                                          const Opt_Array_StyleOptions* styles);
     Ark_NativePointer (*getFinalizer)();
     void (*replaceString)(Ark_MutableStyledString peer,
@@ -30404,7 +30411,7 @@ typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
 
 typedef struct GENERATED_ArkUIStyledStringAccessor {
     void (*destroyPeer)(Ark_StyledString peer);
-    Ark_StyledString (*construct)(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+    Ark_StyledString (*construct)(const Ark_Union_String_ImageAttachment_CustomSpanWrapper* value,
                                   const Opt_Array_StyleOptions* styles);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getString)(Ark_StyledString peer);
@@ -31380,7 +31387,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIControllerHandlerAccessor* (*getControllerHandlerAccessor)();
     const GENERATED_ArkUICopyEventAccessor* (*getCopyEventAccessor)();
     const GENERATED_ArkUICustomDialogControllerExtenderAccessor* (*getCustomDialogControllerExtenderAccessor)();
-    const GENERATED_ArkUICustomSpanAccessor* (*getCustomSpanAccessor)();
+    const GENERATED_ArkUICustomSpanNativeAccessor* (*getCustomSpanNativeAccessor)();
     const GENERATED_ArkUICutEventAccessor* (*getCutEventAccessor)();
     const GENERATED_ArkUIDataPanelExtenderAccessor* (*getDataPanelExtenderAccessor)();
     const GENERATED_ArkUIDataResubmissionHandlerAccessor* (*getDataResubmissionHandlerAccessor)();
