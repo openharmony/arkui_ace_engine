@@ -25,7 +25,7 @@ import { default as webview } from '@ohos.web.webview'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { ArkThemeScopeManager } from '#arktheme'
-import { NestedScrollOptions_serializer, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, KeyEvent, NestedScrollOptions, TouchEvent, MouseEvent, ArkCommonMethodComponent, MouseEvent_serializer, TouchEvent_serializer } from './common'
+import { NestedScrollOptions_serializer, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, KeyEvent, NestedScrollOptions, TouchEvent, MouseEvent, ArkCommonMethodComponent, MouseEvent_serializer } from './common'
 import { EditMenuOptions_serializer, TextDataDetectorConfig_serializer, EditMenuOptions, TextDataDetectorConfig, MenuType } from './textCommon'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
@@ -42,6 +42,7 @@ import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
 import { webview_WebviewController_serializer } from './../framework/ohos.web.webview'
+import { TouchEventProxy, TouchEventProxy_serializer } from './idlize'
 export class ClientAuthenticationHandlerInternal {
     public static fromPtr(ptr: KPointer): ClientAuthenticationHandler {
         return new ClientAuthenticationHandler(MaterializedBaseTag.NOP, ptr)
@@ -6248,58 +6249,6 @@ export class NativeEmbedParamItem_serializer {
         return value
     }
 }
-export class NativeEmbedTouchInfo_serializer {
-    public static write(buffer: SerializerBase, value: NativeEmbedTouchInfo): void {
-        let valueSerializer: SerializerBase = buffer
-        const valueHolderForEmbedId = value.embedId
-        if (valueHolderForEmbedId !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEmbedIdTmpValue = valueHolderForEmbedId!
-            valueSerializer.writeString(valueHolderForEmbedIdTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForTouchEvent = value.touchEvent
-        if (valueHolderForTouchEvent !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForTouchEventTmpValue = valueHolderForTouchEvent!
-            TouchEvent_serializer.write(valueSerializer, valueHolderForTouchEventTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForResult = value.result
-        if (valueHolderForResult !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForResultTmpValue = valueHolderForResult!
-            EventResult_serializer.write(valueSerializer, valueHolderForResultTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): NativeEmbedTouchInfo {
-        let valueDeserializer: DeserializerBase = buffer
-        const embedIdTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let embedIdTmpBuf: string | undefined = undefined
-        if ((embedIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            embedIdTmpBuf = (valueDeserializer.readString() as string)
-        }
-        const embedIdTmpResult: string | undefined = embedIdTmpBuf
-        const touchEventTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let touchEventTmpBuf: TouchEvent | undefined = undefined
-        if ((touchEventTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            touchEventTmpBuf = (TouchEvent_serializer.read(valueDeserializer) as TouchEvent)
-        }
-        const touchEventTmpResult: TouchEvent | undefined = touchEventTmpBuf
-        const resultTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let resultTmpBuf: EventResult | undefined = undefined
-        if ((resultTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            resultTmpBuf = (EventResult_serializer.read(valueDeserializer) as EventResult)
-        }
-        const resultTmpResult: EventResult | undefined = resultTmpBuf
-        let value: NativeEmbedTouchInfo = ({embedId: embedIdTmpResult, touchEvent: touchEventTmpResult, result: resultTmpResult} as NativeEmbedTouchInfo)
-        return value
-    }
-}
 export class NativeEmbedVisibilityInfo_serializer {
     public static write(buffer: SerializerBase, value: NativeEmbedVisibilityInfo): void {
         let valueSerializer: SerializerBase = buffer
@@ -7745,6 +7694,60 @@ export class NativeEmbedDataInfo_serializer {
         }
         const infoTmpResult: NativeEmbedInfo | undefined = infoTmpBuf
         let value: NativeEmbedDataInfo = ({status: statusTmpResult, surfaceId: surfaceIdTmpResult, embedId: embedIdTmpResult, info: infoTmpResult} as NativeEmbedDataInfo)
+        return value
+    }
+}
+export class NativeEmbedTouchInfo_serializer {
+    public static write(buffer: SerializerBase, value: NativeEmbedTouchInfo): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForEmbedId = value.embedId
+        if (valueHolderForEmbedId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEmbedIdTmpValue = valueHolderForEmbedId!
+            valueSerializer.writeString(valueHolderForEmbedIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForTouchEvent = value.touchEvent
+        if (valueHolderForTouchEvent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTouchEventTmpValue = valueHolderForTouchEvent!
+            const valueHolderForTouchEventTmpValueTransformed: TouchEventProxy = extractors.transform_Ark_TouchEvent_to_Ark_TouchEventProxy(valueHolderForTouchEventTmpValue)
+            TouchEventProxy_serializer.write(valueSerializer, valueHolderForTouchEventTmpValueTransformed)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForResult = value.result
+        if (valueHolderForResult !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForResultTmpValue = valueHolderForResult!
+            EventResult_serializer.write(valueSerializer, valueHolderForResultTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): NativeEmbedTouchInfo {
+        let valueDeserializer: DeserializerBase = buffer
+        const embedIdTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let embedIdTmpBuf: string | undefined = undefined
+        if ((embedIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            embedIdTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const embedIdTmpResult: string | undefined = embedIdTmpBuf
+        const touchEventTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let touchEventTmpBuf: TouchEvent | undefined = undefined
+        if ((touchEventTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const touchEventTmpBufOptDeserialized: TouchEventProxy = TouchEventProxy_serializer.read(valueDeserializer)
+            touchEventTmpBuf = extractors.transform_Ark_TouchEventProxy_to_Ark_TouchEvent(touchEventTmpBufOptDeserialized)
+        }
+        const touchEventTmpResult: TouchEvent | undefined = touchEventTmpBuf
+        const resultTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let resultTmpBuf: EventResult | undefined = undefined
+        if ((resultTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            resultTmpBuf = (EventResult_serializer.read(valueDeserializer) as EventResult)
+        }
+        const resultTmpResult: EventResult | undefined = resultTmpBuf
+        let value: NativeEmbedTouchInfo = ({embedId: embedIdTmpResult, touchEvent: touchEventTmpResult, result: resultTmpResult} as NativeEmbedTouchInfo)
         return value
     }
 }

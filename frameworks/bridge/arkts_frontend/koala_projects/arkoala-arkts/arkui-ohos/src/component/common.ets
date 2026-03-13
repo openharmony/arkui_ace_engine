@@ -968,6 +968,121 @@ export class AxisEventTransfer {
     }
 }
 
+export class TouchEventHandwritten implements TouchEvent {
+    public ptr: KPointer
+    public getModifierKeyState?: ModifierKeyStateGetter | undefined
+    public type: TouchType
+    public touches: Array<TouchObject>
+    public changedTouches: Array<TouchObject>
+    public target: EventTarget
+    public timestamp: int64
+    public source: SourceType
+    public pressure: double
+    public tiltX: double
+    public tiltY: double
+    public sourceTool: SourceTool
+    public deviceId?: int32 | undefined
+    public targetDisplayId?: int32 | undefined
+    constructor(peerPtr: KPointer) {
+        this.ptr = peerPtr
+        this.getModifierKeyState = this.getGetModifierKeyState()
+        this.type = TouchType.Down
+        this.touches = []
+        this.changedTouches = []
+        this.target = { area: { width: 0, height: 0, position: {}, globalPosition: {} } }
+        this.timestamp = 0
+        this.source = SourceType.TouchScreen
+        this.pressure = 0.0
+        this.tiltX = 0.0
+        this.tiltY = 0.0
+        this.sourceTool = SourceTool.Unknown
+        this.deviceId = 0
+        this.targetDisplayId = 0
+    }
+    
+    public stopPropagation(): void {
+        TouchEventExtender.stopPropagation(this.ptr)
+        return
+    }
+    public preventDefault(): void {
+        TouchEventExtender.preventDefault(this.ptr)
+        return
+    }
+    public getHistoricalPoints(): Array<HistoricalPoint> | undefined {
+        const points = TouchEventExtender.getHistoricalPoints(this.ptr)
+        return points
+    }
+    private getPtr(): KPointer {
+        return this.ptr
+    }
+    private getGetModifierKeyState(): ModifierKeyStateGetter | undefined {
+        return hookTouchEventGetModifierKeyState(this.ptr)
+    }
+    private getType(): TouchType {
+        return this.type
+    }
+    private getTouches(): Array<TouchObject> {
+        return this.touches
+    }
+    private getChangedTouches(): Array<TouchObject> {
+        return this.changedTouches
+    }
+    private getTarget(): EventTarget {
+        return this.target
+    }
+    private setTarget(target: EventTarget): void {
+        return
+    }
+    private getTimestamp(): int64 {
+        return this.timestamp
+    }
+    private setTimestamp(timestamp: int64): void {
+        return
+    }
+    private getSource(): SourceType {
+        return this.source
+    }
+    private setSource(source: SourceType): void {
+        return
+    }
+    private getPressure(): double {
+        return this.pressure
+    }
+    private setPressure(pressure: double): void {
+        return
+    }
+    private getTiltX(): double {
+        return this.tiltX
+    }
+    private setTiltX(tiltX: double): void {
+        return
+    }
+    private getTiltY(): double {
+        return this.tiltY
+    }
+    private setTiltY(tiltY: double): void {
+        return
+    }
+    private getSourceTool(): SourceTool {
+        return this.sourceTool
+    }
+    private setSourceTool(sourceTool: SourceTool): void {
+        return
+    }
+    private getDeviceId(): int32 | undefined {
+        return this.deviceId
+    }
+    private setDeviceId(deviceId: int32 | undefined): void {
+        return
+    }
+    private getTargetDisplayId(): int32 | undefined {
+        return this.targetDisplayId
+    }
+    private setTargetDisplayId(targetDisplayId: int32 | undefined): void {
+        return
+    }
+}
+
 export class ChildrenMainSizeInternal {
     public static fromPtr(ptr: KPointer): ChildrenMainSize {
         const obj: ChildrenMainSize = new ChildrenMainSize(0)

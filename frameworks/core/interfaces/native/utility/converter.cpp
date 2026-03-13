@@ -3944,6 +3944,49 @@ TouchLocationInfo Convert(const Ark_TouchObject& src)
 }
 
 template<>
+void AssignCast(std::optional<TouchType>& dst, const Ark_TouchType& src)
+{
+    switch (src) {
+        case Ark_TouchType::ARK_TOUCH_TYPE_DOWN: dst = TouchType::DOWN; break;
+        case Ark_TouchType::ARK_TOUCH_TYPE_UP: dst = TouchType::UP; break;
+        case Ark_TouchType::ARK_TOUCH_TYPE_MOVE: dst = TouchType::MOVE; break;
+        case Ark_TouchType::ARK_TOUCH_TYPE_CANCEL: dst = TouchType::CANCEL; break;
+        default: LOGE("Unexpected enum value in Ark_TouchType: %{public}d", src);
+    }
+}
+
+template<>
+SourceTool Convert(const Ark_SourceTool& src)
+{
+    SourceTool dst = SourceTool::UNKNOWN;
+    switch (src) {
+        case Ark_SourceTool::ARK_SOURCE_TOOL_UNKNOWN: dst = SourceTool::UNKNOWN; break;
+        case Ark_SourceTool::ARK_SOURCE_TOOL_FINGER: dst = SourceTool::FINGER; break;
+        case Ark_SourceTool::ARK_SOURCE_TOOL_PEN: dst = SourceTool::PEN; break;
+        case Ark_SourceTool::ARK_SOURCE_TOOL_MOUSE: dst = SourceTool::MOUSE; break;
+        case Ark_SourceTool::ARK_SOURCE_TOOL_TOUCHPAD: dst = SourceTool::TOUCHPAD; break;
+        case Ark_SourceTool::ARK_SOURCE_TOOL_JOYSTICK: dst = SourceTool::JOYSTICK; break;
+        default: LOGE("Unexpected enum value in Ark_SourceTool: %{public}d", src);
+    }
+    return dst;
+}
+
+template<>
+SourceType Convert(const Ark_SourceType& src)
+{
+    SourceType dst = SourceType::NONE;
+    switch (src) {
+        case Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN: dst = SourceType::NONE; break;
+        case Ark_SourceType::ARK_SOURCE_TYPE_MOUSE: dst = SourceType::MOUSE; break;
+        case Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN: dst = SourceType::TOUCH; break;
+        case Ark_SourceType::ARK_SOURCE_TYPE_KEY: dst = SourceType::KEYBOARD; break;
+        case Ark_SourceType::ARK_SOURCE_TYPE_JOYSTICK: dst = SourceType::JOYSTICK; break;
+        default: LOGE("Unexpected enum value in Ark_SourceType: %{public}d", src);
+    }
+    return dst;
+}
+
+template<>
 std::set<SourceTool> Convert(const Array_SourceTool& src)
 {
     std::set<SourceTool> dst = {};
@@ -3955,6 +3998,7 @@ std::set<SourceTool> Convert(const Array_SourceTool& src)
     }
     return dst;
 }
+
 template<>
 std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType& src)
 {

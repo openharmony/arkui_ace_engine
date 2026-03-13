@@ -239,6 +239,13 @@ export function hookBaseEventGetModifierKeyState(event: BaseEventInternal): Modi
   return returnResult
 }
 
+export function hookTouchEventGetModifierKeyState(ptr: KPointer): ModifierKeyStateGetter | undefined  {
+  let returnResult: ModifierKeyStateGetter = (keys: Array<string>) => {
+    return ArkUIAniModule._TouchEvent_getModifierKeyState(ptr, keys);
+  }
+  return returnResult
+}
+
 export function hookDragEventGetModifierKeyState(event: DragEventInternal): ModifierKeyStateGetter | undefined  {
   let returnResult: ModifierKeyStateGetter = (keys: Array<string>) => {
     return ArkUIAniModule._DragEvent_getModifierKeyState(event!.peer!.ptr, keys);

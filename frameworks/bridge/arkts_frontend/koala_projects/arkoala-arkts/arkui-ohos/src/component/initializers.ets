@@ -14,8 +14,9 @@
  */
 
 import { RectResult, TouchTestStrategy } from "./common"
-import { ColorSpace, GestureEvent, GestureRecognizer, EventTarget, SourceType, SourceTool } from '#generated'
+import { ColorSpace, GestureEvent, GestureRecognizer, EventTarget, SourceType, SourceTool, TouchType, TouchObject } from '#generated'
 import { GestureActionPhase } from '@ohos.arkui.UIContext'
+import { nullptr, KPointer } from '@koalaui/interop'
 
 export namespace initializers {
     export namespace arkui.component {
@@ -74,6 +75,19 @@ export namespace initializers {
                 export const alpha = 0
                 export const colorSpace = ColorSpace.SRGB
                 export const resourceId = -1
+            }
+            export namespace TouchEventProxyNS {
+                export const target: EventTarget = { area: { width: 0, height: 0, position: {}, globalPosition: {} } }
+                export const timeStamp = 0
+                export const source = SourceType.TouchScreen
+                export const pressure = 0.0
+                export const tiltX = 0.0
+                export const tiltY = 0.0
+                export const sourceTool = SourceTool.Unknown
+                export const type = TouchType.Down
+                export const touches: Array<TouchObject> = []
+                export const changedTouches: Array<TouchObject> = []
+                export const ptr: KPointer = nullptr
             }
         }
         export namespace waterFlow {

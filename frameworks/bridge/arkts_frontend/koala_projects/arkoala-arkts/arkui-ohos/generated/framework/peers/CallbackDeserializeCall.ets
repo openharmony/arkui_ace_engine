@@ -16,9 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AccessibilityActionInterceptCallback, AccessibilityCallback, AccessibilityHoverEvent_serializer, AccessibilityFocusCallback, AccessibilityTransparentCallback, TouchEvent_serializer, Callback as arkui_component_common_Callback, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, DragItemInfo_serializer, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnGetPreviewBadgeCallback, OnItemDragStartCallback, OnMoveHandler, OnNeedSoftkeyboardCallback, OnScrollCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam_serializer, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityHoverEvent, TouchEvent, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, SpringLoadingContext, DragEvent, DrawContext as arkui_component_common_DrawContext, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, DragItemInfo, PopupStateChangeParam } from './../../component/common'
+import { AccessibilityActionInterceptCallback, AccessibilityCallback, AccessibilityHoverEvent_serializer, AccessibilityFocusCallback, AccessibilityTransparentCallback, Callback as arkui_component_common_Callback, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, DragItemInfo_serializer, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnGetPreviewBadgeCallback, OnItemDragStartCallback, OnMoveHandler, OnNeedSoftkeyboardCallback, OnScrollCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam_serializer, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityHoverEvent, TouchEvent, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, SpringLoadingContext, DragEvent, DrawContext as arkui_component_common_DrawContext, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, DragItemInfo, PopupStateChangeParam } from './../../component/common'
 import { resourceFinalizerRegister, registerApiEventHandler, ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer } from '@koalaui/interop'
-import { AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomNodeBuilderT, BusinessErrorInterface, BusinessErrorInterface_Void_serializer, GestureEventHandler, GestureSwipeHandler, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, PageMapNodeBuilder, RestrictedWorker_onerror_Callback, ErrorEvent_serializer, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents_serializer, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo_serializer, WorkerEventListener, Event_serializer, ErrorEvent, MessageEvents, InnerGestureTriggerInfo, Event } from './../../component/idlize'
+import { TouchEventProxy, TouchEventProxy_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomNodeBuilderT, BusinessErrorInterface, BusinessErrorInterface_Void_serializer, GestureEventHandler, GestureSwipeHandler, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, PageMapNodeBuilder, RestrictedWorker_onerror_Callback, ErrorEvent_serializer, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents_serializer, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo_serializer, WorkerEventListener, Event_serializer, ErrorEvent, MessageEvents, InnerGestureTriggerInfo, Event } from './../../component/idlize'
+import { extractors } from '#handwritten'
 import { SwiperAnimationEvent_serializer, SwiperContentTransitionProxy_serializer, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult_serializer, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperContentTransitionProxy, SwiperContentWillScrollResult } from './../../component/swiper'
 import { ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
 import { ButtonConfiguration_serializer, ButtonTriggerClickCallback, ButtonConfiguration } from './../../component/button'
@@ -52,7 +53,6 @@ import { CheckBoxGroupConfiguration_serializer, OnCheckboxGroupChangeCallback, C
 import { CheckBoxConfiguration_serializer, OnCheckboxChangeCallback, CheckBoxConfiguration } from './../../component/checkbox'
 import { default as DataLoadHandler, default as DataProgressListener, default as DelayedDataLoadHandler, default as unifiedDataChannel } from '@ohos.data.unifiedDataChannel'
 import { DataPanelConfiguration_serializer, DataPanelConfiguration } from './../../component/dataPanel'
-import { extractors } from '#handwritten'
 import { GaugeConfiguration_serializer, GaugeConfiguration } from './../../component/gauge'
 import { ImageCompleteCallback, ImageLoadResult_serializer, ImageLoadResult } from './../../component/imageSpan'
 import { ImageErrorCallback, ImageError_serializer, ImageOnCompleteCallback, ImageCompleteEvent_serializer, ImageError, ImageCompleteEvent } from './../../component/image'
@@ -131,7 +131,8 @@ export function deserializeAndCallAccessibilityFocusCallback(thisDeserializer: D
 export function deserializeAndCallAccessibilityTransparentCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as AccessibilityTransparentCallback)
-    let event: TouchEvent = (TouchEvent_serializer.read(thisDeserializer) as TouchEvent)
+    const eventTmpBufDeserialized: TouchEventProxy = TouchEventProxy_serializer.read(thisDeserializer)
+    let event: TouchEvent = extractors.transform_Ark_TouchEventProxy_to_Ark_TouchEvent(eventTmpBufDeserialized)
     call(event)
 }
 export function deserializeAndCallAnimationEndHandler(thisDeserializer: DeserializerBase): void {
@@ -1935,10 +1936,18 @@ export function deserializeAndCallCallback_TimePickerResult_Void(thisDeserialize
     let data: TimePickerResult = TimePickerResult_serializer.read(thisDeserializer)
     call(data)
 }
-export function deserializeAndCallCallback_TouchEvent_HitTestMode(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_TouchEvent_Void(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as ((event: TouchEvent) => void))
+    const eventTmpBufDeserialized: TouchEventProxy = TouchEventProxy_serializer.read(thisDeserializer)
+    let event: TouchEvent = extractors.transform_Ark_TouchEventProxy_to_Ark_TouchEvent(eventTmpBufDeserialized)
+    call(event)
+}
+export function deserializeAndCallCallback_TouchEventProxy_HitTestMode(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<TouchEvent, HitTestMode>)
-    let data: TouchEvent = (TouchEvent_serializer.read(thisDeserializer) as TouchEvent)
+    const dataTmpBufDeserialized: TouchEventProxy = TouchEventProxy_serializer.read(thisDeserializer)
+    let data: TouchEvent = extractors.transform_Ark_TouchEventProxy_to_Ark_TouchEvent(dataTmpBufDeserialized)
     const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync: KPointer = thisDeserializer.readPointer()
@@ -1957,11 +1966,12 @@ export function deserializeAndCallCallback_TouchEvent_HitTestMode(thisDeserializ
     const callResult = call(data)
     continuationResult(callResult)
 }
-export function deserializeAndCallCallback_TouchEvent_Void(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_TouchEventProxy_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
-    const call = (ResourceHolder.instance().get(resourceId) as ((event: TouchEvent) => void))
-    let event: TouchEvent = (TouchEvent_serializer.read(thisDeserializer) as TouchEvent)
-    call(event)
+    const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<TouchEvent, void>)
+    const dataTmpBufDeserialized: TouchEventProxy = TouchEventProxy_serializer.read(thisDeserializer)
+    let data: TouchEvent = extractors.transform_Ark_TouchEventProxy_to_Ark_TouchEvent(dataTmpBufDeserialized)
+    call(data)
 }
 export function deserializeAndCallCallback_TouchResult_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -4405,8 +4415,9 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_TEXTPICKERRESULT_VOID: return deserializeAndCallCallback_TextPickerResult_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_TEXTRANGE_VOID: return deserializeAndCallCallback_TextRange_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_TIMEPICKERRESULT_VOID: return deserializeAndCallCallback_TimePickerResult_Void(thisDeserializer);
-        case CallbackKind.KIND_CALLBACK_TOUCHEVENT_HITTESTMODE: return deserializeAndCallCallback_TouchEvent_HitTestMode(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_TOUCHEVENT_VOID: return deserializeAndCallCallback_TouchEvent_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_TOUCHEVENTPROXY_HITTESTMODE: return deserializeAndCallCallback_TouchEventProxy_HitTestMode(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_TOUCHEVENTPROXY_VOID: return deserializeAndCallCallback_TouchEventProxy_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_TOUCHRESULT_VOID: return deserializeAndCallCallback_TouchResult_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_TUPLE_I32_I32_I32_I32_VOID: return deserializeAndCallCallback_Tuple_I32_I32_I32_I32_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_TUPLE_I32_I32_VOID: return deserializeAndCallCallback_Tuple_I32_I32_Void(thisDeserializer);

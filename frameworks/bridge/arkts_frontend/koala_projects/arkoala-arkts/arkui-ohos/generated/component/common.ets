@@ -18,7 +18,7 @@
 
 // instuctive change begin
 // no need import the CustomSpan
-import { hookBaseEventGetModifierKeyState, hookDragEventGetSummary, hookDragEventStartDataLoading, hookDragEventSetDataLoadParams, hookEnableInternalDropAnimation, hookDragEventGetModifierKeyState, extractors, hookKeyEventGetModifierKeyState, DrawModifier, GestureModifier, GestureType, WrappedBuilder, GestureControl, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, hookAllowDrop, hookDragPreviewOptions, CustomStyles, initializers, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from '#handwritten'
+import { hookBaseEventGetModifierKeyState, hookTouchEventGetModifierKeyState, hookDragEventGetSummary, hookDragEventStartDataLoading, hookDragEventSetDataLoadParams, hookEnableInternalDropAnimation, hookDragEventGetModifierKeyState, extractors, hookKeyEventGetModifierKeyState, DrawModifier, GestureModifier, GestureType, WrappedBuilder, GestureControl, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, hookAllowDrop, hookDragPreviewOptions, CustomStyles, initializers, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from '#handwritten'
 // instuctive change end
 import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
@@ -91,7 +91,7 @@ import { ohos_arkui_UIContext_UIContext_serializer } from './../framework/ohos.a
 import { OnScrollFrameBeginCallback } from './scroll'
 // instructive change start
 import { _animationStart, _animationStop } from "arkui/base/ArkAnimation"
-import { AnimationExtender } from '#generated';
+import { AnimationExtender, TouchEventExtender } from '#generated';
 import { ArkUIAniModule } from "arkui.ani"
 // instructive change end
 export interface BaseEvent {
@@ -2251,7 +2251,7 @@ export class TransitionEffect implements MaterializedBase {
 }
 export interface UICommonEvent {
     setOnClick(callback_: ((event: ClickEvent) => void) | undefined): void
-    setOnTouch(callback_: ((event: TouchEvent) => void) | undefined): void
+    setOnTouch(callback_: Callback<TouchEvent, void> | undefined): void
     setOnAppear(callback_: VoidCallback | undefined): void
     setOnDisappear(callback_: VoidCallback | undefined): void
     setOnKeyEvent(callback_: Callback<KeyEvent, void> | undefined): void
@@ -2288,8 +2288,8 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         this.setOnClick_serialize(callback__casted)
         return
     }
-    public setOnTouch(callback_: ((event: TouchEvent) => void) | undefined): void {
-        const callback__casted = callback_ as (((event: TouchEvent) => void) | undefined)
+    public setOnTouch(callback_: Callback<TouchEvent, void> | undefined): void {
+        const callback__casted = callback_ as (Callback<TouchEvent, void> | undefined)
         this.setOnTouch_serialize(callback__casted)
         return
     }
@@ -2351,7 +2351,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnClick(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnTouch_serialize(callback_: ((event: TouchEvent) => void) | undefined): void {
+    private setOnTouch_serialize(callback_: Callback<TouchEvent, void> | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -12352,17 +12352,6 @@ export class TextContentControllerBase_serializer {
         let valueDeserializer: DeserializerBase = buffer
         let ptr: KPointer = valueDeserializer.readPointer()
         return TextContentControllerBaseInternal.fromPtr(ptr)
-    }
-}
-export class TouchEvent_serializer {
-    public static write(buffer: SerializerBase, value: TouchEvent): void {
-        let valueSerializer: SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): TouchEvent {
-        let valueDeserializer: DeserializerBase = buffer
-        let ptr: KPointer = valueDeserializer.readPointer()
-        return TouchEventInternal.fromPtr(ptr)
     }
 }
 export class TouchTestInfo_serializer {

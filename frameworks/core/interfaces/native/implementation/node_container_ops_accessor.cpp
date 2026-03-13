@@ -136,9 +136,23 @@ void SetOnTouchEventImpl(Ark_NativePointer self, const Opt_Callback_TouchEvent_V
         ViewAbstract::DisableOnTouch(frameNode);
         return;
     }
-    auto onEvent = [callback = CallbackHelper(value->value)](TouchEventInfo& info) {
-        const auto event = Converter::SyncEvent<Ark_TouchEvent>(info);
-        callback.InvokeSync(event.ArkValue());
+    auto onEvent = [arkCallback = CallbackHelper(value->value)](TouchEventInfo& info) {
+        Ark_TouchEventProxy proxy = {
+            .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
+            .timeStamp = Converter::ArkValue<Ark_Int64>(
+                static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+            .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
+            .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
+            .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
+            .sourceTool = Converter::ArkValue<Ark_SourceTool>(info.GetSourceTool()),
+            .deviceId = Converter::ArkValue<Opt_Int32>(info.GetDeviceId()),
+            .targetDisplayId = Converter::ArkValue<Opt_Int32>(info.GetTargetDisplayId()),
+            .type = Converter::ArkValue<Ark_TouchType>(info.GetChangedTouches().front().GetTouchType()),
+            .touches = Converter::ArkValue<Array_TouchObject>(info.GetTouches(), Converter::FC),
+            .changedTouches = Converter::ArkValue<Array_TouchObject>(info.GetChangedTouches(), Converter::FC),
+            .ptr = &info
+        };
+        arkCallback.InvokeSync(proxy);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }

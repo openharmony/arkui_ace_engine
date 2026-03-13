@@ -1382,8 +1382,23 @@ void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_V
     Ark_NativeEmbedTouchInfo parameter;
     parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
     auto touchEventInfo = eventInfo->GetTouchEventInfo();
-    const auto event = Converter::SyncEvent<Ark_TouchEvent>(touchEventInfo);
-    parameter.touchEvent = Converter::ArkValue<Opt_TouchEvent>(event.ArkValue());
+    Ark_TouchEventProxy proxy = {
+        .target = Converter::ArkValue<Ark_EventTarget>(touchEventInfo.GetTarget()),
+        .timeStamp = Converter::ArkValue<Ark_Int64>(
+            static_cast<int64_t>(touchEventInfo.GetTimeStamp().time_since_epoch().count())),
+        .pressure = Converter::ArkValue<Ark_Float64>(touchEventInfo.GetForce()),
+        .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchEventInfo.GetTiltX().value_or(0))),
+        .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchEventInfo.GetTiltY().value_or(0))),
+        .sourceTool = Converter::ArkValue<Ark_SourceTool>(touchEventInfo.GetSourceTool()),
+        .deviceId = Converter::ArkValue<Opt_Int32>(touchEventInfo.GetDeviceId()),
+        .targetDisplayId = Converter::ArkValue<Opt_Int32>(touchEventInfo.GetTargetDisplayId()),
+        .type = Converter::ArkValue<Ark_TouchType>(touchEventInfo.GetChangedTouches().front().GetTouchType()),
+        .touches = Converter::ArkValue<Array_TouchObject>(touchEventInfo.GetTouches(), Converter::FC),
+        .changedTouches = Converter::ArkValue<Array_TouchObject>(touchEventInfo.GetChangedTouches(), Converter::FC),
+        .ptr = &info
+    };
+    parameter.touchEvent = Converter::ArkValue<Opt_TouchEventProxy>(proxy);
+
     Ark_EventResult arkEventResult;
     auto peer = new EventResultPeer();
     peer->handler = eventInfo->GetResult();

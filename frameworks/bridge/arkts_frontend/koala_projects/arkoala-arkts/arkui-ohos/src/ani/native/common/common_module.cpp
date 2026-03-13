@@ -1748,6 +1748,32 @@ ani_boolean GetBaseEventModifierKeyState(
     return result;
 }
 
+ani_boolean GetTouchEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys)
+{
+    char** modifierKeys = nullptr;
+    int32_t modifierLength = 0;
+    if (!ConvertKeysToLowerStrings(env, keys, &modifierKeys, &modifierLength)) {
+        return false;
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        ReleaseCharArray(modifierKeys, modifierLength);
+        return false;
+    }
+
+    char** pressedKeys = nullptr;
+    int32_t pressedKeysLength = 0;
+    modifier->getCommonAniModifier()->getTouchEventPressedModifierKey(pointer, &pressedKeys, &pressedKeysLength);
+    bool result = CheckPressedKeysMatch(modifierKeys, modifierLength, pressedKeys, pressedKeysLength);
+    ReleaseCharArray(modifierKeys, modifierLength);
+    if (pressedKeys) {
+        ReleaseCharArray(pressedKeys, pressedKeysLength);
+    }
+    return result;
+}
+
 ani_boolean GetDragEventModifierKeyState(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys)
 {
