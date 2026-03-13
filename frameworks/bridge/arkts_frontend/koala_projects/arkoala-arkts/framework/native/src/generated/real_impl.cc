@@ -12948,6 +12948,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Ark_String* textBaseline)
     {
     }
+    Opt_Boolean GetAntialiasImpl(Ark_CanvasRenderer peer)
+    {
+        return {};
+    }
+    void SetAntialiasImpl(Ark_CanvasRenderer peer,
+                          const Opt_Boolean* antialias)
+    {
+    }
     } // CanvasRendererAccessor
     namespace CanvasRenderingContext2DAccessor {
     void DestroyPeerImpl(Ark_CanvasRenderingContext2D peer)
@@ -21611,6 +21619,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CanvasRendererAccessor::SetTextAlignImpl,
             CanvasRendererAccessor::GetTextBaselineImpl,
             CanvasRendererAccessor::SetTextBaselineImpl,
+            CanvasRendererAccessor::GetAntialiasImpl,
+            CanvasRendererAccessor::SetAntialiasImpl,
         };
         return &CanvasRendererAccessorImpl;
     }

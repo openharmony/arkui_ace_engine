@@ -124,6 +124,8 @@ public:
     void JsSetDirection(const JSCallbackInfo& info);
     void JsReset(const JSCallbackInfo& info);
     void JsSetLetterSpacing(const JSCallbackInfo& info);
+    void JsGetAntialias(const JSCallbackInfo& info);
+    void JsSetAntialias(const JSCallbackInfo& info);
 
     template<StatisticEventType T>
     void JSGetEmpty(const JSCallbackInfo& info)

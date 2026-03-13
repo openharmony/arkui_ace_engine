@@ -129,6 +129,8 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSOffscreenRenderingContext>::CustomProperty("letterSpacing",
         &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_LETTER_SPACING_GETTER>,
         &JSCanvasRenderer::JsSetLetterSpacing);
+    JSClass<JSOffscreenRenderingContext>::CustomProperty(
+        "antialias", &JSCanvasRenderer::JsGetAntialias, &JSCanvasRenderer::JsSetAntialias);
 
     // Define all methods of the "OffscreenCanvasRenderingContext2D"
     JSClass<JSOffscreenRenderingContext>::CustomMethod(

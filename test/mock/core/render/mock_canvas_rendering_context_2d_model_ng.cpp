@@ -49,6 +49,13 @@ void CanvasRenderingContext2DModelNG::SetStrokeText(const PaintState& state, con
 
 void CanvasRenderingContext2DModelNG::SetAntiAlias(bool anti) {}
 
+std::optional<bool> CanvasRenderingContext2DModelNG::GetAntialiasExt() const
+{
+    return std::nullopt;
+}
+
+void CanvasRenderingContext2DModelNG::SetAntialiasExt(std::optional<bool> isEnabled) {}
+
 void CanvasRenderingContext2DModelNG::SetFontWeight(const FontWeight& weight) {}
 
 void CanvasRenderingContext2DModelNG::SetFontStyle(const Ace::FontStyle& fontStyle) {}

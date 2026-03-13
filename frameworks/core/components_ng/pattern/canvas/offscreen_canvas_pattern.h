@@ -65,6 +65,8 @@ public:
     void PutImageData(const Ace::ImageData& imageData);
 
     void SetAntiAlias(bool isEnabled);
+    std::optional<bool> GetAntialiasExt() const;
+    void SetAntialiasExt(std::optional<bool> isEnabled);
     void SetFillRuleForPath(const CanvasFillRule rule);
     void SetFillRuleForPath2D(const CanvasFillRule rule);
     void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern);

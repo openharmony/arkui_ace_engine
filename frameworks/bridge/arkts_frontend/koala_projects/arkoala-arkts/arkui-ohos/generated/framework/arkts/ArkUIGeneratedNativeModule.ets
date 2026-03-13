@@ -3983,6 +3983,10 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasRenderer_getTextBaseline(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _CanvasRenderer_setTextBaseline(ptr: KPointer, textBaseline: KStringPtr): void
+    @ani.unsafe.Quick
+    native static _CanvasRenderer_getAntialias(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _CanvasRenderer_setAntialias(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasRenderingContext2D_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
     @ani.unsafe.Direct

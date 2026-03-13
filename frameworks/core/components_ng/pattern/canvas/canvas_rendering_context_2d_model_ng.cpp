@@ -122,6 +122,20 @@ void CanvasRenderingContext2DModelNG::SetAntiAlias(bool anti)
     pattern->SetAntiAlias(anti);
 }
 
+std::optional<bool> CanvasRenderingContext2DModelNG::GetAntialiasExt() const
+{
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    return pattern->GetAntialiasExt();
+}
+
+void CanvasRenderingContext2DModelNG::SetAntialiasExt(std::optional<bool> isEnabled)
+{
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAntialiasExt(isEnabled);
+}
+
 void CanvasRenderingContext2DModelNG::SetFontWeight(const FontWeight& weight)
 {
     auto pattern = weakPattern_.Upgrade();

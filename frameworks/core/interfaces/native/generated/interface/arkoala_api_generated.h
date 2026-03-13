@@ -27987,6 +27987,9 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
     Ark_String (*getTextBaseline)(Ark_CanvasRenderer peer);
     void (*setTextBaseline)(Ark_CanvasRenderer peer,
                             const Ark_String* textBaseline);
+    Opt_Boolean (*getAntialias)(Ark_CanvasRenderer peer);
+    void (*setAntialias)(Ark_CanvasRenderer peer,
+                         const Opt_Boolean* antialias);
 } GENERATED_ArkUICanvasRendererAccessor;
 
 typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {

@@ -1718,4 +1718,29 @@ void JSCanvasRenderer::JsSetLetterSpacing(const JSCallbackInfo& info)
     paintState_.SetLetterSpacing(letterSpacingCal);
     renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
 }
+
+// antialias: boolean | undefined
+void JSCanvasRenderer::JsGetAntialias(const JSCallbackInfo& info)
+{
+    std::optional<bool> antialias = renderingContext2DModel_->GetAntialiasExt();
+    if (antialias.has_value()) {
+        auto returnValue = JSVal(ToJSValue(antialias.value()));
+        auto returnPtr = JSRef<JSVal>::Make(returnValue);
+        info.SetReturnValue(returnPtr);
+    } else {
+        info.SetReturnValue(JSVal::Undefined());
+    }
+}
+
+// antialias: boolean | undefined
+void JSCanvasRenderer::JsSetAntialias(const JSCallbackInfo& info)
+{
+    bool antialias = false;
+    if (info.GetBooleanArg(0, antialias)) {
+        renderingContext2DModel_->SetAntialiasExt(antialias);
+    } else {
+        renderingContext2DModel_->SetAntialiasExt(std::nullopt);
+    }
+}
+
 } // namespace OHOS::Ace::Framework
