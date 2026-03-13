@@ -43,19 +43,23 @@ class PageInfo {
 
 @Entry
 @Component
-struct RefreshMainPage {
+struct WaterFlowMainPage {
   @State routers: Array<PageInfo> = []
   private listScroller: ListScroller = new ListScroller()
 
   aboutToAppear(): void {
     this.routers = []
     this.routers.push(new PageInfo('Back', 'pages/Index'))
-    this.routers.push(new PageInfo('RefreshNumberSample', 'pages/refresh/RefreshNumberSample'))
+    this.routers.push(new PageInfo('WaterFlow 声明式', 'pages/waterflow/WaterFlowDeclare'))
+    this.routers.push(new PageInfo('WaterFlow 命令式', 'pages/waterflow/WaterFlowCommand'))
+    this.routers.push(new PageInfo('WaterFlowNumberSample', 'pages/waterflow/WaterFlowNumberSample'))
+    this.routers.push(new PageInfo('makeObserveWater', 'pages/waterflow/makeObserveWater'))
+    this.routers.push(new PageInfo('RepeatBoolWaterFlow', 'pages/waterflow/RepeatBoolWaterFlow'))
   }
 
   build() {
     Column(undefined) {
-      Text('Refresh')
+      Text('WaterFlow')
         .fontSize(20)
         .margin({ top: 12, bottom: 8 })
       List({ scroller: this.listScroller }) {

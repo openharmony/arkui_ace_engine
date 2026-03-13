@@ -64,12 +64,11 @@ import hilog from '@ohos.hilog'
 @Component
 struct MyStateSample {
   @State selectedFlag: boolean = false;
-  @State numbers: Array<string> = new Array<string>();
+  @State numbers: Array<string> = [];
   private listScroller: ListScroller = new ListScroller();
   private message: string = 'changeSelected';
 
-  aboutToAppear()
-  {
+  aboutToAppear() {
     for (let i = 0; i < 10; i++) {
       this.numbers.push(i.toString())
     }

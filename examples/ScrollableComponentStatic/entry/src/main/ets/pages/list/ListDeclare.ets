@@ -41,10 +41,10 @@ struct ListDeclare {
   @State private bindResult: string = 'Dynamic scroller not bound';
   @State private defaultOffsetText: string = 'Default yOffset: 0';
   @State private dynamicOffsetText: string = 'Dynamic yOffset: 0';
-  @State private items: Array<number> = new Array<number>();
+  @State private items: Array<number> = [];
 
   aboutToAppear(): void {
-    this.items = new Array<number>();
+    this.items = [];
     for (let i: number = 0; i < 40; i++) {
       this.items.push(i);
     }

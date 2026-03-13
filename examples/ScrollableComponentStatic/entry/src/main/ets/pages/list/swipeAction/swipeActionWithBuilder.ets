@@ -64,7 +64,7 @@ import hilog from '@ohos.hilog'
 @Component
 struct SwipeActionTest {
   @State selectedFlag: boolean = false;
-  @State numbers: Array<string> = new Array<string>();
+  @State numbers: Array<string> = [];
   @State enterEndDeleteAreaString: string = 'not enterEndDeleteArea';
   @State exitEndDeleteAreaString: string = 'not exitEndDeleteArea';
   private listScroller: ListScroller = new ListScroller();

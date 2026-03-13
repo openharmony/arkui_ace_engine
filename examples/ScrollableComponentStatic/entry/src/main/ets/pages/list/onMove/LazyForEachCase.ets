@@ -40,7 +40,7 @@ import hilog from '@ohos.hilog'
 // BasicDataSource实现了IDataSource接口，用于管理listener监听，以及通知LazyForEach数据更新
 class BasicDataSource<string> implements IDataSource<string> {
   private listeners: Array<DataChangeListener> = Array<DataChangeListener>();
-  private originDataArray: Array<string> = new Array<string>();
+  private originDataArray: Array<string> = [];
 
   public totalCount(): number {
     return this.originDataArray.length;

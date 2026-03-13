@@ -13,11 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Entry, Text,Builder, Column,TextAlign, Component,ItemDragInfo, Button, ClickEvent, Grid, ForEach, Color, GridItem ,Scroller, ColumnOptions, GridAttribute,Row, RowOptions, Padding, Margin, EdgeEffect , BarState} from '@ohos.arkui.component'
+import {
+  BarState,
+  Builder,
+  Button,
+  ClickEvent,
+  Color,
+  Column,
+  ColumnOptions,
+  Component,
+  EdgeEffect,
+  Entry,
+  ForEach,
+  Grid,
+  GridAttribute,
+  GridItem,
+  ItemDragInfo,
+  Margin,
+  Padding,
+  Row,
+  RowOptions,
+  Scroller,
+  Text,
+  TextAlign
+} from '@ohos.arkui.component'
 import { State, Link } from '@ohos.arkui.stateManagement'
-import { GridModifier } from "@ohos.arkui.modifier";
+import { GridModifier } from '@ohos.arkui.modifier';
 import hilog from '@ohos.hilog'
-import router from '@ohos.router'
 
 
 // 修改基类
@@ -27,7 +49,10 @@ class CustomModifier extends GridModifier {
 
 @Component
 struct ModifierComponent {
-  @State numbers: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]
+  @State numbers: string[] = [
+    '0', '1', '2', '3', '4', '5', '6', '7',
+    '8', '9', '10', '11', '12', '13', '14', '15'
+  ]
   scroller: Scroller = new Scroller()
   customModifier: GridModifier = new CustomModifier()
     .friction(0.8)
@@ -51,7 +76,7 @@ struct ModifierComponent {
 
   @Builder pixelMapBuilder() { //拖拽过程样式
     Column() {
-      Text("xxxxxxxad")
+      Text('xxxxxxxad')
         .fontSize(16)
         .backgroundColor('#F9CF93')
         .width(80)

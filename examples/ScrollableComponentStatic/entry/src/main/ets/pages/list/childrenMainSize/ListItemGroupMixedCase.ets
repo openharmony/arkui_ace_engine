@@ -67,7 +67,7 @@ import hilog from '@ohos.hilog'
 @Entry
 @Component
 struct ListChildrenMainSizeTest {
-  @State numbers: string[] = new Array<string>();
+  @State numbers: string[] = [];
   @State listChildrenSize: ChildrenMainSize = new ChildrenMainSize(100);
   @State groupChildrenSize: ChildrenMainSize = new ChildrenMainSize(100);
   private listScroller: ListScroller = new ListScroller();

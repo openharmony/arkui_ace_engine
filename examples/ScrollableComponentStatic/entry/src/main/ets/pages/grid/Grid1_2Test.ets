@@ -40,12 +40,11 @@ import {
 } from '@ohos.arkui.component'
 import { State } from '@ohos.arkui.stateManagement'
 import hilog from '@ohos.hilog'
-import router from '@ohos.router'
 
 @Entry
 @Component
 struct GridExample {
-  irregularIndexes: Array<number> = new Array<number>()
+  irregularIndexes: Array<number> = []
   layoutOptions2: GridLayoutOptions = {
     regularSize: [1, 1],
     irregularIndexes: this.irregularIndexes,

@@ -43,19 +43,28 @@ class PageInfo {
 
 @Entry
 @Component
-struct RefreshMainPage {
+struct GridMainPage {
   @State routers: Array<PageInfo> = []
   private listScroller: ListScroller = new ListScroller()
 
   aboutToAppear(): void {
     this.routers = []
     this.routers.push(new PageInfo('Back', 'pages/Index'))
-    this.routers.push(new PageInfo('RefreshNumberSample', 'pages/refresh/RefreshNumberSample'))
+    this.routers.push(new PageInfo('Grid 声明式', 'pages/grid/GridDeclare'))
+    this.routers.push(new PageInfo('Grid 命令式', 'pages/grid/GridCommand'))
+    this.routers.push(new PageInfo('Grid1_2Test', 'pages/grid/Grid1_2Test'))
+    this.routers.push(new PageInfo('GridModifierSample1', 'pages/grid/GridModifierSample1'))
+    this.routers.push(new PageInfo('GridModifierSample2', 'pages/grid/GridModifierSample2'))
+    this.routers.push(new PageInfo('GridModifierSample3', 'pages/grid/GridModifierSample3'))
+    this.routers.push(new PageInfo('GridModifierSample4', 'pages/grid/GridModifierSample4'))
+    this.routers.push(new PageInfo('GridItemNumber', 'pages/grid/GridItemNumber'))
+    this.routers.push(new PageInfo('GridNumberSample1', 'pages/grid/GridNumberSample1'))
+    this.routers.push(new PageInfo('GridNumberSample2', 'pages/grid/GridNumberSample2'))
   }
 
   build() {
     Column(undefined) {
-      Text('Refresh')
+      Text('Grid')
         .fontSize(20)
         .margin({ top: 12, bottom: 8 })
       List({ scroller: this.listScroller }) {

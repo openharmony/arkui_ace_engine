@@ -24,7 +24,7 @@ class PageData {
   }
 }
 
-class DraggingData {
+class GridSwiperDraggingData {
   public data?: string;
 }
 
@@ -32,7 +32,7 @@ class DraggingData {
 struct DraggableGrid {
   @Require @Param swiperCtrl: SwiperController;
   @Require @Param data: string[];
-  @Require @Param draggingData: DraggingData;
+  @Require @Param draggingData: GridSwiperDraggingData;
   @Builder
   ItemBuilder(data: string, size: SizeOptions) {
     Stack() {
@@ -66,7 +66,18 @@ struct DraggableGrid {
     .editMode(true)
     .supportAnimation(true)
     .onItemDragStart((event: ItemDragInfo, itemIndex: number)=>{
-      let rect = this.scroller.getItemRect(itemIndex);
+      let rect: RectResult = {
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0
+      };
+      try {
+        rect = this.scroller.getItemRect(itemIndex);
+      } catch (error) {
+        console.error(`Failed to get item rect for index ${itemIndex}:`, error);
+        return;
+      }
       let size: SizeOptions = {
         width: rect.width,
         height: rect.height
@@ -122,7 +133,7 @@ struct DraggableGrid {
 
 @Entry
 @ComponentV2
-struct Index {
+struct GridSwiperDragSortPage {
   swiperCtrl: SwiperController = new SwiperController()
   @Local data: PageData[] = [
     new PageData('A', ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8']),
@@ -131,7 +142,7 @@ struct Index {
     new PageData('D', ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8']),
     new PageData('E', ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8']),
   ]
-  @Local draggingData: DraggingData = new DraggingData()
+  @Local draggingData: GridSwiperDraggingData = new GridSwiperDraggingData()
   build() {
     Stack() {
       Swiper(this.swiperCtrl) {

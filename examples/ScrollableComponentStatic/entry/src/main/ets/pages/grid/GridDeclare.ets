@@ -12,39 +12,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use static'
 
-import { typeNode } from '@kit.ArkUI';
+import { typeNode } from '@ohos.arkui.node';
+import {
+  Button,
+  Column,
+  Component,
+  Edge,
+  Entry,
+  FontWeight,
+  ForEach,
+  Grid,
+  GridItem,
+  Row,
+  Scroller,
+  Text,
+  TextAlign
+} from '@ohos.arkui.component';
+import { State } from '@ohos.arkui.stateManagement';
 
 @Entry
 @Component
-struct WaterFlowDeclare {
-  private static readonly COMPONENT_ID: string = 'COMPONENT_ID';
+struct GridDeclare {
+  private static readonly COMPONENT_ID: string = 'grid_bind_demo_001';
   private defaultScroller: Scroller = new Scroller();
   private dynamicScroller: Scroller = new Scroller();
   @State private bindResult: string = 'Dynamic scroller not bound';
   @State private defaultOffsetText: string = 'Default yOffset: 0';
   @State private dynamicOffsetText: string = 'Dynamic yOffset: 0';
-  @State private items: number[] = [];
+  @State private items: Array<number> = [];
 
   aboutToAppear(): void {
     this.items = [];
-    for (let i = 0; i < 40; i++) {
+    for (let i: number = 0; i < 40; i++) {
       this.items.push(i);
     }
   }
 
-  private bindScrollController(): void {
-    const frameNode = this.getUIContext().getFrameNodeById(WaterFlowDeclare.COMPONENT_ID);
+  private bindController(): void {
+    const frameNode = this.getUIContext().getFrameNodeById(GridDeclare.COMPONENT_ID);
     if (!frameNode) {
       this.bindResult = 'Bind failed: FrameNode is null';
       return;
     }
+    console.log('NodeType=' + frameNode.getNodeType());
     try {
-      typeNode.bindController(frameNode, this.dynamicScroller, 'WaterFlow');
+      typeNode.bindGridController(frameNode, this.dynamicScroller);
       this.bindResult = 'Bind success';
       this.refreshOffset();
     } catch (e) {
       this.bindResult = `Bind failed: code=${e.code}, msg=${e.message}`;
+      console.log(this.bindResult);
     }
   }
 
@@ -71,69 +90,77 @@ struct WaterFlowDeclare {
   }
 
   build() {
-    Column({ space: 12 }) {
-      Text('Declarative WaterFlow Demo')
+    Column() {
+      Text('Declarative Grid Static Demo')
         .fontSize(18)
         .fontWeight(FontWeight.Bold)
+        .margin({ bottom: 8 });
 
-      Text(this.bindResult).fontSize(14)
-      Text(this.defaultOffsetText).fontSize(14)
-      Text(this.dynamicOffsetText).fontSize(14)
+      Text(this.bindResult).fontSize(14).margin({ bottom: 4 });
+      Text(this.defaultOffsetText).fontSize(14).margin({ bottom: 4 });
+      Text(this.dynamicOffsetText).fontSize(14).margin({ bottom: 8 });
 
-      Row({ space: 10 }) {
+      Row() {
         Button('Bind Dynamic').onClick(() => {
-          this.bindScrollController();
-        })
+          this.bindController();
+        }).margin({ right: 10 });
+
         Button('Read Offsets').onClick(() => {
           this.refreshOffset();
-        })
-      }
+        });
+      }.margin({ bottom: 8 });
 
-      Text('Default Scroller').fontSize(14).fontWeight(FontWeight.Medium)
-      Row({ space: 10 }) {
+      Text('Default Scroller').fontSize(14).fontWeight(FontWeight.Medium).margin({ bottom: 4 });
+      Row() {
         Button('Default +120').onClick(() => {
           this.scrollBy(this.defaultScroller);
-        })
+        }).margin({ right: 10 });
+
         Button('Default Top').onClick(() => {
           this.scrollTop(this.defaultScroller);
-        })
+        }).margin({ right: 10 });
+
         Button('Default Bottom').onClick(() => {
           this.scrollBottom(this.defaultScroller);
-        })
-      }
+        });
+      }.margin({ bottom: 8 });
 
-      Text('Dynamic Scroller').fontSize(14).fontWeight(FontWeight.Medium)
-      Row({ space: 10 }) {
+      Text('Dynamic Scroller').fontSize(14).fontWeight(FontWeight.Medium).margin({ bottom: 4 });
+      Row() {
         Button('Dynamic +120').onClick(() => {
           this.scrollBy(this.dynamicScroller);
-        })
+        }).margin({ right: 10 });
+
         Button('Dynamic Top').onClick(() => {
           this.scrollTop(this.dynamicScroller);
-        })
+        }).margin({ right: 10 });
+
         Button('Dynamic Bottom').onClick(() => {
           this.scrollBottom(this.dynamicScroller);
-        })
-      }
+        });
+      }.margin({ bottom: 8 });
 
-      WaterFlow({scroller : this.defaultScroller}) {
+      Grid(this.defaultScroller) {
         ForEach(this.items, (idx: number) => {
-          FlowItem() {
+          GridItem() {
             Text(`Item ${idx}`)
               .width('100%')
               .height(48)
               .textAlign(TextAlign.Center)
-              .backgroundColor(idx % 2 === 0 ? '#f1f3f5' : '#e9ecef')
+              .backgroundColor(idx % 2 === 0 ? '#f1f3f5' : '#e9ecef');
           }
-        })
+        }, (idx: number) => idx.toString());
       }
-      .id(WaterFlowDeclare.COMPONENT_ID)
+      .key(GridDeclare.COMPONENT_ID)
+      .columnsTemplate('1fr')
+      .rowsGap(8)
       .height('70%')
       .width('100%')
       .borderWidth(1)
-      .borderColor('#d0d7de')
+      .borderColor('#d0d7de');
     }
     .padding(16)
     .width('100%')
-    .height('100%')
+    .height('100%');
   }
 }
