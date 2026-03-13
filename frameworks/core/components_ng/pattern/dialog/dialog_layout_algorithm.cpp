@@ -834,7 +834,6 @@ void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper
         keyboardAvoidMode_ == KeyboardAvoidMode::NONE) {
         return;
     }
-    auto hostNode = layoutWrapper->GetHostNode();
     auto childLayoutProperty = child->GetLayoutProperty();
     auto dialogProp = DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(childLayoutProperty);
