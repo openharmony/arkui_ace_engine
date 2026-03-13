@@ -2150,14 +2150,14 @@ ArkUINativeModuleValue SearchBridge::SetJsCustomKeyboard(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
     Local<JSValueRef> contentObject = runtimeCallInfo->GetCallArgRef(1);
-    if (argc < NUM_2 || !contentObject->IsObject(vm)) {
-        return panda::JSValueRef::Undefined(vm);
-    }
     ArkUINodeHandle nativeNode =
         reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (contentObject->IsUndefined() || contentObject->IsNull()) {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchCustomKeyboard(nativeNode);
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchCustomKeyboardWithBuilder();
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (argc < NUM_2 || !contentObject->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
     bool supportAvoidance = false;
