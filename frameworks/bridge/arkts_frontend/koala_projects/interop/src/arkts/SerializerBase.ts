@@ -212,7 +212,7 @@ export class SerializerBase implements Disposable {
 
     final toArray(): byte[] {
         const len = this.length()
-        let result = new byte[len]
+        let result = new byte[len](0)
         for (let i = 0; i < len; i++) {
             result[i] = unsafeMemory.readInt8(this._buffer + i)
         }
