@@ -32,6 +32,42 @@ struct Index {
       title: 'VideoExample',
       page: 'pages/VideoExample/VideoExampleRouter'
     },
+    {
+      title: 'CanvasExample',
+      page: 'pages/CanvasExample/CanvasExampleRouter'
+    },
+    {
+      title: 'CanvasGradientExample',
+      page: 'pages/CanvasGradientExample/CanvasGradientExampleRouter'
+    },
+    {
+      title: 'CanvasPatternExample',
+      page: 'pages/CanvasPatternExample/CanvasPatternExample'
+    },
+    {
+      title: 'DrawingRenderingContextExample',
+      page: 'pages/DrawingRenderingContextExample/DrawingRenderingContextExampleRouter'
+    },
+    {
+      title: 'EllipseExample',
+      page: 'pages/EllipseExample/EllipseExampleRouter'
+    },
+    {
+      title: 'ImageBitmapExample',
+      page: 'pages/ImageBitmapExample/ImageBitmapExampleRouter'
+    },
+    {
+      title: 'ImageDataExample',
+      page: 'pages/ImageDataExample/ImageDataExample'
+    },
+    {
+      title: 'LineExample',
+      page: 'pages/LineExample/LineExampleRouter'
+    },
+    {
+      title: 'RectExample',
+      page: 'pages/RectExample/RectExampleRouter'
+    }
   ]
 
   build() {
