@@ -1,0 +1,10 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/page_button",
+    "pages/page_slider",
+    "pages/page_toggle",
+    "pages/page_radio",
+    "pages/page_checkbox"
+  ]
+}
