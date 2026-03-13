@@ -14,6 +14,8 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+
+#include "core/components_ng/pattern/rich_editor/style_manager.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -327,5 +329,69 @@ HWTEST_F(RichEditorTextStyleTestNg, CreateTextSpanNode001, TestSize.Level0)
      */
     richEditorPattern->typingStyle_ = typingStyle;
     richEditorPattern->typingTextStyle_ = typingTextStyle;
+}
+
+/**
+ * @tc.name: CreateFontSpanByTextStyle001
+ * @tc.desc: Test CreateFontSpanByTextStyle with only updateStrokeWidth
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(RichEditorTextStyleTestNg, CreateFontSpanByTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize UpdateSpanStyle and TextStyle, only updateStrokeWidth
+     */
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateStrokeWidth = STROKE_WIDTH_VALUE;
+
+    TextStyle textStyle;
+    textStyle.SetStrokeWidth(STROKE_WIDTH_VALUE);
+
+    /**
+     * @tc.steps: step2. CreateFontSpanByTextStyle
+     */
+    int32_t testLength = 5;
+    auto fontSpan = StyleManager::CreateFontSpanByTextStyle(updateSpanStyle, textStyle, testLength);
+
+    /**
+     * @tc.steps: step3. Verify strokeWidth
+     */
+    ASSERT_NE(fontSpan, nullptr);
+    auto font = fontSpan->GetFont();
+    EXPECT_TRUE(font.strokeWidth.has_value());
+    EXPECT_EQ(font.strokeWidth.value().Value(), STROKE_WIDTH_VALUE.Value());
+}
+
+/**
+ * @tc.name: CreateFontSpanByTextStyle002
+ * @tc.desc: Test CreateFontSpanByTextStyle with only updateStrokeColor
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(RichEditorTextStyleTestNg, CreateFontSpanByTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize UpdateSpanStyle and TextStyle, only updateStrokeColor
+     */
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateStrokeColor = STROKE_COLOR_VALUE;
+
+    TextStyle textStyle;
+    textStyle.SetStrokeColor(STROKE_COLOR_VALUE);
+
+    /**
+     * @tc.steps: step2. CreateFontSpanByTextStyle
+     */
+    int32_t testLength = 8;
+    auto fontSpan = StyleManager::CreateFontSpanByTextStyle(updateSpanStyle, textStyle, testLength);
+
+    /**
+     * @tc.steps: step3. Verify strokeColor
+     */
+    ASSERT_NE(fontSpan, nullptr);
+    auto font = fontSpan->GetFont();
+    EXPECT_TRUE(font.strokeColor.has_value());
+    EXPECT_EQ(font.strokeColor.value().GetValue(), STROKE_COLOR_VALUE.GetValue());
 }
 }
