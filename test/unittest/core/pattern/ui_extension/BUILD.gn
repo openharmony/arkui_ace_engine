@@ -863,7 +863,7 @@ ace_unittest("preview_session_wrapper_impl_test_ng") {
 }
 
 ace_unittest("preview_ui_extension_compontent_test") {
-  module_name = "DrawingSet-Component3D"
+  module_name = "DrawingSet-XComponent"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
@@ -944,7 +944,7 @@ ace_unittest("preview_ui_extension_compontent_test") {
 }
 
 ace_unittest("preview_ui_extension_compontent_test_two") {
-  module_name = "DrawingSet-Component3D"
+  module_name = "DrawingSet-XComponent"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",

@@ -104,7 +104,7 @@ ace_unittest("json_report_test_ng") {
 }
 
 ace_unittest("load_complete_manager_test_ng") {
-  module_name = "StateManagement-PageRouter"
+  module_name = "StateManagement-CustomCoponent"
   type = "new"
   sources = [ "load_complete_manager_test_ng.cpp" ]
 }

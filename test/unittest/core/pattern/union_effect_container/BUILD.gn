@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("union_effect_container_test") {
-  module_name = "DrawingSet-EffectComponent"
+  module_name = "DrawingSet-XComponent"
   type = "new"
   render = true
   sources = [
