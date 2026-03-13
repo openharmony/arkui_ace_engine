@@ -267,7 +267,7 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
       "ark_layoutalgorithm:layoutalgorithm",
       ":mock",
-      ":prefetcher",
+      "ark_prefetcher:prefetcher",
       ":shape",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
@@ -790,7 +790,7 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
       "ark_layoutalgorithm:layoutalgorithm",
       ":mock",
-      ":prefetcher",
+      "ark_prefetcher:prefetcher",
       ":shape",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
@@ -1265,15 +1265,6 @@ ohos_abc("windowsizelayoutbreakpoint") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   deps = [ ":run_ark_breakpoint_build" ]
-}
-
-ohos_abc("prefetcher") {
-  sources = [ "engine/jsPrefetcher.js" ]
-  output_name = "prefetcher"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
 }
 
 action("gen_uicontext_ohos") {
