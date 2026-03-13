@@ -21,20 +21,21 @@ import {
   Component,
   Edge,
   Entry,
+  FlowItem,
   FontWeight,
   ForEach,
   Row,
-  Scroll,
   Scroller,
   Text,
-  TextAlign
+  TextAlign,
+  WaterFlow
 } from '@ohos.arkui.component';
 import { State } from '@ohos.arkui.stateManagement';
 
 @Entry
 @Component
-struct ScrollDeclare {
-  private static readonly COMPONENT_ID: string = 'scroll_bind_demo_001';
+struct WaterFlowDeclare {
+  private static readonly COMPONENT_ID: string = 'wf_bind_demo_waterflow_001';
   private defaultScroller: Scroller = new Scroller();
   private dynamicScroller: Scroller = new Scroller();
   @State private bindResult: string = 'Dynamic scroller not bound';
@@ -49,14 +50,15 @@ struct ScrollDeclare {
     }
   }
 
-  private bindController(): void {
-    const frameNode = this.getUIContext().getFrameNodeById(ScrollDeclare.COMPONENT_ID);
+  private bindScrollController(): void {
+    const frameNode = this.getUIContext().getFrameNodeById(WaterFlowDeclare.COMPONENT_ID);
     if (!frameNode) {
       this.bindResult = 'Bind failed: FrameNode is null';
       return;
     }
+
     try {
-      typeNode.bindScrollController(frameNode, this.dynamicScroller);
+      typeNode.bindWaterFlowController(frameNode, this.dynamicScroller);
       this.bindResult = 'Bind success';
       this.refreshOffset();
     } catch (e) {
@@ -89,7 +91,7 @@ struct ScrollDeclare {
 
   build() {
     Column() {
-      Text('Declarative Scroll Static Demo')
+      Text('Declarative WaterFlow Static Demo')
         .fontSize(18)
         .fontWeight(FontWeight.Bold)
         .margin({ bottom: 8 });
@@ -100,7 +102,7 @@ struct ScrollDeclare {
 
       Row() {
         Button('Bind Dynamic').onClick(() => {
-          this.bindController();
+          this.bindScrollController();
         }).margin({ right: 10 });
 
         Button('Read Offsets').onClick(() => {
@@ -138,20 +140,18 @@ struct ScrollDeclare {
         });
       }.margin({ bottom: 8 });
 
-      Scroll(this.defaultScroller) {
-        Column() {
-          ForEach(this.items, (idx: number) => {
+      WaterFlow({ scroller: this.defaultScroller }) {
+        ForEach(this.items, (idx: number) => {
+          FlowItem() {
             Text(`Item ${idx}`)
               .width('100%')
               .height(48)
-              .margin({ bottom: 8 })
               .textAlign(TextAlign.Center)
               .backgroundColor(idx % 2 === 0 ? '#f1f3f5' : '#e9ecef');
-          }, (idx: number) => idx.toString());
-        }
-        .width('100%');
+          }
+        }, (idx: number) => idx.toString());
       }
-      .key(ScrollDeclare.COMPONENT_ID)
+      .id(WaterFlowDeclare.COMPONENT_ID)
       .height('70%')
       .width('100%')
       .borderWidth(1)

@@ -42,7 +42,7 @@ import hilog from '@ohos.hilog'
 @Entry
 @Component
 struct ForEachSort {
-  @State arr: Array<string> = new Array<string>();
+  @State arr: Array<string> = [];
 
   build() {
     Row() {

@@ -32,8 +32,8 @@ import {
 import { State } from '@ohos.arkui.stateManagement'
 
 class PageInfo {
-  title: string
-  url: string
+  public title: string
+  public url: string
 
   constructor(title: string, url: string) {
     this.title = title
@@ -44,11 +44,11 @@ class PageInfo {
 @Entry
 @Component
 struct ListMainPage {
-  @State routers: Array<PageInfo> = new Array<PageInfo>()
+  @State routers: Array<PageInfo> = []
   private listScroller: ListScroller = new ListScroller()
 
   aboutToAppear(): void {
-    this.routers = new Array<PageInfo>()
+    this.routers = []
     this.routers.push(new PageInfo('Back', 'pages/Index'))
     this.routers.push(new PageInfo('List 声明式', 'pages/list/ListDeclare'))
     this.routers.push(new PageInfo('List 命令式', 'pages/list/ListCommand'))

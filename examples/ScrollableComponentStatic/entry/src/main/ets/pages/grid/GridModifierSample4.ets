@@ -13,11 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Entry, Text, Column, Component, Button, ClickEvent, Grid, ForEach, Color, GridItem ,Scroller,TextAlign,BorderStyle, ColumnOptions, GridAttribute,Row, RowOptions, Padding, Margin, EdgeEffect , BarState,CustomStyles,CommonMethod} from '@ohos.arkui.component'
+import {
+  BarState,
+  BorderStyle,
+  Button,
+  ClickEvent,
+  Color,
+  Column,
+  ColumnOptions,
+  CommonMethod,
+  Component,
+  CustomStyles,
+  EdgeEffect,
+  Entry,
+  ForEach,
+  Grid,
+  GridAttribute,
+  GridItem,
+  Margin,
+  Padding,
+  Row,
+  RowOptions,
+  Scroller,
+  Text,
+  TextAlign
+} from '@ohos.arkui.component'
 import { State, Link } from '@ohos.arkui.stateManagement'
-import { GridItemModifier } from "@ohos.arkui.modifier";
+import { GridItemModifier } from '@ohos.arkui.modifier';
 import hilog from '@ohos.hilog'
-import router from '@ohos.router'
 
 
 // 修改基类
@@ -29,15 +52,18 @@ class CustomModifier extends GridItemModifier {
 
 @Component
 struct ModifierComponent {
-  @State numbers: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]
+  @State numbers: string[] = [
+    '0', '1', '2', '3', '4', '5', '6', '7',
+    '8', '9', '10', '11', '12', '13', '14', '15'
+  ]
   scroller: Scroller = new Scroller()
 
   stateStyle: CustomStyles = (instance: CommonMethod) =>{
-    instance.backgroundColor("#ED6F21")
+    instance.backgroundColor('#ED6F21')
     .borderRadius(10)
     .borderStyle(BorderStyle.Dashed)
     .borderWidth(2)
-    .borderColor("#33000000")
+    .borderColor('#33000000')
     .width(120)
     .height(30)
     .opacity(1)

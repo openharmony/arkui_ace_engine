@@ -67,7 +67,7 @@ import hilog from '@ohos.hilog'
 @Component
 struct MyStateSample {
   @State smooth: boolean = false;
-  @State numbers: Array<string> = new Array<string>();
+  @State numbers: Array<string> = [];
   private listScroller: ListScroller = new ListScroller();
 
   aboutToAppear()

@@ -13,11 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Entry, Text, Column, Component, Button, ClickEvent, Grid, ForEach, Color, GridItem ,Scroller, ColumnOptions, GridAttribute,Row, RowOptions, Padding, Margin, EdgeEffect , BarState,ScrollSource,ScrollState,OnWillScrollCallback,ScrollResult} from '@ohos.arkui.component'
+import {
+  BarState,
+  Button,
+  ClickEvent,
+  Color,
+  Column,
+  ColumnOptions,
+  Component,
+  EdgeEffect,
+  Entry,
+  ForEach,
+  Grid,
+  GridAttribute,
+  GridItem,
+  Margin,
+  OnWillScrollCallback,
+  Padding,
+  Row,
+  RowOptions,
+  ScrollResult,
+  ScrollSource,
+  ScrollState,
+  Scroller,
+  Text
+} from '@ohos.arkui.component'
 import { State, Link } from '@ohos.arkui.stateManagement'
-import { GridModifier } from "@ohos.arkui.modifier";
+import { GridModifier } from '@ohos.arkui.modifier';
 import hilog from '@ohos.hilog'
-import router from '@ohos.router'
 
 
 // 修改基类
@@ -27,7 +50,10 @@ class CustomModifier extends GridModifier {
 
 @Component
 struct ModifierComponent {
-  @State numbers: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]
+  @State numbers: string[] = [
+    '0', '1', '2', '3', '4', '5', '6', '7',
+    '8', '9', '10', '11', '12', '13', '14', '15'
+  ]
   scroller: Scroller = new Scroller()
   customModifier: GridModifier = new CustomModifier()
     .friction(0.8)
@@ -51,7 +77,7 @@ struct ModifierComponent {
     Column({ space: 10 } as ColumnOptions) {
       Grid(this.scroller) {
           GridItem() {
-            Text("item")
+            Text('item')
           }
           .backgroundColor(Color.Pink)
           .width(80)
@@ -59,7 +85,7 @@ struct ModifierComponent {
           .borderWidth(2)
           .borderColor(Color.Red)
         GridItem() {
-          Text("item")
+          Text('item')
         }
         .backgroundColor(Color.Pink)
         .width(80)
@@ -67,7 +93,7 @@ struct ModifierComponent {
         .borderWidth(2)
         .borderColor(Color.Red)
         GridItem() {
-          Text("item")
+          Text('item')
         }
         .backgroundColor(Color.Pink)
         .width(80)
@@ -75,7 +101,7 @@ struct ModifierComponent {
         .borderWidth(2)
         .borderColor(Color.Red)
         GridItem() {
-          Text("item")
+          Text('item')
         }
         .backgroundColor(Color.Pink)
         .width(80)
@@ -84,7 +110,7 @@ struct ModifierComponent {
         .borderColor(Color.Red)
       }
       .height(100)
-      .columnsTemplate("1fr")
+      .columnsTemplate('1fr')
       .attributeModifier(this.customModifier as CustomModifier)
       .borderColor(Color.Black)
       .onWillScroll((scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource)=>{
