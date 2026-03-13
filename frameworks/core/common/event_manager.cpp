@@ -147,6 +147,41 @@ void EventManager::ProcessTouchTestWithReferee(const TouchEvent& touchPoint, con
     }
 }
 
+void EventManager::CleanRefereeBeforeTouchTestForPost(
+    TouchEvent touchPoint, const RefPtr<NG::GestureReferee>& currentReferee)
+{
+    int32_t key = touchPoint.eventHandleId / EVENT_HANDLE;
+    if (currentReferee->QueryAllDone(touchPoint.id)) {
+        currentReferee->CleanGestureScope(touchPoint.id);
+        bool isEventHandleResultsEmpty = true;
+        for (const auto& result : touchTestResults_) {
+            if (result.first / EVENT_HANDLE == key) {
+                isEventHandleResultsEmpty = false;
+                break;
+            }
+        }
+        if (isEventHandleResultsEmpty && currentReferee->QueryAllDone()) {
+            innerEventWin_ = false;
+            responseCtrl_->Reset();
+            currentReferee->CleanAll();
+        }
+    }
+    bool isEventHandleFingerIdsEmpty = true;
+    for (const auto& fingerId : downFingerIds_) {
+        if (fingerId.first / EVENT_HANDLE == key) {
+            isEventHandleFingerIdsEmpty = false;
+            break;
+        }
+    }
+    if (isEventHandleFingerIdsEmpty && currentReferee->QueryAllDone()) {
+        FalsifyCancelEventAndDispatch(touchPoint);
+        currentReferee->ForceCleanGestureReferee();
+        responseCtrl_->Reset();
+        currentReferee->CleanAll();
+        CleanGestureEventHub();
+    }
+}
+
 void EventManager::CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needAppend)
 {
     auto currentReferee = refereeNG_;
@@ -164,6 +199,10 @@ void EventManager::CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needA
         axisTouchTestResults_.clear();
     }
     currentReferee->CheckSourceTypeChange(touchPoint.sourceType);
+    if (touchPoint.eventHandleId / EVENT_HANDLE > 0) {
+        CleanRefereeBeforeTouchTestForPost(touchPoint, currentReferee);
+        return;
+    }
     if (currentReferee->QueryAllDone(touchPoint.id)) {
         currentReferee->CleanGestureScope(touchPoint.id);
         if (touchTestResults_.empty() && currentReferee->QueryAllDone()) {
@@ -860,6 +899,7 @@ void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
     if (touchEvent.type != TouchType::DOWN)
         return;
+    isNewRefereeMap_[touchEvent.id] = touchEvent.isNewReferee;
     if (touchEventFindResult != downFingerIds_.end()) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
             "InputTracking id:%{public}d, eventManager receive DOWN event twice,"
@@ -907,6 +947,7 @@ void EventManager::CheckUpEvent(const TouchEvent& touchEvent)
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
     if (touchEvent.type != TouchType::UP && touchEvent.type != TouchType::CANCEL)
         return;
+    isNewRefereeMap_[touchEvent.id] = touchEvent.isNewReferee;
     if (touchEventFindResult == downFingerIds_.end()) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
             "InputTracking id:%{public}d, eventManager receive UP/CANCEL event "
@@ -1200,12 +1241,18 @@ void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
     // send cancel to all recognizer
     for (const auto& iter : touchTestResults_) {
         touchEvent.id = iter.first;
+        touchEvent.eventHandleId = touchEvent.id;
         touchEvent.isInterpolated = true;
         if (!downFingerIds_.empty() && downFingerIds_.find(iter.first) != downFingerIds_.end()) {
             touchEvent.originalId = downFingerIds_[touchEvent.id];
         }
+        auto referee = currentReferee;
+        if (touchEvent.eventHandleId / EVENT_HANDLE > 0) {
+            referee = GetCurrentReferee(isNewRefereeMap_[touchEvent.id], touchEvent.eventHandleId);
+        }
+        CHECK_NULL_VOID(referee);
         DispatchTouchEventToTouchTestResult(touchEvent, iter.second, true);
-        currentReferee->CleanGestureScope(touchEvent.id);
+        referee->CleanGestureScope(touchEvent.id);
         referee_->CleanGestureScope(touchEvent.id);
     }
     downFingerIds_.erase(touchEvent.id);
@@ -2114,6 +2161,7 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 {
+    isNewRefereeMap_[event.id] = event.isNewReferee;
     NG::Reporter::GetInstance().HandleInputEventInspectorReporting(event);
     // when api >= 15, do not block this event.
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {

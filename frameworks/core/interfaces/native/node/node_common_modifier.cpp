@@ -9535,6 +9535,7 @@ void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUIT
     arkUITouchEventCloned->stopPropagation = arkUITouchEvent->stopPropagation;
     arkUITouchEventCloned->eventHandleId = arkUITouchEvent->eventHandleId;
     arkUITouchEventCloned->isNewReferee = arkUITouchEvent->isNewReferee;
+    arkUITouchEventCloned->modifierKeyState = arkUITouchEvent->modifierKeyState;
 }
 
 void CreateClonedMouseEvent(ArkUIMouseEvent* arkUIMouseEventCloned, const ArkUIMouseEvent* arkUIMouseEvent)

@@ -169,6 +169,12 @@ TouchEvent& TouchEvent::SetTouchEventId(int32_t touchEventId)
     return *this;
 }
 
+TouchEvent& TouchEvent::SetEventHandleId(int32_t eventHandleId)
+{
+    this->eventHandleId = eventHandleId;
+    return *this;
+}
+
 TouchEvent& TouchEvent::SetIsInterpolated(bool isInterpolated)
 {
     this->isInterpolated = isInterpolated;
