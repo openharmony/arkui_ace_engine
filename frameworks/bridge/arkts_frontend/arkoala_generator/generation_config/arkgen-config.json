@@ -51,6 +51,10 @@
         {
             "from": "arkui.Graphics.ColorMetrics",
             "to": "arkui.component.idlize.ColorMetricsExt"
+        },
+        {
+            "from": "arkui.component.common.TouchEvent",
+            "to": "arkui.component.idlize.TouchEventProxy"
         }
     ],
     "forceMaterialized": [
