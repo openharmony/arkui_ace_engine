@@ -33,6 +33,7 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
+#include "adapter/ohos/entrance/data_share_observer_helper.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/high_contrast_observer.h"
@@ -3071,7 +3072,15 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
                                      useStageModel = useStageModel_]() {
         return AceType::MakeRefPtr<DataAbilityHelperStandard>(ability.lock(), runtimeContext.lock(), useStageModel);
     };
-    auto dataProviderManager = MakeRefPtr<DataProviderManagerStandard>(dataAbilityHelperImpl);
+    auto dataShareObserverHelperImpl = [runtimeContext = runtimeContext_,
+                                          container = WeakClaim(this),
+                                          useStageModel = useStageModel_]() {
+        return AceType::MakeRefPtr<DataShareObserverHelper>(runtimeContext.lock(),
+            container.Upgrade(), useStageModel);
+    };
+
+    auto dataProviderManager = MakeRefPtr<DataProviderManagerStandard>(
+        dataAbilityHelperImpl, dataShareObserverHelperImpl);
     pipelineContext_->SetDataProviderManager(dataProviderManager);
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)

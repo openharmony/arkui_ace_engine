@@ -2208,6 +2208,9 @@ private:
     void OnCaretMoveDone(const TouchEventInfo& info);
     void HandleCrossPlatformInBlurEvent();
     void ModifyInnerStateInBlurEvent();
+    void ProcessMagnifierInBlurEvent();
+    void ProcessMenuAndSelectionInBlurEvent(bool shouldKeepSelection);
+    void ProcessCaretIndexInBlurEvent(bool shouldKeepSelection);
 
     void TwinklingByFocus();
 
@@ -2284,6 +2287,8 @@ private:
     void PaintPasswordRectForTV();
     void SetThemeBorderAttrForTV();
     void PaintFocusAreaRectForTV(const RefPtr<TextInputResponseArea>& responseArea);
+    bool QuerySmartEdgeState();
+    bool ShouldKeepSelectionOnWindowBlur();
 
     RectF frameRect_;
     RectF textRect_;

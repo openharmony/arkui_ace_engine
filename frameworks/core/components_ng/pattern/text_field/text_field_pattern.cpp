@@ -1736,6 +1736,20 @@ bool TextFieldPattern::IsCloseKeyboard(RefPtr<TextFieldManagerNG> textFieldManag
     return isCloseCustomKeyboard || isNoContinueFeatureClose;
 }
 
+bool TextFieldPattern::QuerySmartEdgeState()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto dataProviderManager = pipeline->GetDataProviderManager();
+    CHECK_NULL_RETURN(dataProviderManager, false);
+    return dataProviderManager->QuerySmartEdgeState();
+}
+
+bool TextFieldPattern::ShouldKeepSelectionOnWindowBlur()
+{
+    return blurReason_ != BlurReason::FOCUS_SWITCH && QuerySmartEdgeState();
+}
+
 void TextFieldPattern::HandleBlurEvent()
 {
     auto host = GetHost();
@@ -1760,13 +1774,12 @@ void TextFieldPattern::HandleBlurEvent()
     ProcBorderAndUnderlineInBlurEvent();
     ProcNormalInlineStateInBlurEvent();
     ModifyInnerStateInBlurEvent();
-    if (magnifierController_) {
-        magnifierController_->RemoveMagnifierFrameNode();
-    }
-    CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
+    ProcessMagnifierInBlurEvent();
+    auto shouldKeepSelection = ShouldKeepSelectionOnWindowBlur();
+    ProcessMenuAndSelectionInBlurEvent(shouldKeepSelection);
     StopTwinkling();
     HandleCrossPlatformInBlurEvent();
-    selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+    ProcessCaretIndexInBlurEvent(shouldKeepSelection);
     NotifyOnEditChanged(false);
     ResetFloatingCursorState();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1853,6 +1866,29 @@ void TextFieldPattern::HandleCrossPlatformInBlurEvent()
         CloseKeyboard(true);
     }
 #endif
+}
+
+void TextFieldPattern::ProcessMagnifierInBlurEvent()
+{
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
+}
+
+void TextFieldPattern::ProcessMenuAndSelectionInBlurEvent(bool shouldKeepSelection)
+{
+    if (!shouldKeepSelection) {
+        CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
+    } else if (IsSelected() && selectOverlay_) {
+        selectOverlay_->HideMenu(true);
+    }
+}
+
+void TextFieldPattern::ProcessCaretIndexInBlurEvent(bool shouldKeepSelection)
+{
+    if (!shouldKeepSelection) {
+        selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+    }
 }
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)

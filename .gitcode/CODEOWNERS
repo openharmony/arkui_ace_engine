@@ -66,6 +66,8 @@ adapter/ohos/entrance/capability_registry.h @arkui_framework_xnode
 adapter/ohos/entrance/cj_utils/ @arkui_cj
 adapter/ohos/entrance/data_ability_helper_standard.cpp @arkui_framework_xnode
 adapter/ohos/entrance/data_ability_helper_standard.h @arkui_framework_xnode
+adapter/ohos/entrance/data_share_observer_helper.cpp @huawei_g_five
+adapter/ohos/entrance/data_share_observer_helper.h @huawei_g_five
 adapter/ohos/entrance/dialog_container.cpp @arkuipopupwindow_all
 adapter/ohos/entrance/dialog_container.h @arkuipopupwindow_all
 adapter/ohos/entrance/distributed_ui_manager.h @arkui_framework_xnode
