@@ -23,6 +23,10 @@
     {
       "name": "fillOpacity",
       "value": "0.8"
+    },
+    {
+      "name": "borderWidth",
+      "value": "5"
     }
   ]
 }

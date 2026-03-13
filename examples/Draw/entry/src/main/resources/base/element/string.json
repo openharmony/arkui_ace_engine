@@ -11,6 +11,58 @@
     {
       "name": "EntryAbility_label",
       "value": "label"
+    },
+    {
+      "name": "RectWidth",
+      "value": "100vp"
+    },
+    {
+      "name": "RectHeight",
+      "value": "50vp"
+    },
+    {
+      "name": "RectRadius",
+      "value": "0"
+    },
+    {
+      "name": "RectRadiusWidth",
+      "value": "10vp"
+    },
+    {
+      "name": "RectRadiusHeight",
+      "value": "20vp"
+    },
+    {
+      "name": "PolygonWidth",
+      "value": "100vp"
+    },
+    {
+      "name": "PolygonHeight",
+      "value": "100vp"
+    },
+    {
+      "name": "PolylineWidth",
+      "value": "80vp"
+    },
+    {
+      "name": "PolylineHeight",
+      "value": "80vp"
+    },
+    {
+      "name": "EllipseWidth",
+      "value": "150vp"
+    },
+    {
+      "name": "EllipseHeight",
+      "value": "150vp"
+    },
+    {
+      "name": "LineWidth",
+      "value": "200vp"
+    },
+    {
+      "name": "LineHeight",
+      "value": "200vp"
     }
   ]
 }
