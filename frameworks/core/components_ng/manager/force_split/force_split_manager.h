@@ -57,7 +57,7 @@ public:
     {
         return isForceSplitSupported_ && isRouter_ == isRouter;
     }
-    void SetForceSplitEnable(bool isForceSplit, bool needUpdateViewport = false);
+    void SetForceSplitEnable(bool isForceSplit);
     bool IsForceSplitEnable(bool isRouter) const;
     void SetNavigationForceSplitEnableInternal(bool enableSplit);
     bool GetDisableNavForceSplitInternal() const
