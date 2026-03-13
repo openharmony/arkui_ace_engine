@@ -1,0 +1,219 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@Entry
+@Component
+struct NavigationDemo5 {
+  @Provide('pageInfos') pageInfos: NavPathStack = new NavPathStack()
+
+  @Builder
+  PageMap(name: string) {
+    if (name === 'pageOne') {
+      pageOne5()
+    } else if (name === 'pageTwo') {
+      pageTwo5()
+    }
+  }
+
+  @State disableAnimation: boolean = false
+
+  build() {
+    Navigation(this.pageInfos) {
+      Column() {
+        Button('全局是否禁用转场动画，disableAnimation: ' + this.disableAnimation)
+          .margin(20)
+          .onClick(()=>{
+            this.disableAnimation = !this.disableAnimation
+            this.pageInfos.disableAnimation(this.disableAnimation)
+          })
+
+        Button('NavPathStack-跳转到PageOne', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .margin(20)
+          .onClick(() => {
+            this.pageInfos.pushPath({ name: 'pageOne' })
+          })
+        NavRouter({ name: "pageTwo" }) {
+          Button('NavRouter-跳转到PageTwo', { stateEffect: true, type: ButtonType.Capsule })
+            .width('80%')
+            .height(40)
+            .margin(20)
+        }
+      }
+    }
+    .title("Navigation")
+    .navDestination(this.PageMap)
+
+  }
+}
+
+
+// pageOne.ets
+@Component
+struct pageOne5 {
+  @Consume('pageInfos') pageInfos: NavPathStack;
+
+  build() {
+    NavDestination() {
+      Column({space:10}) {
+        Button('跳转pageTwo，不设置animated，跳转动画：1000ms，下树：1000ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 1000 }, () => {
+              this.pageInfos.pushPath({ name: 'pageTwo' })
+            })
+          })
+        Button('Pop，不设置animated，跳转动画：500ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 500 }, () => {
+              this.pageInfos.pop()
+            })
+          })
+
+        Button('跳转pageTwo，animated：true，跳转动画：1000ms，下树：1000ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 1000 }, () => {
+              this.pageInfos.pushPath({ name: 'pageTwo' },true)
+            })
+          })
+        Button('Pop，animated：true，跳转动画：500ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 500 }, () => {
+              this.pageInfos.pop(true)
+            })
+          })
+
+        Button('跳转pageTwo，animated：false，跳转动画：1000ms，下树：1000ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 1000 }, () => {
+              this.pageInfos.pushPath({ name: 'pageTwo' },true)
+            })
+          })
+        Button('Pop，animated：false，跳转动画：500ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 500 }, () => {
+              this.pageInfos.pop(true)
+            })
+          })
+
+        Image($r('app.media.1')).geometryTransition('picture')
+          .borderWidth(2)
+          .width(200)
+          .height(300)
+      }
+    }
+    .mode(NavDestinationMode.DIALOG)
+    .backgroundColor('rgba(50,0,0,0.5)')
+    .title('pageOne')
+    .transition(TransitionEffect.opacity(0.99).animation({ duration: 1000 }))
+    .onBackPressed(() => {
+      animateTo({ duration: 500 }, () => {
+        this.pageInfos.pop()
+      })
+      return true
+    })
+  }
+}
+
+// pageTwo.ets
+@Component
+struct pageTwo5 {
+  @Consume('pageInfos') pageInfos: NavPathStack;
+
+  build() {
+    NavDestination() {
+      Column({space:10}) {
+
+        Button('跳转PageOne，不设置animated，跳转动画：1000ms，下树：300ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 1000 }, () => {
+              this.pageInfos.pushPath({ name: 'pageOne' })
+            })
+          })
+        Button('Pop，不设置animated，跳转动画：500ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 500 }, () => {
+              this.pageInfos.pop()
+            })
+          })
+
+        Button('跳转PageOne，animated：true，跳转动画：1000ms，下树：300ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 1000 }, () => {
+              this.pageInfos.pushPath({ name: 'pageOne' },true)
+            })
+          })
+        Button('Pop，animated：true，跳转动画：500ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 500 }, () => {
+              this.pageInfos.pop(true)
+            })
+          })
+
+        Button('跳转PageOne，animated：false，跳转动画：1000ms，下树：300ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 1000 }, () => {
+              this.pageInfos.pushPath({ name: 'pageOne' },true)
+            })
+          })
+        Button('Pop，animated：false，跳转动画：500ms', { stateEffect: true, type: ButtonType.Capsule })
+          .width('80%')
+          .height(40)
+          .onClick(() => {
+            animateTo({ duration: 500 }, () => {
+              this.pageInfos.pop(true)
+            })
+          })
+
+        Image($r('app.media.2'))
+          .border({ color: Color.Red, width: 2 })
+          .width(300).height(200)
+          .geometryTransition('picture')
+
+      }
+    }
+    .mode(NavDestinationMode.DIALOG)
+    .backgroundColor('rgba(0,80,0,0.5)')
+    .title('pageTwo')
+    .transition(TransitionEffect.opacity(0.99).animation({ duration: 300 }))
+    .onBackPressed(() => {
+      animateTo({ duration: 500 }, () => {
+        this.pageInfos.pop()
+      })
+      return true
+    })
+  }
+}
