@@ -18,11 +18,10 @@ import arkui.component.Scroller as Scroller;
 import ohos.arkui.UIContext;
 
 [Entity=Class]
-interface Magnifier {
-    constructor();
-    void bind(String id);
-    void show(f64 x, f64 y);
-    void unbind();
+interface MagnifierExtender {
+    static void bind(String id);
+    static void show(f64 x, f64 y);
+    static void unbind();
 };
 
 [Entity=Class]
@@ -38,5 +37,4 @@ interface IUIContext {
     static void bindTabsToNestedScrollable(TabsController tabsController, Scroller parentScroller, Scroller scrollerchildScroller);
     static void unbindTabsFromNestedScrollable(TabsController tabsController, Scroller parentScroller, Scroller childScroller);
     static void setCustomKeyboardContinueFeature(CustomKeyboardContinueFeature feature);
-    static Magnifier getMagnifier();
 };

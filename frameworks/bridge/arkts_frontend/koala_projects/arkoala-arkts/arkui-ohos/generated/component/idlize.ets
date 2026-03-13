@@ -67,8 +67,11 @@ import { default as image } from '@ohos.multimedia.image'
 import { font_FontOptions_serializer, font_FontInfo_serializer, font_UIFontConfig_serializer } from './../framework/ohos.font'
 import { default as font } from '@ohos.font'
 import { MeasureOptions_serializer } from './../framework/ohos.measure'
+import { TextLayoutOptions_serializer, TextLayoutOptions, TextMenuOptions_serializer, TextMenuOptions } from './textCommon'
+import { text_Paragraph_serializer } from './../framework/ohos.graphics.text'
 import { MeasureOptions } from '@ohos.measure'
-import { TextMenuOptions_serializer, TextMenuOptions } from './textCommon'
+import { StyledString, StyledStringInternal } from './styledString'
+import { default as text } from '@ohos.graphics.text'
 import { TabsController, TabsControllerInternal } from './tabs'
 import { Scroller, ScrollerInternal, UIScrollEvent, UIScrollEventInternal } from './scroll'
 import { CustomKeyboardContinueFeature, TargetInfo, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext'
@@ -3442,6 +3445,11 @@ export class GlobalScope_ohos_measure_utils {
         const options_casted = options as (MeasureOptions)
         return GlobalScope_ohos_measure_utils.measureTextSize_serialize(options_casted)
     }
+    public static getParagraphs(styledString: StyledString, options?: TextLayoutOptions): Array<text.Paragraph> {
+        const styledString_casted = styledString as (StyledString)
+        const options_casted = options as (TextLayoutOptions | undefined)
+        return GlobalScope_ohos_measure_utils.getParagraphs_serialize(styledString_casted, options_casted)
+    }
     private static measureText_serialize(options: MeasureOptions): double {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         MeasureOptions_serializer.write(thisSerializer, options)
@@ -3456,6 +3464,25 @@ export class GlobalScope_ohos_measure_utils {
         thisSerializer.release()
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: SizeOptions = SizeOptions_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    private static getParagraphs_serialize(styledString: StyledString, options?: TextLayoutOptions): Array<text.Paragraph> {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            TextLayoutOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._GlobalScope_ohos_measure_utils_getParagraphs(toPeerPtr(styledString), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength: int32 = retvalDeserializer.readInt32()
+        const buffer: Array<text.Paragraph> = new Array<text.Paragraph>(bufferLength, (arg0: int32):text.Paragraph => {
+            return (text_Paragraph_serializer.read(retvalDeserializer) as text.Paragraph);
+        })
+        const returnResult: Array<text.Paragraph> = buffer
         return returnResult
     }
 }
@@ -3763,15 +3790,6 @@ export class LevelOrderExtender implements MaterializedBase {
     }
 }
 export class MagnifierExtender {
-    static bind_serialize(id: string): void {
-        ArkUIGeneratedNativeModule._MagnifierExtender_bind(id)
-    }
-    static show_serialize(x: double, y: double): void {
-        ArkUIGeneratedNativeModule._MagnifierExtender_show(x, y)
-    }
-    static unbind_serialize(): void {
-        ArkUIGeneratedNativeModule._MagnifierExtender_unbind()
-    }
     public static bind(id: string): void {
         const id_casted = id as (string)
         MagnifierExtender.bind_serialize(id_casted)
@@ -3786,6 +3804,15 @@ export class MagnifierExtender {
     public static unbind(): void {
         MagnifierExtender.unbind_serialize()
         return
+    }
+    private static bind_serialize(id: string): void {
+        ArkUIGeneratedNativeModule._MagnifierExtender_bind(id)
+    }
+    private static show_serialize(x: double, y: double): void {
+        ArkUIGeneratedNativeModule._MagnifierExtender_show(x, y)
+    }
+    private static unbind_serialize(): void {
+        ArkUIGeneratedNativeModule._MagnifierExtender_unbind()
     }
 }
 export class NavExtender {

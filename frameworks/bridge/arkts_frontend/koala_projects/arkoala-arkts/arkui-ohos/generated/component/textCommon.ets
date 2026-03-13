@@ -33,6 +33,7 @@ import { memo, memo_stable } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { Color as arkui_component_enums_Color, TextDecorationType, TextDecorationStyle } from './enums'
 import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 export class ContentTransitionInternal {
     public static fromPtr(ptr: KPointer): ContentTransition {
         return new ContentTransition(MaterializedBaseTag.NOP, ptr)
@@ -1681,6 +1682,30 @@ export class TextChangeOptions_serializer {
         const oldContentTmpResult: string = (valueDeserializer.readString() as string)
         const oldPreviewTextTmpResult: PreviewText = PreviewText_serializer.read(valueDeserializer)
         let value: TextChangeOptions = ({rangeBefore: rangeBeforeTmpResult, rangeAfter: rangeAfterTmpResult, oldContent: oldContentTmpResult, oldPreviewText: oldPreviewTextTmpResult} as TextChangeOptions)
+        return value
+    }
+}
+export class TextLayoutOptions_serializer {
+    public static write(buffer: SerializerBase, value: TextLayoutOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForConstraintWidth = value.constraintWidth
+        if (valueHolderForConstraintWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForConstraintWidthTmpValue = valueHolderForConstraintWidth!
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForConstraintWidthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): TextLayoutOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const constraintWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let constraintWidthTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
+        if ((constraintWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            constraintWidthTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const constraintWidthTmpResult: arkui_component_units_LengthMetrics | undefined = constraintWidthTmpBuf
+        let value: TextLayoutOptions = ({constraintWidth: constraintWidthTmpResult} as TextLayoutOptions)
         return value
     }
 }

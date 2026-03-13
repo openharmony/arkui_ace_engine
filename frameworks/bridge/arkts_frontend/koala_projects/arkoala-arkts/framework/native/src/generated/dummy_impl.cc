@@ -32982,6 +32982,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {.width={ .tag=INTEROP_TAG_UNDEFINED }, .height={ .tag=INTEROP_TAG_UNDEFINED }};
     }
+    Array_text_Paragraph GetParagraphsImpl(Ark_StyledString styledString,
+                                           const Opt_TextLayoutOptions* options)
+    {
+        if (!needGroupedLog(1)) {
+            return {};
+        }
+        string out("getParagraphs(");
+        WriteToString(&out, styledString);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // GlobalScope_ohos_measure_utilsAccessor
     namespace GlobalScopeUicontextFontScaleAccessor {
     Ark_Boolean IsFollowingSystemFontScaleImpl()
@@ -49060,6 +49075,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor GlobalScope_ohos_measure_utilsAccessorImpl {
             GlobalScope_ohos_measure_utilsAccessor::MeasureTextImpl,
             GlobalScope_ohos_measure_utilsAccessor::MeasureTextSizeImpl,
+            GlobalScope_ohos_measure_utilsAccessor::GetParagraphsImpl,
         };
         return &GlobalScope_ohos_measure_utilsAccessorImpl;
     }

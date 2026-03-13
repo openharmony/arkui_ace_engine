@@ -20,6 +20,7 @@ import { default as text } from '@ohos.graphics.text'
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { CallbackTransformer } from './../CallbackTransformer'
+import { extractors } from '#handwritten'
 import { common2D_Color_serializer, common2D_Rect_serializer, common2D_Point_serializer } from './ohos.graphics.common2D'
 import { default as common2D } from '@ohos.graphics.common2D'
 import { drawing_FontMetrics_serializer } from './ohos.graphics.drawing'
@@ -54,6 +55,17 @@ export class text_FontVariation_serializer {
         const valueTmpResult: double = valueDeserializer.readFloat64()
         let value: text.FontVariation = ({axis: axisTmpResult, value: valueTmpResult} as text.FontVariation)
         return value
+    }
+}
+export class text_Paragraph_serializer {
+    public static write(buffer: SerializerBase, value: text.Paragraph): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(extractors.toTextParagraphPtr(value))
+    }
+    public static read(buffer: DeserializerBase): text.Paragraph {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return extractors.fromTextParagraphPtr(ptr)
     }
 }
 export class text_LineMetrics_serializer {
