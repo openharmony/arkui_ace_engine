@@ -13,14 +13,10 @@
  * limitations under the License.
  */
 
-// xxx.ets
 /*
-/
 * 不同次级菜单类型, 多级菜单绘制效果绘制
-*
 * 验证Menu的customBuilder:
 * 多级菜单的绘制验证：重点验证UX位置和避让
-*
  */
 import { MyComponent } from '../../common/MyComponent'
 
@@ -28,7 +24,6 @@ class BuilderOptions {
   width?: Length = '240'
   height?: Length = '300'
 }
-
 @Extend(Text)
 function paramTextStyle() {
   .fontSize(9)
@@ -66,7 +61,6 @@ struct MenuTestLevel1_2 {
   @State subMenuMode: SubMenuExpandingMode = 0
   @State subMenuMode_1: SubMenuExpandingMode = 0
   @State menuShow: boolean = false
-
   @State menuHoverInfo: string = ''
 
   // 一级菜单
@@ -161,11 +155,9 @@ struct MenuTestLevel1_2 {
   build() {
     Scroll(this.scroller) {
       Column({ space: 5 }) {
-        Text(`验证多级菜单的绘制`)
-          .paramTextStyle()
+        Text(`验证多级菜单的绘制`).paramTextStyle()
         Column({ space: 3 }) {
-          Text(`切换一级菜单的次级菜单类型`)
-            .paramTextStyle()
+          Text(`切换一级菜单的次级菜单类型`).paramTextStyle()
           Select([
             { value:'SIDE' },
             { value:'EMBEDDED' },
@@ -184,13 +176,11 @@ struct MenuTestLevel1_2 {
                 case 'STACK':
                   this.subMenuMode = 2
                   break;
-
               }
             })
             .key('select_main_subMenuMode')
 
-          Text(`切换二级菜单的次级菜单类型`)
-            .paramTextStyle()
+          Text(`切换二级菜单的次级菜单类型`).paramTextStyle()
           Select([
             { value:'SIDE' },
             { value:'EMBEDDED' },

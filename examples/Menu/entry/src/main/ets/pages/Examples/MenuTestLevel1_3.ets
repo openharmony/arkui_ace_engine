@@ -14,12 +14,9 @@
  */
 
 /*
-/
 * bindContextMenu设置预览图菜单专项
 * 验证bindContextMenu设置预览图和previewAnimationOptions: 组合测试scale/hoverScale和transition
-*
 */
-
 @Extend(Text)
 function paramTextStyle_a() {
   .fontSize(10)
@@ -63,11 +60,9 @@ struct MenuTestLevel1_3 {
     Scroll(this.scroller){
       Column() {
         // previewAnimationOptions的scale和hoverScale
-        Text(`验证bindContextMenu预览图的scale/hoverScale和transition的组合测试`)
-          .paramTextStyle_a()
+        Text(`验证bindContextMenu预览图的scale/hoverScale和transition的组合测试`).paramTextStyle_a()
         Column({space : 5}){
-          Text(`bindContextMenu设置预览图, 设置scale和hoverScale, 不设置transition`)
-            .paramTextStyle_a()
+          Text(`bindContextMenu设置预览图, 设置scale和hoverScale, 不设置transition`).paramTextStyle_a()
           Image($r('app.media.app_icon'))
             .key(`setPreview_scale_hoverScale_unsetTransition`)
             .width('120').height(45)
@@ -95,8 +90,7 @@ struct MenuTestLevel1_3 {
               this.menuShow[0] = true
             })
 
-          Text(`bindContextMenu设置预览图, 设置scale和hoverScale, 设置transition`)
-            .paramTextStyle_a()
+          Text(`bindContextMenu设置预览图, 设置scale和hoverScale, 设置transition`).paramTextStyle_a()
           Image($r('app.media.app_icon'))
             .key(`setPreview_scale_hoverScale_setTransition`)
             .width('120').height(45)
@@ -126,8 +120,7 @@ struct MenuTestLevel1_3 {
               this.menuShow[1] = true
             })
 
-          Text(`bindContextMenu设置预览图, 设置scale和hoverScale, 设置preview的transition`)
-            .paramTextStyle_a()
+          Text(`bindContextMenu设置预览图, 设置scale和hoverScale, 设置preview的transition`).paramTextStyle_a()
           Image($r('app.media.app_icon'))
             .key(`setPreview_scale_hoverScale_setPreviewTransition`)
             .width('120').height(45)
@@ -157,8 +150,7 @@ struct MenuTestLevel1_3 {
               this.menuShow[2] = true
             })
 
-          Text(`bindContextMenu设置预览图, 不设置scale和hoverScale, 设置transition和preview的transition`)
-            .paramTextStyle_a()
+          Text(`bindContextMenu设置预览图, 不设置scale和hoverScale, 设置transition和preview的transition`).paramTextStyle_a()
           Image($r('app.media.app_icon'))
             .key(`setPreview_unsetScale_hoverScale_setPreviewTransition`)
             .width('120').height(45)
@@ -183,8 +175,7 @@ struct MenuTestLevel1_3 {
             })
         }
         .columnStyle()
-        Text(`验证bindContextMenu设置预览图和组件拖拽事件的组合测试`)
-          .paramTextStyle_a()
+        Text(`验证bindContextMenu设置预览图和组件拖拽事件的组合测试`).paramTextStyle_a()
         Column({space: 5}){
           Image($r('app.media.app_icon'))
             .key(`setPreview_dragPreview`)

@@ -14,7 +14,6 @@
  */
 /*
 * 菜单组合测试：安全区易用性测试用例
-*
  */
 import { LengthMetrics } from '@kit.ArkUI';
 import { MyComponent } from '../../common/MyComponent'
@@ -26,7 +25,6 @@ class SizeOpt {
 class MenuParentCompAttrOptions {
   menuParentCompAlign?: Alignment = Alignment.Center
   menuParentCompSafeAreaPadding?: Padding | LengthMetrics | LocalizedPadding = LengthMetrics.vp(0)
-
   menuParentCompMargin?: Margin | Length | LocalizedMargin = 0
   menuParentCompPadding?: Padding |  Length |   LocalizedPadding = 0
   menuParentCompBorderWidth?: Length = 0
@@ -109,8 +107,7 @@ export struct MenuSafeArea {
   @Builder bindSheetBuilder() {
     Column({space: 5}) {
       Column({space: 5}){
-        Text('选择验证场景')
-          .paramTextStyle()
+        Text('选择验证场景').paramTextStyle()
         Select([
           { value: 'Menu组件background设置builder' },
           { value: 'Menu组件background设置resourceColor' },
@@ -130,8 +127,7 @@ export struct MenuSafeArea {
       .columnStyle()
 
       Column({space: 5}){
-        Text(`切换父容器Stack的对齐参数: ${this.menuParentCompAttrOptions.menuParentCompAlign}`)
-          .paramTextStyle()
+        Text(`切换父容器Stack的对齐参数: ${this.menuParentCompAttrOptions.menuParentCompAlign}`).paramTextStyle()
         Select([
           { value: 'align设置TopStart' },
           { value: 'align设置Top' },
@@ -182,7 +178,7 @@ export struct MenuSafeArea {
           .key('select_comp_align')
 
         Text(`切换父容器Stack的safeAreaPadding参数: ${this.menuParentCompAttrOptions. menuParentCompSafeAreaPadding}`)
-          .paramTextStyle()
+            .paramTextStyle()
         Select([
           { value: 'safePadding:0vp' },
           { value: 'safePadding:10vp' },
@@ -227,8 +223,7 @@ export struct MenuSafeArea {
           })
           .key('select_parent_comp_borderWidth')
 
-        Text(`切换父容器Stack的padding参数: ${this.menuParentCompAttrOptions. menuParentCompPadding}`)
-          .paramTextStyle()
+        Text(`切换父容器Stack的padding参数: ${this.menuParentCompAttrOptions. menuParentCompPadding}`).paramTextStyle()
         Select([
           { value: 'padding:0vp' },
           { value: 'padding:10vp' },
@@ -250,8 +245,7 @@ export struct MenuSafeArea {
           })
           .key('select_parent_comp_padding')
 
-        Text(`切换父容器Stack的margin参数: ${this.menuParentCompAttrOptions. menuParentCompMargin}`)
-          .paramTextStyle()
+        Text(`切换父容器Stack的margin参数: ${this.menuParentCompAttrOptions. menuParentCompMargin}`).paramTextStyle()
         Select([
           { value: 'margin:0vp' },
           { value: 'margin:10vp' },
@@ -273,8 +267,7 @@ export struct MenuSafeArea {
           })
           .key('select_parent_comp_margin')
 
-        Text(`切换Menu组件尺寸: width-${this.menuSize.Width}, height: ${this.menuSize.Height}`)
-          .paramTextStyle()
+        Text(`切换Menu组件尺寸: width-${this.menuSize.Width}, height: ${this.menuSize.Height}`).paramTextStyle()
         Row({space: 3}){
           MyComponent({title: 'W40%', func: () => {
             this.menuSize.Width = '40%'
@@ -301,8 +294,7 @@ export struct MenuSafeArea {
       .columnStyle()
 
       Column({space: 5}){
-        Text(`切换background.options.align参数: ${this.backgroundOptions.align}`)
-          .paramTextStyle()
+        Text(`切换background.options.align参数: ${this.backgroundOptions.align}`).paramTextStyle()
         Select([
           { value: 'align设置TopStart' },
           { value: 'align设置Top' },
@@ -403,8 +395,7 @@ export struct MenuSafeArea {
 
       // ignoreSafeArea属性
       Column({space: 5}){
-        Text(`切换ignoreLayoutSA.edges参数: `)
-          .paramTextStyle()
+        Text(`切换ignoreLayoutSA.edges参数: `).paramTextStyle()
         Select([
           { value: 'ignore设置TOP' },
           { value: 'ignore设置BOTTOM' },
@@ -453,8 +444,7 @@ export struct MenuSafeArea {
       .columnStyle()
 
       Column({space: 5}){
-        Text(`选择Menu组件LayoutPolicy的参数`)
-          .paramTextStyle()
+        Text(`选择Menu组件LayoutPolicy的参数`).paramTextStyle()
         Select([
           { value: '默认值' },
           { value: 'LayoutPolicy.matchParent' },
@@ -496,8 +486,7 @@ export struct MenuSafeArea {
           })
           .key('select_layoutPolicy')
 
-        Text(`LayoutPolicy中的MenuItem尺寸参数: ${this.menuItemSize.Width}`)
-          .paramTextStyle()
+        Text(`LayoutPolicy中的MenuItem尺寸参数: ${this.menuItemSize.Width}`).paramTextStyle()
         Row({space: 3}){
           MyComponent({title: `200`, func: () => {
             this.menuItemSize = {

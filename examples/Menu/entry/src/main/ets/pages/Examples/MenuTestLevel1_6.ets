@@ -192,17 +192,14 @@ struct MenuTestLevel1_6 {
   build() {
     Scroll(this.scroller) {
       Column({ space: 5 }) {
-        Text(`MenuItem组件主题场景的功能实现`)
-          .paramTextStyle()
+        Text(`MenuItem组件主题场景的功能实现`).paramTextStyle()
         Column({space: 5}){
-          Text(`切换WithTheme主题配色: ${this.themeNames[this.themeIndex]}`)
-            .paramTextStyle()
+          Text(`切换WithTheme主题配色: ${this.themeNames[this.themeIndex]}`).paramTextStyle()
           MyComponent({title: '切换withTheme配色', func: () => {
             this.themeIndex = (this.themeIndex + 1) % MenuTestLevel1_6.themeCount;
           }})
 
-          Text(`切换MenuItem组件字体颜色`)
-            .paramTextStyle()
+          Text(`切换MenuItem组件字体颜色`).paramTextStyle()
           Row({space: 3}){
             MyComponent({title: 'UN', func: ()=> {
               this.menuItemAttrOpt.labelFontColor = undefined
@@ -218,8 +215,7 @@ struct MenuTestLevel1_6 {
         .columnStyle()
 
         Column({space: 5}){
-          Text(`WithTheme下的MenuItem组件`)
-            .paramTextStyle()
+          Text(`WithTheme下的MenuItem组件`).paramTextStyle()
           Text('bindMenu菜单-主题')
             .componentTextStyle()
             .bindMenu(this.MenuItemBuilder_WithTheme())
@@ -237,8 +233,7 @@ struct MenuTestLevel1_6 {
         .columnStyle()
 
         Column({space: 5}){
-          Text(`非WithTheme下的Menu组件`)
-            .paramTextStyle()
+          Text(`非WithTheme下的Menu组件`).paramTextStyle()
           Text('bindMenu菜单-非主题')
             .componentTextStyle()
             .bindMenu(this.MenuItemBuilder())

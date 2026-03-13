@@ -82,7 +82,6 @@ struct MenuTestLevel1_5 {
   @State show: boolean = false
   @State show_1: boolean = false
 
-  //
   static readonly themeCount = 3;
   themeNames: string[] = ['System', 'Custom (green)', 'Custom (red)'];
   themeArray: (CustomTheme | undefined)[] = [
@@ -117,17 +116,14 @@ struct MenuTestLevel1_5 {
   build() {
     Scroll(this.scroller) {
       Column({ space: 5 }) {
-        Text(`Menu组件主题场景的功能实现`)
-          .paramTextStyle()
+        Text(`Menu组件主题场景的功能实现`).paramTextStyle()
         Column({space: 5}){
-          Text(`切换WithTheme主题配色: ${this.themeNames[this.themeIndex]}`)
-            .paramTextStyle()
+          Text(`切换WithTheme主题配色: ${this.themeNames[this.themeIndex]}`).paramTextStyle()
           MyComponent({title: '切换withTheme配色', func: () => {
             this.themeIndex = (this.themeIndex + 1) % MenuTestLevel1_5.themeCount;
           }})
 
-          Text(`切换Menu组件字体颜色`)
-            .paramTextStyle()
+          Text(`切换Menu组件字体颜色`).paramTextStyle()
           Row({space: 3}){
             MyComponent({title: 'UN', func: ()=> {
               this.menuAttrOpt.fontColor = undefined
@@ -137,8 +133,7 @@ struct MenuTestLevel1_5 {
             }})
           }
 
-          Text(`切换次级菜单类型: ${this.menuAttrOpt.submenuMode}`)
-            .paramTextStyle()
+          Text(`切换次级菜单类型: ${this.menuAttrOpt.submenuMode}`).paramTextStyle()
           Row({space: 3}){
             MyComponent({title: 'SIDE', func: () => {
               this.menuAttrOpt.submenuMode = 0
@@ -153,8 +148,7 @@ struct MenuTestLevel1_5 {
         }
         .columnStyle()
         Column({space: 5}){
-          Text(`WithTheme下的Menu组件`)
-            .paramTextStyle()
+          Text(`WithTheme下的Menu组件`).paramTextStyle()
           Text('图文菜单')
             .componentTextStyle()
             .bindMenu([
@@ -206,8 +200,7 @@ struct MenuTestLevel1_5 {
         .columnStyle()
 
         Column({space: 5}){
-          Text(`非WithTheme下的Menu组件`)
-            .paramTextStyle()
+          Text(`非WithTheme下的Menu组件`).paramTextStyle()
           Text('图文菜单-非主题')
             .componentTextStyle()
             .bindMenu([
