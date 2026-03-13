@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /*
 * bindContextMenu设置预览图菜单专项
 * 验证bindContextMenu设置预览图和previewAnimationOptions: 组合测试scale/hoverScale和transition

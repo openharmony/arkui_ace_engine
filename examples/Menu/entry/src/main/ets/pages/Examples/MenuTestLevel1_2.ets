@@ -12,14 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /*
 * 不同次级菜单类型, 多级菜单绘制效果绘制
 * 验证Menu的customBuilder:
 * 多级菜单的绘制验证：重点验证UX位置和避让
  */
 import { MyComponent } from '../../common/MyComponent'
-
 class BuilderOptions {
   width?: Length = '240'
   height?: Length = '300'

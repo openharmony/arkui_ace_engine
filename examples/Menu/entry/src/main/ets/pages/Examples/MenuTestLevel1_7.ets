@@ -17,7 +17,6 @@
  */
 import { LengthMetrics } from '@kit.ArkUI';
 import { MyComponent } from '../../common/MyComponent'
-
 class SizeOpt {
   Width?: Length |  LayoutPolicy = '40%'
   Height?: Length |  LayoutPolicy = '40%'
@@ -79,13 +78,11 @@ export struct MenuSafeArea {
   @State menuSize: SizeOpt = {
     Width: '40%',
     Height: '100%'
-}
-
+ }
   // Menu组件background
   @State backgroundOptions: BackgroundOptions = {
     align: Alignment.Center
   }
-
   //Menu组件父容器属性
   @State menuParentCompAttrOptions: MenuParentCompAttrOptions = {}
   //Menu组件ignoreLayoutSafeArea

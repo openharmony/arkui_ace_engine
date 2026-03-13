@@ -19,7 +19,6 @@
 * 2、withTheme内设置设置Menu
 * 3、Menu
  */
-
 import { CustomTheme, CustomColors, ThemeControl } from '@kit.ArkUI';
 import { MyComponent } from '../../common/MyComponent'
 import { MenuBuilder, MenuAttrOptions, symbolStartIcon, startIcon, endIcon, symbolEndIcon, SubMenuBuilder} from '../../customBuilder/MenuBuilder'
@@ -104,7 +103,6 @@ struct MenuTestLevel1_6 {
   }
   // 菜单选项的字体颜色
   @State menuItemAttrOpt: MenuItemAttrOpt = {
-
   }
   // 菜单的builder
   @Builder
@@ -121,7 +119,6 @@ struct MenuTestLevel1_6 {
       })
         .contentFontColor(this.menuItemAttrOpt.contentFontColor)
         .labelFontColor(this.menuItemAttrOpt.labelFontColor)
-
       MenuItemGroup({header: '标题', footer: '脚标' }) {
         MenuItem({
           content: '菜单选项1',
@@ -133,7 +130,6 @@ struct MenuTestLevel1_6 {
           labelInfo: 'label',
         })
       }
-
       MenuItem({
         content: '菜单选项2',
         labelInfo: 'label',

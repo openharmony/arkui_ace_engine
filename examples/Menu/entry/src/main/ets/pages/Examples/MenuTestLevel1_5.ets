@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /*
 * Menu组件主题场景测试用例
 * 测试设计：
@@ -20,7 +19,6 @@
 * 2、withTheme内设置设置Menu
 * 3、Menu
  */
-
 import { CustomTheme, CustomColors, ThemeControl } from '@kit.ArkUI';
 import { MyComponent } from '../../common/MyComponent'
 import { MenuBuilder, MenuAttrOptions, symbolStartIcon } from '../../customBuilder/MenuBuilder'
