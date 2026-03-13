@@ -495,4 +495,201 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg012, TestSize.Level1)
     distributedUI.RestoreUITreeInner(array);
     EXPECT_EQ(distributedUI.sinkPageChildren_.empty(), true);
 }
+
+/**
+ * @tc.name: DistributedUiTestNg013
+ * @tc.desc: ProcessSerializeableInputEvent with null context
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg013, TestSize.Level1)
+{
+    MockPipelineContext::GetCurrent()->stageManager_ = nullptr;
+    DistributedUI distributedUI;
+    SerializeableObjectArray array;
+    std::unique_ptr<SerializeableObject> value = std::make_unique<JsonValue>();
+    array.push_back(std::move(value));
+    auto arraySizeBefore = array.size();
+    distributedUI.ProcessSerializeableInputEvent(array);
+    EXPECT_EQ(array.size(), arraySizeBefore);
+}
+
+/**
+ * @tc.name: DistributedUiTestNg014
+ * @tc.desc: OnTreeUpdate with empty update
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg014, TestSize.Level1)
+{
+    Init();
+    DistributedUI distributedUI;
+    std::function<void(int32_t, SerializeableObjectArray&)> fun = [](int32_t num, SerializeableObjectArray& array) {};
+    distributedUI.SubscribeUpdate(fun);
+    auto dirtySizeBefore = distributedUI.dirtyRenderNodes_.size();
+    distributedUI.OnTreeUpdate();
+    EXPECT_EQ(distributedUI.dirtyRenderNodes_.size(), dirtySizeBefore);
+}
+
+/**
+ * @tc.name: DistributedUiTestNg015
+ * @tc.desc: DumpDirtyRenderNodes with various conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg015, TestSize.Level1)
+{
+    Init();
+    DistributedUI distributedUI;
+    std::function<void(int32_t, SerializeableObjectArray&)> fun = [](int32_t num, SerializeableObjectArray& array) {};
+    distributedUI.SubscribeUpdate(fun);
+    
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    distributedUI.AddDirtyRenderNode(nodeId);
+    distributedUI.AddNewNode(nodeId);
+    SerializeableObjectArray objectArray;
+    distributedUI.DumpDirtyRenderNodes(objectArray);
+    EXPECT_TRUE(objectArray.empty());
+}
+
+/**
+ * @tc.name: DistributedUiTestNg016
+ * @tc.desc: DumpDirtyLayoutNodes with various conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg016, TestSize.Level1)
+{
+    Init();
+    DistributedUI distributedUI;
+    std::function<void(int32_t, SerializeableObjectArray&)> fun = [](int32_t num, SerializeableObjectArray& array) {};
+    distributedUI.SubscribeUpdate(fun);
+    
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    distributedUI.AddDirtyLayoutNode(nodeId);
+    distributedUI.AddNewNode(nodeId);
+    SerializeableObjectArray objectArray;
+    distributedUI.DumpDirtyLayoutNodes(objectArray);
+    EXPECT_TRUE(objectArray.empty());
+}
+
+/**
+ * @tc.name: DistributedUiTestNg017
+ * @tc.desc: DumpNewNodes with various conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg017, TestSize.Level1)
+{
+    Init();
+    DistributedUI distributedUI;
+    std::function<void(int32_t, SerializeableObjectArray&)> fun = [](int32_t num, SerializeableObjectArray& array) {};
+    distributedUI.SubscribeUpdate(fun);
+    
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    distributedUI.AddNewNode(nodeId);
+    SerializeableObjectArray objectArray;
+    distributedUI.DumpNewNodes(objectArray);
+    EXPECT_TRUE(objectArray.empty());
+}
+
+/**
+ * @tc.name: DistributedUiTestNg018
+ * @tc.desc: DumpUpdate with all dirty sets empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg018, TestSize.Level1)
+{
+    DistributedUI distributedUI;
+    auto array = distributedUI.DumpUpdate();
+    EXPECT_TRUE(array.empty());
+}
+
+/**
+ * @tc.name: DistributedUiTestNg019
+ * @tc.desc: GetIdMapping with non-existent node
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg019, TestSize.Level1)
+{
+    DistributedUI distributedUI;
+    int32_t srcNodeId = 999;
+    auto sinkNodeId = distributedUI.GetIdMapping(srcNodeId);
+    EXPECT_EQ(sinkNodeId, ElementRegister::UndefinedElementId);
+}
+
+/**
+ * @tc.name: DistributedUiTestNg020
+ * @tc.desc: DelNodeHash with non-existent node
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg020, TestSize.Level1)
+{
+    DistributedUI distributedUI;
+    int32_t nodeId = 999;
+    distributedUI.DelNodeHash(nodeId);
+    EXPECT_TRUE(distributedUI.nodeHashs_.empty());
+}
+
+/**
+ * @tc.name: DistributedUiTestNg021
+ * @tc.desc: IsRecordHash with non-existent node
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg021, TestSize.Level1)
+{
+    DistributedUI distributedUI;
+    int32_t nodeId = 999;
+    std::size_t hashValue = 12345;
+    auto result = distributedUI.IsRecordHash(nodeId, hashValue);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: DistributedUiTestNg022
+ * @tc.desc: DumpNode with null parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg022, TestSize.Level1)
+{
+    auto node = FrameNode::CreateFrameNode(
+        "test", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    DistributedUI distributedUI;
+    auto nodeObject = std::make_unique<OHOS::Ace::NodeObject>();
+    distributedUI.DumpNode(node, 1, DistributedUI::OperationType::OP_ADD, nodeObject);
+    EXPECT_NE(nodeObject, nullptr);
+}
+
+/**
+ * @tc.name: DistributedUiTestNg023
+ * @tc.desc: RestoreNode without attrs
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg023, TestSize.Level1)
+{
+    DistributedUI distributedUI;
+    auto nodeObject = std::make_unique<OHOS::Ace::NodeObject>();
+    nodeObject->Put("$type", V2::TEXT_ETS_TAG);
+    nodeObject->Put("$ID", 1);
+    nodeObject->Put("$parent", 0);
+    nodeObject->Put("$depth", 1);
+    auto node = distributedUI.RestoreNode(nodeObject);
+    EXPECT_EQ(node, nullptr);
+}
+
+/**
+ * @tc.name: DistributedUiTestNg024
+ * @tc.desc: DelNode with null parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg024, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = FrameNode::CreateFrameNode(
+        "test", nodeId, AceType::MakeRefPtr<Pattern>());
+    
+    DistributedUI distributedUI;
+    distributedUI.SetIdMapping(nodeId, nodeId);
+    
+    auto nodeObject = std::make_unique<OHOS::Ace::NodeObject>();
+    nodeObject->Put(DISTRIBUTE_UI_ID, nodeId);
+    
+    distributedUI.DelNode(nodeObject);
+    EXPECT_EQ(node->GetParent(), nullptr);
+}
 } // namespace OHOS::Ace::NG
