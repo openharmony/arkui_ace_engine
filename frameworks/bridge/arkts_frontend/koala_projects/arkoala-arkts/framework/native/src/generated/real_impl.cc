@@ -8039,6 +8039,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Boolean* value)
     {
     }
+    void SetSupportEmptyBranchInLazyLoadingImpl(Ark_NativePointer node,
+                                                const Opt_Boolean* value)
+    {
+    }
     void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
                                    const Opt_OnScrollFrameBeginCallback* value)
     {
@@ -11004,6 +11008,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WaterFlowAttributeModifier::SetLayoutDirectionImpl,
             WaterFlowAttributeModifier::SetCachedCount0Impl,
             WaterFlowAttributeModifier::SetSyncLoadImpl,
+            WaterFlowAttributeModifier::SetSupportEmptyBranchInLazyLoadingImpl,
             WaterFlowAttributeModifier::SetOnScrollFrameBeginImpl,
             WaterFlowAttributeModifier::SetOnScrollIndexImpl,
             WaterFlowAttributeModifier::SetOnWillScrollImpl,

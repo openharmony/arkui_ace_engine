@@ -18251,6 +18251,32 @@ int32_t SetWaterFlowScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeIt
         node->uiNodeHandle, values[NUM_0], values[NUM_1], values[NUM_2], extraOffset);
     return ERROR_CODE_NO_ERROR;
 }
+
+int32_t SetWaterFlowSupportLazyLoadingEmptyBranch(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    bool supportLazyLoadingEmptyBranch = false;
+    if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else {
+        supportLazyLoadingEmptyBranch = item->value[0].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setSupportLazyLoadingEmptyBranch(
+        node->uiNodeHandle, supportLazyLoadingEmptyBranch);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetWaterFlowSupportLazyLoadingEmptyBranch(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setSupportLazyLoadingEmptyBranch(node->uiNodeHandle, false);
+}
+
+const ArkUI_AttributeItem* GetWaterFlowSupportLazyLoadingEmptyBranch(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value =
+        GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getSupportLazyLoadingEmptyBranch(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
 // radio attribute
 int32_t SetRadioChecked(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -21512,7 +21538,7 @@ int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
     static Setter* setters[] = { SetLayoutDirection, SetColumnsTemplate, SetRowsTemplate, SetWaterFlowColumnsGap,
         SetWaterFlowRowsGap, SetWaterFlowSectionOption, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount,
         SetWaterFlowFooter, SetWaterFlowScrollToIndex, SetItemConstraintSize, SetWaterFlowLayoutMode,
-        SetWaterFlowSyncLoad, SetColumnsTemplateItemFillPolicy };
+        SetWaterFlowSyncLoad, SetColumnsTemplateItemFillPolicy, SetWaterFlowSupportLazyLoadingEmptyBranch };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -21525,7 +21551,7 @@ void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetLayoutDirection, ResetColumnsTemplate, ResetRowsTemplate,
         ResetWaterFlowColumnsGap, ResetWaterFlowRowsGap, ResetWaterFlowSectionOption, ResetWaterFlowNodeAdapter,
         ResetWaterFlowCachedCount, ResetWaterFlowFooter, nullptr, ResetItemConstraintSize, ResetWaterFlowLayoutMode,
-        ResetWaterFlowSyncLoad, ResetColumnsTemplateItemFillPolicy };
+        ResetWaterFlowSyncLoad, ResetColumnsTemplateItemFillPolicy, ResetWaterFlowSupportLazyLoadingEmptyBranch };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -21537,7 +21563,8 @@ const ArkUI_AttributeItem* GetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t 
 {
     static Getter* getters[] = { GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate, GetWaterFlowColumnsGap,
         GetWaterFlowRowsGap, GetWaterFlowSectionOption, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount, nullptr,
-        nullptr, GetItemConstraintSize, GetWaterFlowLayoutMode, GetWaterFlowSyncLoad, GetColumnsTemplateItemFillPolicy };
+        nullptr, GetItemConstraintSize, GetWaterFlowLayoutMode, GetWaterFlowSyncLoad, GetColumnsTemplateItemFillPolicy,
+        GetWaterFlowSupportLazyLoadingEmptyBranch };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

@@ -19196,6 +19196,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetSupportEmptyBranchInLazyLoadingImpl(Ark_NativePointer node,
+                                                const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setSupportEmptyBranchInLazyLoading(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
                                    const Opt_OnScrollFrameBeginCallback* value)
     {
@@ -23395,6 +23406,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WaterFlowAttributeModifier::SetLayoutDirectionImpl,
             WaterFlowAttributeModifier::SetCachedCount0Impl,
             WaterFlowAttributeModifier::SetSyncLoadImpl,
+            WaterFlowAttributeModifier::SetSupportEmptyBranchInLazyLoadingImpl,
             WaterFlowAttributeModifier::SetOnScrollFrameBeginImpl,
             WaterFlowAttributeModifier::SetOnScrollIndexImpl,
             WaterFlowAttributeModifier::SetOnWillScrollImpl,

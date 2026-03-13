@@ -358,6 +358,20 @@ class WaterFlowOnScrollIndexModifier extends ModifierWithKey {
 }
 WaterFlowOnScrollIndexModifier.identity = Symbol('waterFlowOnScrollIndex');
 
+class WaterFlowSupportLazyLoadingEmptyBranchModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+ 	if (reset) {
+ 	  getUINativeModule().waterFlow.setSupportLazyLoadingEmptyBranch(node, false);
+ 	} else {
+ 	  getUINativeModule().waterFlow.setSupportLazyLoadingEmptyBranch(node, this.value);
+ 	}
+  }
+}
+WaterFlowSupportLazyLoadingEmptyBranchModifier.identity = Symbol('waterFlowSupportLazyLoadingEmptyBranch');
+
 class WaterFlowInitializeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -488,6 +502,11 @@ class ArkWaterFlowComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, WaterFlowOnScrollIndexModifier.identity, WaterFlowOnScrollIndexModifier, event);
     return this;
   }
+  supportEmptyBranchInLazyLoading(value) {
+ 	modifierWithKey(this._modifiersWithKeys, WaterFlowSupportLazyLoadingEmptyBranchModifier.identity, WaterFlowSupportLazyLoadingEmptyBranchModifier, value);
+ 	return this;
+  }
+
   initialize(value) {
     if (value[0] !== undefined) {
       modifierWithKey(this._modifiersWithKeys, WaterFlowInitializeModifier.identity,
@@ -587,6 +606,10 @@ class JSWaterFlow extends JSContainerBase {
   static onScrollFrameBegin(value) {
     getUINativeModule().waterFlow.setOnScrollFrameBegin(true, value);
   }
+  static supportEmptyBranchInLazyLoading(value) {
+    getUINativeModule().waterFlow.setSupportLazyLoadingEmptyBranch(true, value);
+  }
+  
   static remoteMessage(value) {
     __Common__.remoteMessage(value);
   }

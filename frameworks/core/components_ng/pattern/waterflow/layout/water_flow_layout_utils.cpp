@@ -15,10 +15,19 @@
 #include "frameworks/core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 
 #include "core/components_ng/pattern/waterflow/water_flow_item_layout_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 namespace {
 const std::string UNIT_AUTO = "auto";
+namespace {
+RefPtr<LayoutWrapper> CreateDummyFlowItem()
+{
+    auto wrapper = WaterFlowItemModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    wrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0), CalcLength(0)));
+    return wrapper;
+}
+} // namespace
 }
 std::string WaterFlowLayoutUtils::PreParseArgs(const std::string& args)
 {
@@ -235,5 +244,19 @@ AdjustOffset WaterFlowLayoutUtils::GetAdjustOffset(const RefPtr<LayoutWrapper>& 
         child = child->GetFirstChild();
     } while (child);
     return pos;
+}
+
+RefPtr<LayoutWrapper> WaterFlowLayoutUtils::GetWaterFlowItem(
+    LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
+{
+    const auto& layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
+        if (!wrapper) {
+            wrapper = CreateDummyFlowItem();
+        }
+        return wrapper;
+    }
+    return layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
 }
 } // namespace OHOS::Ace::NG

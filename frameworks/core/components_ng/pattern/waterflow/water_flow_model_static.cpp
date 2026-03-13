@@ -288,4 +288,9 @@ void WaterFlowModelStatic::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SyncLoad, syncLoad, frameNode);
 }
+
+void WaterFlowModelStatic::SetSupportEmptyBranchInLazyLoading(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SupportLazyLoadingEmptyBranch, enabled, frameNode);
+}
 } // namespace OHOS::Ace::NG

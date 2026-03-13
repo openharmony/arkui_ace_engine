@@ -101,7 +101,7 @@ public:
 
     virtual void SetSyncLoad(bool syncLoad) {}
     virtual void ParseResObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
-
+    virtual void SetSupportLazyLoadingEmptyBranch(bool enable) {};
 private:
     static std::unique_ptr<WaterFlowModel> instance_;
     static std::mutex mutex_;

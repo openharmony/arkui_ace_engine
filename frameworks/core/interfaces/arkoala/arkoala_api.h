@@ -6573,6 +6573,8 @@ struct ArkUIWaterFlowModifier {
     void* (*createScrollBarProxy)();
     void* (*getEventSetHandler)(uint32_t kind);
     void* (*getEventResetHandler)(uint32_t kind);
+    void (*setSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node, ArkUI_Bool enable);
+    ArkUI_Bool (*getSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node);
 };
 
 struct ArkUIWaterFlowItemModifier {
