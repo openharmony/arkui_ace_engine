@@ -17,7 +17,7 @@
 
 #include "compatible/components/picker/timepicker_model_impl.h"
 
-#include "bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/generated/arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/common/dynamic_module.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/time_picker/bridge/arkts_native_timepickerdialog_bridge.h"

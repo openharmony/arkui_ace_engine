@@ -21,7 +21,7 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 #include "core/components_ng/pattern/custom/custom_node_static.h"
-#include "generated/arkoala_api_generated.h"
+#include "arkoala_api_generated.h"
 
 const OH_AnyAPI* GetAnyImpl(int kind, int version, std::string *result = nullptr);
 
