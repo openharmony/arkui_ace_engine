@@ -259,6 +259,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
     aboutToDisappear(): void {
         if (!this.executedAboutToDisappear) {
+            this.instance.__getLifecycle__Internal()?.trigger(LifeCycleEvent.ON_DISAPPEAR);
             this.instance.aboutToDisappear();
             this.executedAboutToDisappear = true;
             this.aboutToBeDeletedInternal();

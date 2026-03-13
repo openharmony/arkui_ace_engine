@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,7 @@
 
 // Using Object type to avoid circular dependency with ExtendableComponent
 // This allows the class to be compiled and linked without circular reference issues
-import { ReuseObject, CustomComponentV2 } from './customComponent';
-import { RecordData } from '@ohos.base';
+import { ReuseObject, CustomComponentV2, CustomComponent } from './customComponent';
 import { CustomComponentLifecycle, CustomComponentLifecycleState, CustomComponentLifecycleObserver, LifeCycleEvent } from './customComponent';
 
 /**
@@ -53,7 +52,7 @@ const transitionTable: Map<
 export class __CustomComponentLifecycle__Internal implements CustomComponentLifecycle {
     private currentState_: CustomComponentLifecycleState = CustomComponentLifecycleState.INIT;
     private owningView_: Object = {};
-    private observers_: Array<CustomComponentLifecycleObserver> = new Array<CustomComponentLifecycleObserver>();
+    private observers_: Set<CustomComponentLifecycleObserver> = new Set<CustomComponentLifecycleObserver>();
 
     constructor(view: Object) {
         this.owningView_ = view;
@@ -81,7 +80,7 @@ export class __CustomComponentLifecycle__Internal implements CustomComponentLife
     }
 
     public trigger(event: LifeCycleEvent, params?: ReuseObject): boolean {
-        if (this.observers_.length === 0) {
+        if (this.observers_.size === 0) {
             return false;
         }
         return this.handleEvent(event, params);
@@ -134,7 +133,7 @@ export class __CustomComponentLifecycle__Internal implements CustomComponentLife
         for (const observer of this.observers_) {
             if (this.owningView_ instanceof CustomComponentV2) {
                 observer.aboutToReuse();
-            } else {
+            } else if (this.owningView_ instanceof CustomComponent) {
                 observer.aboutToReuse(params);
             }
         }
@@ -147,30 +146,28 @@ export class __CustomComponentLifecycle__Internal implements CustomComponentLife
         for (const observer of this.observers_) {
             observer.aboutToDisappear();
         }
-        this.observers_ = [];
+        this.observers_.clear();
     }
 
     /**
      * Add lifecycle observer
      */
     public addObserver(target: CustomComponentLifecycleObserver): void {
-        if (!this.observers_.includes(target)) {
-            this.observers_.push(target);
-        }
+        this.observers_.add(target);
     }
 
     /**
      * Remove lifecycle observer
      */
     public removeObserver(target: CustomComponentLifecycleObserver): void {
-        this.observers_ = this.observers_.filter(obs => obs !== target);
+        this.observers_.delete(target);
     }
 
     /**
      * Check if has observer
      */
     public hasObserver(): boolean {
-        return this.observers_.length > 0;
+        return this.observers_.size > 0;
     }
 
 
