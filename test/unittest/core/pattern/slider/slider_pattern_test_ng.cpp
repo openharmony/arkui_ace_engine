@@ -1466,4 +1466,57 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest004, TestSize.Level1
         }
     }
 }
+
+/**
+ * @tc.name: ParseCommand001
+ * @tc.desc: Test SliderPattern ParseCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, ParseCommand001, TestSize.Level1)
+{
+    float value = MIN;
+    std::string command = "";
+    EXPECT_FALSE(SliderPattern::ParseCommand(command, value));
+    command = "{";
+    EXPECT_FALSE(SliderPattern::ParseCommand(command, value));
+    command = "{}";
+    EXPECT_FALSE(SliderPattern::ParseCommand(command, value));
+    command = "{\"cmd\":\"SetValue\"}";
+    EXPECT_FALSE(SliderPattern::ParseCommand(command, value));
+    command = "{\"cmd\":\"SetSliderValue\"}";
+    EXPECT_FALSE(SliderPattern::ParseCommand(command, value));
+    command = "{\"cmd\":\"SetSliderValue\",\"params\":{}}";
+    EXPECT_FALSE(SliderPattern::ParseCommand(command, value));
+    command = "{\"cmd\":\"SetSliderValue\",\"params\":{\"value\":\"abc\"}}";
+    EXPECT_FALSE(SliderPattern::ParseCommand(command, value));
+    command = "{\"cmd\":\"SetSliderValue\",\"params\":{\"value\":true}}";
+    EXPECT_FALSE(SliderPattern::ParseCommand(command, value));
+    command = "{\"cmd\":\"SetSliderValue\",\"params\":{\"value\":12.5}}";
+    EXPECT_TRUE(SliderPattern::ParseCommand(command, value));
+    EXPECT_EQ(value, 12.5f);
+}
+
+/**
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: Test SliderPattern OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, OnInjectionEvent001, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    ASSERT_EQ(sliderPaintProperty->GetValueValue(MIN), VALUE);
+
+    std::string command = "abc";
+    EXPECT_EQ(sliderPattern->OnInjectionEvent(command), RET_FAILED);
+    command = "{\"cmd\":\"SetSliderValue\",\"params\":{\"value\":7}}";
+    EXPECT_EQ(sliderPattern->OnInjectionEvent(command), RET_SUCCESS);
+    EXPECT_EQ(sliderPaintProperty->GetValueValue(MIN), 7.0f);
+}
 } // namespace OHOS::Ace::NG

@@ -85,6 +85,7 @@ public:
     void SetButtonPress(bool value);
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -122,6 +123,8 @@ private:
     void HandleHoverEvent(bool isHover);
     void InitEvent();
     void SetToggleScale(RefPtr<RenderContext>& renderContext);
+    static bool ParseCommand(const std::string& command, bool& isOn);
+    void ReportChangeEvent(bool isOn);
 
     RefPtr<FrameNode> BuildContentModifierNode();
     std::function<void(bool)> isFocusActiveUpdateEvent_;

@@ -18,6 +18,8 @@
 #include <iomanip>
 #include <sstream>
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -407,6 +409,7 @@ void RatingPattern::FireChangeEvent()
     std::stringstream ss;
     ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue(0.0);
     ratingEventHub->FireChangeEvent(ss.str());
+    ReportChangeEvent(ss.str());
     lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue(0.0);
 
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -1209,5 +1212,22 @@ void RatingPattern::OnColorModeChange(uint32_t colorMode)
     if (IsNeedFocusStyle()) {
         LoadFocusBackground(layoutProperty, ratingTheme, iconTheme);
     }
+}
+
+void RatingPattern::ReportChangeEvent(const std::string& index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("nodeId", nodeId);
+    params->Put("value", StringUtils::StringToDouble(index));
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("event", "Rating.onChange");
+    json->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
 }
 } // namespace OHOS::Ace::NG

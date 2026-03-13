@@ -243,6 +243,7 @@ private:
     void UpdateNavIdAndState(const RefPtr<FrameNode>& host);
     void UpdateGroupManager();
     bool IsArkTSStatic();
+    void ReportToggleChangeEvent(bool isOn);
 
     CheckboxSettingData checkboxSettingData_;
 

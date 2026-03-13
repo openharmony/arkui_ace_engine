@@ -18,9 +18,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void SliderPattern::UpdateValueMultiThread(const RefPtr<FrameNode>& frameNode)
+void SliderPattern::UpdateValueMultiThread(const RefPtr<FrameNode>& frameNode, bool isNotifyRecovery)
 {
-    auto isExceptionValueRecovery = CalcSliderValue();
+    auto isExceptionValueRecovery = CalcSliderValue() && isNotifyRecovery;
     auto updateTask = [weak = WeakClaim(this), isExceptionValueRecovery]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
