@@ -89,7 +89,7 @@ struct MyStateSample {
           ListItem() {
             Text(day)
               .fontSize(20)
-              .backgroundColor("#fff3bef3")
+              .backgroundColor('#fff3bef3')
               .height(100)
               .width('100%')
               .borderRadius(20)

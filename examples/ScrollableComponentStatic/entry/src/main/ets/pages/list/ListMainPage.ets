@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,23 +43,34 @@ class PageInfo {
 
 @Entry
 @Component
-struct Index {
+struct ListMainPage {
   @State routers: Array<PageInfo> = new Array<PageInfo>()
   private listScroller: ListScroller = new ListScroller()
 
   aboutToAppear(): void {
     this.routers = new Array<PageInfo>()
-    this.routers.push(new PageInfo('WaterFlow', 'pages/waterflow/WaterFlowMainPage'))
-    this.routers.push(new PageInfo('Grid', 'pages/grid/GridMainPage'))
-    this.routers.push(new PageInfo('Scroll', 'pages/scroll/ScrollMainPage'))
-    this.routers.push(new PageInfo('List', 'pages/list/ListMainPage'))
-    this.routers.push(new PageInfo('Refresh', 'pages/refresh/RefreshMainPage'))
-    this.routers.push(new PageInfo('LazyVGrid', 'pages/lazyvgrid/LazyVGridMainPage'))
+    this.routers.push(new PageInfo('Back', 'pages/Index'))
+    this.routers.push(new PageInfo('List 声明式', 'pages/list/ListDeclare'))
+    this.routers.push(new PageInfo('List 命令式', 'pages/list/ListCommand'))
+    this.routers.push(new PageInfo('ListItemGroupMixedCase', 'pages/list/childrenMainSize/ListItemGroupMixedCase'))
+    this.routers.push(new PageInfo('OnlyListItemCase', 'pages/list/childrenMainSize/OnlyListItemCase'))
+    this.routers.push(new PageInfo('ListOnItemDrag', 'pages/list/drag/ListOnItemDrag'))
+    this.routers.push(new PageInfo('ListBindListScroller', 'pages/list/ListScroller/ListBindListScroller'))
+    this.routers.push(new PageInfo('ListItemNumberSample', 'pages/list/number/ListItemNumberSample'))
+    this.routers.push(new PageInfo('ListNumberSample1', 'pages/list/number/ListNumberSample1'))
+    this.routers.push(new PageInfo('ListNumberSample2', 'pages/list/number/ListNumberSample2'))
+    this.routers.push(new PageInfo('ForEachCase', 'pages/list/onMove/ForEachCase'))
+    this.routers.push(new PageInfo('LazyForEachCase', 'pages/list/onMove/LazyForEachCase'))
+    this.routers.push(new PageInfo('RepeatNonVirtualCase', 'pages/list/onMove/RepeatNonVirtualCase'))
+    this.routers.push(new PageInfo('RepeatVirtualScrollCase', 'pages/list/onMove/RepeatVirtualScrollCase'))
+    this.routers.push(new PageInfo('scrollEvent', 'pages/list/scrollEvent/scrollEvent'))
+    this.routers.push(new PageInfo('listSelectedAttr', 'pages/list/selected/listSelectedAttr'))
+    this.routers.push(new PageInfo('swipeActionWithBuilder', 'pages/list/swipeAction/swipeActionWithBuilder'))
   }
 
   build() {
     Column(undefined) {
-      Text('ScrollableComponentStatic')
+      Text('List')
         .fontSize(20)
         .margin({ top: 12, bottom: 8 })
       List({ scroller: this.listScroller }) {

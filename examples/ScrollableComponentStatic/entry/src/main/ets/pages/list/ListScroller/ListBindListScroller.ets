@@ -203,13 +203,13 @@ struct MyStateSample {
               ListItem({ style: ListItemStyle.CARD }) {
                 Text(`group: ${index}, item: ${innerIndex}`)
                   .fontSize(20)
-                  .backgroundColor("#fff3bef3")
+                  .backgroundColor('#fff3bef3')
               }
             })
           }
           .divider({
             strokeWidth: 2,
-            color: "#ff000000",
+            color: '#ff000000',
             startMargin: 20,
             endMargin: 20
           } as ListDividerOptions)
@@ -218,7 +218,7 @@ struct MyStateSample {
           ListItem() {
             Text(day)
               .fontSize(20)
-              .backgroundColor("#fff3bef3")
+              .backgroundColor('#fff3bef3')
               .height(100)
               .width('100%')
               .borderRadius(20)
