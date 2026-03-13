@@ -380,15 +380,24 @@ HWTEST_F(RichEditorSpanAmendTestNg, PlaceholderImageNode, TestSize.Level1)
     options.imagePixelMap = pixelMap;
     auto spanString = AceType::MakeRefPtr<SpanString>(options);
     ASSERT_NE(spanString, nullptr);
+
+    // Set placeholder with image.
     richEditorPattern->SetPlaceholderStyledString(spanString);
     auto& placeholderSpanNodes = richEditorPattern->placeholderImageNodes_;
     std::vector<std::list<RefPtr<SpanItem>>> spans;
     richEditorPattern->SetPlaceholder(spans);
     EXPECT_EQ(spans.size(), 1);
     EXPECT_EQ(placeholderSpanNodes.size(), 1);
+
+    // Remove placeholder image nodes when a text span is added.
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    EXPECT_TRUE(placeholderSpanNodes.empty());
+    richEditorPattern->spans_.clear();
     richEditorPattern->SetPlaceholder(spans);
     EXPECT_EQ(spans.size(), 1);
     EXPECT_EQ(placeholderSpanNodes.size(), 1);
+
+    // Remove placeholder image nodes since real content exists.
     richEditorPattern->BeforeCreateLayoutWrapper();
     EXPECT_EQ(placeholderSpanNodes.size(), 1);
     richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
