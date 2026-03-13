@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1132,6 +1132,14 @@ public:
     const Color& GetMenuFontColor() const
     {
         return menuFontColor_;
+    }
+
+    void SetMenuFontColor(const Color& value)
+    {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return;
+        }
+        menuFontColor_ = value;
     }
 
     const Color& GetDisabledMenuFontColor() const

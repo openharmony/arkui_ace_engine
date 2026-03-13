@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -375,7 +375,6 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     CHECK_NULL_VOID(theme);
 
     SetupMenuItemProperties(menuItem, theme);
-
     auto buildFunc = menuItemProps.buildFunc;
     auto pattern = menuItem->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -607,6 +606,11 @@ void MenuItemModelNG::SetLabelFontColor(const std::optional<Color>& color)
         ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor);
         ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColorSetByUser);
     }
+}
+
+void MenuItemModelNG::UpdateLabelFontColorSetByUser(bool setByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColorSetByUser, setByUser);
 }
 
 void MenuItemModelNG::SetLabelFontFamily(const std::vector<std::string> &families)

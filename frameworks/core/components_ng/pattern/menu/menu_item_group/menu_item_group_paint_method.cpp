@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper
             CHECK_NULL_VOID(host);
             pipeline = host->GetContext();
             CHECK_NULL_VOID(pipeline);
-            GroupDividerInfo info = group->PreparePaintData(pipeline, props, paintWrapper);
+            GroupDividerInfo info = group->PreparePaintData(host, props, paintWrapper);
             bool needHeaderDivider = props->GetNeedHeaderDivider().value_or(true);
             bool needFooterDivider = props->GetNeedFooterDivider().value_or(true);
             if (needHeaderPadding & needHeaderDivider) {
@@ -55,9 +55,9 @@ CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper
 }
 
 GroupDividerInfo MenuItemGroupPaintMethod::PreparePaintData(
-    RefPtr<PipelineBase>& pipeline, RefPtr<MenuItemGroupPaintProperty>& props, PaintWrapper* paintWrapper)
+    const RefPtr<FrameNode>& host, RefPtr<MenuItemGroupPaintProperty>& props, PaintWrapper* paintWrapper)
 {
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
     auto horInterval = Dimension(0.0f, DimensionUnit::PX);
     auto strokeWidth = Dimension(1.0f, DimensionUnit::PX);
     Color dividerColor = Color::TRANSPARENT;
