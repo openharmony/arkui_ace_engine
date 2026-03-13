@@ -739,7 +739,7 @@ void RichEditorPattern::HandleEnabled()
 
 void RichEditorPattern::RemovePlaceholderImageNodes()
 {
-    CHECK_NULL_VOID(!placeholderImageNodes_.empty() && !spans_.empty());
+    CHECK_NULL_VOID(!placeholderImageNodes_.empty());
     auto host = GetContentHost();
     CHECK_NULL_VOID(host);
     for (const auto& node : placeholderImageNodes_) {
@@ -754,7 +754,7 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
 {
     ACE_SCOPED_TRACE("RichEditorBeforeCreateLayoutWrapper");
     // Remove placeholder image nodes since real content exists.
-    RemovePlaceholderImageNodes();
+    IF_TRUE(!spans_.empty(), RemovePlaceholderImageNodes());
     bool isShowPlaceholderImage = spans_.empty() && !placeholderImageNodes_.empty();
     bool needInitSpanItem = !isSpanStringMode_ && !isShowPlaceholderImage;
     if (needInitSpanItem) {
@@ -1542,7 +1542,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     CHECK_NULL_RETURN(host, -1);
 
     auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
-
+    RemovePlaceholderImageNodes();
     int32_t spanIndex = 0;
     int32_t offset = -1;
     if (options.offset.has_value()) {
