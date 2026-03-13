@@ -109,7 +109,7 @@ FRAMEWORK_OBJS = $(patsubst ${SRC_PATH}/%.ets,${TARGET_PATH}/%.abc,$(FRAMEWORK_S
 FRAMEWORK_TARGET = ${TARGET_PATH}/framework.abc
 
 # Config entry function of program
-ENTRY          = main.ETSGLOBAL::main
+ENTRY          = main::main
 
 run: $(TARGET)
 	@${LAUNCHER} ${LAUNCH_FLAGS} --panda-files $(TARGET) $(TARGET) ${ENTRY}

@@ -20,7 +20,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace {
-const char ANI_TEST_NS[] = "@ohos.arkui.Test.ETSGLOBAL";
+const char ANI_TEST_NS[] = "@ohos.arkui.Test";
 }
 
 namespace OHOS::Ace {
@@ -219,8 +219,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_ERROR;
     }
-    ani_namespace ns;
-    if (ANI_OK != env->FindNamespace(ANI_TEST_NS, &ns)) {
+    ani_module ns;
+    if (ANI_OK != env->FindModule(ANI_TEST_NS, &ns)) {
         return ANI_ERROR;
     }
 
@@ -229,7 +229,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         ani_native_function { "sendKeyEvent", nullptr, reinterpret_cast<void*>(OHOS::Ace::ANI_SendKeyEvent) },
         ani_native_function { "sendMouseEvent", nullptr, reinterpret_cast<void*>(OHOS::Ace::ANI_SendMouseEvent) },
     };
-    if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
+    if (ANI_OK != env->Module_BindNativeFunctions(ns, methods.data(), methods.size())) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_GESTURE, "ANI BindNativeFunctions failed!");
         return ANI_ERROR;
     }

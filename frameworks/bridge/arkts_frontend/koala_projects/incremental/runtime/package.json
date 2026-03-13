@@ -18,7 +18,7 @@
         "test": "mocha",
         "test:coverage": "nyc mocha",
         "panda:sdk:install": "cd ../tools/panda && npm run panda:sdk:install",
-        "arkts:test:run": "bash ../tools/panda/arkts/ark build/runtime-tests.abc --ark-boot-files ../compat/build/compat.abc:../common/build/common.abc:../harness/build/harness.abc --ark-entry-point @koalaui.runtime-tests.test-arkts.tests.ETSGLOBAL::main",
+        "arkts:test:run": "bash ../tools/panda/arkts/ark build/runtime-tests.abc --ark-boot-files ../compat/build/compat.abc:../common/build/common.abc:../harness/build/harness.abc --ark-entry-point @koalaui.runtime-tests.test-arkts.tests::main",
         "arkts:test": "npm run panda:sdk:install && npm run build:compat && npm run build:common && npm run build:harness && npm run build:runtime:with:tests && npm run arkts:test:run",
         "unmemoize": "mkdir -p build/unmemoized/abc && mkdir -p build/test/lib && ets-tsc -b tsconfig-unmemoize.json && mkdir -p build/test/lib",
         "unmemoize:with:tests": "npm run compile:all --prefix ../harness && mkdir -p build/unmemoized/abc && mkdir -p build/test/lib && ets-tsc -b tsconfig-unmemoize-with-tests.json && mkdir -p build/test/lib",
