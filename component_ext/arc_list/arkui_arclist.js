@@ -17,6 +17,7 @@ const __ArcList__ = requireInternal('arkui.ArcList');
 const ModifierMap = requireNapi('arkui.modifier').ModifierMap;
 const ModifierUtils = requireNapi('arkui.modifier').ModifierUtils;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
+const ArkThemeScopeManager = requireNapi('arkui.arktheme').ArkThemeScopeManager;
 
 class ArcListChildrenMainSizeModifier extends ModifierWithKey {
     static identity = Symbol('childrenMainSize');

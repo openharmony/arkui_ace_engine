@@ -224,7 +224,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
             "arkui.components.arkmenu", "arkui.components.arkmenuitem", "arkui.components.arkmenuitemgroup",
             "arkui.components.arkdatapanel", "arkui.components.arktextclock", "arkui.components.arkpatternlock",
             "arkui.components.arkcounter", "arkui.components.arkqrcode", "arkui.components.arkalphabetindexer",
-            "arkui.components.arkricheditor" };
+            "arkui.components.arkricheditor", "arkui.arktheme" };
         for (const char* allowedModule : allowedModules) {
             if (std::strcmp(moduleName, allowedModule) == 0) {
                 return true;
