@@ -387,8 +387,8 @@ HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest014, TestSize.Level1)
     ArkUI_NodeHandle node = CreateNodeSafely(ArkUI_NodeType::ARKUI_NODE_COLUMN);
     ASSERT_NE(node, nullptr);
 
-    int32_t ret = RegisterNodeCustomEventSafely(nullptr,
-        ArkUI_NodeCustomEventType::ARKUI_NODE_CUSTOM_EVENT_ON_DRAW, 0, nullptr);
+    int32_t ret = RegisterNodeCustomEventSafely(
+        nullptr, ArkUI_NodeCustomEventType::ARKUI_NODE_CUSTOM_EVENT_ON_DRAW, 0, nullptr);
     EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
 
     ret = RegisterNodeCustomEventSafely(node,
@@ -397,8 +397,10 @@ HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest014, TestSize.Level1)
     ASSERT_NE(node->extraCustomData, nullptr);
     ASSERT_NE(reinterpret_cast<ExtraData*>(node->extraCustomData)->eventMap.size(), 0);
 
-    UnregisterNodeCustomEventSafely(nullptr, ArkUI_NodeCustomEventType::ARKUI_NODE_CUSTOM_EVENT_ON_DRAW);
-    UnregisterNodeCustomEventSafely(node, ArkUI_NodeCustomEventType::ARKUI_NODE_CUSTOM_EVENT_ON_DRAW);
+    UnregisterNodeCustomEventSafely(nullptr,
+        ArkUI_NodeCustomEventType::ARKUI_NODE_CUSTOM_EVENT_ON_DRAW);
+    UnregisterNodeCustomEventSafely(node,
+        ArkUI_NodeCustomEventType::ARKUI_NODE_CUSTOM_EVENT_ON_DRAW);
     EXPECT_EQ(node->extraCustomData, nullptr);
 
     DisposeNodeSafely(node);

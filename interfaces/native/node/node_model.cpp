@@ -351,12 +351,30 @@ void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, cons
     SetNodeAttribute(node, attribute, value);
 }
 
+bool IsSupportAttributeTypeWithBindNative(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
+{
+    if (!node || !node->isBindNative) {
+        return false;
+    }
+
+    static std::set<ArkUI_NodeAttributeType> supportAttributeType = {
+        NODE_XCOMPONENT_SURFACE_SIZE,
+        NODE_XCOMPONENT_SURFACE_RECT
+    };
+
+    if (supportAttributeType.find(attribute) != supportAttributeType.end()) {
+        return true;
+    }
+
+    return false;
+}
+
 int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value)
 {
     if (node == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (node->type == -1 && attribute != NODE_LAYOUT_RECT) {
+    if (node->type == -1 && attribute != NODE_LAYOUT_RECT && !IsSupportAttributeTypeWithBindNative(node, attribute)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     return SetNodeAttribute(node, attribute, value);
