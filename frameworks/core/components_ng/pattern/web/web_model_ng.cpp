@@ -441,10 +441,12 @@ void WebModelNG::SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* i
 void WebModelNG::SetAISessionOptions(uint32_t type, const AISessionCallback&& onCreateAISession,
     const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession)
 {
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->GetAgentEventReporter()->SetAISessionOptions(type, std::move(onCreateAISession),
         std::move(onExecuteAIAction), std::move(onDestroyAISession));
+#endif
 }
 
 void WebModelNG::SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback)

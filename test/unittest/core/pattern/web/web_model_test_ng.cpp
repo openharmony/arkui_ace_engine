@@ -40,6 +40,7 @@ constexpr int32_t DEFAULT_MINFONT_SIZE = 8;
 constexpr int32_t DEFAULT_DEFAULTFONT_SIZE = 16;
 constexpr int32_t DEFAULT_DEFAULTFIXEDFONT_SIZE = 13;
 constexpr int32_t DEFAULT_MINLOGICALFONT_SIZE = 8;
+constexpr int32_t DEFAULT_AI_SESSION_TYPE = 0;
 
 class MockBaseEventInfo : public BaseEventInfo {
 public:
@@ -5718,5 +5719,172 @@ HWTEST_F(WebModelTestNg, SetOnMediaCastEnter001, TestSize.Level1)
         callbackFunc();
         EXPECT_TRUE(callbackCalled);
     }
+}
+
+/**
+ * @tc.name: SetAISessionOptions001
+ * @tc.desc: Test SetAISessionOptions with valid callbacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetAISessionOptions001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    bool onCreateCalled = false;
+    bool onExecuteCalled = false;
+    bool onDestroyCalled = false;
+
+    AISessionCallback onCreate = [&onCreateCalled](
+        const std::string&, const std::string&, const std::function<void(uint32_t, const std::string&)>&&) {
+        onCreateCalled = true;
+        return true;
+    };
+
+    AISessionCallback onExecute = [&onExecuteCalled](
+        const std::string&, const std::string&, const std::function<void(uint32_t, const std::string&)>&&) {
+        onExecuteCalled = true;
+        return true;
+    };
+
+    AISessionCallback onDestroy = [&onDestroyCalled](
+        const std::string&, const std::string&, const std::function<void(uint32_t, const std::string&)>&&) {
+        onDestroyCalled = true;
+        return true;
+    };
+
+    WebModelNG webModelNG;
+    webModelNG.SetAISessionOptions(DEFAULT_AI_SESSION_TYPE, std::move(onCreate),
+        std::move(onExecute), std::move(onDestroy));
+
+    auto reporter = webPattern->GetAgentEventReporter();
+    ASSERT_NE(reporter, nullptr);
+
+    auto retrievedOnCreate = reporter->GetOnCreateAISession(DEFAULT_AI_SESSION_TYPE);
+    auto retrievedOnExecute = reporter->GetOnExecuteAIAction(DEFAULT_AI_SESSION_TYPE);
+    auto retrievedOnDestroy = reporter->GetOnDestroyAISession(DEFAULT_AI_SESSION_TYPE);
+
+    ASSERT_NE(retrievedOnCreate, nullptr);
+    ASSERT_NE(retrievedOnExecute, nullptr);
+    ASSERT_NE(retrievedOnDestroy, nullptr);
+
+    retrievedOnCreate("", "", [](uint32_t, const std::string&) {});
+    EXPECT_TRUE(onCreateCalled);
+
+    retrievedOnExecute("", "", [](uint32_t, const std::string&) {});
+    EXPECT_TRUE(onExecuteCalled);
+
+    retrievedOnDestroy("", "", [](uint32_t, const std::string&) {});
+    EXPECT_TRUE(onDestroyCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetAISessionOptions002
+ * @tc.desc: Test SetAISessionOptions with nullptr callbacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetAISessionOptions002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    WebModelNG webModelNG;
+    webModelNG.SetAISessionOptions(DEFAULT_AI_SESSION_TYPE + 1, nullptr, nullptr, nullptr);
+
+    auto reporter = webPattern->GetAgentEventReporter();
+    ASSERT_NE(reporter, nullptr);
+
+    auto retrievedOnCreate = reporter->GetOnCreateAISession(DEFAULT_AI_SESSION_TYPE + 1);
+    auto retrievedOnExecute = reporter->GetOnExecuteAIAction(DEFAULT_AI_SESSION_TYPE + 1);
+    auto retrievedOnDestroy = reporter->GetOnDestroyAISession(DEFAULT_AI_SESSION_TYPE + 1);
+
+    EXPECT_EQ(retrievedOnCreate, nullptr);
+    EXPECT_EQ(retrievedOnExecute, nullptr);
+    EXPECT_EQ(retrievedOnDestroy, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: SetAISessionOptions003
+ * @tc.desc: Test SetAISessionOptions with different type values
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetAISessionOptions003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    bool callbackCalled = false;
+    AISessionCallback callback = [&callbackCalled](const std::string&, const std::string&,
+                                  const std::function<void(uint32_t, const std::string&)>&&) {
+        callbackCalled = true;
+        return true;
+    };
+
+    WebModelNG webModelNG;
+    webModelNG.SetAISessionOptions(DEFAULT_AI_SESSION_TYPE + 2, std::move(callback), nullptr, nullptr);
+
+    auto reporter = webPattern->GetAgentEventReporter();
+    ASSERT_NE(reporter, nullptr);
+
+    auto retrievedOnCreate = reporter->GetOnCreateAISession(DEFAULT_AI_SESSION_TYPE + 2);
+    ASSERT_NE(retrievedOnCreate, nullptr);
+
+    retrievedOnCreate("", "", [](uint32_t, const std::string&) {});
+    EXPECT_TRUE(callbackCalled);
+
+    callbackCalled = false;
+    AISessionCallback callback2 = [&callbackCalled](const std::string&, const std::string&,
+                                  const std::function<void(uint32_t, const std::string&)>&&) {
+        callbackCalled = true;
+        return true;
+    };
+    webModelNG.SetAISessionOptions(DEFAULT_AI_SESSION_TYPE + 3, nullptr, std::move(callback2), nullptr);
+
+    auto retrievedOnExecute = reporter->GetOnExecuteAIAction(DEFAULT_AI_SESSION_TYPE + 3);
+    ASSERT_NE(retrievedOnExecute, nullptr);
+
+    retrievedOnExecute("", "", [](uint32_t, const std::string&) {});
+    EXPECT_TRUE(callbackCalled);
+
+    callbackCalled = false;
+    AISessionCallback callback3 = [&callbackCalled](const std::string&, const std::string&,
+                                  const std::function<void(uint32_t, const std::string&)>&&) {
+        callbackCalled = true;
+        return true;
+    };
+    webModelNG.SetAISessionOptions(DEFAULT_AI_SESSION_TYPE + 4, nullptr, nullptr, std::move(callback3));
+
+    auto retrievedOnDestroy = reporter->GetOnDestroyAISession(DEFAULT_AI_SESSION_TYPE + 4);
+    ASSERT_NE(retrievedOnDestroy, nullptr);
+
+    retrievedOnDestroy("", "", [](uint32_t, const std::string&) {});
+    EXPECT_TRUE(callbackCalled);
+#endif
 }
 } // namespace OHOS::Ace::NG
