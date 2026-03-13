@@ -91,9 +91,6 @@ template("ace_core_interfaces_native") {
         "window_manager:scene_session_manager",
       ]
     }
-    if (defined(config.enable_standard_input) && config.enable_standard_input) {
-      external_deps += [ "imf:extra_config_ani" ]
-    }
   }
 }
 

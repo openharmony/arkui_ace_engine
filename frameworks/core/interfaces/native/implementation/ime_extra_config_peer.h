@@ -15,18 +15,26 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_IME_EXTRA_CONFIG_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_IME_EXTRA_CONFIG_PEER_H
 
-#include <cstdint>
-
-#include "extra_config.h"
-#include "core/interfaces/native/utility/peer_utils.h"
+#include "base/memory/referenced.h"
+#include "core/common/ime/ime_extra_config.h"
 
 struct InputMethodExtraConfigPeer final {
-    using ExtraConfig = OHOS::MiscServices::ExtraConfig;
-    std::shared_ptr<ExtraConfig> extraInfo = nullptr;
+    OHOS::Ace::RefPtr<OHOS::Ace::IMEExtraConfig> aceExtraConfig_ = nullptr;
+
+    static InputMethodExtraConfigPeer* Create(void* data)
+    {
+        auto config = OHOS::Ace::IMEExtraConfig::CreateFromNative(data);
+        return new InputMethodExtraConfigPeer(config);
+    }
+
+    static void Destroy(InputMethodExtraConfigPeer* peer)
+    {
+        CHECK_NULL_VOID(peer);
+        delete peer;
+    }
 
 protected:
-    explicit InputMethodExtraConfigPeer(std::shared_ptr<ExtraConfig> extraInfo) : extraInfo(extraInfo) {};
-    virtual ~InputMethodExtraConfigPeer() = default;
-    friend OHOS::Ace::NG::PeerUtils;
+    explicit InputMethodExtraConfigPeer(OHOS::Ace::RefPtr<OHOS::Ace::IMEExtraConfig> aceExtraConfig)
+        : aceExtraConfig_(aceExtraConfig) {};
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_IME_EXTRA_CONFIG_PEER_H
