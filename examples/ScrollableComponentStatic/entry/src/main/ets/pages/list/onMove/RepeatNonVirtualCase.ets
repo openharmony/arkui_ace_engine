@@ -73,15 +73,15 @@ struct ForEachSort {
               Text(obj.item)
                 .fontSize(16)
                 .textAlign(TextAlign.Center)
-                .size({height: 100, width: "100%"})
+                .size({height: 100, width: '100%'})
             }.margin(10)
             .borderRadius(10)
-            .backgroundColor("#FFFFFFFF")
+            .backgroundColor('#FFFFFFFF')
           })
           .key((item: string, index: number) => {
             return item;
           })
-          .virtualScroll({ totalCount: this.arr.length })
+          .virtualScroll({ disableVirtualScroll: true })
       }
       .width('100%')
       .height('100%')

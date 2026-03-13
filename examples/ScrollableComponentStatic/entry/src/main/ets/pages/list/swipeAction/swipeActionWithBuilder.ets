@@ -62,7 +62,7 @@ import hilog from '@ohos.hilog'
 
 @Entry
 @Component
-struct MyStateSample {
+struct SwipeActionTest {
   @State selectedFlag: boolean = false;
   @State numbers: Array<string> = new Array<string>();
   @State enterEndDeleteAreaString: string = 'not enterEndDeleteArea';
@@ -108,80 +108,57 @@ struct MyStateSample {
 
   build() {
     Column(undefined) {
-      List({ space: 10, initialIndex: 11, scroller: this.listScroller }) {
-        ForEach(this.numbers, (day: string, index: number) => {
-          ListItemGroup({
-            style: ListItemGroupStyle.CARD,
-            header: () => {
-              this.itemHead('Header')
-            } as CustomBuilder,
-            footer: () => {
-              this.itemHead('Footer')
-            } as CustomBuilder
-          }) {
-            ForEach(this.numbers, (innerDay: string, innerIndex: number) => {
-              ListItem({ style: ListItemStyle.CARD }) {
-                Text(`group: ${index}, item: ${innerIndex}`)
-                  .fontSize(20)
-                  .backgroundColor("#fff3bef3")
-              }
-            })
-          }
-          .divider({
-            strokeWidth: 2,
-            color: "#ff000000",
-            startMargin: 20,
-            endMargin: 20
-          } as ListDividerOptions)
-        })
+      Text(this.enterEndDeleteAreaString)
+        .fontSize(20)
+      Text(this.exitEndDeleteAreaString)
+        .fontSize(20)
+      List({ space: 10, initialIndex: 0, scroller: this.listScroller }) {
         ForEach(this.numbers, (day: string, index: number) => {
           ListItem() {
             Text(day)
               .fontSize(20)
-              .backgroundColor("#fff3bef3")
+              .backgroundColor('#fff3bef3')
               .height(100)
               .width('100%')
               .borderRadius(20)
           }
+          .swipeAction({
+            start: () => {
+              this.itemSwipeNode(`item: ${index} SwipeNode`)
+            } as CustomBuilder,
+            end: {
+              builder: () => {
+                this.itemSwipeNode(`item: ${index} SwipeNode`)
+              } as CustomBuilder,
+              onAction: () => {
+                console.info(`listTest onAction triggered`)
+              },
+              actionAreaDistance: 56,
+              onEnterActionArea: () => {
+                this.enterEndDeleteAreaString = 'enterEndDeleteArea';
+                this.exitEndDeleteAreaString = 'not exitEndDeleteArea';
+              },
+              onExitActionArea: () => {
+                this.enterEndDeleteAreaString = 'not enterEndDeleteArea';
+                this.exitEndDeleteAreaString = 'exitEndDeleteArea';
+              },
+              onStateChange: (state: SwipeActionState) => {
+                console.info(`listTest onStateChange state: ${state}`)
+              }
+            } as SwipeActionItem,
+            edgeEffect: SwipeEdgeEffect.None,
+            onOffsetChange: (offset: number) => {
+              console.info(`listTest onOffsetChange offset: ${offset}`)
+            }
+          } as SwipeActionOptions)
         })
       }
       .height(600)
       .width(400)
       .backgroundColor(Color.Gray)
-      .onScrollStart(() => {
-        console.info(`listTest onScrollStart`)
-      })
-      .onScrollStop(() => {
-        console.info(`listTest onScrollStop`)
-      })
-      .onReachStart(() => {
-        console.info(`listTest onReachStart`)
-      })
-      .onReachEnd(() => {
-        console.info(`listTest onReachEnd`)
-      })
-      .onScrollIndex((start: number, end: number, center: number) => {
-        console.info(`listTest onScrollIndex start: ${start}, center: ${center}, end: ${end}`)
-      })
       .chainAnimation(true)
-      .sticky(StickyStyle.Header)
-      .onWillScroll((scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => {
-        console.info(`listTest onWillScroll offset: ${scrollOffset}, state: ${scrollState}`)
-        return undefined;
-      } as OnWillScrollCallback)
-      .onDidScroll((scrollOffset: number, scrollState: ScrollState) => {
-        console.info(`listTest onDidScroll offset: ${scrollOffset}, state: ${scrollState}`)
-      } as OnScrollCallback)
-      .onScrollVisibleContentChange((start: VisibleListContentInfo, end: VisibleListContentInfo) => {
-        console.info(`listTest onScrollVisibleContentChange start index: ${start.index}, itemGroupArea: ${start.itemGroupArea}, itemIndexInGroup: ${start.itemIndexInGroup}`)
-        console.info(`listTest onScrollVisibleContentChange end index: ${end.index}, itemGroupArea: ${end.itemGroupArea}, itemIndexInGroup: ${end.itemIndexInGroup}`)
-      } as OnScrollVisibleContentChangeCallback)
       .enableScrollInteraction(true)
-      .multiSelectable(true)
-      .lanes({ minLength: 150, maxLength: 300 } as LengthConstrain, 100)
-      .stackFromEnd(true)
       .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true, effectEdge: EffectEdge.END | EffectEdge.START })
-      .divider({ strokeWidth: 2 } as ListDividerOptions)
     }
   }
 }

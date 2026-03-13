@@ -176,7 +176,7 @@ struct MyStateSample {
       })
       .width('100%')
       .height('100%')
-      .backgroundColor("#FFDCDCDC")
+      .backgroundColor('#FFDCDCDC')
     }
   }
 }

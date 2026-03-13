@@ -12,39 +12,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use static'
 
-import { typeNode } from '@kit.ArkUI';
+import { typeNode } from '@ohos.arkui.node';
+import {
+  Button,
+  Column,
+  Component,
+  Edge,
+  Entry,
+  FontWeight,
+  ForEach,
+  List,
+  ListItem,
+  Row,
+  Scroller,
+  Text,
+  TextAlign
+} from '@ohos.arkui.component';
+import { State } from '@ohos.arkui.stateManagement';
 
 @Entry
 @Component
 struct ListDeclare {
-  private static readonly COMPONENT_ID: string = 'COMPONENT_ID';
+  private static readonly COMPONENT_ID: string = 'list_bind_demo_001';
   private defaultScroller: Scroller = new Scroller();
   private dynamicScroller: Scroller = new Scroller();
   @State private bindResult: string = 'Dynamic scroller not bound';
   @State private defaultOffsetText: string = 'Default yOffset: 0';
   @State private dynamicOffsetText: string = 'Dynamic yOffset: 0';
-  @State private items: number[] = [];
+  @State private items: Array<number> = new Array<number>();
 
   aboutToAppear(): void {
-    this.items = [];
-    for (let i = 0; i < 40; i++) {
+    this.items = new Array<number>();
+    for (let i: number = 0; i < 40; i++) {
       this.items.push(i);
     }
   }
 
-  private bindScrollController(): void {
+  private bindController(): void {
     const frameNode = this.getUIContext().getFrameNodeById(ListDeclare.COMPONENT_ID);
     if (!frameNode) {
       this.bindResult = 'Bind failed: FrameNode is null';
       return;
     }
     try {
-      typeNode.bindController(frameNode, this.dynamicScroller, 'List');
+      typeNode.bindListController(frameNode, this.dynamicScroller);
       this.bindResult = 'Bind success';
       this.refreshOffset();
     } catch (e) {
       this.bindResult = `Bind failed: code=${e.code}, msg=${e.message}`;
+      console.log(this.bindResult);
     }
   }
 
@@ -71,49 +89,55 @@ struct ListDeclare {
   }
 
   build() {
-    Column({ space: 12 }) {
-      Text('Declarative List Demo')
+    Column() {
+      Text('Declarative List Static Demo')
         .fontSize(18)
         .fontWeight(FontWeight.Bold)
+        .margin({ bottom: 8 });
 
-      Text(this.bindResult).fontSize(14)
-      Text(this.defaultOffsetText).fontSize(14)
-      Text(this.dynamicOffsetText).fontSize(14)
+      Text(this.bindResult).fontSize(14).margin({ bottom: 4 });
+      Text(this.defaultOffsetText).fontSize(14).margin({ bottom: 4 });
+      Text(this.dynamicOffsetText).fontSize(14).margin({ bottom: 8 });
 
-      Row({ space: 10 }) {
+      Row() {
         Button('Bind Dynamic').onClick(() => {
-          this.bindScrollController();
-        })
+          this.bindController();
+        }).margin({ right: 10 });
+
         Button('Read Offsets').onClick(() => {
           this.refreshOffset();
-        })
-      }
+        });
+      }.margin({ bottom: 8 });
 
-      Text('Default Scroller').fontSize(14).fontWeight(FontWeight.Medium)
-      Row({ space: 10 }) {
+      Text('Default Scroller').fontSize(14).fontWeight(FontWeight.Medium).margin({ bottom: 4 });
+      Row() {
         Button('Default +120').onClick(() => {
           this.scrollBy(this.defaultScroller);
-        })
+        }).margin({ right: 10 });
+
         Button('Default Top').onClick(() => {
           this.scrollTop(this.defaultScroller);
-        })
+        }).margin({ right: 10 });
+
         Button('Default Bottom').onClick(() => {
           this.scrollBottom(this.defaultScroller);
-        })
-      }
+        });
+      }.margin({ bottom: 8 });
 
-      Text('Dynamic Scroller').fontSize(14).fontWeight(FontWeight.Medium)
-      Row({ space: 10 }) {
+      Text('Dynamic Scroller').fontSize(14).fontWeight(FontWeight.Medium).margin({ bottom: 4 });
+      Row() {
         Button('Dynamic +120').onClick(() => {
           this.scrollBy(this.dynamicScroller);
-        })
+        }).margin({ right: 10 });
+
         Button('Dynamic Top').onClick(() => {
           this.scrollTop(this.dynamicScroller);
-        })
+        }).margin({ right: 10 });
+
         Button('Dynamic Bottom').onClick(() => {
           this.scrollBottom(this.dynamicScroller);
-        })
-      }
+        });
+      }.margin({ bottom: 8 });
 
       List({ scroller: this.defaultScroller }) {
         ForEach(this.items, (idx: number) => {
@@ -122,18 +146,18 @@ struct ListDeclare {
               .width('100%')
               .height(48)
               .textAlign(TextAlign.Center)
-              .backgroundColor(idx % 2 === 0 ? '#f1f3f5' : '#e9ecef')
+              .backgroundColor(idx % 2 === 0 ? '#f1f3f5' : '#e9ecef');
           }
-        })
+        }, (idx: number) => idx.toString());
       }
-      .id(ListDeclare.COMPONENT_ID)
+      .key(ListDeclare.COMPONENT_ID)
       .height('70%')
       .width('100%')
       .borderWidth(1)
-      .borderColor('#d0d7de')
+      .borderColor('#d0d7de');
     }
     .padding(16)
     .width('100%')
-    .height('100%')
+    .height('100%');
   }
 }
