@@ -883,7 +883,9 @@ HWTEST_F(DragEventTestNg, DragEventExecutePreDragActionTest001, TestSize.Level1)
     EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::ACTION_DETECTING_STATUS)).WillOnce(Return());
     EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION)).WillOnce(Return());
     EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::PREVIEW_LIFT_STARTED)).WillOnce(Return());
+    EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::PREVIEW_LIFT_FINISHED)).WillOnce(Return());
     EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::PREVIEW_LANDING_STARTED)).WillOnce(Return());
+    EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::PREVIEW_LANDING_FINISHED)).WillOnce(Return());
     EXPECT_CALL(mockOnPreFunction, Call(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG)).WillOnce(Return());
     std::function<void(const PreDragStatus&)> mockOnPreDragFunc = mockOnPreFunction.AsStdFunction();
 
