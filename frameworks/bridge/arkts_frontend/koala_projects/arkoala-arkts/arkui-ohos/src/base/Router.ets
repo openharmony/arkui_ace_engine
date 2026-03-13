@@ -109,7 +109,6 @@ class VisiblePage {
 }
 
 class RouterState {
-    readonly visiblePages = arrayState<VisiblePage>()
     currentActivePage = mutableState(0)
     constructor(
         page: UserViewBuilder,
@@ -121,7 +120,6 @@ class RouterState {
         this.url = url
         this.params = params
         this.resolve = resolve
-        // this.visiblePages.push(new VisiblePage(page, this.version.value, RouterTransitionVisibility.Visible))
     }
     @memo
     page: UserViewBuilder
@@ -248,7 +246,7 @@ export class RouterImpl implements Router {
     // list of jsViewNode
     private peerNodeList = new Array<KPointer>
     // infos of pages in stack
-    public readonly visiblePages = arrayState<VisiblePage>()
+    public readonly visiblePages = new Array<VisiblePage>()
     private showingPageIndex : int = 0
     // entry page
     private entryPage: VisiblePage | undefined = undefined;
@@ -331,7 +329,7 @@ export class RouterImpl implements Router {
     }
 
     private findPageInStack(url: string, isReplace: boolean = false): boolean {
-        let index = this.visiblePages.value.findLastIndex(page => (page.path + page.url) === url);
+        let index = this.visiblePages.findLastIndex(page => (page.path + page.url) === url);
         if (index === -1) {
             return false;
         }
@@ -1241,7 +1239,7 @@ export class RouterImpl implements Router {
         RouterExtender.back(optionsInner);
         if (options) {
             let url = options?.url;
-            let index = this.visiblePages.value.findLastIndex(element => (element.path + element.url) === url);
+            let index = this.visiblePages.findLastIndex(element => (element.path + element.url) === url);
             if (index != -1) {
                 let pageInfo = this.visiblePages.at(index.toInt());
                 if (pageInfo) {
@@ -1272,7 +1270,7 @@ export class RouterImpl implements Router {
     }
 
     getParams(): Object {
-        let curPage = this.visiblePages.at(this.showingPageIndex)
+        let curPage = this.visiblePages.at(this.showingPageIndex);
         return curPage.params !== undefined ? curPage.params! : new Object()
     }
 
@@ -1285,7 +1283,7 @@ export class RouterImpl implements Router {
     }
 
     getState(): router.RouterState {
-        let curPage = this.visiblePages.at(this.showingPageIndex)
+        let curPage = this.visiblePages.at(this.showingPageIndex);
         // routerState index is started from 1. 
         let state: router.RouterState = {
             index: this.showingPageIndex + 1,
@@ -1312,7 +1310,7 @@ export class RouterImpl implements Router {
 
     getStateByUrl(url: string): Array<router.RouterState> {
         let retVal: Array<router.RouterState> = new Array<router.RouterState>()
-        this.visiblePages.value.forEach((element, index) => {
+        this.visiblePages.forEach((element, index) => {
             if ((element.path + element.url) === url) {
                 // routerState index is started from 1. 
                 let state: router.RouterState = {
