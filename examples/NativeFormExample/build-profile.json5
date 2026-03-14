@@ -39,20 +39,7 @@
         "name": "release"
       }
     ],
-    "signingConfigs": [
-      {
-        "name": "default",
-        "material": {
-          "certpath": "C:/Users/firminly/.ohos/config/openharmony/default_NativeFormExample_stbo_Wi7IUl6SBcsldypfI-402_FnZc_rKM3nJgo59U=.cer",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001B081925F64515DB91EF82A6B47E380BEBAA23043A1530F4916CCBF164C40609D943AA96E61E9B59",
-          "profile": "C:/Users/firminly/.ohos/config/openharmony/default_NativeFormExample_stbo_Wi7IUl6SBcsldypfI-402_FnZc_rKM3nJgo59U=.p7b",
-          "signAlg": "SHA256withECDSA",
-          "storeFile": "C:/Users/firminly/.ohos/config/openharmony/default_NativeFormExample_stbo_Wi7IUl6SBcsldypfI-402_FnZc_rKM3nJgo59U=.p12",
-          "storePassword": "0000001BB9E3A5DFE434065FD5F4E3137A3E857C91E199B589DD9ACF7AAFE33E818031533D65302A0BB549"
-        }
-      }
-    ]
+    "signingConfigs": []
   },
   "modules": [
     {
