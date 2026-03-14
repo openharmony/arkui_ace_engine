@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_UTILS_H
 
+#include "base/utils/string_utils.h"
+
 namespace OHOS::Ace::NG {
 
 static std::string ToBriefString(const TextStyle& style, const ImageSpanAttribute& imageStyle,

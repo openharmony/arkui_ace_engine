@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 
 namespace OHOS::Ace::NG {
 
