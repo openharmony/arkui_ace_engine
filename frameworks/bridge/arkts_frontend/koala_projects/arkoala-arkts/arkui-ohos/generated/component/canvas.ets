@@ -1174,6 +1174,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     set textBaseline(textBaseline: CanvasTextBaseline) {
         this.setTextBaseline(textBaseline)
     }
+    get antialias(): boolean | undefined {
+        return this.getAntialias()
+    }
+    set antialias(antialias: boolean | undefined) {
+        this.setAntialias(antialias)
+    }
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
     }
@@ -1593,6 +1599,14 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setTextBaseline(textBaseline: CanvasTextBaseline): void {
         const textBaseline_casted = textBaseline as (CanvasTextBaseline)
         this.setTextBaseline_serialize(textBaseline_casted)
+        return
+    }
+    private getAntialias(): boolean | undefined {
+        return this.getAntialias_serialize()
+    }
+    private setAntialias(antialias: boolean | undefined): void {
+        const antialias_casted = antialias as (boolean | undefined)
+        this.setAntialias_serialize(antialias_casted)
         return
     }
     private drawImage0_serialize(image: ImageBitmap | PixelMap, dx: double, dy: double): void {
@@ -2138,6 +2152,29 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private setTextBaseline_serialize(textBaseline: CanvasTextBaseline): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setTextBaseline(this.peer!.ptr, textBaseline)
+    }
+    private getAntialias_serialize(): boolean | undefined {
+        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getAntialias(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
+    }
+    private setAntialias_serialize(antialias: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (antialias !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const antialiasTmpValue  = antialias!
+            thisSerializer.writeBoolean(antialiasTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CanvasRenderer_setAntialias(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class Path2DInternal {

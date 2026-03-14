@@ -1066,6 +1066,22 @@ void SetTextBaselineImpl(Ark_CanvasRenderer peer,
     auto baseLineStr = Converter::Convert<std::string>(*textBaseline);
     peerImpl->SetTextBaseline(baseLineStr);
 }
+Opt_Boolean GetAntialiasImpl(Ark_CanvasRenderer peer)
+{
+    auto invalid = Converter::ArkValue<Opt_Boolean>();
+    CHECK_NULL_RETURN(peer, invalid);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, invalid);
+    return Converter::ArkValue<Opt_Boolean>(peerImpl->GetAntialias());
+}
+void SetAntialiasImpl(Ark_CanvasRenderer peer, const Opt_Boolean* antialias)
+{
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    std::optional<bool> enabled = Converter::OptConvertPtr<bool>(antialias);
+    peerImpl->SetAntialias(enabled);
+}
 } // CanvasRendererAccessor
 const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
 {
@@ -1152,6 +1168,8 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
         CanvasRendererAccessor::SetTextAlignImpl,
         CanvasRendererAccessor::GetTextBaselineImpl,
         CanvasRendererAccessor::SetTextBaselineImpl,
+        CanvasRendererAccessor::GetAntialiasImpl,
+        CanvasRendererAccessor::SetAntialiasImpl,
     };
     return &CanvasRendererAccessorImpl;
 }

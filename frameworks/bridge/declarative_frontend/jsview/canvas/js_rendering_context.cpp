@@ -165,6 +165,8 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomProperty("letterSpacing",
         &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_LETTER_SPACING_GETTER>,
         &JSCanvasRenderer::JsSetLetterSpacing);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "antialias", &JSCanvasRenderer::JsGetAntialias, &JSCanvasRenderer::JsSetAntialias);
 
     // Define all methods of the "CanvasRenderingContext2D"
     JSClass<JSRenderingContext>::CustomMethod("toDataURL", &JSCanvasRenderer::JsToDataUrl);

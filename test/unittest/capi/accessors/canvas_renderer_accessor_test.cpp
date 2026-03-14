@@ -295,6 +295,8 @@ public:
     MOCK_METHOD(void, SetStrokeColor, (const Color&, bool), (override));
     MOCK_METHOD(void, SetStrokeGradient, (const std::shared_ptr<Ace::Gradient>&), (override));
     MOCK_METHOD(void, SetStrokePattern, (const std::shared_ptr<Ace::Pattern>&), (override));
+    MOCK_METHOD(std::optional<bool>, GetAntialiasExt, (), (const override));
+    MOCK_METHOD(void, SetAntialiasExt, (std::optional<bool>), (override));
 };
 struct MockImageBitmapPeer : public ImageBitmapPeer {
 public:

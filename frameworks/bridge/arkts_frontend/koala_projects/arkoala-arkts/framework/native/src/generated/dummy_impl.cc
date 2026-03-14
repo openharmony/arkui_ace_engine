@@ -27747,6 +27747,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Opt_Boolean GetAntialiasImpl(Ark_CanvasRenderer peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getAntialias(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetAntialiasImpl(Ark_CanvasRenderer peer,
+                          const Opt_Boolean* antialias)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setAntialias(");
+        WriteToString(&out, antialias);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // CanvasRendererAccessor
     namespace CanvasRenderingContext2DAccessor {
     void DestroyPeerImpl(Ark_CanvasRenderingContext2D peer)
@@ -48178,6 +48202,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CanvasRendererAccessor::SetTextAlignImpl,
             CanvasRendererAccessor::GetTextBaselineImpl,
             CanvasRendererAccessor::SetTextBaselineImpl,
+            CanvasRendererAccessor::GetAntialiasImpl,
+            CanvasRendererAccessor::SetAntialiasImpl,
         };
         return &CanvasRendererAccessorImpl;
     }

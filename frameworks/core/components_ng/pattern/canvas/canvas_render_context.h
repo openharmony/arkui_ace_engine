@@ -36,6 +36,9 @@ public:
 
     virtual void SetCustomNodeName(const std::string& customNodeName) {}
 
+    virtual std::optional<bool> GetAntialiasExt() const = 0;
+    virtual void SetAntialiasExtParam(std::optional<bool> isEnabled) {}
+    virtual void ResetAntialiasExt() {}
     virtual TransformParam GetTransform() const = 0;
     virtual LineDashParam GetLineDash() const = 0;
     virtual void SaveProperties() {}

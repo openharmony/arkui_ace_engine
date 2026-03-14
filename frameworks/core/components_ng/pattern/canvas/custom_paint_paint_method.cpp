@@ -1230,6 +1230,7 @@ void CustomPaintPaintMethod::Path2DSetTransform(const PathArgs& args)
 void CustomPaintPaintMethod::Save()
 {
     CHECK_NULL_VOID(rsCanvas_);
+    saveAntiAliasStates_.emplace_back(std::make_pair(antiAlias_, fontAntiAlias_));
     saveStates_.push_back(state_);
     saveColorFilter_.push_back(colorFilter_);
     saveBlurFilter_.push_back(blurFilter_);
@@ -1239,8 +1240,10 @@ void CustomPaintPaintMethod::Save()
 void CustomPaintPaintMethod::Restore()
 {
     CHECK_NULL_VOID(rsCanvas_);
-    if ((rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) && (!saveStates_.empty()) && (!saveColorFilter_.empty()) &&
-        (!saveBlurFilter_.empty())) {
+    if ((rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) && (!saveAntiAliasStates_.empty()) && (!saveStates_.empty()) &&
+        (!saveColorFilter_.empty()) && (!saveBlurFilter_.empty())) {
+        std::tie(antiAlias_, fontAntiAlias_) = saveAntiAliasStates_.back();
+        saveAntiAliasStates_.pop_back();
         state_ = saveStates_.back();
         saveStates_.pop_back();
         colorFilter_ = saveColorFilter_.back();
@@ -1976,6 +1979,8 @@ void CustomPaintPaintMethod::ResetStates()
 {
     smoothingEnabled_ = true;
     smoothingQuality_ = SmoothingQuality::LOW;
+    fontAntiAlias_.reset();
+    antiAlias_ = settingsAntiAlias_;
     state_.fillState = PaintState();
     state_.strokeState = StrokePaintState();
     state_.globalState = GlobalPaintState();
@@ -1987,6 +1992,7 @@ void CustomPaintPaintMethod::ResetStates()
     imageBrush_ = RSBrush();
     rsPath_.Reset();
     rsPath2d_.Reset();
+    std::vector<std::pair<bool, std::optional<bool>>>().swap(saveAntiAliasStates_);
     std::vector<PaintHolder>().swap(saveStates_);
     std::vector<std::shared_ptr<RSColorFilter>>().swap(saveColorFilter_);
     std::vector<std::shared_ptr<RSImageFilter>>().swap(saveBlurFilter_);
@@ -2135,6 +2141,8 @@ bool CustomPaintPaintMethod::UpdateFillParagraph(const std::string& text)
     } else {
         UpdateFillTxtStyle(txtStyle);
     }
+    txtStyle.fontEdging =
+        fontAntiAlias_.value_or(true) ? Rosen::Drawing::FontEdging::ANTI_ALIAS : Rosen::Drawing::FontEdging::ALIAS;
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));
     paragraph_ = builder->CreateTypography();
@@ -2189,6 +2197,8 @@ bool CustomPaintPaintMethod::UpdateStrokeParagraph(const std::string& text)
         InitPaintBlend(pen);
     }
     ConvertTxtStyle(state_.strokeState.GetTextStyle(), txtStyle);
+    txtStyle.fontEdging =
+        fontAntiAlias_.value_or(true) ? Rosen::Drawing::FontEdging::ANTI_ALIAS : Rosen::Drawing::FontEdging::ALIAS;
     txtStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
     txtStyle.foregroundPen = pen;
     builder->PushStyle(txtStyle);
@@ -2233,6 +2243,8 @@ void CustomPaintPaintMethod::UpdateStrokeShadowParagraph(
         InitPaintBlend(shadowPen);
     }
     shadowStyle.foregroundPen = shadowPen;
+    shadowStyle.fontEdging =
+        fontAntiAlias_.value_or(true) ? Rosen::Drawing::FontEdging::ANTI_ALIAS : Rosen::Drawing::FontEdging::ALIAS;
     std::unique_ptr<RSParagraphBuilder> shadowBuilder = RSParagraphBuilder::Create(style, fontCollection);
     CHECK_NULL_VOID(shadowBuilder);
     shadowBuilder->PushStyle(shadowStyle);

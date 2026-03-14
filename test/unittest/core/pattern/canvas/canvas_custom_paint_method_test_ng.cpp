@@ -1399,4 +1399,52 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest036, TestSize
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
 }
 
+/**
+ * @tc.name: CanvasCustomPaintMethodTest039
+ * @tc.desc: Test to function 'SetAntialiasExt' with different values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest039, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    /**
+     * @tc.steps2: Call to function SetAntialiasExt with true when settingsAntiAlias is false.
+     * @tc.expected: antiAlias is true, fontAntiAlias has value and is true.
+     */
+    paintMethod->settingsAntiAlias_ = false;
+    paintMethod->SetAntialiasExt(true);
+    EXPECT_TRUE(paintMethod->antiAlias_);
+    EXPECT_TRUE(paintMethod->fontAntiAlias_.has_value());
+    EXPECT_TRUE(paintMethod->fontAntiAlias_.value());
+    /**
+     * @tc.steps3: Call to function SetAntialiasExt with false value when settingsAntiAlias is true.
+     * @tc.expected: antiAlias is false, fontAntiAlias has value and is false.
+     */
+    paintMethod->settingsAntiAlias_ = true;
+    paintMethod->SetAntialiasExt(false);
+    EXPECT_FALSE(paintMethod->antiAlias_);
+    EXPECT_TRUE(paintMethod->fontAntiAlias_.has_value());
+    EXPECT_FALSE(paintMethod->fontAntiAlias_.value());
+    /**
+     * @tc.steps4: Call to function SetAntialiasExt with undefined when settingsAntiAlias is true.
+     * @tc.expected: antiAlias is true, fontAntiAlias has no value.
+     */
+    paintMethod->settingsAntiAlias_ = true;
+    paintMethod->SetAntialiasExt(std::nullopt);
+    EXPECT_TRUE(paintMethod->antiAlias_);
+    EXPECT_FALSE(paintMethod->fontAntiAlias_.has_value());
+    /**
+     * @tc.steps5: Call to function SetAntialiasExt with undefined when settingsAntiAlias is false.
+     * @tc.expected: antiAlias is false, fontAntiAlias has no value.
+     */
+    paintMethod->settingsAntiAlias_ = false;
+    paintMethod->SetAntialiasExt(std::nullopt);
+    EXPECT_FALSE(paintMethod->antiAlias_);
+    EXPECT_FALSE(paintMethod->fontAntiAlias_.has_value());
+}
 } // namespace OHOS::Ace::NG

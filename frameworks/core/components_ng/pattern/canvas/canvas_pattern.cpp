@@ -201,6 +201,20 @@ void CanvasPattern::SetAntiAlias(bool isEnabled)
     paintMethod_->PushTask(task);
 }
 
+std::optional<bool> CanvasPattern::GetAntialiasExt() const
+{
+    CHECK_NULL_RETURN(paintMethod_, std::nullopt);
+    return paintMethod_->GetAntialiasExt();
+}
+
+void CanvasPattern::SetAntialiasExt(std::optional<bool> isEnabled)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    auto task = [isEnabled](CanvasPaintMethod& paintMethod) { paintMethod.SetAntialiasExt(isEnabled); };
+    paintMethod_->PushTask(task);
+    paintMethod_->SetAntialiasExtParam(isEnabled);
+}
+
 void CanvasPattern::FillRect(const Rect& rect)
 {
     auto task = [rect](CanvasPaintMethod& paintMethod) { paintMethod.FillRect(rect); };
@@ -848,6 +862,7 @@ void CanvasPattern::Reset()
 {
     auto task = [](CanvasPaintMethod& paintMethod) { paintMethod.Reset(); };
     paintMethod_->PushTask(task);
+    paintMethod_->ResetAntialiasExt();
     paintMethod_->ResetTransformMatrix();
     paintMethod_->ResetLineDash();
     SetTextDirection(TextDirection::INHERIT);

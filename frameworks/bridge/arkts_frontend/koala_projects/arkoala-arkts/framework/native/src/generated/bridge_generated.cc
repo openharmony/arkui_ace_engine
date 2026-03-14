@@ -30980,6 +30980,33 @@ void impl_CanvasRenderer_setTextBaseline(Ark_NativePointer thisPtr, const KStrin
         GetAccessors()->getCanvasRendererAccessor()->setTextBaseline(self, (const Ark_String*) (&textBaseline));
 }
 KOALA_INTEROP_V2(CanvasRenderer_setTextBaseline, Ark_NativePointer, KStringPtr)
+KInteropReturnBuffer impl_CanvasRenderer_getAntialias(Ark_NativePointer thisPtr) {
+        Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
+        const auto &retValue = GetAccessors()->getCanvasRendererAccessor()->getAntialias(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeBoolean(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(CanvasRenderer_getAntialias, KInteropReturnBuffer, Ark_NativePointer)
+void impl_CanvasRenderer_setAntialias(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto antialiasValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean antialiasValueTempTmpBuf = {};
+        antialiasValueTempTmpBuf.tag = antialiasValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((antialiasValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            antialiasValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean antialiasValueTemp = antialiasValueTempTmpBuf;;
+        GetAccessors()->getCanvasRendererAccessor()->setAntialias(self, static_cast<Opt_Boolean*>(&antialiasValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CanvasRenderer_setAntialias, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_CanvasRenderingContext2D_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto settingsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
