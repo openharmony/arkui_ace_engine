@@ -56,7 +56,7 @@ void SetOnClickImpl(Ark_UICommonEvent peer, const Opt_Callback_ClickEvent_Void* 
         ViewAbstract::ClearJSFrameNodeOnClick(rawPtr);
     }
 }
-void SetOnTouchImpl(Ark_UICommonEvent peer, const Opt_Callback_TouchEvent_Void* callback_)
+void SetOnTouchImpl(Ark_UICommonEvent peer, const Opt_Callback_TouchEventProxy_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto refPtr = peer->node.Upgrade();
@@ -65,8 +65,22 @@ void SetOnTouchImpl(Ark_UICommonEvent peer, const Opt_Callback_TouchEvent_Void* 
     auto arkOnTouch = Converter::GetOptPtr(callback_);
     if (arkOnTouch) {
         auto onTouch = [arkCallback = CallbackHelper(arkOnTouch.value())](TouchEventInfo& info) {
-            auto touchEvent = Converter::SyncEvent<Ark_TouchEvent>(info);
-            arkCallback.InvokeSync(touchEvent.ArkValue());
+            Ark_TouchEventProxy proxy = {
+                .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
+                .timeStamp = Converter::ArkValue<Ark_Int64>(
+                    static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+                .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
+                .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
+                .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
+                .sourceTool = Converter::ArkValue<Ark_SourceTool>(info.GetSourceTool()),
+                .deviceId = Converter::ArkValue<Opt_Int32>(info.GetDeviceId()),
+                .targetDisplayId = Converter::ArkValue<Opt_Int32>(info.GetTargetDisplayId()),
+                .type = Converter::ArkValue<Ark_TouchType>(info.GetChangedTouches().front().GetTouchType()),
+                .touches = Converter::ArkValue<Array_TouchObject>(info.GetTouches(), Converter::FC),
+                .changedTouches = Converter::ArkValue<Array_TouchObject>(info.GetChangedTouches(), Converter::FC),
+                .ptr = &info
+            };
+            arkCallback.InvokeSync(proxy);
         };
         ViewAbstract::SetFrameNodeCommonOnTouch(rawPtr, std::move(onTouch));
     } else {

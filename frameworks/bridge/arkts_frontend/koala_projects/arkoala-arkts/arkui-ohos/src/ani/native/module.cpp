@@ -1741,6 +1741,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetBaseEventModifierKeyState)
         },
         ani_native_function {
+            "_TouchEvent_getModifierKeyState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetTouchEventModifierKeyState)
+        },
+        ani_native_function {
             "_DragEvent_getModifierKeyState",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetDragEventModifierKeyState)

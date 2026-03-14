@@ -98,6 +98,28 @@ interface GestureOps {
 };
 
 [Entity=Class]
+interface TouchEventProxy {
+    attribute EventTarget target;
+    attribute i64 timeStamp;
+    attribute SourceType source;
+    [Optional] attribute (f64 or undefined) axisHorizontal;
+    [Optional] attribute (f64 or undefined) axisVertical;
+    attribute f64 pressure;
+    attribute f64 tiltX;
+    attribute f64 tiltY;
+    [Optional] attribute (f64 or undefined) rollAngle;
+    attribute SourceTool sourceTool;
+    [Optional] attribute (ModifierKeyStateGetter or undefined) getModifierKeyState;
+    [Optional] attribute (i32 or undefined) deviceId;
+    [Optional] attribute (i32 or undefined) targetDisplayId;
+    [Optional] attribute (f64 or undefined) axisPinch;
+    attribute TouchType type;
+    attribute sequence<TouchObject> touches;
+    attribute sequence<TouchObject> changedTouches;
+    attribute pointer ptr;
+};
+
+[Entity=Class]
 interface FocusController {
     static void requestFocus(String key);
 };

@@ -157,6 +157,7 @@ export class ArkUIAniModule {
     native static _TransferScrollableTargetInfoPointer(input: KPointer): KPointer
     native static _Common_setIsRecycleInvisibleImageMemory(value: KBoolean, instanceId: KInt): void
     native static _BaseEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
+    native static _TouchEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
     native static _DragEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
     native static _KeyEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
     native static _ClickEvent_preventDefault(ptr: KPointer): void

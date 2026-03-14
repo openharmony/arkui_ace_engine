@@ -105,7 +105,7 @@ void CallManagedAccessibilityFocusCallbackSync(Ark_VMContext vmContext, Ark_Int3
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
-void CallManagedAccessibilityTransparentCallback(Ark_Int32 resourceId, Ark_TouchEvent event)
+void CallManagedAccessibilityTransparentCallback(Ark_Int32 resourceId, Ark_TouchEventProxy event)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource,
@@ -115,17 +115,17 @@ void CallManagedAccessibilityTransparentCallback(Ark_Int32 resourceId, Ark_Touch
                                                    sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
     argsSerializer.writeInt32(KIND_ACCESSIBILITYTRANSPARENTCALLBACK);
     argsSerializer.writeInt32(resourceId);
-    TouchEvent_serializer::write(argsSerializer, event);
+    TouchEventProxy_serializer::write(argsSerializer, event);
     enqueueCallback(API_KIND, &callbackBuffer);
 }
 void CallManagedAccessibilityTransparentCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId,
-                                                     Ark_TouchEvent event)
+                                                     Ark_TouchEventProxy event)
 {
     SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(API_KIND);
     argsSerializer.writeInt32(KIND_ACCESSIBILITYTRANSPARENTCALLBACK);
     argsSerializer.writeInt32(resourceId);
-    TouchEvent_serializer::write(argsSerializer, event);
+    TouchEventProxy_serializer::write(argsSerializer, event);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -5444,8 +5444,30 @@ void CallManagedCallback_TimePickerResult_VoidSync(Ark_VMContext vmContext, Ark_
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
-void CallManagedCallback_TouchEvent_HitTestMode(Ark_Int32 resourceId, Ark_TouchEvent data,
-                                                Callback_HitTestMode_Void continuation)
+void CallManagedCallback_TouchEvent_Void(Ark_Int32 resourceId, Ark_TouchEventProxy event)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(KIND_CALLBACK_TOUCHEVENT_VOID);
+    argsSerializer.writeInt32(resourceId);
+    TouchEventProxy_serializer::write(argsSerializer, event);
+    enqueueCallback(API_KIND, &callbackBuffer);
+}
+void CallManagedCallback_TouchEvent_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_TouchEventProxy event)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(API_KIND);
+    argsSerializer.writeInt32(KIND_CALLBACK_TOUCHEVENT_VOID);
+    argsSerializer.writeInt32(resourceId);
+    TouchEventProxy_serializer::write(argsSerializer, event);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
+void CallManagedCallback_TouchEventProxy_HitTestMode(Ark_Int32 resourceId, Ark_TouchEventProxy data,
+                                                     Callback_HitTestMode_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource,
@@ -5453,22 +5475,22 @@ void CallManagedCallback_TouchEvent_HitTestMode(Ark_Int32 resourceId, Ark_TouchE
     callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer) & (callbackBuffer.buffer),
                                                    sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
-    argsSerializer.writeInt32(KIND_CALLBACK_TOUCHEVENT_HITTESTMODE);
+    argsSerializer.writeInt32(KIND_CALLBACK_TOUCHEVENTPROXY_HITTESTMODE);
     argsSerializer.writeInt32(resourceId);
-    TouchEvent_serializer::write(argsSerializer, data);
+    TouchEventProxy_serializer::write(argsSerializer, data);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     enqueueCallback(API_KIND, &callbackBuffer);
 }
-void CallManagedCallback_TouchEvent_HitTestModeSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_TouchEvent data,
-                                                    Callback_HitTestMode_Void continuation)
+void CallManagedCallback_TouchEventProxy_HitTestModeSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_TouchEventProxy data,
+                                                         Callback_HitTestMode_Void continuation)
 {
     SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(API_KIND);
-    argsSerializer.writeInt32(KIND_CALLBACK_TOUCHEVENT_HITTESTMODE);
+    argsSerializer.writeInt32(KIND_CALLBACK_TOUCHEVENTPROXY_HITTESTMODE);
     argsSerializer.writeInt32(resourceId);
-    TouchEvent_serializer::write(argsSerializer, data);
+    TouchEventProxy_serializer::write(argsSerializer, data);
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
@@ -5476,7 +5498,7 @@ void CallManagedCallback_TouchEvent_HitTestModeSync(Ark_VMContext vmContext, Ark
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
-void CallManagedCallback_TouchEvent_Void(Ark_Int32 resourceId, Ark_TouchEvent event)
+void CallManagedCallback_TouchEventProxy_Void(Ark_Int32 resourceId, Ark_TouchEventProxy event)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource,
@@ -5484,18 +5506,18 @@ void CallManagedCallback_TouchEvent_Void(Ark_Int32 resourceId, Ark_TouchEvent ev
     callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer) & (callbackBuffer.buffer),
                                                    sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
-    argsSerializer.writeInt32(KIND_CALLBACK_TOUCHEVENT_VOID);
+    argsSerializer.writeInt32(KIND_CALLBACK_TOUCHEVENTPROXY_VOID);
     argsSerializer.writeInt32(resourceId);
-    TouchEvent_serializer::write(argsSerializer, event);
+    TouchEventProxy_serializer::write(argsSerializer, event);
     enqueueCallback(API_KIND, &callbackBuffer);
 }
-void CallManagedCallback_TouchEvent_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_TouchEvent event)
+void CallManagedCallback_TouchEventProxy_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_TouchEventProxy event)
 {
     SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(API_KIND);
-    argsSerializer.writeInt32(KIND_CALLBACK_TOUCHEVENT_VOID);
+    argsSerializer.writeInt32(KIND_CALLBACK_TOUCHEVENTPROXY_VOID);
     argsSerializer.writeInt32(resourceId);
-    TouchEvent_serializer::write(argsSerializer, event);
+    TouchEventProxy_serializer::write(argsSerializer, event);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -11484,10 +11506,12 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TextRange_Void);
     case KIND_CALLBACK_TIMEPICKERRESULT_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TimePickerResult_Void);
-    case KIND_CALLBACK_TOUCHEVENT_HITTESTMODE:
-        return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TouchEvent_HitTestMode);
     case KIND_CALLBACK_TOUCHEVENT_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TouchEvent_Void);
+    case KIND_CALLBACK_TOUCHEVENTPROXY_HITTESTMODE:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TouchEventProxy_HitTestMode);
+    case KIND_CALLBACK_TOUCHEVENTPROXY_VOID:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TouchEventProxy_Void);
     case KIND_CALLBACK_TOUCHRESULT_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TouchResult_Void);
     case KIND_CALLBACK_TUPLE_I32_I32_I32_I32_VOID:
@@ -12208,10 +12232,12 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TextRange_VoidSync);
     case KIND_CALLBACK_TIMEPICKERRESULT_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TimePickerResult_VoidSync);
-    case KIND_CALLBACK_TOUCHEVENT_HITTESTMODE:
-        return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TouchEvent_HitTestModeSync);
     case KIND_CALLBACK_TOUCHEVENT_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TouchEvent_VoidSync);
+    case KIND_CALLBACK_TOUCHEVENTPROXY_HITTESTMODE:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TouchEventProxy_HitTestModeSync);
+    case KIND_CALLBACK_TOUCHEVENTPROXY_VOID:
+        return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TouchEventProxy_VoidSync);
     case KIND_CALLBACK_TOUCHRESULT_VOID:
         return reinterpret_cast<Ark_NativePointer>(CallManagedCallback_TouchResult_VoidSync);
     case KIND_CALLBACK_TUPLE_I32_I32_I32_I32_VOID:

@@ -793,6 +793,8 @@ namespace Converter {
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src);
     template<> std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src);
     template<> std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src);
+    template<> SourceTool Convert(const Ark_SourceTool& src);
+    template<> SourceType Convert(const Ark_SourceType& src);
     template<> std::set<SourceTool> Convert(const Array_SourceTool& src);
     template<> std::set<std::string> Convert(const Array_uniformTypeDescriptor_UniformDataType& src);
     template<> std::string Convert(const Ark_CommandPath& src);

@@ -528,6 +528,7 @@ struct ArkUIAniDragModifier {
     SharedPointerWrapper (*getUnifiedData)(ani_long peer);
     ani_long (*createDataLoadParamsPeer)(void* dataLoadParams);
     void (*getPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
+    void (*getPressedModifierKeyForTouch)(ani_long nativePtr, char*** keys, ani_int* length);
 };
 struct ArkUIAniXBarModifier {
     void (*setComponentCreateFunc)(std::function<int64_t(const int32_t&, const int32_t&)>&& fn);
@@ -624,6 +625,7 @@ struct ArkUIAniCommonModifier {
     void (*applyThemeScopeId)(ani_env* env, ani_long ptr, ani_int themeScopeId);
     void (*setIsRecycleInvisibleImageMemory)(ani_boolean isRecycle, ani_int instanceId);
     void (*getBaseEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
+    void (*getTouchEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     void (*getKeyEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     ani_boolean (*setClickEventPreventDefault)(ani_long nativePtr);
     ani_boolean (*setTouchEventPreventDefault)(ani_long nativePtr);

@@ -123,11 +123,11 @@ void deserializeAndCallAccessibilityTransparentCallback(KSerializerBuffer thisAr
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
-    const auto call = reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+const auto call = reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEventProxy event)>(
         thisDeserializer.readPointerOrDefault(
             reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_ACCESSIBILITYTRANSPARENTCALLBACK))));
     thisDeserializer.readPointer();
-    Ark_TouchEvent event = static_cast<Ark_TouchEvent>(TouchEvent_serializer::read(thisDeserializer));
+    Ark_TouchEventProxy event = TouchEventProxy_serializer::read(thisDeserializer);
     call(resourceId, event);
 }
 void deserializeAndCallSyncAccessibilityTransparentCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray,
@@ -136,11 +136,11 @@ void deserializeAndCallSyncAccessibilityTransparentCallback(Ark_VMContext vmCont
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto callSyncMethod =
-        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+const auto callSyncMethod =
+        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy event)>(
             thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
                 getManagedCallbackCallerSync(KIND_ACCESSIBILITYTRANSPARENTCALLBACK))));
-    Ark_TouchEvent event = static_cast<Ark_TouchEvent>(TouchEvent_serializer::read(thisDeserializer));
+    Ark_TouchEventProxy event = TouchEventProxy_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, event);
 }
 void deserializeAndCallAnimationEndHandler(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -5819,16 +5819,36 @@ void deserializeAndCallSyncCallback_TimePickerResult_Void(Ark_VMContext vmContex
     Ark_TimePickerResult data = TimePickerResult_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, data);
 }
-void deserializeAndCallCallback_TouchEvent_HitTestMode(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+
+void deserializeAndCallCallback_TouchEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
-    const auto call = reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEvent data,
+    const auto call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_TouchEventProxy event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENT_VOID))));
+    thisDeserializer.readPointer();
+    Ark_TouchEventProxy event = TouchEventProxy_serializer::read(thisDeserializer);
+    call(resourceId, event);
+}
+void deserializeAndCallSyncCallback_TouchEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENT_VOID))));
+    Ark_TouchEventProxy event = TouchEventProxy_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, event);
+}
+
+void deserializeAndCallCallback_TouchEventProxy_HitTestMode(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    const auto call = reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEventProxy data,
                                                 const Callback_HitTestMode_Void continuation)>(
         thisDeserializer.readPointerOrDefault(
-            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENT_HITTESTMODE))));
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENTPROXY_HITTESTMODE))));
     thisDeserializer.readPointer();
-    Ark_TouchEvent data = static_cast<Ark_TouchEvent>(TouchEvent_serializer::read(thisDeserializer));
+    Ark_TouchEventProxy data = TouchEventProxy_serializer::read(thisDeserializer);
     Callback_HitTestMode_Void continuationResult = {
         thisDeserializer.readCallbackResource(),
         reinterpret_cast<void (*)(const Ark_Int32 resourceId, Ark_HitTestMode value)>(
@@ -5839,18 +5859,18 @@ void deserializeAndCallCallback_TouchEvent_HitTestMode(KSerializerBuffer thisArr
                 reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_HITTESTMODE_VOID))))};
     call(resourceId, data, continuationResult);
 }
-void deserializeAndCallSyncCallback_TouchEvent_HitTestMode(Ark_VMContext vmContext, KSerializerBuffer thisArray,
-                                                           Ark_Int32 thisLength)
+void deserializeAndCallSyncCallback_TouchEventProxy_HitTestMode(Ark_VMContext vmContext, KSerializerBuffer thisArray,
+                                                               Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
     const auto callSyncMethod =
-        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent data,
+        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy data,
                                   const Callback_HitTestMode_Void continuation)>(
             thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
-                getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENT_HITTESTMODE))));
-    Ark_TouchEvent data = static_cast<Ark_TouchEvent>(TouchEvent_serializer::read(thisDeserializer));
+                getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENTPROXY_HITTESTMODE))));
+    Ark_TouchEventProxy data = TouchEventProxy_serializer::read(thisDeserializer);
     Callback_HitTestMode_Void continuationResult = {
         thisDeserializer.readCallbackResource(),
         reinterpret_cast<void (*)(const Ark_Int32 resourceId, Ark_HitTestMode value)>(
@@ -5861,29 +5881,29 @@ void deserializeAndCallSyncCallback_TouchEvent_HitTestMode(Ark_VMContext vmConte
                 reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_HITTESTMODE_VOID))))};
     callSyncMethod(vmContext, resourceId, data, continuationResult);
 }
-void deserializeAndCallCallback_TouchEvent_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+void deserializeAndCallCallback_TouchEventProxy_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
-    const auto call = reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+    const auto call = reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEventProxy data)>(
         thisDeserializer.readPointerOrDefault(
-            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENT_VOID))));
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(KIND_CALLBACK_TOUCHEVENTPROXY_VOID))));
     thisDeserializer.readPointer();
-    Ark_TouchEvent event = static_cast<Ark_TouchEvent>(TouchEvent_serializer::read(thisDeserializer));
-    call(resourceId, event);
+    Ark_TouchEventProxy data = TouchEventProxy_serializer::read(thisDeserializer);
+    call(resourceId, data);
 }
-void deserializeAndCallSyncCallback_TouchEvent_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray,
-                                                    Ark_Int32 thisLength)
+void deserializeAndCallSyncCallback_TouchEventProxy_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray,
+                                                        Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
     const auto callSyncMethod =
-        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEventProxy data)>(
             thisDeserializer.readPointerOrDefault(
-                reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENT_VOID))));
-    Ark_TouchEvent event = static_cast<Ark_TouchEvent>(TouchEvent_serializer::read(thisDeserializer));
-    callSyncMethod(vmContext, resourceId, event);
+                reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(KIND_CALLBACK_TOUCHEVENTPROXY_VOID))));
+    Ark_TouchEventProxy data = TouchEventProxy_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, data);
 }
 void deserializeAndCallCallback_TouchResult_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -12596,10 +12616,12 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         return deserializeAndCallCallback_TextRange_Void(thisArray, thisLength);
     case KIND_CALLBACK_TIMEPICKERRESULT_VOID:
         return deserializeAndCallCallback_TimePickerResult_Void(thisArray, thisLength);
-    case KIND_CALLBACK_TOUCHEVENT_HITTESTMODE:
-        return deserializeAndCallCallback_TouchEvent_HitTestMode(thisArray, thisLength);
     case KIND_CALLBACK_TOUCHEVENT_VOID:
         return deserializeAndCallCallback_TouchEvent_Void(thisArray, thisLength);
+    case KIND_CALLBACK_TOUCHEVENTPROXY_HITTESTMODE:
+        return deserializeAndCallCallback_TouchEventProxy_HitTestMode(thisArray, thisLength);
+    case KIND_CALLBACK_TOUCHEVENTPROXY_VOID:
+        return deserializeAndCallCallback_TouchEventProxy_Void(thisArray, thisLength);
     case KIND_CALLBACK_TOUCHRESULT_VOID:
         return deserializeAndCallCallback_TouchResult_Void(thisArray, thisLength);
     case KIND_CALLBACK_TUPLE_I32_I32_I32_I32_VOID:
@@ -13326,10 +13348,12 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         return deserializeAndCallSyncCallback_TextRange_Void(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_TIMEPICKERRESULT_VOID:
         return deserializeAndCallSyncCallback_TimePickerResult_Void(vmContext, thisArray, thisLength);
-    case KIND_CALLBACK_TOUCHEVENT_HITTESTMODE:
-        return deserializeAndCallSyncCallback_TouchEvent_HitTestMode(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_TOUCHEVENT_VOID:
         return deserializeAndCallSyncCallback_TouchEvent_Void(vmContext, thisArray, thisLength);
+    case KIND_CALLBACK_TOUCHEVENTPROXY_HITTESTMODE:
+        return deserializeAndCallSyncCallback_TouchEventProxy_HitTestMode(vmContext, thisArray, thisLength);
+    case KIND_CALLBACK_TOUCHEVENTPROXY_VOID:
+        return deserializeAndCallSyncCallback_TouchEventProxy_Void(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_TOUCHRESULT_VOID:
         return deserializeAndCallSyncCallback_TouchResult_Void(vmContext, thisArray, thisLength);
     case KIND_CALLBACK_TUPLE_I32_I32_I32_I32_VOID:

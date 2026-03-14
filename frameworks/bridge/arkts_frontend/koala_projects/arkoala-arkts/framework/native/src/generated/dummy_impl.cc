@@ -4006,7 +4006,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnTouchInterceptImpl(Ark_NativePointer node,
-                                 const Opt_Callback_TouchEvent_HitTestMode* value)
+                                 const Opt_Callback_TouchEventProxy_HitTestMode* value)
     {
         if (!needGroupedLog(1)) {
             return;
@@ -26264,7 +26264,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer,
-                                   Ark_TouchEvent event)
+                                   const Ark_TouchEventProxy* event)
     {
         if (!needGroupedLog(1)) {
             return 0;
@@ -45003,7 +45003,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_TouchEvent ConstructImpl()
+    Ark_TouchEventProxy ConstructImpl()
     {
         if (!needGroupedLog(1)) {
             return reinterpret_cast<Ark_TouchEvent>(100);
@@ -45121,6 +45121,52 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // TouchEventAccessor
+    namespace TouchEventExtenderAccessor {
+    Ark_NativePointer GetNativePtrImpl(const Ark_TouchEventProxy* event)
+    {
+        if (!needGroupedLog(1)) {
+            return nullptr;
+        }
+        string out("getNativePtr(");
+        WriteToString(&out, event);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    void StopPropagationImpl(Ark_NativePointer ptr)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("stopPropagation(");
+        WriteToString(&out, ptr);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Opt_Array_HistoricalPoint GetHistoricalPointsImpl(Ark_NativePointer ptr)
+    {
+        if (!needGroupedLog(1)) {
+            return { .tag=INTEROP_TAG_UNDEFINED };
+        }
+        string out("getHistoricalPoints(");
+        WriteToString(&out, ptr);
+        out.append(") \n");
+        out.append("[return { .tag=INTEROP_TAG_UNDEFINED }] \n");
+        appendGroupedLog(1, out);
+        return { .tag=INTEROP_TAG_UNDEFINED };
+    }
+    void PreventDefaultImpl(Ark_NativePointer ptr)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("preventDefault(");
+        WriteToString(&out, ptr);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // TouchEventExtenderAccessor
     namespace TouchRecognizerAccessor {
     void DestroyPeerImpl(Ark_TouchRecognizer peer)
     {
@@ -45469,7 +45515,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetOnTouchImpl(Ark_UICommonEvent peer,
-                        const Opt_Callback_TouchEvent_Void* callback_)
+                        const Opt_Callback_TouchEventProxy_Void* callback_)
     {
         if (!needGroupedLog(1)) {
             return;
@@ -51207,6 +51253,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TouchEventPeer {
         virtual ~TouchEventPeer() = default;
     };
+    const GENERATED_ArkUITouchEventExtenderAccessor* GetTouchEventExtenderAccessor()
+    {
+        static const GENERATED_ArkUITouchEventExtenderAccessor TouchEventExtenderAccessorImpl {
+            TouchEventExtenderAccessor::GetNativePtrImpl,
+            TouchEventExtenderAccessor::StopPropagationImpl,
+            TouchEventExtenderAccessor::GetHistoricalPointsImpl,
+            TouchEventExtenderAccessor::PreventDefaultImpl,
+        };
+        return &TouchEventExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor()
     {
         static const GENERATED_ArkUITouchRecognizerAccessor TouchRecognizerAccessorImpl {
@@ -51863,6 +51920,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetThemeOpsAccessor,
             GetToggleExtenderAccessor,
             GetTouchEventAccessor,
+            GetTouchEventExtenderAccessor,
             GetTouchRecognizerAccessor,
             GetTransitionEffectAccessor,
             GetUICommonEventAccessor,

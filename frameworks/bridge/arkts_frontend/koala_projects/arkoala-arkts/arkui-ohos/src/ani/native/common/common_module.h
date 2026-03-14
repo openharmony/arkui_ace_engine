@@ -125,6 +125,8 @@ ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_l
 void ApplyThemeScopeId(ani_env* env, ani_object obj, ani_long ptr, ani_int themeScopeId);
 ani_boolean GetBaseEventModifierKeyState(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
+ani_boolean GetTouchEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
 ani_boolean GetDragEventModifierKeyState(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
 ani_boolean GetKeyEventModifierKeyState(

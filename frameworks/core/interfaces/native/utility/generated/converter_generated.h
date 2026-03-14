@@ -699,22 +699,6 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_InputEventType& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
                    const Ark_ResourceColor& src)
 {
     switch (src.selector) {
@@ -3349,6 +3333,22 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_InputEventType& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_PopupOptions_CustomPopupOptions& src)
 {
     switch (src.selector) {
@@ -4080,7 +4080,6 @@ ASSIGN_OPT(Opt_TitleHeight)
 ASSIGN_OPT(Opt_ToggleType)
 ASSIGN_OPT(Opt_ToolBarItemPlacement)
 ASSIGN_OPT(Opt_ToolbarItemStatus)
-ASSIGN_OPT(Opt_TouchEvent)
 ASSIGN_OPT(Opt_TouchRecognizer)
 ASSIGN_OPT(Opt_TouchTestInfo)
 ASSIGN_OPT(Opt_TouchTestStrategy)
@@ -4481,8 +4480,9 @@ ASSIGN_OPT(Opt_Callback_TerminationInfo)
 ASSIGN_OPT(Opt_Callback_TextPickerResult_Void)
 ASSIGN_OPT(Opt_Callback_TextRange_Void)
 ASSIGN_OPT(Opt_Callback_TimePickerResult_Void)
-ASSIGN_OPT(Opt_Callback_TouchEvent_HitTestMode)
 ASSIGN_OPT(Opt_Callback_TouchEvent_Void)
+ASSIGN_OPT(Opt_Callback_TouchEventProxy_HitTestMode)
+ASSIGN_OPT(Opt_Callback_TouchEventProxy_Void)
 ASSIGN_OPT(Opt_Callback_TouchResult_Void)
 ASSIGN_OPT(Opt_Callback_Tuple_I32_I32_I32_I32_Void)
 ASSIGN_OPT(Opt_Callback_Tuple_I32_I32_Void)
@@ -4794,7 +4794,6 @@ ASSIGN_OPT(Opt_ImageAIOptions)
 ASSIGN_OPT(Opt_ImageAnalyzerConfig)
 ASSIGN_OPT(Opt_ImageCompleteEvent)
 ASSIGN_OPT(Opt_InnerGestureObserverConfigs)
-ASSIGN_OPT(Opt_InputEventType)
 ASSIGN_OPT(Opt_InsertValue)
 ASSIGN_OPT(Opt_IntelligentTrackingPreventionDetails)
 ASSIGN_OPT(Opt_intl_DateTimeOptions)
@@ -4826,7 +4825,6 @@ ASSIGN_OPT(Opt_MotionPathOptions)
 ASSIGN_OPT(Opt_NativeEmbedMouseInfo)
 ASSIGN_OPT(Opt_NativeEmbedParamDataInfo)
 ASSIGN_OPT(Opt_NativeEmbedParamItem)
-ASSIGN_OPT(Opt_NativeEmbedTouchInfo)
 ASSIGN_OPT(Opt_NativeEmbedVisibilityInfo)
 ASSIGN_OPT(Opt_NavContentInfo)
 ASSIGN_OPT(Opt_NavDestinationModuleInfo)
@@ -5393,6 +5391,7 @@ ASSIGN_OPT(Opt_TabBarLabelStyle)
 ASSIGN_OPT(Opt_text_RunMetrics)
 ASSIGN_OPT(Opt_TextBackgroundStyle)
 ASSIGN_OPT(Opt_TextPickerTextStyle)
+ASSIGN_OPT(Opt_TouchEventProxy)
 ASSIGN_OPT(Opt_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions)
 ASSIGN_OPT(Opt_Union_BadgeParamWithNumber_BadgeParamWithString)
 ASSIGN_OPT(Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions)
@@ -5404,7 +5403,9 @@ ASSIGN_OPT(Opt_DatePickerDialogOptions)
 ASSIGN_OPT(Opt_EmitterOptionsInner)
 ASSIGN_OPT(Opt_GridRowOptions)
 ASSIGN_OPT(Opt_ImageAttachmentInterface)
+ASSIGN_OPT(Opt_InputEventType)
 ASSIGN_OPT(Opt_NativeEmbedDataInfo)
+ASSIGN_OPT(Opt_NativeEmbedTouchInfo)
 ASSIGN_OPT(Opt_ParticleOptionsInner)
 ASSIGN_OPT(Opt_PopupOptions)
 ASSIGN_OPT(Opt_ResourceImageAttachmentOptions)
