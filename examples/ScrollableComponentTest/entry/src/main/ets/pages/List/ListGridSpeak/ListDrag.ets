@@ -14,7 +14,7 @@
  */
 
 @ObservedV2
-class ListData {
+class ListDragData {
   @Trace public title: string = '';
   @Trace public data: string[] = [];
 
@@ -24,14 +24,14 @@ class ListData {
   }
 }
 
-class DraggingData {
+class ListDragDraggingData {
   public data?: string;
 }
 
 @ComponentV2
-struct DraggableList {
+struct ListDragPanel {
   @Require @Param data: string[];
-  @Require @Param draggingData: DraggingData;
+  @Require @Param draggingData: ListDragDraggingData;
 
   @Builder
   ItemBuilder(data: string, size: SizeOptions, event: ItemDragInfo): void {
@@ -105,17 +105,17 @@ struct DraggableList {
 @Entry
 @ComponentV2
 struct dragListIndex {
-  @Local data: ListData[] = [
-    new ListData('A', ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8']),
-    new ListData('B', ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']),
+  @Local data: ListDragData[] = [
+    new ListDragData('A', ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8']),
+    new ListDragData('B', ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']),
   ]
-  @Local draggingData: DraggingData = new DraggingData();
+  @Local draggingData: ListDragDraggingData = new ListDragDraggingData();
 
   build() {
     Stack() {
       Row() {
-        DraggableList({ data: this.data[0].data, draggingData: this.draggingData })
-        DraggableList({ data: this.data[1].data, draggingData: this.draggingData })
+        ListDragPanel({ data: this.data[0].data, draggingData: this.draggingData })
+        ListDragPanel({ data: this.data[1].data, draggingData: this.draggingData })
       }
     }
     .backgroundColor('#FFDCDCDC')
