@@ -185,10 +185,15 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public __customComponentExecuteInit__Internal(): void {
     let watchProp = Symbol.for('INIT_INTERNAL_FUNCTION' + this.constructor.name);
     const componentInitFunctions = this[watchProp];
-    if (componentInitFunctions instanceof Array) {
+    try {
+      if (componentInitFunctions instanceof Array) {
         componentInitFunctions.forEach((componentInitFunction) => {
             componentInitFunction.call(this);
-        })
+        });
+      }
+    } catch (e) {
+      stateMgmtConsole.frequentApplicationError(`Lifecycle ComponentInit error, ${this.debugInfo__()}, ${e.message} ${e.stack}`);
+      throw e;
     }
   }
 
