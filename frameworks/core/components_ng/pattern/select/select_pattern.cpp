@@ -769,6 +769,7 @@ void SelectPattern::ClearFocusStyle()
 
 void SelectPattern::ModFocusIconStyle(RefPtr<SelectTheme> selectTheme, bool focusedFlag)
 {
+    CHECK_NULL_VOID(spinner_);
     auto spinnerLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
     focusedFlag ? spinnerLayoutProperty->UpdateSymbolColorList({selectTheme->GetSpinnerFocusedSymbolColor()}) :
@@ -2742,6 +2743,7 @@ void SelectPattern::SetArrowModifierApply(const std::function<void(WeakPtr<NG::F
 {
     arrowApply_ = arrowApply;
     if (arrowApply) {
+        CHECK_NULL_VOID(spinner_);
         arrowApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(spinner_)));
         spinner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         spinner_->MarkModifyDone();
