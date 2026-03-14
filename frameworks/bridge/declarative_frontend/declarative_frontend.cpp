@@ -603,7 +603,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             CHECK_NULL_RETURN(env, false);
             napi_value result;
             napi_status status;
-            if ((status = napi_load_module_with_module_request(env, ohmUrl.c_str(), nullptr, &result)) != napi_ok) {
+            if ((status = napi_load_module_with_module_request(env, ohmUrl.c_str(), &result)) != napi_ok) {
                 LOGE("AceRouter failed to load module with ohmUrl:%{public}s, status:%{public}d",
                     ohmUrl.c_str(), (int32_t)status);
                 return false;
