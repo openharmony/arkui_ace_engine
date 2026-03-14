@@ -17,7 +17,6 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
-#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -28,7 +27,6 @@
 #include <string>
 #include <utility>
 
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
@@ -37,20 +35,30 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/measure_util.h"
-#include "base/utils/multi_thread.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
+#include "base/view_data/view_data_wrap.h"
+#include "core/common/ace_application_info.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/clipboard/paste_data.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/ime/text_input_client.h"
+#include "core/common/ime/text_input_configuration.h"
+#include "core/common/ime/text_input_connection.h"
+#include "core/common/ime/text_input_formatter.h"
+#include "core/common/ime/text_input_proxy.h"
+#include "core/common/ime/text_input_type.h"
+#include "core/common/ime/text_edit_controller.h"
+#include "core/common/ime/text_selection.h"
 #include "core/common/share/text_share_adapter.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
+#include "core/components/common/properties/text_layout_info.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
@@ -62,17 +70,27 @@
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/rich_editor/color_mode_processor.h"
 #include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_utils.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
+#include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 #include "core/text/html_utils.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -1231,29 +1249,14 @@ RefPtr<FrameNode> RichEditorPattern::GetContentHost() const
     return contentPattern_->GetHost();
 }
 
-void RichEditorPattern::OnAttachToMainTree()
-{
-    auto host = GetHost();
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-    TextPattern::OnAttachToMainTree();
-}
-
-void RichEditorPattern::OnDetachFromMainTree()
-{
-    auto host = GetHost();
-    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
-    TextPattern::OnDetachFromMainTree();
-}
-
 void RichEditorPattern::OnAttachToFrameNode()
 {
     ACE_SCOPED_TRACE("RichEditorPattern::OnAttachToFrameNode");
-    auto frameNode = GetHost();
-    THREAD_SAFE_NODE_CHECK(frameNode, OnAttachToFrameNode);
-    CHECK_NULL_VOID(frameNode);
-    ACE_UINODE_TRACE(frameNode);
     TextPattern::OnAttachToFrameNode();
     richEditorInstanceId_ = Container::CurrentIdSafely();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     frameId_ = frameNode->GetId();
     StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
     auto context = GetContext();
@@ -1270,7 +1273,7 @@ void RichEditorPattern::OnAttachToFrameNode()
 void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnDetachFromFrameNode");
-    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node);
+    CloseSelectOverlay();
     CHECK_NULL_VOID(node);
     TextPattern::OnDetachFromFrameNode(node);
     ScrollablePattern::OnDetachFromFrameNode(node);
@@ -1279,39 +1282,6 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
     IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
     CHECK_NULL_VOID(keyboardOverlay_);
     keyboardOverlay_->CloseKeyboard(node->GetId());
-}
-
-void RichEditorPattern::OnAttachToMainTreeMultiThread()
-{
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnAttachToMainTreeMultiThread");
-    TextPattern::OnAttachToFrameNode();
-    richEditorInstanceId_ = Container::CurrentIdSafely();
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    frameId_ = frameNode->GetId();
-    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    context->AddWindowSizeChangeCallback(frameId_);
-
-    auto patternCreator = [weak = WeakClaim(this)]() { return AceType::MakeRefPtr<RichEditorContentPattern>(weak); };
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_CONTENT_ETS_TAG, nodeId, patternCreator);
-    frameNode->AddChild(contentNode);
-    SetContentPattern(contentNode->GetPattern<RichEditorContentPattern>());
-}
-
-void RichEditorPattern::OnDetachFromMainTreeMultiThread()
-{
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnDetachFromMainTreeMultiThread");
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto frameNode = host.GetRawPtr();
-    TextPattern::OnDetachFromFrameNode(frameNode);
-    ScrollablePattern::OnDetachFromFrameNode(frameNode);
-    ClearOnFocusTextField(frameNode);
-    auto context = pipeline_.Upgrade();
-    IF_PRESENT(context, RemoveWindowSizeChangeCallback(frameId_));
 }
 
 int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options,

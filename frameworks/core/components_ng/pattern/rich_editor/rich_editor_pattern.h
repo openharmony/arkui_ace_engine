@@ -22,50 +22,113 @@
 #include <string>
 
 #include "base/log/event_report.h"
-#include "base/view_data/view_data_wrap.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/ai/ai_write_adapter.h"
-#include "core/common/ime/text_edit_controller.h"
+#include "core/common/ime/constant.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_client.h"
-#include "core/common/ime/text_input_configuration.h"
 #include "core/common/ime/text_input_connection.h"
-#include "core/common/ime/text_input_formatter.h"
-#include "core/common/ime/text_input_proxy.h"
-#include "core/common/ime/text_input_type.h"
-#include "core/common/ime/text_selection.h"
-#include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_select_overlay.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/select_overlay/magnifier.h"
-#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
-#include "core/components_ng/pattern/text/layout_info_interface.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_paragraph_manager.h"
 #include "core/text/text_emoji_processor.h"
 
-#ifndef ACE_UNITTEST
-#ifdef ENABLE_STANDARD_INPUT
-#include "refbase.h"
+// Forward declarations
+namespace OHOS::Ace {
+class AceApplicationInfo;
+struct AIWriteInfo;
+struct AISpan;
+class Clipboard;
+class Color;
+class Dimension;
+class EventReport;
+class FocusHub;
+struct Font;
+class ImageSourceInfo;
+class JsonUtil;
+class JsonValue;
+struct KeyEvent;
+class Offset;
+class OffsetF;
+class PipelineContext;
+class PointF;
+class RectF;
+enum class TextDecoration;
+struct TextEditingValue;
+class TextInputConnection;
+class TextInputFormatter;
+class TextInputProxy;
+class TextStyle;
+enum class WindowSizeChangeReason : uint32_t;
+struct TextSpanOptions;
+struct ImageSpanOptions;
+struct RichEditorInfo;
+struct BuilderSpanOptions;
+class SelectionInfo;
+struct SpanOptionBase;
+struct SpanPositionInfo;
+struct SymbolSpanOptions;
+struct RangeOptions;
+
+namespace NG {
+class EventHub;
+class FrameNode;
+class InspectorFilter;
+class LayoutAlgorithm;
+class LayoutProperty;
+class NodePaintMethod;
+class OneStepDragController;
+struct OverlayRequest;
+class RichEditorAccessibilityProperty;
+class RichEditorContentModifier;
+class RichEditorContentPattern;
+class RichEditorLayoutAlgorithm;
+class RichEditorOverlayModifier;
+class RichEditorScrollController;
+class RichEditorUndoManager;
+class ScrollBar;
+class SpanNode;
+class StyleManager;
+class TextBase;
+class TextFieldManagerNG;
+class UINode;
+class ImageSpanNode;
+class PlaceholderSpanNode;
+struct SpanItem;
+struct ImageSpanItem;
+struct CaretMetricsF;
+struct DirtySwapConfig;
+enum class DragEventType;
+class LayoutWrapper;
+struct PositionWithAffinity;
+class RichEditorChangeValue;
+class RichEditorDeleteValue;
+struct SelectHandleInfo;
+struct SelectMenuParam;
+struct SelectOverlayInfo;
+class TextInsertValueInfo;
+enum class TextResponseType;
+struct UndoRedoRecord;
+}
+}
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
 struct TextConfig;
-} // namespace OHOS::MiscServices
+}
+
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
+#include "refbase.h"
 #endif
 #endif
 
@@ -576,14 +639,18 @@ public:
     }
 
     BlurReason GetBlurReason();
-    void OnAttachToMainTree() override;
+
     uint32_t GetSCBSystemWindowId();
-    void OnDetachFromMainTree() override;
-    void OnAttachToFrameNodeMultiThread() {}
-    void OnAttachToMainTreeMultiThread();
-    void OnDetachFromMainTreeMultiThread();
-    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
-    
+    void OnAttachToMainTree() override
+    {
+        TextPattern::OnAttachToMainTree();
+    }
+
+    void OnDetachFromMainTree() override
+    {
+        TextPattern::OnDetachFromMainTree();
+    }
+
     void RegisiterCaretChangeListener(std::function<void(int32_t)>&& listener);
     void RecreateUndoManager();
     void CreateStyledString();
