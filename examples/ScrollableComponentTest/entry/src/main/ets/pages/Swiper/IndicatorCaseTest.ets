@@ -113,7 +113,7 @@ class IndicatorDataSource implements IDataSource {
 
 @Entry
 @Component
-struct Index {
+struct IndicatorCaseTestPage {
   UpdateIndicator(): DotIndicator | DigitIndicator | boolean {
     switch(this.indicatorController){
       case 0:

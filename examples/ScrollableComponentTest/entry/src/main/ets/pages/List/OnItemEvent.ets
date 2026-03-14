@@ -19,7 +19,7 @@
  */
 
 @ObservedV2
-class ListData {
+class OnItemEventListData {
   @Trace public title: string = '';
   @Trace public data: string[] = [];
 
@@ -29,14 +29,14 @@ class ListData {
   }
 }
 
-class DraggingData {
+class OnItemEventDraggingData {
   public data?: string;
 }
 
 @ComponentV2
-struct DraggableList {
+struct OnItemEventDraggableList {
   @Require @Param data: string[];
-  @Require @Param draggingData: DraggingData;
+  @Require @Param draggingData: OnItemEventDraggingData;
 
   @Builder
   ItemBuilder(data: string, size: SizeOptions, event: ItemDragInfo): void {
@@ -58,8 +58,8 @@ struct DraggableList {
         ListItem() {
           Text(item)
         }
-        .width("100%")
-        .height("10%")
+        .width('100%')
+        .height('10%')
         .margin(10)
         .backgroundColor(Color.White)
         .borderRadius(4)
@@ -67,7 +67,7 @@ struct DraggableList {
         .aspectRatio(1)
       }, (item: string) => item)
     }
-    .width("50%")
+    .width('50%')
     .layoutWeight(1)
     .padding(10)
     .onItemDragStart((event: ItemDragInfo, itemIndex: number) => {
@@ -94,16 +94,16 @@ struct DraggableList {
       return this.ItemBuilder(this.draggingData.data, size, event);
     })
     .onItemDragEnter((event: ItemDragInfo) => {
-      console.info("Item drag enter at position:", event.x, event.y);
+      console.info('Item drag enter at position:', event.x, event.y);
     })
     .onItemDragMove((event: ItemDragInfo, itemIndex: number, insertIndex: number) => {
       if (this.lastInsertIndex != insertIndex) {
-        console.info("insertIndex change from ", this.lastInsertIndex, "to", insertIndex);
+        console.info('insertIndex change from ', this.lastInsertIndex, 'to', insertIndex);
         this.lastInsertIndex = insertIndex;
       }
     })
     .onItemDragLeave((event: ItemDragInfo, itemIndex: number) => {
-      console.info("Item " + itemIndex + " drag leave at position:", event.x, event.y);
+      console.info('Item ' + itemIndex + ' drag leave at position:', event.x, event.y);
     })
     .onItemDrop((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => {
       if (!isSuccess) {
@@ -123,18 +123,18 @@ struct DraggableList {
 
 @Entry
 @ComponentV2
-struct Index {
-  @Local data: ListData[] = [
-    new ListData('A', ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8']),
-    new ListData('B', ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']),
+struct OnItemEventPage {
+  @Local data: OnItemEventListData[] = [
+    new OnItemEventListData('A', ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8']),
+    new OnItemEventListData('B', ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']),
   ];
-  @Local draggingData: DraggingData = new DraggingData();
+  @Local draggingData: OnItemEventDraggingData = new OnItemEventDraggingData();
 
   build() {
     Stack() {
       Row() {
-        DraggableList({ data: this.data[0].data, draggingData: this.draggingData })
-        DraggableList({ data: this.data[1].data, draggingData: this.draggingData })
+        OnItemEventDraggableList({ data: this.data[0].data, draggingData: this.draggingData })
+        OnItemEventDraggableList({ data: this.data[1].data, draggingData: this.draggingData })
       }
     }
     .backgroundColor('#FFDCDCDC')
