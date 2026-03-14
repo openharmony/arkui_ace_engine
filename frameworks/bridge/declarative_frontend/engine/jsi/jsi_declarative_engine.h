@@ -491,6 +491,8 @@ public:
 
     void JsSetAceDebugMode();
 
+    void JsEnableSwitchInstance();
+
     void JsUnregisterInstanceId();
 
 #if defined(PREVIEW)

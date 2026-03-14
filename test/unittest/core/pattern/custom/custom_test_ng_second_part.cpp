@@ -1556,4 +1556,82 @@ HWTEST_F(CustomTestNg, CustomTest123, TestSize.Level1)
     EXPECT_TRUE(context->pendingDeleteCustomNode_.empty());
 }
 
+/**
+ * @tc.name: CustomTest124
+ * @tc.desc: Test NeedRebuild method returns default value false
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest124, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Check NeedRebuild default value.
+     * @tc.expected: NeedRebuild returns false by default.
+     */
+    EXPECT_FALSE(customNode->NeedRebuild());
+}
+
+/**
+ * @tc.name: CustomTest125
+ * @tc.desc: Test NeedRebuild returns true after MarkNeedUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest125, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Check NeedRebuild default value is false.
+     * @tc.expected: NeedRebuild returns false.
+     */
+    EXPECT_FALSE(customNode->NeedRebuild());
+
+    /**
+     * @tc.steps: step3. Call MarkNeedUpdate.
+     * @tc.expected: NeedRebuild returns true after MarkNeedUpdate.
+     */
+    customNode->MarkNeedUpdate();
+    EXPECT_TRUE(customNode->NeedRebuild());
+}
+
+/**
+ * @tc.name: CustomTest126
+ * @tc.desc: Test NeedRebuild returns false after Update is called
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest126, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     * @tc.expected: CustomNode created successfully.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Call MarkNeedUpdate to set needRebuild_ to true.
+     * @tc.expected: NeedRebuild returns true.
+     */
+    customNode->MarkNeedUpdate();
+    EXPECT_TRUE(customNode->NeedRebuild());
+
+    /**
+     * @tc.steps: step3. Call Update to reset needRebuild_.
+     * @tc.expected: NeedRebuild returns false after Update.
+     */
+    customNode->Update();
+    EXPECT_FALSE(customNode->NeedRebuild());
+}
+
 } // namespace OHOS::Ace::NG

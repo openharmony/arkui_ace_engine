@@ -305,6 +305,16 @@ public:
         return touchPadIdChanged_;
     }
 
+    void SetEnableCustomComponentCrossAbility(bool enableCustomComponentCrossAbility)
+    {
+        enableCustomComponentCrossAbility_ = enableCustomComponentCrossAbility;
+    }
+
+    bool GetEnableCustomComponentCrossAbility() const
+    {
+        return enableCustomComponentCrossAbility_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -342,6 +352,7 @@ protected:
     bool reusedNodeSkipMeasure_ = false;
     bool mouseTransformEnable_ = false;
     bool touchPadIdChanged_ = false;
+    bool enableCustomComponentCrossAbility_ = false;
     TextMenuInfo textMenuInfo_;
 };
 

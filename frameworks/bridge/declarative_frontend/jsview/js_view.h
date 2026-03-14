@@ -171,6 +171,11 @@ public:
     {
         return instanceId_;
     }
+    
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
 
     RefPtr<AceType> GetViewNode() const
     {
@@ -462,6 +467,8 @@ public:
 
     void JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInfo& info);
 
+    void JSRegisterUpdateJSInstanceCallback(const JSCallbackInfo& info);
+
     void SetLatestInstanceId(const int32_t instanceId);
 
     JSRef<JSVal> GetJsContext();
@@ -469,6 +476,8 @@ public:
     int32_t GetLatestInstanceId() const;
 private:
     void MarkNeedUpdate() override;
+
+    void RegisterCombinedCallbackToBackend();
 
     // indicates if the JSView has ever completed initial render
     // used for code branching in lambda given to ComposedComponent
@@ -503,6 +512,11 @@ private:
     bool executedAboutToRender_ = false;
     bool executedOnRenderDone_ = false;
     bool executedRender_ = false;
+
+    // Save two independent instance update callbacks
+    std::function<void(int32_t)> updateInstanceForEnvCallback_;
+    std::function<void(int32_t)> updateJSInstanceCallback_;
+
     int32_t latestInstanceId_ = -1;
 };
 
