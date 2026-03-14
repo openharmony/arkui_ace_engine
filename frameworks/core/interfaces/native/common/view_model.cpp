@@ -371,7 +371,6 @@ void* createSliderNode(ArkUI_Int32 nodeId)
     CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
     return frameNode;
 }
 
