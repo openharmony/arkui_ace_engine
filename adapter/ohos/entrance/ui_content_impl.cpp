@@ -4483,7 +4483,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
             auto appInfo = context->GetApplicationInfo();
             container->SetApiTargetVersion(appInfo->apiTargetVersion);
         }
-
+        container->SetBundleName(context->GetBundleName());
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
     } else {
