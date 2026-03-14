@@ -31,6 +31,7 @@ import { ArkUIAniModule } from 'arkui.ani'
 import { UIContextImpl, ContextRecord } from "./base/UIContextImpl"
 import { RecordData } from "@ohos.base"
 import { ParallelizeUI } from "../@ohos.arkui.Parallelize"
+import { CustomBuilder } from "./component/builder";
 
 export enum NodeRenderType {
     RENDER_TYPE_DISPLAY = 0,
@@ -135,12 +136,86 @@ class BuilderNodeFinalizationRegisterProxy {
         let trunk = new BuilderNodeFinalizationRegisterCleanerThunk<T>(BuilderNodeFinalizationRegisterProxy.removeJSBuilderNode<T>, builderNode._JSBuilderNode<T>)
         finalizerRegister(builderNode, trunk)
     }
+    public static registerReactive(target: object): void {
+        let builderNode = target as ReactiveBuilderNode;
+        let trunk = new BuilderNodeFinalizationRegisterCleanerThunk<undefined>(
+            BuilderNodeFinalizationRegisterProxy.removeJSBuilderNode<undefined>, builderNode._JSBuilderNode);
+        finalizerRegister(builderNode, trunk)
+    }
     public static instance_: BuilderNodeFinalizationRegisterProxy = new BuilderNodeFinalizationRegisterProxy();
 }
 
 export type voidBuilderFunc = /** @memo */ () => void;
 
 export type TBuilderFunc<T> = /** @memo */ (t: T) => void;
+
+export class ReactiveBuilderNode {
+    public _JSBuilderNode: JSBuilderNode<undefined>;
+    // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_ani.cpp.
+    private nodePtr_: KPointer | undefined;
+    private isDisposed_: boolean = false;
+    constructor(uiContext: UIContext, options?: RenderOptions) {
+        this._JSBuilderNode = new JSBuilderNode<undefined>(uiContext, options);
+        BuilderNodeFinalizationRegisterProxy.registerReactive(this);
+    }
+    //@ts-ignore
+    public build(builder: CustomBuilder, options?: BuildOptions): void {
+        this._JSBuilderNode.buildReactive(builder, options);
+        this.nodePtr_ = this._JSBuilderNode.getValidNodePtr();
+    }
+
+    public getNodePtr(): KPointer | undefined {
+        return this._JSBuilderNode.getValidNodePtr();
+    }
+
+    public getFrameNode(): FrameNode | null {
+        return this._JSBuilderNode.getFrameNode();
+    }
+
+    public postTouchEvent(event: TouchEvent): boolean {
+        let ret = this._JSBuilderNode.postTouchEvent(event);
+        return ret;
+    }
+
+    public dispose(): void {
+        if (this.isDisposed()) {
+            return;
+        }
+        this._JSBuilderNode.disposeNode();
+        this.nodePtr_ = undefined;
+    }
+
+    public reuse(param?: RecordData): void {
+        this._JSBuilderNode.reuse(param);
+    }
+
+    public recycle(): void {
+        this._JSBuilderNode.recycle();
+    }
+
+    public updateConfiguration(): void {
+        this._JSBuilderNode.updateConfiguration();
+    }
+
+    public flushState(): void {
+        this._JSBuilderNode.flushState();
+    }
+
+    public isDisposed(): boolean {
+        return (this.nodePtr_ === undefined || this.nodePtr_ === null) && this._JSBuilderNode.isDisposedInner();
+    }
+
+    public postInputEvent(event: InputEventType): boolean {
+        let ret = this._JSBuilderNode.postInputEvent(event);
+        return ret;
+    }
+    public getNodeWithoutProxy(): pointer | undefined {
+        return this._JSBuilderNode.getNodeWithoutProxy();
+    }
+    public getFrameNodeWithoutCheck(): FrameNode | null | undefined {
+        return this._JSBuilderNode.getFrameNodeWithoutCheck();
+    }
+}
 
 export class BuilderNode<T = undefined> {
     public _JSBuilderNode: JSBuilderNode<T>;
@@ -214,6 +289,7 @@ export class BuilderNode<T = undefined> {
 }
 
 export class JSBuilderNode<T> extends BuilderNodeOps {
+    private __managerGlobal?: StateManager;
     private __root?: BuilderRootNode;
     private __builderRootNode?: PeerNode;
     private __builderProxyNode?: ArkBuilderProxyNodePeer;
@@ -223,6 +299,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private __params?: MutableState<T>;
     private __builder?: WrappedBuilder<TBuilderFunc<T>>;
     private __builder0?: WrappedBuilder<voidBuilderFunc>;
+    private __reactiveBuilder?: WrappedBuilder<CustomBuilder>;
     private __frameNode: BuilderRootFrameNode<T> | null;
     private __uiContext?: UIContextImpl;
     private _instanceId: int32 = -1;
@@ -283,17 +360,38 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             }
             return this.__root!;
         }, () => {
-            if (this.__builder0) {
+            if (this.__reactiveBuilder) {
                 const result = setNeedCreate(true);
                 if (this.__buildOptions?.useParallel) {
-                    const builder = this.__builder0?.builder;
+                    /** @memo */
+                    const builder = () => {
+                        this.innerBuildReactive();
+                    };
                     ParallelizeUI({
                         completed: () => {
                             this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
                         }
                     }, builder as () => void);
                 } else {
-                    this.__builder0?.builder();
+                    this.innerBuildReactive();
+                }
+                setNeedCreate(result);
+                return;
+            }
+            if (this.__builder0) {
+                const result = setNeedCreate(true);
+                if (this.__buildOptions?.useParallel) {
+                    /** @memo */
+                    const builder = () => {
+                        this.innerBuild0();
+                    }
+                    ParallelizeUI({
+                        completed: () => {
+                            this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
+                        }
+                    }, builder as () => void);
+                } else {
+                    this.innerBuild0();
                 }
                 setNeedCreate(result);
                 return;
@@ -304,7 +402,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
                 if (this.__buildOptions?.useParallel) {
                     /** @memo */
                     const builder = (params: T) => {
-                        this.__builder?.builder(params);
+                        this.innerBuildT(params);
                     }
                     ParallelizeUI<T>({
                         completed: () => {
@@ -314,7 +412,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
                         updateUseParallel: this.__updateUseParallel
                     }, () => { return this.__params!.value }, builder);
                 } else {
-                    this.__builder?.builder(this.__params!.value);
+                    this.innerBuildT(this.__params!.value);
                 }
                 setNeedCreate(result);
             }
@@ -356,10 +454,10 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__arg = undefined;
         this.__builder = undefined;
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
-        const old = GlobalStateManager.instance;
+        this.__managerGlobal = GlobalStateManager.instance;
         GlobalStateManager.SetLocalManager(this.__manager);
         this.create(this.buildFunc);
-        GlobalStateManager.SetLocalManager(old);
+        GlobalStateManager.SetLocalManager(this.__managerGlobal);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -369,11 +467,58 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__arg = arg;
         this.__buildOptions = options;
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
-        const old = GlobalStateManager.instance;
+        this.__managerGlobal = GlobalStateManager.instance;
         GlobalStateManager.SetLocalManager(this.__manager);
         this.create(this.buildFunc);
-        GlobalStateManager.SetLocalManager(old);
+        GlobalStateManager.SetLocalManager(this.__managerGlobal);
         ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public buildReactive(builder: CustomBuilder, options?: BuildOptions): void {
+        this.__reactiveBuilder = new WrappedBuilder<CustomBuilder>(builder);
+        this.__builder0 = undefined;
+        this.__builder = undefined;
+        this.__arg = undefined;
+        this.__buildOptions = options;
+        ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
+        this.__managerGlobal = GlobalStateManager.instance;
+        GlobalStateManager.SetLocalManager(this.__manager);
+        this.create(this.buildFunc);
+        GlobalStateManager.SetLocalManager(this.__managerGlobal);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    /** @memo */
+    public innerBuild0(): void {
+        const currentStateManager = GlobalStateManager.instance;
+        GlobalStateManager.SetLocalManager(this.__managerGlobal);
+        try {
+            this.__builder0?.builder();
+        } finally {
+            GlobalStateManager.SetLocalManager(currentStateManager);
+        }
+    }
+
+    /** @memo */
+    public innerBuildT(params: T): void {
+        const currentStateManager = GlobalStateManager.instance;
+        GlobalStateManager.SetLocalManager(this.__managerGlobal);
+        try {
+            this.__builder?.builder(params);
+        } finally {
+            GlobalStateManager.SetLocalManager(currentStateManager);
+        }
+    }
+    
+    /** @memo */
+    public innerBuildReactive(): void {
+        const currentStateManager = GlobalStateManager.instance;
+        GlobalStateManager.SetLocalManager(this.__managerGlobal);
+        try {
+            this.__reactiveBuilder?.builder();
+        } finally {
+            GlobalStateManager.SetLocalManager(currentStateManager);
+        }
     }
 
     public update(arg: T): void {
@@ -393,6 +538,27 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__updateUseParallel = false;
         GlobalStateManager.SetLocalManager(old);
         ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public flushState(): void {
+        if (this.isDisposedInner()) {
+            return;
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
+        const old = GlobalStateManager.instance;
+        GlobalStateManager.SetLocalManager(this.__manager);
+        this.__updateUseParallel = !(this.__frameNode?.isAttached() ?? true);
+        this.__rootStage?.forceCompleteRerender();
+        this.__manager!.syncChanges();
+        this.__manager!.updateSnapshot();
+        this.__rootStage?.value;
+        this.__updateUseParallel = false;
+        GlobalStateManager.SetLocalManager(old);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public isDisposedInner(): boolean {
+        return this.__isDisposed && (this.__frameNode === undefined || this.__frameNode === null);
     }
 
     public getFrameNode(): FrameNode | null {
@@ -450,12 +616,14 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.disposeAll();
         this.__frameNode?.disposeNode();
         this.__frameNode = null;
+        this.__isDisposed = true;
         ArkUIAniModule._Common_Restore_InstanceId();
         this.__isDisposed = true;
     }
 
     private disposeAll(): void {
         super.disposeNode();
+        this.__managerGlobal = undefined;
         this.__root = undefined;
         this.__rootStage?.dispose();
         this.__rootStage = undefined;
@@ -473,6 +641,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.disposeAll();
         this.__frameNode?.disposeNode();
         this.__frameNode = null;
+        this.__isDisposed = true;
         ArkUIAniModule._Common_Restore_InstanceId();
         this.__isDisposed = true;
     }
