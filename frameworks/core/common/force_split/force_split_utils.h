@@ -30,6 +30,7 @@ struct ForceSplitConfig {
     bool isArkUIHookEnabled = false;
     bool navigationDisablePlaceholder = false;
     bool navigationDisableDivider = false;
+    bool dialogSupportSplit = true;
     std::optional<std::string> navigationId;
     std::optional<int32_t> navigationDepth;
     std::set<std::string> fullScreenPages;

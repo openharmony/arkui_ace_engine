@@ -24,7 +24,8 @@
         "TouchResult",
         "SectionOptions",
         "LengthMetrics",
-        "ColorMetrics"
+        "ColorMetrics",
+        "CustomSpan"
     ],
     "ignoreGenerics": [
         "arkui.component.common.AttributeModifier",
@@ -51,6 +52,10 @@
         {
             "from": "arkui.Graphics.ColorMetrics",
             "to": "arkui.component.idlize.ColorMetricsExt"
+        },
+        {
+            "from": "arkui.component.styledString.CustomSpan",
+            "to": "arkui.component.idlize.CustomSpanWrapper"
         },
         {
             "from": "arkui.component.common.TouchEvent",
@@ -473,10 +478,6 @@
             "drawContent",
             "drawFront"
         ],
-        "CustomSpan": [
-            "onMeasure",
-            "onDraw"
-        ],
         "LeadingMarginSpan": [
             "onDraw",
             "getLeadingMargin"
@@ -689,7 +690,8 @@
             "IfInterface",
             "WithTheme",
             "SaveButton",
-            "PasteButton"
+            "PasteButton",
+            "CustomSpan"
         ],
         "ignoreEntry": [
             "Optional",

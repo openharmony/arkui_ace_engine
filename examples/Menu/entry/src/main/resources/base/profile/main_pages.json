@@ -46,6 +46,12 @@
     "pages/Examples/MenuTestLevel0_9",
     "pages/Examples/MenuTestLevel1_0",
     "pages/Examples/MenuTestLevel1_1",
+    "pages/Examples/MenuTestLevel1_2",
+    "pages/Examples/MenuTestLevel1_3",
+    "pages/Examples/MenuTestLevel1_4",
+    "pages/Examples/MenuTestLevel1_5",
+    "pages/Examples/MenuTestLevel1_6",
+    "pages/Examples/MenuTestLevel1_7",
 
     "pages/Examples/MenuAdvancedIndex",
     "pages/Examples/MenuAdvancedOptions",
@@ -55,6 +61,7 @@
     "pages/Examples/MenuWithPreview",
     "pages/Examples/MenuMaskDemo",
     "pages/Examples/MenuSystemMaterial",
+    "pages/Examples/MenuComprehensiveDemo",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",

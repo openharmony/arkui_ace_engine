@@ -161,6 +161,7 @@ public:
     {
         return true;
     }
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -172,7 +173,7 @@ private:
     RefPtr<Curve> GetCurve() const;
     int32_t GetDuration() const;
     int32_t nodeId_ = -1;
-    void UpdateChangeEvent() const;
+    void UpdateChangeEvent();
     void OnChange();
     void OnTouchDown();
     void OnTouchUp();
@@ -214,6 +215,8 @@ private:
     void InitDefaultMargin();
     void ResetDefaultMargin();
     RefPtr<FrameNode> BuildContentModifierNode();
+    static bool ParseCommand(const std::string& command, bool& isOn);
+    void ReportChangeEvent(bool isOn);
     std::optional<SwitchMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
 

@@ -23,6 +23,7 @@
 #include "native_type.h"
 #include "native_styled_string.h"
 #include "event_converter.h"
+#include "interfaces/inner_api/ace/node_module_inner.h"
 #include "interfaces/native/node/node_extened.h"
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/node/styled_string.h"
@@ -32,7 +33,10 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/base/error/error_code.h"
+#include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
+#include "frameworks/core/components_ng/pattern/pattern.h"
+#include "frameworks/core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -57,6 +61,21 @@ public:
     void SetUp() {}
     void TearDown() {}
 };
+
+namespace {
+void RunTaskInScopeTestCallback(void* userData)
+{
+    auto* value = static_cast<int32_t*>(userData);
+    if (value != nullptr) {
+        *value = 1;
+    }
+}
+
+void CommonVisibleAreaApproximateChangeEventCallback(ArkUI_NodeEvent* event)
+{
+    (void)event;
+}
+} // namespace
 
 /**
  * @tc.name: OH_ArkUI_NodeUtils_GetLayoutSize001
@@ -143,6 +162,39 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPosition001, TestSize.Level
 }
 
 /**
+ * @tc.name: OH_ArkUI_NodeUtils_GetLayoutPosition002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPosition002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto frameNode = NG::FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, 100001, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ArkUI_NodeHandle node =
+        OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    ASSERT_NE(node, nullptr);
+    ArkUI_IntOffset localOffset;
+
+    /**
+     * @tc.steps: step2. Call the function.
+     * @tc.expect: the function is be called.
+     */
+    int32_t result = OH_ArkUI_NodeUtils_GetLayoutPosition(node, &localOffset);
+
+    /**
+     * @tc.steps: step3. Verify the result.
+     * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
  * @tc.name: OH_ArkUI_NodeUtils_GetParentInPageTree001
  * @tc.desc: Test OH_ArkUI_NodeUtils_GetParentInPageTree.
  * @tc.type: FUNC
@@ -167,6 +219,54 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetParentInPageTree001, TestSize.Lev
      * @tc.expect: result is nullptr.
      */
     EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetParentInPageTree002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetParentInPageTree with valid parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetParentInPageTree002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto parentNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(parentNode, nullptr);
+    ASSERT_NE(childNode, nullptr);
+    EXPECT_EQ(nodeAPI->addChild(parentNode, childNode), ARKUI_ERROR_CODE_NO_ERROR);
+
+    ArkUI_NodeHandle result = OH_ArkUI_NodeUtils_GetParentInPageTree(childNode);
+
+    EXPECT_EQ(result, parentNode);
+    nodeAPI->disposeNode(parentNode);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetCurrentPageRootNode001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetCurrentPageRootNode with valid page tree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCurrentPageRootNode001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto pageNode = NG::FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<NG::Pattern>(), true);
+    auto childNode = NG::FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, 2, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(pageNode, nullptr);
+    ASSERT_NE(childNode, nullptr);
+    pageNode->AddChild(childNode);
+
+    auto node = OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(childNode)));
+    ASSERT_NE(node, nullptr);
+
+    ArkUI_NodeHandle result = OH_ArkUI_NodeUtils_GetCurrentPageRootNode(node);
+
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->uiNodeHandle, reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(childNode)));
 }
 
 /**
@@ -634,6 +734,84 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale002, Te
 }
 
 /**
+ * @tc.name: OH_ArkUI_NodeUtils_AddCustomProperty001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_AddCustomProperty with nullptr node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_AddCustomProperty001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NodeHandle node = nullptr;
+    const char* name = "test_name";
+    const char* value = "test_value";
+
+    OH_ArkUI_NodeUtils_AddCustomProperty(node, name, value);
+
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_AddCustomProperty002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_AddCustomProperty with valid CNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_AddCustomProperty002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+
+    const char* name = "test_name";
+    const char* value = "test_value";
+    ArkUI_CustomProperty* handle = nullptr;
+
+    OH_ArkUI_NodeUtils_AddCustomProperty(node, name, value);
+
+    int32_t result = OH_ArkUI_NodeUtils_GetCustomProperty(node, name, &handle);
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ASSERT_NE(handle, nullptr);
+    ASSERT_NE(handle->value, nullptr);
+    EXPECT_STREQ(handle->value, value);
+
+    delete[] handle->value;
+    delete handle;
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_RemoveCustomProperty001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_RemoveCustomProperty with valid CNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_RemoveCustomProperty001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+
+    const char* name = "test_name";
+    const char* value = "test_value";
+    ArkUI_CustomProperty* handle = nullptr;
+
+    OH_ArkUI_NodeUtils_AddCustomProperty(node, name, value);
+    OH_ArkUI_NodeUtils_RemoveCustomProperty(node, name);
+
+    int32_t result = OH_ArkUI_NodeUtils_GetCustomProperty(node, name, &handle);
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ASSERT_NE(handle, nullptr);
+    EXPECT_STREQ(OH_ArkUI_CustomProperty_GetStringValue(handle), "");
+
+    OH_ArkUI_CustomProperty_Destroy(handle);
+    nodeAPI->disposeNode(node);
+}
+
+/**
  * @tc.name: OH_ArkUI_NodeUtils_GetCustomProperty001
  * @tc.desc: Test OH_ArkUI_NodeUtils_GetCustomProperty.
  * @tc.type: FUNC
@@ -718,6 +896,615 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCustomProperty003, TestSize.Level
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
     EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_CustomProperty_GetStringValue001
+ * @tc.desc: Test OH_ArkUI_CustomProperty_GetStringValue with valid handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_CustomProperty_GetStringValue001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+
+    const char* name = "test_name";
+    const char* value = "test_value";
+    ArkUI_CustomProperty* handle = nullptr;
+    OH_ArkUI_NodeUtils_AddCustomProperty(node, name, value);
+
+    int32_t result = OH_ArkUI_NodeUtils_GetCustomProperty(node, name, &handle);
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ASSERT_NE(handle, nullptr);
+    EXPECT_STREQ(OH_ArkUI_CustomProperty_GetStringValue(handle), value);
+
+    OH_ArkUI_CustomProperty_Destroy(handle);
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetActiveChildrenInfo001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetActiveChildrenInfo when active children exist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetActiveChildrenInfo001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNodeOne = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNodeTwo = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    ASSERT_NE(childNodeOne, nullptr);
+    ASSERT_NE(childNodeTwo, nullptr);
+    EXPECT_EQ(nodeAPI->addChild(rootNode, childNodeOne), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->addChild(rootNode, childNodeTwo), ARKUI_ERROR_CODE_NO_ERROR);
+    auto* childFrameNodeOne = reinterpret_cast<NG::FrameNode*>(childNodeOne->uiNodeHandle);
+    auto* childFrameNodeTwo = reinterpret_cast<NG::FrameNode*>(childNodeTwo->uiNodeHandle);
+    ASSERT_NE(childFrameNodeOne, nullptr);
+    ASSERT_NE(childFrameNodeTwo, nullptr);
+    childFrameNodeOne->SetActive(true);
+    childFrameNodeTwo->SetActive(true);
+
+    ArkUI_ActiveChildrenInfo* handle = nullptr;
+    int32_t result = OH_ArkUI_NodeUtils_GetActiveChildrenInfo(rootNode, &handle);
+
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ASSERT_NE(handle, nullptr);
+    EXPECT_EQ(OH_ArkUI_ActiveChildrenInfo_GetCount(handle), 2);
+    EXPECT_EQ(OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(handle, 0), childNodeOne);
+    EXPECT_EQ(OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(handle, 1), childNodeTwo);
+
+    OH_ArkUI_ActiveChildrenInfo_Destroy(handle);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex001
+ * @tc.desc: Test OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex with valid handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex001, TestSize.Level1)
+{
+    ArkUI_Node nodeOne {};
+    ArkUI_Node nodeTwo {};
+    ArkUI_NodeHandle nodeList[] = { &nodeOne, &nodeTwo };
+    ArkUI_ActiveChildrenInfo handle { .nodeList = nodeList, .nodeCount = 2 };
+
+    EXPECT_EQ(OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(&handle, 0), &nodeOne);
+    EXPECT_EQ(OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(&handle, 1), &nodeTwo);
+    EXPECT_EQ(OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(&handle, 2), nullptr);
+}
+
+/**
+ * @tc.name: OH_ArkUI_ActiveChildrenInfo_GetCount001
+ * @tc.desc: Test OH_ArkUI_ActiveChildrenInfo_GetCount with valid handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_ActiveChildrenInfo_GetCount001, TestSize.Level1)
+{
+    ArkUI_ActiveChildrenInfo handle { .nodeList = nullptr, .nodeCount = 2 };
+
+    EXPECT_EQ(OH_ArkUI_ActiveChildrenInfo_GetCount(&handle), 2);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_IsCreatedByNDK001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_IsCreatedByNDK with different node types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_IsCreatedByNDK001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+    auto manualNode = new ArkUI_Node({ ARKUI_NODE_TEXT, nullptr, false });
+
+    EXPECT_TRUE(OH_ArkUI_NodeUtils_IsCreatedByNDK(node));
+    EXPECT_FALSE(OH_ArkUI_NodeUtils_IsCreatedByNDK(manualNode));
+    EXPECT_FALSE(OH_ArkUI_NodeUtils_IsCreatedByNDK(nullptr));
+
+    delete manualNode;
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetNodeType001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetNodeType with nullptr node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetNodeType001, TestSize.Level1)
+{
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetNodeType(nullptr), -1);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetNodeType002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetNodeType with cached and tag-based paths.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetNodeType002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetNodeType(node), static_cast<int32_t>(ARKUI_NODE_STACK));
+    node->type = -1;
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetNodeType(node), static_cast<int32_t>(ARKUI_NODE_STACK));
+
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetWindowInfo001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetWindowInfo with invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetWindowInfo001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_HostWindowInfo* info = nullptr;
+
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetWindowInfo(nullptr, &info), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetWindowInfo002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetWindowInfo with node not on main tree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetWindowInfo002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+
+    ArkUI_HostWindowInfo* info = nullptr;
+    int32_t result = OH_ArkUI_NodeUtils_GetWindowInfo(node, &info);
+
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    ASSERT_NE(info, nullptr);
+    EXPECT_EQ(info->name, nullptr);
+
+    OH_ArkUI_HostWindowInfo_Destroy(info);
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: OH_ArkUI_HostWindowInfo_GetName001
+ * @tc.desc: Test OH_ArkUI_HostWindowInfo_GetName with valid info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_HostWindowInfo_GetName001, TestSize.Level1)
+{
+    char name[] = "window";
+    ArkUI_HostWindowInfo info { .name = name };
+
+    EXPECT_STREQ(OH_ArkUI_HostWindowInfo_GetName(&info), "window");
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetAttachedNodeHandleById001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetAttachedNodeHandleById with invalid id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetAttachedNodeHandleById001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NodeHandle node = nullptr;
+
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(nullptr, &node), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetAttachedNodeHandleById002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetAttachedNodeHandleById with id not found.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetAttachedNodeHandleById002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NodeHandle node = nullptr;
+    int32_t result = OH_ArkUI_NodeUtils_GetAttachedNodeHandleById("attached_node_handle_by_id_not_exist", &node);
+
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(node, nullptr);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NativeModule_AdoptChild001
+ * @tc.desc: Test OH_ArkUI_NativeModule_AdoptChild when node or child is not CNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NativeModule_AdoptChild001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto realNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto realChild = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(realNode, nullptr);
+    ASSERT_NE(realChild, nullptr);
+    auto fakeNode = new ArkUI_Node({ ARKUI_NODE_STACK, nullptr, false });
+    auto fakeChild = new ArkUI_Node({ ARKUI_NODE_STACK, nullptr, false });
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_AdoptChild(fakeNode, realChild), ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO);
+    EXPECT_EQ(OH_ArkUI_NativeModule_AdoptChild(realNode, fakeChild), ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED);
+
+    delete fakeNode;
+    delete fakeChild;
+    nodeAPI->disposeNode(realNode);
+    nodeAPI->disposeNode(realChild);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NativeModule_RemoveAdoptedChild001
+ * @tc.desc: Test OH_ArkUI_NativeModule_RemoveAdoptedChild when node or child is not CNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NativeModule_RemoveAdoptedChild001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto realNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto realChild = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(realNode, nullptr);
+    ASSERT_NE(realChild, nullptr);
+    auto fakeNode = new ArkUI_Node({ ARKUI_NODE_STACK, nullptr, false });
+    auto fakeChild = new ArkUI_Node({ ARKUI_NODE_STACK, nullptr, false });
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_RemoveAdoptedChild(fakeNode, realChild),
+        OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+    EXPECT_EQ(OH_ArkUI_NativeModule_RemoveAdoptedChild(realNode, fakeChild),
+        OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
+
+    delete fakeNode;
+    delete fakeChild;
+    nodeAPI->disposeNode(realNode);
+    nodeAPI->disposeNode(realChild);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_MoveTo001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_MoveTo with invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_MoveTo001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto realNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto targetParent = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(realNode, nullptr);
+    ASSERT_NE(targetParent, nullptr);
+    auto fakeNode = new ArkUI_Node({ ARKUI_NODE_STACK, nullptr, false });
+
+    EXPECT_EQ(OH_ArkUI_NodeUtils_MoveTo(fakeNode, targetParent, 0), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NodeUtils_MoveTo(realNode, fakeNode, 0), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    delete fakeNode;
+    nodeAPI->disposeNode(realNode);
+    nodeAPI->disposeNode(targetParent);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_MoveTo002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_MoveTo with valid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_MoveTo002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto sourceParent = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto targetParent = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(sourceParent, nullptr);
+    ASSERT_NE(targetParent, nullptr);
+    ASSERT_NE(childNode, nullptr);
+    ASSERT_EQ(nodeAPI->addChild(sourceParent, childNode), ARKUI_ERROR_CODE_NO_ERROR);
+
+    int32_t result = OH_ArkUI_NodeUtils_MoveTo(childNode, targetParent, 0);
+
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetParentInPageTree(childNode), targetParent);
+
+    nodeAPI->disposeNode(sourceParent);
+    nodeAPI->disposeNode(targetParent);
+}
+
+/**
+ * @tc.name: OH_ArkUI_CrossLanguageOption001
+ * @tc.desc: Test CrossLanguageOption create, destroy, set and get helpers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_CrossLanguageOption001, TestSize.Level1)
+{
+    auto option = OH_ArkUI_CrossLanguageOption_Create();
+
+    ASSERT_NE(option, nullptr);
+    EXPECT_FALSE(OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(option));
+    EXPECT_FALSE(OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(nullptr));
+
+    OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus(nullptr, true);
+    OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus(option, true);
+    EXPECT_TRUE(OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(option));
+    OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus(option, false);
+    EXPECT_FALSE(OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(option));
+
+    OH_ArkUI_CrossLanguageOption_Destroy(nullptr);
+    OH_ArkUI_CrossLanguageOption_Destroy(option);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_SetCrossLanguageOption001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_SetCrossLanguageOption with invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_SetCrossLanguageOption001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto option = OH_ArkUI_CrossLanguageOption_Create();
+    ASSERT_NE(option, nullptr);
+    auto fakeNode = new ArkUI_Node({ ARKUI_NODE_STACK, nullptr, false });
+
+    EXPECT_EQ(OH_ArkUI_NodeUtils_SetCrossLanguageOption(nullptr, option), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NodeUtils_SetCrossLanguageOption(fakeNode, option), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NodeUtils_SetCrossLanguageOption(fakeNode, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    delete fakeNode;
+    OH_ArkUI_CrossLanguageOption_Destroy(option);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_SetCrossLanguageOption002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_SetCrossLanguageOption and GetCrossLanguageOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_SetCrossLanguageOption002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+    auto option = OH_ArkUI_CrossLanguageOption_Create();
+    auto queryOption = OH_ArkUI_CrossLanguageOption_Create();
+    ASSERT_NE(option, nullptr);
+    ASSERT_NE(queryOption, nullptr);
+    OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus(option, true);
+
+    EXPECT_EQ(OH_ArkUI_NodeUtils_SetCrossLanguageOption(node, option), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetCrossLanguageOption(node, queryOption), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_TRUE(OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(queryOption));
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetCrossLanguageOption(nullptr, queryOption), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetCrossLanguageOption(node, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    OH_ArkUI_CrossLanguageOption_Destroy(option);
+    OH_ArkUI_CrossLanguageOption_Destroy(queryOption);
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NativeModule_InvalidateAttributes001
+ * @tc.desc: Test OH_ArkUI_NativeModule_InvalidateAttributes with invalid and valid nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NativeModule_InvalidateAttributes001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+    auto fakeNode = new ArkUI_Node({ ARKUI_NODE_STACK, nullptr, false });
+
+    EXPECT_EQ(OH_ArkUI_NativeModule_InvalidateAttributes(nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NativeModule_InvalidateAttributes(fakeNode), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NativeModule_InvalidateAttributes(node), ARKUI_ERROR_CODE_NO_ERROR);
+
+    delete fakeNode;
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNodeOne = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNodeTwo = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    ASSERT_NE(childNodeOne, nullptr);
+    ASSERT_NE(childNodeTwo, nullptr);
+    ASSERT_EQ(nodeAPI->addChild(rootNode, childNodeOne), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(nodeAPI->addChild(rootNode, childNodeTwo), ARKUI_ERROR_CODE_NO_ERROR);
+    uint32_t index = 0;
+
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(nullptr, &index), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(rootNode, &index), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(index, 0u);
+
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNodeOne = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNodeTwo = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    ASSERT_NE(childNodeOne, nullptr);
+    ASSERT_NE(childNodeTwo, nullptr);
+    ASSERT_EQ(nodeAPI->addChild(rootNode, childNodeOne), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(nodeAPI->addChild(rootNode, childNodeTwo), ARKUI_ERROR_CODE_NO_ERROR);
+    uint32_t index = 0;
+
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(nullptr, &index), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(rootNode, &index), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(index, 1u);
+
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetChildWithExpandMode001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetChildWithExpandMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetChildWithExpandMode001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNodeOne = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNodeTwo = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    ASSERT_NE(childNodeOne, nullptr);
+    ASSERT_NE(childNodeTwo, nullptr);
+    ASSERT_EQ(nodeAPI->addChild(rootNode, childNodeOne), ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(nodeAPI->addChild(rootNode, childNodeTwo), ARKUI_ERROR_CODE_NO_ERROR);
+    ArkUI_NodeHandle subnode = nullptr;
+
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetChildWithExpandMode(nullptr, 0, &subnode, ARKUI_NOT_EXPAND),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetChildWithExpandMode(rootNode, 1, &subnode, ARKUI_NOT_EXPAND),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(subnode, childNodeTwo);
+
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetPositionToParent001
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetPositionToParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetPositionToParent001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto frameNode = NG::FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, 100002, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->GetRenderContext()->UpdatePaintRect(NG::RectF(12.0f, 34.0f, 1.0f, 1.0f));
+    auto node = OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    ASSERT_NE(node, nullptr);
+    ArkUI_IntOffset offset = { 0, 0 };
+
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetPositionToParent(nullptr, &offset), OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetPositionToParent(node, &offset), OHOS::Ace::ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(offset.x, 12);
+    EXPECT_EQ(offset.y, 34);
+}
+
+/**
+ * @tc.name: OH_ArkUI_AddSupportedUIStates001
+ * @tc.desc: Test OH_ArkUI_AddSupportedUIStates and OH_ArkUI_RemoveSupportedUIStates with nullptr node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_AddSupportedUIStates001, TestSize.Level1)
+{
+    int32_t settingUIStatus = 1;
+
+    EXPECT_EQ(OH_ArkUI_AddSupportedUIStates(nullptr, settingUIStatus, nullptr, false, nullptr),
+        ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RemoveSupportedUIStates(nullptr, settingUIStatus), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_AddSupportedUIStates002
+ * @tc.desc: Test OH_ArkUI_AddSupportedUIStates and OH_ArkUI_RemoveSupportedUIStates with valid node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_AddSupportedUIStates002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+    int32_t settingUIStatus = 1;
+
+    EXPECT_EQ(OH_ArkUI_AddSupportedUIStates(node, settingUIStatus, nullptr, false, nullptr),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RemoveSupportedUIStates(node, settingUIStatus), ARKUI_ERROR_CODE_NO_ERROR);
+
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: OH_ArkUI_RunTaskInScope001
+ * @tc.desc: Test OH_ArkUI_RunTaskInScope with invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_RunTaskInScope001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({ .id = 0 });
+    int32_t value = 0;
+
+    EXPECT_EQ(OH_ArkUI_RunTaskInScope(nullptr, &value, RunTaskInScopeTestCallback),
+        ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+    EXPECT_EQ(OH_ArkUI_RunTaskInScope(uiContext, &value, nullptr), ARKUI_ERROR_CODE_CALLBACK_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_RunTaskInScope002
+ * @tc.desc: Test OH_ArkUI_RunTaskInScope with valid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_RunTaskInScope002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({ .id = 0 });
+    int32_t value = 0;
+
+    EXPECT_EQ(OH_ArkUI_RunTaskInScope(uiContext, &value, RunTaskInScopeTestCallback), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(value, 1);
 }
 
 /**
@@ -8046,9 +8833,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest_BackgroundImageResizable_001, TestSize.L
  */
 HWTEST_F(NativeNodeTest, NativeNodeTest142, TestSize.Level1)
 {
-    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    ArkUI_NodeHandle styleButton = nodeAPI->createNode(ARKUI_NODE_BUTTON);
+    ArkUI_NodeHandle styleButton = nullptr;
     int32_t settingUIStatus = 1;
     EXPECT_EQ(OH_ArkUI_AddSupportedUIStates(
         styleButton, settingUIStatus, nullptr, false, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -9222,6 +10007,43 @@ HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest011, TestSize.Level1)
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE);
     ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_ON_CLICK);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NODE_UNSUPPORTED_EVENT_TYPE);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonEventTest012
+ * @tc.desc: Test Common event with nullptr callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest012, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_NE(stack, nullptr);
+
+    auto ret = OH_ArkUI_NativeModule_RegisterCommonEvent(stack, NODE_ON_CLICK_EVENT, nullptr, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    nodeAPI->disposeNode(stack);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonEventTest013
+ * @tc.desc: Test UnregisterCommonEvent when common event map does not exist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonEventTest013, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto stack = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(stack, nullptr);
+
+    auto ret = OH_ArkUI_NativeModule_UnregisterCommonEvent(stack, NODE_ON_CLICK_EVENT);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    nodeAPI->disposeNode(stack);
 }
 
 /**
@@ -12278,6 +13100,44 @@ HWTEST_F(NativeNodeTest, NodeModelCommonEventMapTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NodeModelCommonEventMapTest002
+ * @tc.desc: Test NodeModel::MakeCommonEventMap with duplicate event registration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NodeModelCommonEventMapTest002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    node->type = static_cast<int32_t>(ArkUI_NodeType::ARKUI_NODE_TEXT);
+    node->cNode = true;
+    ASSERT_NE(node, nullptr);
+
+    int32_t userDataOne = 1;
+    int32_t userDataTwo = 2;
+    auto eventCallback = [](ArkUI_NodeEvent* event) {};
+
+    bool makeResult = OHOS::Ace::NodeModel::MakeCommonEventMap(
+        node, NODE_ON_CLICK_EVENT, &userDataOne, eventCallback);
+    EXPECT_TRUE(makeResult);
+    makeResult = OHOS::Ace::NodeModel::MakeCommonEventMap(
+        node, NODE_ON_CLICK_EVENT, &userDataTwo, eventCallback);
+    EXPECT_TRUE(makeResult);
+
+    auto* extraData = reinterpret_cast<ExtraData*>(node->extraCommonData);
+    ASSERT_NE(extraData, nullptr);
+    auto extraParam = extraData->eventMap.find(NODE_ON_CLICK_EVENT);
+    ASSERT_NE(extraParam, extraData->eventMap.end());
+    ASSERT_NE(extraParam->second, nullptr);
+    EXPECT_EQ(extraParam->second->userData, &userDataTwo);
+
+    bool clearResult = OHOS::Ace::NodeModel::ClearCommonEventMap(node, NODE_ON_CLICK_EVENT);
+    EXPECT_TRUE(clearResult);
+
+    delete node;
+}
+
+/**
  * @tc.name: NodeModelMarkDirtyTest001
  * @tc.desc: Test NodeModel::MarkDirty with different flags
  * @tc.type: FUNC
@@ -12350,6 +13210,268 @@ HWTEST_F(NativeNodeTest, NodeModelConvertNodeTypeToTagTest001, TestSize.Level1)
     std::string unknownTag = OHOS::Ace::NodeModel::ConvertNodeTypeToTag(
         static_cast<ArkUI_NodeType>(9999));
     EXPECT_EQ(unknownTag, "");
+}
+
+/**
+ * @tc.name: OH_ArkUI_UnregisterSystemColorModeChangeEvent001
+ * @tc.desc: Test OH_ArkUI_UnregisterSystemColorModeChangeEvent with nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_UnregisterSystemColorModeChangeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node nullptr.
+     * @tc.expect: function returns without error.
+     */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NodeHandle node = nullptr;
+
+    /**
+     * @tc.steps: step2. Call function.
+     * @tc.expect: function returns without error.
+     */
+    OH_ArkUI_UnregisterSystemColorModeChangeEvent(node);
+
+    /**
+     * @tc.steps: step3. Verify result.
+     * @tc.expect: function returns without error.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OH_ArkUI_UnregisterSystemColorModeChangeEvent002
+ * @tc.desc: Test OH_ArkUI_UnregisterSystemColorModeChangeEvent with valid node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_UnregisterSystemColorModeChangeEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: function returns without error.
+     */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NodeHandle node = new ArkUI_Node();
+
+    /**
+     * @tc.steps: step2. Call function.
+     * @tc.expect: function returns without error.
+     */
+    OH_ArkUI_UnregisterSystemColorModeChangeEvent(node);
+
+    /**
+     * @tc.steps: step3. Verify result.
+     * @tc.expect: function returns without error.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OH_ArkUI_NodeUtils_GetCurrentPageRootNode002
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetCurrentPageRootNode with nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCurrentPageRootNode002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+
+    EXPECT_EQ(OH_ArkUI_NodeUtils_GetCurrentPageRootNode(nullptr), nullptr);
+}
+
+/**
+ * @tc.name: OH_ArkUI_UnregisterSystemFontStyleChangeEvent001
+ * @tc.desc: Test OH_ArkUI_UnregisterSystemFontStyleChangeEvent with nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_UnregisterSystemFontStyleChangeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node nullptr.
+     * @tc.expect: function returns without error.
+     */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NodeHandle node = nullptr;
+
+    /**
+     * @tc.steps: step2. Call function.
+     * @tc.expect: function returns without error.
+     */
+    OH_ArkUI_UnregisterSystemFontStyleChangeEvent(node);
+
+    /**
+     * @tc.steps: step3. Verify result.
+     * @tc.expect: function returns without error.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OH_ArkUI_UnregisterSystemFontStyleChangeEvent002
+ * @tc.desc: Test OH_ArkUI_UnregisterSystemFontStyleChangeEvent with valid node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_UnregisterSystemFontStyleChangeEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: function returns without error.
+     */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NodeHandle node = new ArkUI_Node();
+
+    /**
+     * @tc.steps: step2. Call function.
+     * @tc.expect: function returns without error.
+     */
+    OH_ArkUI_UnregisterSystemFontStyleChangeEvent(node);
+
+    /**
+     * @tc.steps: step3. Verify result.
+     * @tc.expect: function returns without error.
+     */
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: OH_ArkUI_RegisterDrawCallbackOnNodeHandle003
+ * @tc.desc: Test OH_ArkUI_RegisterDrawCallbackOnNodeHandle with impl nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_RegisterDrawCallbackOnNodeHandle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a node not nullptr.
+     * @tc.expect: result is ERROR_CODE_PARAM_INVALID when impl is nullptr.
+     */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NodeHandle node = new ArkUI_Node();
+    void* userData = nullptr;
+    void (*onDrawCompleted)(void* userData) = nullptr;
+
+    /**
+     * @tc.steps: step2. Call function with valid node.
+     * @tc.expect: result is ERROR_CODE_NO_ERROR when impl is valid.
+     */
+    int32_t result = OH_ArkUI_RegisterDrawCallbackOnNodeHandle(node, userData, onDrawCompleted);
+
+    /**
+     * @tc.steps: step3. Verify result.
+     * @tc.expect: result is ERROR_CODE_NO_ERROR.
+     */
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonVisibleAreaApproximateChangeEventTest001
+ * @tc.desc: Test OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent with invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonVisibleAreaApproximateChangeEventTest001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    float ratios[] = { 0.5f };
+
+    auto result = OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(
+        nullptr, ratios, 1, 0.0f, nullptr, CommonVisibleAreaApproximateChangeEventCallback);
+
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonVisibleAreaApproximateChangeEventTest002
+ * @tc.desc: Test OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent with invalid ratio.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonVisibleAreaApproximateChangeEventTest002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+    float ratios[] = { -0.1f };
+
+    auto result = OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(
+        node, ratios, 1, 16.0f, nullptr, CommonVisibleAreaApproximateChangeEventCallback);
+
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    (void)OHOS::Ace::NodeModel::ClearCommonEventMap(node, NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT);
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: NativeNodeRegisterCommonVisibleAreaApproximateChangeEventTest003
+ * @tc.desc: Test register and unregister common visible area approximate change event successfully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRegisterCommonVisibleAreaApproximateChangeEventTest003, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+    float ratios[] = { 0.5f };
+
+    auto registerResult = OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(
+        node, ratios, 1, 16.0f, nullptr, CommonVisibleAreaApproximateChangeEventCallback);
+    auto unregisterResult = OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(node);
+
+    EXPECT_EQ(registerResult, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(unregisterResult, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: NativeNodeUnregisterCommonVisibleAreaApproximateChangeEventTest001
+ * @tc.desc: Test OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent with nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeUnregisterCommonVisibleAreaApproximateChangeEventTest001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+
+    auto result = OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(nullptr);
+
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeUnregisterCommonVisibleAreaApproximateChangeEventTest002
+ * @tc.desc: Test OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent without registration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeUnregisterCommonVisibleAreaApproximateChangeEventTest002, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+
+    auto result = OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(node);
+
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    nodeAPI->disposeNode(node);
+}
+
+/**
+ * @tc.name: NativeNodeContentTransitionEffectCreateTest001
+ * @tc.desc: Test OH_ArkUI_ContentTransitionEffect_Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeContentTransitionEffectCreateTest001, TestSize.Level1)
+{
+    constexpr int32_t type = 3;
+
+    auto* effect = OH_ArkUI_ContentTransitionEffect_Create(type);
+
+    ASSERT_NE(effect, nullptr);
+    EXPECT_EQ(effect->contentTransitionType, type);
+    delete effect;
 }
 
 } // namespace OHOS::Ace

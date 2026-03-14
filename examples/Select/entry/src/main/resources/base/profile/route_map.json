@@ -547,7 +547,7 @@
     },
     {
       "name": "SliderPrefixSuffix",
-      "pageSourceFile": "src/main/ets/pages/components/slider/SliderPrefixSuffix.ets",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderPrefixSuffix.ets",
       "buildFunction": "SliderPrefixSuffixBuilder"
     },
     {

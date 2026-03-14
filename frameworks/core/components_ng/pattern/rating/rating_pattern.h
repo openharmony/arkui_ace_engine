@@ -186,6 +186,7 @@ private:
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
     bool IsRatingImageReady(uint32_t imageStateCode);
+    void ReportChangeEvent(const std::string& index);
 
     std::optional<RatingMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

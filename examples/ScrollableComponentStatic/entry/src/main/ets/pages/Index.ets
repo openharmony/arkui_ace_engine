@@ -16,95 +16,85 @@
 
 import {
   Entry,
-  Text,
-  Column,
   Component,
-  Button,
-  ClickEvent,
-  Scroll,
-  ListDividerOptions,
-  RectResult,
+  Column,
   List,
   ListItem,
-  ListItemGroup,
   ForEach,
+  Text,
   ListScroller,
+  ListDividerOptions,
+  TextAlign,
+  ListItemAlign,
   EdgeEffect,
-  GridItem,
-  Grid,
-  EffectEdge,
-  ScrollAlign,
-  SwipeActionOptions,
-  LengthConstrain,
-  ListItemGroupStyle,
-  ListItemStyle,
-  Color,
-  Row,
-  ClickEvent,
-  SwipeEdgeEffect,
-  CustomBuilder,
-  Builder,
-  SwipeActionItem,
-  ScrollState,
-  OnScrollCallback,
-  OnWillScrollCallback,
-  FlexAlign,
-  SwipeActionState,
-  $$,
-  ScrollResult,
-  ScrollSource,
-  OnScrollVisibleContentChangeCallback,
-  VisibleListContentInfo,
-  StickyStyle,
+  BarState
 } from '@ohos.arkui.component'
 import { State } from '@ohos.arkui.stateManagement'
-import hilog from '@ohos.hilog'
+
+class PageInfo {
+  public title: string
+  public url: string
+
+  constructor(title: string, url: string) {
+    this.title = title
+    this.url = url
+  }
+}
 
 @Entry
 @Component
-struct MyStateSample {
-  @State selectedFlag: boolean = false;
-  @State numbers: Array<string> = new Array<string>();
-  private listScroller: ListScroller = new ListScroller();
-  private message: string = 'changeSelected';
+struct Index {
+  @State routers: Array<PageInfo> = []
+  private listScroller: ListScroller = new ListScroller()
 
-  aboutToAppear()
-  {
-    for (let i = 0; i < 10; i++) {
-      this.numbers.push(i.toString())
-    }
+  aboutToAppear(): void {
+    this.routers = []
+    this.routers.push(new PageInfo('WaterFlow', 'pages/waterflow/WaterFlowMainPage'))
+    this.routers.push(new PageInfo('Grid', 'pages/grid/GridMainPage'))
+    this.routers.push(new PageInfo('Scroll', 'pages/scroll/ScrollMainPage'))
+    this.routers.push(new PageInfo('List', 'pages/list/ListMainPage'))
+    this.routers.push(new PageInfo('Refresh', 'pages/refresh/RefreshMainPage'))
+    this.routers.push(new PageInfo('LazyVGrid', 'pages/lazyvgrid/LazyVGridMainPage'))
   }
 
   build() {
     Column(undefined) {
-      Text(`selected: ${this.selectedFlag}`)
+      Text('ScrollableComponentStatic')
         .fontSize(20)
-      Button(this.message)
-        .backgroundColor('#FFFF00FF')
-        .onClick((e: ClickEvent) => {
-          this.selectedFlag = this.selectedFlag === true ? false : true
-        })
-      List({ space: 10, initialIndex: 11, scroller: this.listScroller }) {
-        ForEach(this.numbers, (day: string, index: number) => {
+        .margin({ top: 12, bottom: 8 })
+      List({ scroller: this.listScroller }) {
+        ForEach(this.routers, (item: PageInfo) => {
           ListItem() {
-            Text(day)
-              .fontSize(20)
-              .backgroundColor("#fff3bef3")
-              .height(100)
+            Text(item.title)
               .width('100%')
-              .borderRadius(20)
+              .height(88)
+              .fontSize(16)
+              .textAlign(TextAlign.Center)
+              .borderRadius(10)
+              .backgroundColor(0xFFFFFF)
+              .onClick(() => {
+                this.getUIContext().getRouter().pushUrl({ url: item.url })
+              })
           }
-          .selectable(true)
-          .selected($$(this.selectedFlag))
-          .onSelect((isSelected: boolean) => {
-            console.info(`listTest item: ${index} isSelected: ${this.selectedFlag}`)
-          })
-        })
+          .width('80%')
+        }, (item: PageInfo) => item.url)
       }
-      .height(600)
-      .width(400)
-      .backgroundColor(Color.Gray)
-      .multiSelectable(true)
+      .divider({
+        strokeWidth: 2,
+        color: 0xFFFFFF,
+        startMargin: 20,
+        endMargin: 20
+      } as ListDividerOptions)
+      .width('100%')
+      .layoutWeight(1)
+      .edgeEffect(EdgeEffect.Spring)
+      .alignListItem(ListItemAlign.Center)
+      .scrollBar(BarState.On)
+      .scrollBarWidth(20)
     }
+    .width('100%')
+    .height('100%')
+    .backgroundColor(0xDCDCDC)
+    .padding({ top: 5 })
   }
 }

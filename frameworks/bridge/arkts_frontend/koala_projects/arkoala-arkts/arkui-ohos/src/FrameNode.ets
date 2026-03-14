@@ -17,9 +17,8 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIEventHelper } from 'arkui/component/idlize';
 import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
-import {
-    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk, InteropNativeModule
-} from "@koalaui/interop"
+import { Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk,
+    InteropNativeModule, SerializerBase } from "@koalaui/interop"
 import { finalizerRegister, int32 } from "@koalaui/common"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode } from "./RenderNode"
@@ -183,8 +182,7 @@ export type UIStatesChangeHandler = (node: FrameNode, currentUIStates: int) => v
 export class FrameNodeFinalizationRegisterProxy {
     constructor() { }
     public static instance_: FrameNodeFinalizationRegisterProxy = new FrameNodeFinalizationRegisterProxy();
-    public static ElementIdToOwningFrameNode_ = new Map<number, FrameNode>();
-
+    public static ElementIdToOwningFrameNode_ = new containers.ConcurrentHashMap<number, FrameNode>();
 }
 
 export class FrameNodeInternal {
@@ -225,7 +223,7 @@ export class FrameNode implements MaterializedBase {
     protected _gestureEvent: UIGestureEvent | undefined = undefined;
     public nodeType_?: string | undefined = undefined;
     private nodeAdapterRef_ ?: NodeAdapter;
-    private supportMultiThread: boolean = false;
+    protected _supportMultiThread: boolean = false;
 
     getType(): string {
         return 'CustomFrameNode';
@@ -259,7 +257,7 @@ export class FrameNode implements MaterializedBase {
             this.uiContext = uiContext as UIContextImpl;
             this.instanceId_ = this.uiContext!.instanceId_;
             this.nodeType_ = type;
-            this.supportMultiThread = options?.supportMultiThread ?? false;
+            this._supportMultiThread = options?.supportMultiThread ?? false;
             if (type === 'ProxyFrameNode') {
                 if (ptr) {
                     this.peer = new Finalizable(ptr, FrameNode.getFinalizer());
@@ -277,12 +275,12 @@ export class FrameNode implements MaterializedBase {
             const isCustomFrameNode = type === undefined || type === 'CustomFrameNode';
             if (isCustomFrameNode) {
                 this.renderNode_ = new RenderNode('CustomFrameNode')
-                const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode(this.supportMultiThread)
+                const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode(this._supportMultiThread)
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
                 this.nodePtr_ = this.peer?.ptr
                 ArkUIAniModule._SetCustomCallbackWithCheck(this!.peer!.ptr, this);  
             } else {
-                const retval = ptr ? ptr : FrameNodeExtender.createTypedFrameNode(type as string, this.supportMultiThread);
+                const retval = ptr ? ptr : FrameNodeExtender.createTypedFrameNode(type as string, this._supportMultiThread);
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
                 this.nodePtr_ = this.peer?.ptr
             }
@@ -659,35 +657,35 @@ export class FrameNode implements MaterializedBase {
     public isTransferred(): boolean {
         return false;
     }
-    adoptChild(child: FrameNode): void{
-    if (child === undefined || child === null) {
-        const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
-        throw new BusinessError(100025, error);
+    adoptChild(child: FrameNode): void {
+        if (child === undefined || child === null) {
+            const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
+            throw new BusinessError(100025, error);
+        }
+        if (this.isDisposed()) {
+            const error = Error('The current node has been disposed.');
+            throw new BusinessError(100026, error);
+        }
+        if (!this.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+            const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
+            throw new BusinessError(100025, error);
+        }
+        if (child.isDisposed()) {
+            const error = Error("The parameter 'child' is invalid: the child node has been disposed.");
+            throw new BusinessError(100025, error);
+        }
+        const child_casted = child as (FrameNode);
+        let result = FrameNodeExtender.adoptChild(this, child_casted);
+        let errorInfo = errorMap_.get(result);
+        if (errorInfo !== undefined) {
+            const error = Error(errorInfo);
+            throw new BusinessError(100025, error);
+        }
     }
-    if (this.isDisposed()) {
-        const error = Error('The current node has been disposed.');
-        throw new BusinessError(100026, error);
-    }
-    if (!this.isModifiable()) {
-        const error = Error('The FrameNode is not modifiable.');
-        throw new BusinessError(100021, error);
-    }
-    if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
-        const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
-        throw new BusinessError(100025, error);
-    }
-    if (child.isDisposed()) {
-        const error = Error("The parameter 'child' is invalid: the child node has been disposed.");
-        throw new BusinessError(100025, error);
-    }
-    const child_casted = child as (FrameNode);
-    let result = FrameNodeExtender.adoptChild(this, child_casted);
-    let errorInfo = errorMap_.get(result);
-    if (errorInfo !== undefined) {
-        const error = Error(errorInfo);
-        throw new BusinessError(100025, error);
-    }
-  }
     removeAdoptedChild(child: FrameNode): void {
     if (child === undefined || child === null) {
         const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
@@ -798,6 +796,9 @@ export class FrameNode implements MaterializedBase {
             let peer = new ArkFrameNodePeer(retval, this._nodeId!.toInt(), "FrameNode", 0);
             baseNode.setPeer(peer);
             this._commonAttribute = baseNode as CommonAttribute;
+        }
+        if (this._supportMultiThread) {
+            SerializerBase.setMultithreadMode();
         }
         return this._commonAttribute!;
     }
@@ -1102,6 +1103,9 @@ abstract class TypedFrameNode<T extends Object> extends FrameNode {
         ArkUIAniModule._CheckThreadValid(false, this!.peer!.ptr);
         if (this.attribute_ === undefined) {
             this.attribute_ = this.attrCreator_(this, ModifierType.FRAME_NODE);
+        }
+        if (this._supportMultiThread) {
+            SerializerBase.setMultithreadMode();
         }
         return this.attribute_!;
     }

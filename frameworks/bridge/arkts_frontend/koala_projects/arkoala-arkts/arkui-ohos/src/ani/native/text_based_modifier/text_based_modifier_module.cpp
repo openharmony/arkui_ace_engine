@@ -22,6 +22,9 @@
 #include "load.h"
 #include "log/log.h"
 #include "utils/ani_utils.h"
+#include "core/interfaces/native/implementation/text_paragraph_peer.h"
+#include "core/interfaces/native/utility/peer_utils.h"
+#include "ani/include/ani_paragraph.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -164,4 +167,25 @@ ani_long ExtractorsToInputMethodExtraConfigPtr(ani_env* env, [[maybe_unused]] an
 #endif
 }
 
+ani_long ExtractorsToTextParagraphPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object textParagraphObj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return 0;
+    }
+    auto textParagraphPtr = modifier->getTextBasedAniModifier()->toTextParagraphPeer(
+        reinterpret_cast<void*>(textParagraphObj));
+    CHECK_NULL_RETURN(textParagraphPtr, 0);
+    return reinterpret_cast<ani_long>(textParagraphPtr);
+}
+
+ani_object ExtractorsFromTextParagraphPtr(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_long pointer)
+{
+    auto textParagraphPeer = reinterpret_cast<text_ParagraphPeer*>(pointer);
+    CHECK_NULL_RETURN(textParagraphPeer, nullptr);
+    CHECK_NULL_RETURN(textParagraphPeer->paragraph, nullptr);
+    auto result = OHOS::Text::ANI::AniParagraph::SetTypography(env, textParagraphPeer->paragraph.release());
+    NG::PeerUtils::DestroyPeer<text_ParagraphPeer>(textParagraphPeer);
+    return result;
+}
 } // namespace OHOS::Ace::Ani

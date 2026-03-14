@@ -160,6 +160,18 @@ class ModifierUtils {
     }
     getUINativeModule().frameNode.registerFrameCallback(frameCallback);
   }
+  static isInstanceOf(instance, componentName) {
+    if (!instance || !instance.constructor || !instance.constructor.name || !componentName) {
+      return false;
+    }
+    let changedName = componentName;
+    if (componentName === 'UIPickerComponent') {
+      changedName = 'ContainerPicker';
+    }
+    const instanceName = instance.constructor.name;
+    const expectedName = `Ark${changedName}Component`;
+    return instanceName === expectedName;
+  }
 }
 ModifierUtils.dirtyComponentSet = new Set();
 ModifierUtils.dirtyFlag = false;

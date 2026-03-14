@@ -15120,6 +15120,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Array_text_Paragraph GetParagraphsImpl(Ark_StyledString styledString,
+                                           const Opt_TextLayoutOptions* options)
+    {
+        return {};
+    }
     } // GlobalScope_ohos_measure_utilsAccessor
     namespace GlobalScopeUicontextFontScaleAccessor {
     Ark_Boolean IsFollowingSystemFontScaleImpl()
@@ -16167,7 +16172,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void UnbindImpl()
     {
     }
-    } // MagnifierAccessor
+    } // MagnifierExtenderAccessor
     namespace Matrix2DAccessor {
     void DestroyPeerImpl(Ark_Matrix2D peer)
     {
@@ -22576,6 +22581,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor GlobalScope_ohos_measure_utilsAccessorImpl {
             GlobalScope_ohos_measure_utilsAccessor::MeasureTextImpl,
             GlobalScope_ohos_measure_utilsAccessor::MeasureTextSizeImpl,
+            GlobalScope_ohos_measure_utilsAccessor::GetParagraphsImpl,
         };
         return &GlobalScope_ohos_measure_utilsAccessorImpl;
     }

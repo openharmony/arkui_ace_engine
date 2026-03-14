@@ -200,6 +200,19 @@ class ModifierUtils {
     }
     getUINativeModule().frameNode.registerFrameCallback(frameCallback);
   }
+  
+  static isInstanceOf<T extends CommonMethod<T>>(instance: T, componentName: string): boolean {
+    if (!instance || !instance.constructor || !instance.constructor.name || !componentName) {
+      return false;
+    }
+    let changedName = componentName;
+    if (componentName === 'UIPickerComponent') {
+      changedName = 'ContainerPicker';
+    }
+    const instanceName = instance.constructor.name;
+    const expectedName = `Ark${changedName}Component`;
+    return instanceName === expectedName;
+  }
 }
 
 class ModifierMap {

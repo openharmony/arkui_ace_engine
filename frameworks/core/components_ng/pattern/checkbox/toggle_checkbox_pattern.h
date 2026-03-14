@@ -38,6 +38,29 @@ public:
         return MakeRefPtr<ToggleCheckBoxAccessibilityProperty>();
     }
 
+    static bool ParseCommand(const std::string& command, bool& isOn)
+    {
+        auto json = JsonUtil::ParseJsonString(command);
+        CHECK_NE_RETURN(json->IsObject(), true, false);
+        auto cmdType = json->GetString("cmd");
+        CHECK_NE_RETURN(cmdType, "SetToggleIsOn", false);
+        auto paramJson = json->GetValue("params");
+        CHECK_NE_RETURN(paramJson->IsObject(), true, false);
+        auto isOnJson = paramJson->GetValue("isOn");
+        CHECK_NE_RETURN(isOnJson->IsBool(), true, false);
+        isOn = isOnJson->GetBool();
+        return true;
+    }
+
+    int32_t OnInjectionEvent(const std::string& command) override
+    {
+        bool isOn = false;
+        auto ret = ParseCommand(command, isOn);
+        CHECK_EQUAL_RETURN(ret, false, RET_FAILED);
+        SetCheckBoxSelect(isOn);
+        return RET_SUCCESS;
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ToggleCheckBoxPattern);
 };

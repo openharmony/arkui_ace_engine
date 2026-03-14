@@ -16,6 +16,7 @@
 
 #include <ani.h>
 #include <ani_signature_builder.h>
+#include "ets_ani_expo.h"
 #include "interfaces/inner_api/ace/constants.h"
 #include "ui/base/utils/utils.h"
 #include "base/utils/system_properties.h"
@@ -158,6 +159,7 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
         LOGE("[%{public}s] Cannot load main class %{public}s, status: %{public}d, \nerrorMsg: %{public}s, \nerrorName: "
              "%{public}s, \nerrorStack: %{public}s",
             __func__, KOALA_APP_INFO.className, status, errorMsg.c_str(), errorName.c_str(), errorStack.c_str());
+        ark::ets::ETSAni::HandleUncaughtException(aniError);
         return;
     }
 

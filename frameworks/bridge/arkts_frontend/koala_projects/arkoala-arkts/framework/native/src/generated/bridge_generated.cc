@@ -33889,6 +33889,25 @@ KInteropReturnBuffer impl_GlobalScope_ohos_measure_utils_measureTextSize(KSerial
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_2(GlobalScope_ohos_measure_utils_measureTextSize, KInteropReturnBuffer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_GlobalScope_ohos_measure_utils_getParagraphs(Ark_NativePointer styledString, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_TextLayoutOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = TextLayoutOptions_serializer::read(thisDeserializer);
+        }
+        Opt_TextLayoutOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        const auto &retValue = GetAccessors()->getGlobalScope_ohos_measure_utilsAccessor()->getParagraphs(static_cast<Ark_StyledString>(styledString), static_cast<Opt_TextLayoutOptions*>(&optionsValueTemp));
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_text_Paragraph retValueTmpElement = retValue.array[retValueCounterI];
+            text_Paragraph_serializer::write(_retSerializer, retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_3(GlobalScope_ohos_measure_utils_getParagraphs, KInteropReturnBuffer, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_Boolean impl_GlobalScopeUicontextFontScale_isFollowingSystemFontScale() {
         return GetAccessors()->getGlobalScopeUicontextFontScaleAccessor()->isFollowingSystemFontScale();
 }
@@ -35557,10 +35576,11 @@ KOALA_INTEROP_V1(MagnifierExtender_bind, KStringPtr)
 void impl_MagnifierExtender_show(KDouble x, KDouble y) {
         GetAccessors()->getMagnifierExtenderAccessor()->show(x, y);
 }
-KOALA_INTEROP_V2(MagnifierExtender_show, KDouble, KDouble)
+KOALA_INTEROP_DIRECT_V2(MagnifierExtender_show, KDouble, KDouble)
 void impl_MagnifierExtender_unbind() {
         GetAccessors()->getMagnifierExtenderAccessor()->unbind();
 }
+KOALA_INTEROP_DIRECT_V0(MagnifierExtender_unbind)
 Ark_NativePointer impl_Matrix2D_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto unitValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());

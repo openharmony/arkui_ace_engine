@@ -98,6 +98,7 @@ interface GlobalScope_ohos_font {
 interface GlobalScope_ohos_measure_utils {
     static f64 measureText(MeasureOptions options);
     static SizeOptions measureTextSize(MeasureOptions options);
+    static sequence<text.Paragraph> getParagraphs(StyledString styledString , optional TextLayoutOptions options);
 };
 
 /**

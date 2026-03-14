@@ -50,6 +50,7 @@ import { ErrorCallback } from '@ohos.base';
 import { int32 } from '@koalaui/compat';
 import { SaveButtonCallback, PasteButtonCallback } from '#generated';
 import { InputMethodExtraConfig } from '@ohos.inputMethod.ExtraConfig'
+import { default as text } from '@ohos.graphics.text'
 
 export class ArkUIAniModule {
     static {
@@ -61,6 +62,8 @@ export class ArkUIAniModule {
     native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
     native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
     native static _Extractors_ToInputMethodExtraConfigPtr(config: InputMethodExtraConfig): KPointer;
+    native static _Extractors_ToTextParagraphPtr(paragraph: text.Paragraph): KPointer;
+    native static _Extractors_FromTextParagraphPtr(ptr: KPointer): text.Paragraph;
     native static _Extractors_ToRectShapePtr(value: RectShape): KPointer;
     native static _Extractors_FromRectShapePtr(ptr: KPointer): RectShape;
     native static _Extractors_ToCircleShapePtr(value: CircleShape): KPointer;
