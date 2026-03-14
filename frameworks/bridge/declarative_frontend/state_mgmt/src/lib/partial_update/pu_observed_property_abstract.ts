@@ -71,7 +71,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   public staticWatchFunc?: Object;
   public _setInteropValueForStaticState?: setValue<T>;
-  public _notifyInteropFireChange?: () => void;
 
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
     super(subscriber, viewName);
@@ -371,10 +370,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       }
     });
     stateMgmtProfiler.end();
-    // for interop
-    if (InteropConfigureStateMgmt.needsInterop() && this._notifyInteropFireChange) {
-      this._notifyInteropFireChange();
-    }
   }
 
 

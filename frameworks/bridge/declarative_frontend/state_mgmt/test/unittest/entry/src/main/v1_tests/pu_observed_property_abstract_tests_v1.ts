@@ -56,7 +56,6 @@ declare class ObservedPropertyAbstractPU<T> {
   setProxy(proxy: Object): void;
   staticWatchFunc?: Object;
   _setInteropValueForStaticState?: any;
-  _notifyInteropFireChange?: () => void;
   
   // Type checking
   checkIsSupportedValue(value: any): boolean;

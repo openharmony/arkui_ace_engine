@@ -15,9 +15,18 @@
 
 class InteropExtractorModule {
     static getInteropObservedObject<T extends Object>(newValue: T, owningProperty: ObservedPropertyPU<T>): T {
-        if ((newValue instanceof Array || newValue instanceof Set || newValue instanceof Map || newValue instanceof Date) &&
-            !('addWatchSubscriber' in newValue) && (typeof InteropExtractorModule.makeObserved !== undefined && typeof InteropExtractorModule.makeObserved === 'function')) {
-            newValue = InteropExtractorModule.makeObserved(newValue) as T;
+        const isStaBuiltin =
+          globalThis.Panda.STValue.isSTArray(newValue) ||
+          globalThis.Panda.STValue.isSTSet(newValue) ||
+          globalThis.Panda.STValue.isSTMap(newValue) ||
+          newValue instanceof Date;
+        if (
+          isStaBuiltin &&
+          !('addWatchSubscriber' in newValue) &&
+          typeof InteropExtractorModule.makeObserved !== undefined &&
+          typeof InteropExtractorModule.makeObserved === 'function'
+        ) {
+          newValue = InteropExtractorModule.makeObserved(newValue) as T;
         }
         if ('addWatchSubscriber' in newValue && typeof (newValue as any).addWatchSubscriber === 'function') {
             const callback = () => {
