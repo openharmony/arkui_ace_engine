@@ -892,7 +892,9 @@ class PersistenceV2Impl extends StorageHelper {
       key = 'unknown';
     }
     if (error instanceof BusinessError) {
-      throw error;
+      stateMgmtConsole.frequentApplicationError(`For PersistenceV2 '${key}' key has error, ` +
+        `error code: ${error?.code}, message: ${error?.message}`);
+      return;
     }
     throw new Error(`For '${key}' key: ` + error);
   }
