@@ -13474,4 +13474,222 @@ HWTEST_F(NativeNodeTest, NativeNodeContentTransitionEffectCreateTest001, TestSiz
     delete effect;
 }
 
+/**
+ * @tc.name: DrawContextTest001
+ * @tc.desc: Test OH_ArkUI_DrawContext_GetCanvas
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, DrawContextTest001, TestSize.Level1)
+{
+    auto* context = new ArkUI_DrawContext();
+    context->canvas = reinterpret_cast<void*>(12345);
+    
+    auto result = OH_ArkUI_DrawContext_GetCanvas(context);
+    EXPECT_EQ(result, reinterpret_cast<void*>(12345));
+    
+    auto nullResult = OH_ArkUI_DrawContext_GetCanvas(nullptr);
+    EXPECT_EQ(nullResult, nullptr);
+    
+    delete context;
+}
+
+/**
+ * @tc.name: DrawContextTest002
+ * @tc.desc: Test OH_ArkUI_DrawContext_GetSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, DrawContextTest002, TestSize.Level1)
+{
+    auto* context = new ArkUI_DrawContext();
+    context->width = 100;
+    context->height = 200;
+    
+    auto result = OH_ArkUI_DrawContext_GetSize(context);
+    EXPECT_EQ(result.width, 100);
+    EXPECT_EQ(result.height, 200);
+    
+    auto nullResult = OH_ArkUI_DrawContext_GetSize(nullptr);
+    EXPECT_EQ(nullResult.width, 0);
+    EXPECT_EQ(nullResult.height, 0);
+    
+    delete context;
+}
+
+/**
+ * @tc.name: SwiperIndicatorCreate001
+ * @tc.desc: Test OH_ArkUI_SwiperIndicator_Create with valid type
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperIndicatorCreate001, TestSize.Level1)
+{
+    auto* indicator = OH_ArkUI_SwiperIndicator_Create(ARKUI_SWIPER_INDICATOR_TYPE_DOT);
+    ASSERT_NE(indicator, nullptr);
+    EXPECT_EQ(indicator->type, ARKUI_SWIPER_INDICATOR_TYPE_DOT);
+    OH_ArkUI_SwiperIndicator_Dispose(indicator);
+}
+
+/**
+ * @tc.name: SwiperIndicatorCreate002
+ * @tc.desc: Test OH_ArkUI_SwiperIndicator_Create with invalid type
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperIndicatorCreate002, TestSize.Level1)
+{
+    auto* indicator = OH_ArkUI_SwiperIndicator_Create(ARKUI_SWIPER_INDICATOR_TYPE_DIGIT);
+    EXPECT_EQ(indicator, nullptr);
+}
+
+/**
+ * @tc.name: SwiperIndicatorSetGet001
+ * @tc.desc: Test OH_ArkUI_SwiperIndicator setter and getter functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperIndicatorSetGet001, TestSize.Level1)
+{
+    auto* indicator = OH_ArkUI_SwiperIndicator_Create(ARKUI_SWIPER_INDICATOR_TYPE_DOT);
+    ASSERT_NE(indicator, nullptr);
+    
+    OH_ArkUI_SwiperIndicator_SetStartPosition(indicator, 10.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetStartPosition(indicator), 10.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetStartPosition(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperIndicator_SetTopPosition(indicator, 20.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetTopPosition(indicator), 20.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetTopPosition(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperIndicator_SetEndPosition(indicator, 30.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetEndPosition(indicator), 30.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetEndPosition(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperIndicator_SetBottomPosition(indicator, 40.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetBottomPosition(indicator), 40.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetBottomPosition(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperIndicator_Dispose(indicator);
+}
+
+/**
+ * @tc.name: SwiperIndicatorSetGet002
+ * @tc.desc: Test OH_ArkUI_SwiperIndicator item size functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperIndicatorSetGet002, TestSize.Level1)
+{
+    auto* indicator = OH_ArkUI_SwiperIndicator_Create(ARKUI_SWIPER_INDICATOR_TYPE_DOT);
+    ASSERT_NE(indicator, nullptr);
+    
+    OH_ArkUI_SwiperIndicator_SetItemWidth(indicator, 5.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetItemWidth(indicator), 5.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetItemWidth(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperIndicator_SetItemHeight(indicator, 6.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetItemHeight(indicator), 6.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetItemHeight(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperIndicator_SetSelectedItemWidth(indicator, 7.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetSelectedItemWidth(indicator), 7.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetSelectedItemWidth(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperIndicator_SetSelectedItemHeight(indicator, 8.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetSelectedItemHeight(indicator), 8.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperIndicator_GetSelectedItemHeight(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperIndicator_Dispose(indicator);
+}
+
+/**
+ * @tc.name: SwiperIndicatorSetGet003
+ * @tc.desc: Test OH_ArkUI_SwiperIndicator mask and color functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperIndicatorSetGet003, TestSize.Level1)
+{
+    auto* indicator = OH_ArkUI_SwiperIndicator_Create(ARKUI_SWIPER_INDICATOR_TYPE_DOT);
+    ASSERT_NE(indicator, nullptr);
+    
+    OH_ArkUI_SwiperIndicator_SetMask(indicator, 1);
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetMask(indicator), 1);
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetMask(nullptr), 0);
+    
+    OH_ArkUI_SwiperIndicator_SetColor(indicator, 0xFF00FF00);
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetColor(indicator), 0xFF00FF00);
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetColor(nullptr), 0);
+    
+    OH_ArkUI_SwiperIndicator_SetSelectedColor(indicator, 0xFFFF0000);
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetSelectedColor(indicator), 0xFFFF0000);
+    EXPECT_EQ(OH_ArkUI_SwiperIndicator_GetSelectedColor(nullptr), 0);
+    
+    OH_ArkUI_SwiperIndicator_Dispose(indicator);
+}
+
+/**
+ * @tc.name: SwiperDigitIndicatorCreate001
+ * @tc.desc: Test OH_ArkUI_SwiperDigitIndicator_Create
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperDigitIndicatorCreate001, TestSize.Level1)
+{
+    auto* indicator = OH_ArkUI_SwiperDigitIndicator_Create();
+    ASSERT_NE(indicator, nullptr);
+    EXPECT_EQ(indicator->type, ARKUI_SWIPER_INDICATOR_TYPE_DIGIT);
+    OH_ArkUI_SwiperDigitIndicator_Destroy(indicator);
+}
+
+/**
+ * @tc.name: SwiperDigitIndicatorSetGet001
+ * @tc.desc: Test OH_ArkUI_SwiperDigitIndicator setter and getter functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperDigitIndicatorSetGet001, TestSize.Level1)
+{
+    auto* indicator = OH_ArkUI_SwiperDigitIndicator_Create();
+    ASSERT_NE(indicator, nullptr);
+    
+    OH_ArkUI_SwiperDigitIndicator_SetStartPosition(indicator, 10.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetStartPosition(indicator), 10.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetStartPosition(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperDigitIndicator_SetTopPosition(indicator, 20.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetTopPosition(indicator), 20.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetTopPosition(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperDigitIndicator_SetEndPosition(indicator, 30.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetEndPosition(indicator), 30.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetEndPosition(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperDigitIndicator_SetBottomPosition(indicator, 40.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetBottomPosition(indicator), 40.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetBottomPosition(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperDigitIndicator_Destroy(indicator);
+}
+
+/**
+ * @tc.name: SwiperDigitIndicatorSetGet002
+ * @tc.desc: Test OH_ArkUI_SwiperDigitIndicator font functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, SwiperDigitIndicatorSetGet002, TestSize.Level1)
+{
+    auto* indicator = OH_ArkUI_SwiperDigitIndicator_Create();
+    ASSERT_NE(indicator, nullptr);
+    
+    OH_ArkUI_SwiperDigitIndicator_SetFontColor(indicator, 0xFF00FF00);
+    EXPECT_EQ(OH_ArkUI_SwiperDigitIndicator_GetFontColor(indicator), 0xFF00FF00);
+    EXPECT_EQ(OH_ArkUI_SwiperDigitIndicator_GetFontColor(nullptr), 0);
+    
+    OH_ArkUI_SwiperDigitIndicator_SetSelectedFontColor(indicator, 0xFFFF0000);
+    EXPECT_EQ(OH_ArkUI_SwiperDigitIndicator_GetSelectedFontColor(indicator), 0xFFFF0000);
+    EXPECT_EQ(OH_ArkUI_SwiperDigitIndicator_GetSelectedFontColor(nullptr), 0);
+    
+    OH_ArkUI_SwiperDigitIndicator_SetFontSize(indicator, 16.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetFontSize(indicator), 16.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetFontSize(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperDigitIndicator_SetSelectedFontSize(indicator, 18.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetSelectedFontSize(indicator), 18.0f);
+    EXPECT_FLOAT_EQ(OH_ArkUI_SwiperDigitIndicator_GetSelectedFontSize(nullptr), 0.0f);
+    
+    OH_ArkUI_SwiperDigitIndicator_Destroy(indicator);
+}
 } // namespace OHOS::Ace
