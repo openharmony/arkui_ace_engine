@@ -1907,4 +1907,38 @@ HWTEST_F(ListAttrTestNg, FadingEdgeProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetBool("fadingEdge"), true);
     EXPECT_EQ(json->GetBool("defaultFadingEdge"), true);
 }
+
+/**
+ * @tc.name: GetListController001
+ * @tc.desc: Test GetListController returns existing controller without replacing positionController_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, GetListController001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    auto controller = pattern_->positionController_;
+    EXPECT_NE(controller, nullptr);
+
+    auto fetched = ListModelNG::GetOrCreateController(AceType::RawPtr(frameNode_));
+    EXPECT_NE(fetched, nullptr);
+    EXPECT_EQ(fetched, controller);
+    EXPECT_EQ(pattern_->positionController_, controller);
+}
+
+/**
+ * @tc.name: SetListScrollBarProxy001
+ * @tc.desc: Test SetScrollBarProxy pushes proxy to list pattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, SetListScrollBarProxy001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    auto proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    pattern_->SetScrollBarProxy(proxy);
+    EXPECT_EQ(pattern_->scrollBarProxy_, proxy);
+}
 } // namespace OHOS::Ace::NG
