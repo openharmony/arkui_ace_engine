@@ -77,6 +77,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+constexpr uint32_t FORM_MAX_DURATION = 2000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t INVALID_ID = -1;
 constexpr int32_t INDEX_ONE = 1;
@@ -314,7 +315,7 @@ bool CheckIfSetFormAnimationDuration(const RefPtr<PipelineBase>& pipelineContext
 {
     CHECK_NULL_RETURN(pipelineContext, false);
     return pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRenderExceptDynamicComponent() &&
-        option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
+        option.GetDuration() > (FORM_MAX_DURATION - GetFormAnimationTimeInterval(pipelineContext));
 }
 
 std::function<float(float)> ParseCallBackFunction(
@@ -559,8 +560,8 @@ const AnimationOption JSViewContext::CreateAnimation(
 
     // limit animation for ArkTS Form
     if (isForm) {
-        if (duration > static_cast<int32_t>(DEFAULT_DURATION)) {
-            duration = static_cast<int32_t>(DEFAULT_DURATION);
+        if (duration > static_cast<int32_t>(FORM_MAX_DURATION)) {
+            duration = static_cast<int32_t>(FORM_MAX_DURATION);
         }
         if (delay != 0) {
             delay = 0;
@@ -617,9 +618,9 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pipelineContextBase);
     if (pipelineContextBase->IsFormAnimationFinishCallback() &&
         pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
-        GetFormAnimationTimeInterval(pipelineContextBase) > DEFAULT_DURATION) {
+        GetFormAnimationTimeInterval(pipelineContextBase) > FORM_MAX_DURATION) {
         TAG_LOGW(
-            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 2000ms.");
         return;
     }
     if (info[0]->IsNull() || !info[0]->IsObject()) {
@@ -649,10 +650,10 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         CreateAnimation(info.GetExecutionContext(), obj, pipelineContextBase->IsFormRenderExceptDynamicComponent());
     if (pipelineContextBase->IsFormAnimationFinishCallback() &&
         pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
-        option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
-        option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
+        option.GetDuration() > (FORM_MAX_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
+        option.SetDuration(FORM_MAX_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
         TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
-            static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase)));
+            static_cast<long long>(FORM_MAX_DURATION - GetFormAnimationTimeInterval(pipelineContextBase)));
     }
 
     option.SetOnFinishEvent(onFinishEvent);
@@ -740,9 +741,9 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     if (pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRenderExceptDynamicComponent() &&
-        GetFormAnimationTimeInterval(pipelineContext) > DEFAULT_DURATION) {
+        GetFormAnimationTimeInterval(pipelineContext) > FORM_MAX_DURATION) {
         TAG_LOGW(
-            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 2000ms.");
         return;
     }
 
@@ -798,9 +799,9 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                     << ",curve:" << (option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
     AceAsyncTraceBegin(0, traceStreamPtr->str().c_str(), true);
     if (CheckIfSetFormAnimationDuration(pipelineContext, option)) {
-        option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
+        option.SetDuration(FORM_MAX_DURATION - GetFormAnimationTimeInterval(pipelineContext));
         TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
-            static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext)));
+            static_cast<long long>(FORM_MAX_DURATION - GetFormAnimationTimeInterval(pipelineContext)));
     }
     if (SystemProperties::GetRosenBackendEnabled()) {
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
