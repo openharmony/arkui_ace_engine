@@ -357,6 +357,9 @@ void PostEventManager::PostAxisCancelEvent(
     auto lastAxisEvent = eventManager->GetLastAxisEvent();
     falsifyEvent.pointerEvent = lastAxisEvent.pointerEvent;
     falsifyEvent.isFalsifyCancel = true;
+    auto targetFrameNode = AceType::DynamicCast<FrameNode>(targetNode);
+    eventManager->AxisTest(falsifyEvent, targetFrameNode);
+    eventManager->DispatchAxisEventNG(falsifyEvent);
     eventManager->DispatchTouchEvent(falsifyEvent);
     ClearPostInputActions(targetNode, axisEvent.id, PostInputEventType::AXIS);
 }

@@ -477,6 +477,8 @@ private:
         bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     void CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId, int32_t fingerId);
     void CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needAppend);
+    void CleanRefereeBeforeTouchTestForPost(
+        TouchEvent touchPoint, const RefPtr<NG::GestureReferee>& currentReferee);
     void LogTouchTestResultInfo(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);
@@ -564,6 +566,7 @@ private:
     TimeStamp lastEventTime_;
     int64_t lastTouchEventEndTimestamp_ = 0;
     std::unordered_map<int32_t, int32_t> downFingerIds_;
+    std::unordered_map<int32_t, bool> isNewRefereeMap_;
     std::unordered_map<int32_t, int32_t> downTargetDisplayIds_;
     int32_t downEventErrorCnt_ = 0;
     int32_t upEventErrorCnt_ = 0;
