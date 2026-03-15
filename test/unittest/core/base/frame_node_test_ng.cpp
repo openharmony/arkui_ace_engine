@@ -13,13 +13,22 @@
  * limitations under the License.
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
+
 #include "gtest/gtest.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
+
+#include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2991,5 +3000,762 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestRoot001, TestSize.Level1)
     EXPECT_FALSE(isRoot);
     isPendingState = frameNodeTemp2->IsPendingOnMainRenderTree();
     EXPECT_FALSE(isPendingState);
+}
+/**
+ * @tc.name: FrameNodeTestNg313
+ * @tc.desc: Test OnRecycle branch when accessibilityProperty is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg313, TestSize.Level1)
+{
+    constexpr int32_t FRAME_NODE_ID = 313;
+    auto frameNode =
+        FrameNode::CreateFrameNode("onRecycleNullAccessibility", FRAME_NODE_ID, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isAccessibilityPropertyInitialized_ = true;
+    frameNode->accessibilityProperty_ = nullptr;
+    frameNode->OnRecycle();
+    EXPECT_EQ(frameNode->accessibilityProperty_, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg314
+ * @tc.desc: Test OnRecycle branch when renderContext is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg314, TestSize.Level1)
+{
+    constexpr int32_t FRAME_NODE_ID = 314;
+    auto frameNode =
+        FrameNode::CreateFrameNode("onRecycleNullRenderContext", FRAME_NODE_ID, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->isAccessibilityPropertyInitialized_ = true;
+    frameNode->accessibilityProperty_ = AceType::MakeRefPtr<AccessibilityProperty>();
+    frameNode->renderContext_ = nullptr;
+    frameNode->OnRecycle();
+    EXPECT_EQ(frameNode->renderContext_, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg315
+ * @tc.desc: Test FrameProxy branch chain when reset happens in-use.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg315, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 315;
+    constexpr int32_t CHILD_NODE_ID = 316;
+    auto hostNode = FrameNode::CreateFrameNode("frameProxyHost", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto childNode = FrameNode::CreateFrameNode("frameProxyChild", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(childNode, nullptr);
+    hostNode->AddChild(childNode);
+
+    std::unique_ptr<ChildrenListWithGuard> nextProxyGuard;
+    {
+        auto currentProxyGuard = hostNode->GetAllChildrenWithBuild(false);
+        EXPECT_EQ(currentProxyGuard.size(), 1);
+
+        hostNode->RemoveAllChildInRenderTree();
+        nextProxyGuard = std::make_unique<ChildrenListWithGuard>(hostNode->GetAllChildrenWithBuild(false));
+        hostNode->MarkNeedSyncRenderTree(true);
+    }
+    nextProxyGuard.reset();
+
+    auto rebuiltChildren = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_EQ(rebuiltChildren.size(), 1);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg316
+ * @tc.desc: Test AddFrameNode non-frame recursion branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg316, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 317;
+    constexpr int32_t NON_FRAME_ROOT_ID = 318;
+    constexpr int32_t NORMAL_FRAME_CHILD_ID = 319;
+    constexpr int32_t CUSTOM_MEASURE_CHILD_ID = 320;
+    constexpr int32_t NON_FRAME_CHILD_ID = 321;
+
+    auto hostNode = FrameNode::CreateFrameNode("nonFrameHost", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto nonFrameRoot = TestNode::CreateTestNode(NON_FRAME_ROOT_ID);
+    auto normalFrameChild =
+        FrameNode::CreateFrameNode("normalFrameChild", NORMAL_FRAME_CHILD_ID, AceType::MakeRefPtr<Pattern>());
+    auto customMeasureChild =
+        CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(CUSTOM_MEASURE_CHILD_ID, "customMeasureChild");
+    auto nonFrameChild = TestNode::CreateTestNode(NON_FRAME_CHILD_ID);
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(nonFrameRoot, nullptr);
+    ASSERT_NE(normalFrameChild, nullptr);
+    ASSERT_NE(customMeasureChild, nullptr);
+    ASSERT_NE(nonFrameChild, nullptr);
+
+    nonFrameRoot->AddChild(normalFrameChild);
+    nonFrameRoot->AddChild(customMeasureChild);
+    nonFrameRoot->AddChild(nonFrameChild);
+    hostNode->AddChild(nonFrameRoot);
+
+    auto children = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_EQ(children.size(), 2);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg317
+ * @tc.desc: Test AddFrameNode custom node branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg317, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 322;
+    constexpr int32_t CUSTOM_NODE_ID = 323;
+    auto hostNode = FrameNode::CreateFrameNode("customNodeHost", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto customNode = CustomNode::CreateCustomNode(CUSTOM_NODE_ID, "customNodeForBranch");
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(customNode, nullptr);
+
+    hostNode->AddChild(customNode);
+    auto children = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_TRUE(children.empty());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg318
+ * @tc.desc: Test AddFrameNode lazy for each branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg318, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 324;
+    constexpr int32_t LAZY_NODE_ID = 325;
+    auto hostNode = FrameNode::CreateFrameNode("lazyForEachHost", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    RefPtr<LazyForEachBuilder> builder = AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(LAZY_NODE_ID, builder);
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    hostNode->AddChild(lazyForEachNode);
+    auto children = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_TRUE(children.empty());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg319
+ * @tc.desc: Test AddFrameNode arkoala lazy branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg319, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 326;
+    constexpr int32_t ARKOALA_NODE_ID = 327;
+    auto hostNode = FrameNode::CreateFrameNode("arkoalaHost", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto arkoalaLazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(ARKOALA_NODE_ID);
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(arkoalaLazyNode, nullptr);
+
+    hostNode->AddChild(arkoalaLazyNode);
+    auto children = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_TRUE(children.empty());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg320
+ * @tc.desc: Test AddFrameNode repeat virtual scroll branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg320, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 328;
+    constexpr int32_t REPEAT_NODE_ID = 329;
+    auto hostNode = FrameNode::CreateFrameNode("repeatHost", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    const std::map<std::string, std::pair<bool, uint32_t>> templateCachedCountMap;
+    auto repeatNode = AceType::MakeRefPtr<RepeatVirtualScrollNode>(
+        REPEAT_NODE_ID, 0, templateCachedCountMap, [](uint32_t) {}, [](const std::string&, uint32_t) {},
+        [](uint32_t, uint32_t) { return std::list<std::string>(); },
+        [](uint32_t, uint32_t) { return std::list<std::string>(); }, [](int32_t, int32_t) {}, true);
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(repeatNode, nullptr);
+
+    hostNode->AddChild(repeatNode);
+    auto children = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_TRUE(children.empty());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg321
+ * @tc.desc: Test AddFrameNode repeat virtual scroll2 branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg321, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 330;
+    constexpr int32_t REPEAT_NODE_ID = 331;
+    auto hostNode = FrameNode::CreateFrameNode("repeat2Host", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto repeatNode = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
+        REPEAT_NODE_ID, 0, 0,
+        [](IndexType, bool) {
+            return std::make_pair(static_cast<RIDType>(0), static_cast<uint32_t>(OnGetRid4IndexResult::NO_NODE));
+        },
+        [](IndexType, IndexType) {}, [](int32_t, int32_t, int32_t, int32_t, bool, bool) {}, [](IndexType, IndexType) {},
+        []() {}, []() {});
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(repeatNode, nullptr);
+
+    hostNode->AddChild(repeatNode);
+    auto children = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_TRUE(children.empty());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg322
+ * @tc.desc: Test FrameProxy cache and cursor branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg322, TestSize.Level1)
+{
+    constexpr int32_t HOST_FOR_ALL_ID = 32200;
+    constexpr int32_t HOST_FOR_CURSOR_ID = 32201;
+    constexpr int32_t HOST_FOR_CACHE_ID = 32202;
+    constexpr int32_t CHILD_A_ID = 32203;
+    constexpr int32_t CHILD_B_ID = 32204;
+    constexpr int32_t CACHE_CHILD_ID = 32205;
+    constexpr uint32_t INDEX_ZERO = 0;
+    constexpr uint32_t INDEX_ONE = 1;
+    constexpr uint32_t INVALID_INDEX = 99;
+    constexpr size_t EXPECTED_CHILD_COUNT = 2;
+
+    auto hostForAll = FrameNode::CreateFrameNode("frameProxyAll", HOST_FOR_ALL_ID, AceType::MakeRefPtr<Pattern>());
+    auto allChildA = FrameNode::CreateFrameNode("frameProxyAllChildA", CHILD_A_ID, AceType::MakeRefPtr<Pattern>());
+    auto allChildB = FrameNode::CreateFrameNode("frameProxyAllChildB", CHILD_B_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostForAll, nullptr);
+    ASSERT_NE(allChildA, nullptr);
+    ASSERT_NE(allChildB, nullptr);
+    hostForAll->AddChild(allChildA);
+    hostForAll->AddChild(allChildB);
+    auto allChildrenFirst = hostForAll->GetAllChildrenWithBuild(false);
+    EXPECT_EQ(allChildrenFirst.size(), EXPECTED_CHILD_COUNT);
+    auto allChildrenSecond = hostForAll->GetAllChildrenWithBuild(false);
+    EXPECT_EQ(allChildrenSecond.size(), EXPECTED_CHILD_COUNT);
+
+    auto hostForCursor =
+        FrameNode::CreateFrameNode("frameProxyCursor", HOST_FOR_CURSOR_ID, AceType::MakeRefPtr<Pattern>());
+    auto cursorChildA =
+        FrameNode::CreateFrameNode("frameProxyCursorChildA", CHILD_A_ID + 10, AceType::MakeRefPtr<Pattern>());
+    auto cursorChildB =
+        FrameNode::CreateFrameNode("frameProxyCursorChildB", CHILD_B_ID + 10, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostForCursor, nullptr);
+    ASSERT_NE(cursorChildA, nullptr);
+    ASSERT_NE(cursorChildB, nullptr);
+    hostForCursor->AddChild(cursorChildA);
+    hostForCursor->AddChild(cursorChildB);
+    auto childAtOne = hostForCursor->GetChildByIndex(INDEX_ONE, false);
+    EXPECT_NE(childAtOne, nullptr);
+    auto childAtZero = hostForCursor->GetChildByIndex(INDEX_ZERO, false);
+    EXPECT_NE(childAtZero, nullptr);
+    auto outOfRangeChild = hostForCursor->GetChildByIndex(INVALID_INDEX, false);
+    EXPECT_EQ(outOfRangeChild, nullptr);
+
+    auto hostForCache =
+        FrameNode::CreateFrameNode("frameProxyCache", HOST_FOR_CACHE_ID, AceType::MakeRefPtr<Pattern>());
+    auto cacheChild =
+        FrameNode::CreateFrameNode("frameProxyCacheChild", CACHE_CHILD_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostForCache, nullptr);
+    ASSERT_NE(cacheChild, nullptr);
+    hostForCache->AddChild(cacheChild);
+    auto cacheLookup = hostForCache->GetChildByIndex(INDEX_ZERO, true);
+    EXPECT_NE(cacheLookup, nullptr);
+    auto normalLookup = hostForCache->GetChildByIndex(INDEX_ZERO, false);
+    EXPECT_NE(normalLookup, nullptr);
+    auto mapLookup = hostForCache->GetChildByIndex(INDEX_ZERO, false);
+    EXPECT_EQ(mapLookup, normalLookup);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg323
+ * @tc.desc: Test FrameProxy child index lookup branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg323, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 32300;
+    constexpr int32_t CHILD_NODE_ID = 32301;
+    constexpr uint32_t INDEX_ZERO = 0;
+    constexpr int32_t INVALID_TRUE_INDEX = -1;
+    constexpr int32_t EXPECTED_TRUE_INDEX = 0;
+
+    auto hostNode = FrameNode::CreateFrameNode("childIndexHost", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto childNode = FrameNode::CreateFrameNode("childIndexNode", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(childNode, nullptr);
+    hostNode->AddChild(childNode);
+
+    auto trueIndexBeforeBuild = hostNode->GetChildTrueIndex(childNode);
+    EXPECT_EQ(trueIndexBeforeBuild, INVALID_TRUE_INDEX);
+
+    auto childLayoutWrapper = hostNode->GetChildByIndex(INDEX_ZERO, false);
+    EXPECT_NE(childLayoutWrapper, nullptr);
+    auto trueIndexAfterBuild = hostNode->GetChildTrueIndex(childNode);
+    EXPECT_EQ(trueIndexAfterBuild, EXPECTED_TRUE_INDEX);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg324
+ * @tc.desc: Test FrameProxy ResetChildren branch while in-use.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg324, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 32400;
+    constexpr int32_t CHILD_NODE_ID = 32401;
+    constexpr uint32_t INDEX_ZERO = 0;
+    constexpr size_t EXPECTED_CHILD_COUNT = 1;
+
+    auto hostNode = FrameNode::CreateFrameNode("resetChildrenHost", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto childNode = FrameNode::CreateFrameNode("resetChildrenChild", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(childNode, nullptr);
+    hostNode->AddChild(childNode);
+
+    auto oldLogLevel = ::OHOS::Ace::LogWrapper::GetLogLevel();
+    bool oldLayoutDetectEnabled = SystemProperties::layoutDetectEnabled_;
+    SystemProperties::layoutDetectEnabled_ = false;
+    ::OHOS::Ace::LogWrapper::SetLogLevel(::OHOS::Ace::LogLevel::DEBUG);
+
+    {
+        auto inUseChildren = hostNode->GetAllChildrenWithBuild(false);
+        EXPECT_EQ(inUseChildren.size(), EXPECTED_CHILD_COUNT);
+        hostNode->RemoveAllChildInRenderTree();
+    }
+
+    hostNode->MarkNeedSyncRenderTree(true);
+    EXPECT_TRUE(hostNode->needSyncRenderTree_);
+    auto childAfterReset = hostNode->GetChildByIndex(INDEX_ZERO, false);
+    EXPECT_NE(childAfterReset, nullptr);
+
+    ::OHOS::Ace::LogWrapper::SetLogLevel(oldLogLevel);
+    SystemProperties::layoutDetectEnabled_ = oldLayoutDetectEnabled;
+}
+
+/**
+ * @tc.name: FrameNodeTestNg325
+ * @tc.desc: Test FrameProxy RemoveChildInRenderTree branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg325, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 32500;
+    constexpr int32_t CHILD_A_ID = 32501;
+    constexpr int32_t CHILD_B_ID = 32502;
+    constexpr int32_t CHILD_C_ID = 32503;
+    constexpr uint32_t INDEX_ONE = 1;
+    constexpr uint32_t INDEX_TWO = 2;
+    constexpr uint32_t INVALID_INDEX = 999;
+
+    auto hostNode = FrameNode::CreateFrameNode("removeChildHost", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto childA = FrameNode::CreateFrameNode("removeChildA", CHILD_A_ID, AceType::MakeRefPtr<Pattern>());
+    auto childB = FrameNode::CreateFrameNode("removeChildB", CHILD_B_ID, AceType::MakeRefPtr<Pattern>());
+    auto childC = FrameNode::CreateFrameNode("removeChildC", CHILD_C_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(childA, nullptr);
+    ASSERT_NE(childB, nullptr);
+    ASSERT_NE(childC, nullptr);
+    hostNode->AddChild(childA);
+    hostNode->AddChild(childB);
+    hostNode->AddChild(childC);
+
+    auto wrapperAtOne = hostNode->GetChildByIndex(INDEX_ONE, false);
+    auto wrapperAtTwo = hostNode->GetChildByIndex(INDEX_TWO, false);
+    auto nodeAtOne = AceType::DynamicCast<FrameNode>(wrapperAtOne);
+    auto nodeAtTwo = AceType::DynamicCast<FrameNode>(wrapperAtTwo);
+    ASSERT_NE(nodeAtOne, nullptr);
+    ASSERT_NE(nodeAtTwo, nullptr);
+    nodeAtOne->SetActive(true);
+    nodeAtTwo->SetActive(true);
+
+    hostNode->RemoveChildInRenderTree(INVALID_INDEX);
+    hostNode->RemoveChildInRenderTree(INDEX_ONE);
+    EXPECT_FALSE(nodeAtOne->IsActive());
+    EXPECT_TRUE(nodeAtTwo->IsActive());
+
+    hostNode->RemoveChildInRenderTree(INDEX_TWO);
+    EXPECT_FALSE(nodeAtTwo->IsActive());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg326
+ * @tc.desc: Test FrameProxy RemoveChildInRenderTree end-iterator branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg326, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 32600;
+    constexpr int32_t CUSTOM_NODE_ID = 32601;
+    constexpr uint32_t INDEX_ONE = 1;
+    constexpr size_t EXPECTED_CHILD_COUNT = 2;
+
+    auto hostNode = FrameNode::CreateFrameNode("removeChildEndHost", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto customNode = CustomNode::CreateCustomNode(CUSTOM_NODE_ID, "removeChildEndCustom");
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(customNode, nullptr);
+
+    customNode->SetRenderFunction([](int64_t, bool& isTimeout) -> RefPtr<UINode> {
+        isTimeout = false;
+        constexpr int32_t NESTED_NODE_ID_INNER = 33602;
+        constexpr int32_t INNER_FRAME_A_ID_INNER = 33603;
+        constexpr int32_t INNER_FRAME_B_ID_INNER = 33604;
+        auto nestedNode = TestNode::CreateTestNode(NESTED_NODE_ID_INNER);
+        auto firstFrame =
+            FrameNode::CreateFrameNode("removeChildEndInnerA", INNER_FRAME_A_ID_INNER, AceType::MakeRefPtr<Pattern>());
+        auto secondFrame =
+            FrameNode::CreateFrameNode("removeChildEndInnerB", INNER_FRAME_B_ID_INNER, AceType::MakeRefPtr<Pattern>());
+        nestedNode->AddChild(firstFrame);
+        nestedNode->AddChild(secondFrame);
+        return nestedNode;
+    });
+    hostNode->AddChild(customNode);
+
+    auto allChildren = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_EQ(allChildren.size(), EXPECTED_CHILD_COUNT);
+    auto secondChildWrapper = hostNode->GetChildByIndex(INDEX_ONE, false);
+    auto secondChildNode = AceType::DynamicCast<FrameNode>(secondChildWrapper);
+    ASSERT_NE(secondChildNode, nullptr);
+    secondChildNode->SetActive(true);
+
+    hostNode->RemoveChildInRenderTree(INDEX_ONE);
+    EXPECT_FALSE(secondChildNode->IsActive());
+    EXPECT_EQ(hostNode->GetChildByIndex(INDEX_ONE, false), nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg327
+ * @tc.desc: Test FrameProxy SetActiveChildRange showCache branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg327, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 32700;
+    constexpr int32_t CHILD_NODE_ID = 32701;
+    constexpr int32_t START_INDEX = 1;
+    constexpr int32_t END_INDEX = 1;
+    constexpr int32_t CACHE_START = 1;
+    constexpr int32_t CACHE_END = 1;
+    constexpr int32_t ACTIVE_START = 0;
+    constexpr int32_t ACTIVE_END = 0;
+    constexpr uint32_t CHILD_INDEX = 0;
+
+    auto hostNode = FrameNode::CreateFrameNode("activeRangeHost", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto childNode = FrameNode::CreateFrameNode("activeRangeChild", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(childNode, nullptr);
+    hostNode->AddChild(childNode);
+    childNode->SetActive(true);
+    auto childWrapper = hostNode->GetChildByIndex(CHILD_INDEX, false);
+    ASSERT_NE(childWrapper, nullptr);
+
+    hostNode->SetActiveChildRange(START_INDEX, END_INDEX, CACHE_START, CACHE_END, false);
+    EXPECT_FALSE(childNode->IsActive());
+
+    hostNode->SetActiveChildRange(ACTIVE_START, ACTIVE_END, CACHE_START, CACHE_END, true);
+    EXPECT_TRUE(childNode->IsActive());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg328
+ * @tc.desc: Test FrameProxy SetActiveChildRange start<=end branches with and without cache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg328, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 32800;
+    constexpr int32_t CHILD_A_ID = 32801;
+    constexpr int32_t CHILD_B_ID = 32802;
+    constexpr uint32_t INDEX_ZERO = 0;
+    constexpr uint32_t INDEX_ONE = 1;
+    constexpr int32_t NO_CACHE = 0;
+    constexpr int32_t RANGE_START = 0;
+    constexpr int32_t RANGE_END = 0;
+    constexpr int32_t CACHE_START = 1;
+    constexpr int32_t CACHE_END = 1;
+    constexpr int32_t CACHED_START = 1;
+    constexpr int32_t CACHED_END = 1;
+    constexpr size_t EXPECTED_CHILD_COUNT = 2;
+
+    auto hostNode = FrameNode::CreateFrameNode("activeRangeHost328", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto childA = FrameNode::CreateFrameNode("activeRangeChildA328", CHILD_A_ID, AceType::MakeRefPtr<Pattern>());
+    auto childB = FrameNode::CreateFrameNode("activeRangeChildB328", CHILD_B_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(childA, nullptr);
+    ASSERT_NE(childB, nullptr);
+    hostNode->AddChild(childA);
+    hostNode->AddChild(childB);
+
+    auto allChildren = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_EQ(allChildren.size(), EXPECTED_CHILD_COUNT);
+
+    auto wrapperA = hostNode->GetChildByIndex(INDEX_ZERO, false);
+    auto wrapperB = hostNode->GetChildByIndex(INDEX_ONE, false);
+    auto nodeA = AceType::DynamicCast<FrameNode>(wrapperA);
+    auto nodeB = AceType::DynamicCast<FrameNode>(wrapperB);
+    ASSERT_NE(nodeA, nullptr);
+    ASSERT_NE(nodeB, nullptr);
+    nodeA->SetActive(true);
+    nodeB->SetActive(true);
+
+    hostNode->SetActiveChildRange(RANGE_START, RANGE_END, NO_CACHE, NO_CACHE, false);
+    EXPECT_TRUE(nodeA->IsActive());
+    EXPECT_FALSE(nodeB->IsActive());
+
+    auto rebuiltWrapperB = hostNode->GetChildByIndex(INDEX_ONE, false);
+    auto rebuiltNodeB = AceType::DynamicCast<FrameNode>(rebuiltWrapperB);
+    ASSERT_NE(rebuiltNodeB, nullptr);
+    rebuiltNodeB->SetActive(true);
+
+    hostNode->SetActiveChildRange(CACHED_START, CACHED_END, CACHE_START, CACHE_END, true);
+    EXPECT_TRUE(nodeA->IsActive());
+    EXPECT_TRUE(rebuiltNodeB->IsActive());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg329
+ * @tc.desc: Test FrameProxy SetActiveChildRange wrap-around branches when start is greater than end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg329, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 32900;
+    constexpr int32_t CHILD_A_ID = 32901;
+    constexpr int32_t CHILD_B_ID = 32902;
+    constexpr int32_t CHILD_C_ID = 32903;
+    constexpr uint32_t INDEX_ZERO = 0;
+    constexpr uint32_t INDEX_ONE = 1;
+    constexpr uint32_t INDEX_TWO = 2;
+    constexpr int32_t WRAP_START = 2;
+    constexpr int32_t WRAP_END = 0;
+    constexpr int32_t NO_CACHE = 0;
+    constexpr size_t EXPECTED_CHILD_COUNT = 3;
+
+    auto hostNode = FrameNode::CreateFrameNode("activeRangeHost329", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto childA = FrameNode::CreateFrameNode("activeRangeChildA329", CHILD_A_ID, AceType::MakeRefPtr<Pattern>());
+    auto childB = FrameNode::CreateFrameNode("activeRangeChildB329", CHILD_B_ID, AceType::MakeRefPtr<Pattern>());
+    auto childC = FrameNode::CreateFrameNode("activeRangeChildC329", CHILD_C_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(childA, nullptr);
+    ASSERT_NE(childB, nullptr);
+    ASSERT_NE(childC, nullptr);
+    hostNode->AddChild(childA);
+    hostNode->AddChild(childB);
+    hostNode->AddChild(childC);
+
+    auto allChildren = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_EQ(allChildren.size(), EXPECTED_CHILD_COUNT);
+
+    auto wrapperA = hostNode->GetChildByIndex(INDEX_ZERO, false);
+    auto wrapperB = hostNode->GetChildByIndex(INDEX_ONE, false);
+    auto wrapperC = hostNode->GetChildByIndex(INDEX_TWO, false);
+    auto nodeA = AceType::DynamicCast<FrameNode>(wrapperA);
+    auto nodeB = AceType::DynamicCast<FrameNode>(wrapperB);
+    auto nodeC = AceType::DynamicCast<FrameNode>(wrapperC);
+    ASSERT_NE(nodeA, nullptr);
+    ASSERT_NE(nodeB, nullptr);
+    ASSERT_NE(nodeC, nullptr);
+    nodeA->SetActive(true);
+    nodeB->SetActive(true);
+    nodeC->SetActive(true);
+
+    hostNode->SetActiveChildRange(WRAP_START, WRAP_END, NO_CACHE, NO_CACHE, false);
+    EXPECT_TRUE(nodeA->IsActive());
+    EXPECT_FALSE(nodeB->IsActive());
+    EXPECT_TRUE(nodeC->IsActive());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg330
+ * @tc.desc: Test optional SetActiveChildRange JS_REPEAT branch without active range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg330, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 33000;
+    constexpr int32_t JS_REPEAT_CHILD_ID = 33001;
+    constexpr int32_t NORMAL_CHILD_ID = 33002;
+    constexpr uint32_t INDEX_ZERO = 0;
+    constexpr uint32_t INDEX_ONE = 1;
+    constexpr size_t EXPECTED_CHILD_COUNT = 2;
+    constexpr int32_t ACTIVE_ITEM_ZERO = 0;
+    constexpr int32_t ACTIVE_ITEM_ONE = 1;
+    constexpr int32_t CACHED_ITEM = 2;
+
+    auto hostNode = FrameNode::CreateFrameNode("activeSetHost330", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto repeatChild =
+        FrameNode::CreateFrameNode(V2::JS_REPEAT_ETS_TAG, JS_REPEAT_CHILD_ID, AceType::MakeRefPtr<Pattern>());
+    auto normalChild = FrameNode::CreateFrameNode("activeSetChild330", NORMAL_CHILD_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(repeatChild, nullptr);
+    ASSERT_NE(normalChild, nullptr);
+    hostNode->AddChild(repeatChild);
+    hostNode->AddChild(normalChild);
+
+    auto allChildren = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_EQ(allChildren.size(), EXPECTED_CHILD_COUNT);
+
+    auto repeatWrapper = hostNode->GetChildByIndex(INDEX_ZERO, false);
+    auto normalWrapper = hostNode->GetChildByIndex(INDEX_ONE, false);
+    auto repeatNode = AceType::DynamicCast<FrameNode>(repeatWrapper);
+    auto normalNode = AceType::DynamicCast<FrameNode>(normalWrapper);
+    ASSERT_NE(repeatNode, nullptr);
+    ASSERT_NE(normalNode, nullptr);
+    repeatNode->SetActive(true);
+    normalNode->SetActive(true);
+
+    ActiveChildSets activeChildSets;
+    activeChildSets.activeItems = { ACTIVE_ITEM_ZERO, ACTIVE_ITEM_ONE };
+    activeChildSets.cachedItems = { CACHED_ITEM };
+    hostNode->SetActiveChildRange(activeChildSets, std::nullopt);
+
+    EXPECT_TRUE(repeatNode->IsActive());
+    EXPECT_TRUE(normalNode->IsActive());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg331
+ * @tc.desc: Test optional SetActiveChildRange non-JS_REPEAT branch with active range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg331, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 33100;
+    constexpr int32_t NORMAL_CHILD_ID = 33101;
+    constexpr uint32_t INDEX_ZERO = 0;
+    constexpr int32_t ACTIVE_ITEM_ZERO = 0;
+    constexpr int32_t RANGE_START = 1;
+    constexpr int32_t RANGE_END = 1;
+    constexpr int32_t CACHE_START = 0;
+    constexpr int32_t CACHE_END = 0;
+
+    auto hostNode = FrameNode::CreateFrameNode("activeRangeHost331", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto normalChild =
+        FrameNode::CreateFrameNode("activeRangeChild331", NORMAL_CHILD_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(normalChild, nullptr);
+    hostNode->AddChild(normalChild);
+
+    auto childWrapper = hostNode->GetChildByIndex(INDEX_ZERO, false);
+    auto childNode = AceType::DynamicCast<FrameNode>(childWrapper);
+    ASSERT_NE(childNode, nullptr);
+    childNode->SetActive(true);
+
+    ActiveChildSets activeChildSets;
+    activeChildSets.activeItems = { ACTIVE_ITEM_ZERO };
+
+    ActiveChildRange activeChildRange;
+    activeChildRange.start = RANGE_START;
+    activeChildRange.end = RANGE_END;
+    activeChildRange.cacheStart = CACHE_START;
+    activeChildRange.cacheEnd = CACHE_END;
+    hostNode->SetActiveChildRange(activeChildSets, activeChildRange);
+
+    EXPECT_FALSE(childNode->IsActive());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg332
+ * @tc.desc: Test FrameProxy RecycleItemsByIndex erase and increment branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg332, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 33200;
+    constexpr int32_t CHILD_A_ID = 33201;
+    constexpr int32_t CHILD_B_ID = 33202;
+    constexpr int32_t CHILD_C_ID = 33203;
+    constexpr uint32_t INDEX_ZERO = 0;
+    constexpr uint32_t INDEX_ONE = 1;
+    constexpr uint32_t INDEX_TWO = 2;
+    constexpr int32_t RECYCLE_START = 1;
+    constexpr int32_t RECYCLE_END = 3;
+
+    auto hostNode = FrameNode::CreateFrameNode("recycleHost332", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto childA = FrameNode::CreateFrameNode("recycleChildA332", CHILD_A_ID, AceType::MakeRefPtr<Pattern>());
+    auto childB = FrameNode::CreateFrameNode("recycleChildB332", CHILD_B_ID, AceType::MakeRefPtr<Pattern>());
+    auto childC = FrameNode::CreateFrameNode("recycleChildC332", CHILD_C_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(childA, nullptr);
+    ASSERT_NE(childB, nullptr);
+    ASSERT_NE(childC, nullptr);
+    hostNode->AddChild(childA);
+    hostNode->AddChild(childB);
+    hostNode->AddChild(childC);
+
+    auto wrapperA = hostNode->GetChildByIndex(INDEX_ZERO, false);
+    auto wrapperB = hostNode->GetChildByIndex(INDEX_ONE, false);
+    auto wrapperC = hostNode->GetChildByIndex(INDEX_TWO, false);
+    auto nodeA = AceType::DynamicCast<FrameNode>(wrapperA);
+    auto nodeB = AceType::DynamicCast<FrameNode>(wrapperB);
+    auto nodeC = AceType::DynamicCast<FrameNode>(wrapperC);
+    ASSERT_NE(nodeA, nullptr);
+    ASSERT_NE(nodeB, nullptr);
+    ASSERT_NE(nodeC, nullptr);
+    nodeA->SetActive(true);
+    nodeB->SetActive(true);
+    nodeC->SetActive(true);
+
+    hostNode->RecycleItemsByIndex(RECYCLE_START, RECYCLE_END);
+
+    hostNode->RemoveChildInRenderTree(INDEX_ONE);
+    EXPECT_TRUE(nodeB->IsActive());
+    hostNode->RemoveChildInRenderTree(INDEX_TWO);
+    EXPECT_TRUE(nodeC->IsActive());
+
+    hostNode->RemoveChildInRenderTree(INDEX_ZERO);
+    EXPECT_FALSE(nodeA->IsActive());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg333
+ * @tc.desc: Test FrameProxy Dump branch when part child host node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg333, TestSize.Level1)
+{
+    constexpr int32_t HOST_NODE_ID = 33300;
+    constexpr int32_t CHILD_A_ID = 33301;
+    constexpr int32_t CHILD_B_ID = 33302;
+    constexpr uint32_t INDEX_ZERO = 0;
+    constexpr uint32_t INDEX_ONE = 1;
+    constexpr size_t EXPECTED_CHILD_COUNT = 2;
+
+    auto hostNode = FrameNode::CreateFrameNode("dumpHost333", HOST_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    auto childA = FrameNode::CreateFrameNode("dumpChildA333", CHILD_A_ID, AceType::MakeRefPtr<Pattern>());
+    auto childB = FrameNode::CreateFrameNode("dumpChildB333", CHILD_B_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(hostNode, nullptr);
+    ASSERT_NE(childA, nullptr);
+    ASSERT_NE(childB, nullptr);
+    hostNode->AddChild(childA);
+    hostNode->AddChild(childB);
+
+    auto allChildren = hostNode->GetAllChildrenWithBuild(false);
+    EXPECT_EQ(allChildren.size(), EXPECTED_CHILD_COUNT);
+
+    auto firstWrapper = hostNode->GetChildByIndex(INDEX_ZERO, false);
+    auto secondWrapper = hostNode->GetChildByIndex(INDEX_ONE, false);
+    ASSERT_NE(firstWrapper, nullptr);
+    ASSERT_NE(secondWrapper, nullptr);
+    firstWrapper->hostNode_.Reset();
+
+    auto json = JsonUtil::Create(true);
+    hostNode->DumpInfo(json);
+    auto frameProxyInfo = json->GetString("FrameProxy");
+    EXPECT_FALSE(frameProxyInfo.empty());
+
+    const std::string partLabel = "partFrameNodeChildren:[";
+    auto partStart = frameProxyInfo.find(partLabel);
+    auto partEnd = frameProxyInfo.find("] TotalCount:");
+    ASSERT_NE(partStart, std::string::npos);
+    ASSERT_NE(partEnd, std::string::npos);
+
+    auto partSection = frameProxyInfo.substr(partStart, partEnd - partStart);
+    EXPECT_EQ(partSection.find(std::to_string(CHILD_A_ID)), std::string::npos);
+    EXPECT_NE(partSection.find(std::to_string(CHILD_B_ID)), std::string::npos);
 }
 } // namespace OHOS::Ace::NG
