@@ -533,7 +533,9 @@ void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
         windowManager->WindowMaximize(true);
     }
-    GetHost()->OnWindowActivated();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnWindowActivated();
 }
 
 void ContainerModalPatternEnhance::OnMinButtonClick(GestureEvent& info)
@@ -786,7 +788,9 @@ void ContainerModalPatternEnhance::OnMaxButtonClick()
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_MAXIMIZE);
         windowManager->WindowMaximize(true);
     }
-    GetHost()->OnWindowActivated();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnWindowActivated();
 }
 
 void ContainerModalPatternEnhance::OnMinButtonClick()

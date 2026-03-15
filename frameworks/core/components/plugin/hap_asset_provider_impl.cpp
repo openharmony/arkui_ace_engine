@@ -56,6 +56,8 @@ std::unique_ptr<AssetMapping> HapAssetProviderImpl::GetAsMapping(const std::stri
         if (!mapper) {
             continue;
         }
+        mapper->SetAutoReleaseMem(true);
+        runtimeExtractor_->SetAutoCloseFd(true);
         if (mapper->GetDataLen()) {
             osStream.write((char*)mapper->GetDataPtr(), mapper->GetDataLen());
             return std::make_unique<HapAssetImplMapping>(osStream);
