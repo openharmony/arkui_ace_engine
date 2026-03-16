@@ -42,6 +42,7 @@ void ModalPresentationPattern::ModalInteractiveDismiss()
 
 void ModalPresentationPattern::OnWillDisappear()
 {
+    ACE_SCOPED_TRACE("Modal lifecycle OnWillDisappear");
     if (onWillDisappear_) {
         onWillDisappear_();
     }
@@ -119,6 +120,7 @@ void ModalPresentationPattern::RegisterModalBgColorResFunc(
 
 void ModalPresentationPattern::OnAppear()
 {
+    ACE_SCOPED_TRACE("Modal lifecycle OnAppear");
     if (onAppear_) {
         onAppear_();
     }
@@ -131,6 +133,7 @@ void ModalPresentationPattern::OnAppear()
 
 void ModalPresentationPattern::OnDisappear()
 {
+    ACE_SCOPED_TRACE("Modal lifecycle OnDisappear");
     if (onDisappear_) {
         isExecuteOnDisappear_ = true;
         onDisappear_();
