@@ -173,9 +173,20 @@ void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
     CHECK_NULL_VOID(appbar->contentStage_);
     pattern->BeforeCreateLayoutWrapper();
     InitAccessibility(Inspector::GetInspectorByKey(atom, "AtomicServiceMenubarRowId"));
+    appbar->UpdateVisibilityOfMenuBarRow(pattern->GetMenuBarRow(), container);
     stageNodeWrapper->AddChild(appbar->contentStage_);
     stageNodeWrapper->MarkModifyDone();
     stageNodeWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
+}
+
+void AppBarView::UpdateVisibilityOfMenuBarRow(const RefPtr<FrameNode>& menubarRow, const RefPtr<Container>& container)
+{
+    CHECK_NULL_VOID(menubarRow);
+    CHECK_NULL_VOID(container);
+    CHECK_EQUAL_VOID(container->IsSubWindow(), false);
+    auto layoutProperty = menubarRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
 }
 
 void AppBarView::InitAccessibility(RefPtr<UINode> uiNode)
