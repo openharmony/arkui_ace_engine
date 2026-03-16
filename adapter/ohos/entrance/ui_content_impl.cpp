@@ -3955,18 +3955,16 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
 
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
         TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
-        taskExecutor->PostTask([context, config, avoidAreas] {
-            if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
-                context->AnimateOnSafeAreaUpdate();
-            }
-            AvoidAreasUpdateOnUIExtension(context, avoidAreas);
-            }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
-        taskExecutor->PostSyncTask([reason, instanceId = instanceId_,
+        taskExecutor->PostTask([context, config, avoidAreas, reason, instanceId = instanceId_,
             pipelineContext, info, container] {
-            if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
-                KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
-            }
-            }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAvoid");
+                if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
+                    context->AnimateOnSafeAreaUpdate();
+                }
+                AvoidAreasUpdateOnUIExtension(context, avoidAreas);
+                if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
+                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
+                }
+            }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
         return;
     }
 
