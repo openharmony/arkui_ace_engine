@@ -729,14 +729,19 @@ public:
         return {};
     }
 
-    template<typename T>
-    RefPtr<T> GetTheme(int32_t themeScopeId) const
+    RefPtr<Theme> GetThemeByType(ThemeType type, int32_t themeScopeId) const
     {
         std::shared_lock<std::shared_mutex> lock(themeMtx_);
         if (themeManager_) {
-            return themeManager_->GetTheme<T>(themeScopeId);
+            return themeManager_->GetTheme(type, themeScopeId);
         }
         return {};
+    }
+
+    template<typename T>
+    RefPtr<T> GetTheme(int32_t themeScopeId) const
+    {
+        return AceType::DynamicCast<T>(GetThemeByType(T::TypeId(), themeScopeId));
     }
 
     bool CheckIfGetTheme();
