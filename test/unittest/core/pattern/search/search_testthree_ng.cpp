@@ -1861,4 +1861,53 @@ HWTEST_F(SearchTestThreeNg, CreateSearchNode_ComprehensiveBorderPropsCoverage, T
     EXPECT_TRUE(renderContext2->HasBorderColor());
 }
 
+/**
+ * @tc.name: SearchLayoutProperty_Clone_IsUserSetBackgroundColor
+ * @tc.desc: Test SearchLayoutProperty::Clone correctly clones isUserSetBackgroundColor_
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestThreeNg, SearchLayoutProperty_Clone_IsUserSetBackgroundColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Search node and get its SearchLayoutProperty
+     * @tc.expected: SearchLayoutProperty should be created successfully
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(DEFAULT_TEXT_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto searchNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(searchNode, nullptr);
+
+    auto searchLayoutProperty = searchNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(searchLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set isUserSetBackgroundColor_ to true using UpdateIsUserSetBackgroundColor
+     * @tc.expected: isUserSetBackgroundColor_ should be true
+     */
+    searchLayoutProperty->UpdateIsUserSetBackgroundColor(true);
+    EXPECT_EQ(searchLayoutProperty->GetIsUserSetBackgroundColor(), true);
+
+    /**
+     * @tc.steps: step3. Clone the SearchLayoutProperty
+     * @tc.expected: Clone should return a valid SearchLayoutProperty
+     */
+    auto clonedProperty = AceType::DynamicCast<SearchLayoutProperty>(searchLayoutProperty->Clone());
+    ASSERT_NE(clonedProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. Verify isUserSetBackgroundColor_ is correctly cloned
+     * @tc.expected: clonedProperty should have isUserSetBackgroundColor_ = true
+     */
+    EXPECT_EQ(clonedProperty->GetIsUserSetBackgroundColor(), true);
+
+    /**
+     * @tc.steps: step5. Test with isUserSetBackgroundColor_ = false
+     * @tc.expected: clonedProperty should have isUserSetBackgroundColor_ = false
+     */
+    searchLayoutProperty->UpdateIsUserSetBackgroundColor(false);
+    auto clonedProperty2 = AceType::DynamicCast<SearchLayoutProperty>(searchLayoutProperty->Clone());
+    ASSERT_NE(clonedProperty2, nullptr);
+    EXPECT_EQ(clonedProperty2->GetIsUserSetBackgroundColor(), false);
+}
+
 } // namespace OHOS::Ace::NG

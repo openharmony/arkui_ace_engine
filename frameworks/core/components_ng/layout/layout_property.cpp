@@ -452,6 +452,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     backgroundIgnoresLayoutSafeAreaEdges_ = layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_;
     localizedBackgroundIgnoresLayoutSafeAreaEdges_ =
         layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_;
+    isUserSetBackgroundColor_ = layoutProperty->isUserSetBackgroundColor_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
