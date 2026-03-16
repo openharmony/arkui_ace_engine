@@ -334,6 +334,9 @@ HWTEST_F(RichEditorStyleTestNg, TestRichEditorHandleSelectFontStyle001, TestSize
  */
 HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Init pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -342,6 +345,10 @@ HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle001, TestSize.Level0)
     AddSpan(INIT_VALUE_1);
     auto contentNode = richEditorNode_->GetChildAtIndex(0);
     auto newSpan1 = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
+
+    /**
+     * @tc.steps: step2. set style
+     */
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
     textStyle.SetFontFeatures(TEXT_FONTFEATURE);
@@ -353,6 +360,9 @@ HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle001, TestSize.Level0)
     updateSpanStyle.updateLetterSpacing = LETTER_SPACING;
     updateSpanStyle.updateFontFeature = TEXT_FONTFEATURE;
 
+    /**
+     * @tc.steps: step3. UpdateTextStyle
+     */
     richEditorPattern->UpdateTextStyle(newSpan1, updateSpanStyle, textStyle);
     ASSERT_NE(newSpan1, nullptr);
     EXPECT_EQ(newSpan1->GetLineHeight(), LINE_HEIGHT_VALUE);
