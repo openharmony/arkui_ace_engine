@@ -84,6 +84,15 @@ void CommonModuleCallbackAni::Call(ani_env* env, ani_size argc, ani_ref* argv, a
     env->FunctionalObject_Call(static_cast<ani_fn_object>(func_), argc, argv, result);
 }
 
+ani_boolean IsEasySplit([[maybe_unused]] ani_env* env, ani_object obj, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    return modifier->getCommonAniModifier()->isEasySplit(instanceId);
+}
+
 ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key)
 {
     const auto* modifier = GetNodeAniModifier();

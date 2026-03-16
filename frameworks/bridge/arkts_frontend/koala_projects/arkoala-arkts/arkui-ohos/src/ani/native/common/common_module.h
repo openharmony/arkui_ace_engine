@@ -29,6 +29,7 @@ private:
     ani_vm* vm_ = nullptr;
     ani_ref func_ = nullptr;
 };
+ani_boolean IsEasySplit([[maybe_unused]] ani_env* env, ani_object obj, ani_int instaceId);
 ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key);
 void SetFrameRateRange([[maybe_unused]] ani_env* env, ani_object obj, ani_long key, ani_object value, ani_int type);
 ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env);
