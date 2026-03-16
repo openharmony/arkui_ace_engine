@@ -41,4 +41,17 @@ export class InteropDecoratorBackingValue<T> extends DecoratorBackingValue<T> {
             this.onTrackPropertyChange
         )
     }
+
+    public set(newValue: T): boolean {
+        const result = super.set(newValue);
+        if (result) {
+            staticStateBindObservedObject(
+                newValue,
+                () => this.fireChange(),
+                this.onTrackPropertyRead,
+                this.onTrackPropertyChange
+            )
+        }
+        return result;
+    }
 }
