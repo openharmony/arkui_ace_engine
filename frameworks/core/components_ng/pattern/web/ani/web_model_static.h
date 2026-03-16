@@ -167,6 +167,8 @@ public:
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetOnSslSelectCertRequest(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
+    static void SetOnVerifyPinRequest(
+        FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetWindowNewEvent(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback);
     static void SetWindowNewExtEvent(

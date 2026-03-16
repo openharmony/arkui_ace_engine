@@ -13,13 +13,31 @@
  * limitations under the License.
  */
 
-import { ArkWebComponent, JavaScriptProxy } from "#generated"
+import { ArkWebComponent, JavaScriptProxy, CredentialType, MaterializedBase } from "#generated"
 import { ArkUIAniModule } from "arkui.ani"
+import { canIUse } from '@internal.full.global'
 
 export class WebHandWritten {
     static hookJavaScriptProxyImpl(component: ArkWebComponent, value: JavaScriptProxy | undefined): void {
         if (value !== undefined) {
             ArkUIAniModule._Web_SetJavaScriptProxyController(component.getPeer().peer.ptr, value)
+        }
+    }
+
+    static hookConfirmImpl(handler: MaterializedBase, priKeyFile: string, certChainFile: string): void {
+         
+    }
+
+    static hookConfirmImpl(handler: MaterializedBase, authUri: string): void {
+         
+    }
+
+    static hookConfirmImpl(handler: MaterializedBase, 
+                            identity: string,credentialTypeOrCertChainFile: CredentialType | string): void {
+         if (typeof credentialTypeOrCertChainFile == CredentialType.CREDENTIAL_UKEY &&
+                !canIUse("SystemCapability.Security.Huks.CryptoExtension")) {
+            console.log(`rm001 CryptoExtension: ${canIUse("SystemCapability.Security.Huks.CryptoExtension")}`);
+            throw new Error(801, "Capability not supported.");
         }
     }
 }

@@ -114,6 +114,11 @@ struct TouchInfo {
 };
 } // namespace
 
+namespace SameLayerSurface {
+void SetSameLayerSurfaceId(const std::string& surfaceId);
+void RemoveSameLayerSurfaceId(const std::string& surfaceId);
+}
+
 enum class WebInfoType : int32_t {
     TYPE_MOBILE,
     TYPE_TABLET,

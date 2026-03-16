@@ -46,6 +46,7 @@
 #include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/ssl_error_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
+#include "core/interfaces/native/implementation/verify_pin_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_param_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_result_peer_impl.h"
 #include "core/interfaces/native/implementation/web_keyboard_controller_peer_impl.h"
@@ -803,6 +804,24 @@ bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthentication
     parameter.handler = peer;
     arkCallback.InvokeSync(parameter);
     return false;
+}
+
+bool OnVerifyPin(const CallbackHelper<OnVerifyPinCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<WebVerifyPinEvent>(info);
+    CHECK_NULL_RETURN(eventInfo, false);
+    Ark_VerifyPinEvent parameter;
+    parameter.identity = Converter::ArkValue<Ark_String>(eventInfo->GetIdentity());
+    auto peer = new VerifyPinHandlerPeer();
+    peer->verifyPinHandler = eventInfo->GetResult();
+    parameter.handler = peer;
+    arkCallback.InvokeSync(parameter);
+    return true;
 }
 
 static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)

@@ -1146,6 +1146,17 @@ void WebModelStatic::SetOnSslSelectCertRequest(
     webEventHub->SetOnSslSelectCertRequestEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetOnVerifyPinRequest(
+    FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](
+                          const std::shared_ptr<BaseEventInfo>& info) -> bool { return func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnVerifyPinRequestEvent(std::move(uiCallback));
+}
+
 void WebModelStatic::SetWindowNewEvent(
     FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback)
 {
