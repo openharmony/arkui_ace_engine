@@ -775,7 +775,8 @@ void WaterFlowLayoutSW::AdjustOverScroll()
 
 float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane, bool forward) const
 {
-    auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx), !cacheDeadline_, cacheDeadline_.has_value());
+    auto child = WaterFlowLayoutUtils::GetWaterFlowItem(wrapper_,
+        nodeIdx(idx), !cacheDeadline_, cacheDeadline_.has_value());
     CHECK_NULL_RETURN(child, -1.0f);
     float userHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(idx), idx);
     if (NonNegative(userHeight)) {

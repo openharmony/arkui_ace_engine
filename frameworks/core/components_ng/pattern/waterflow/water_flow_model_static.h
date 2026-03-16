@@ -53,6 +53,7 @@ public:
     static void ResetItemLayoutConstraint(FrameNode* frameNode);
     static void SetItemFillPolicy(FrameNode* frameNode, PresetFillType fillType);
     static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
+    static void SetSupportEmptyBranchInLazyLoading(FrameNode* frameNode, bool enabled);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_STATIC_H

@@ -375,6 +375,20 @@ class WaterFlowOnScrollIndexModifier extends ModifierWithKey<(first: number, las
   }
 }
 
+class WaterFlowSupportLazyLoadingEmptyBranchModifier extends ModifierWithKey<boolean> {
+  constructor(value) {
+ 	super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowSupportLazyLoadingEmptyBranch');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+ 	  getUINativeModule().waterFlow.setSupportLazyLoadingEmptyBranch(node, false);
+ 	} else {
+ 	  getUINativeModule().waterFlow.setSupportLazyLoadingEmptyBranch(node, this.value);
+ 	}
+  }
+}
+
 class WaterFlowInitializeModifier extends ModifierWithKey<WaterFlowParam> {
   constructor(value: WaterFlowParam) {
     super(value);
@@ -518,6 +532,10 @@ class ArkWaterFlowComponent extends ArkScrollable<WaterFlowAttribute> implements
   }
   onScrollIndex(event: (first: number, last: number) => void): this {
     modifierWithKey(this._modifiersWithKeys, WaterFlowOnScrollIndexModifier.identity, WaterFlowOnScrollIndexModifier, event);
+    return this;
+  }
+  supportEmptyBranchInLazyLoading(value): this {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowSupportLazyLoadingEmptyBranchModifier.identity, WaterFlowSupportLazyLoadingEmptyBranchModifier, value);
     return this;
   }
   initialize(value: Object[]): this {

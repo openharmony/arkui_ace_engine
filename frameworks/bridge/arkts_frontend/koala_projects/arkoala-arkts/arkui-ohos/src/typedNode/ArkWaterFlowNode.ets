@@ -184,6 +184,11 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
         this.markDirty()
         return this
     }
+    supportEmptyBranchInLazyLoading(supported: boolean | undefined): this {
+ 	    this.getPeer()?.setSupportEmptyBranchInLazyLoadingAttribute(supported)
+ 	    this.markDirty()
+ 	    return this
+ 	}
     attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> |
         AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')

@@ -1645,6 +1645,7 @@
       "OHOS::Ace::NG::ScrollableEvent::Idle() const";
       "OHOS::Ace::NG::ScrollableEvent::SetAxis(OHOS::Ace::Axis)";
       "OHOS::Ace::NG::ScrollableLayoutProperty::ToJsonValue(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
+      "OHOS::Ace::NG::ScrollableLayoutProperty::UpdateSupportLazyLoadingEmptyBranch(bool const&)";
       "OHOS::Ace::NG::ScrollableModelNG::CreateWithResourceObjScrollBarColor(OHOS::Ace::NG::FrameNode*, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&)";
       "OHOS::Ace::NG::ScrollableModelNG::GetAlwaysEnabled(OHOS::Ace::NG::FrameNode*)";
       "OHOS::Ace::NG::ScrollableModelNG::GetEdgeEffect(OHOS::Ace::NG::FrameNode*)";

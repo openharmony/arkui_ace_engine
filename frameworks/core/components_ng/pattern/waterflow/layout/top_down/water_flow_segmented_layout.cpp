@@ -25,6 +25,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -347,6 +348,8 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
         info_->ClearCacheAfterIndex(info_->footerIndex_ - 1);
         // re-insert at the end
         auto footer = wrapper_->GetOrCreateChildByIndex(info_->footerIndex_);
+        CHECK_NULL_VOID(footer);
+
         auto waterFlow = wrapper_->GetHostNode();
         waterFlow->RemoveChildAtIndex(info_->footerIndex_);
         footer->GetHostNode()->MountToParent(waterFlow);
@@ -623,7 +626,7 @@ bool WaterFlowSegmentedLayout::PreloadItem(LayoutWrapper* host, int32_t itemIdx,
 {
     InitEnv(host);
     if (itemIdx < static_cast<int32_t>(info_->itemInfos_.size())) {
-        return host->GetOrCreateChildByIndex(itemIdx, false, true);
+        return WaterFlowLayoutUtils::GetWaterFlowItem(host, itemIdx, false, true);
     }
     MeasureToTarget(itemIdx, deadline, true);
     return true;

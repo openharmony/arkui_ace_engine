@@ -3039,6 +3039,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WaterFlowAttribute_setSyncLoad(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _WaterFlowAttribute_setSupportEmptyBranchInLazyLoading(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _WaterFlowAttribute_setOnScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _WaterFlowAttribute_setOnScrollIndex(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void

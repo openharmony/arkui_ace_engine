@@ -27004,6 +27004,8 @@ typedef struct GENERATED_ArkUIWaterFlowModifier {
                             const Opt_Int32* value);
     void (*setSyncLoad)(Ark_NativePointer node,
                         const Opt_Boolean* value);
+    void (*setSupportEmptyBranchInLazyLoading)(Ark_NativePointer node,
+                                               const Opt_Boolean* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   const Opt_OnScrollFrameBeginCallback* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,

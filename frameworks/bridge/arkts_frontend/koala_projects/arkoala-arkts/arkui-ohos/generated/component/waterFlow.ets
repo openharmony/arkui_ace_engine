@@ -196,6 +196,18 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._WaterFlowAttribute_setSyncLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSupportEmptyBranchInLazyLoadingAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WaterFlowAttribute_setSupportEmptyBranchInLazyLoading(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -313,6 +325,9 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     syncLoad(value: boolean | undefined): this {
         throw new Error('Unimplemented method syncLoad')
     }
+    supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
+        throw new Error('Unimplemented method supportEmptyBranchInLazyLoading')
+    }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         throw new Error('Unimplemented method onScrollFrameBegin')
     }
@@ -383,6 +398,11 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
     public syncLoad(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setSyncLoadAttribute(value_casted)
+        return this
+    }
+    public supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setSupportEmptyBranchInLazyLoadingAttribute(value_casted)
         return this
     }
     public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {

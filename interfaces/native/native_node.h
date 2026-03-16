@@ -8121,6 +8121,25 @@ typedef enum {
     NODE_WATER_FLOW_COLUMN_TEMPLATE_ITEMFILLPOLICY = 1010013,
 
     /**
+ 	 * @brief Specifies whether to support empty branch rendering in lazy loading mode for the <b>WaterFlow</b> container.
+ 	 * This attribute can be set, reset, and obtained as required through APIs. When enabled in lazy loading mode, 
+ 	 * empty branches (items without content) in the <b>WaterFlow</b> will be rendered and set to width 0 and height 0, 
+ 	 * which may affect the overall layout and scrolling behavior. This is typically used in scenarios where the
+ 	 * data source may have gaps or when maintaining specific layout positions is required.
+ 	 *
+ 	 * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+ 	 * .value[0].i32: whether to support empty branch rendering in lazy loading mode.
+ 	 * <b>0</b>: Disable empty branch support. Empty branches will not be rendered. <b>1</b>: Enable empty branch support. 
+ 	 * Empty branches will be rendered as placeholder items. Default value: <b>0</b>.\n
+ 	 * \n
+ 	 * Format of the return value {@link ArkUI_AttributeItem}:\n
+ 	 * .value[0].i32: whether empty branch rendering is enabled. <b>0</b>: Disabled. <b>1</b>: Enabled.\n
+ 	 *
+ 	 * @since 26.0.0
+ 	 */
+ 	NODE_WATER_FLOW_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1010014,
+ 	
+    /**
      * @brief Sets the number of columns in the water flow layout. If this parameter is not set, one column is used by
      * default. This attribute can be set, reset, and obtained as required through APIs.
      * For example, <b>'1fr 1fr 2fr'</b> indicates three columns, with the first column taking up 1/4 of the parent
