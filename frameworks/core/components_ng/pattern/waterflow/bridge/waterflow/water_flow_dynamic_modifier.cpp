@@ -1178,6 +1178,20 @@ void* GetEventResetHandler(uint32_t kind)
     return reinterpret_cast<void*>(waterFlowNodeResetAsyncEventHandlers[kind]);
 }
 
+void SetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node, ArkUI_Bool support)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetSupportLazyLoadingEmptyBranch(frameNode, support);
+}
+
+ArkUI_Bool GetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return WaterFlowModelNG::GetSupportLazyLoadingEmptyBranch(frameNode);
+}
+
 #ifndef CROSS_PLATFORM
 void SetRowsTemplateImpl(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
@@ -1487,21 +1501,6 @@ void SetColumnsTemplateImpl(ArkUINodeHandle node, ArkUI_CharPtr value)
 void ResetWaterFlowLayoutModeImpl(ArkUINodeHandle) {}
 
 void ResetItemFillPolicyImpl(ArkUINodeHandle) {}
-
-void SetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node, ArkUI_Bool support)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    WaterFlowModelNG::SetSupportLazyLoadingEmptyBranch(frameNode, support);
-}
-
-ArkUI_Bool GetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, false);
-    return WaterFlowModelNG::GetSupportLazyLoadingEmptyBranch(frameNode);
-}
-
 #endif
 } // namespace
 namespace NodeModifier {
