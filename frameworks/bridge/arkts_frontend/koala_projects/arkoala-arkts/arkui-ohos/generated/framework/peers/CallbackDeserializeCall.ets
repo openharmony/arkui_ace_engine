@@ -38,7 +38,7 @@ import { ErrorInformation_serializer, FormCallbackInfo_serializer, RouterCallbac
 import { FullscreenInfo_serializer, PlaybackInfo_serializer, PreparedInfo_serializer, FullscreenInfo, PlaybackInfo, PreparedInfo } from './../../component/video'
 import { GestureEvent_serializer, GestureInfo_serializer, BaseGestureEvent_serializer, GestureRecognizer_serializer, TouchRecognizer_serializer, GestureEvent, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, TouchRecognizer } from './../../component/gesture'
 import { Callback as ohos_base_Callback, ErrorCallback, RecordData, BusinessError } from '@ohos.base'
-import { NativeEmbedDataInfo_serializer, NativeEmbedTouchInfo_serializer, OnAlertEvent_serializer, OnAudioStateChangedEvent_serializer, OnBeforeUnloadEvent_serializer, OnClientAuthenticationEvent_serializer, OnConfirmEvent_serializer, OnConsoleEvent_serializer, OnContextMenuShowEvent_serializer, OnDataResubmittedEvent_serializer, OnDownloadStartEvent_serializer, OnErrorReceiveEvent_serializer, OnFaviconReceivedEvent_serializer, OnFirstContentfulPaintEvent_serializer, OnGeolocationShowEvent_serializer, OnHttpAuthRequestEvent_serializer, OnHttpErrorReceiveEvent_serializer, OnInterceptRequestEvent_serializer, WebResourceResponse_serializer, OnLoadFinishedEvent_serializer, OnLoadInterceptEvent_serializer, OnLoadStartedEvent_serializer, OnOverScrollEvent_serializer, OnPageBeginEvent_serializer, OnPageEndEvent_serializer, OnPageVisibleEvent_serializer, OnPdfLoadEvent_serializer, OnPdfScrollEvent_serializer, OnPermissionRequestEvent_serializer, OnProgressChangeEvent_serializer, OnPromptEvent_serializer, OnRefreshAccessedHistoryEvent_serializer, OnRenderExitedEvent_serializer, OnResourceLoadEvent_serializer, OnScaleChangeEvent_serializer, OnScreenCaptureRequestEvent_serializer, OnScrollEvent_serializer, OnSearchResultReceiveEvent_serializer, OnShowFileSelectorEvent_serializer, OnSslErrorEventReceiveEvent_serializer, OnTitleReceiveEvent_serializer, OnTouchIconUrlReceivedEvent_serializer, OnWindowNewEvent_serializer, OnWindowNewExtEvent_serializer, WebKeyboardOptions_serializer, MouseInfoCallback, NativeEmbedMouseInfo_serializer, OnAdsBlockedCallback, AdsBlockedDetails_serializer, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo_serializer, OnContextMenuHideCallback, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo_serializer, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint_serializer, OnFirstScreenPaintCallback, FirstScreenPaint_serializer, OnFullScreenEnterCallback, FullScreenEnterEvent_serializer, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails_serializer, OnLargestContentfulPaintCallback, LargestContentfulPaint_serializer, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo_serializer, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo_serializer, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo_serializer, OnNavigationEntryCommittedCallback, LoadCommittedDetails_serializer, OnOverrideErrorPageCallback, OnOverrideUrlLoadingCallback, WebResourceRequest_serializer, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData_serializer, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, SslErrorEvent_serializer, OnVerifyPinCallback, VerifyPinEvent_serializer, OnViewportFitChangedCallback, TextSelectionChangeCallback, WebKeyboardCallback, WebKeyboardCallbackInfo_serializer, NativeEmbedDataInfo, NativeEmbedTouchInfo, OnAlertEvent, OnAudioStateChangedEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnConsoleEvent, OnContextMenuShowEvent, OnDataResubmittedEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, WebResourceResponse, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnOverScrollEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPdfLoadEvent, OnPdfScrollEvent, OnPermissionRequestEvent, OnProgressChangeEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScaleChangeEvent, OnScreenCaptureRequestEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, OnWindowNewExtEvent, WebKeyboardOptions, NativeEmbedMouseInfo, AdsBlockedDetails, CameraCaptureStateChangeInfo, BlankScreenDetectionEventInfo, FirstMeaningfulPaint, FirstScreenPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, LargestContentfulPaint, MicrophoneCaptureStateChangeInfo, NativeEmbedParamDataInfo, NativeEmbedVisibilityInfo, LoadCommittedDetails, WebResourceRequest, RenderProcessNotRespondingData, ThreatType, SslErrorEvent, VerifyPinEvent, ViewportFit, WebKeyboardCallbackInfo } from './../../component/web'
+import { NativeEmbedDataInfo_serializer, NativeEmbedTouchInfo_serializer, OnAlertEvent_serializer, OnAudioStateChangedEvent_serializer, OnBeforeUnloadEvent_serializer, OnClientAuthenticationEvent_serializer, OnConfirmEvent_serializer, OnConsoleEvent_serializer, OnContextMenuShowEvent_serializer, OnDataResubmittedEvent_serializer, OnDownloadStartEvent_serializer, OnErrorReceiveEvent_serializer, OnFaviconReceivedEvent_serializer, OnFirstContentfulPaintEvent_serializer, OnGeolocationShowEvent_serializer, OnHttpAuthRequestEvent_serializer, OnHttpErrorReceiveEvent_serializer, OnInterceptRequestEvent_serializer, WebResourceResponse_serializer, OnLoadFinishedEvent_serializer, OnLoadInterceptEvent_serializer, OnLoadStartedEvent_serializer, OnOverScrollEvent_serializer, OnPageBeginEvent_serializer, OnPageEndEvent_serializer, OnPageVisibleEvent_serializer, OnPdfLoadEvent_serializer, OnPdfScrollEvent_serializer, OnPermissionRequestEvent_serializer, OnProgressChangeEvent_serializer, OnPromptEvent_serializer, OnRefreshAccessedHistoryEvent_serializer, OnRenderExitedEvent_serializer, OnResourceLoadEvent_serializer, OnScaleChangeEvent_serializer, OnScreenCaptureRequestEvent_serializer, OnScrollEvent_serializer, OnSearchResultReceiveEvent_serializer, OnShowFileSelectorEvent_serializer, OnSslErrorEventReceiveEvent_serializer, OnTitleReceiveEvent_serializer, OnTouchIconUrlReceivedEvent_serializer, OnWindowNewEvent_serializer, OnWindowNewExtEvent_serializer, WebKeyboardOptions_serializer, MouseInfoCallback, NativeEmbedMouseInfo_serializer, OnAdsBlockedCallback, AdsBlockedDetails_serializer, OnAISessionCallback, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo_serializer, OnContextMenuHideCallback, OnCreateAISession, OnDestroyAISession, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo_serializer, OnExecuteAIAction, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint_serializer, OnFirstScreenPaintCallback, FirstScreenPaint_serializer, OnFullScreenEnterCallback, FullScreenEnterEvent_serializer, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails_serializer, OnLargestContentfulPaintCallback, LargestContentfulPaint_serializer, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo_serializer, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo_serializer, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo_serializer, OnNavigationEntryCommittedCallback, LoadCommittedDetails_serializer, OnOverrideErrorPageCallback, OnOverrideUrlLoadingCallback, WebResourceRequest_serializer, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData_serializer, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, SslErrorEvent_serializer, OnVerifyPinCallback, VerifyPinEvent_serializer, OnViewportFitChangedCallback, TextSelectionChangeCallback, WebKeyboardCallback, WebKeyboardCallbackInfo_serializer, NativeEmbedDataInfo, NativeEmbedTouchInfo, OnAlertEvent, OnAudioStateChangedEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnConsoleEvent, OnContextMenuShowEvent, OnDataResubmittedEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, WebResourceResponse, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnOverScrollEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPdfLoadEvent, OnPdfScrollEvent, OnPermissionRequestEvent, OnProgressChangeEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScaleChangeEvent, OnScreenCaptureRequestEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, OnWindowNewExtEvent, WebKeyboardOptions, NativeEmbedMouseInfo, AdsBlockedDetails, AISessionResultType, CameraCaptureStateChangeInfo, BlankScreenDetectionEventInfo, FirstMeaningfulPaint, FirstScreenPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, LargestContentfulPaint, MicrophoneCaptureStateChangeInfo, NativeEmbedParamDataInfo, NativeEmbedVisibilityInfo, LoadCommittedDetails, WebResourceRequest, RenderProcessNotRespondingData, ThreatType, SslErrorEvent, VerifyPinEvent, ViewportFit, WebKeyboardCallbackInfo } from './../../component/web'
 import { NavDestinationContext_serializer, NavDestinationTransition_serializer, NavDestinationTransitionDelegate, NavDestinationActiveReason, NavDestinationContext, NavDestinationTransition, VisibilityChangeReason } from './../../component/navDestination'
 import { NavigationTransitionProxy_serializer, NavigationAnimatedTransition_serializer, PopInfo_serializer, InterceptionCallback, NavPathInfo_serializer, NavPathStack_serializer, InterceptionModeCallback, InterceptionShowCallback, NavContentInfo_serializer, UpdateTransitionCallback, NavigationMode, NavigationTitleMode, NavigationTransitionProxy, NavigationAnimatedTransition, PopInfo, NavPathInfo, NavBar, NavPathStack, NavigationOperation, NavContentInfo } from './../../component/navigation'
 import { OnScrollFrameBeginHandlerResult_serializer, OffsetResult_serializer, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnDidZoomCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback, OnScrollFrameBeginHandlerResult, OffsetResult } from './../../component/scroll'
@@ -2654,6 +2654,13 @@ export function deserializeAndCallOnAdsBlockedCallback(thisDeserializer: Deseria
     let details: AdsBlockedDetails = AdsBlockedDetails_serializer.read(thisDeserializer)
     call(details)
 }
+export function deserializeAndCallOnAISessionCallback(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as OnAISessionCallback)
+    let state: AISessionResultType = AISessionResultType.fromValue(thisDeserializer.readInt32())
+    let content: string = (thisDeserializer.readString() as string)
+    call(state, content)
+}
 export function deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as OnAlphabetIndexerPopupSelectCallback)
@@ -2722,6 +2729,45 @@ export function deserializeAndCallOnContextMenuHideCallback(thisDeserializer: De
     const call = (ResourceHolder.instance().get(resourceId) as OnContextMenuHideCallback)
     call()
 }
+export function deserializeAndCallOnCreateAISession(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as OnCreateAISession)
+    let id: string = (thisDeserializer.readString() as string)
+    let params: string = (thisDeserializer.readString() as string)
+    const resultTmpBufBufResource: CallbackResource = thisDeserializer.readCallbackResource()
+    const resultTmpBufBufCall: KPointer = thisDeserializer.readPointer()
+    const resultTmpBufBufCallSync: KPointer = thisDeserializer.readPointer()
+    const resultTmpBufClosure = (state: AISessionResultType, content: string):void => {
+        const resultTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+        resultTmpBufBufArgsSerializer.writeInt32(resultTmpBufBufResource.resourceId);
+        resultTmpBufBufArgsSerializer.writePointer(resultTmpBufBufCall);
+        resultTmpBufBufArgsSerializer.writePointer(resultTmpBufBufCallSync);
+        resultTmpBufBufArgsSerializer.writeInt32(state.valueOf());
+        resultTmpBufBufArgsSerializer.writeString(content);
+        InteropNativeModule._CallCallbackSync(10, 40986188, resultTmpBufBufArgsSerializer.asBuffer(), resultTmpBufBufArgsSerializer.length());
+        resultTmpBufBufArgsSerializer.release();
+        return;
+    }
+    resourceFinalizerRegister(resultTmpBufClosure, resultTmpBufBufResource)
+    let result: OnAISessionCallback = resultTmpBufClosure
+    const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync: KPointer = thisDeserializer.readPointer()
+    const continuationBufferClosure = (isSelected: boolean):void => {
+        const continuationBufferBufArgsSerializer: SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        continuationBufferBufArgsSerializer.writeBoolean(isSelected);
+        InteropNativeModule._CallCallbackSync(10, -2127714345, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
+    let continuationResult: ((isSelected: boolean) => void) = continuationBufferClosure
+    const callResult = call(id, params, result)
+    continuationResult(callResult)
+}
 export function deserializeAndCallOnCreateMenuCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as OnCreateMenuCallback)
@@ -2751,6 +2797,12 @@ export function deserializeAndCallOnCreateMenuCallback(thisDeserializer: Deseria
     let continuationResult: ((value: Array<TextMenuItem>) => void) = continuationBufferClosure
     const callResult = call(menuItems)
     continuationResult(callResult)
+}
+export function deserializeAndCallOnDestroyAISession(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as OnDestroyAISession)
+    let id: string = (thisDeserializer.readString() as string)
+    call(id)
 }
 export function deserializeAndCallOnDetectBlankScreenCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -2782,6 +2834,29 @@ export function deserializeAndCallOnDragEventCallback(thisDeserializer: Deserial
     }
     let extraParams: string | undefined = extraParamsTmpBuf
     call(event, extraParams)
+}
+export function deserializeAndCallOnExecuteAIAction(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as OnExecuteAIAction)
+    let id: string = (thisDeserializer.readString() as string)
+    let params: string = (thisDeserializer.readString() as string)
+    const resultTmpBufBufResource: CallbackResource = thisDeserializer.readCallbackResource()
+    const resultTmpBufBufCall: KPointer = thisDeserializer.readPointer()
+    const resultTmpBufBufCallSync: KPointer = thisDeserializer.readPointer()
+    const resultTmpBufClosure = (state: AISessionResultType, content: string):void => {
+        const resultTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+        resultTmpBufBufArgsSerializer.writeInt32(resultTmpBufBufResource.resourceId);
+        resultTmpBufBufArgsSerializer.writePointer(resultTmpBufBufCall);
+        resultTmpBufBufArgsSerializer.writePointer(resultTmpBufBufCallSync);
+        resultTmpBufBufArgsSerializer.writeInt32(state.valueOf());
+        resultTmpBufBufArgsSerializer.writeString(content);
+        InteropNativeModule._CallCallbackSync(10, 40986188, resultTmpBufBufArgsSerializer.asBuffer(), resultTmpBufBufArgsSerializer.length());
+        resultTmpBufBufArgsSerializer.release();
+        return;
+    }
+    resourceFinalizerRegister(resultTmpBufClosure, resultTmpBufBufResource)
+    let result: OnAISessionCallback = resultTmpBufClosure
+    call(id, params, result)
 }
 export function deserializeAndCallOnFirstMeaningfulPaintCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -4460,6 +4535,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_NAVEXTENDER_ONUPDATESTACK: return deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer);
         case CallbackKind.KIND_NAVEXTENDER_PAGEMAPNODEBUILDER: return deserializeAndCallNavExtender_PageMapNodeBuilder(thisDeserializer);
         case CallbackKind.KIND_ONADSBLOCKEDCALLBACK: return deserializeAndCallOnAdsBlockedCallback(thisDeserializer);
+        case CallbackKind.KIND_ONAISESSIONCALLBACK: return deserializeAndCallOnAISessionCallback(thisDeserializer);
         case CallbackKind.KIND_ONALPHABETINDEXERPOPUPSELECTCALLBACK: return deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisDeserializer);
         case CallbackKind.KIND_ONALPHABETINDEXERREQUESTPOPUPDATACALLBACK: return deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(thisDeserializer);
         case CallbackKind.KIND_ONALPHABETINDEXERSELECTCALLBACK: return deserializeAndCallOnAlphabetIndexerSelectCallback(thisDeserializer);
@@ -4468,11 +4544,14 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_ONCHECKBOXGROUPCHANGECALLBACK: return deserializeAndCallOnCheckboxGroupChangeCallback(thisDeserializer);
         case CallbackKind.KIND_ONCONTENTSCROLLCALLBACK: return deserializeAndCallOnContentScrollCallback(thisDeserializer);
         case CallbackKind.KIND_ONCONTEXTMENUHIDECALLBACK: return deserializeAndCallOnContextMenuHideCallback(thisDeserializer);
+        case CallbackKind.KIND_ONCREATEAISESSION: return deserializeAndCallOnCreateAISession(thisDeserializer);
         case CallbackKind.KIND_ONCREATEMENUCALLBACK: return deserializeAndCallOnCreateMenuCallback(thisDeserializer);
+        case CallbackKind.KIND_ONDESTROYAISESSION: return deserializeAndCallOnDestroyAISession(thisDeserializer);
         case CallbackKind.KIND_ONDETECTBLANKSCREENCALLBACK: return deserializeAndCallOnDetectBlankScreenCallback(thisDeserializer);
         case CallbackKind.KIND_ONDIDCHANGECALLBACK: return deserializeAndCallOnDidChangeCallback(thisDeserializer);
         case CallbackKind.KIND_ONDIDSTOPDRAGGINGCALLBACK: return deserializeAndCallOnDidStopDraggingCallback(thisDeserializer);
         case CallbackKind.KIND_ONDRAGEVENTCALLBACK: return deserializeAndCallOnDragEventCallback(thisDeserializer);
+        case CallbackKind.KIND_ONEXECUTEAIACTION: return deserializeAndCallOnExecuteAIAction(thisDeserializer);
         case CallbackKind.KIND_ONFIRSTMEANINGFULPAINTCALLBACK: return deserializeAndCallOnFirstMeaningfulPaintCallback(thisDeserializer);
         case CallbackKind.KIND_ONFIRSTSCREENPAINTCALLBACK: return deserializeAndCallOnFirstScreenPaintCallback(thisDeserializer);
         case CallbackKind.KIND_ONFOLDSTATUSCHANGECALLBACK: return deserializeAndCallOnFoldStatusChangeCallback(thisDeserializer);

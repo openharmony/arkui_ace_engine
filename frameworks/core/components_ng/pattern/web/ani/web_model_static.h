@@ -253,6 +253,8 @@ public:
     static void SetCameraCaptureStateChangedId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetEnableDefaultContextMenu(FrameNode* frameNode, bool isEnabled);
+    static void SetAISessionOptions(FrameNode* frameNode, uint32_t type, const AISessionCallback&& onCreateAISession,
+        const AISessionCallback&& onExecuteAIAction, const AISessionCallback&& onDestroyAISession);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_ANI_WEB_MODEL_STATIC_H

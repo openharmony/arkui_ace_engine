@@ -27961,6 +27961,26 @@ void impl_WebAttribute_setEnableDefaultContextMenu(Ark_NativePointer thisPtr, KS
         GetNodeModifiers()->getWebModifier()->setEnableDefaultContextMenu(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_setEnableDefaultContextMenu, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_WebAttribute_setAiSessionOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_AISessionEvent valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 valueValueTempTmpBufOptLength = thisDeserializer.readInt32();
+            Array_AISessionEvent valueValueTempTmpBufOpt = {};
+            thisDeserializer.resizeArray<std::decay<decltype(valueValueTempTmpBufOpt)>::type,
+        std::decay<decltype(*valueValueTempTmpBufOpt.array)>::type>(&valueValueTempTmpBufOpt, valueValueTempTmpBufOptLength);
+            for (int valueValueTempTmpBufOptBufCounterI = 0; valueValueTempTmpBufOptBufCounterI < valueValueTempTmpBufOptLength; valueValueTempTmpBufOptBufCounterI++) {
+                valueValueTempTmpBufOpt.array[valueValueTempTmpBufOptBufCounterI] = AISessionEvent_serializer::read(thisDeserializer);
+            }
+            valueValueTempTmpBuf.value = valueValueTempTmpBufOpt;
+        }
+        Opt_Array_AISessionEvent valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getWebModifier()->setAiSessionOptions(self, static_cast<Opt_Array_AISessionEvent*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(WebAttribute_setAiSessionOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_setRegisterNativeEmbedRule(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

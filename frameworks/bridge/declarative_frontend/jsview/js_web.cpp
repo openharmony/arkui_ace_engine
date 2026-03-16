@@ -4309,7 +4309,7 @@ void WrapAISessionCallback(const JSRef<JSObject>& option, const std::string& fun
         auto adapter = runtime->NewFunction(
             [callback = std::move(callback)](shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
                     const std::vector<shared_ptr<JsValue>>& args, int32_t argc) -> shared_ptr<JsValue> {
-                if (argc > 0) {
+                if (argc == 2) {
                     auto state = args[0]->ToInt32(runtime);
                     auto content = args[1]->ToString(runtime);
                     callback(state, content);

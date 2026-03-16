@@ -20892,6 +20892,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetAiSessionOptionsImpl(Ark_NativePointer node,
+                                 const Opt_Array_AISessionEvent* value)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setAiSessionOptions(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                         const Opt_String* tag,
                                         const Opt_String* type)
@@ -23566,6 +23577,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
             WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
             WebAttributeModifier::SetEnableDefaultContextMenuImpl,
+            WebAttributeModifier::SetAiSessionOptionsImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
         };
