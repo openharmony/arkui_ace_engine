@@ -1984,7 +1984,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
      */
     pattern->isMoveCaretAnywhere_ = true;
     pattern->HandleTouchEvent(touchEventInfo);
-    
+    /**
+     * @tc.steps: step5. ProcessOverlay
+     */
     pattern->isMoveCaretAnywhere_ = false;
     pattern->ProcessOverlay();
     pattern->moveCaretState_.isTouchCaret = true;
@@ -1994,7 +1996,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     pattern->ProcessOverlay();
     pattern->moveCaretState_.isTouchCaret = false;
     pattern->HandleTouchEvent(touchEventInfo);
-
+    /**
+     * @tc.step: step6. SetLocalOffset
+     */
     RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->SetLocalOffset(OffsetF(0.f, 0.f));
