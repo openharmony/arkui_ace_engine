@@ -376,4 +376,12 @@ OffsetF NavDestinationNodeBase::CalcTranslateForSlideTransition(
     auto translate = OffsetF{ isRight ? width : 0.0f, isRight ? 0.0f : height };
     return translate;
 }
+
+void NavDestinationNodeBase::SetNodeFreeze(bool isFreeze)
+{
+    if (isUserSetFreeze_) {
+        return;
+    }
+    FrameNode::SetNodeFreeze(isFreeze);
+}
 } // namespace OHOS::Ace::NG

@@ -199,6 +199,7 @@ public:
     bool CustomizeExpandSafeArea();
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint) override;
     void Layout() override;
+    void SetNodeFreeze(bool isFreeze) override;
 
     void SetOrientation(const std::optional<Orientation>& ori)
     {
@@ -333,6 +334,10 @@ public:
     {
         return isHomeDestination_;
     }
+    void SetIsUserSetFreeze(bool isSet)
+    {
+        isUserSetFreeze_ = isSet;
+    }
 
 protected:
     RectF CalcFullClipRectForTransition(const SizeF& frameSize);
@@ -380,6 +385,7 @@ protected:
     std::optional<bool> navigationIndicatorConfig_;
     std::optional<bool> preNavigationIndicatorConfig_;
     bool isSizeMatchNavigation_ = true;
+    bool isUserSetFreeze_ = false;
     NavDestinationType destType_ = NavDestinationType::DETAIL;
 };
 } // namespace OHOS::Ace::NG
