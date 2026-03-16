@@ -1058,8 +1058,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, CacheClearedAfterChildrenUpdate, TestS
 
     // Create cache by scrolling
     ScrollBy(0, ITEM_MAIN_SIZE * 2);
-    EXPECT_EQ(pattern_->info_.lineHeightMap_.size(), 7);
-    EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 8);
+    EXPECT_EQ(pattern_->info_.lineHeightMap_.size(), 6);
+    EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 7);
     EXPECT_EQ(pattern_->info_.startIndex_, 4);
     EXPECT_EQ(pattern_->info_.endIndex_, 11);
 

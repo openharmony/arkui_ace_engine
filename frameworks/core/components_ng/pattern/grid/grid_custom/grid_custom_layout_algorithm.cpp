@@ -339,7 +339,7 @@ void GridCustomLayoutAlgorithm::FillBackward(float mainSize)
         line = it->first;
     }
     GridIrregularFiller filler(&info_, wrapper_);
-    filler.FillBackward({ crossLens_, crossGap_, mainGap_ }, mainSize - offset + it->second + mainGap_, line);
+    filler.FillBackward({ crossLens_, crossGap_, mainGap_ }, mainSize - offset, line);
 
     GridLayoutRangeSolver solver(&info_, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
