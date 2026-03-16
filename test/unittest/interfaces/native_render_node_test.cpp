@@ -1630,4 +1630,62 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest010, TestSize.Level1)
     ASSERT_EQ(result, ARKUI_ERROR_CODE_RENDER_NOT_ADOPTED_NODE);
 }
 
+/**
+ * @tc.name: NativeRenderNodeGuardTest001
+ * @tc.desc: Test render node wrapper parameter guard branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeGuardTest001, TestSize.Level1)
+{
+    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(renderNode, nullptr);
+
+    ArkUI_RenderNodeHandle child = nullptr;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(nullptr), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetChild(renderNode, -1, &child), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBounds(renderNode, 0, 0, -1, 1), ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetClipToFrame(renderNode, 2), ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetClipToBounds(renderNode, -1), ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetShadowElevation(renderNode, -1.0f), ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetShadowRadius(renderNode, -1.0f), ERROR_CODE_PARAM_OUT_OF_RANGE);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeRenderNodeGuardTest002
+ * @tc.desc: Test render node property getters and empty children query.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeGuardTest002, TestSize.Level1)
+{
+    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(renderNode, nullptr);
+
+    uint32_t color = 0;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBackgroundColor(renderNode, 0xFF123456), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetBackgroundColor(renderNode, &color), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(color, 0U);
+    EXPECT_EQ((color >> 24) & 0xFF, 0xFFU);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetPosition(renderNode, 12, 34), ARKUI_ERROR_CODE_NO_ERROR);
+    int32_t x = 0;
+    int32_t y = 0;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetPosition(renderNode, &x, &y), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(x, 12);
+    EXPECT_EQ(y, 34);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetOpacity(renderNode, 0.5f), ARKUI_ERROR_CODE_NO_ERROR);
+    float opacity = 0.0f;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetOpacity(renderNode, &opacity), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FLOAT_EQ(opacity, 0.5f);
+
+    ArkUI_RenderNodeHandle* children = nullptr;
+    int32_t count = -1;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetChildren(renderNode, &children, &count), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(count, 0);
+    EXPECT_EQ(children, nullptr);
+
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
+}
 } // namespace OHOS::Ace
