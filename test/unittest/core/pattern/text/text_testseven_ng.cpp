@@ -17,6 +17,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
 #include "test/unittest/core/common/clipboard/mock_clip_board.h"
 #include "text_base.h"
 
@@ -173,7 +174,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString005, TestSize.Level1)
     textLayoutProperty->UpdateFontWeight(FontWeight::W400);
     textLayoutProperty->UpdateFontFamily(fontFamily);
     textLayoutProperty->UpdateFontFeature(fontFeature);
-    textLayoutProperty->UpdateTextDecoration({TextDecoration::UNDERLINE});
+    textLayoutProperty->UpdateTextDecoration({ TextDecoration::UNDERLINE });
     textLayoutProperty->UpdateTextDecorationColor(Color::RED);
     textLayoutProperty->UpdateTextDecorationStyle(TextDecorationStyle::DOTTED);
     textLayoutProperty->UpdateTextCase(TextCase::LOWERCASE);
@@ -279,7 +280,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     span0->fontStyle->UpdateFontWeight(FontWeight::W400);
     span0->fontStyle->UpdateFontFamily(fontFamily);
     span0->fontStyle->UpdateFontFeature(fontFeature);
-    span0->fontStyle->UpdateTextDecoration({TextDecoration::UNDERLINE});
+    span0->fontStyle->UpdateTextDecoration({ TextDecoration::UNDERLINE });
     span0->fontStyle->UpdateTextDecorationColor(Color::RED);
     span0->fontStyle->UpdateTextDecorationStyle(TextDecorationStyle::DOTTED);
     span0->fontStyle->UpdateTextCase(TextCase::LOWERCASE);
@@ -511,7 +512,6 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
         EXPECT_EQ(StringUtils::Str16ToStr8(spanDe->content), " ");
     }
 }
-
 
 /**
  * @tc.name: InheritParentTextStyle001
@@ -749,5 +749,105 @@ HWTEST_F(TextTestSevenNg, SpanBuildParagraph001, TestSize.Level1)
         textStyle, textLayoutProperty, contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     MockContainer::Current()->SetApiTargetVersion(originApiVersion);
     EXPECT_EQ(textStyle.GetFontSize(), ADAPT_MAX_FONT_SIZE_VALUE);
+}
+
+/**
+ * @tc.name: SymbolColorListToStringWithHolder001
+ * @tc.desc: Test SymbolColorListToStringWithHolder function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SymbolColorListToStringWithHolder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test empty color list.
+     */
+    std::vector<Color> emptyColorList;
+    auto result = StringUtils::SymbolColorListToStringWithHolder(emptyColorList);
+    EXPECT_EQ(result, "");
+
+    /**
+     * @tc.steps: step2. Test single color.
+     */
+    std::vector<Color> singleColorList;
+    singleColorList.emplace_back(Color::RED);
+    result = StringUtils::SymbolColorListToStringWithHolder(singleColorList);
+    EXPECT_EQ(result, Color::RED.ColorToString() + "|PH:0");
+
+    /**
+     * @tc.steps: step3. Test multiple colors with placeholders.
+     */
+    std::vector<Color> multiColorList;
+    Color color1 = Color::RED;
+    color1.SetPlaceholder(ColorPlaceholder::NONE);
+    multiColorList.emplace_back(color1);
+    Color color2 = Color::GREEN;
+    color2.SetPlaceholder(ColorPlaceholder::SURFACE);
+    multiColorList.emplace_back(color2);
+    Color color3 = Color::BLUE;
+    color3.SetPlaceholder(ColorPlaceholder::SURFACE_CONTRAST);
+    multiColorList.emplace_back(color3);
+    result = StringUtils::SymbolColorListToStringWithHolder(multiColorList);
+    std::string expected = Color::RED.ColorToString() + "|PH:0" + ", " + Color::GREEN.ColorToString() + "|PH:1" + ", " +
+                           Color::BLUE.ColorToString() + "|PH:2";
+    EXPECT_EQ(result, expected);
+}
+
+/**
+ * @tc.name: ChangeParagraphColor001
+ * @tc.desc: Test TextContentModifier::ChangeParagraphColor function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, ChangeParagraphColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextContentModifier with onlyTextColorAnimation_ enabled.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateContent("Hello World");
+    frameNode->layoutProperty_ = textLayoutProperty;
+
+    auto contentModifier = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()), pattern);
+    contentModifier->onlyTextColorAnimation_ = true;
+    Color textColor = Color::RED;
+    textColor.SetPlaceholder(ColorPlaceholder::SURFACE);
+    contentModifier->textColor_ = textColor;
+
+    /**
+     * @tc.steps: step2. Create a mock paragraph and call ChangeParagraphColor.
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    paragraph->AddText(u"Hello World");
+    contentModifier->ChangeParagraphColor(paragraph);
+    EXPECT_NE(paragraph, nullptr);
+}
+
+/**
+ * @tc.name: ChangeParagraphColor002
+ * @tc.desc: Test TextContentModifier::ChangeParagraphColor with onlyTextColorAnimation_ false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, ChangeParagraphColor002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextContentModifier with onlyTextColorAnimation_ disabled.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto contentModifier = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()), pattern);
+    contentModifier->onlyTextColorAnimation_ = false;
+
+    /**
+     * @tc.steps: step2. Create a paragraph and call ChangeParagraphColor.
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();;
+    paragraph->AddText(u"Hello World");
+    contentModifier->ChangeParagraphColor(paragraph);
+    EXPECT_NE(paragraph, nullptr);
 }
 } // namespace OHOS::Ace::NG
