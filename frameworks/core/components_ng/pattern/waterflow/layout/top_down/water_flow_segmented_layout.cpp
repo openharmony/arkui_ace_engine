@@ -148,7 +148,13 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     }
     const int32_t maxIdx = std::min(info_->endIndex_ + cacheCount, static_cast<int32_t>(info_->itemInfos_.size() - 1));
     for (int32_t i = std::max(0, info_->startIndex_ - cacheCount); i <= maxIdx; ++i) {
-        LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
+        auto seg = info_->GetSegment(i);
+        auto crossIdx = info_->itemInfos_[i].crossIdx;
+        if (seg < 0 || seg >= static_cast<int32_t>(crossPos.size()) ||
+            crossIdx < 0 || crossIdx >= static_cast<int32_t>(crossPos[seg].size())) {
+            continue;
+        }
+        LayoutItem(i, crossPos[seg][crossIdx], initialOffset, isReverse);
     }
     wrapper_->SetActiveChildRange(info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount,
         cacheCount, props_->GetShowCachedItemsValue(false));
@@ -275,8 +281,9 @@ void WaterFlowSegmentLayoutBase::SegmentedInit(const std::vector<WaterFlowSectio
 
         const auto& margin = margins[i];
         float crossSize = frameSize.CrossSize(axis_) - (axis_ == Axis::VERTICAL ? margin.Width() : margin.Height());
-        int32_t crossCnt = options[i].crossCount.value_or(1);
+        int32_t crossCnt = std::max(options[i].crossCount.value_or(1), 1);
         itemsCrossSize_[i].resize(crossCnt);
+        // crossCnt is guaranteed >= 1 by std::max above, kept for code check
         if (crossCnt == 0) {
             continue;
         }
