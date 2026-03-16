@@ -3346,4 +3346,24 @@ HWTEST_F(TextFieldPatternTest, TextPatternGetWindowIdFromPipeline001, TestSize.L
     auto windowId = std::make_shared<uint32_t>(pattern->GetWindowIdFromPipeline());
     ASSERT_NE(windowId, nullptr);
 }
+
+/**
+ * @tc.name: TextPattern109
+ * @tc.desc: Test TextPattern DumpSimplifyInfo placeholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern109, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdatePlaceholder(DEFAULT_TEXT_U16);
+    std::shared_ptr<JsonValue> json = std::make_shared<JsonValue>();
+    pattern->DumpSimplifyInfo(json);
+    EXPECT_EQ(json->GetString("placeholder", DEFAULT_TEXT), DEFAULT_TEXT);
+}
 } // namespace OHOS::Ace::NG
