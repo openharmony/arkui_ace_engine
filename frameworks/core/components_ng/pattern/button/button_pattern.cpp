@@ -945,6 +945,7 @@ void ButtonPattern::HandleShadowStyle(ButtonStyleMode buttonStyle, ShadowStyle s
             auto shadow = GetShadowFromTheme(
                 buttonStyle == ButtonStyleMode::TEXT ? ShadowStyle::None : shadowStyle);
             renderContext->UpdateBackShadow(shadow);
+            shadowModify_ = true;
         }
     }
 }
@@ -1517,7 +1518,6 @@ void ButtonPattern::SetFocusButtonStyle(RefPtr<RenderContext>& renderContext, Re
     if (buttonStyle != ButtonStyleMode::TEXT) {
         ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowFocus());
         HandleShadowStyle(buttonStyle, shadowStyle, renderContext, buttonTheme);
-        shadowModify_ = true;
     }
     SetButtonScale(renderContext, buttonTheme);
     bgColorModify_ = renderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
