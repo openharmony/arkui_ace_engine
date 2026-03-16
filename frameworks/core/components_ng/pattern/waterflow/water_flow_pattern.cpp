@@ -355,7 +355,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
 
     if (layoutInfo_->isDataValid_) {
-        GetHost()->ChildrenUpdatedFrom(-1);
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->ChildrenUpdatedFrom(-1);
     }
     layoutInfo_->isDataValid_ = true;
 
