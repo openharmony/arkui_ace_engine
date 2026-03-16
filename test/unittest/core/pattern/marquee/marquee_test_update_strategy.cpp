@@ -1139,11 +1139,19 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy015, TestSize.Lev
     marqueeModel.SetFontSize(std::nullopt);
     EXPECT_FALSE(marqueeLayoutProperty->HasFontSize());
 
+    /**
+     * @tc.steps: step5. Call Set Function.
+     * @tc.expected: step5. All Set Successful.
+     */
     marqueeModel.SetTextColor(Color(2));
     EXPECT_EQ(marqueeLayoutProperty->GetFontColor(), Color(2));
     marqueeModel.SetTextColor(std::nullopt);
     EXPECT_FALSE(marqueeLayoutProperty->HasFontColor());
 
+    /**
+     * @tc.steps: step6. Call Set Function.
+     * @tc.expected: step6. All Set Successful.
+     */
     marqueeModel.SetFontWeight(Ace::FontWeight::W200);
     EXPECT_EQ(marqueeLayoutProperty->GetFontWeight(), Ace::FontWeight::W200);
     marqueeModel.SetFontWeight(std::nullopt);
