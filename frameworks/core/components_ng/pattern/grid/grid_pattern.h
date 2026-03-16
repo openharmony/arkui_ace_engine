@@ -241,6 +241,11 @@ public:
         return std::move(preloadItemList_);
     }
 
+    void ClearPreloadItemList()
+    {
+        preloadItemList_.clear();
+    }
+
     void SetPreloadItemList(std::list<GridPreloadItem>&& list)
     {
         preloadItemList_ = std::move(list);
