@@ -62,6 +62,7 @@
     "pages/Examples/MenuMaskDemo",
     "pages/Examples/MenuSystemMaterial",
     "pages/Examples/MenuComprehensiveDemo",
+    "pages/Examples/MenuAdvancedDemo",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",
