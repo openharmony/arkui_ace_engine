@@ -32,7 +32,6 @@ import { UIContext } from '@ohos/arkui/UIContext';
 import { RouterImpl } from 'arkui/base/Router';
 import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
-import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';

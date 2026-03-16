@@ -16,7 +16,7 @@
 import { ArkUIAniModule } from 'arkui.ani';
 import { WaterFlowOptions, ArkWaterFlowComponent } from '../component/waterFlow';
 import { PeerNode, findPeerNode } from 'arkui/PeerNode';
-import { UIContextImpl } from 'arkui/base/UIContextImpl';
+import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { CustomBuilder } from 'arkui/framework';
 import { StateContext } from 'arkui.incremental.runtime.state';
@@ -41,7 +41,7 @@ export class WaterFlowHandWritten {
                 ArkUIAniModule._SetWaterFlowFooterContent(peerPtr, footerNodePtr);
                 options.footer = undefined;
             } else if (options.footer !== undefined) {
-                let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+                let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
                 if (options.footer instanceof CustomBuilder) {
                     const valueBuilder = options.footer as CustomBuilder;
                     const old = GlobalStateManager.instance;

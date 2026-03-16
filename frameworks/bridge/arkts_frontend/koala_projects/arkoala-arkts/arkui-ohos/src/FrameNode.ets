@@ -14,7 +14,6 @@
  */
 
 import { UIContext } from "@ohos/arkui/UIContext"
-import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIEventHelper } from 'arkui/component/idlize';
 import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
 import { Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk,
@@ -214,7 +213,7 @@ errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child'
 export class FrameNode implements MaterializedBase {
     private isDisposed_: boolean = false;
     peer?: Finalizable | undefined = undefined
-    uiContext: UIContextImpl | undefined = undefined
+    uiContext: UIContext | undefined = undefined
     renderNode_: RenderNode | undefined = undefined
     instanceId_?: number;
     // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_ani.cpp.
@@ -255,7 +254,7 @@ export class FrameNode implements MaterializedBase {
     }
     constructor(uiContext?: UIContext, options?: FrameNodeOptions, type?: string, ptr?: KPointer) {
         if ((uiContext) !== (undefined)) {
-            this.uiContext = uiContext as UIContextImpl;
+            this.uiContext = uiContext as UIContext;
             this.instanceId_ = this.uiContext!.instanceId_;
             this.nodeType_ = type;
             this._supportMultiThread = options?.supportMultiThread ?? false;

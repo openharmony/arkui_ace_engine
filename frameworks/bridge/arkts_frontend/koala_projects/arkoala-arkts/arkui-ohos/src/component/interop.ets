@@ -36,7 +36,8 @@ import {
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
-import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
+import { UIContext } from "@ohos/arkui/UIContext"
+import { DetachedRootEntryImpl } from 'arkui/base/UIContextImpl';
 import { CustomComponent, CustomDelegate, BaseCustomComponent } from './customComponent';
 import { setNeedCreate } from '../ArkComponentRoot';
 import { StateMgmtTool } from '#stateMgmtTool';
@@ -130,7 +131,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
         BaseCustomComponent._invokeImpl<T, T_Options>(undefined, factory, options, undefined, content);
     };
 
-    const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+    const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
     const manager = GlobalStateManager.instance;
 
     ArkThemeScopeManager.getInstance().applyColorModeFromThemeScope();
@@ -491,7 +492,7 @@ export function transferCompatibleBuilder<T extends Function>(
             builder.unsafeCall(...[__context(), __id(), ...params]);
         };
 
-        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         const manager = GlobalStateManager.instance;
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
@@ -528,7 +529,7 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
                 }
             }
         }
-        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         const manager = GlobalStateManager.instance;
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());

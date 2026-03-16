@@ -16,7 +16,6 @@ import { UIContextTransfer } from '../handwritten/transfer/UIContextTransfer';
 import { ComponentContent } from '../ComponentContent';
 import { UIContext } from '@ohos.arkui.UIContext';
 import { KPointer } from '@koalaui/interop';
-import { UIContextImpl } from '../base/UIContextImpl';
 import { int32 } from '@koalaui/compat';
 import { FrameNodeExtender } from '../framework';
 import { BusinessError } from '#external';
@@ -47,7 +46,7 @@ export class ComponentContentTransfer {
         let nodeRawPtr = getFrameNodeRawPtr.invoke(nodePtrDyn as Object).toNumber();
 
         let instanceId = ESValue.wrap(input).invokeMethod('getInstanceId').toNumber();
-        let uiContextSta = new UIContextImpl(instanceId as int32);
+        let uiContextSta = new UIContext(instanceId as int32);
         return new TransComponentContent(uiContextSta as UIContext, nodeRawPtr as KPointer, frameNodePeer);
     }
 

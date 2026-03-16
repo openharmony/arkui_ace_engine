@@ -22,7 +22,7 @@ import { ArkUIAniModule } from "arkui.ani"
 import { CustomBuilder, CustomBuilderT } from "./component/builder"
 import { CustomNodeBuilder, ArkComponentRootPeer, CustomNodeBuilderT } from "#generated"
 import { UIContextUtil } from './base/UIContextUtil';
-import { UIContextImpl } from './base/UIContextImpl';
+import { UIContext } from "@ohos/arkui/UIContext"
 import { ObserveSingleton } from './stateManagement/base/observeSingleton';
 import { ExtendableComponent } from './component/extendableComponent';
 import { ResponseType } from "./component/enums"
@@ -56,7 +56,7 @@ function componentRootPeerFactory(): PeerNode {
 export class FreeRootNode extends PeerNode {
     public static current: FreeRootNode | undefined = undefined;
     private componentRoot: ArkCustomComponentRootPeer | undefined = undefined;
-    private context: UIContextImpl | undefined = undefined;
+    private context: UIContext | undefined = undefined;
     public ptr: KPointer = -1;
     protected constructor(peerPtr: pointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -75,7 +75,7 @@ export class FreeRootNode extends PeerNode {
         this.componentRoot = node as ArkCustomComponentRootPeer | undefined;
         this.componentRoot?.addFreezeRoot(this);
     }
-    setUIContext(context: UIContextImpl): void {
+    setUIContext(context: UIContext): void {
         this.context = context;
     }
     freezeSelf(): void {
@@ -108,7 +108,7 @@ export class FreeRootNode extends PeerNode {
     }
 }
 
-function componentFreeRootFactory(component: object | undefined, context: UIContextImpl): IncrementalNode {
+function componentFreeRootFactory(component: object | undefined, context: UIContext): IncrementalNode {
     const node = FreeRootNode.create();
     node.setComponent(component);
     node.setUIContext(context);
@@ -117,7 +117,7 @@ function componentFreeRootFactory(component: object | undefined, context: UICont
 
 export class CallbackTransformer {
     static transformFromCustomBuilder(value: CustomBuilder): CustomNodeBuilder {
-        const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
         const currentExtendableComponent = ExtendableComponent.current;
         const currentStateManager = GlobalStateManager.instance;
@@ -157,7 +157,7 @@ export class CallbackTransformer {
     }
 
     static transformFromCustomBuilderT(value: CustomBuilderT<ResponseType>): CustomNodeBuilderT<ResponseType> {
-        const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
         const currentExtendableComponent = ExtendableComponent.current;
         return (parentNodeId: KPointer, t: ResponseType): KPointer => {

@@ -16,7 +16,8 @@ import { KLong } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
 import { CustomComponent } from './component/customComponent'
 import { UIContextUtil } from "arkui/base/UIContextUtil";
-import { DetachedRootEntryImpl, UIContextImpl } from 'arkui/base/UIContextImpl';
+import { UIContext } from '@ohos/arkui/UIContext';
+import { DetachedRootEntryImpl } from 'arkui/base/UIContextImpl';
 
 import {
     GlobalStateManager,
@@ -116,7 +117,7 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
         }
     }
     console.log(`[createXBarCustomComponent]start getUIContextById ${instanceID}`)
-    const uiContext = UIContextUtil.getOrCreateUIContextById(instanceID) as UIContextImpl;
+    const uiContext = UIContextUtil.getOrCreateUIContextById(instanceID) as UIContext;
     console.log(`[createXBarCustomComponent]getUIContextById`)
     const manager = GlobalStateManager.instance;
     const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {

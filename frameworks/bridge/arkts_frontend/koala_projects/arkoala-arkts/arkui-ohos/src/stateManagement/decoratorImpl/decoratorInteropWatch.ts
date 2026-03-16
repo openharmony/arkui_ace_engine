@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { WatchFuncType, WatchFunc } from '../index';
-import { UIContextImpl } from 'arkui/base/UIContextImpl';
+import { UIContext } from '@ohos/arkui/UIContext';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 
 export class InteropWatchFunc extends WatchFunc {
@@ -23,7 +23,7 @@ export class InteropWatchFunc extends WatchFunc {
 
     constructor(func: WatchFuncType) {
         super(func);
-        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let uiContext: UIContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         let instanceId = uiContext.getInstanceId();
         this.checkThread = (): boolean => uiContext.checkThread(instanceId);
     }

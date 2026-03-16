@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-import { UIContextImpl } from '../../base/UIContextImpl';
+import { UIContext } from "@ohos/arkui/UIContext"
 import { int32 } from '@koalaui/common'
 
 export class UIContextTransfer {
 
     static transferStatic(input: Any): Object {
         const instanceId = ESValue.wrap(input).getProperty('instanceId_').toNumber();
-        let uiContext = new UIContextImpl(instanceId as int32);
+        let uiContext = new UIContext(instanceId as int32);
         return uiContext;
     }
     static transferDynamic(input: Object): Any {
-        let uiContextImpl = input as UIContextImpl;
-        let instaceId = uiContextImpl.instanceId_;
+        let uiContext = input as UIContext;
+        let instaceId = uiContext.instanceId_;
         return UIContextTransfer.createDynamic(instaceId);
     }
     static createDynamic(instanceId: int32): Any {

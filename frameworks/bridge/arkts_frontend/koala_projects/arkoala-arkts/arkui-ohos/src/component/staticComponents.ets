@@ -28,7 +28,7 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { IExtendableComponent } from './extendableComponent';
 import { destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
-import { UIContextImpl } from 'arkui/base/UIContextImpl';
+import { UIContext } from '@ohos/arkui/UIContext';
 import { ArkUINativeModule } from '#components';
 import { FreeRootNode } from '../CallbackTransformer';
 import { CustomNodeBuilder } from '#generated';
@@ -119,7 +119,7 @@ export class ArkCustomComponentRootPeer extends PeerNode {
     }
     dispose() {
         if (this.childPeerPtr !== nullptr) {
-            destroyUiDetachedRoot(this.childPeerPtr, (this.component!.getUIContext() as UIContextImpl).getInstanceId());
+            destroyUiDetachedRoot(this.childPeerPtr, (this.component!.getUIContext() as UIContext).getInstanceId());
             this.childPeerPtr = nullptr;
         }
         this.component?.__removeChildWhenDispose__IExtendableComponent_Internal();
