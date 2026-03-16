@@ -219,6 +219,8 @@ struct TranslateTextExtraData {
 TranslateTextExtraData g_translateTextData;
 uint32_t g_currentControllerId = 0;
 bool g_currentControllerIdStop = false;
+std::vector<std::string> g_sameLayerSurfaceIds = {};
+std::mutex g_surfaceIdMutex;
 enum PictureInPictureState {
     PIP_STATE_ENTER = 0,
     PIP_STATE_EXIT,
@@ -401,6 +403,30 @@ bool IsSnapshotPathValid(const std::string& snapshotPath)
     return true;
 }
 } // namespace
+
+namespace SameLayerSurface {
+void SetSameLayerSurfaceId(const std::string& surfaceId)
+{
+    std::lock_guard<std::mutex> lock(g_surfaceIdMutex);
+    if (std::find(g_sameLayerSurfaceIds.begin(), g_sameLayerSurfaceIds.end(), surfaceId) == g_sameLayerSurfaceIds.end()) {
+        g_sameLayerSurfaceIds.push_back(surfaceId);
+    }
+}
+
+void RemoveSameLayerSurfaceId(const std::string& surfaceId)
+{
+    std::lock_guard<std::mutex> lock(g_surfaceIdMutex);
+    auto it = std::remove(g_sameLayerSurfaceIds.begin(), g_sameLayerSurfaceIds.end(), surfaceId);
+    if (it != g_sameLayerSurfaceIds.end()) {
+        g_sameLayerSurfaceIds.erase(it, g_sameLayerSurfaceIds.end());
+    }
+}
+
+bool HasSurfaceId(const std::string& surfaceId) {
+    std::lock_guard<std::mutex> lock(g_surfaceIdMutex);
+    return std::find(g_sameLayerSurfaceIds.begin(), g_sameLayerSurfaceIds.end(), surfaceId) != g_sameLayerSurfaceIds.end();
+}
+}
 
 void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surfaceId)
 {
@@ -4251,7 +4277,8 @@ bool WebPattern::IsRootNeedExportTexture()
         }
         isNeedExportTexture = frameNode->IsNeedExportTexture();
         if (isNeedExportTexture) {
-            return isNeedExportTexture;
+            auto textureInfo = frameNode->GetExportTextureInfo();
+            return SameLayerSurface::HasSurfaceId(textureInfo->GetSurfaceId());
         }
     }
     return isNeedExportTexture;
