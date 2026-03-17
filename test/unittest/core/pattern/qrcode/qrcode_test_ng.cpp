@@ -1279,4 +1279,27 @@ HWTEST_F(QRCodeTestNg, QRCodePaintPropertyToJsonValue002, TestSize.Level0)
     EXPECT_EQ(json->GetString("backgroundColor"), QR_CODE_BACKGROUND_COLOR_VALUE.ColorToString());
     EXPECT_EQ(json->GetDouble("contentOpacity"), 0.5);
 }
+
+/**
+ * @tc.name: QRCodePatternOnAttachToFrameNode001
+ * @tc.desc: test OnAttachToFrameNode updates render context background color.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodePatternOnAttachToFrameNode001, TestSize.Level1)
+{
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    renderContext->UpdateBackgroundColor(Color::BLACK);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
+
+    qrCodePattern->OnAttachToFrameNode();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::WHITE);
+}
 } // namespace OHOS::Ace::NG
