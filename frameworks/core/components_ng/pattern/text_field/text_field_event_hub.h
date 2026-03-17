@@ -473,6 +473,8 @@ public:
         }
     }
 
+    RefPtr<GestureEventHub> CreateGestureEventHub() override;
+
 private:
     std::optional<std::u16string> lastValue_;
     PreviewText lastPreviewText_ {};

@@ -61,6 +61,7 @@ export class ArkCustomComponentRootPeer extends PeerNode {
     private component?: IExtendableComponent;
     private childPeerPtr: KPointer = nullptr;
     private buildFunc?: () => Long;
+    private envFunc?: (instanceId: int32) => void;
     private customNodeBuilder: CustomNodeBuilder | undefined = undefined;
     private freezeRoot: Set<FreeRootNode>;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -155,6 +156,7 @@ export class ArkCustomComponentRootPeer extends PeerNode {
     }
 
     getEnvInstanceId(envFunc: (instanceId: int32) => void): void {
+        this.envFunc = envFunc;
         ArkUIAniCustomNodeModule._CustomNode_EnvFunction(this.peer.ptr, envFunc);
         return;
     }

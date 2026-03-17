@@ -40,7 +40,7 @@ import { ObserveSingleton } from './stateManagement/base/observeSingleton'
 import { StateMgmtDFX, StateUpdateLoop } from './stateManagement'
 import { AceTrace } from 'arkui/base/AceTrace'
 import { flushBuilderRootNode } from './BuilderNode'
-import { EnvDecoratedVariable } from "./stateManagement/decoratorImpl/decoratorEnv";
+import { EnvDecoratedVariable } from './stateManagement/decoratorImpl/decoratorEnv';
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 

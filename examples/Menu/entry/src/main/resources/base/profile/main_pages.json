@@ -64,6 +64,7 @@
     "pages/Examples/MenuComprehensiveDemo",
     "pages/Examples/MenuBusinessScenarios",
     "pages/Examples/MenuAllInOneDemo",
+    "pages/Examples/MenuAdvancedDemo",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",

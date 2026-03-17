@@ -742,6 +742,18 @@ public:
         return subMenuOriginOffset_;
     }
 
+    void ApplyScrollBarToScrollNode();
+
+    void SetScrollBar(std::optional<DisplayMode> displayMode)
+    {
+        scrollBar_ = displayMode;
+    }
+
+    std::optional<DisplayMode> GetScrollBar() const
+    {
+        return scrollBar_;
+    }
+
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -891,6 +903,7 @@ private:
     bool isDisableMenuBgColorByUser_ = false;
     bool buildDividerTaskAdded_ = false;
     OffsetF subMenuOriginOffset_ = OffsetF();
+    std::optional<DisplayMode> scrollBar_;
 
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;

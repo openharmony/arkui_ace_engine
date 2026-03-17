@@ -30,6 +30,68 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
+namespace {
+bool g_registerObserverCalled = false;
+bool g_unregisterObserverCalled = false;
+bool g_getNodePropertyCalled = false;
+bool g_getTreeCalled = false;
+bool g_getTreeAsyncCalled = false;
+bool g_executeCommandCalled = false;
+bool g_getComponentInfoCalled = false;
+
+void MockRegisterUIEventObserver(const std::string&, const std::shared_ptr<UIEventObserver>&)
+{
+    g_registerObserverCalled = true;
+}
+
+void MockUnregisterUIEventObserver(const std::shared_ptr<UIEventObserver>&)
+{
+    g_unregisterObserverCalled = true;
+}
+
+void MockGetNodeProperty(const std::string&, std::unordered_map<std::string, std::string>& nodeProperties)
+{
+    g_getNodePropertyCalled = true;
+    nodeProperties["result"] = "ok";
+}
+
+void MockGetSimplifiedInspectorTree(const TreeParams&, std::string& tree)
+{
+    g_getTreeCalled = true;
+    tree = "mock_tree";
+}
+
+void MockGetSimplifiedInspectorTreeAsync(const TreeParams&, OnInspectorTreeResult&& callback)
+{
+    g_getTreeAsyncCalled = true;
+    callback(std::make_shared<std::string>("mock_async_tree"));
+}
+
+void MockExecuteCommandAsync(const UICommandParams&, UICommandResult&& callback)
+{
+    g_executeCommandCalled = true;
+    callback(std::make_shared<std::string>("mock_command"));
+}
+
+void MockGetComponentImageInfo(const ComponentParams&, std::shared_ptr<ComponentResult>& result)
+{
+    g_getComponentInfoCalled = true;
+    result->isOk = true;
+}
+
+void ResetUIEventFuncForTest(UIEventFunc& func)
+{
+    func.registerFunc_ = nullptr;
+    func.unregisterFunc_ = nullptr;
+    func.getPropFunc_ = nullptr;
+    func.getTreeFunc_ = nullptr;
+    func.getTreeAsyncFunc_ = nullptr;
+    func.executeCommandAsyncFunc_ = nullptr;
+    func.getComponentInfoFuncFunc_ = nullptr;
+    func.handle_ = nullptr;
+}
+} // namespace
+
 class UiEventTest : public testing::Test {
 public:
     static void SetUpTestSuite()
@@ -225,5 +287,100 @@ HWTEST_F(UiEventTest, UiEventTest008, TestSize.Level1)
     UIEvent::GetComponentImageInfo(params, result);
     bool ret = UIEventFunc::Get().IsAvailable();
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UiEventTest009
+ * @tc.desc: test UIEventFunc wrappers with injected function pointers
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiEventTest, UiEventTest009, TestSize.Level1)
+{
+    auto& func = UIEventFunc::Get();
+    ResetUIEventFuncForTest(func);
+    func.registerFunc_ = MockRegisterUIEventObserver;
+    func.unregisterFunc_ = MockUnregisterUIEventObserver;
+    func.getPropFunc_ = MockGetNodeProperty;
+    func.getTreeFunc_ = MockGetSimplifiedInspectorTree;
+    func.getTreeAsyncFunc_ = MockGetSimplifiedInspectorTreeAsync;
+    func.executeCommandAsyncFunc_ = MockExecuteCommandAsync;
+    func.getComponentInfoFuncFunc_ = MockGetComponentImageInfo;
+
+    g_registerObserverCalled = false;
+    g_unregisterObserverCalled = false;
+    g_getNodePropertyCalled = false;
+    g_getTreeCalled = false;
+    g_getTreeAsyncCalled = false;
+    g_executeCommandCalled = false;
+    g_getComponentInfoCalled = false;
+
+    EXPECT_TRUE(func.IsAvailable());
+
+    UIEventFunc::RegisterUIEventObserver("config", nullptr);
+    UIEventFunc::UnregisterUIEventObserver(nullptr);
+
+    std::unordered_map<std::string, std::string> nodeProperties;
+    UIEventFunc::GetNodeProperty("page", nodeProperties);
+    EXPECT_EQ(nodeProperties["result"], "ok");
+
+    std::string tree;
+    UIEventFunc::GetSimplifiedInspectorTree({ false }, tree);
+    EXPECT_EQ(tree, "mock_tree");
+
+    bool treeAsyncCallbackCalled = false;
+    UIEventFunc::GetSimplifiedInspectorTreeAsync({ false }, [&treeAsyncCallbackCalled](
+                                                              const std::shared_ptr<std::string> result) {
+        treeAsyncCallbackCalled = result && *result == "mock_async_tree";
+    });
+
+    bool commandCallbackCalled = false;
+    UIEventFunc::ExecuteCommandAsync({ "test" }, [&commandCallbackCalled](const std::shared_ptr<std::string> result) {
+        commandCallbackCalled = result && *result == "mock_command";
+    });
+
+    auto componentResult = std::make_shared<ComponentResult>();
+    UIEventFunc::GetComponentImageInfo({ 1, 1 }, componentResult);
+
+    EXPECT_TRUE(g_registerObserverCalled);
+    EXPECT_TRUE(g_unregisterObserverCalled);
+    EXPECT_TRUE(g_getNodePropertyCalled);
+    EXPECT_TRUE(g_getTreeCalled);
+    EXPECT_TRUE(g_getTreeAsyncCalled);
+    EXPECT_TRUE(treeAsyncCallbackCalled);
+    EXPECT_TRUE(g_executeCommandCalled);
+    EXPECT_TRUE(commandCallbackCalled);
+    EXPECT_TRUE(g_getComponentInfoCalled);
+    EXPECT_TRUE(componentResult->isOk);
+
+    ResetUIEventFuncForTest(func);
+}
+
+/**
+ * @tc.name: UiEventTest010
+ * @tc.desc: test GetComponentImageInfo no-op branch does not affect availability
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiEventTest, UiEventTest010, TestSize.Level1)
+{
+    auto& func = UIEventFunc::Get();
+    ResetUIEventFuncForTest(func);
+    func.registerFunc_ = MockRegisterUIEventObserver;
+    func.unregisterFunc_ = MockUnregisterUIEventObserver;
+    func.getPropFunc_ = MockGetNodeProperty;
+    func.getTreeFunc_ = MockGetSimplifiedInspectorTree;
+    func.getTreeAsyncFunc_ = MockGetSimplifiedInspectorTreeAsync;
+    func.executeCommandAsyncFunc_ = MockExecuteCommandAsync;
+    func.getComponentInfoFuncFunc_ = nullptr;
+
+    g_getComponentInfoCalled = false;
+    auto componentResult = std::make_shared<ComponentResult>();
+    componentResult->isOk = false;
+
+    EXPECT_TRUE(func.IsAvailable());
+    UIEventFunc::GetComponentImageInfo({ 2, 2 }, componentResult);
+    EXPECT_FALSE(g_getComponentInfoCalled);
+    EXPECT_FALSE(componentResult->isOk);
+
+    ResetUIEventFuncForTest(func);
 }
 } // namespace OHOS::Ace

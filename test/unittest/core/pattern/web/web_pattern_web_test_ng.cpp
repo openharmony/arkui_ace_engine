@@ -1371,13 +1371,12 @@ HWTEST_F(WebPatternWebTest, HandleTouchCancel, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
+    std::string surfaceId = "123";
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
     RefPtr<UINode> son = frameNode;
     RefPtr<UINode> parent =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
@@ -1386,9 +1385,14 @@ HWTEST_F(WebPatternWebTest, HandleTouchCancel, TestSize.Level1)
     parent->exportTextureInfo_ = AceType::MakeRefPtr<ExportTextureInfo>();
     grandParent->exportTextureInfo_ = AceType::MakeRefPtr<ExportTextureInfo>();
     parent->exportTextureInfo_->SetCurrentRenderType(NodeRenderType::RENDER_TYPE_DISPLAY);
+    parent->exportTextureInfo_->SetSurfaceId(surfaceId);
     grandParent->exportTextureInfo_->SetCurrentRenderType(NodeRenderType::RENDER_TYPE_TEXTURE);
+    grandParent->exportTextureInfo_->SetSurfaceId(surfaceId);
     son->SetParent(parent);
     parent->SetParent(grandParent);
+    ASSERT_NE(webPattern, nullptr);
+    NG::SameLayerSurface::SetSameLayerSurfaceId(surfaceId);
+    webPattern->OnModifyDone();
     TouchEventInfo info("info");
     webPattern->HandleTouchCancel(info);
     EXPECT_TRUE(webPattern->isTouchUpEvent_);

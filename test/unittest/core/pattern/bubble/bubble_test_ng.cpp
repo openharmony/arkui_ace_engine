@@ -243,7 +243,7 @@ RefPtr<FrameNode> BubbleTestNg::CreateBubbleNode(const TestProperty& testPropert
  * @tc.desc: Test all the properties of bubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest001, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize all properties of bubble.
@@ -296,7 +296,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest001, TestSize.Level1)
  * @tc.desc: Verify whether the layout property, layoutAlgorithm and event functions are created.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest002, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -343,7 +343,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest002, TestSize.Level1)
  * @tc.desc: Test event function of bubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level1)
+HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -386,7 +386,7 @@ HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level1)
  * @tc.desc: Test bubble onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest004, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -436,7 +436,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest004, TestSize.Level1)
  * @tc.desc: Test bubble OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest005, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -514,7 +514,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest005, TestSize.Level1)
  * @tc.desc: Test bubble pattern InitTouchEvent HandleTouchEvent HandleTouchDOWN.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest006, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -574,7 +574,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest006, TestSize.Level1)
  * @tc.desc: Test CreateBubbleNode with message and Update.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level0)
 {
     // set value to popupParam
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
@@ -625,7 +625,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level1)
  * @tc.desc: Test CreateCustomBubbleNode and Update.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -692,7 +692,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level1)
  * @tc.desc: Test StartEnteringAnimation and StartExitingAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -748,7 +748,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level1)
  * @tc.desc: Test IsOnShow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest010, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -774,7 +774,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest010, TestSize.Level1)
  * @tc.desc: Test GetInvisibleOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -837,7 +837,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level1)
  * @tc.desc: Test start animation in OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest012, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -882,7 +882,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest012, TestSize.Level1)
  * @tc.desc: Test BubblePaintMethod PaintBorder PaintBubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -971,7 +971,7 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level1)
  * @tc.desc: Test BubblePaintMethod UpdateArrowOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePaintMethod002, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePaintMethod002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -1022,7 +1022,7 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod002, TestSize.Level1)
  * @tc.desc: Test BubblePaintMethod PaintMask.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePaintMethod003, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePaintMethod003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -1064,7 +1064,7 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod003, TestSize.Level1)
  * @tc.desc: Test bubble onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -1126,7 +1126,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level1)
  * @tc.desc: Test bubble hover and touch callback.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -1206,7 +1206,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
  * @tc.desc: Test CreateBubbleNode with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set popup value to popupParam.
@@ -1276,7 +1276,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level1)
  * @tc.desc: Test CreateCustomBubbleNode with with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest016, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest016, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set popup value to popupParam.
@@ -1332,7 +1332,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest016, TestSize.Level1)
  * @tc.desc: Test UpdateCommonParam with with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest021, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest021, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set popup value to popupParam.
@@ -1377,7 +1377,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest021, TestSize.Level1)
  * @tc.desc: Test OnDetachFromFrameNodeImpl.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest022, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest022, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create bubble node with target node.
