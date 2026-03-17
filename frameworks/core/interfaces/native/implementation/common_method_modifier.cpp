@@ -830,6 +830,9 @@ auto g_bindMenuOptionsParam = [](
     if (scrollBarOpt.has_value()) {
         menuParam.scrollBar = scrollBarOpt.value();
     }
+    auto maxHeightOpt = OptConvert<Dimension>(menuOptions.maxHeight);
+    Validator::ValidateNonNegative(maxHeightOpt);
+    menuParam.maxHeight = maxHeightOpt;
 };
 
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,

@@ -69,6 +69,7 @@ public:
         value->propSelectAvoidanceMode_ = CloneSelectAvoidanceMode();
         value->propBorderRadius_ = CloneBorderRadius();
         value->propMenuWidth_ = CloneMenuWidth();
+        value->propMenuMaxHeight_ = CloneMenuMaxHeight();
         value->propShowInSubWindow_ = CloneShowInSubWindow();
         value->propShowDefaultSelectedIcon_ = CloneShowDefaultSelectedIcon();
         value->propExpandingMode_ = CloneExpandingMode();
@@ -91,6 +92,7 @@ public:
         ResetSelectAvoidanceMode();
         ResetBorderRadius();
         ResetMenuWidth();
+        ResetMenuMaxHeight();
         ResetShowInSubWindow();
         ResetShowDefaultSelectedIcon();
         ResetExpandingMode();
@@ -116,6 +118,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetSize, NG::SizeF, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, NG::BorderRadiusProperty, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuMaxHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemDivider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemDividerMode, DividerMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemGroupDivider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
