@@ -1475,6 +1475,7 @@ void JSViewPartialUpdate::JSRegisterUpdateJSInstanceCallback(const JSCallbackInf
             CHECK_NULL_VOID(customNodeBase);
             if (customNodeBase->NeedRebuild()) {
                 func->ExecuteJS(0, nullptr);
+                customNodeBase->ResetNeedRebuild();
             }
         }
     };
