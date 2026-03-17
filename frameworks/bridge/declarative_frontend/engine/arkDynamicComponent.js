@@ -15,7 +15,11 @@
 function __ArkUI_PreloadDynamicModule__(componentName, abcName) {
   getUINativeModule().loadNativeModule(componentName);
   let module = globalThis.requireNapi(abcName);
-  module.exportView();
+  if (componentName === 'CalendarPickerDialog' || componentName === 'TimePickerDialog') {
+    module.exportViewDialog();
+  } else {
+    module.exportView();
+  }
   module.loadComponent();
 }
 
@@ -47,14 +51,15 @@ if (globalThis.CalendarPicker === undefined) {
 
 // @ts-ignore
 if (globalThis.CalendarPickerDialog === undefined) {
-  globalThis.CalendarPickerDialog = {
-    show: function(params) {
+  globalThis.CalendarPickerDialog = class {
+    static name = 'JSCalendarPickerDialog'
+    constructor() {}
+    static show(params) {
       getUINativeModule().loadNativeModule('CalendarPickerDialog');
       let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
-      module.exportDialogView();
+      module.exportViewDialog();
       getUINativeModule().calendarPickerDialog.show(params);
-    },
-    name: 'JSCalendarPickerDialog'
+    }
   }
 }
 
@@ -288,14 +293,15 @@ if (globalThis.TimePicker === undefined) {
 
 // @ts-ignore
 if (globalThis.TimePickerDialog === undefined) {
-  globalThis.TimePickerDialog = {
-    show: function(params) {
+  globalThis.TimePickerDialog = class {
+    static name = 'JSTimePickerDialog'
+    constructor() {}
+    static show(params) {
       getUINativeModule().loadNativeModule('TimePickerDialog');
-      const module = globalThis.requireNapi('arkui.components.arktimepicker');
+      let module = globalThis.requireNapi('arkui.components.arktimepicker');
       module.exportViewDialog();
       getUINativeModule().timePickerDialog.show(params);
-    },
- 	name: 'JSTimePickerDialog'
+    }
   }
 }
 
