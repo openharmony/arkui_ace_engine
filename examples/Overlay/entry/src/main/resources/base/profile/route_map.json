@@ -540,6 +540,31 @@
       "name": "AlertDialogExtended",
       "pageSourceFile": "src/main/ets/pages/components/dialog/alertDialogExtended.ets",
       "buildFunction": "AlertDialogExtendedBuilder"
+    },
+    {
+      "name": "toastDurationTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toastDurationTest.ets",
+      "buildFunction": "ToastDurationBuilder"
+    },
+    {
+      "name": "toastAnimationTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toastAnimationTest.ets",
+      "buildFunction": "ToastAnimationBuilder"
+    },
+    {
+      "name": "toastLifecycleTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toastLifecycleTest.ets",
+      "buildFunction": "ToastLifecycleBuilder"
+    },
+    {
+      "name": "toastInteractionTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toastInteractionTest.ets",
+      "buildFunction": "ToastInteractionBuilder"
+    },
+    {
+      "name": "toastAdvancedTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toastAdvancedTest.ets",
+      "buildFunction": "ToastAdvancedBuilder"
     }
   ]
 }
