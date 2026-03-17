@@ -757,7 +757,9 @@ int32_t ListItemDragManager::GetIndex() const
 {
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_RETURN(forEach, -1);
-    return forEach->GetFrameNodeIndex(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    return forEach->GetFrameNodeIndex(host);
 }
 
 int32_t ListItemDragManager::GetLanes() const

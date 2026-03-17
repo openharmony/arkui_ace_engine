@@ -57,6 +57,17 @@ constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
 #endif
 } // namespace
 
+// Just used for only read
+PaddingPropertyF* GetPaddingFromHost(RefPtr<FrameNode> node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto geometryNode = node->GetGeometryNode();
+    if (geometryNode) {
+        return geometryNode->GetPadding().get();
+    }
+    return nullptr;
+}
+
 ListPattern::~ListPattern() = default;
 
 void ListPattern::OnModifyDone()
@@ -70,7 +81,7 @@ void ListPattern::OnModifyDone()
     if (axis != GetAxis()) {
         needReEstimateOffset_ = true;
         SetAxis(axis);
-        ChangeAxis(GetHost());
+        ChangeAxis(host);
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
@@ -1797,7 +1808,9 @@ void ListPattern::ScrollTo(float position)
     SetIsOverScroll(GetCanStayOverScroll());
     MarkDirtyNodeSelf();
     isScrollEnd_ = true;
-    ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ContentChangeReport(host, ContentChangeManager::SCROLL_TO);
 }
 
 void ListPattern::ResetScrollToIndexParams()
@@ -1831,7 +1844,9 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             jumpIndex_ = index;
             scrollAlign_ = align;
             jumpIndexInGroup_.reset();
-            ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO_INDEX);
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            ContentChangeReport(host, ContentChangeManager::SCROLL_TO_INDEX);
         }
         MarkDirtyNodeSelf();
     }
@@ -2360,8 +2375,13 @@ int32_t ListPattern::ProcessAreaVertical(double& x, double& y, Rect& groupRect, 
     } else if (groupItemPattern->IsHasHeader() || groupItemPattern->IsHasFooter()) {
         float headerHeight = groupItemPattern->GetHeaderMainSize();
         float footerHeight = groupItemPattern->GetFooterMainSize();
-        float topPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->top.value_or(0.0f);
-        float bottomPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->bottom.value_or(0.0f);
+        float topPaddng = 0.0f;
+        float bottomPaddng = 0.0f;
+        auto padding = GetPaddingFromHost(groupItemPattern->GetHost());
+        if (padding) {
+            topPaddng = padding->top.value_or(0.0f);
+            bottomPaddng = padding->bottom.value_or(0.0f);
+        }
         if (LessOrEqual(y, groupRect.Top() + headerHeight + topPaddng)  && GreatOrEqual(y, groupRect.Top())) { //header
             return  DEFAULT_HEADER_VALUE;
         } else if (GreatOrEqual(y, groupRect.Bottom() - footerHeight - bottomPaddng) &&
@@ -2392,8 +2412,13 @@ int32_t ListPattern::ProcessAreaHorizontal(double& x, double& y, Rect& groupRect
     } else if (groupItemPattern->IsHasHeader() || groupItemPattern->IsHasFooter()) {
         float headerHeight = groupItemPattern->GetHeaderMainSize();
         float footerHeight = groupItemPattern->GetFooterMainSize();
-        float leftPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->left.value_or(0.0f);
-        float rightPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->right.value_or(0.0f);
+        float leftPaddng = 0.0f;
+        float rightPaddng = 0.0f;
+        auto padding = GetPaddingFromHost(groupItemPattern->GetHost());
+        if (padding) {
+            leftPaddng = padding->left.value_or(0.0f);
+            rightPaddng = padding->right.value_or(0.0f);
+        }
         if (LessOrEqual(x, groupRect.Left() + headerHeight + leftPaddng)  && GreatOrEqual(x, groupRect.Left())) {
             return  DEFAULT_HEADER_VALUE;
         } else if (GreatOrEqual(x, groupRect.Right() - footerHeight - rightPaddng) &&
@@ -2637,7 +2662,7 @@ void ListPattern::UpdateScrollBarOffset()
     } else {
         auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis(), itemStartIndex_);
         calculate.SetPosMap(posMap_);
-        calculate.GetEstimateHeightAndOffset(GetHost());
+        calculate.GetEstimateHeightAndOffset(host);
         currentOffset = calculate.GetEstimateOffset();
         estimatedHeight = calculate.GetEstimateHeight();
     }
