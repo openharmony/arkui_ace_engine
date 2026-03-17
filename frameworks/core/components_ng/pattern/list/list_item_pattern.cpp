@@ -201,6 +201,9 @@ void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
             if (endNodeIndex_ >= startNodeIndex_) {
                 endNodeIndex_++;
             }
+            auto prop = host->GetLayoutProperty<ListItemLayoutProperty>();
+            CHECK_NULL_VOID(prop);
+            prop->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             host->ReplaceChild(host->GetChildAtIndex(startNodeIndex_), startNode);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -236,6 +239,9 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
             if (startNodeIndex_ >= endNodeIndex_) {
                 startNodeIndex_++;
             }
+            auto prop = host->GetLayoutProperty<ListItemLayoutProperty>();
+            CHECK_NULL_VOID(prop);
+            prop->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             host->ReplaceChild(host->GetChildAtIndex(endNodeIndex_), endNode);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
