@@ -682,7 +682,8 @@ void OH_ArkUI_FontConfigs_Destroy(OH_ArkUI_FontConfigs* option)
     delete option;
 }
 
-void OH_ArkUI_FontConfigs_SetFontWeightConfigs(OH_ArkUI_FontConfigs* option, OH_ArkUI_FontWeightConfigs* fontWeightConfigs)
+void OH_ArkUI_FontConfigs_SetFontWeightConfigs(OH_ArkUI_FontConfigs* option,
+    OH_ArkUI_FontWeightConfigs* fontWeightConfigs)
 {
     CHECK_NULL_VOID(option);
     option->fontWeightConfigs = fontWeightConfigs;

@@ -1616,6 +1616,12 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeSpanFontWeightTest004, TestSize.Level1
     ret = nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, &item);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
 
+    auto attr = nodeAPI->getAttribute(spanNode, NODE_SPAN_FONT_WEIGHT);
+    EXPECT_NE(attr, nullptr);
+    if (attr) {
+        EXPECT_EQ(attr->value[0].i32, 100);
+    }
+
     EXPECT_EQ(nodeAPI->setAttribute(spanNode, NODE_SPAN_FONT_WEIGHT, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
 
     nodeAPI->disposeNode(spanNode);

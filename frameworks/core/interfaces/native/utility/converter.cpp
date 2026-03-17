@@ -1431,6 +1431,19 @@ FontWeightInt Convert(const Ark_Resource& src)
 }
 
 template<>
+FontWeightInt Convert(const Ark_ResourceStr& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0:
+            return Convert<FontWeightInt>(src.value0);
+        case SELECTOR_ID_1:
+            return Convert<FontWeightInt>(src.value1);
+        default:
+            return {};
+    }
+}
+
+template<>
 Gradient Convert(const Ark_LinearGradient& value)
 {
     Gradient gradient;
