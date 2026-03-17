@@ -163,6 +163,7 @@
     "pages/grid/GridModifierIndex",
     "pages/grid/scrollBarColor",
     "pages/grid/CAPI/ScrollableGrid",
+    "pages/grid/DynamicGrid",
     "pages/Scroll/ScrollMainPage",
     "pages/Scroll/InfiniteScrolling",
     "pages/Scroll/CustomSnap",
