@@ -20,7 +20,7 @@ import { CommonMethodModifier } from './CommonMethodModifier'
 import { AttributeModifier, extractors } from '#handwritten'
 import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
 import { PeerNode } from './PeerNode'
-import { ArkSwiperPeer, DotIndicator, DigitIndicator, SwiperDisplayMode, OnSwiperAnimationStartCallback, SwiperAnimationEvent, OnSwiperAnimationEndCallback, OnSwiperGestureSwipeCallback, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, SwiperAttribute, AutoPlayOptions, ArrowStyle, SwiperAutoFill } from './component/swiper'
+import { ArkSwiperPeer, DotIndicator, DigitIndicator, SwiperDisplayMode, OnSwiperAnimationStartCallback, SwiperAnimationEvent, OnSwiperAnimationEndCallback, OnSwiperGestureSwipeCallback, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, SwiperAttribute, AutoPlayOptions, ArrowStyle, CachedCountOptions, SwiperAutoFill } from './component/swiper'
 import { int32, int64 } from '@koalaui/common'
 import { ModifierState } from './CommonModifier'
 import { CommonMethod, Bindable, ICurve, Callback as arkui_component_common_Callback } from './component/common'
@@ -81,6 +81,8 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     public _displayArrow_0_1value?: boolean | undefined
     public _cachedCount_1_0value?: int32 | undefined
     public _cachedCount_1_1value?: boolean | undefined
+    public _cachedCount_2_0value?: int32 | undefined
+    public _cachedCount_2_1value?: CachedCountOptions | undefined
     public _displayCount_0_0value?: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined
     public _displayCount_0_1value?: boolean | undefined
     public _prevMargin_0_0value?: Length | undefined
@@ -611,7 +613,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         if (flagArray[30] != 0) {
             switch (flagArray[30]) {
                 case 1: {
-                    peer.setDisplayCountAttribute((this._displayCount_0_0value as int32 | string | SwiperAutoFill | ItemFillPolicy | undefined), (this._displayCount_0_1value as boolean | undefined | undefined));
+                    peer.setCachedCount2Attribute((this._cachedCount_2_0value as int32 | undefined), (this._cachedCount_2_1value as CachedCountOptions | undefined));
                     flagArray[30] = 2;
                     break;
                 }
@@ -621,14 +623,14 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     flagArray[30] = 0;
-                    peer.setDisplayCountAttribute((undefined as int32 | string | SwiperAutoFill | ItemFillPolicy | undefined), (undefined as boolean | undefined | undefined));
+                    peer.setCachedCount2Attribute((undefined as int32 | undefined), (undefined as CachedCountOptions | undefined));
                 }
             }
         }
         if (flagArray[31] != 0) {
             switch (flagArray[31]) {
                 case 1: {
-                    peer.setPrevMarginAttribute((this._prevMargin_0_0value as Length | undefined), (this._prevMargin_0_1value as boolean | undefined | undefined));
+                    peer.setDisplayCountAttribute((this._displayCount_0_0value as int32 | string | SwiperAutoFill | ItemFillPolicy | undefined), (this._displayCount_0_1value as boolean | undefined | undefined));
                     flagArray[31] = 2;
                     break;
                 }
@@ -638,14 +640,14 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     flagArray[31] = 0;
-                    peer.setPrevMarginAttribute((undefined as Length | undefined), (undefined as boolean | undefined | undefined));
+                    peer.setDisplayCountAttribute((undefined as int32 | string | SwiperAutoFill | ItemFillPolicy | undefined), (undefined as boolean | undefined | undefined));
                 }
             }
         }
         if (flagArray[32] != 0) {
             switch (flagArray[32]) {
                 case 1: {
-                    peer.setNextMarginAttribute((this._nextMargin_0_0value as Length | undefined), (this._nextMargin_0_1value as boolean | undefined | undefined));
+                    peer.setPrevMarginAttribute((this._prevMargin_0_0value as Length | undefined), (this._prevMargin_0_1value as boolean | undefined | undefined));
                     flagArray[32] = 2;
                     break;
                 }
@@ -655,6 +657,23 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     flagArray[32] = 0;
+                    peer.setPrevMarginAttribute((undefined as Length | undefined), (undefined as boolean | undefined | undefined));
+                }
+            }
+        }
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
+                case 1: {
+                    peer.setNextMarginAttribute((this._nextMargin_0_0value as Length | undefined), (this._nextMargin_0_1value as boolean | undefined | undefined));
+                    flagArray[33] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[33] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[33] = 0;
                     peer.setNextMarginAttribute((undefined as Length | undefined), (undefined as boolean | undefined | undefined));
                 }
             }
@@ -1034,6 +1053,18 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
             switch (flagArray[30]) {
                 case 1:
                 case 3: {
+                    this.cachedCount((modifier._cachedCount_2_0value as int32 | undefined), (modifier._cachedCount_2_1value as CachedCountOptions | undefined));
+                    break;
+                }
+                default: {
+                    this.cachedCount((undefined as int32 | undefined), (undefined as CachedCountOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
+                case 1:
+                case 3: {
                     this.displayCount((modifier._displayCount_0_0value as int32 | string | SwiperAutoFill | ItemFillPolicy | undefined), (modifier._displayCount_0_1value as boolean | undefined));
                     break;
                 }
@@ -1042,8 +1073,8 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
             }
         }
-        if (flagArray[31] != 0) {
-            switch (flagArray[31]) {
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
                 case 1:
                 case 3: {
                     this.prevMargin((modifier._prevMargin_0_0value as Length | undefined), (modifier._prevMargin_0_1value as boolean | undefined));
@@ -1054,8 +1085,8 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
             }
         }
-        if (flagArray[32] != 0) {
-            switch (flagArray[32]) {
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
                 case 1:
                 case 3: {
                     this.nextMargin((modifier._nextMargin_0_0value as Length | undefined), (modifier._nextMargin_0_1value as boolean | undefined));
@@ -1370,36 +1401,47 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
-    displayCount(value: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined, swipeByGroup?: boolean): this {
-        if (((this._flagArray[30]) == (0)) || (true) || ((this._displayCount_0_1value) !== (swipeByGroup))) {
+    cachedCount(count: int32 | undefined, options: CachedCountOptions | undefined): this {
+        if (((this._flagArray[30]) == (0)) || ((this._cachedCount_2_0value) !== (count)) || (true)) {
             this._flagArray[30] = 1
-            this._displayCount_0_0value = value
-            this._displayCount_0_1value = swipeByGroup
+            this._cachedCount_2_0value = count
+            this._cachedCount_2_1value = options
             this._state.fireChange()
         } else {
             this._flagArray[30] = 3
         }
         return this
     }
-    prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
-        if (((this._flagArray[31]) == (0)) || (true) || ((this._prevMargin_0_1value) !== (ignoreBlank))) {
+    displayCount(value: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined, swipeByGroup?: boolean): this {
+        if (((this._flagArray[31]) == (0)) || (true) || ((this._displayCount_0_1value) !== (swipeByGroup))) {
             this._flagArray[31] = 1
-            this._prevMargin_0_0value = value
-            this._prevMargin_0_1value = ignoreBlank
+            this._displayCount_0_0value = value
+            this._displayCount_0_1value = swipeByGroup
             this._state.fireChange()
         } else {
             this._flagArray[31] = 3
         }
         return this
     }
-    nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
-        if (((this._flagArray[32]) == (0)) || (true) || ((this._nextMargin_0_1value) !== (ignoreBlank))) {
+    prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
+        if (((this._flagArray[32]) == (0)) || (true) || ((this._prevMargin_0_1value) !== (ignoreBlank))) {
             this._flagArray[32] = 1
+            this._prevMargin_0_0value = value
+            this._prevMargin_0_1value = ignoreBlank
+            this._state.fireChange()
+        } else {
+            this._flagArray[32] = 3
+        }
+        return this
+    }
+    nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
+        if (((this._flagArray[33]) == (0)) || (true) || ((this._nextMargin_0_1value) !== (ignoreBlank))) {
+            this._flagArray[33] = 1
             this._nextMargin_0_0value = value
             this._nextMargin_0_1value = ignoreBlank
             this._state.fireChange()
         } else {
-            this._flagArray[32] = 3
+            this._flagArray[33] = 3
         }
         return this
     }

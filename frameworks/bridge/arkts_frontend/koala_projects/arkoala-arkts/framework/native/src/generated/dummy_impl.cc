@@ -14575,6 +14575,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetCachedCount2Impl(Ark_NativePointer node,
+                             const Opt_Int32* count,
+                             const Opt_CachedCountOptions* options)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setCachedCount2(");
+        WriteToString(&out, count);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetDisplayCountImpl(Ark_NativePointer node,
                              const Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy* value,
                              const Opt_Boolean* swipeByGroup)
@@ -22894,6 +22908,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SwiperAttributeModifier::SetAutoPlay1Impl,
             SwiperAttributeModifier::SetDisplayArrowImpl,
             SwiperAttributeModifier::SetCachedCount1Impl,
+            SwiperAttributeModifier::SetCachedCount2Impl,
             SwiperAttributeModifier::SetDisplayCountImpl,
             SwiperAttributeModifier::SetPrevMarginImpl,
             SwiperAttributeModifier::SetNextMarginImpl,

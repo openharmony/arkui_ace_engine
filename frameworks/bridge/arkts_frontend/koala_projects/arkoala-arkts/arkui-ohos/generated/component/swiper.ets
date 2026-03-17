@@ -982,6 +982,25 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SwiperAttribute_setCachedCount1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setCachedCount2Attribute(count: int32 | undefined, options: CachedCountOptions | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (count !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const countTmpValue = count!
+            thisSerializer.writeInt32(countTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            CachedCountOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SwiperAttribute_setCachedCount2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setDisplayCountAttribute(value: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined, swipeByGroup?: boolean): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1102,6 +1121,10 @@ export interface SwiperAnimationEvent {
 export interface AutoPlayOptions {
     stopWhenTouched: boolean;
 }
+export interface CachedCountOptions {
+    isShown?: boolean;
+    independent?: boolean;
+}
 export enum SwiperNestedScrollMode {
     SELF_ONLY = 0,
     SELF_FIRST = 1
@@ -1206,6 +1229,9 @@ export interface SwiperAttribute extends CommonMethod {
         throw new Error('Unimplemented method displayArrow')
     }
     cachedCount(count: int32 | undefined, isShown: boolean | undefined): this {
+        throw new Error('Unimplemented method cachedCount')
+    }
+    cachedCount(count: int32 | undefined, options: CachedCountOptions | undefined): this {
         throw new Error('Unimplemented method cachedCount')
     }
     displayCount(value: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined, swipeByGroup?: boolean): this {
@@ -1396,6 +1422,12 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         this.getPeer()?.setCachedCount1Attribute(count_casted, isShown_casted)
         return this
     }
+    public cachedCount(count: int32 | undefined, options: CachedCountOptions | undefined): this {
+        const count_casted = count as (int32 | undefined)
+        const options_casted = options as (CachedCountOptions | undefined)
+        this.getPeer()?.setCachedCount2Attribute(count_casted, options_casted)
+        return this
+    }
     public displayCount(value: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined, swipeByGroup?: boolean): this {
         const value_casted = value as (int32 | string | SwiperAutoFill | ItemFillPolicy | undefined)
         const swipeByGroup_casted = swipeByGroup as (boolean | undefined)
@@ -1548,6 +1580,44 @@ export class AutoPlayOptions_serializer {
         let valueDeserializer: DeserializerBase = buffer
         const stopWhenTouchedTmpResult: boolean = valueDeserializer.readBoolean()
         let value: AutoPlayOptions = ({stopWhenTouched: stopWhenTouchedTmpResult} as AutoPlayOptions)
+        return value
+    }
+}
+export class CachedCountOptions_serializer {
+    public static write(buffer: SerializerBase, value: CachedCountOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForIsShown = value.isShown
+        if (valueHolderForIsShown !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsShownTmpValue = valueHolderForIsShown!
+            valueSerializer.writeBoolean(valueHolderForIsShownTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForIndependent = value.independent
+        if (valueHolderForIndependent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIndependentTmpValue = valueHolderForIndependent!
+            valueSerializer.writeBoolean(valueHolderForIndependentTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): CachedCountOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const isShownTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let isShownTmpBuf: boolean | undefined = undefined
+        if ((isShownTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isShownTmpBuf = valueDeserializer.readBoolean()
+        }
+        const isShownTmpResult: boolean | undefined = isShownTmpBuf
+        const independentTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let independentTmpBuf: boolean | undefined = undefined
+        if ((independentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            independentTmpBuf = valueDeserializer.readBoolean()
+        }
+        const independentTmpResult: boolean | undefined = independentTmpBuf
+        let value: CachedCountOptions = ({isShown: isShownTmpResult, independent: independentTmpResult} as CachedCountOptions)
         return value
     }
 }

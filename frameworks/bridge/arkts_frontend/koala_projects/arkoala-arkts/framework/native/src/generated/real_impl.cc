@@ -6302,6 +6302,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Opt_Boolean* isShown)
     {
     }
+    void SetCachedCount2Impl(Ark_NativePointer node,
+                             const Opt_Int32* count,
+                             const Opt_CachedCountOptions* options)
+    {
+    }
     void SetDisplayCountImpl(Ark_NativePointer node,
                              const Opt_Union_I32_String_SwiperAutoFill_ItemFillPolicy* value,
                              const Opt_Boolean* swipeByGroup)
@@ -10490,6 +10495,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SwiperAttributeModifier::SetDisplayArrowImpl,
             SwiperAttributeModifier::SetCachedCount1Impl,
             SwiperAttributeModifier::SetDisplayCountImpl,
+            SwiperAttributeModifier::SetCachedCount2Impl,
             SwiperAttributeModifier::SetPrevMarginImpl,
             SwiperAttributeModifier::SetNextMarginImpl,
         };
