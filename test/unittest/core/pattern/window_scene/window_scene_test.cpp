@@ -1166,4 +1166,41 @@ HWTEST_F(WindowSceneTest, OnBoundsChanged, TestSize.Level0)
     EXPECT_EQ(session->GetShowRecent(), true);
     usleep(WAIT_SYNC_IN_NS);
 }
+
+/**
+ * @tc.name: DisposeSnapshotAndBlankWindow
+ * @tc.desc: DisposeSnapshotAndBlankWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, DisposeSnapshotAndBlankWindow, TestSize.Level0)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = "ABILITY_NAME",
+        .bundleName_ = "BUNDLE_NAME",
+        .moduleName_ = "MODULE_NAME",
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<Rosen::ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    auto snapshotWindowNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->snapshotWindow_ = AceType::RawPtr(snapshotWindowNode);
+    ASSERT_NE(windowScene->snapshotWindow_, nullptr);
+
+    windowScene->isScaledSnapshot_ = false;
+    windowScene->DisposeSnapshotAndBlankWindow();
+    ASSERT_NE(windowScene->snapshotWindow_, nullptr);
+
+    windowScene->isScaledSnapshot_ = false;
+    windowScene->DisposeSnapshotAndBlankWindow();
+    ASSERT_NE(windowScene->snapshotWindow_, nullptr);
+    windowScene->frameNode_ = nullptr;
+    windowScene->snapshotWindow_ = nullptr;
+}
 } // namespace OHOS::Ace::NG
