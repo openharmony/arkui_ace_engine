@@ -137,6 +137,7 @@ public:
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetHalfLeading(bool value) override;
+    void SetHorizontalScrolling(bool value) override;
     void SetLineSpacing(const Dimension& value) override;
     void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
@@ -201,6 +202,9 @@ public:
     static void SetSelectDetectEnable(FrameNode* frameNode, bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
     static void ResetSelectDetectEnable(FrameNode* frameNode);
+    static void SetHorizontalScrolling(FrameNode* frameNode, bool value);
+    static bool GetHorizontalScrolling(FrameNode* frameNode);
+    static void ResetHorizontalScrolling(FrameNode* frameNode);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
     static bool GetSelectionMenuHidden(FrameNode* frameNode);
     static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);

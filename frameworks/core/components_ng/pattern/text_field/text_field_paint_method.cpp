@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_free_scroller.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -226,6 +227,11 @@ void TextFieldPaintMethod::DoTextFadeoutIfNeed(PaintWrapper* paintWrapper)
 
 void TextFieldPaintMethod::UpdateScrollBar()
 {
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    if (textFieldPattern && textFieldPattern->IsFreeScrollEnabled()) {
+        textFieldPattern->GetFreeScroller()->UpdateScrollBar();
+        return;
+    }
     auto scrollBar = scrollBar_.Upgrade();
     if (!scrollBar || !scrollBar->NeedPaint()) {
         return;
@@ -236,7 +242,6 @@ void TextFieldPaintMethod::UpdateScrollBar()
     textFieldOverlayModifier_->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);

@@ -1879,6 +1879,27 @@ void ResetSelectDetectorEnable(ArkUINodeHandle node)
     TextFieldModelNG::ResetSelectDetectEnable(frameNode);
 }
 
+void SetHorizontalScrolling(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetHorizontalScrolling(frameNode, static_cast<bool>(value));
+}
+
+ArkUI_Int32 GetHorizontalScrolling(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetHorizontalScrolling(frameNode));
+}
+
+void ResetHorizontalScrolling(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ResetHorizontalScrolling(frameNode);
+}
+
 void SetAllOptionalBorderStyle(
     NG::BorderStyleProperty& borderStyles, const uint32_t* values, ArkUI_Int32 valuesSize, ArkUI_Int32& offset)
 {
@@ -2811,6 +2832,9 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setSelectDetectorEnable = SetSelectDetectorEnable,
         .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .setHorizontalScrolling = SetHorizontalScrolling,
+        .getHorizontalScrolling = GetHorizontalScrolling,
+        .resetHorizontalScrolling = ResetHorizontalScrolling,
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
         .setTextAreaSelectionMenuHidden = SetTextAreaSelectionMenuHidden,

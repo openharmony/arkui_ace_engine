@@ -516,6 +516,15 @@ int32_t TextFieldSelectOverlay::GetTextAreaCaretPosition(const OffsetF& localOff
     } else {
         offset = Offset(localOffset.GetX() - paddingLeft, localOffset.GetY() - textRect.GetY());
     }
+    if (pattern->IsHorizontalScrollEnabled()) {
+        if (LessNotEqual(localOffset.GetX(), contentRect.GetX())) {
+            offset.SetX(contentRect.GetX() - textRect.GetX());
+        } else if (GreatOrEqual(localOffset.GetX(), contentRect.GetX() + contentRect.Width())) {
+            offset.SetX(contentRect.GetX() + contentRect.Width() - textRect.GetX());
+        } else {
+            offset.SetX(localOffset.GetX() - textRect.GetX());
+        }
+    }
     return pattern->ConvertTouchOffsetToCaretPosition(offset);
 }
 
@@ -757,7 +766,7 @@ void TextFieldSelectOverlay::TriggerContentToScroll(const OffsetF& localOffset, 
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    if (pattern->GetScrollEnabled()) {
+    if (pattern->IsScrollEnabled()) {
         if (isEnd) {
             pattern->StopContentScroll();
         } else {

@@ -1100,6 +1100,15 @@ void TextFieldModelNG::SetHalfLeading(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value);
 }
 
+void TextFieldModelNG::SetHorizontalScrolling(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHorizontalScrolling(value);
+}
+
 void TextFieldModelNG::SetLineSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value);
@@ -1493,6 +1502,30 @@ void TextFieldModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetSelectDetectEnable();
+}
+
+void TextFieldModelNG::SetHorizontalScrolling(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHorizontalScrolling(value);
+}
+
+bool TextFieldModelNG::GetHorizontalScrolling(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetHorizontalScrolling();
+}
+
+void TextFieldModelNG::ResetHorizontalScrolling(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHorizontalScrolling(false);
 }
 
 void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const CaretStyle& value)

@@ -164,6 +164,23 @@ class TextAreaSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextAreaHorizontalScrollingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaHorizontalScrolling');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetHorizontalScrolling(node);
+    } else {
+      getUINativeModule().textArea.setHorizontalScrolling(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaFontStyleModifier extends ModifierWithKey<FontStyle> {
   static identity: Symbol = Symbol('textAreaFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
@@ -1607,6 +1624,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
+    return this;
+  }
+  horizontalScrolling(value: boolean): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaHorizontalScrollingModifier.identity, TextAreaHorizontalScrollingModifier, value);
     return this;
   }
   type(value: TextAreaType): TextAreaAttribute {

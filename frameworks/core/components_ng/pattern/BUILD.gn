@@ -560,6 +560,8 @@ build_component_ng("pattern_ng") {
     "text/text_select_overlay.cpp",
     "text/text_styles.cpp",
     "text/typed_text.cpp",
+    "text/text_free_scroll_controller.cpp",
+    "text/text_scroll_bar_2d.cpp",
     "text_area/text_area_layout_algorithm.cpp",
     "text_drag/text_drag_overlay_modifier.cpp",
     "text_drag/text_drag_paint_method.cpp",

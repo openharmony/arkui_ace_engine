@@ -32,6 +32,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
     static void SetMinLines(const JSCallbackInfo& info);
+    static void SetHorizontalScrolling(const JSCallbackInfo& info);
 };
 
 class JSTextAreaController final : public Referenced {

@@ -661,6 +661,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetSelectDetectorEnable));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDetectorEnable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetSelectDetectorEnable));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHorizontalScrolling"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetHorizontalScrolling));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHorizontalScrolling"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetHorizontalScrolling));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetStyle));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStyle"),
