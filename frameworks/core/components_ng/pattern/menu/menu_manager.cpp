@@ -1294,7 +1294,7 @@ void MenuManager::ShowMenuInSubWindow(const RefPtr<OverlayManager>& overlayManag
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "show menu insubwindow",
         ComponentEventType::COMPONENT_EVENT_MENU);
-    TAG_LOGW(AceLogTag::ACE_OVERLAY, "[ReportComponentChangeEvent] event show menu insubwindow");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "[ReportComponentChangeEvent] event show menu insubwindow");
     // set subwindow container id in menu.
     auto menuPattern = menu->GetPattern<PopupBasePattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -1316,7 +1316,7 @@ void MenuManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu,
     RemoveMenuFilter(menu);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "hide menu insubwindow",
         ComponentEventType::COMPONENT_EVENT_MENU);
-    TAG_LOGW(AceLogTag::ACE_OVERLAY, "[ReportComponentChangeEvent] event hide menu insubwindow");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "[ReportComponentChangeEvent] event hide menu insubwindow");
 }
 
 void MenuManager::HideMenuInSubWindow(const RefPtr<OverlayManager>& overlayManager,
@@ -1339,7 +1339,7 @@ void MenuManager::HideMenuInSubWindow(const RefPtr<OverlayManager>& overlayManag
     }
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "hide menu insubwindow",
         ComponentEventType::COMPONENT_EVENT_MENU);
-    TAG_LOGW(AceLogTag::ACE_OVERLAY, "[ReportComponentChangeEvent] event hide menu insubwindow");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "[ReportComponentChangeEvent] event hide menu insubwindow");
 }
 
 RefPtr<FrameNode> MenuManager::GetMenuNodeWithExistContent(const RefPtr<UINode>& node)
