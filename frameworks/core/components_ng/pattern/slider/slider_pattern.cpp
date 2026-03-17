@@ -682,6 +682,7 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
     ACE_UINODE_TRACE(pointNode);
     auto gestureHub = pointNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    CHECK_EQUAL_VOID(index >= pointAccessibilityNodeEventVec_.size(), true);
     if (isClickAbled && !pointAccessibilityNodeEventVec_[index]) {
         auto clickHandle = [weak = WeakClaim(this), index, reverse](GestureEvent& info) {
             auto pattern = weak.Upgrade();
