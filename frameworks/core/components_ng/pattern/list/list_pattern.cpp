@@ -2143,12 +2143,8 @@ float ListPattern::GetListCrossAxisSize() const
     return GetCrossAxisSize(size, GetAxis());
 }
 
-void ListPattern::ApplyRtlTransform(float& mainPos) const
+void ListPattern::ApplyRtlTransform(float& mainPos, float mainSize) const
 {
-    if (GetAxis() != Axis::HORIZONTAL || !IsRTL()) {
-        return;
-    }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
@@ -2158,7 +2154,13 @@ void ListPattern::ApplyRtlTransform(float& mainPos) const
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, listMainSize);
 
-    mainPos = listMainSize.Width() - mainPos;
+    if (GetAxis() == Axis::VERTICAL) {
+        mainPos += padding.top.value_or(0.0f);
+    } else if (IsRTL()) {
+        mainPos = listMainSize.Width() - mainPos - mainSize + padding.left.value_or(0.0f);
+    } else {
+        mainPos += padding.left.value_or(0.0f);
+    }
 }
 
 int32_t ListPattern::CalculateLaneNumber(int32_t index, const ListLayoutAlgorithm::PositionMap& itemPosition) const
@@ -2210,7 +2212,7 @@ RectF ListPattern::GetItemRectWithItemPosition(
     // calc main axis position and size
     float mainPos = iter->second.startPos;
     float mainSize = iter->second.endPos - iter->second.startPos;
-    ApplyRtlTransform(mainPos);
+    ApplyRtlTransform(mainPos, mainSize);
 
     //calc cross axis position and size
     float listCrossSize = GetListCrossAxisSize();

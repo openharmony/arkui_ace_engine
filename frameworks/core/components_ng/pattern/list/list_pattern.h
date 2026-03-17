@@ -569,7 +569,7 @@ private:
     float GetListCrossAxisSize() const;
     int32_t CalculateLaneNumber(int32_t index, const ListLayoutAlgorithm::PositionMap& itemPosition) const;
     void CalculateCrossAxisPosition(int32_t lane, float listCrossSize, float& crossPos, float& crossSize) const;
-    void ApplyRtlTransform(float& mainPos) const;
+    void ApplyRtlTransform(float& mainPos, float mainSize) const;
     RectF GetItemRectWithItemPosition(int32_t index, const std::map<int32_t, ListItemInfo>& itemPosition) const;
     void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
     void ResetScrollToIndexParams();
