@@ -20,10 +20,10 @@
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(
-    const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
+    const DialogProperties& param, const RefPtr<UINode>& customNode, const RefPtr<UINode>& themeNode)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    return CreateDialogNode(nodeId, param, customNode);
+    return CreateDialogNode(nodeId, param, customNode, themeNode);
 }
 
 void SetDialogTransitionEffects(
@@ -72,7 +72,7 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
             CHECK_NULL_VOID(maskContext);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
             Color maskColor;
             bool state = ResourceParseUtils::ParseResColor(resObj, maskColor);
@@ -170,7 +170,7 @@ void UpdateAndAddBackgroundColorCallback(RefPtr<FrameNode> dialog, const DialogP
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
 
             Color backgroundColor;
@@ -214,7 +214,7 @@ void UpdateAndAddBorderTopColorCallback(
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
 
             Color topBorderColor;
@@ -263,7 +263,7 @@ void UpdateAndAddBorderBottomColorCallback(
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
 
             Color bottomBorderColor;
@@ -313,7 +313,7 @@ void UpdateAndAddBorderLeftColorCallback(
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
 
             Color leftBorderColor;
@@ -363,7 +363,7 @@ void UpdateAndAddBorderRightColorCallback(
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
 
             Color rightBorderColor;
@@ -583,19 +583,21 @@ void AddColorModeChangeCallback(RefPtr<FrameNode> dialog, const DialogProperties
     UpdateAndAddEffectOptionCallback(dialog, dialogProps);
 }
 
-RefPtr<FrameNode> DialogView::CreateDialogNode(
-    const int32_t nodeId, const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
+RefPtr<FrameNode> DialogView::CreateDialogNode(const int32_t nodeId, const DialogProperties& param,
+    const RefPtr<UINode>& customNode, const RefPtr<UINode>& themeNode)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, nullptr);
-
     std::string tag = GetDialogTag(param);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(tag, nodeId,
-        AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode));
+        AceType::MakeRefPtr<DialogPattern>(nullptr, customNode));
     ACE_UINODE_TRACE(dialog);
+
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(pattern, dialog);
+    pattern->SetDialogThemeNode(themeNode);
+    pattern->UpdateDialogTheme();
+    auto dialogTheme = pattern->GetDialogTheme();
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
 
     if (customNode) {
         customNode->Build(nullptr);
@@ -634,8 +636,6 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);
-    auto pattern = dialog->GetPattern<DialogPattern>();
-    CHECK_NULL_RETURN(pattern, dialog);
     pattern->SetDialogProperties(param);
     auto isSubwindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
     if (isSubwindow || !dialogLayoutProp->GetIsModal().value_or(true)) {

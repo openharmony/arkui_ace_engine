@@ -132,6 +132,8 @@ private:
     DialogAlignment alignment_ = DialogAlignment::DEFAULT;
     TouchingBoundaryType touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;
 
+    RefPtr<DialogTheme> dialogTheme_ = nullptr;
+
     bool expandDisplay_ = false;
     double expandDisplayValidHeight_ = 0.0;
     bool isUIExtensionSubWindow_ = false;
