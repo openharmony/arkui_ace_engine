@@ -222,7 +222,7 @@ RefPtr<FrameNode> BubbleTestOneNg::CreateBubbleNode(const TestProperty& testProp
  * @tc.desc: Test AdjustPosition
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, AdjustPosition001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, AdjustPosition001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -250,7 +250,7 @@ HWTEST_F(BubbleTestOneNg, AdjustPosition001, TestSize.Level1)
  * @tc.desc: Test GetPositionWithPlacementNew
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, GetPositionWithPlacementNew001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, GetPositionWithPlacementNew001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -284,7 +284,7 @@ HWTEST_F(BubbleTestOneNg, GetPositionWithPlacementNew001, TestSize.Level1)
  * @tc.desc: Test UpdateChildPosition
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, UpdateChildPosition001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, UpdateChildPosition001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -336,7 +336,7 @@ HWTEST_F(BubbleTestOneNg, UpdateChildPosition001, TestSize.Level1)
  * @tc.desc: Test GetArrowBuildPlacement
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -374,7 +374,7 @@ HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement001, TestSize.Level1)
  * @tc.desc: Test GetArrowBuildPlacement
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement002, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement002, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -412,7 +412,7 @@ HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement002, TestSize.Level1)
  * @tc.desc: Test GetArrowBuildPlacement
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement003, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement003, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -450,7 +450,7 @@ HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement003, TestSize.Level1)
  * @tc.desc: Test GetArrowBuildPlacement
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement004, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement004, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -490,7 +490,7 @@ HWTEST_F(BubbleTestOneNg, GetArrowBuildPlacement004, TestSize.Level1)
  * @tc.desc: Test BuildCornerPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, BuildCornerPath001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, BuildCornerPath001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -513,7 +513,7 @@ HWTEST_F(BubbleTestOneNg, BuildCornerPath001, TestSize.Level1)
  * @tc.desc: Test ClipBubbleWithPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -551,7 +551,7 @@ HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath001, TestSize.Level1)
  * @tc.desc: Test ClipBubbleWithPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath002, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath002, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -582,7 +582,7 @@ HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath002, TestSize.Level1)
  * @tc.desc: Test ClipBubbleWithPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath003, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath003, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -608,7 +608,7 @@ HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath003, TestSize.Level1)
  * @tc.desc: Test ClipBubbleWithPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath004, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath004, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -640,7 +640,7 @@ HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath004, TestSize.Level1)
  * @tc.desc: Test ClipBubbleWithPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath005, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath005, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -666,7 +666,7 @@ HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath005, TestSize.Level1)
  * @tc.desc: Test ClipBubbleWithPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath006, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath006, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -697,7 +697,7 @@ HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath006, TestSize.Level1)
  * @tc.desc: Test ClipBubbleWithPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath007, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath007, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -723,7 +723,7 @@ HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath007, TestSize.Level1)
  * @tc.desc: Test ClipBubbleWithPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath008, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath008, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -754,7 +754,7 @@ HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath008, TestSize.Level1)
  * @tc.desc: Test ClipBubbleWithPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath009, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath009, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -785,7 +785,7 @@ HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath009, TestSize.Level1)
  * @tc.desc: Test ClipBubbleWithPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath010, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath010, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -814,7 +814,7 @@ HWTEST_F(BubbleTestOneNg, ClipBubbleWithPath010, TestSize.Level1)
  * @tc.desc: Test ClipBubbleWithPath
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, FitToScreenNew001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, FitToScreenNew001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -843,7 +843,7 @@ HWTEST_F(BubbleTestOneNg, FitToScreenNew001, TestSize.Level1)
  * @tc.desc: Test GetIfNeedArrow
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, GetIfNeedArrow001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, GetIfNeedArrow001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -877,7 +877,7 @@ HWTEST_F(BubbleTestOneNg, GetIfNeedArrow001, TestSize.Level1)
  * @tc.desc: Test GetAdjustPosition
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, GetAdjustPosition001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, GetAdjustPosition001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -919,7 +919,7 @@ HWTEST_F(BubbleTestOneNg, GetAdjustPosition001, TestSize.Level1)
  * @tc.desc: Test CheckPositionInPlacementRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -947,7 +947,7 @@ HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect001, TestSize.Level1)
  * @tc.desc: Test CheckPositionInPlacementRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect002, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect002, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -974,7 +974,7 @@ HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect002, TestSize.Level1)
  * @tc.desc: Test CheckPositionInPlacementRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect003, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect003, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -1009,7 +1009,7 @@ HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect003, TestSize.Level1)
  * @tc.desc: Test CheckPositionInPlacementRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect004, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect004, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -1050,7 +1050,7 @@ HWTEST_F(BubbleTestOneNg, CheckPositionInPlacementRect004, TestSize.Level1)
  * @tc.desc: Test CheckPositionInPlacementRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, UpdateClipOffset001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, UpdateClipOffset001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -1073,7 +1073,7 @@ HWTEST_F(BubbleTestOneNg, UpdateClipOffset001, TestSize.Level1)
  * @tc.desc: Test GetErrorPositionType
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, GetErrorPositionType001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, GetErrorPositionType001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     ASSERT_NE(targetNode, nullptr);
@@ -1103,7 +1103,7 @@ HWTEST_F(BubbleTestOneNg, GetErrorPositionType001, TestSize.Level1)
  * @tc.desc: Test FitToScreen
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, FitToScreen001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, FitToScreen001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1.create node
@@ -1146,7 +1146,7 @@ HWTEST_F(BubbleTestOneNg, FitToScreen001, TestSize.Level1)
  * @tc.desc: Test GetChildPosition
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, GetChildPosition001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, GetChildPosition001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     ASSERT_NE(targetNode, nullptr);
@@ -1179,7 +1179,7 @@ HWTEST_F(BubbleTestOneNg, GetChildPosition001, TestSize.Level1)
  * @tc.desc: Test UpdateHostWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, UpdateHostWindowRect001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, UpdateHostWindowRect001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     ASSERT_NE(targetNode, nullptr);
@@ -1202,7 +1202,7 @@ HWTEST_F(BubbleTestOneNg, UpdateHostWindowRect001, TestSize.Level1)
  * @tc.desc: Test SetBubbleRadius
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, SetBubbleRadius001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, SetBubbleRadius001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     ASSERT_NE(targetNode, nullptr);
@@ -1248,7 +1248,7 @@ HWTEST_F(BubbleTestOneNg, SetBubbleRadius001, TestSize.Level1)
  * @tc.desc: Test UpdateBubbleText
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, UpdateBubbleText001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, UpdateBubbleText001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     ASSERT_NE(targetNode, nullptr);
@@ -1270,7 +1270,7 @@ HWTEST_F(BubbleTestOneNg, UpdateBubbleText001, TestSize.Level1)
  * @tc.desc: Test UpdateShadow function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, UpdateShadowTest001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, UpdateShadowTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -1300,7 +1300,7 @@ HWTEST_F(BubbleTestOneNg, UpdateShadowTest001, TestSize.Level1)
  * @tc.desc: Test GetAdjustPosition
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest001, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -1341,7 +1341,7 @@ HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest001, TestSize.Level1)
  * @tc.desc: Test AddTargetSpace
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest002, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -1376,7 +1376,7 @@ HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest002, TestSize.Level1)
  * @tc.desc: Test CheckPosition
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest003, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -1414,7 +1414,7 @@ HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest003, TestSize.Level1)
  * @tc.desc: Test GetArrowOffset
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest004, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -1452,7 +1452,7 @@ HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest004, TestSize.Level1)
  * @tc.desc: Test UpdateArrowOffset
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest005, TestSize.Level1)
+HWTEST_F(BubbleTestOneNg, BubbleAlgorithmTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.

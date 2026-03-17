@@ -288,7 +288,7 @@ RefPtr<FrameNode> BubbleTestTwoNg::CreateBubbleNode(const TestProperty& testProp
  * @tc.desc: Test InitWrapperRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, InitWrapperRect001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, InitWrapperRect001, TestSize.Level0)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<BubblePattern>());
     ASSERT_NE(frameNode, nullptr);
@@ -330,7 +330,7 @@ HWTEST_F(BubbleTestTwoNg, InitWrapperRect001, TestSize.Level1)
  * @tc.desc: Test UpdateBubbleMaxSize.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, UpdateBubbleMaxSize001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, UpdateBubbleMaxSize001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -373,7 +373,7 @@ HWTEST_F(BubbleTestTwoNg, UpdateBubbleMaxSize001, TestSize.Level1)
  * @tc.desc: Test CreateBubbleNode
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, CreateBubbleNode001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, CreateBubbleNode001, TestSize.Level0)
 {
     auto param = AceType::MakeRefPtr<PopupParam>();
     ASSERT_NE(param, nullptr);
@@ -391,7 +391,7 @@ HWTEST_F(BubbleTestTwoNg, CreateBubbleNode001, TestSize.Level1)
  * @tc.desc: Test InitTargetSizeAndPosition.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, InitTargetSizeAndPosition, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, InitTargetSizeAndPosition, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -423,7 +423,7 @@ HWTEST_F(BubbleTestTwoNg, InitTargetSizeAndPosition, TestSize.Level1)
  * @tc.desc: Test AdjustAvoidPosition
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AdjustAvoidPosition001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AdjustAvoidPosition001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
@@ -456,7 +456,7 @@ HWTEST_F(BubbleTestTwoNg, AdjustAvoidPosition001, TestSize.Level1)
  * @tc.desc: Test AdjustAvoidPosition
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AdjustAvoidPosition002, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AdjustAvoidPosition002, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
@@ -489,7 +489,7 @@ HWTEST_F(BubbleTestTwoNg, AdjustAvoidPosition002, TestSize.Level1)
  * @tc.desc: Test AdjustAvoidPosition
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AdjustAvoidPosition003, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AdjustAvoidPosition003, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_ONE_HUNDRED, SIZE_ONE_HUNDRED);
@@ -522,7 +522,7 @@ HWTEST_F(BubbleTestTwoNg, AdjustAvoidPosition003, TestSize.Level1)
  * @tc.desc: Test CoverParent
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, CoverParent001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, CoverParent001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -568,7 +568,7 @@ HWTEST_F(BubbleTestTwoNg, CoverParent001, TestSize.Level1)
  * @tc.desc: Test AvoidToTopOrBottomByWidth
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTopOrBottomByWidth001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTopOrBottomByWidth001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -615,7 +615,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTopOrBottomByWidth001, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetBottom
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetBottom001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetBottom001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -660,7 +660,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetBottom001, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetBottom
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetBottom002, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetBottom002, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -707,7 +707,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetBottom002, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetTop
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetTop001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetTop001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -761,7 +761,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetTop001, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetTop
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetTop002, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetTop002, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -791,7 +791,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetTop002, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetTopMid
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetTopMid001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetTopMid001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -820,7 +820,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetTopMid001, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetTopMid
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetTopMid002, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetTopMid002, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -850,7 +850,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetTopMid002, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetTopMid
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetTopMid003, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetTopMid003, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -881,7 +881,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetTopMid003, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetRight
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetRight001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetRight001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -909,7 +909,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetRight001, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetRight
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetRight002, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetRight002, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -954,7 +954,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetRight002, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetRight
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetRight003, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetRight003, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -1001,7 +1001,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetRight003, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetLeft
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -1027,7 +1027,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft001, TestSize.Level1)
  * @tc.desc: Test InitBubbleArrow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, InitBubbleArrow001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, InitBubbleArrow001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -1069,7 +1069,7 @@ HWTEST_F(BubbleTestTwoNg, InitBubbleArrow001, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetLeft
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft002, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft002, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -1099,7 +1099,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft002, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetLeft
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft003, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft003, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -1129,7 +1129,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft003, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetLeft
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft004, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft004, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -1160,7 +1160,7 @@ HWTEST_F(BubbleTestTwoNg, AvoidToTargetLeft004, TestSize.Level1)
  * @tc.desc: Test CheckPositionBottom
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, CheckPositionBottom001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, CheckPositionBottom001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     BubbleTestTwoNg::InitCheckPositionSetting(algorithm);
@@ -1195,7 +1195,7 @@ HWTEST_F(BubbleTestTwoNg, CheckPositionBottom001, TestSize.Level1)
  * @tc.desc: Test CheckPositionTop
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, CheckPositionTop001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, CheckPositionTop001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     BubbleTestTwoNg::InitCheckPositionSetting(algorithm);
@@ -1230,7 +1230,7 @@ HWTEST_F(BubbleTestTwoNg, CheckPositionTop001, TestSize.Level1)
  * @tc.desc: Test CheckPositionRight
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, CheckPositionRight001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, CheckPositionRight001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     BubbleTestTwoNg::InitCheckPositionSetting(algorithm);
@@ -1265,7 +1265,7 @@ HWTEST_F(BubbleTestTwoNg, CheckPositionRight001, TestSize.Level1)
  * @tc.desc: Test CheckPositionLeft
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, CheckPositionLeft001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, CheckPositionLeft001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     BubbleTestTwoNg::InitCheckPositionSetting(algorithm);
@@ -1298,7 +1298,7 @@ HWTEST_F(BubbleTestTwoNg, CheckPositionLeft001, TestSize.Level1)
  * @tc.desc: Test GetBottomRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, GetBottomRect001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, GetBottomRect001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
@@ -1323,7 +1323,7 @@ HWTEST_F(BubbleTestTwoNg, GetBottomRect001, TestSize.Level1)
  * @tc.desc: Test GetTopRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, GetTopRect001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, GetTopRect001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
@@ -1348,7 +1348,7 @@ HWTEST_F(BubbleTestTwoNg, GetTopRect001, TestSize.Level1)
  * @tc.desc: Test GetRightRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, GetRightRect001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, GetRightRect001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
@@ -1373,7 +1373,7 @@ HWTEST_F(BubbleTestTwoNg, GetRightRect001, TestSize.Level1)
  * @tc.desc: Test GetLeftRect
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, GetLeftRect001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, GetLeftRect001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
@@ -1398,7 +1398,7 @@ HWTEST_F(BubbleTestTwoNg, GetLeftRect001, TestSize.Level1)
  * @tc.desc: Test BubblePattern::UpdateBubbleGradient
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, UpdateBubbleGradient001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, UpdateBubbleGradient001, TestSize.Level0)
 {
      /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -1426,7 +1426,7 @@ HWTEST_F(BubbleTestTwoNg, UpdateBubbleGradient001, TestSize.Level1)
  * @tc.desc: Test BubblePattern::UpdateStyleOption
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateStyleOptionTest001, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateStyleOptionTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.
@@ -1456,7 +1456,7 @@ HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateStyleOptionTest001, TestSize.Level1
  * @tc.desc: Test BubblePattern::UpdateBubbleBackGroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateBubbleBackGroundColorTest002, TestSize.Level1)
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateBubbleBackGroundColorTest002, TestSize.Level0)
 {
      /**
      * @tc.steps: step1. create targetNode and get frameNode.

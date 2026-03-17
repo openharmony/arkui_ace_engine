@@ -270,7 +270,7 @@ RefPtr<FrameNode> BubbleFiveTestNg::CreateBubbleNode(const TestProperty& testPro
  * @tc.desc: Test AvoidToTargetPlacement
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement001, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement001, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -321,7 +321,7 @@ HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement001, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetPlacement
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement002, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement002, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -372,7 +372,7 @@ HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement002, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetPlacement
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement003, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement003, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -424,7 +424,7 @@ HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement003, TestSize.Level1)
  * @tc.desc: Test AvoidToTargetPlacement
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement004, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement004, TestSize.Level0)
 {
     BubbleLayoutAlgorithm algorithm;
     algorithm.wrapperSize_ = SizeF(SIZE_TWO_HUNDRED, SIZE_TWO_HUNDRED);
@@ -477,7 +477,7 @@ HWTEST_F(BubbleFiveTestNg, AvoidToTargetPlacement004, TestSize.Level1)
  * @tc.desc: Test AvoidOrCoverParent
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, AvoidOrCoverParent001, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, AvoidOrCoverParent001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -533,7 +533,7 @@ HWTEST_F(BubbleFiveTestNg, AvoidOrCoverParent001, TestSize.Level1)
  * @tc.desc: Test AvoidOrCoverParent
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, AvoidOrCoverParent002, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, AvoidOrCoverParent002, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
@@ -590,7 +590,7 @@ HWTEST_F(BubbleFiveTestNg, AvoidOrCoverParent002, TestSize.Level1)
  * @tc.desc: Test BubblePattern::UpdateBubbleBackGroundColor
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateBubbleBackGroundColorTest001, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateBubbleBackGroundColorTest001, TestSize.Level0)
 {
     TestProperty testProperty;
     RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
@@ -615,7 +615,7 @@ HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateBubbleBackGroundColorTest001, Test
  * @tc.desc: Test BubblePattern::UpdateMaskColor
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateMaskColorTest001, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateMaskColorTest001, TestSize.Level0)
 {
     TestProperty testProperty;
     RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
@@ -640,7 +640,7 @@ HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateMaskColorTest001, TestSize.Level1)
  * @tc.desc: Test InitTargetSizeAndPosition.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, InitTargetSizeAndPosition002, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, InitTargetSizeAndPosition002, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -670,7 +670,7 @@ HWTEST_F(BubbleFiveTestNg, InitTargetSizeAndPosition002, TestSize.Level1)
  * @tc.desc: Test adjust bubble position.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, UpdateContentPositionRange001, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, UpdateContentPositionRange001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -710,7 +710,7 @@ HWTEST_F(BubbleFiveTestNg, UpdateContentPositionRange001, TestSize.Level1)
  * @tc.desc: Test BubblePattern::UpdateArrowWidth
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateArrowWidthTest001, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateArrowWidthTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create bubble frame node.
@@ -751,7 +751,7 @@ HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateArrowWidthTest001, TestSize.Level1
  * @tc.desc: Test BubblePattern::UpdateArrowHeight
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateArrowHeightTest001, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateArrowHeightTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create bubble frame node.
@@ -792,7 +792,7 @@ HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateArrowHeightTest001, TestSize.Level
  * @tc.desc: Test BubblePattern::UpdateWidth
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateWidthTest001, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateWidthTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create bubble frame node.
@@ -839,7 +839,7 @@ HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateWidthTest001, TestSize.Level1)
  * @tc.desc: Test BubblePattern::UpdateRadius
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateRadiusTest001, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateRadiusTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create bubble frame node.
@@ -880,7 +880,7 @@ HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateRadiusTest001, TestSize.Level1)
  * @tc.desc: Test BubblePattern::UpdateBubbleText
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateBubbleTextTest001, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateBubbleTextTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create bubble frame node.
@@ -929,7 +929,7 @@ HWTEST_F(BubbleFiveTestNg, BubblePatternUpdateBubbleTextTest001, TestSize.Level1
  * @tc.desc: Test OnWindowSizeChanged func.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleFiveTestNg, OnWindowSizeChangedTest001, TestSize.Level1)
+HWTEST_F(BubbleFiveTestNg, OnWindowSizeChangedTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get bubblePattern.
