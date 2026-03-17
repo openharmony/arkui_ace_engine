@@ -23,6 +23,7 @@ ace_unittest("gauge_test_ng") {
     "gauge_pattern_test_ng.cpp",
     "gauge_pattern_test_two_ng.cpp",
     "gauge_test_ng.cpp",
+    "gauge_withtheme_test_ng.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {

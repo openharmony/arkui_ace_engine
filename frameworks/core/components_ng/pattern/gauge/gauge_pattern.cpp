@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
+#include "ui/base/versions.h"
 
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_algorithm.h"
@@ -30,6 +31,17 @@ bool GaugePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+    return true;
+}
+
+bool GaugePattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
 }
 
