@@ -62,6 +62,8 @@
     "pages/Examples/MenuMaskDemo",
     "pages/Examples/MenuSystemMaterial",
     "pages/Examples/MenuComprehensiveDemo",
+    "pages/Examples/MenuBusinessScenarios",
+    "pages/Examples/MenuAllInOneDemo",
     "pages/Examples/MenuAdvancedDemo",
 
     "pages/LifeCycle/Index",
