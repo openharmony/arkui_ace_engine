@@ -720,6 +720,9 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     if (!ParseMenuBlurStyleEffect(param, menuNode->GetRenderContext())) { return; }
 
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
+    if (menuPattern->GetScrollBar().has_value()) {
+        param.scrollBar = menuPattern->GetScrollBar().value();
+    }
     ParseMenuRadius(param);
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);

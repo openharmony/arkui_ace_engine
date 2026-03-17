@@ -826,6 +826,10 @@ auto g_bindMenuOptionsParam = [](
     menuParam.minKeyboardAvoidDistance = convValue;
     auto material = OptConvert<UiMaterial*>(menuOptions.systemMaterial).value_or(nullptr);
     menuParam.systemMaterial = material ? material->Copy() : nullptr;
+    auto scrollBarOpt = OptConvert<DisplayMode>(menuOptions.scrollBar);
+    if (scrollBarOpt.has_value()) {
+        menuParam.scrollBar = scrollBarOpt.value();
+    }
 };
 
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,
