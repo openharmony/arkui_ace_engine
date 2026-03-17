@@ -39,6 +39,8 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
     @JSONStringifyIgnore
     private allowDeep_: boolean;
     private isAPI_ : boolean;
+    @JSONStringifyIgnore
+    public isStaticMapProxy_: boolean = true;
     /**
      * Constructs a Map from another Map
      * @param map another map
