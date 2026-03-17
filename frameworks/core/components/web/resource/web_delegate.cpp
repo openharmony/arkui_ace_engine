@@ -116,6 +116,7 @@ constexpr uint32_t ACCESSIBILITY_DELAY_MILLISECONDS = 100;
 constexpr uint32_t DELAY_MILLISECONDS_1000 = 1000;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 constexpr uint32_t ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS = 200;
+constexpr uint32_t AUTOFILL_DELAY_MILLISECONDS = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 constexpr uint32_t TIMEOUT_SECONDS = 5;
 
@@ -7259,6 +7260,9 @@ void WebDelegate::OnFocus(const OHOS::NWeb::FocusReason& reason)
     if (nweb_) {
         nweb_->OnFocus(reason);
     }
+    if (hasPendingAutoFill_) {
+        DoFillAutoFillData();
+    }
 }
 
 bool WebDelegate::NeedSoftKeyboard()
@@ -7512,12 +7516,32 @@ void WebDelegate::HandleAccessibilityHoverEvent(
 void WebDelegate::NotifyAutoFillViewData(
     const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type)
 {
+    if (hasPendingAutoFill_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::NotifyAutoFillViewData already has pending autofill data");
+        return;
+    }
+    pendingAutoFillJsonStr_ = jsonStr;
+    pendingAutoFillType_ = type;
+    hasPendingAutoFill_ = true;
+    DoFillAutoFillData(type == OHOS::NWeb::NWebAutoFillTriggerType::PASTE_REQUEST ? 0 : AUTOFILL_DELAY_MILLISECONDS);
+}
+
+void WebDelegate::DoFillAutoFillData(uint32_t delayMs)
+{
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), jsonStr, type]() {
+    context->GetTaskExecutor()->PostDelayedTask(
+        [weak = WeakClaim(this), jsonStr = pendingAutoFillJsonStr_, type = pendingAutoFillType_, delayMs]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
+            if (!delegate->hasPendingAutoFill_) {
+                return;
+            }
+            if (delayMs > 0) {
+                TAG_LOGW(AceLogTag::ACE_WEB, "WebDelegate::NotifyAutoFillViewData fallback, type = %{public}d", type);
+            }
+            delegate->hasPendingAutoFill_ = false;
+            delegate->pendingAutoFillJsonStr_ = "";
             CHECK_NULL_VOID(delegate->nweb_);
             auto romMessage = std::make_shared<OHOS::NWeb::WebViewValue>(NWebRomValue::Type::NONE);
             romMessage->SetType(NWebRomValue::Type::STRING);
@@ -7534,7 +7558,7 @@ void WebDelegate::NotifyAutoFillViewData(
                 delegate->nweb_->FillAutofillData(webMessage);
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyAutoFillViewData");
+        TaskExecutor::TaskType::PLATFORM, delayMs, "ArkUIWebPendingAutoFill");
 }
 
 void WebDelegate::AutofillCancel(const std::string& fillContent)
