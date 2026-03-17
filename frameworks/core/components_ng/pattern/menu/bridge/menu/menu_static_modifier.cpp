@@ -119,6 +119,8 @@ void SetRadiusImpl(Ark_NativePointer node,
                 radiusPtr->radiusTopLeft, radiusPtr->radiusTopRight,
                 radiusPtr->radiusBottomLeft, radiusPtr->radiusBottomRight);
         }
+    } else {
+        MenuModelStatic::ResetBorderRadius(frameNode);
     }
 }
 
