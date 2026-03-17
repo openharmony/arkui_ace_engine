@@ -24,15 +24,17 @@ DynamicLayoutAlgorithm::DynamicLayoutAlgorithm(const RefPtr<CustomLayoutAlgorith
 
 void DynamicLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    if (customParams_) {
-        customParams_->FireOnMeasureSize(layoutWrapper);
+    auto hasCustomMeasured = customParams_ && customParams_->FireOnMeasureSize(layoutWrapper);
+    if (!hasCustomMeasured) {
+        BoxLayoutAlgorithm::Measure(layoutWrapper);
     }
 }
 
 void DynamicLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    if (customParams_) {
-        customParams_->FireOnPlaceChildren(layoutWrapper);
+    auto hasCustomLayouted = customParams_ && customParams_->FireOnPlaceChildren(layoutWrapper);
+    if (!hasCustomLayouted) {
+        StackLayoutAlgorithm::Layout(layoutWrapper);
     }
 }
 } // namespace OHOS::Ace::NG

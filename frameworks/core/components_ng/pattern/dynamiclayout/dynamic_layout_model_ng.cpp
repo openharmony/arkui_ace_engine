@@ -50,7 +50,6 @@ void DynamicLayoutModelNG::UpdatePropertyFromCustomParam(
     auto dynamicLayoutPattern = frameNode->GetPattern<DynamicLayoutPattern>();
     CHECK_NULL_VOID(dynamicLayoutPattern);
     dynamicLayoutPattern->UpdateCustomLayoutAlgorithmParam(customParam);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void DynamicLayoutModelNG::UpdatePropertyFromGridParam(
@@ -95,11 +94,18 @@ void DynamicLayoutModelNG::UpdatePropertyFromAlgorithmParams(const RefPtr<FrameN
     }
 }
 
+void DynamicLayoutModelNG::UpdatePropertyFromDefaultParam(
+    const RefPtr<NG::FrameNode> &frameNode, const RefPtr<AlgorithmParamBase>& params)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(StackLayoutProperty, Alignment, Alignment::CENTER, frameNode);
+}
+
 std::unordered_map<DynamicLayoutType, UpdateLayoutPropertyFunc> DynamicLayoutModelNG::updateLayoutPropertyFuncMap_ = {
     { DynamicLayoutType::COLUMN_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromLinearParam },
     { DynamicLayoutType::ROW_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromLinearParam },
     { DynamicLayoutType::STACK_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromStackParam },
     { DynamicLayoutType::CUSTOM_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromCustomParam },
+    { DynamicLayoutType::DEFAULT_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromDefaultParam },
     { DynamicLayoutType::GRID_LAYOUT, &DynamicLayoutModelNG::UpdatePropertyFromGridParam },
 };
 
@@ -129,7 +135,7 @@ void DynamicLayoutModelNG::Create(
                 return pattern;
             }
             default:
-                return AceType::MakeRefPtr<DynamicLayoutPattern>();
+                return AceType::MakeRefPtr<StackPattern>();
         }
     };
     auto [frameNode, isInitialRender] =
@@ -142,5 +148,6 @@ void DynamicLayoutModelNG::Create(
     }
     UpdatePropertyFromAlgorithmParams(frameNode, params, type);
     frameNode->SetLayoutType(type);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

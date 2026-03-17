@@ -151,10 +151,16 @@ HWTEST_F(GridContainerUtilsTestNG, SaveGridRowGutterOptionxResObjXsSmMdTest, Tes
     RefPtr<ResourceObject> gutterSizeArrayResObj[V2::MAX_NUMBER_BREAKPOINT];
     gutterSizeArrayResObj[0] = AceType::MakeRefPtr<ResourceObject>();
     V2::GridContainerUtils::SaveGridRowGutterOptionxResObjXsSmMd(gutter, gutterSizeArrayResObj);
+    /**
+     * @tc.expected: gutter->resMap_.find("gridrow.gutter.xXs") != gutter->resMap_.end().
+     */
     EXPECT_TRUE(gutter->resMap_.find("gridrow.gutter.xXs") != gutter->resMap_.end());
 
     gutterSizeArrayResObj[1] = AceType::MakeRefPtr<ResourceObject>();
     V2::GridContainerUtils::SaveGridRowGutterOptionxResObjXsSmMd(gutter, gutterSizeArrayResObj);
+    /**
+     * @tc.expected: gutter->resMap_.find("gridrow.gutter.xSm") != gutter->resMap_.end().
+     */
     EXPECT_TRUE(gutter->resMap_.find("gridrow.gutter.xSm") != gutter->resMap_.end());
 
     gutterSizeArrayResObj[2] = AceType::MakeRefPtr<ResourceObject>();
