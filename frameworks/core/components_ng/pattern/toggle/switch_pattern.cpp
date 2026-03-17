@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,8 @@ constexpr int32_t DEFAULT_DURATION = 200;
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr double NUMBER_TWO = 2.0;
 constexpr int32_t  HOTZONE_SPACE = 2;
+const std::string INJECTION_CMD_FORMAT_ERROR = "Invalid injection command format.";
+const std::string COMPONENT_IN_READONLY = "The component is in read-only state.";
 } // namespace
 
 void SwitchPattern::OnAttachToFrameNode()
@@ -911,14 +913,31 @@ RefPtr<FrameNode> SwitchPattern::BuildContentModifierNode()
 
 bool SwitchPattern::ParseCommand(const std::string& command, bool& isOn)
 {
-    auto json = JsonUtil::ParseJsonString(command);
-    CHECK_NE_RETURN(json->IsObject(), true, false);
-    auto cmdType = json->GetString("cmd");
-    CHECK_NE_RETURN(cmdType, "SetToggleIsOn", false);
-    auto paramJson = json->GetValue("params");
-    CHECK_NE_RETURN(paramJson->IsObject(), true, false);
+    auto jsonObj = JsonUtil::ParseJsonString(command);
+    if (!jsonObj->IsValid() || !jsonObj->IsObject()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return false;
+    }
+    auto cmdObj = jsonObj->GetValue("cmd");
+    if (!cmdObj->IsValid() || !cmdObj->IsString()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return false;
+    }
+    auto cmdType = cmdObj->GetString();
+    if (cmdType != "onToggleChange") {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return false;
+    }
+    auto paramJson = jsonObj->GetValue("params");
+    if (!paramJson->IsValid() || !paramJson->IsObject()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return false;
+    }
     auto isOnJson = paramJson->GetValue("isOn");
-    CHECK_NE_RETURN(isOnJson->IsBool(), true, false);
+    if (!isOnJson->IsValid() || !isOnJson->IsBool()) {
+        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        return false;
+    }
     isOn = isOnJson->GetBool();
     return true;
 }
@@ -928,7 +947,16 @@ int32_t SwitchPattern::OnInjectionEvent(const std::string& command)
     bool isOn = false;
     auto ret = ParseCommand(command, isOn);
     CHECK_EQUAL_RETURN(ret, false, RET_FAILED);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, RET_FAILED);
+    if (!eventHub->IsEnabled()) {
+        ReportInjectionResult(false, COMPONENT_IN_READONLY);
+        return RET_FAILED;
+    }
     SetSwitchIsOn(isOn);
+    ReportInjectionResult(true, "");
     return RET_SUCCESS;
 }
 
@@ -943,9 +971,26 @@ void SwitchPattern::ReportChangeEvent(bool isOn)
     params->Put("isOn", isOn);
     auto json = JsonUtil::Create();
     CHECK_NULL_VOID(json);
-    json->Put("event", "Toggle.onChange");
+    json->Put("event", "onToggleChange");
     json->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+}
+
+bool SwitchPattern::ReportInjectionResult(bool isSuccess, const std::string& reason)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto nodeId = host->GetId();
+    CHECK_NULL_RETURN(nodeId, false);
+    auto result = JsonUtil::Create();
+    CHECK_NULL_RETURN(result, false);
+    result->Put("nodeId", nodeId);
+    result->Put("event", "onToggleChange");
+    result->Put("result", isSuccess ? "success" : "failed");
+    result->Put("reason", reason.c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "ToggleResult", result->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+    return true;
 }
 } // namespace OHOS::Ace::NG
