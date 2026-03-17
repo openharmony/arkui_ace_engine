@@ -126,7 +126,7 @@ RadioBuilderFunc RadioTestNg::RadioBuilder()
  * @tc.desc: Set Radio value into RadioPaintProperty and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPaintPropertyTest001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintPropertyTest001, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -148,7 +148,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest001, TestSize.Level1)
  * @tc.desc: Test SetCheckedBackgroundColor when the Radio is checked.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPaintPropertyTest002, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintPropertyTest002, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -176,7 +176,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest002, TestSize.Level1)
  * @tc.desc: Test SetUncheckedBorderColor when the Radio is unchecked.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPaintPropertyTest003, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintPropertyTest003, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -204,7 +204,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest003, TestSize.Level1)
  * @tc.desc: Test SetIndicatorColor when the Radio is select.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPaintPropertyTest004, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintPropertyTest004, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -232,7 +232,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest004, TestSize.Level1)
  * @tc.desc: Test SetRadioIndicator.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPaintPropertyTest005, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintPropertyTest005, TestSize.Level0)
 {
     int32_t settingApiVersion = 12;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
@@ -253,7 +253,7 @@ HWTEST_F(RadioTestNg, RadioPaintPropertyTest005, TestSize.Level1)
  * @tc.desc: Set Radio value into RadioEventHub and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioEventHubPropertyTest002, TestSize.Level0)
 {
     /**
      * @tc.cases: case1. RadioPattern can Create without value or group.
@@ -284,7 +284,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
  * @tc.desc: Set Radio value into RadioEventHub and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioEventHubPropertyTest003, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioEventHubPropertyTest003, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -301,7 +301,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest003, TestSize.Level1)
  * @tc.desc: Set Radio value into RadioEventHub and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioEventHubPropertyTest004, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioEventHubPropertyTest004, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, std::nullopt, INDICATOR_TYPE_TICK);
@@ -318,7 +318,7 @@ HWTEST_F(RadioTestNg, RadioEventHubPropertyTest004, TestSize.Level1)
  * @tc.desc: Test Radio onChange event.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioEventTest003, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioEventTest003, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -338,7 +338,7 @@ HWTEST_F(RadioTestNg, RadioEventTest003, TestSize.Level1)
  * @tc.desc: Test Radio onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest004, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest004, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -362,7 +362,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest004, TestSize.Level1)
  * @tc.desc: Test UpdateUncheckStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest005, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest005, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -384,7 +384,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest005, TestSize.Level1)
  * @tc.desc: Test UpdateUncheckStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest006, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest006, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -414,7 +414,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest006, TestSize.Level1)
  * @tc.desc: Test UpdateGroupCheckStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level0)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -448,7 +448,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level1)
  * @tc.desc: Test UpdateGroupCheckStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level0)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -505,7 +505,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
  * @tc.desc: Test InitClickEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest009, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest009, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -525,7 +525,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest009, TestSize.Level1)
  * @tc.desc: Test InitTouchEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest010, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest010, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -545,7 +545,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest010, TestSize.Level1)
  * @tc.desc: Test InitMouseEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest011, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest011, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -565,7 +565,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest011, TestSize.Level1)
  * @tc.desc: Test OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest012, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest012, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -588,7 +588,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest012, TestSize.Level1)
  * @tc.desc: Test OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest013, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest013, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -611,7 +611,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest013, TestSize.Level1)
  * @tc.desc: Test OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest014, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest014, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -633,7 +633,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest014, TestSize.Level1)
  * @tc.desc: Test OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest015, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest015, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -657,7 +657,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest015, TestSize.Level1)
  * @tc.desc: Test OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest016, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest016, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -680,7 +680,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest016, TestSize.Level1)
  * @tc.desc: Test OnTouchDown and OnTouchUp.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest019, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest019, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -706,7 +706,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest019, TestSize.Level1)
  * @tc.desc: Test OnTouchDown   OnTouchUp.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest020, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest020, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -732,7 +732,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest020, TestSize.Level1)
  * @tc.desc: Test Radio OnModifyDone default margin.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest021, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest021, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -769,7 +769,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest021, TestSize.Level1)
  * @tc.desc: Verify that RadioLayoutAlgorithm can correctly InitializeParam.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest001, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
@@ -786,7 +786,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest001, TestSize.Level1)
              when Width and height are set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest002, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest002, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
@@ -807,7 +807,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest002, TestSize.Level1)
              when The front end only sets width.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
@@ -838,7 +838,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
              when The front end only sets height.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest004, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest004, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
@@ -858,7 +858,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest004, TestSize.Level1)
              when Width and height are not set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest005, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
@@ -880,7 +880,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
              when Width and height are set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest006, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest006, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
@@ -902,7 +902,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest006, TestSize.Level1)
              when The front end only sets width.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest007, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest007, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
@@ -923,7 +923,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest007, TestSize.Level1)
              when The front end only sets height.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest008, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest008, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
@@ -943,7 +943,7 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest008, TestSize.Level1)
  * @tc.desc: Verify that radioModifier can correctly InitializeParam.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPaintMethodTest013, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintMethodTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: MockContainer.apiTargetVersion_ = VERSION_TWELVE.
@@ -976,7 +976,7 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest013, TestSize.Level1)
  * @tc.desc: Test the IsCheckable property of Radio.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg001, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
@@ -992,7 +992,7 @@ HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg001, TestSize.Level1)
  * @tc.desc: Test the IsChecked property of Radio.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg002, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg002, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
@@ -1015,7 +1015,7 @@ HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg002, TestSize.Level1)
  * @tc.desc: Test the Text property of Radio.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg003, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg003, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
@@ -1036,7 +1036,7 @@ HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg003, TestSize.Level1)
  * @tc.desc: Test Radio OnKeyEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest022, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest022, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -1072,7 +1072,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest022, TestSize.Level1)
  * @tc.desc: Test Radio SetInnerFocusPaintRectCallback.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest023, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest023, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -1096,7 +1096,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest023, TestSize.Level1)
  * @tc.desc: Test Radio Pattern Methods.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioPatternTest024, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest024, TestSize.Level0)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
@@ -1140,7 +1140,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest024, TestSize.Level1)
              when Width and height are not set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioReverseLayout001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioReverseLayout001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init Radio node and add Image child.
@@ -1202,7 +1202,7 @@ HWTEST_F(RadioTestNg, RadioReverseLayout001, TestSize.Level1)
              when Width and height are set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioReverseLayout002, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioReverseLayout002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init Radio node and add Image child.
@@ -1266,7 +1266,7 @@ HWTEST_F(RadioTestNg, RadioReverseLayout002, TestSize.Level1)
              when Width and height are set in the front end and child node is customBuilder.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioReverseLayout003, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioReverseLayout003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init Radio node and add customNode child.
@@ -1335,7 +1335,7 @@ HWTEST_F(RadioTestNg, RadioReverseLayout003, TestSize.Level1)
  * @tc.desc: Test Radio LayoutPolicyIsMatchParent.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, LayoutPolicyIsMatchParentTest001, TestSize.Level1)
+HWTEST_F(RadioTestNg, LayoutPolicyIsMatchParentTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. call LayoutPolicyIsMatchParent function.
@@ -1407,7 +1407,7 @@ HWTEST_F(RadioTestNg, LayoutPolicyIsMatchParentTest001, TestSize.Level1)
  * @tc.desc: Test RadioModelNG::Create resets *_SetByUser flags in RadioPaintProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioCreateResetSetByUserTest001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioCreateResetSetByUserTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create a radio button and retrieve its paint property.
@@ -1451,7 +1451,7 @@ HWTEST_F(RadioTestNg, RadioCreateResetSetByUserTest001, TestSize.Level1)
  * @tc.desc: Test RadioModelNG CreateWithColorResourceObj with different resource objects.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, CreateWithColorResourceObj001, TestSize.Level1)
+HWTEST_F(RadioTestNg, CreateWithColorResourceObj001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create a radio button and retrieve its pattern.
@@ -1507,7 +1507,7 @@ HWTEST_F(RadioTestNg, CreateWithColorResourceObj001, TestSize.Level1)
  * @tc.desc: Test RadioModelNG CreateWithColorResourceObj when resource object is not provided.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, CreateWithColorResourceObj002, TestSize.Level1)
+HWTEST_F(RadioTestNg, CreateWithColorResourceObj002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create a radio button and retrieve its pattern.
@@ -1537,7 +1537,7 @@ HWTEST_F(RadioTestNg, CreateWithColorResourceObj002, TestSize.Level1)
  * @tc.desc: Test SetCheckedBackgroundColorSetByUser.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioSetCheckedBackgroundColorSetByUser001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioSetCheckedBackgroundColorSetByUser001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create a radio button.
@@ -1566,7 +1566,7 @@ HWTEST_F(RadioTestNg, RadioSetCheckedBackgroundColorSetByUser001, TestSize.Level
  * @tc.desc: Test SetUncheckedBorderColorSetByUser.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioSetUncheckedBorderColorSetByUser001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioSetUncheckedBorderColorSetByUser001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create a radio button.
@@ -1595,7 +1595,7 @@ HWTEST_F(RadioTestNg, RadioSetUncheckedBorderColorSetByUser001, TestSize.Level1)
  * @tc.desc: Test SetIndicatorColorSetByUser.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioSetIndicatorColorSetByUser001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioSetIndicatorColorSetByUser001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create a radio button.
@@ -1624,7 +1624,7 @@ HWTEST_F(RadioTestNg, RadioSetIndicatorColorSetByUser001, TestSize.Level1)
  * @tc.desc: Test SetResponseRegion.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioSetResponseRegion001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioSetResponseRegion001, TestSize.Level0)
 {
     /**
      * @tc.cases: case1. RadioPattern can Create without value or group.
@@ -1651,7 +1651,7 @@ HWTEST_F(RadioTestNg, RadioSetResponseRegion001, TestSize.Level1)
  * @tc.desc: Test SetHoverEffect.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, RadioSetHoverEffect001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioSetHoverEffect001, TestSize.Level0)
 {
     /**
      * @tc.cases: case1. RadioPattern can Create without value or group.
@@ -1676,7 +1676,7 @@ HWTEST_F(RadioTestNg, RadioSetHoverEffect001, TestSize.Level1)
  * @tc.desc: Test CreateRadio.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioTestNg, CreateRadio001, TestSize.Level1)
+HWTEST_F(RadioTestNg, CreateRadio001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Init Radio node and check name, groupName
