@@ -93,7 +93,6 @@ import { pointer } from "@koalaui/interop";
 import { Scene } from "graphics3d.Scene"
 import { Animation, Environment } from "graphics3d.SceneResources"
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
-import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { int32 } from '@koalaui/common';
 import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
@@ -352,8 +351,8 @@ export namespace extractors {
   }
 
   export function toUIContextPtr(value: UIContext): KPointer {
-    let uicontextImpl = value as UIContextImpl;
-    let instanceId = uicontextImpl.instanceId_;
+    let uiContext = value as UIContext;
+    let instanceId = uiContext.instanceId_;
     return instanceId as KPointer;
   }
   export function fromUIContextPtr(ptr: KPointer): UIContext {

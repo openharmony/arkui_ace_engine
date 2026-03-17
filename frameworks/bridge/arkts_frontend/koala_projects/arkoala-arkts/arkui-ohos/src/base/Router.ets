@@ -43,7 +43,6 @@ import router from "@ohos/router"
 import { InteropNativeModule, nullptr } from "@koalaui/interop"
 import { RouterExtender, PageRouterOptions, RouterOptionsInner } from "#generated"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
-import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { AsyncCallback, BusinessError } from "@ohos.base"
 import { UIContext } from "@ohos/arkui/UIContext"
 
@@ -463,7 +462,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
             this.peerNodeList.push(jsViewNodePtr);
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -603,7 +602,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
             this.peerNodeList.push(jsViewNodePtr);
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -683,7 +682,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
             this.peerNodeList.push(jsViewNodePtr);
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -772,7 +771,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
             this.peerNodeList.push(jsViewNodePtr);
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -820,7 +819,7 @@ export class RouterImpl implements Router {
         })
         this.rootState.push(stateNode);
         this.peerNodeList.push(pageNode)
-        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         context.getDetachedRootEntryManager().setDetachedRootNode(pageNode, stateNode);
         let pageEnterTransitionCallback = (pageNode: KPointer) => {
             let index = this.peerNodeList.indexOf(pageNode);
@@ -893,7 +892,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
             this.peerNodeList.push(jsViewNodePtr)
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pageEnterTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -948,7 +947,7 @@ export class RouterImpl implements Router {
         })
         this.rootState.push(stateNode);
         this.peerNodeList.push(pageNode)
-        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         context.getDetachedRootEntryManager().setDetachedRootNode(pageNode, stateNode);
         let pageEnterTransitionCallback = (pageNode: KPointer) => {
             let index = this.peerNodeList.indexOf(pageNode);
@@ -1034,7 +1033,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
             this.peerNodeList.push(jsViewNodePtr)
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pageEnterTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -1113,7 +1112,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
             this.peerNodeList.push(jsViewNodePtr)
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pageEnterTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -1201,7 +1200,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
             this.peerNodeList.push(jsViewNodePtr)
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pageEnterTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -1366,7 +1365,7 @@ export class RouterImpl implements Router {
         const jsViewNodePtr = peerNode!.peer.ptr
         this.rootState.push(stateNode)
         this.peerNodeList.push(jsViewNodePtr);
-        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
         let pagePushTransitionCallback = (jsNode: KPointer) => {
             let index = this.peerNodeList.indexOf(jsNode);
