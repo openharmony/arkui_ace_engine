@@ -822,8 +822,6 @@ frameworks/bridge/declarative_frontend/engine/functions/js_event_function.cpp @A
 frameworks/bridge/declarative_frontend/engine/functions/js_event_function.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_xcomponent_onload_function.cpp @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/engine/functions/js_xcomponent_onload_function.h @ArkUI_ability_group
-frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.cpp @ArkUI_Event
-frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_gesture_judge_function.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_gesture_judge_function.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_hover_function.cpp @ArkUI_Event

@@ -861,7 +861,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
-            func->Execute(*clickInfo);
+            func->Execute(execCtx.vm_, *clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             std::u16string label = u"";
             auto frameNode = node.Upgrade();

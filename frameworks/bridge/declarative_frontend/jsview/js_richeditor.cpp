@@ -653,7 +653,7 @@ void JSRichEditorController::ParseUserGesture(
                                 node =  AceType::WeakClaim(targetNode)](GestureEvent& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT(spanTypeInner + ".onLongPress");
-            func->Execute(info);
+            func->Execute(execCtx.vm_, info);
         };
         gestureOption.onLongPress = std::move(onLongPress);
     }
@@ -681,7 +681,7 @@ void JSRichEditorController::ParseUserMouseOption(
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         PipelineContext::SetCallBackNode(node);
         ACE_SCORING_EVENT(spanTypeInner + ".onHover");
-        func->HoverExecute(isHover, info);
+        func->HoverExecute(execCtx.vm_, isHover, info);
     };
     mouseOption.onHover = std::move(onHover);
 }
@@ -701,7 +701,7 @@ void JSRichEditorController::ParseUserClickEvent(const JSCallbackInfo& args, con
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT(spanTypeInner + ".onClick");
             PipelineContext::SetCallBackNode(node);
-            func->Execute(info);
+            func->Execute(execCtx.vm_, info);
         };
         gestureOption.onClick = std::move(onClick);
     }
@@ -715,7 +715,7 @@ void JSRichEditorController::ParseUserClickEvent(const JSCallbackInfo& args, con
                                 node =  AceType::WeakClaim(targetNode)](GestureEvent& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT(spanTypeInner + ".onDoubleClick");
-            func->Execute(info);
+            func->Execute(execCtx.vm_, info);
         };
         gestureOption.onDoubleClick = std::move(onDoubleClick);
     }

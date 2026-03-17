@@ -17,11 +17,11 @@
 
 #include "base/log/log_wrapper.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/jsview/models/gesture_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "frameworks/base/log/ace_scoring_log.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h"
 #include "frameworks/core/gestures/timeout_gesture.h"
 
 namespace OHOS::Ace {
@@ -602,23 +602,44 @@ void JSGesture::JsHandlerOnGestureEvent(Ace::GestureEventAction action, const JS
         return;
     }
 
-    RefPtr<JsGestureFunction> handlerFunc = AceType::MakeRefPtr<JsGestureFunction>(JSRef<JSFunc>::Cast(args[0]));
+    EcmaVM* vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsFunc = JSRef<JSFunc>::Cast(args[0]);
+    if (jsFunc->IsEmpty()) {
+        return;
+    }
+    auto jsFuncLocalHandle = jsFunc->GetLocalHandle();
+    auto execCtx = args.GetExecutionContext();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
 
     if (action == Ace::GestureEventAction::CANCEL) {
-        auto onActionCancelFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc)](
+        auto onActionCancelFunc = [vm, execCtx, func = panda::CopyableGlobal(vm, jsFuncLocalHandle), node = frameNode](
                                       GestureEvent& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Gesture.onCancel");
-            func->Execute(info);
+            PipelineContext::SetCallBackNode(node);
+            // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+            // It is not allowed to hold this address elsewhere.
+            auto infoPtr = new GestureEvent(info);
+            auto eventObj = NG::CommonBridge::CreateCommonGestureEventInfo(vm, infoPtr);
+            panda::Local<panda::JSValueRef> params[1] = { eventObj };
+            func->Call(vm, func.ToLocal(), params, 1);
         };
         GestureModel::GetInstance()->SetOnGestureEvent(onActionCancelFunc);
         return;
     }
 
-    auto onActionFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc)](GestureEvent& info) {
+    auto onActionFunc = [vm, execCtx, func = panda::CopyableGlobal(vm, jsFuncLocalHandle), node = frameNode](
+                            GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Gesture.onActionCancel");
-        func->Execute(info);
+        PipelineContext::SetCallBackNode(node);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new GestureEvent(info);
+        auto eventObj = NG::CommonBridge::CreateCommonGestureEventInfo(vm, infoPtr);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
 
     GestureModel::GetInstance()->SetOnActionFunc(onActionFunc, action);

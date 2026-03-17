@@ -468,7 +468,7 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onClick");
             PipelineContext::SetCallBackNode(node);
-            func->Execute(*clickInfo);
+            func->Execute(execCtx.vm_, *clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             JSInteractableView::ReportClickEvent(node);
 #endif
@@ -585,7 +585,7 @@ void JSSpan::SetOnHover(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onHover");
         PipelineContext::SetCallBackNode(node);
-        func->HoverExecute(isHover, hoverInfo);
+        func->HoverExecute(execCtx.vm_, isHover, hoverInfo);
     };
     SpanModel::GetInstance()->SetOnHover(std::move(onHover));
 }
