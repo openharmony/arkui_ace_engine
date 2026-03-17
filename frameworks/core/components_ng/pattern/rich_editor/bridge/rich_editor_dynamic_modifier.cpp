@@ -1333,6 +1333,20 @@ void ResetRichEditorUndoStyle(ArkUINodeHandle node)
     RichEditorModelNG::SetSupportStyledUndo(frameNode, false);
 }
 
+void SetRichEditorOrphanCharOptimization(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOrphanCharOptimization(frameNode, value);
+}
+ 
+void ResetRichEditorOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOrphanCharOptimization(frameNode, false);
+}
+
 void SetRichEditorScrollBarColor(ArkUINodeHandle node, ArkUI_Int32 color, void* resRawPtr)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2160,6 +2174,8 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .setStyledString = SetStyledString,
         .getStyledString = GetStyledString,
         .setStyledPlaceholder = SetStyledPlaceholder,
+        .setRichEditorOrphanCharOptimization = SetRichEditorOrphanCharOptimization,
+        .resetRichEditorOrphanCharOptimization = ResetRichEditorOrphanCharOptimization,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

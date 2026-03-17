@@ -626,6 +626,14 @@ public:
         return isEnableAutoSpacing_;
     }
 
+    void SetOrphanCharOptimization(bool isOrphanCharOptimization)
+    {
+        CHECK_NULL_VOID(isOrphanCharOptimization_ != isOrphanCharOptimization);
+        isOrphanCharOptimization_ = isOrphanCharOptimization;
+        paragraphCache_.Clear();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetOrphanCharOptimization: [%{public}d]", isOrphanCharOptimization_);
+    }
+
     void SetCompressLeadingPunctuation(bool enabled)
     {
         CHECK_NULL_VOID(isCompressLeadingPunctuation_ != enabled);
@@ -2115,6 +2123,7 @@ private:
     std::unordered_map<std::u16string, RefPtr<SpanItem>> placeholderSpansMap_;
     bool isEnableHapticFeedback_ = true;
     bool isEnableAutoSpacing_ = false;
+    bool isOrphanCharOptimization_ = false;
     bool isCompressLeadingPunctuation_ = false;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
     uint32_t twinklingInterval_ = 0;

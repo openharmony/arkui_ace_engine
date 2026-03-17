@@ -123,6 +123,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     UpdateShaderStyle(textLayoutProperty, textStyle);
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
     textStyle.SetEnableAutoSpacing(textLayoutProperty->GetEnableAutoSpacingValue(false));
+    textStyle.SetOrphanCharOptimization(textLayoutProperty->GetOrphanCharOptimizationValue(false));
     textStyle.SetParagraphVerticalAlign(
         textLayoutProperty->GetTextVerticalAlignValue(TextVerticalAlign::BASELINE));
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());

@@ -42,7 +42,8 @@ ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
         .orphanCharOptimization = textStyle.GetOrphanCharOptimization(),
         .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
-        .fallbackLineSpacing = textStyle.GetFallbackLineSpacing()
+        .fallbackLineSpacing = textStyle.GetFallbackLineSpacing(),
+        .orphanCharOptimization = textStyle.GetOrphanCharOptimization()
         };
 }
 

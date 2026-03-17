@@ -209,7 +209,8 @@ struct ParagraphStyle {
                enableAutoSpacing == others.enableAutoSpacing &&
                orphanCharOptimization == others.orphanCharOptimization &&
                compressLeadingPunctuation == others.compressLeadingPunctuation &&
-               includeFontPadding == others.includeFontPadding && fallbackLineSpacing == others.fallbackLineSpacing;
+               includeFontPadding == others.includeFontPadding && fallbackLineSpacing == others.fallbackLineSpacing &&
+               orphanCharOptimization == others.orphanCharOptimization;
     }
 
     bool operator!=(const ParagraphStyle others) const
@@ -247,6 +248,8 @@ struct ParagraphStyle {
         result += includeFontPadding;
         result += ", fallbackLineSpacing: ";
         result += fallbackLineSpacing;
+        result += ", orphanCharOptimization: ";
+        result += orphanCharOptimization;
         return result;
     }
 };
