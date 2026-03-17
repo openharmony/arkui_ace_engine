@@ -73,6 +73,7 @@ def main():
         "--scraper-options-file", scraper_options_file,
         "--arkgen", f"{npx} @idlizer/arkgen",
         "--etsgen", f"{npx} @idlizer/etsgen",
+        "--target", "all",
         "--output", output_dir
     ]
 
