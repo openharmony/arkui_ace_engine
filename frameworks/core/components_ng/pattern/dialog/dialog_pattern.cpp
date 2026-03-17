@@ -66,6 +66,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -328,7 +329,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     if (host->IsRemoving()) {
         return;
     }
-
+    ReportDestroy(buttonIdx);
     auto hub = host->GetEventHub<DialogEventHub>();
     if (buttonIdx != -1) {
         hub->FireSuccessEvent(buttonIdx, host);
@@ -1212,11 +1213,12 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     if (item.action) {
         hub->AddClickEvent(item.action);
         auto recordEvent = [weak = WeakClaim(this), title = item.title](GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->storedSheetTitle_ = title;
             if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
                 return;
             }
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
             Recorder::EventParamsBuilder builder;
             builder.SetEventType(Recorder::EventType::DIALOG_SELECT)
                 .SetText(title)
@@ -2567,5 +2569,421 @@ void DialogPattern::RemoveFollowParentWindowLayoutNode()
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_DIALOG);
     CHECK_NULL_VOID(subwindow);
     subwindow->RemoveFollowParentWindowLayoutNode(host->GetId());
+}
+
+int32_t DialogPattern::OnInjectionEvent(const std::string& command)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "OnInjectionEvent input:%{public}s!", command.c_str());
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "not JSON format!");
+        return RET_FAILED;
+    }
+    auto cmdType = json->GetString("cmd");
+    if (cmdType == "alertDialogButtonClick") {
+        auto ret = HandleAlertDialogButtonClickCmd(json);
+        if (!ret) {
+            return RET_FAILED;
+        }
+    } else if (cmdType == "actionSheetClick") {
+        auto ret = HandleActionSheetClickCmd(json);
+        if (ret != RET_SUCCESS) {
+            return RET_FAILED;
+        }
+    } else if (cmdType == "actionMenuClick") {
+        auto ret = HandleActionMenuButtonClickCmd(json);
+        if (ret != RET_SUCCESS) {
+            return RET_FAILED;
+        }
+    } else {
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+std::vector<RefPtr<FrameNode>> DialogPattern::GetButtons()
+{
+    std::vector<RefPtr<FrameNode>> result;
+    CHECK_NULL_RETURN(buttonContainer_, result);
+    for (const auto& buttonNode : buttonContainer_->GetChildren()) {
+        if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
+            continue;
+        }
+        ACE_UINODE_TRACE(buttonNode);
+        auto buttonFrameNode = DynamicCast<FrameNode>(buttonNode);
+        result.push_back(buttonFrameNode);
+    }
+    return result;
+}
+
+bool DialogPattern::HandleAlertDialogButtonClickCmd(const std::unique_ptr<JsonValue>& json)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "HandleAlertDialogButtonClickCmd enter!");
+    if (!json || json->IsNull()) {
+        ReportAlertDialogOnInjectionEvent(false, "Incorrect JSON format!", -1);
+        return false;
+    }
+    auto params = json->GetValue("params");
+    if (!params || !params->IsObject()) {
+        ReportAlertDialogOnInjectionEvent(false, "Incorrect JSON format!", -1);
+        return false;
+    }
+    auto jsonIndex = params->GetValue("buttonIndex");
+    if (!jsonIndex || !jsonIndex->IsNumber()) {
+        ReportAlertDialogOnInjectionEvent(false,
+            "The buttonIndex field is not found in the JSON object or the field type is incorrect.!", -1);
+        return false;
+    }
+    auto btnIndex = jsonIndex->GetInt();
+    if (dialogProperties_.type != DialogType::ALERT_DIALOG) {
+        ReportAlertDialogOnInjectionEvent(false, "The dialog box type does not match!", btnIndex);
+        return false;
+    }
+    CHECK_NULL_RETURN(buttonContainer_, false);
+    auto btnNodes = GetButtons();
+    TAG_LOGD(AceLogTag::ACE_DIALOG,
+        "btnNodes num:%{public}zu,btnIndex:%{public}d! ", btnNodes.size(), btnIndex);
+    if (btnIndex < 0 || static_cast<size_t>(btnIndex) >= btnNodes.size()) {
+        ReportAlertDialogOnInjectionEvent(false,
+            "The index value exceeds the actual total number of buttons!", btnIndex);
+        return false;
+    }
+    auto buttonFrameNode = DynamicCast<FrameNode>(btnNodes.at(btnIndex));
+    CHECK_NULL_RETURN(buttonFrameNode, false);
+    RefPtr<GestureEventHub> gestureHub = buttonFrameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, false);
+    gestureHub->ActClick();
+    ReportAlertDialogOnInjectionEvent(true, "", btnIndex, buttonFrameNode);
+    return true;
+}
+
+void DialogPattern::ReportAlertDialogOnInjectionEvent(bool result, std::string reason,
+    int32_t btnIndex, RefPtr<FrameNode> btnNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    CHECK_NULL_VOID(buttonContainer_);
+    std::string btnText;
+    if (btnIndex >= 0 && static_cast<size_t>(btnIndex) < dialogProperties_.buttons.size()) {
+        btnText = dialogProperties_.buttons.at(btnIndex).text;
+    }
+    auto jsonResult = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_VOID(jsonResult);
+    jsonResult->Put("dialogNodeId", nodeId);
+    jsonResult->Put("event", "alertDialogButtonClick");
+    if (result) {
+        jsonResult->Put("result", "success");
+    } else {
+        jsonResult->Put("result", "fail");
+        jsonResult->Put("reason", reason.c_str());
+    }
+    jsonResult->Put("buttonText", btnText.c_str());
+    jsonResult->Put("buttonIndex", btnIndex);
+    auto json = InspectorJsonUtil::Create();
+    json->Put("alertDialogButtonClickResult", jsonResult);
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]Report info:%{public}s.", json->ToString().c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
+        ComponentEventType::COMPONENT_EVENT_DIALOG);
+}
+
+void DialogPattern::ReportShow()
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]Report show event.");
+    if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show",
+            ComponentEventType::COMPONENT_EVENT_DIALOG);
+    } else if (dialogProperties_.type == DialogType::ACTION_SHEET) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "ActionSheet.show",
+            ComponentEventType::COMPONENT_EVENT_DIALOG);
+    } else if (dialogProperties_.isMenu) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "ActionMenu.show",
+            ComponentEventType::COMPONENT_EVENT_DIALOG);
+    }
+}
+
+void DialogPattern::ReportDestroy(int32_t buttonIdx)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportDestroy buttonIdx:%{public}d,hasReportDestroy:%{public}d",
+        buttonIdx, hasReportDestroy);
+    if (!hasReportDestroy) {
+        hasReportDestroy = true;
+    } else {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
+        std::string btnText;
+        if (buttonIdx >= 0 && static_cast<size_t>(buttonIdx) < dialogProperties_.buttons.size()) {
+            btnText = dialogProperties_.buttons.at(buttonIdx).text;
+        }
+        auto json = InspectorJsonUtil::Create();
+        json->Put("buttonText", btnText.c_str());
+        json->Put("autoCancel", false);
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportDestroy report:%{public}s", json->ToString().c_str());
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
+            "destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+    }
+    if (dialogProperties_.type == DialogType::ACTION_SHEET) {
+        std::string title = "";
+        std::string buttonText = "";
+        if (buttonIdx == SHEET_INFO_IDX) {
+            title = storedSheetTitle_;
+        } else if (buttonIdx >= 0 && static_cast<size_t>(buttonIdx) < dialogProperties_.buttons.size()) {
+            buttonText = dialogProperties_.buttons.at(buttonIdx).text;
+        }
+        auto json = InspectorJsonUtil::Create();
+        json->Put("sheetTitle", title.c_str());
+        json->Put("buttonText", buttonText.c_str());
+        json->Put("autoCancel", false);
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportDestroy report:%{public}s", json->ToString().c_str());
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
+            "ActionSheet.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+    }
+    if (dialogProperties_.isMenu) {
+        ReportDestroyActionMenu(buttonIdx);
+    }
+}
+
+void DialogPattern::ReportDestroyAutoCancel()
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportDestroyAutoCancel hasReportDestroy:%{public}d", hasReportDestroy);
+    if (!hasReportDestroy) {
+        hasReportDestroy = true;
+    } else {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
+        auto json = InspectorJsonUtil::Create();
+        json->Put("autoCancel", true);
+        TAG_LOGD(AceLogTag::ACE_DIALOG,
+            "[DIALOG]ReportDestroyAutoCancel report:%{public}s", json->ToString().c_str());
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
+            "destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+    }
+    if (dialogProperties_.type == DialogType::ACTION_SHEET) {
+        auto json = InspectorJsonUtil::Create();
+        json->Put("autoCancel", true);
+        TAG_LOGD(AceLogTag::ACE_DIALOG,
+            "[DIALOG]ReportDestroyAutoCancel report:%{public}s", json->ToString().c_str());
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
+            "ActionSheet.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+    }
+}
+
+void DialogPattern::ReportDestroyActionMenu(int32_t buttonIdx)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto upgradedMenuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(upgradedMenuNode);
+    auto menuCount = upgradedMenuNode->GetChildren().size();
+    if (buttonIdx < static_cast<int32_t>(-1) || buttonIdx >= static_cast<int32_t>(menuCount)) {
+        return;
+    }
+    int findIndex = buttonIdx;
+    if (buttonIdx == static_cast<int32_t>(-1)) {
+        // click cancel button
+        findIndex = static_cast<int32_t>(menuCount) - 1;
+    }
+    auto btnRow = DynamicCast<FrameNode>(upgradedMenuNode->GetChildAtIndex(findIndex));
+    CHECK_NULL_VOID(btnRow);
+    auto buttonNode = DynamicCast<FrameNode>(btnRow->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto textNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto textDisplay = UtfUtils::Str16ToStr8(textPattern->GetTextForDisplay());
+    auto json = InspectorJsonUtil::Create();
+    json->Put("buttonText", textDisplay.c_str());
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "[DIALOG]PopDialog menu:%{public}s.", json->ToString().c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
+        "ActionMenu.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+}
+
+void DialogPattern::ReportActionSheetOnInjectionEvent(bool result,
+    std::string reason, int32_t sheetIndex, int32_t buttonIndex)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto sheetContainer = contentNodeMap_[DialogContentNode::SHEET];
+    CHECK_NULL_VOID(sheetContainer);
+    auto sheetCount = sheetContainer->GetChildren().size();
+    std::string title = "";
+    std::string buttonText = "";
+    if (sheetIndex >= 0 && sheetIndex < static_cast<int32_t>(sheetCount)) {
+        title = dialogProperties_.sheetsInfo.at(sheetIndex).title;
+    }
+    if (buttonIndex >= 0 && static_cast<size_t>(buttonIndex) < dialogProperties_.buttons.size()) {
+        buttonText = dialogProperties_.buttons.at(buttonIndex).text;
+    }
+    auto actionSheetResult = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_VOID(actionSheetResult);
+    actionSheetResult->Put("nodeId", nodeId);
+    actionSheetResult->Put("event", "actionSheetClick");
+    if (result) {
+        actionSheetResult->Put("result", "success");
+    } else {
+        actionSheetResult->Put("result", "fail");
+        actionSheetResult->Put("failReason", reason.c_str());
+    }
+    actionSheetResult->Put("sheetTitle", title.c_str());
+    actionSheetResult->Put("sheetIndex", sheetIndex);
+    actionSheetResult->Put("buttonText", buttonText.c_str());
+    actionSheetResult->Put("buttonIndex", buttonIndex);
+    auto json = InspectorJsonUtil::Create();
+    json->Put("actionSheetClickResult", actionSheetResult);
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "ReportActionSheetOnInjectionEvent report: %{public}s!", json->ToString().c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
+        ComponentEventType::COMPONENT_EVENT_DIALOG);
+}
+
+int32_t DialogPattern::HandleActionSheetClick(int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    auto sheetContainer = contentNodeMap_[DialogContentNode::SHEET];
+    CHECK_NULL_RETURN(sheetContainer, RET_FAILED);
+    auto sheetCount = sheetContainer->GetChildren().size();
+    if (index < 0 || index >= static_cast<int32_t>(sheetCount)) {
+        ReportActionSheetOnInjectionEvent(false, "sheet index out of range", index, -1);
+        return RET_FAILED;
+    }
+    auto sheetFrameNode = AceType::DynamicCast<FrameNode>(sheetContainer->GetChildAtIndex(index));
+    CHECK_NULL_RETURN(sheetFrameNode, RET_FAILED);
+    auto row = AceType::DynamicCast<FrameNode>(sheetFrameNode->GetFirstChild());
+    CHECK_NULL_RETURN(row, RET_FAILED);
+    auto sheetHub = row->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(sheetHub, RET_FAILED);
+    sheetHub->ActClick();
+    ReportActionSheetOnInjectionEvent(true, "", index, -1);
+    return RET_SUCCESS;
+}
+
+int32_t DialogPattern::HandleActionButtonClick(int32_t index)
+{
+    CHECK_NULL_RETURN(buttonContainer_, RET_FAILED);
+    auto btnNodes = GetButtons();
+    TAG_LOGD(AceLogTag::ACE_DIALOG,
+        "btnNodes num:%{public}zu, btnIndex:%{public}d! ", btnNodes.size(), index);
+    if (index < 0 || static_cast<size_t>(index) >= btnNodes.size()) {
+        ReportActionSheetOnInjectionEvent(false, "button index out of range", -1, index);
+        return RET_FAILED;
+    }
+    auto buttonFrameNode = DynamicCast<FrameNode>(btnNodes.at(index));
+    CHECK_NULL_RETURN(buttonFrameNode, RET_FAILED);
+    RefPtr<GestureEventHub> gestureHub = buttonFrameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, RET_FAILED);
+    gestureHub->ActClick();
+    ReportActionSheetOnInjectionEvent(true, "", -1, index);
+    return RET_SUCCESS;
+}
+
+int32_t DialogPattern::HandleActionSheetClickCmd(const std::unique_ptr<JsonValue>& json)
+{
+    if (!json || json->IsNull()) {
+        ReportActionSheetOnInjectionEvent(false, "Incorrect JSON format!", -1, -1);
+        return RET_FAILED;
+    }
+    auto params = json->GetValue("params");
+    if (!params || !params->IsObject()) {
+        ReportActionSheetOnInjectionEvent(false, "Incorrect JSON format!", -1, -1);
+        return RET_FAILED;
+    }
+    auto clickType = params->GetString("clickType", "");
+    if (clickType != "sheet" && clickType != "button") {
+        ReportActionSheetOnInjectionEvent(false, "click type invalid!", -1, -1);
+        return RET_FAILED;
+    }
+    auto index = params->GetValue("index");
+    if (!index || !index->IsNumber()) {
+        ReportActionSheetOnInjectionEvent(false,
+            "The Index field is not found in the JSON object or the field type is incorrect.", -1, -1);
+        return RET_FAILED;
+    }
+    auto indexValue = index->GetInt();
+    if (dialogProperties_.type != DialogType::ACTION_SHEET) {
+        ReportActionSheetOnInjectionEvent(false, "The dialog box type does not match!", indexValue, -1);
+        return RET_FAILED;
+    }
+    if (clickType == "sheet") {
+        return HandleActionSheetClick(indexValue);
+    }
+    return HandleActionButtonClick(indexValue);
+}
+
+int32_t DialogPattern::HandleActionMenuButtonClickCmd(const std::unique_ptr<JsonValue>& json)
+{
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "HandleActionMenuButtonClickCmd enter!");
+    if (!json || json->IsNull()) {
+        ReportActionMenuOnInjectionEvent(false, "Incorrect JSON format!", "");
+        return RET_FAILED;
+    }
+    auto params = json->GetValue("params");
+    if (!params || !params->IsObject()) {
+        ReportActionMenuOnInjectionEvent(false, "Incorrect JSON format!", "");
+        return RET_FAILED;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    if (!dialogProperties_.isMenu) {
+        ReportActionMenuOnInjectionEvent(false, "dialog is not action menu!", "");
+        return RET_FAILED;
+    }
+    auto upgradedMenuNode = menuNode_.Upgrade();
+    CHECK_NULL_RETURN(upgradedMenuNode, RET_FAILED);
+    auto menuCount = upgradedMenuNode->GetChildren().size();
+    auto index = params->GetInt("buttonIndex", -1);
+    if (index < static_cast<int32_t>(-1) || index >= static_cast<int32_t>(menuCount)) {
+        ReportActionMenuOnInjectionEvent(false, "index out of range", "");
+        return RET_FAILED;
+    }
+    int findIndex = index;
+    if (index == static_cast<int32_t>(-1)) {
+        // click cancel button
+        findIndex = static_cast<int32_t>(menuCount) - 1;
+    }
+    auto btnRow = DynamicCast<FrameNode>(upgradedMenuNode->GetChildAtIndex(findIndex));
+    CHECK_NULL_RETURN(btnRow, RET_FAILED);
+    auto buttonNode = DynamicCast<FrameNode>(btnRow->GetFirstChild());
+    CHECK_NULL_RETURN(buttonNode, RET_FAILED);
+    auto textNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, RET_FAILED);
+    auto hub = buttonNode->GetOrCreateGestureEventHub();
+    auto textDisplay = UtfUtils::Str16ToStr8(textPattern->GetTextForDisplay());
+    CHECK_NULL_RETURN(hub, RET_FAILED);
+    hub->ActClick();
+    ReportActionMenuOnInjectionEvent(true, "success", textDisplay);
+    return RET_SUCCESS;
+}
+
+void DialogPattern::ReportActionMenuOnInjectionEvent(bool result, const std::string& reason, const std::string& text)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto clickResult = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_VOID(clickResult);
+    clickResult->Put("nodeId", nodeId);
+    clickResult->Put("event", "actionMenuClick");
+    if (result) {
+        clickResult->Put("result", "success");
+    } else {
+        clickResult->Put("result", "fail");
+        clickResult->Put("failReason", reason.c_str());
+    }
+    clickResult->Put("menuText", text.c_str());
+    auto json = InspectorJsonUtil::Create();
+    json->Put("actionMenuClickResult", clickResult);
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportActionMenuOnInjectionEvent:%{public}s",
+        json->ToString().c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
+        ComponentEventType::COMPONENT_EVENT_DIALOG);
 }
 } // namespace OHOS::Ace::NG

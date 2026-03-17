@@ -489,6 +489,7 @@ void RadioPattern::OnClick()
         paintProperty->UpdateRadioCheck(true);
         UpdateState();
     }
+    ReportOnChangeEvent(host->GetId(), paintProperty->GetRadioCheckValue(false));
 }
 
 void RadioPattern::OnTouchDown()
@@ -1022,6 +1023,7 @@ void RadioPattern::SetRadioChecked(bool check)
     paintProperty->UpdateRadioCheck(check);
     UpdateState();
     OnModifyDone();
+    ReportOnChangeEvent(host->GetId(), check);
 }
 
 void RadioPattern::DumpInfo ()
@@ -1202,6 +1204,8 @@ void RadioPattern::OnColorModeChange(uint32_t colorMode)
 
 int32_t RadioPattern::OnInjectionEvent(const std::string& command)
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
+        "OnInjectionEvent radio report: %{public}s!", command.c_str());
     auto json = JsonUtil::ParseJsonString(command);
     CHECK_NULL_RETURN(IsJsonValid(json), RET_FAILED);
     CHECK_NULL_RETURN(IsJsonObject(json), RET_FAILED);
@@ -1245,6 +1249,8 @@ bool RadioPattern::ReportOnChangeEvent(int32_t nodeId, bool isChecked, bool forc
     CHECK_NULL_RETURN(value, false);
     value->Put("Radio", "onChange");
     value->Put("params", params);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
+        "ReportOnChangeEvent radio report: %{public}s!", value->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
         ComponentEventType::COMPONENT_EVENT_SELECT);
     return true;
