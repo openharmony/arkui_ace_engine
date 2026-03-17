@@ -1419,6 +1419,7 @@ public:
     bool HandleFocusBackward(FocuseIndex index);
 
     bool HandleSpaceEvent();
+    bool HandleSpaceKeyClickEvent();
 
     virtual void ApplyNormalTheme();
     void ApplyUnderlineTheme();
