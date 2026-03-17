@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@ const char PLAYER_PARAM_NEEDFRESHFORCE[] = "needRefreshForce";
 const char PLAYER_PARAM_LOOP[] = "loop";
 const char PLAYER_PARAM_SEEKMODE[] = "seekMode";
 const char PLAYER_PARAM_ISTEXTURE[] = "isTexture";
+const char PLAYER_PARAM_RESET[] = "reset";
 
 const char PLAYER_METHOD_INIT[] = "init";
 const char PLAYER_METHOD_GETPOSITION[] = "getposition";
@@ -49,6 +50,7 @@ const char PLAYER_METHOD_UPDATERESOURCE[] = "updateresource";
 const char PLAYER_EVENT_PREPARED[] = "prepared";
 const char PLAYER_EVENT_COMPLETION[] = "completion";
 const char PLAYER_EVENT_SEEKCOMPLETE[] = "seekcomplete";
+const char PLAYER_EVENT_STOP[] = "stop";
 const char PLAYER_EVENT_ONPLAYSTATUS[] = "onplaystatus";
 const char PLAYER_EVENT_ONGETCURRENTTIME[] = "ongetcurrenttime";
 
@@ -127,6 +129,13 @@ void Player::CreatePlayer(const std::function<void(int64_t)>& onCreate)
             }
         });
     resRegister->RegisterEvent(
+        MakeEventHash(PLAYER_EVENT_STOP), [weak = WeakClaim(this)](const std::string& /* param */) {
+            auto player = weak.Upgrade();
+            if (player) {
+                player->OnStop();
+            }
+        });
+    resRegister->RegisterEvent(
         MakeEventHash(PLAYER_EVENT_ONPLAYSTATUS), [weak = WeakClaim(this)](const std::string& param) {
             auto player = weak.Upgrade();
             if (player) {
@@ -163,14 +172,46 @@ void Player::InitPlay()
     });
 
     isInit_ = true;
+    if (hasSetRenderFirstFrame_) {
+        ApplyRenderFirstFrame();
+    }
+}
+
+void Player::SetRenderFirstFrame(bool showFirstFrame)
+{
+    showFirstFrame_ = showFirstFrame;
+    hasSetRenderFirstFrame_ = true;
+    if (isInit_) {
+        ApplyRenderFirstFrame();
+    }
+}
+
+void Player::ApplyRenderFirstFrame()
+{
+    std::stringstream paramStream;
+    paramStream << "showFirstFrame" << PARAM_EQUALS << (showFirstFrame_ ? 1 : 0);
+    std::string param = paramStream.str();
+    CallResRegisterMethod(MakeMethodHash("setRenderFirstFrame"), param, [weak = WeakClaim(this)](std::string& result) {
+        auto player = weak.Upgrade();
+        if (player) {
+            if (!player->IsResultSuccess(result)) {
+                player->OnError(PLAYER_ERROR_CODE_FILEINVALID, PLAYER_ERROR_MSG_FILEINVALID);
+            }
+        }
+    });
 }
 
 void Player::SetSource(const std::string& src)
 {
+    auto previousSrc = src_;
     src_ = src;
     if (isInit_) {
+        auto isResetPending = resetPending_.exchange(false, std::memory_order_acq_rel);
         std::stringstream paramStream;
         paramStream << PLAYER_PARAM_SRC << PARAM_EQUALS << src_;
+        if (isResetPending && previousSrc == src_) {
+            paramStream << PARAM_AND << PLAYER_PARAM_RESET << PARAM_EQUALS << 1;
+        }
         std::string param = paramStream.str();
         CallResRegisterMethod(MakeMethodHash(PLAYER_METHOD_UPDATERESOURCE), param,
             [weak = WeakClaim(this)](std::string& result) {
@@ -352,14 +393,7 @@ void Player::Stop()
     if (scheduler_) {
         scheduler_->Stop();
     }
-
-    CallResRegisterMethod(stopMethod_, PARAM_NONE, [weak = WeakClaim(this)](std::string& result) {
-        LOGI("callback play OnStop.");
-        auto player = weak.Upgrade();
-        if (player) {
-            player->OnStop();
-        }
-    });
+    CallResRegisterMethod(stopMethod_, PARAM_NONE);
 }
 
 void Player::OnStop()
@@ -368,8 +402,8 @@ void Player::OnStop()
     currentPos_ = 0;
     SetTickActive(isPlaying_);
 
-    for (const auto& listener : onPlayStatusListener_) {
-        listener(isPlaying_);
+    for (const auto& listener : onStopListener_) {
+        listener();
     }
 }
 
@@ -387,6 +421,7 @@ void Player::UnregisterEvent()
     resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_PREPARED));
     resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_COMPLETION));
     resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_SEEKCOMPLETE));
+    resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_STOP));
     resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_ONPLAYSTATUS));
 }
 
@@ -546,6 +581,30 @@ void Player::OnAddCompletionListener(CompletionListener&& listener)
     onCompletionListener_.push_back(std::move(listener));
 }
 
+void Player::AddStopListener(StopListener&& listener)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context");
+        return;
+    }
+
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
+    platformTaskExecutor.PostTask(
+        [weak = WeakClaim(this), listener = std::move(listener)]() mutable {
+            auto player = weak.Upgrade();
+            if (player) {
+                player->OnAddStopListener(std::move(listener));
+            }
+        },
+        "ArkUIVideoAddStopListener");
+}
+
+void Player::OnAddStopListener(StopListener&& listener)
+{
+    onStopListener_.push_back(std::move(listener));
+}
+
 void Player::PopListener()
 {
     onRefreshRenderListener_.pop_back();
@@ -610,6 +669,7 @@ void Player::OnPopListener()
     onCurrentPosListener_.pop_back();
     onSeekDoneListener_.pop_back();
     onCompletionListener_.pop_back();
+    onStopListener_.pop_back();
     if (!onCurrentPosListener_.empty()) {
         onCurrentPosListener_.back()(currentPos_);
     }
@@ -653,5 +713,6 @@ void Player::Release(const std::function<void(bool)>& onRelease)
     Resource::Release(onRelease);
 
     isInit_ = false;
+    resetPending_.store(false, std::memory_order_relaxed);
 }
 } // namespace OHOS::Ace

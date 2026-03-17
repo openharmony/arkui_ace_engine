@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,6 +100,16 @@ void MediaPlayerImpl::InitListener()
             }, "ArkUIVideoPlayerStatusChanged");
     };
 
+    auto onStop = [weak = WeakClaim(this), uiTaskExecutor] {
+        uiTaskExecutor.PostSyncTask([weak] {
+                auto player = weak.Upgrade();
+                CHECK_NULL_VOID(player);
+                if (player->stateChangeCallback_) {
+                    player->stateChangeCallback_(PlaybackStatus::STOPPED);
+                }
+            }, "ArkUIVideoPlayerStopped");
+    };
+
     auto onCurrentTimeChange = [weak = WeakClaim(this), uiTaskExecutor](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask([weak, currentPos] {
                 auto player = weak.Upgrade();
@@ -135,9 +145,14 @@ void MediaPlayerImpl::InitListener()
     player_->AddCurrentPosListener(onCurrentTimeChange);
     player_->AddCompletionListener(onCompletion);
     player_->AddSeekDoneListener(onSeekDone);
+    player_->AddStopListener(onStop);
 }
 
-void MediaPlayerImpl::ResetMediaPlayer() {}
+void MediaPlayerImpl::ResetMediaPlayer()
+{
+    CHECK_NULL_VOID(player_);
+    player_->MarkResetPending();
+}
 
 bool MediaPlayerImpl::IsMediaPlayerValid()
 {
@@ -249,6 +264,13 @@ int32_t MediaPlayerImpl::SetSurface()
     CHECK_NULL_RETURN(surfaceImpl, -1);
     player_->SetSurfaceId(surfaceImpl->GetSurfaceId(), false);
 #endif
+    return 0;
+}
+
+int32_t MediaPlayerImpl::SetRenderFirstFrame(bool display)
+{
+    CHECK_NULL_RETURN(player_, -1);
+    player_->SetRenderFirstFrame(display);
     return 0;
 }
 
