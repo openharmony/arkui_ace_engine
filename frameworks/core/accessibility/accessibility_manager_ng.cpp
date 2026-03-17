@@ -616,6 +616,10 @@ bool AccessibilityManagerNG::IsEventTypeChangeDirectHandleHover(
         && (eventType == AccessibilityHoverEventType::EXIT)) {
         return true;
     }
+    if ((prevEventType == AccessibilityHoverEventType::ENTER)
+        && (eventType == AccessibilityHoverEventType::EXIT)) {
+        return true;
+    }
     return false;
 }
 
