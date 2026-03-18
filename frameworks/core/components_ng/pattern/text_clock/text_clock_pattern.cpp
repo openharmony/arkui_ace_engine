@@ -351,7 +351,6 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     dateTime.week = static_cast<uint32_t>(timeZoneTime->tm_wday); // 0-6
 
     // parse input format
-    formatElementMap_.clear();
     ParseInputFormat();
 
     char buffer[SIZE_OF_TIME_TEXT] = {};
@@ -376,7 +375,10 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
         timeZoneTime->tm_hour);
     if (timeValue - timeValue_ > LOG_INTERVAL_TIME) {
         timeValue_ = timeValue;
-        TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "newTime:%{public}s", outputDateTime.c_str());
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, outputDateTime);
+        TAG_LOGI(
+            AceLogTag::ACE_TEXT_CLOCK, "newTime:%{public}s nodeId:%{public}d", outputDateTime.c_str(), host->GetId());
     }
     return outputDateTime;
 }
@@ -433,6 +435,7 @@ std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue,
 
 void TextClockPattern::ParseInputFormat()
 {
+    formatElementMap_.clear();
     std::string inputFormat = GetFormat();
     std::vector<std::string> formatSplitter;
     auto i = 0;
