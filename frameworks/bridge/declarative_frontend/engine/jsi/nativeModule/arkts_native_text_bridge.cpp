@@ -73,8 +73,13 @@ ArkUINativeModuleValue TextBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtimeCa
             weight = std::to_string(weightArg->Int32Value(vm));
             variableFontWeight = weightArg->Int32Value(vm);
         } else if ((weightArg->IsString(vm) || weightArg->IsObject(vm)) &&
-            (!ArkTSUtils::ParseJsString(vm, weightArg, weight))) {
-            variableFontWeight = StringUtils::StringToInt(weight);
+            (ArkTSUtils::ParseJsString(vm, weightArg, weight))) {
+            auto parseResult = Framework::ParseFontWeight(weight);
+            if (parseResult.first) {
+                variableFontWeight = Framework::GetFontWeightNumericValue(parseResult.second);
+            } else {
+                variableFontWeight = StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT);
+            }
         }
     }
     weightInfo.weight = weight.c_str();
@@ -1135,16 +1140,24 @@ ArkUINativeModuleValue TextBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
 
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
     std::string weight = DEFAULT_FONT_WEIGHT;
+    FontWeight fontWeightEnum = FontWeight::NORMAL;
     if (!weightArg->IsNull()) {
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
             variableFontWeight = weightArg->Int32Value(vm);
+            fontWeightEnum = Framework::ConvertStrToFontWeight(weight);
         } else if (weightArg->IsString(vm)) {
             weight = weightArg->ToString(vm)->ToString(vm);
-            variableFontWeight = StringUtils::StringToInt(weight);
+            auto parseResult = Framework::ParseFontWeight(weight);
+            fontWeightEnum = parseResult.second;
+            if (parseResult.first) {
+                variableFontWeight = Framework::GetFontWeightNumericValue(fontWeightEnum);
+            } else {
+                variableFontWeight = StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT);
+            }
         }
     }
-    fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
+    fontInfo.fontWeight = static_cast<uint8_t>(fontWeightEnum);
     fontInfo.variableFontWeight = variableFontWeight;
 
     if (optionsArg->IsBoolean()) {
