@@ -776,4 +776,39 @@ HWTEST_F(CounterTestNg, CounterModelNGUpdatesHeightForAllChildrenTest001, TestSi
     auto contentLayoutProperty = contentNode->GetLayoutProperty();
     ASSERT_NE(contentLayoutProperty, nullptr);
 }
+
+/**
+ * @tc.name: CounterModelNGOnInjectionEventTest001
+ * @tc.desc: Test OnInjectionEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGOnInjectionEventTest001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+
+    auto jsResourceType = JsCounterResourceType::BackgroundColor;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+
+    model.CreateWithResourceObj(jsResourceType, resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto counterPattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(counterPattern, nullptr);
+    std::string jsonCommand = R"({"cmd":"setCounterOnInc"})";
+    int32_t result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    jsonCommand = R"({"cmd":"setCounterOnDec"})";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    jsonCommand = R"({"cmd":"setCounter"})";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+
+    jsonCommand = R"({")";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+}
 } // namespace OHOS::Ace::NG
