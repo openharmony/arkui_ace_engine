@@ -15,66 +15,14 @@
 
 import {
     __context,
-    memoize,
     MutableState,
-    rememberDisposable,
     StateManager,
-    GlobalStateManager,
-    StateToScopes,
-    Dependency,
     __id,
 } from '@koalaui/runtime';
-import { MemoState } from './memorize/state';
 import { IObservedObject } from './decorator';
 import { ObserveSingleton } from './base/observeSingleton';
 import { NullableObject } from './base/types';
-import { functionOverValue, unsafeCast } from '@koalaui/common';
-
-export class CascadeMemoState<Value> implements MemoState<Value> {
-    private manager: StateManager;
-    private _value: Value;
-    public dependencies: StateToScopes | undefined = undefined;
-
-    constructor(manager: StateManager) {
-        this.dependencies = new StateToScopes();
-        this.manager = manager;
-    }
-
-    get value(): Value {
-        const scope = GlobalStateManager.instance.currentScope;
-        if (scope) {
-            this.manager.scheduleCallback(() => {
-                this.dependencies?.register(unsafeCast<Dependency>(scope));
-            });
-        }
-        return this._value;
-    }
-
-    set value(value: Value) {
-        this._value = value;
-        this.dependencies?.invalidate();
-    }
-
-    dispose(): void {
-        this.dependencies = undefined;
-    }
-}
-
-/** @memo */
-export function memorizeUpdatedState<T>(factory: () => T): MemoState<T> {
-    return memoize<CascadeMemoState<T>>(() => {
-        const receiver = rememberDisposable<CascadeMemoState<T>>(
-            () => {
-                return new CascadeMemoState<T>(__context() as StateManager);
-            },
-            (state: CascadeMemoState<T> | undefined) => {
-                state?.dispose();
-            }
-        );
-        receiver.value = factory();
-        return receiver;
-    });
-}
+import { functionOverValue } from '@koalaui/common';
 
 /** @memo:intrinsic */
 export function rememberVariable<Value>(initial: (() => Value) | Value): MutableVariable<Value> {
