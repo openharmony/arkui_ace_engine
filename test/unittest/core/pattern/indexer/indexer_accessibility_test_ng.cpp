@@ -146,4 +146,65 @@ HWTEST_F(IndexerAccessibilityTestNg, GetCollectionItemCounts001, TestSize.Level1
     auto result = indexerAccessibilityProperty->GetCollectionItemCounts();
     EXPECT_EQ(result, 0);
 }
+
+/**
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: Test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerAccessibilityTestNg, OnInjectionEvent001, TestSize.Level1)
+{
+    CreateIndexer(GetLongArrayValue(), 0);
+    CreateDone();
+
+    pattern_->isHover_ = 1;
+    auto ret = pattern_->OnInjectionEvent(R"({"cmd":"setAlphabetIndexer","params": {"value": 1}})");
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    ret = pattern_->OnInjectionEvent(R"({"cmd":"setAlphabetIndexer","params": {"value": 1}})");
+    EXPECT_EQ(ret, RET_SUCCESS);
+
+    ret = pattern_->OnInjectionEvent(R"({"cmd":"setAlphabetIndexer","params": {"value": -1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+
+    pattern_->itemCount_ = 3;
+    ret = pattern_->OnInjectionEvent(R"({"cmd":"setAlphabetIndexer","params": {"value": 4444}})");
+    EXPECT_EQ(ret, RET_FAILED);
+
+    ret = pattern_->OnInjectionEvent(R"({"cmd":"setAlphabetIndexe","params": {"value": 1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+
+    ret = pattern_->OnInjectionEvent(R"({"cmd":"setAlphabetIndexer","params": {"valu": 1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+
+    ret = pattern_->OnInjectionEvent(R"({"cmd":"setAlphabetIndexer","params": {"value": "1"}})");
+    EXPECT_EQ(ret, RET_FAILED);
+
+    ret = pattern_->OnInjectionEvent(R"({"cmd":"setAlphabetIndexer","param": {"value": 2}})");
+    EXPECT_EQ(ret, RET_FAILED);
+
+    ret = pattern_->OnInjectionEvent(R"({"cmd":"setAlphabetIndexer","params": 3})");
+    EXPECT_EQ(ret, RET_FAILED);
+}
+
+/**
+ * @tc.name: ParseCommand001
+ * @tc.desc: Test ParseCommand
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerAccessibilityTestNg, ParseCommand001, TestSize.Level1)
+{
+    CreateIndexer(GetLongArrayValue(), 0);
+    CreateDone();
+
+    int select = 0;
+    auto ret = pattern_->ParseCommand(R"({"cmd":"setAlphabetIndexer","params": {"value": 1}})", select);
+    EXPECT_EQ(ret, true);
+
+    ret = pattern_->ParseCommand(R"({"cmd":"setAlphabetIndexer","params": {"valu": 1}})", select);
+    EXPECT_EQ(ret, false);
+
+    ret = pattern_->ParseCommand(R"({"cmd":"setAlphabetIndexer","params": {"value": "1"}})", select);
+    EXPECT_EQ(ret, false);
+}
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/swiper/swiper_ui_session_adapter.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include <string>
 
 namespace OHOS::Ace::NG {
 constexpr char SWIPER_COMMAND_CHANGE[] = "change";
@@ -77,10 +78,11 @@ int32_t SwiperUISessionAdapter::ParseIndexFromCommand(const std::string& command
     return StringUtils::StringToInt(originIndex, defaultErr);
 }
 
-int32_t SwiperUISessionAdapter::OnInjectionEvent(const std::string& command)
+int32_t SwiperUISessionAdapter::OnInjectionEvent(int32_t nodeId, const std::string& command)
 {
     CHECK_NULL_RETURN(pattern_, RET_FAILED);
     auto scrollAbility = GetScrollAbility();
+    int32_t index = -1;
     if (strcmp(scrollAbility, SWIPER_SCROLL_DIRECTION_UNABLE) == 0) {
         return RET_FAILED;
     }
@@ -110,7 +112,7 @@ int32_t SwiperUISessionAdapter::OnInjectionEvent(const std::string& command)
             break;
         }
         case SwiperCommand::INDEX: {
-            int32_t index = ParseIndexFromCommand(command);
+            index = ParseIndexFromCommand(command);
             if (index < 0 || index >= totalCount) {
                 ReportComponentChangeEvent(false, commandType);
                 return RET_FAILED;
@@ -124,6 +126,7 @@ int32_t SwiperUISessionAdapter::OnInjectionEvent(const std::string& command)
         }
     }
     ReportComponentChangeEvent(true, commandType);
+    ReportSelectChangeData(nodeId, index);
     return RET_SUCCESS;
 }
 
@@ -168,6 +171,18 @@ void SwiperUISessionAdapter::ReportComponentChangeEvent(bool result, SwiperComma
         }
     }
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("swiperResult", json->ToString().c_str(),
+        ComponentEventType::COMPONENT_EVENT_SWIPER);
+}
+
+void SwiperUISessionAdapter::ReportSelectChangeData(int32_t nodeId, int index)
+{
+    auto json = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(json);
+
+    json->Put("event", "Swiper.onChange");
+    json->Put("currentIndex", std::to_string(index).c_str());
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(json),
         ComponentEventType::COMPONENT_EVENT_SWIPER);
 }
 
