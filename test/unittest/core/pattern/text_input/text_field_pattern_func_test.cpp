@@ -15,6 +15,7 @@
 
 #include "text_input_base.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "frameworks/core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
@@ -1603,6 +1604,13 @@ HWTEST_F(TextFieldPatternFuncTest, UpdateMagnifierOffset, TestSize.Level1)
     auto textFieldGeometryNode = textFieldNode->GetGeometryNode();
     ASSERT_NE(textFieldGeometryNode, nullptr);
     textFieldGeometryNode->SetFrameSize(SizeF(300.f, 100.f));
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    RectF paintRect(0, 0, 300.f, 100.f);
+    mockParentRenderContext->SetPaintRectWithTransform(paintRect);
+    auto rootUINodeRenderContext = rootUINode->renderContext_;
+    rootUINode->renderContext_ = mockParentRenderContext;
+    textFieldNode->renderContext_ = mockParentRenderContext;
+    textFieldNode->MountToParent(rootUINode);
 
     /**
      * @tc.steps: step5. Set magnifier node dimensions.
@@ -1640,5 +1648,7 @@ HWTEST_F(TextFieldPatternFuncTest, UpdateMagnifierOffset, TestSize.Level1)
     auto magnifierOffset = geometryNode->GetFrameOffset();
     EXPECT_TRUE(magnifierOffset.GetX() >= 0.0f);
     EXPECT_TRUE(magnifierOffset.GetY() >= 0.0f);
+    rootUINode->RemoveChild(textFieldNode);
+    rootUINode->renderContext_ = rootUINodeRenderContext;
 }
 } // namespace OHOS::Ace::NG
