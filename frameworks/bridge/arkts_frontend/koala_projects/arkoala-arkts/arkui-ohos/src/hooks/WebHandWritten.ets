@@ -34,7 +34,7 @@ export class WebHandWritten {
 
     static hookConfirmImpl(handler: MaterializedBase, 
                             identity: string,credentialTypeOrCertChainFile: CredentialType | string): void {
-         if (typeof credentialTypeOrCertChainFile == CredentialType.CREDENTIAL_UKEY &&
+         if (credentialTypeOrCertChainFile == CredentialType.CREDENTIAL_UKEY &&
                 !canIUse("SystemCapability.Security.Huks.CryptoExtension")) {
             throw new Error(801, "Capability not supported.");
         }
