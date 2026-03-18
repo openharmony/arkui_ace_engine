@@ -36,7 +36,6 @@ export class WebHandWritten {
                             identity: string,credentialTypeOrCertChainFile: CredentialType | string): void {
          if (typeof credentialTypeOrCertChainFile == CredentialType.CREDENTIAL_UKEY &&
                 !canIUse("SystemCapability.Security.Huks.CryptoExtension")) {
-            console.log(`rm001 CryptoExtension: ${canIUse("SystemCapability.Security.Huks.CryptoExtension")}`);
             throw new Error(801, "Capability not supported.");
         }
     }
