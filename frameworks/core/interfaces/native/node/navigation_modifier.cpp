@@ -363,6 +363,9 @@ void UpdateNavigationTitlebarOptions(FrameNode* frameNode, ArkUINavigationTitleb
         if (options.enableHoverMode.isSet) {
             finalOptions.enableHoverMode = options.enableHoverMode.value;
         }
+        if (options.enableCustomTitlePaddingCheck.isSet) {
+            finalOptions.enableCustomTitlePaddingCheck = options.enableCustomTitlePaddingCheck.value;
+        }
         auto localFinalOptions = finalOptions;
         auto frameNode = wekNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -418,6 +421,9 @@ void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUI
     }
     if (options.enableHoverMode.isSet) {
         finalOptions.enableHoverMode = options.enableHoverMode.value;
+    }
+    if (options.enableCustomTitlePaddingCheck.isSet) {
+        finalOptions.enableCustomTitlePaddingCheck = options.enableCustomTitlePaddingCheck.value;
     }
     NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
     if (SystemProperties::ConfigChangePerform()) {
@@ -638,8 +644,15 @@ void SetTitlebarOptions(ArkUINodeHandle node, ArkUINavigationTitlebarOptions opt
     if (opts.barStyle.isSet) {
         finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(opts.barStyle.value);
     }
+    if (opts.paddingEnd.isSet) {
+        finalOptions.brOptions.paddingEnd = CalcDimension(static_cast<double>(opts.paddingEnd.dimension.value),
+            static_cast<DimensionUnit>(opts.paddingEnd.dimension.units));
+    }
     if (opts.enableHoverMode.isSet) {
         finalOptions.enableHoverMode = opts.enableHoverMode.value;
+    }
+    if (opts.enableCustomTitlePaddingCheck.isSet) {
+        finalOptions.enableCustomTitlePaddingCheck = opts.enableCustomTitlePaddingCheck.value;
     }
     NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
 }
