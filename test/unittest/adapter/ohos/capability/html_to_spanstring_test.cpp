@@ -74,7 +74,7 @@ auto imageOption4 = HtmlConvertTestNg::GetImageOption(
  *           It ensures that all styles are properly applied and the correct number of span items is produced.
  * @tc.level: 1
  */
-HWTEST_F(HtmlConvertTestNg, HtmlConvertComplex01, TestSize.Level1)
+HWTEST_F(HtmlConvertTestNg, HtmlConvertComplex01, TestSize.Level0)
 {
     /**
      * @tc.steps1: Initialize mutable SpanString and add a variety of styles like font, letter spacing,

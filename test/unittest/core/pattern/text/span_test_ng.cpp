@@ -126,7 +126,7 @@ public:
  * @tc.desc: Test all the properties of text.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level0)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE_W);

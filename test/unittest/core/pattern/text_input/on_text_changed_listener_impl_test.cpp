@@ -41,7 +41,7 @@ public:
  * @tc.desc: Test InsertText with empty text (should return early)
  * @tc.type: FUNC
  */
-HWTEST_F(OnTextChangedListenerImplTest, InsertText001, TestSize.Level1)
+HWTEST_F(OnTextChangedListenerImplTest, InsertText001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create frameNode and pattern
