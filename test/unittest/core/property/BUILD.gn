@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("grid_property_test_ng") {
-  module_name = "ScrollingSet-GridAndGridItem"
+  module_name = "ScrollingSet-Scroll"
   type = "new"
   sources = [ "grid_property_test_ng.cpp" ]
 }

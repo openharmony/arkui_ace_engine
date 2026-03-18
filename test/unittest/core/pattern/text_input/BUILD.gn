@@ -143,7 +143,7 @@ ace_unittest("text_emoji_test") {
 }
 
 ace_unittest("text_input_listener_test") {
-  module_name = "TextSet-InputListener"
+  module_name = "TextSet-TextInput"
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/text_field/on_text_changed_listener_impl.cpp",

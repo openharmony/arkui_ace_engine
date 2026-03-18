@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("lazy_for_each_syntax_test_ng") {
-  module_name = "RenderControl-LazyForEach"
+  module_name = "StateManagement-CustomCoponent"
   type = "new"
   sources = [
     "lazy_for_each_model_test_ng.cpp",
@@ -25,7 +25,7 @@ ace_unittest("lazy_for_each_syntax_test_ng") {
 }
 
 ace_unittest("lazy_for_each_builder_syntax_test_ng") {
-  module_name = "RenderControl-LazyForEach"
+  module_name = "StateManagement-CustomCoponent"
   type = "new"
   sources = [
     "lazy_for_each_builder_syntax_test_ng.cpp",
@@ -34,7 +34,7 @@ ace_unittest("lazy_for_each_builder_syntax_test_ng") {
 }
 
 ace_unittest("for_each_syntax_test_ng") {
-  module_name = "RenderControl-ForEach"
+  module_name = "StateManagement-CustomCoponent"
   type = "new"
   sources = [
     "for_each_syntax_test_ng.cpp",
@@ -43,7 +43,7 @@ ace_unittest("for_each_syntax_test_ng") {
 }
 
 ace_unittest("if_else_syntax_test_ng") {
-  module_name = "RenderControl-IfElse"
+  module_name = "StateManagement-CustomCoponent"
   type = "new"
   sources = [
     "if_else_model_test_ng.cpp",
@@ -53,7 +53,7 @@ ace_unittest("if_else_syntax_test_ng") {
 }
 
 ace_unittest("content_slot_syntax_test_ng") {
-  module_name = "RenderControl-ContentSlot"
+  module_name = "StateManagement-CustomCoponent"
   type = "new"
   sources = [
     "$ace_root/frameworks/core/interfaces/native/node/node_content_modifier.cpp",
@@ -62,7 +62,7 @@ ace_unittest("content_slot_syntax_test_ng") {
 }
 
 ace_unittest("repeat_test_ng") {
-  module_name = "RenderControl-Repeat"
+  module_name = "StateManagement-CustomCoponent"
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components_ng/syntax/repeat_model_ng.cpp",
@@ -73,7 +73,7 @@ ace_unittest("repeat_test_ng") {
 }
 
 ace_unittest("repeat_virtual_test_ng") {
-  module_name = "RenderControl-Repeat"
+  module_name = "StateManagement-CustomCoponent"
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components_ng/syntax/repeat_model_ng.cpp",
@@ -86,7 +86,7 @@ ace_unittest("repeat_virtual_test_ng") {
 }
 
 ace_unittest("repeat_virtual_2_test_ng") {
-  module_name = "RenderControl-Repeat"
+  module_name = "StateManagement-CustomCoponent"
   type = "new"
   sources = [
     "repeat_virtual_2_caches_test_ng.cpp",
@@ -97,7 +97,7 @@ ace_unittest("repeat_virtual_2_test_ng") {
 }
 
 ace_unittest("syntax_arkoala_test_ng") {
-  module_name = "RenderControl-Sta"
+  module_name = "StateManagement-CustomCoponent"
   type = "new"
   sources = [
     "arkoala_condition_scope_test_ng_ai.cpp",

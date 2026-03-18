@@ -47,7 +47,7 @@ ace_unittest("event_manager_test_ng") {
 }
 
 ace_unittest("click_event_test_ng") {
-  module_name = "PickerSet-DatePicker/DatePickerDialog"
+  module_name = "PickerSet-Picker"
   type = "new"
   sources = [ "click_event_test_ng.cpp" ]
 }
