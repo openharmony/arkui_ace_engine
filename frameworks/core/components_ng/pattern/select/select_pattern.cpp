@@ -2411,11 +2411,36 @@ void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
     renderContext->UpdateBackBlurStyle(blurStyle);
 }
 
-bool SelectPattern::ParseCommand(const std::string& command, int32_t& targetIndex)
+bool SelectPattern::FindOptionIndexByValue(const std::string& value, int32_t& index)
+{
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_RETURN(menuItemModifier, false);
+    
+    for (size_t i = 0; i < options_.size(); ++i) {
+        std::string optionValue = menuItemModifier->getText(options_[i]);
+        if (optionValue == value) {
+            index = static_cast<int32_t>(i);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SelectPattern::ParseCommand(const std::string& command, int32_t& targetIndex, std::string& targetValue)
 {
     auto json = JsonUtil::ParseJsonString(command);
     CHECK_NULL_RETURN(json, false);
     auto jsonUtil = SelectJsonUtil::FromJson(json);
+    if (jsonUtil.value.has_value()) {
+        targetValue = jsonUtil.value.value();
+        if (FindOptionIndexByValue(targetValue, targetIndex)) {
+            return true;
+        }
+        std::string failReason = "Invalid Value";
+        ReportInjectResult("onSelect", false, failReason);
+        return false;
+    }
+
     if (!jsonUtil.index.has_value()) {
         return false;
     }
@@ -2444,13 +2469,15 @@ void SelectPattern::ShowOptions(int32_t index)
 
 int32_t SelectPattern::OnInjectionEvent(const std::string& command)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "received command:%{public}s", command.c_str());
     int32_t targetIndex = -1;
-    if (!ParseCommand(command, targetIndex)) {
+    std::string targetValue;
+    if (!ParseCommand(command, targetIndex, targetValue)) {
         return RET_FAILED;
     }
 
     if (!IsValidIndex(targetIndex)) {
+        std::string failReason = "Invalid Index";
+        ReportInjectResult("onSelect", false, failReason);
         return RET_FAILED;
     }
 
@@ -2459,6 +2486,7 @@ int32_t SelectPattern::OnInjectionEvent(const std::string& command)
     UpdateText(targetIndex);
     std::string value = "";
     GetSelectedValue(targetIndex, value);
+    ReportInjectResult("onSelect", true, "");
     ReportOnSelectEvent(targetIndex, value);
     return RET_SUCCESS;
 }
@@ -2480,6 +2508,19 @@ void SelectPattern::GetSelectedValue(int32_t index, std::string& value)
     const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     CHECK_NULL_VOID(menuItemModifier);
     value = menuItemModifier->getText(options_[index]);
+}
+
+void SelectPattern::ReportInjectResult(const std::string& event, bool success, const std::string& reason)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int nodeId = host->GetId();
+    auto jsonResult = SelectJsonUtil::BuildInjectResult(nodeId, event, success, reason);
+
+    auto manager = UiSessionManager::GetInstance();
+    CHECK_NULL_VOID(manager);
+    manager->ReportComponentChangeEvent(nodeId, "inject_result",
+        std::move(jsonResult), ComponentEventType::COMPONENT_EVENT_SELECT);
 }
 
 bool SelectPattern::ReportOnSelectEvent(int32_t index, const std::string& value)

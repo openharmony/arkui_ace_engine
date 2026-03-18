@@ -1308,4 +1308,257 @@ HWTEST_F(SelectPatternTheTestNg, UpdateSelectedOptionFontFromPattern002, TestSiz
     selectPattern->UpdateSelectedOptionFontFromPattern(option);
     ASSERT_NE(selectPattern->optionFont_.FontFamily, std::nullopt);
 }
+
+/**
+ * @tc.name: SelectJsonUtilFromJsonWithValueTest
+ * @tc.desc: Test SelectJsonUtil::FromJson method with value field
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, SelectJsonUtilFromJsonWithValueTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create JSON containing value field
+     * @tc.expected: step1. JSON creation successful
+     */
+    auto params = JsonUtil::Create();
+    ASSERT_NE(params, nullptr);
+    params->Put("value", OPTION_TEXT_2.c_str());
+    params->Put("index", 2);
+    
+    auto json = JsonUtil::Create();
+    ASSERT_NE(json, nullptr);
+    json->Put("cmd", "onSelect");
+    json->Put("params", params);
+
+    auto jsonUtil = SelectJsonUtil::FromJson(json);
+    EXPECT_TRUE(jsonUtil.index.has_value());
+    EXPECT_TRUE(jsonUtil.value.has_value());
+    EXPECT_EQ(jsonUtil.index.value(), 2);
+    EXPECT_EQ(jsonUtil.value.value(), OPTION_TEXT_2);
+}
+
+/**
+ * @tc.name: ParseCommandWithValueTest
+ * @tc.desc: Test SelectPattern::ParseCommand with value-based commands
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ParseCommandWithValueTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Select component
+     */
+    auto frameNode = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    int32_t targetIndex = -1;
+    std::string targetValue;
+
+    /**
+     * @tc.steps: step2. Test valid value command
+     * @tc.expected: step2. Parsing successful, returns correct index and value
+     */
+    std::string validCmd = "{\"cmd\":\"onSelect\",\"params\":{\"value\":\"" + OPTION_TEXT_2 + "\"}}";
+    bool result1 = selectPattern->ParseCommand(validCmd, targetIndex, targetValue);
+    EXPECT_TRUE(result1);
+    EXPECT_EQ(targetIndex, 1);
+    EXPECT_EQ(targetValue, OPTION_TEXT_2);
+
+    /**
+     * @tc.steps: step3. Test invalid value command
+     * @tc.expected: step3. Parsing fails
+     */
+    std::string invalidCmd = "{\"cmd\":\"onSelect\",\"params\":{\"value\":\"NonExistent\"}}";
+    bool result2 = selectPattern->ParseCommand(invalidCmd, targetIndex, targetValue);
+    EXPECT_FALSE(result2);
+}
+
+/**
+ * @tc.name: ParseCommandWithBothFieldsTest
+ * @tc.desc: Test SelectPattern::ParseCommand with both index and value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, ParseCommandWithBothFieldsTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Select component
+     */
+    auto frameNode = CreateSelect(CREATE_VALUE);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    int32_t targetIndex = -1;
+    std::string targetValue;
+
+    /**
+     * @tc.steps: step2. Test command containing both index and value
+     * @tc.expected: step2. Value takes precedence, should use value for lookup
+     */
+    std::string cmd = "{\"cmd\":\"onSelect\",\"params\":{\"index\":2,\"value\":\"" + OPTION_TEXT_2 + "\"}}";
+    bool result = selectPattern->ParseCommand(cmd, targetIndex, targetValue);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(targetIndex, 1);
+    EXPECT_EQ(targetValue, OPTION_TEXT_2);
+}
+
+/**
+ * @tc.name: OnInjectionEventWithValueTest
+ * @tc.desc: Test OnInjectionEvent with value-based injection
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, OnInjectionEventWithValueTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Select component
+     */
+    std::vector<SelectParam> params = {
+        { OPTION_TEXT, FILE_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE }
+    };
+    auto frameNode = CreateSelect(params);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    
+    selectPattern->selected_ = -1;
+
+    /**
+     * @tc.steps: step2. Test successful injection via value
+     * @tc.expected: step2. Returns RET_SUCCESS, selects the correct option
+     */
+    std::string cmd1 = "{\"cmd\":\"onSelect\",\"params\":{\"value\":\"" + OPTION_TEXT_2 + "\"}}";
+    EXPECT_EQ(selectPattern->OnInjectionEvent(cmd1), RET_SUCCESS);
+    EXPECT_EQ(selectPattern->GetSelected(), 1);
+    EXPECT_EQ(selectPattern->selectValue_, OPTION_TEXT_2);
+
+    /**
+     * @tc.steps: step3. Test injecting the same option via value (already selected)
+     * @tc.expected: step3. Returns RET_FAILED, selection state unchanged
+     */
+    EXPECT_EQ(selectPattern->OnInjectionEvent(cmd1), RET_FAILED);
+    EXPECT_EQ(selectPattern->GetSelected(), 1);
+
+    /**
+     * @tc.steps: step4. Test injecting non-existent option via value
+     * @tc.expected: step4. Returns RET_FAILED, selection state unchanged
+     */
+    std::string cmd2 = "{\"cmd\":\"onSelect\",\"params\":{\"value\":\"NonExistent\"}}";
+    EXPECT_EQ(selectPattern->OnInjectionEvent(cmd2), RET_FAILED);
+    EXPECT_EQ(selectPattern->GetSelected(), 1);
+}
+
+/**
+ * @tc.name: OnInjectionEventWithInvalidJsonTest
+ * @tc.desc: Test OnInjectionEvent with invalid JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, OnInjectionEventWithInvalidJsonTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Select component
+     */
+    std::vector<SelectParam> params = {
+        { OPTION_TEXT, FILE_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE }
+    };
+    auto frameNode = CreateSelect(params);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    
+    selectPattern->selected_ = -1;
+
+    /**
+     * @tc.steps: step2. Test invalid JSON string
+     * @tc.expected: step2. Returns RET_FAILED
+     */
+    EXPECT_EQ(selectPattern->OnInjectionEvent("invalid json"), RET_FAILED);
+    EXPECT_EQ(selectPattern->GetSelected(), -1);
+
+    /**
+     * @tc.steps: step3. Test JSON missing cmd field
+     * @tc.expected: step3. Returns RET_FAILED
+     */
+    EXPECT_EQ(selectPattern->OnInjectionEvent("{\"params\":{\"value\":\"" + OPTION_TEXT_2 + "\"}}"), RET_FAILED);
+    EXPECT_EQ(selectPattern->GetSelected(), -1);
+
+    /**
+     * @tc.steps: step4. Test JSON with cmd field not equal to "onSelect"
+     * @tc.expected: step4. Returns RET_FAILED
+     */
+    EXPECT_EQ(selectPattern->OnInjectionEvent("{\"cmd\":\"wrongCmd\", \"params\":{\"value\":\"" +
+        OPTION_TEXT_2 + "\"}}"), RET_FAILED);
+    EXPECT_EQ(selectPattern->GetSelected(), -1);
+}
+
+/**
+ * @tc.name: FullInjectFlowWithValueAndIndexTest
+ * @tc.desc: Test complete inject flow with both value and index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTheTestNg, FullInjectFlowWithValueAndIndexTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Select component (with 4 options)
+     */
+    std::vector<SelectParam> params = {
+        { "Red", FILE_SOURCE },
+        { "Green", INTERNAL_SOURCE },
+        { "Blue", INTERNAL_SOURCE },
+        { "Yellow", INTERNAL_SOURCE }
+    };
+    auto frameNode = CreateSelect(params);
+    ASSERT_NE(frameNode, nullptr);
+    auto selectPattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    
+    selectPattern->selected_ = -1;
+
+    /**
+     * @tc.steps: step2. Inject via value - select "Green"
+     * @tc.expected: step2. Successfully select index=1
+     */
+    std::string cmdGreen = "{\"cmd\":\"onSelect\",\"params\":{\"value\":\"Green\"}}";
+    EXPECT_EQ(selectPattern->OnInjectionEvent(cmdGreen), RET_SUCCESS);
+    EXPECT_EQ(selectPattern->GetSelected(), 1);
+    EXPECT_EQ(selectPattern->selectValue_, "Green");
+
+    /**
+     * @tc.steps: step3. Inject via index - select index=3 ("Yellow")
+     * @tc.expected: step3. Successfully select index=3
+     */
+    std::string cmdYellow = "{\"cmd\":\"onSelect\",\"params\":{\"index\":3}}";
+    EXPECT_EQ(selectPattern->OnInjectionEvent(cmdYellow), RET_SUCCESS);
+    EXPECT_EQ(selectPattern->GetSelected(), 3);
+    EXPECT_EQ(selectPattern->selectValue_, "Yellow");
+
+    /**
+     * @tc.steps: step4. Inject via both value and index - value takes priority, select "Red"
+     * @tc.expected: step4. Successfully select index=0
+     */
+    std::string cmdRed = "{\"cmd\":\"onSelect\",\"params\":{\"index\":2,\"value\":\"Red\"}}";
+    EXPECT_EQ(selectPattern->OnInjectionEvent(cmdRed), RET_SUCCESS);
+    EXPECT_EQ(selectPattern->GetSelected(), 0);
+    EXPECT_EQ(selectPattern->selectValue_, "Red");
+
+    /**
+     * @tc.steps: step5. Inject invalid option via value
+     * @tc.expected: step5. Returns RET_FAILED, selection state unchanged
+     */
+    std::string cmdInvalid = "{\"cmd\":\"onSelect\",\"params\":{\"value\":\"Purple\"}}";
+    EXPECT_EQ(selectPattern->OnInjectionEvent(cmdInvalid), RET_FAILED);
+    EXPECT_EQ(selectPattern->GetSelected(), 0);  // 仍为"Red"
+
+    /**
+     * @tc.steps: step6. Inject invalid index via index
+     * @tc.expected: step6. Returns RET_FAILED, selection state unchanged
+     */
+    std::string cmdInvalidIndex = "{\"cmd\":\"onSelect\",\"params\":{\"index\":10}}";
+    EXPECT_EQ(selectPattern->OnInjectionEvent(cmdInvalidIndex), RET_FAILED);
+    EXPECT_EQ(selectPattern->GetSelected(), 0);
+}
 } // namespace OHOS::Ace::NG
