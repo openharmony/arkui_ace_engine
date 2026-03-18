@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "text_input_base.h"
-
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "text_input_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -135,7 +134,7 @@ HWTEST_F(TextFieldContentModifierTest, CreateNodePaintMethod002, TestSize.Level1
     EXPECT_EQ(textRectX, MIN_RECT_X);
     auto textRectY = textFieldContentModifier->GetTextRectY();
     EXPECT_EQ(textRectY, MIN_RECT_Y);
-    
+
     /**
      * @tc.steps: step4. change textRect
      */
@@ -246,7 +245,7 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierTest001, TestSize
      */
     OffsetF caretOffset(DEFAULT_RECT_X, DEFAULT_RECT_Y);
     pattern_->SetMovingCaretOffset(caretOffset);
-    
+
     /**
      * @tc.steps: step5. Create DrawingContext
      */
@@ -273,10 +272,10 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierTest001, TestSize
 }
 
 /**
-* @tc.name: TextFieldContentModifierUTSuit001
-* @tc.desc: Test SetFontStyle to update fontStyle_.
-* @tc.type: FUNC
-*/
+ * @tc.name: TextFieldContentModifierUTSuit001
+ * @tc.desc: Test SetFontStyle to update fontStyle_.
+ * @tc.type: FUNC
+ */
 HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit001, TestSize.Level1)
 {
     /**
@@ -316,10 +315,10 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit001, TestSi
 }
 
 /**
-* @tc.name: TextFieldContentModifierUTSuit002
-* @tc.desc: Test SetShowUnderlineState to update showUnderline_.
-* @tc.type: FUNC
-*/
+ * @tc.name: TextFieldContentModifierUTSuit002
+ * @tc.desc: Test SetShowUnderlineState to update showUnderline_.
+ * @tc.type: FUNC
+ */
 HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit002, TestSize.Level1)
 {
     /**
@@ -376,10 +375,10 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit002, TestSi
 }
 
 /**
-* @tc.name: TextFieldContentModifierUTSuit003
-* @tc.desc: Test SetTextDecoration to update textDecorationStyle_, textDecorationColor_, textDecoration_.
-* @tc.type: FUNC
-*/
+ * @tc.name: TextFieldContentModifierUTSuit003
+ * @tc.desc: Test SetTextDecoration to update textDecorationStyle_, textDecorationColor_, textDecoration_.
+ * @tc.type: FUNC
+ */
 HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit003, TestSize.Level1)
 {
     /**
@@ -403,7 +402,7 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit003, TestSi
     EXPECT_EQ(textFieldContentModifier->textDecoration_.value_or(TextDecoration::NONE), TextDecoration::NONE);
     EXPECT_EQ(textFieldContentModifier->textDecorationColor_.value_or(Color::BLACK), Color::BLACK);
     EXPECT_EQ(textFieldContentModifier->textDecorationStyle_.value_or(TextDecorationStyle::SOLID),
-              TextDecorationStyle::SOLID);
+        TextDecorationStyle::SOLID);
 
     /**
      * @tc.steps: step4. call SetTextDecoration
@@ -416,7 +415,7 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit003, TestSi
     EXPECT_EQ(textFieldContentModifier->textDecoration_.value_or(TextDecoration::NONE), TextDecoration::INHERIT);
     EXPECT_EQ(textFieldContentModifier->textDecorationColor_.value_or(Color::BLACK), Color::BLUE);
     EXPECT_EQ(textFieldContentModifier->textDecorationStyle_.value_or(TextDecorationStyle::DOTTED),
-              TextDecorationStyle::SOLID);
+        TextDecorationStyle::SOLID);
     EXPECT_EQ(textFieldContentModifier->textDecorationColorAlpha_->Get(), 255.0f);
 
     /**
@@ -428,7 +427,7 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit003, TestSi
     EXPECT_EQ(textFieldContentModifier->textDecoration_.value_or(TextDecoration::NONE), TextDecoration::INHERIT);
     EXPECT_EQ(textFieldContentModifier->textDecorationColor_.value_or(Color::BLACK), Color::BLUE);
     EXPECT_EQ(textFieldContentModifier->textDecorationStyle_.value_or(TextDecorationStyle::DOTTED),
-            TextDecorationStyle::DASHED);
+        TextDecorationStyle::DASHED);
     EXPECT_EQ(textFieldContentModifier->textDecorationColorAlpha_->Get(), 255.0f);
 
     /**
@@ -440,7 +439,7 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit003, TestSi
     EXPECT_EQ(textFieldContentModifier->textDecoration_.value_or(TextDecoration::NONE), TextDecoration::NONE);
     EXPECT_EQ(textFieldContentModifier->textDecorationColor_.value_or(Color::BLACK), Color::BLUE);
     EXPECT_EQ(textFieldContentModifier->textDecorationStyle_.value_or(TextDecorationStyle::DOTTED),
-            TextDecorationStyle::DASHED);
+        TextDecorationStyle::DASHED);
     EXPECT_EQ(textFieldContentModifier->textDecorationColorAlpha_->Get(), 0.0f);
 
     /**
@@ -453,12 +452,11 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit003, TestSi
     EXPECT_EQ(textFieldContentModifier->textDecorationAnimatable_, true);
 }
 
-
 /**
-* @tc.name: TextFieldContentModifierUTSuit004
-* @tc.desc: Test ModifyDecorationInTextStyle to update textStyle.
-* @tc.type: FUNC
-*/
+ * @tc.name: TextFieldContentModifierUTSuit004
+ * @tc.desc: Test ModifyDecorationInTextStyle to update textStyle.
+ * @tc.type: FUNC
+ */
 HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit004, TestSize.Level1)
 {
     /**
@@ -487,7 +485,7 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit004, TestSi
     EXPECT_EQ(textFieldContentModifier->textDecoration_.value_or(TextDecoration::NONE), TextDecoration::UNDERLINE);
     EXPECT_EQ(textFieldContentModifier->textDecorationColor_.value_or(Color::BLACK), Color::GRAY);
     EXPECT_EQ(textFieldContentModifier->textDecorationStyle_.value_or(TextDecorationStyle::DOTTED),
-            TextDecorationStyle::WAVY);
+        TextDecorationStyle::WAVY);
     EXPECT_EQ(textFieldContentModifier->textDecorationColorAlpha_->Get(), 255.0f);
 
     /**
@@ -509,5 +507,529 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit004, TestSi
     textFieldContentModifier->ModifyDecorationInTextStyle(textStyle);
     EXPECT_EQ(textStyle.GetTextDecorationFirst(), TextDecoration::NONE);
     EXPECT_EQ(textStyle.GetTextDecorationColor(), Color::GRAY);
+}
+
+/**
+ * @tc.name: ModifyTextStyle001
+ * @tc.desc: Test ModifyTextStyle with fontSize_ set and fontSizeFloat_ valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set fontSize via SetFontSize method.
+     */
+    TextStyle textStyle;
+    Dimension fontSizeValue(20.0, DimensionUnit::PX);
+    textFieldContentModifier->SetFontSize(fontSizeValue, textStyle);
+
+    /**
+     * @tc.steps: step3. Call ModifyTextStyle and verify fontSize is set correctly.
+     */
+    TextStyle resultTextStyle;
+    resultTextStyle.SetFontSize(Dimension(10.0, DimensionUnit::PX));
+    textFieldContentModifier->ModifyTextStyle(resultTextStyle);
+    EXPECT_EQ(resultTextStyle.GetFontSize().Value(), 20.0);
+}
+
+/**
+ * @tc.name: ModifyTextStyle002
+ * @tc.desc: Test ModifyTextStyle with fontWeight_ set and fontWeightFloat_ valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set fontWeight via SetFontWeight method.
+     */
+    textFieldContentModifier->SetFontWeight(FontWeight::BOLD);
+
+    /**
+     * @tc.steps: step3. Call ModifyTextStyle and verify fontWeight is set correctly.
+     * Note: FontWeight::BOLD is converted to FontWeight::W700 by ConvertFontWeight.
+     */
+    TextStyle resultTextStyle;
+    resultTextStyle.SetFontWeight(FontWeight::NORMAL);
+    textFieldContentModifier->ModifyTextStyle(resultTextStyle);
+    EXPECT_EQ(resultTextStyle.GetFontWeight(), FontWeight::W700);
+}
+
+/**
+ * @tc.name: ModifyTextStyle003
+ * @tc.desc: Test ModifyTextStyle with textColor_ set and animatableTextColor_ valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyTextStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set textColor via SetTextColor method.
+     */
+    Color textColorValue = Color::RED;
+    textFieldContentModifier->SetTextColor(textColorValue);
+
+    /**
+     * @tc.steps: step3. Call ModifyTextStyle and verify textColor is set correctly.
+     */
+    TextStyle resultTextStyle;
+    resultTextStyle.SetTextColor(Color::BLACK);
+    textFieldContentModifier->ModifyTextStyle(resultTextStyle);
+    EXPECT_EQ(resultTextStyle.GetTextColor(), Color::RED);
+}
+
+/**
+ * @tc.name: ModifyTextStyle004
+ * @tc.desc: Test ModifyTextStyle with adaptMinFontSize and adaptMaxFontSize when GetAdaptTextSize is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyTextStyle004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set adaptMinFontSize and adaptMaxFontSize via SetAdaptMinFontSize and SetAdaptMaxFontSize.
+     */
+    TextStyle textStyle;
+    Dimension adaptMinValue(10.0, DimensionUnit::PX);
+    Dimension adaptMaxValue(30.0, DimensionUnit::PX);
+    textFieldContentModifier->SetAdaptMinFontSize(adaptMinValue, textStyle);
+    textFieldContentModifier->SetAdaptMaxFontSize(adaptMaxValue, textStyle);
+
+    /**
+     * @tc.steps: step3. Call ModifyTextStyle with GetAdaptTextSize true and verify adapt font sizes are set.
+     */
+    TextStyle resultTextStyle;
+    resultTextStyle.SetAdaptTextSize(true);
+    textFieldContentModifier->ModifyTextStyle(resultTextStyle);
+    EXPECT_EQ(resultTextStyle.GetAdaptMinFontSize().Value(), 10.0);
+    EXPECT_EQ(resultTextStyle.GetAdaptMaxFontSize().Value(), 30.0);
+}
+
+/**
+ * @tc.name: ModifyTextStyle005
+ * @tc.desc: Test ModifyTextStyle with fontSize and fontWeight without adapt font sizes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyTextStyle005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set fontSize and fontWeight on the modifier.
+     */
+    TextStyle textStyle;
+    textFieldContentModifier->SetFontSize(Dimension(18.0, DimensionUnit::PX), textStyle);
+    textFieldContentModifier->SetFontWeight(FontWeight::W500);
+
+    /**
+     * @tc.steps: step3. Call ModifyTextStyle and verify fontSize and fontWeight are set.
+     */
+    TextStyle resultTextStyle;
+    resultTextStyle.SetFontSize(Dimension(10.0, DimensionUnit::PX));
+    resultTextStyle.SetFontWeight(FontWeight::W300);
+    textFieldContentModifier->ModifyTextStyle(resultTextStyle);
+    EXPECT_EQ(resultTextStyle.GetFontSize().Value(), 18.0);
+    EXPECT_EQ(resultTextStyle.GetFontWeight(), FontWeight::W500);
+}
+
+/**
+ * @tc.name: NeedMeasureUpdate002
+ * @tc.desc: Test NeedMeasureUpdate returns true when fontSize mismatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, NeedMeasureUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set fontSize to a value and then modify fontSizeFloat_ to create mismatch.
+     */
+    TextStyle textStyle;
+    textFieldContentModifier->SetFontSize(Dimension(20.0, DimensionUnit::PX), textStyle);
+    textFieldContentModifier->fontSizeFloat_->Set(30.0);
+
+    /**
+     * @tc.steps: step3. Call NeedMeasureUpdate and verify flag has PROPERTY_UPDATE_MEASURE.
+     */
+    PropertyChangeFlag flag = 0;
+    bool result = textFieldContentModifier->NeedMeasureUpdate(flag);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(flag & PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: NeedMeasureUpdate003
+ * @tc.desc: Test NeedMeasureUpdate returns true when adaptMinFontSize mismatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, NeedMeasureUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set adaptMinFontSize and modify adaptMinFontSizeFloat_ to create mismatch.
+     */
+    TextStyle textStyle;
+    textFieldContentModifier->SetAdaptMinFontSize(Dimension(10.0, DimensionUnit::PX), textStyle);
+    textFieldContentModifier->adaptMinFontSizeFloat_->Set(20.0);
+
+    /**
+     * @tc.steps: step3. Call NeedMeasureUpdate and verify flag has PROPERTY_UPDATE_MEASURE.
+     */
+    PropertyChangeFlag flag = 0;
+    bool result = textFieldContentModifier->NeedMeasureUpdate(flag);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(flag & PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: NeedMeasureUpdate004
+ * @tc.desc: Test NeedMeasureUpdate returns true when adaptMaxFontSize mismatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, NeedMeasureUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set adaptMaxFontSize and modify adaptMaxFontSizeFloat_ to create mismatch.
+     */
+    TextStyle textStyle;
+    textFieldContentModifier->SetAdaptMaxFontSize(Dimension(30.0, DimensionUnit::PX), textStyle);
+    textFieldContentModifier->adaptMaxFontSizeFloat_->Set(40.0);
+
+    /**
+     * @tc.steps: step3. Call NeedMeasureUpdate and verify flag has PROPERTY_UPDATE_MEASURE.
+     */
+    PropertyChangeFlag flag = 0;
+    bool result = textFieldContentModifier->NeedMeasureUpdate(flag);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(flag & PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: NeedMeasureUpdate005
+ * @tc.desc: Test NeedMeasureUpdate returns true when fontWeight mismatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, NeedMeasureUpdate005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set fontWeight and modify fontWeightFloat_ to create mismatch.
+     */
+    textFieldContentModifier->SetFontWeight(FontWeight::BOLD);
+    textFieldContentModifier->fontWeightFloat_->Set(static_cast<int>(FontWeight::NORMAL));
+
+    /**
+     * @tc.steps: step3. Call NeedMeasureUpdate and verify flag has PROPERTY_UPDATE_MEASURE.
+     */
+    PropertyChangeFlag flag = 0;
+    bool result = textFieldContentModifier->NeedMeasureUpdate(flag);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(flag & PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: NeedMeasureUpdate006
+ * @tc.desc: Test NeedMeasureUpdate returns true when textColor mismatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, NeedMeasureUpdate006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set textColor and modify animatableTextColor_ to create mismatch.
+     */
+    textFieldContentModifier->SetTextColor(Color::RED);
+    textFieldContentModifier->animatableTextColor_->Set(LinearColor(Color::BLUE));
+
+    /**
+     * @tc.steps: step3. Call NeedMeasureUpdate and verify flag has PROPERTY_UPDATE_MEASURE_SELF.
+     */
+    PropertyChangeFlag flag = 0;
+    bool result = textFieldContentModifier->NeedMeasureUpdate(flag);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(flag & PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+/**
+ * @tc.name: ModifyDecorationInTextStyle002
+ * @tc.desc: Test ModifyDecorationInTextStyle with textDecorationAnimatable_ true and alpha != 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyDecorationInTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set textDecoration to UNDERLINE then NONE to trigger animatable true.
+     */
+    Color color = Color::BLUE;
+    TextDecorationStyle style = TextDecorationStyle::SOLID;
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style);
+    textFieldContentModifier->SetTextDecoration(TextDecoration::NONE, color, style);
+    EXPECT_TRUE(textFieldContentModifier->textDecorationAnimatable_);
+
+    /**
+     * @tc.steps: step3. Set alpha to non-zero value.
+     */
+    textFieldContentModifier->textDecorationColorAlpha_->Set(128.0f);
+
+    /**
+     * @tc.steps: step4. Call ModifyDecorationInTextStyle and verify textDecoration is UNDERLINE with modified alpha.
+     */
+    TextStyle textStyle;
+    textFieldContentModifier->ModifyDecorationInTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetTextDecorationFirst(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(textStyle.GetTextDecorationColor().GetAlpha(), 128);
+}
+
+/**
+ * @tc.name: ModifyDecorationInTextStyle003
+ * @tc.desc: Test ModifyDecorationInTextStyle with textDecorationAnimatable_ false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyDecorationInTextStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. First set to INHERIT, then to UNDERLINE (not from NONE, so animatable is false).
+     */
+    Color color = Color::GREEN;
+    TextDecorationStyle style = TextDecorationStyle::DASHED;
+    textFieldContentModifier->SetTextDecoration(TextDecoration::INHERIT, color, style);
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style);
+    EXPECT_FALSE(textFieldContentModifier->textDecorationAnimatable_);
+
+    /**
+     * @tc.steps: step3. Call ModifyDecorationInTextStyle and verify textDecoration is set directly.
+     */
+    TextStyle textStyle;
+    textFieldContentModifier->ModifyDecorationInTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetTextDecorationFirst(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(textStyle.GetTextDecorationColor(), Color::GREEN);
+    EXPECT_EQ(textStyle.GetTextDecorationStyle(), TextDecorationStyle::DASHED);
+}
+
+/**
+ * @tc.name: ModifyDecorationInTextStyle004
+ * @tc.desc: Test ModifyDecorationInTextStyle with textDecorationStyle_ set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, ModifyDecorationInTextStyle004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set textDecoration with WAVY style.
+     */
+    Color color = Color::GRAY;
+    TextDecorationStyle style = TextDecorationStyle::WAVY;
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style);
+
+    /**
+     * @tc.steps: step3. Call ModifyDecorationInTextStyle and verify textDecorationStyle is set.
+     */
+    TextStyle textStyle;
+    textFieldContentModifier->ModifyDecorationInTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetTextDecorationStyle(), TextDecorationStyle::WAVY);
+}
+
+/**
+ * @tc.name: UpdateTextDecorationMeasureFlag001
+ * @tc.desc: Test UpdateTextDecorationMeasureFlag with UNDERLINE and alpha mismatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, UpdateTextDecorationMeasureFlag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set textDecoration to UNDERLINE with color alpha 255, then modify alpha to create mismatch.
+     */
+    Color color(0xFF0000FF);
+    TextDecorationStyle style = TextDecorationStyle::SOLID;
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style);
+    textFieldContentModifier->textDecorationColorAlpha_->Set(128.0f);
+
+    /**
+     * @tc.steps: step3. Call NeedMeasureUpdate and verify flag has PROPERTY_UPDATE_MEASURE.
+     */
+    PropertyChangeFlag flag = 0;
+    bool result = textFieldContentModifier->NeedMeasureUpdate(flag);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(flag & PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: UpdateTextDecorationMeasureFlag002
+ * @tc.desc: Test UpdateTextDecorationMeasureFlag with NONE and alpha != 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, UpdateTextDecorationMeasureFlag002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set textDecoration to NONE but keep alpha non-zero.
+     */
+    Color color(0xFF0000FF);
+    TextDecorationStyle style = TextDecorationStyle::SOLID;
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style);
+    textFieldContentModifier->textDecoration_ = TextDecoration::NONE;
+    textFieldContentModifier->textDecorationColorAlpha_->Set(128.0f);
+
+    /**
+     * @tc.steps: step3. Call NeedMeasureUpdate and verify flag has PROPERTY_UPDATE_MEASURE.
+     */
+    PropertyChangeFlag flag = 0;
+    bool result = textFieldContentModifier->NeedMeasureUpdate(flag);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(flag & PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: UpdateTextDecorationMeasureFlag003
+ * @tc.desc: Test UpdateTextDecorationMeasureFlag with no flag update when conditions not met.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldContentModifierTest, UpdateTextDecorationMeasureFlag003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get content modifier.
+     */
+    CreateTextField();
+    GetFocus();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set textDecoration to UNDERLINE with matching alpha.
+     */
+    Color color(0xFF0000FF);
+    TextDecorationStyle style = TextDecorationStyle::SOLID;
+    textFieldContentModifier->SetTextDecoration(TextDecoration::UNDERLINE, color, style);
+
+    /**
+     * @tc.steps: step3. Call NeedMeasureUpdate and verify flag does not have PROPERTY_UPDATE_MEASURE from decoration.
+     */
+    PropertyChangeFlag flag = 0;
+    textFieldContentModifier->NeedMeasureUpdate(flag);
+    EXPECT_FALSE(flag & PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

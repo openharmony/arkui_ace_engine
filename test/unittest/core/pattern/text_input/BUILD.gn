@@ -28,6 +28,7 @@ ace_unittest("text_input_test") {
     "text_field_content_modifier_test.cpp",
     "text_field_keyevent_test.cpp",
     "text_field_manager_test_ng.cpp",
+    "text_field_manager_test_ng_two.cpp",
     "text_field_model_static_test.cpp",
     "text_field_overlay_modifier_test.cpp",
     "text_field_pattern_func_test.cpp",
