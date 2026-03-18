@@ -1041,10 +1041,16 @@ HWTEST_F(RichEditorStyledStringTestNg, ToStyledString001, TestSize.Level0)
  */
 HWTEST_F(RichEditorStyledStringTestNg, ToStyledString002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. create richEditorPattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. test ToStyledString
+     */
     int32_t start = 3;
     int32_t end = -2;
     AddSpan("test");

@@ -635,7 +635,8 @@ void ApplyFontStyle(ArkUISpanStyle& style, const RefPtr<SpanBase>& span)
     textStyle.fontColor = font.fontColor ? font.fontColor->GetValue() : 0xFF000000;
     textStyle.fontFamily = font.GetFontFamily().c_str();
     textStyle.fontSize = font.fontSize ? font.fontSize->ConvertToVp() : NG::DEFAULT_TEXT_SIZE;
-    textStyle.fontWeight = font.fontWeight ? static_cast<int32_t>(font.fontWeight.value()) : NG::DEFAULT_FONT_WEIGHT;
+    textStyle.fontWeight = font.fontWeight ? static_cast<uint32_t>(font.fontWeight.value())
+        : static_cast<uint32_t>(NG::DEFAULT_FONT_WEIGHT);
     textStyle.fontStyle = font.fontStyle ? static_cast<int32_t>(font.fontStyle.value()) : 0;
     textStyle.strokeWidth = font.strokeWidth ? font.strokeWidth->ConvertToVp() : 0;
     textStyle.strokeColor = font.strokeColor ? font.strokeColor->GetValue() : textStyle.fontColor;
