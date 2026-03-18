@@ -38,7 +38,36 @@
 
 using namespace testing;
 using namespace testing::ext;
-
+namespace {
+    const std::string COMMAND_SET_TIME_PICKER_TIME = "setTimePickerTime";
+    const std::string COMMAND_INVALID = "invalidCommand";
+    const std::string TIME_STR_VALID = "{\"hour\":10,\"minute\":30,\"second\":45}";
+    const std::string TIME_STR_HOUR_12 = "{\"hour\":12,\"minute\":0,\"second\":0}";
+    const std::string TIME_STR_HOUR_23 = "{\"hour\":23,\"minute\":59,\"second\":59}";
+    const std::string TIME_STR_HOUR_0 = "{\"hour\":0,\"minute\":0,\"second\":0}";
+    const std::string TIME_STR_HOUR_25 = "{\"hour\":25,\"minute\":0,\"second\":0}";
+    const std::string TIME_STR_MINUTE_60 = "{\"hour\":10,\"minute\":60,\"second\":0}";
+    const std::string TIME_STR_SECOND_60 = "{\"hour\":10,\"minute\":30,\"second\":60}";
+    const std::string JSON_INVALID = "invalid json";
+    const std::string JSON_NOT_OBJECT = "123";
+    const std::string JSON_WITHOUT_CMD = "{\"params\":{\"hour\":10,\"minute\":30,\"second\":45}}";
+    const std::string JSON_WITHOUT_PARAMS = "{\"cmd\":\"setTimePickerTime\"}";
+    const std::string JSON_PARAMS_NOT_OBJECT = "{\"cmd\":\"setTimePickerTime\",\"params\":123}";
+    const std::string JSON_PARAMS_WITHOUT_HOUR =
+        "{\"cmd\":\"setTimePickerTime\",\"params\":{\"minute\":30,\"second\":45}}";
+    const std::string JSON_PARAMS_WITHOUT_MINUTE =
+        "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":10,\"second\":45}}";
+    const std::string JSON_PARAMS_WITHOUT_SECOND =
+        "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":10,\"minute\":30}}";
+    const std::string JSON_PARAMS_INVALID_HOUR =
+        "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":\"abc\",\"minute\":30,\"second\":45}}";
+    const std::string JSON_VALID =
+        "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":10,\"minute\":30,\"second\":45}}";
+    const std::string DEFAULT_EVENT = "";
+    const std::string DEFAULT_RESULT_SUCCESS = "success";
+    const std::string DEFAULT_RESULT_FAIL = "fail";
+    const std::string DEFAULT_REASON = "";
+    } // namespace
 namespace OHOS::Ace::NG {
 const InspectorFilter filter;
 class TimePickerRowPatternTest : public testing::Test {
@@ -540,4 +569,521 @@ HWTEST_F(TimePickerRowPatternTest, TimePickerRowPatternToJsonValue002, TestSize.
     EXPECT_EQ(json->GetString("end"), endTime.ToString(false, false).c_str());
     EXPECT_EQ(json->GetBool("enableHapticFeedback"), isEnableHaptic);
 }
+
+
+/**
+ * @tc.name: OnInjectionEvent_InvalidJson
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when JSON is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_InvalidJson, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    auto result = timePickerRowPattern->OnInjectionEvent(JSON_INVALID);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_JsonNotObject
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when JSON is not an object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_JsonNotObject, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    auto result = timePickerRowPattern->OnInjectionEvent(JSON_NOT_OBJECT);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_InvalidCommand
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when command is not setTimePickerTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_InvalidCommand, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    std::string invalidCmdJson = "{\"cmd\":\"invalidCommand\",\"params\":{\"hour\":10,\"minute\":30,\"second\":45}}";
+    auto result = timePickerRowPattern->OnInjectionEvent(invalidCmdJson);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_MissingParams
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when params are missing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_MissingParams, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    auto result = timePickerRowPattern->OnInjectionEvent(JSON_WITHOUT_PARAMS);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ParamsNotObject
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when params is not an object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_ParamsNotObject, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    auto result = timePickerRowPattern->OnInjectionEvent(JSON_PARAMS_NOT_OBJECT);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_MissingHour
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when hour is missing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_MissingHour, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    auto result = timePickerRowPattern->OnInjectionEvent(JSON_PARAMS_WITHOUT_HOUR);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_MissingMinute
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when minute is missing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_MissingMinute, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    auto result = timePickerRowPattern->OnInjectionEvent(JSON_PARAMS_WITHOUT_MINUTE);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_MissingSecond
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when second is missing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_MissingSecond, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    auto result = timePickerRowPattern->OnInjectionEvent(JSON_PARAMS_WITHOUT_SECOND);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_HourOutOfRange
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when hour is out of valid range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_HourOutOfRange, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    std::string jsonHourOutOfRange =
+        "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":25,\"minute\":30,\"second\":45}}";
+    auto result = timePickerRowPattern->OnInjectionEvent(jsonHourOutOfRange);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_MinuteOutOfRange
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when minute is out of valid range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_MinuteOutOfRange, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    std::string jsonMinuteOutOfRange =
+        "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":10,\"minute\":60,\"second\":45}}";
+    auto result = timePickerRowPattern->OnInjectionEvent(jsonMinuteOutOfRange);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_SecondOutOfRange
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when second is out of valid range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_SecondOutOfRange, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    std::string jsonSecondOutOfRange =
+        "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":10,\"minute\":30,\"second\":60}}";
+    auto result = timePickerRowPattern->OnInjectionEvent(jsonSecondOutOfRange);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_TimeBelowStartTime
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when time is below start time.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_TimeBelowStartTime, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->SetStartTime(PickerTime(10, 0, 0));
+    timePickerRowPattern->SetEndTime(PickerTime(20, 0, 0));
+
+    std::string jsonTimeBelowStart =
+        "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":5,\"minute\":0,\"second\":0}}";
+    auto result = timePickerRowPattern->OnInjectionEvent(jsonTimeBelowStart);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_TimeAboveEndTime
+ * @tc.desc: OnInjectionEvent should return RET_FAILED when time is above end time.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_TimeAboveEndTime, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->SetStartTime(PickerTime(10, 0, 0));
+    timePickerRowPattern->SetEndTime(PickerTime(20, 0, 0));
+
+    std::string jsonTimeAboveEnd = "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":22,\"minute\":0,\"second\":0}}";
+    auto result = timePickerRowPattern->OnInjectionEvent(jsonTimeAboveEnd);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ValidTime
+ * @tc.desc: OnInjectionEvent should return RET_SUCCESS when all parameters are valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_ValidTime, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->SetStartTime(PickerTime(0, 0, 0));
+    timePickerRowPattern->SetEndTime(PickerTime(23, 59, 59));
+
+    auto result = timePickerRowPattern->OnInjectionEvent(JSON_VALID);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    auto selectedTime = timePickerRowPattern->GetSelectedTime();
+    EXPECT_EQ(selectedTime.GetHour(), static_cast<uint32_t>(10));
+    EXPECT_EQ(selectedTime.GetMinute(), static_cast<uint32_t>(30));
+    EXPECT_EQ(selectedTime.GetSecond(), static_cast<uint32_t>(45));
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ValidTimeBoundaryHour0
+ * @tc.desc: OnInjectionEvent should succeed with hour set to minimum valid value (0).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_ValidTimeBoundaryHour0, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->SetStartTime(PickerTime(0, 0, 0));
+    timePickerRowPattern->SetEndTime(PickerTime(23, 59, 59));
+
+    std::string jsonHour0 = "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":0,\"minute\":0,\"second\":0}}";
+    auto result = timePickerRowPattern->OnInjectionEvent(jsonHour0);
+    EXPECT_EQ(result, RET_SUCCESS);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ValidTimeBoundaryHour23
+ * @tc.desc: OnInjectionEvent should succeed with hour set to maximum valid value (23).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, OnInjectionEvent_ValidTimeBoundaryHour23, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->SetStartTime(PickerTime(0, 0, 0));
+    timePickerRowPattern->SetEndTime(PickerTime(23, 59, 59));
+
+    std::string jsonHour23 = "{\"cmd\":\"setTimePickerTime\",\"params\":{\"hour\":23,\"minute\":59,\"second\":59}}";
+    auto result = timePickerRowPattern->OnInjectionEvent(jsonHour23);
+    EXPECT_EQ(result, RET_SUCCESS);
+}
+
+/**
+ * @tc.name: ReportTimeChangeEvent_NormalCase
+ * @tc.desc: ReportTimeChangeEvent should return true with valid time string.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, ReportTimeChangeEvent_NormalCase, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    int32_t nodeId = frameNode->GetId();
+    auto result = timePickerRowPattern->ReportTimeChangeEvent(nodeId, TIME_STR_VALID);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ReportTimeChangeEvent_Hour12
+ * @tc.desc: ReportTimeChangeEvent should succeed with hour 12.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, ReportTimeChangeEvent_Hour12, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    int32_t nodeId = frameNode->GetId();
+    auto result = timePickerRowPattern->ReportTimeChangeEvent(nodeId, TIME_STR_HOUR_12);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ReportCommandResult_Success
+ * @tc.desc: ReportCommandResult should return true when reporting success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, ReportCommandResult_Success, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    int32_t nodeId = frameNode->GetId();
+    auto result = timePickerRowPattern->ReportCommandResult(
+        nodeId, COMMAND_SET_TIME_PICKER_TIME, DEFAULT_RESULT_SUCCESS, DEFAULT_REASON);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ReportCommandResult_FailWithReason
+ * @tc.desc: ReportCommandResult should return true when reporting failure with reason.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, ReportCommandResult_FailWithReason, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    int32_t nodeId = frameNode->GetId();
+    std::string reason = "invalidTimeParameters";
+    auto result =
+        timePickerRowPattern->ReportCommandResult(nodeId, COMMAND_SET_TIME_PICKER_TIME, DEFAULT_RESULT_FAIL, reason);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ReportCommandResult_EmptyReason
+ * @tc.desc: ReportCommandResult should return true when reason is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, ReportCommandResult_EmptyReason, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    int32_t nodeId = frameNode->GetId();
+    auto result =
+        timePickerRowPattern->ReportCommandResult(nodeId, DEFAULT_EVENT, DEFAULT_RESULT_SUCCESS, DEFAULT_REASON);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ValidateTimeParameters_InvalidJson
+ * @tc.desc: ValidateTimeParameters should return false when json is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, ValidateTimeParameters_InvalidJson, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    int32_t hour = 0;
+    int32_t minute = 0;
+    int32_t second = 0;
+    auto invalidJson = JsonUtil::ParseJsonString(JSON_INVALID);
+    auto result = timePickerRowPattern->ValidateTimeParameters(invalidJson, hour, minute, second);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateTimeParameters_ValidTimeInRange
+ * @tc.desc: ValidateTimeParameters should return true when time is within valid range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerRowPatternTest, ValidateTimeParameters_ValidTimeInRange, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    timePickerRowPattern->SetStartTime(PickerTime(0, 0, 0));
+    timePickerRowPattern->SetEndTime(PickerTime(23, 59, 59));
+
+    int32_t hour = 0;
+    int32_t minute = 0;
+    int32_t second = 0;
+    auto validJson = JsonUtil::ParseJsonString(TIME_STR_VALID);
+    auto result = timePickerRowPattern->ValidateTimeParameters(validJson, hour, minute, second);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(hour, 10);
+    EXPECT_EQ(minute, 30);
+    EXPECT_EQ(second, 45);
+}
+
 } // namespace OHOS::Ace::NG
