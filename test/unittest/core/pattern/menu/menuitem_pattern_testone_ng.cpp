@@ -1487,4 +1487,55 @@ HWTEST_F(MenuItemPatternTestOneNg, CreateCheckMarkNode001, TestSize.Level1)
     auto type = checkMarkLayoutProps->GetVisibility().value_or(VisibleType::VISIBLE);
     EXPECT_EQ(type, VisibleType::INVISIBLE);
 }
+
+/**
+ * @tc.name: ReportEvent001
+ * @tc.desc: Testing the ReportEvent001 method has a parent container.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ReportEvent001, TestSize.Level1)
+{
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto selectId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [selectId]() { return AceType::MakeRefPtr<MenuPattern>(selectId, V2::SELECT_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode, nullptr);
+
+    itemPattern->SetMenu(menuNode);
+    itemPattern->ReportEvent();
+}
+
+/**
+ * @tc.name: ReportEvent002
+ * @tc.desc: Testing the ReportEvent002 method has a parent container.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ReportEvent002, TestSize.Level1)
+{
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto selectId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [selectId]() { return AceType::MakeRefPtr<MenuPattern>(selectId, V2::SELECT_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode, nullptr);
+
+    itemPattern->SetMenu(menuNode);
+    itemPattern->isOptionPattern_ = true;
+    itemPattern->ReportEvent();
+}
 } // namespace OHOS::Ace::NG
