@@ -52,6 +52,7 @@ constexpr char NAVIGATION_OPTIONS_DEPTH_KEY[] = "depth";
 constexpr char NAVIGATION_OPTIONS_DISABLE_PLACEHOLDER_KEY[] = "disablePlaceholder";
 constexpr char NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY[] = "disableDivider";
 constexpr char FULL_SCREEN_PAGES_KEY[] = "fullScreenPages";
+constexpr char DIALOG_SUPPORT_SPLIT_KEY[] = "dialogSupportSplit";
 
 std::string FullScreenPageToString(const std::set<std::string>& fullScreenPages)
 {
@@ -381,6 +382,7 @@ bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonS
         return false;
     }
     config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, true);
+    config.dialogSupportSplit = configJson->GetBool(DIALOG_SUPPORT_SPLIT_KEY, true);
     if (configJson->Contains(NAVIGATION_OPTIONS_KEY)) {
         if (!ParseNavigationOptions(configJson->GetValue(NAVIGATION_OPTIONS_KEY), config)) {
             return false;
@@ -411,6 +413,7 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
         return false;
     }
     config.isArkUIHookEnabled = configJson->GetBool(ENABLE_REDUCED_CONTAINER_SIZE_KEY, false);
+    config.dialogSupportSplit = configJson->GetBool(DIALOG_SUPPORT_SPLIT_KEY, true);
     if (configJson->Contains(HOME_PAGE_KEY)) {
         auto homePageJson = configJson->GetValue(HOME_PAGE_KEY);
         if (!homePageJson->IsString()) {

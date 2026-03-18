@@ -44,7 +44,10 @@ public:
     {
         isRouter_ = isRouter;
     }
-
+    bool IsRouterForceSplit() const
+    {
+        return isRouter_;
+    }
     void SetForceSplitSupported(bool isForceSplitSupported)
     {
         isForceSplitSupported_ = isForceSplitSupported;
@@ -95,6 +98,7 @@ public:
     void AddForceSplitStateListener(int32_t nodeId, std::function<void()>&& listener);
     void RemoveForceSplitStateListener(int32_t nodeId);
     void NotifyForceSplitStateChange();
+    void OnForceSplitEnableChange();
 
     bool HasRelatedPage() const
     {
@@ -109,14 +113,26 @@ public:
         appIconId_ = id;
     }
 
+    void SetDialogSupportSplit(bool dialogSupportSplit)
+    {
+        dialogSuppotSplit_ = dialogSupportSplit;
+    }
+
+    bool GetDialogSupportSplit()
+    {
+        return dialogSuppotSplit_;
+    }
 private:
-    void OnForceSplitEnableChange();
+    bool IsTopFullScreenPage();
+    bool IsWindowConditionMatched();
+    bool HasForceSplitTargetNavigation();
 
     WeakPtr<PipelineContext> pipeline_;
     bool hasSetForceSplitConfig_ = false;
     bool isForceSplitSupported_ = false;
     bool isForceSplitEnable_ = false;
     bool isRouter_ = false;
+    bool dialogSuppotSplit_ = true;
     std::set<std::string> fullScreenPages_;
     std::string homePageName_;
     std::string relatedPageName_;
